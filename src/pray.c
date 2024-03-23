@@ -2274,7 +2274,7 @@ dosacrifice()
 	    } else if (rnl((30 + u.ulevel)*10) < 10) {
 			/* no artifact, but maybe a helpful pet? */
 			/* WAC is now some generic benefit (includes pets) */
-			god_gives_benefit(altaralign);
+			god_gives_benefit(altargod);
 		    return MOVE_STANDARD;
 	    }
 	    change_luck((value * LUCKMAX) / (MAXVALUE * 2));
