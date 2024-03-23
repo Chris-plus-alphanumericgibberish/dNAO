@@ -1479,7 +1479,7 @@ struct obj * otmp;
 		}
 		else if(otmp->where == OBJ_MINVENT){
 			struct monst *magr = otmp->ocarry;
-			if(magr && mon_knight(magr) && MON_WEP(magr) == otmp && mlev(magr) >= 14){
+			if(magr && (mon_knight(magr) || magr->mtyp == PM_OONA) && MON_WEP(magr) == otmp && mlev(magr) >= 14){
 				if(mlev(magr) >= 28)
 					dmg += vd(6, 8);
 				else if(mlev(magr) >= 21)
@@ -1612,6 +1612,18 @@ struct obj * otmp;
 		/* calculate */
 		if (ndice)
 			dmg += vd(ndice, diesize);
+		//wields lawful energies
+		if(otmp->where == OBJ_MINVENT){
+			struct monst *magr = otmp->ocarry;
+			if(magr && (magr->mtyp == PM_OONA) && MON_WEP(magr) == otmp && mlev(magr) >= 14){
+				if(mlev(magr) >= 28)
+					dmg += vd(6, 8);
+				else if(mlev(magr) >= 21)
+					dmg += vd(3, 8);
+				else 
+					dmg += vd(1, 8);
+			}
+		}
 	}
 
 	if (hates_chaos_mon(mdef) &&

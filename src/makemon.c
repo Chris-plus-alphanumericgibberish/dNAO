@@ -15900,6 +15900,11 @@ struct monst *mtmp;
 			give_mintrinsic(mtmp, DISINT_RES);
 		}
 	}
+	else if(mtmp->mtyp == PM_OONA){
+		if(mtmp->m_lev >= 27){ //20 base +7
+			give_mintrinsic(mtmp, FAST);
+		}
+	}
 	else if(mtmp->mtyp == PM_IKSH_NA_DEVA){
 		if(mtmp->m_lev >= 22){
 			give_mintrinsic(mtmp, FAST);
