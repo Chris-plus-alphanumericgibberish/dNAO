@@ -7291,9 +7291,16 @@ struct monst *mon;
 			if (rn2(7)) mndx = pick_nasty();
 			break;
 			case CHAM_DOPPELGANGER:
-			if (!rn2(7)) mndx = pick_nasty();
-			else if (rn2(3)) mndx = rn1(PM_WIZARD - PM_ARCHEOLOGIST + 1,
-							PM_ARCHEOLOGIST);
+				if (!rn2(7)) mndx = pick_nasty();
+				else if (rn2(3)){
+					do{
+						mndx = rn1(PM_WIZARD - PM_ARCHEOLOGIST + 1, PM_ARCHEOLOGIST);
+					} while(mndx == PM_ITINERANT_PRIESTESS
+						|| mndx == PM_TRANSCENDENT_VALKYRIE
+						|| mndx == PM_AWAKENED_VALKYRIE
+						|| mndx == PM_WORM_THAT_WALKS
+						|| mndx == PM_INCANTIFIER);
+				}
 			break;
 			case CHAM_CHAMELEON:
 			if (!rn2(3)) mndx = rndshape(&pick_animal);
