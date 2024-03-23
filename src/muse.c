@@ -400,7 +400,7 @@ struct monst *mtmp;
 
 		for(xx = x-1; xx <= x+1; xx++) for(yy = y-1; yy <= y+1; yy++)
 		if (isok(xx,yy))
-		if (xx != u.ux && yy != u.uy)
+		if (!(xx == u.ux && yy == u.uy))
 		if ((mtmp->mtyp != PM_GRID_BUG && mtmp->mtyp != PM_BEBELITH) || xx == x || yy == y)
 		if(!is_vectored_mtyp(mtmp->mtyp) ||
 			(x + xdir[(int)mtmp->mvar_vector] == xx && 
@@ -2058,7 +2058,7 @@ struct monst *mtmp;
 				     mon_resistance(mtmp,PASSES_WALLS));
 	  for(xx = x-1; xx <= x+1; xx++)
 	    for(yy = y-1; yy <= y+1; yy++)
-		if (isok(xx,yy) && (xx != u.ux || yy != u.uy))
+		if (isok(xx,yy) && !(xx == u.ux && yy == u.uy))
 		    if ((mdat->mtyp != PM_GRID_BUG && mtmp->mtyp != PM_BEBELITH) || xx == x || yy == y)
 			if(!is_vectored_mtyp(mtmp->mtyp) ||
 				(x + xdir[(int)mtmp->mvar_vector] == xx && 
