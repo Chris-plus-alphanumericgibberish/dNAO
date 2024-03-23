@@ -5127,6 +5127,9 @@ boolean was_swallowed;			/* digestion */
 	if(Role_if(PM_ANACHRONONAUT) && (mon->mpeaceful || (has_lifesigns(mon) && mon->mvar_lifesigns)) && In_quest(&u.uz) && Is_qstart(&u.uz)){
 		if(!cansee(mon->mx,mon->my)) map_invisible(mon->mx, mon->my);
 	}
+	/* bypass anything about templates, etc. just always make a corpse*/
+	if (is_rider(mdat)) return TRUE;
+
 	/* Liches and Vlad and his wives have a fancy death message, and leave no corpse */
 	if ((mdat->mlet == S_LICH) ||
 		(mdat->mlet == S_VAMPIRE && mdat->geno & G_UNIQ)) {
@@ -6310,7 +6313,7 @@ xkilled(mtmp, dest)
 		goto cleanup;
 	}
 
-	if((dest & 2) || LEVEL_SPECIFIC_NOCORPSE(mdat))
+	if(!is_rider(mdat) && ((dest & 2) || LEVEL_SPECIFIC_NOCORPSE(mdat)))
 		goto cleanup;
 
 #ifdef MAIL

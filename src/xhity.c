@@ -13501,11 +13501,11 @@ int vis;						/* True if action is at all visible to the player */
 		sneak_dice++;
 	if (weapon && weapon->owornmask && weapon->oartifact == ART_SPINESEEKER)
 		sneak_dice++;
-	if (weapon && weapon->oartifact == ART_LOLTH_S_FANG)
+	if (weapon && weapon->owornmask && weapon->oartifact == ART_LOLTH_S_FANG)
 		sneak_dice++;
 	if (weapon && weapon->owornmask && weapon->otyp == BESTIAL_CLAW && active_glyph(BEASTS_EMBRACE))
 		sneak_dice++;
-	if (weapon && weapon->owornmask && weapon->oartifact == ART_PEN_OF_THE_VOID && weapon->ovar1_seals&SEAL_ANDROMALIUS)
+	if (weapon && weapon->oartifact == ART_PEN_OF_THE_VOID && weapon->ovar1_seals&SEAL_ANDROMALIUS)
 		sneak_dice++;
 
 	/* check sneak attack conditions -- defender's conditions must allow sneak attacking */
@@ -13578,7 +13578,7 @@ int vis;						/* True if action is at all visible to the player */
 		/* some things increase the number of sneak dice even further */
 		if (weapon && weapon->owornmask && weapon->oartifact == ART_SPINESEEKER && (sneak_attack&SNEAK_BEHIND))
 			sneak_dice++;
-		if (weapon && weapon->oartifact == ART_LOLTH_S_FANG && (sneak_attack&SNEAK_TRAPPED) && t_at(x(mdef), y(mdef)) && t_at(x(mdef), y(mdef))->ttyp == WEB)
+		if (weapon && weapon->owornmask && weapon->oartifact == ART_LOLTH_S_FANG && (sneak_attack&SNEAK_TRAPPED) && t_at(x(mdef), y(mdef)) && t_at(x(mdef), y(mdef))->ttyp == WEB)
 			sneak_dice++;
 		if (weapon && weapon->oartifact == ART_PEN_OF_THE_VOID && weapon->ovar1_seals&SEAL_ANDROMALIUS && (mvitals[PM_ACERERAK].died > 0))
 			sneak_dice++;
