@@ -4946,6 +4946,7 @@ shk_identify(slang, shkp)
 	    		prinv((char *)0, obj, 0L); /* Print result */
 			u.uconduct.IDs++;
 		}
+		update_inventory();
 		u.uconduct.shopID++;
 	} //loop for multiple ids
 }
@@ -5019,6 +5020,7 @@ shk_uncurse(slang, shkp)
 		verbalize("All done - safe to handle, now!");
 		uncurse(obj);
 	}
+	update_inventory();
 }
 
 
@@ -5285,6 +5287,7 @@ struct monst *shkp;
 			obj->oeroded = obj->oeroded2 = 0;
 			obj->rknown = TRUE;
 			obj->oerodeproof = TRUE;
+			update_inventory();
 		break;
 		case 2:
 			verbalize("Guaranteed not to harm your weapon, or your money back!");
@@ -5326,6 +5329,7 @@ struct monst *shkp;
 			}
 
 			obj->spe++;
+			update_inventory();
 		break;
 		case 3:
 			verbalize("Just imagine what your poisoned %s can do!", xname(obj));
@@ -5337,10 +5341,15 @@ struct monst *shkp;
 
 			if(obj->otyp == VIPERWHIP){
 				if(obj->opoisoned == OPOISON_BASIC) obj->opoisonchrgs += 2;
-				else obj->opoisonchrgs = 1;
+				else {
+					obj->opoisonchrgs = 1;
+					obj->opoisoned = OPOISON_BASIC;
+				}
 			}
-			else if (is_poisonable(obj))
+			else if (is_poisonable(obj)){
 				obj->opoisoned = OPOISON_BASIC;
+				update_inventory();
+			}
 			else {
 				verbalize("All done!");
 				// steals your money
@@ -5356,10 +5365,15 @@ struct monst *shkp;
 
 			if(obj->otyp == VIPERWHIP){
 				if(obj->opoisoned == OPOISON_SLEEP) obj->opoisonchrgs += 2;
-				else obj->opoisonchrgs = 1;
+				else {
+					obj->opoisonchrgs = 1;
+					obj->opoisoned = OPOISON_SLEEP;
+				}
 			}
-			else if (is_poisonable(obj))
+			else if (is_poisonable(obj)){
 				obj->opoisoned = OPOISON_SLEEP;
+				update_inventory();
+			}
 			else {
 				verbalize("All done!");
 				// steals your money
@@ -5375,10 +5389,15 @@ struct monst *shkp;
 
 			if(obj->otyp == VIPERWHIP){
 				if(obj->opoisoned == OPOISON_BLIND) obj->opoisonchrgs += 2;
-				else obj->opoisonchrgs = 1;
+				else {
+					obj->opoisonchrgs = 1;
+					obj->opoisoned = OPOISON_BLIND;
+				}
 			}
-			else if (is_poisonable(obj))
+			else if (is_poisonable(obj)){
 				obj->opoisoned = OPOISON_BLIND;
+				update_inventory();
+			}
 			else {
 				verbalize("All done!");
 				// steals your money
@@ -5394,10 +5413,15 @@ struct monst *shkp;
 
 			if(obj->otyp == VIPERWHIP){
 				if(obj->opoisoned == OPOISON_PARAL) obj->opoisonchrgs += 2;
-				else obj->opoisonchrgs = 1;
+				else {
+					obj->opoisonchrgs = 1;
+					obj->opoisoned = OPOISON_PARAL;
+				}
 			}
-			else if (is_poisonable(obj))
+			else if (is_poisonable(obj)){
 				obj->opoisoned = OPOISON_PARAL;
+				update_inventory();
+			}
 			else {
 				verbalize("All done!");
 				// steals your money
@@ -5413,10 +5437,15 @@ struct monst *shkp;
 
 			if(obj->otyp == VIPERWHIP){
 				if(obj->opoisoned == OPOISON_FILTH) obj->opoisonchrgs += 2;
-				else obj->opoisonchrgs = 1;
+				else {
+					obj->opoisonchrgs = 1;
+					obj->opoisoned = OPOISON_FILTH;
+				}
 			}
-			else if (is_poisonable(obj))
+			else if (is_poisonable(obj)){
 				obj->opoisoned = OPOISON_FILTH;
+				update_inventory();
+			}
 			else {
 				verbalize("All done!");
 				// steals your money
@@ -5432,10 +5461,15 @@ struct monst *shkp;
 
 			if(obj->otyp == VIPERWHIP){
 				if(obj->opoisoned == OPOISON_ACID) obj->opoisonchrgs += 2;
-				else obj->opoisonchrgs = 1;
+				else {
+					obj->opoisonchrgs = 1;
+					obj->opoisoned = OPOISON_ACID;
+				}
 			}
-			else if (is_poisonable(obj))
+			else if (is_poisonable(obj)){
 				obj->opoisoned = OPOISON_ACID;
+				update_inventory();
+			}
 			else {
 				verbalize("All done!");
 				// steals your money
@@ -5516,6 +5550,7 @@ shk_armor_works(slang, shkp)
 			obj->oeroded2 = 0;
 			obj->rknown = TRUE;
 			obj->oerodeproof = TRUE;
+			update_inventory();
 			break;
 
 			case 2:
@@ -5563,6 +5598,7 @@ shk_armor_works(slang, shkp)
 
 			obj->spe++;
 			adj_abon(obj, 1);
+			update_inventory();
 			break;
 
 			default:
@@ -5701,6 +5737,7 @@ shk_charge(slang, shkp)
 #endif
 			makeknown(obj->otyp);
 			bot();
+			update_inventory();
 		}
 		else
 		{
@@ -5711,6 +5748,7 @@ shk_charge(slang, shkp)
 			*/
 			if (obj->spe < 16) obj->spe += rn1(5,5);
 			else if (obj->spe < 20) obj->spe += 1;
+			update_inventory();
 		}
 	}
 }
