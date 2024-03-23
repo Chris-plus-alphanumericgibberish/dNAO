@@ -5451,59 +5451,166 @@ reassign()
 #endif /* OVLB */
 #ifdef OVL1
 
+/** #adjust command
+ *
+ *      User specifies a 'from' slot for inventory stack to move,
+ *      then a 'to' slot for its destination.  Open slots and those
+ *      filled by compatible stacks are listed as likely candidates
+ *      but user can pick any inventory letter (including 'from').
+ *
+ *  to == from, 'from' has a name
+ *      All compatible items (same name or no name) are gathered
+ *      into the 'from' stack.  No count is allowed.
+ *  to == from, 'from' does not have a name
+ *      All compatible items without a name are gathered into the
+ *      'from' stack.  No count is allowed.  Compatible stacks with
+ *      names are left as-is.
+ *  to != from, no count
+ *      Move 'from' to 'to'.  If 'to' is not empty, merge 'from'
+ *      into it if possible, otherwise swap it with the 'from' slot.
+ *  to != from, count given
+ *      If the user specifies a count when choosing the 'from' slot,
+ *      and that count is less than the full size of the stack,
+ *      then the stack will be split.  The 'count' portion is moved
+ *      to the destination, and the only candidate for merging with
+ *      it is the stack already at the 'to' slot, if any.  When the
+ *      destination is non-empty but won't merge, whatever is there
+ *      will be moved to an open slot; if there isn't any open slot
+ *      available, the adjustment attempt fails.
+ *
+ *      To minimize merging for 'from == to', unnamed stacks will
+ *      merge with named 'from' but named ones won't merge with
+ *      unnamed 'from'.  Otherwise attempting to collect all unnamed
+ *      stacks would lump the first compatible named stack with them
+ *      and give them its name.
+ *
+ *      To maximize merging for 'from != to', compatible stacks will
+ *      merge when either lacks a name (or they already have the same
+ *      name).  When no count is given and one stack has a name and
+ *      the other doesn't, the merged result will have that name.
+ *      However, when splitting results in a merger, the name of the
+ *      destination overrides that of the source, even if destination
+ *      is unnamed and source is named.
+ */
 int
-doorganize()	/* inventory organizer by Del Lamb */
+doorganize(void) /* inventory organizer by Del Lamb */
 {
 	struct obj *obj, *otmp;
-	register int ix, cur;
-	register char let;
-	char alphabet[52+1], buf[52+1];
+	int ix, cur;
+	char let;
+#define GOLD_INDX   0
+#define GOLD_OFFSET 1
+#define OVRFLW_INDX (GOLD_OFFSET + 52) /* past gold and 2*26 letters */
+#define ALPHABET_SIZE 1 + 52 + 1 + 1
+	char alphabet[ALPHABET_SIZE], buf[ALPHABET_SIZE]; /* room for '$a-zA-Z#\0' */
 	char qbuf[QBUFSZ];
+#ifdef ADJSPLIT
+	char *objname, *otmpname;
+	char allowallcnt[3];
+	struct obj *splitting;
+#else
 	char allowall[2];
+#endif
 	const char *adj_type;
 
-	if (!flags.invlet_constant) reassign();
+	/* when no invent, or just gold in '$' slot, there's nothing to adjust */
+	if (!invent ||
+		(invent->oclass == COIN_CLASS && invent->invlet == GOLD_SYM && !invent->nobj)) {
+		You("aren't carrying anything %s.", !invent ? "to adjust" : "adjustable");
+		return 0;
+	}
+
+	if (!flags.invlet_constant) {
+		reassign();
+	}
 	/* get a pointer to the object the user wants to organize */
+#ifdef ADJSPLIT
+	allowallcnt[0] = ALLOW_COUNT;
+	allowallcnt[1] = ALL_CLASSES;
+	allowallcnt[2] = '\0';
+	if (!(obj = getobj(allowallcnt, "adjust"))) {
+		return 0;
+	}
+	/* figure out whether user gave a split count to getobj() */
+	splitting = 0;
+	for (otmp = invent; otmp; otmp = otmp->nobj) {
+		if (otmp->nobj == obj) { /* knowledge of splitobj() operation */
+			if (otmp->invlet == obj->invlet)
+				splitting = otmp;
+			break;
+		}
+	}
+#else
 	allowall[0] = ALL_CLASSES; allowall[1] = '\0';
-	if (!(obj = getobj(allowall,"adjust"))) return MOVE_CANCELLED;
+	if (!(obj = getobj(allowall, "adjust"))) {
+		return 0;
+	}
+#endif
 
 	/* initialize the list with all upper and lower case letters */
-	for (let = 'a', ix = 0;  let <= 'z';) alphabet[ix++] = let++;
-	for (let = 'A', ix = 26; let <= 'Z';) alphabet[ix++] = let++;
-	alphabet[52] = 0;
+	alphabet[GOLD_INDX] = (obj->oclass == COIN_CLASS) ? GOLD_SYM : ' ';
+	for (ix = GOLD_OFFSET, let = 'a'; let <= 'z';) {
+		alphabet[ix++] = let++;
+	}
+	for (let = 'A'; let <= 'Z';) {
+		alphabet[ix++] = let++;
+	}
+	alphabet[OVRFLW_INDX] = ' ';
+	alphabet[sizeof alphabet - 1] = '\0';
 
 	/* blank out all the letters currently in use in the inventory */
 	/* except those that will be merged with the selected object   */
-	for (otmp = invent; otmp; otmp = otmp->nobj)
-		if (otmp != obj && !mergable(otmp,obj)) {
-			if (otmp->invlet <= 'Z')
-				alphabet[(otmp->invlet) - 'A' + 26] = ' ';
-			else	alphabet[(otmp->invlet) - 'a']	    = ' ';
+	for (otmp = invent; otmp; otmp = otmp->nobj) {
+		if (otmp != obj && !mergable(otmp, obj)) {
+			let = otmp->invlet;
+			if (let >= 'a' && let <= 'z') {
+				alphabet[GOLD_OFFSET + let - 'a'] = ' ';
+			} else if (let >= 'A' && let <= 'Z') {
+				alphabet[GOLD_OFFSET + let - 'A' + 26] = ' ';
+			/* overflow defaults to off, but it we find a stack using that
+			   slot, switch to on -- the opposite of normal invlet handling */
+			} else if (let == NOINVSYM) {
+				alphabet[OVRFLW_INDX] = NOINVSYM;
+			}
 		}
+	}
 
 	/* compact the list by removing all the blanks */
-	for (ix = cur = 0; ix <= 52; ix++)
-		if (alphabet[ix] != ' ') buf[cur++] = alphabet[ix];
+	for (ix = cur = 0; ix <= sizeof alphabet-1; ix++) {
+		if (alphabet[ix] != ' ') {
+			buf[cur++] = alphabet[ix];
+		}
+	}
+	buf[cur] = '\0';
 
 	/* and by dashing runs of letters */
-	if(cur > 5) compactify(buf);
+	if (cur > 5) {
+		compactify(buf);
+	}
 
 	/* get new letter to use as inventory letter */
 	for (;;) {
-		Sprintf(qbuf, "Adjust letter to what [%s]?",buf);
+		Sprintf(qbuf, "Adjust letter to what [%s]?", buf);
 		let = yn_function(qbuf, (char *)0, '\0');
-		if(index(quitchars,let)) {
-			pline1(Never_mind);
-			return(0);
+		if (index(quitchars, let)) {
+			pline("%s", Never_mind);
+#ifdef ADJSPLIT
+			goto cleansplit;
+#else
+			return 0;
+#endif
 		}
-		if (let == '@' || !letter(let))
+		if (let == '@' || !letter(let)) {
 			pline("Select an inventory slot letter.");
-		else
+		} else {
 			break;
+		}
 	}
 
 	/* change the inventory and print the resulting item */
+#ifndef ADJSPLIT
 	adj_type = "Moving:";
+#endif
 
 	/*
 	 * don't use freeinv/addinv to avoid double-touching artifacts,
@@ -5511,19 +5618,78 @@ doorganize()	/* inventory organizer by Del Lamb */
 	 */
 	extract_nobj(obj, &invent);
 
-	for (otmp = invent; otmp;)
-		if (merged(&otmp,&obj)) {
-			adj_type = "Merging:";
-			obj = otmp;
-			otmp = otmp->nobj;
-			extract_nobj(obj, &invent);
-		} else {
-			if (otmp->invlet == let) {
-				adj_type = "Swapping:";
-				otmp->invlet = obj->invlet;
+#ifdef ADJSPLIT
+	for (otmp = invent; otmp && otmp->invlet != let;) {
+		otmp = otmp->nobj;
+	}
+	/* Collecting: #adjust an inventory stack into its same slot;
+	   keep it there and merge other compatible stacks into it.
+	   Traditional inventory behavior is to merge unnamed stacks
+	   with compatible named ones; we only want that if it is
+	   the 'from' stack (obj) with a name and candidate (otmp)
+	   without one, not unnamed 'from' with named candidate. */
+	if (let == obj->invlet) {
+		adj_type = "Collecting:";
+		for (otmp = invent; otmp;) {
+			/* it's tempting to pull this outside the loop, but merged() could
+			   free ONAME(obj) [via obfree()] and replace it with ONAME(otmp) */
+			objname = get_ox(obj, OX_ENAM) ? ONAME(obj) : (char *) 0;
+			otmpname = get_ox(otmp, OX_ENAM) ? ONAME(otmp) : (char *) 0;
+			if ((!otmpname || (objname && !strcmp(objname, otmpname)))
+			    && merged(&otmp, &obj)) {
+				adj_type = "Merging:";
+				obj = otmp;
+				otmp = otmp->nobj;
+				extract_nobj(obj, &invent);
+				continue; /* otmp has already been updated */
 			}
 			otmp = otmp->nobj;
 		}
+	} else if (!otmp) {
+		adj_type = splitting ? "Splitting:" : "Moving:";
+#else
+	for (otmp = invent; otmp;)
+		if (merged(&otmp, &obj)) {
+		adj_type = "Merging:";
+		obj = otmp;
+		otmp = otmp->nobj;
+		extract_nobj(obj, &invent);
+#endif
+	} else {
+#ifdef ADJSPLIT
+		struct obj *otmp2;
+		for (otmp2 = invent; otmp2
+			 && otmp2->invlet != obj->invlet;) {
+			otmp2 = otmp2->nobj;
+		}
+		if (otmp2) {
+			char oldlet = obj->invlet;
+
+			adj_type = "Displacing:";
+
+			/* Here be a nasty hack; solutions that don't
+			 * require duplication of assigninvlet's code
+			 * here are welcome.
+			 */
+			assigninvlet(obj);
+
+			if (obj->invlet == NOINVSYM) {
+				pline("There's nowhere to put that.");
+				obj->invlet = oldlet;
+				goto cleansplit;
+			}
+		} else {
+#else
+		if (otmp->invlet == let) {
+#endif
+			adj_type = "Swapping:";
+		}
+		otmp->invlet = obj->invlet;
+	}
+#ifndef ADJSPLIT
+	otmp = otmp->nobj;
+}
+#endif
 
 	/* inline addinv (assuming flags.invlet_constant and !merged) */
 	obj->invlet = let;
@@ -5534,7 +5700,18 @@ doorganize()	/* inventory organizer by Del Lamb */
 
 	prinv(adj_type, obj, 0L);
 	update_inventory();
-	return MOVE_CANCELLED;
+	return 0;
+#ifdef ADJSPLIT
+cleansplit:
+	for (otmp = invent; otmp; otmp = otmp->nobj) {
+		if (otmp != obj && otmp->invlet == obj->invlet) {
+			merged(&otmp, &obj);
+			break;
+		}
+	}
+
+	return 0;
+#endif
 }
 
 /* common to display_minventory and display_cinventory */

@@ -277,6 +277,7 @@ extern const struct symdef def_warnsyms[WARNCOUNT];
 #ifdef USER_DUNGEONCOLOR
 extern uchar showsymcolors[MAXPCHARS];
 #endif
+extern const char * const symbol_names[MAXPCHARS];
 
 /*
  * Graphics sets for display symbols
