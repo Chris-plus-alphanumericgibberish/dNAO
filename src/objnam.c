@@ -279,6 +279,7 @@ const char *
 lightsaber_colorText(otmp)
 struct obj *otmp;
 {
+	struct obj *gem = otmp->cobj;
 	if(otmp->oartifact) switch(otmp->oartifact){
 		case ART_ANNULUS: return Hallucination ? hcolor(0) : "cerulean";
 		case ART_INFINITY_S_MIRRORED_ARC:
@@ -305,16 +306,20 @@ struct obj *otmp;
 				return "bladeless";
 			}
 			break;
-		case ART_ARKENSTONE: return Hallucination ? hcolor(0) : "rainbow-glinting sparking white";
-		case ART_FLUORITE_OCTAHEDRON: return Hallucination ? hcolor(0) : "burning cobalt";
-		case ART_HEART_OF_AHRIMAN: return Hallucination ? hcolor(0) : "pulsing and shimmering ruby";
-		case ART_GLITTERSTONE: return Hallucination ? hcolor(0) : "glittering gold";
-		
-		default: return Hallucination ? hcolor(0) : LightsaberColor[((int)otmp->cobj->otyp) - MAGICITE_CRYSTAL].colorText;
 	}
 	if(otmp->otyp == KAMEREL_VAJRA)
 		return "lightning bladed";
-	return Hallucination ? hcolor(0) : LightsaberColor[((int)otmp->cobj->otyp) - MAGICITE_CRYSTAL].colorText;
+	if(gem){
+		switch(gem->oartifact){
+			case ART_ARKENSTONE: return Hallucination ? hcolor(0) : "rainbow-glinting sparking white";
+			case ART_FLUORITE_OCTAHEDRON: return Hallucination ? hcolor(0) : "burning cobalt";
+			case ART_HEART_OF_AHRIMAN: return Hallucination ? hcolor(0) : "pulsing and shimmering ruby";
+			case ART_GLITTERSTONE: return Hallucination ? hcolor(0) : "glittering gold";
+			
+			default: return Hallucination ? hcolor(0) : LightsaberColor[((int)gem->otyp) - MAGICITE_CRYSTAL].colorText;
+		}
+	}
+	return "404";
 }
 
 int
@@ -1428,10 +1433,7 @@ char *buf;
 	else
 #endif
 	if (is_lightsaber(obj) && litsaber(obj) && obj->otyp != ROD_OF_FORCE){
-		if (obj->cobj)
-			Strcat(buf, lightsaber_colorText(obj->cobj));
-		else
-			Strcat(buf, lightsaber_colorText(obj));
+		Strcat(buf, lightsaber_colorText(obj));
 		if (!objects[obj->otyp].oc_name_known && strncmpi(eos(buf)-7, " bladed", 7))
 			Strcat(buf, " bladed");
 		Strcat(buf, " ");
