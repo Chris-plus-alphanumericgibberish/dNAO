@@ -1411,7 +1411,11 @@ spiritLets(lets, respect_timeout)
 				if(u.spiritPOrder[i] == -1) continue;
 				if(u.spiritPOrder[i] == PWR_MAD_BURST && !check_mutation(YOG_GAZE_1)) continue;
 				if(u.spiritPOrder[i] == PWR_UNENDURABLE_MADNESS && !check_mutation(YOG_GAZE_2)) continue;
-				if(spirit_powers[u.spiritPOrder[i]].owner == u.spirit[s] && (u.spiritPColdowns[u.spiritPOrder[i]] < monstermoves || !respect_timeout)){
+				if(u.spiritPOrder[i] == PWR_CONTACT_YOG_SOTHOTH){
+					if(u.yog_sothoth_credit >= 50)
+						Sprintf(lets, "%c", i<26 ? 'a'+(char)i : 'A'+(char)(i-26));
+				}
+				else if(spirit_powers[u.spiritPOrder[i]].owner == u.spirit[s] && (u.spiritPColdowns[u.spiritPOrder[i]] < monstermoves || !respect_timeout)){
 					Sprintf(lets, "%c", i<26 ? 'a'+(char)i : 'A'+(char)(i-26));
 				}
 			}
@@ -1421,7 +1425,11 @@ spiritLets(lets, respect_timeout)
 			if(u.spiritPOrder[i] == -1) continue;
 			if(u.spiritPOrder[i] == PWR_MAD_BURST && !check_mutation(YOG_GAZE_1)) continue;
 			if(u.spiritPOrder[i] == PWR_UNENDURABLE_MADNESS && !check_mutation(YOG_GAZE_2)) continue;
-			if(((spirit_powers[u.spiritPOrder[i]].owner & u.sealsActive &&
+			if(u.spiritPOrder[i] == PWR_CONTACT_YOG_SOTHOTH){
+				if(u.yog_sothoth_credit >= 50)
+					Sprintf(lets, "%c", i<26 ? 'a'+(char)i : 'A'+(char)(i-26));
+			}
+			else if(((spirit_powers[u.spiritPOrder[i]].owner & u.sealsActive &&
 				!(spirit_powers[u.spiritPOrder[i]].owner & SEAL_SPECIAL)) || 
 				(spirit_powers[u.spiritPOrder[i]].owner & u.specialSealsActive & ~SEAL_SPECIAL &&
 				 spirit_powers[u.spiritPOrder[i]].owner & SEAL_SPECIAL)) &&
@@ -5060,7 +5068,20 @@ int respect_timeout;
 						if (u.spiritPOrder[i] == -1) continue;
 						if (u.spiritPOrder[i] == PWR_MAD_BURST && !check_mutation(YOG_GAZE_1) && (action == SPELLMENU_CAST || action == SPELLMENU_DESCRIBE)) continue;
 						if (u.spiritPOrder[i] == PWR_UNENDURABLE_MADNESS && !check_mutation(YOG_GAZE_2) && (action == SPELLMENU_CAST || action == SPELLMENU_DESCRIBE)) continue;
-						if (spirit_powers[u.spiritPOrder[i]].owner == u.spirit[s]){
+						if(u.spiritPOrder[i] == PWR_CONTACT_YOG_SOTHOTH){
+							if(u.yog_sothoth_credit >= 50){
+								Sprintf1(buf, spirit_powers[u.spiritPOrder[i]].name);
+								any.a_int = u.spiritPOrder[i] + 1;	/* must be non-zero */
+								add_menu(tmpwin, NO_GLYPH, &any,
+									i < 26 ? 'a' + (char)i : 'A' + (char)(i - 26),
+									0, ATR_NONE, buf, MENU_UNSELECTED);
+							}
+							else {
+								Sprintf(buf, " na %s", spirit_powers[u.spiritPOrder[i]].name);
+								add_menu(tmpwin, NO_GLYPH, &anyvoid, 0, 0, ATR_NONE, buf, MENU_UNSELECTED);
+							}
+						}
+						else if (spirit_powers[u.spiritPOrder[i]].owner == u.spirit[s]){
 							if (action != SPELLMENU_CAST || u.spiritPColdowns[u.spiritPOrder[i]] < monstermoves || !respect_timeout){
 								if ((u.spiritPOrder[i] == PWR_MAD_BURST && !check_mutation(YOG_GAZE_1))
 								 || (u.spiritPOrder[i] == PWR_UNENDURABLE_MADNESS && !check_mutation(YOG_GAZE_2))
@@ -5091,7 +5112,20 @@ int respect_timeout;
 			for (i = 0; i < 52; i++){
 				if (u.spiritPOrder[i] == PWR_MAD_BURST && !check_mutation(YOG_GAZE_1) && (action == SPELLMENU_CAST || action == SPELLMENU_DESCRIBE)) continue;
 				if (u.spiritPOrder[i] == PWR_UNENDURABLE_MADNESS && !check_mutation(YOG_GAZE_2) && (action == SPELLMENU_CAST || action == SPELLMENU_DESCRIBE)) continue;
-				if (u.spiritPOrder[i] != -1 && ((
+				if(u.spiritPOrder[i] == PWR_CONTACT_YOG_SOTHOTH){
+					if(u.yog_sothoth_credit >= 50){
+						Sprintf1(buf, spirit_powers[u.spiritPOrder[i]].name);
+						any.a_int = u.spiritPOrder[i] + 1;	/* must be non-zero */
+						add_menu(tmpwin, NO_GLYPH, &any,
+							i < 26 ? 'a' + (char)i : 'A' + (char)(i - 26),
+							0, ATR_NONE, buf, MENU_UNSELECTED);
+					}
+					else {
+						Sprintf(buf, " na %s", spirit_powers[u.spiritPOrder[i]].name);
+						add_menu(tmpwin, NO_GLYPH, &anyvoid, 0, 0, ATR_NONE, buf, MENU_UNSELECTED);
+					}
+				}
+				else if (u.spiritPOrder[i] != -1 && ((
 					spirit_powers[u.spiritPOrder[i]].owner & u.sealsActive &&
 					!(spirit_powers[u.spiritPOrder[i]].owner & SEAL_SPECIAL)) ||
 					((spirit_powers[u.spiritPOrder[i]].owner & SEAL_SPECIAL) &&
