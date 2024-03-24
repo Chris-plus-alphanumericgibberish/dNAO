@@ -13675,8 +13675,8 @@ int vis;						/* True if action is at all visible to the player */
 			(mdef->mattackedu || !rn2(5))) ||	// (odds reduced by 80% when not counterattacking)
 			// Juyo 
 			(ulightsaberhit && activeFightingForm(FFORM_JUYO) &&
-			(snekdmg > 0) && (dieroll < min(P_SKILL(P_JUYO), P_SKILL(weapon_type(uwep)))) &&
-			((sneak_attack&SNEAK_JUYO) || (rn2(5) < 2)))	// (odds reduced by 60% when not sneak attacking)
+			(dieroll < min(P_SKILL(P_JUYO), P_SKILL(weapon_type(uwep)))) &&
+			((sneak_attack&~SNEAK_JUYO) || (rn2(5) < 2)))	// (odds reduced by 60% when not sneak attacking)
 			)
 		{
 			staggering_strike = TRUE;
@@ -15160,7 +15160,7 @@ int vis;						/* True if action is at all visible to the player */
 					if ((activeFightingForm(FFORM_SHII_CHO) ||
 						(activeFightingForm(FFORM_JUYO))
 						) &&
-						(sneak_attack != 0)	/* attacking a disadvantaged target, but might not have sneak dice */
+						(sneak_attack&~SNEAK_JUYO)	/* attacking a disadvantaged target, but might not have sneak dice */
 						) use_skill(P_JUYO, 1);
 				}
 			}
