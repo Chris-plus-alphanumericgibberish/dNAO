@@ -440,6 +440,9 @@ static struct Comp_Opt
 						32, SET_IN_GAME },
 	{ "scroll_amount", "amount to scroll map when scroll_margin is reached",
 						20, DISP_IN_GAME }, /*WC*/
+#ifdef CURSES_GRAPHICS
+	{ "setcolor", "set color to specific value", 32, DISP_IN_GAME }, /*WC*/
+#endif
 	{ "scroll_margin", "scroll map when this far from the edge", 20, DISP_IN_GAME }, /*WC*/
 #ifdef SORTLOOT
 	{ "sortloot", "sort object selection lists by description", 4, SET_IN_GAME },
@@ -1297,6 +1300,94 @@ parse_status_color_options(start)
 }
 
 #endif /* STATUS_COLORS */
+
+
+struct rgb_color_option *setcolor_opts = NULL;
+struct rgb_color_option *resetcolor_opts = NULL;
+
+struct rgb_color_option * add_rgb_color_option(new_option, list_head)
+     struct rgb_color_option *new_option;
+     struct rgb_color_option *list_head;
+{
+    if (list_head == NULL)
+		return new_option;
+
+	new_option->next = list_head;
+    return new_option;
+}
+
+boolean
+parse_rgbcolor(char* cptr, boolean reset)
+{
+	int clr;
+
+	char hpre[BUFSZ] = "0x";
+	long hexcode = -1;
+	int r, g, b, l = 0;
+
+	if 		(!strncmpi(cptr, "black",		l=5))	clr = CLR_BLACK;
+	else if (!strncmpi(cptr, "red",			l=3))	clr = CLR_RED;
+	else if (!strncmpi(cptr, "green",	 	l=5))	clr = CLR_GREEN;
+	else if (!strncmpi(cptr, "brown",		l=5))	clr = CLR_BROWN;
+	else if (!strncmpi(cptr, "blue", 		l=4))	clr = CLR_BLUE;
+	else if (!strncmpi(cptr, "magenta",		l=7))	clr = CLR_MAGENTA;
+	else if (!strncmpi(cptr, "cyan",		l=4))	clr = CLR_CYAN;
+	else if (!strncmpi(cptr, "gray", 		l=4))	clr = CLR_GRAY;
+	else if (!strncmpi(cptr, "orange",		l=6))	clr = CLR_ORANGE;
+	else if (!strncmpi(cptr, "brightgreen",	l=11))	clr = CLR_BRIGHT_GREEN;
+	else if (!strncmpi(cptr, "lightgreen",	l=10))	clr = CLR_BRIGHT_GREEN;
+	else if (!strncmpi(cptr, "yellow",		l=6))	clr = CLR_YELLOW;
+	else if (!strncmpi(cptr, "brightblue",	l=10))	clr = CLR_BRIGHT_BLUE;
+	else if (!strncmpi(cptr, "lightblue",	l=9))	clr = CLR_BRIGHT_BLUE;
+	else if (!strncmpi(cptr, "brightmagenta",l=13))	clr = CLR_BRIGHT_MAGENTA;
+	else if (!strncmpi(cptr, "lightmagenta",l=12))	clr = CLR_BRIGHT_MAGENTA;
+	else if (!strncmpi(cptr, "brightcyan",	l=10))	clr = CLR_BRIGHT_CYAN;
+	else if (!strncmpi(cptr, "lightcyan",	l=9))	clr = CLR_BRIGHT_CYAN;
+	else if (!strncmpi(cptr, "white",		l=5))	clr = CLR_WHITE;
+	else return FALSE;
+
+	cptr += l+1;
+
+	if (cptr[0] == '#'){
+		cptr++;
+		strcat(hpre, cptr);
+		hexcode = strtol(cptr, NULL, 16);
+		r = (int) (hexcode & 0xff0000) >> 16;
+		g = (int) (hexcode & 0x00ff00) >> 8;
+		b = (int) (hexcode & 0x0000ff);
+	} else {
+		r = (int) strtol(cptr, &cptr, 10);
+		g = (int) strtol(cptr, &cptr, 10);
+		b = (int) strtol(cptr, NULL,  10);
+	}
+
+	r = r * 1000 / 255;
+	g = g * 1000 / 255;
+	b = b * 1000 / 255;
+
+	struct rgb_color_option *rgb_opt = (struct rgb_color_option *)alloc(sizeof(struct rgb_color_option));
+	rgb_opt->color = clr;
+	rgb_opt->r = r;
+	rgb_opt->g = g;
+	rgb_opt->b = b;
+	rgb_opt->next = NULL;
+
+	if (reset) resetcolor_opts = add_rgb_color_option(rgb_opt, resetcolor_opts);
+	else setcolor_opts = add_rgb_color_option(rgb_opt, setcolor_opts);
+
+    return TRUE;
+}
+
+
+boolean
+parse_setcolor(char* cptr){
+	return parse_rgbcolor(cptr, FALSE);
+}
+
+boolean
+parse_resetcolor(char* cptr){
+	return parse_rgbcolor(cptr, TRUE);
+}
 
 
 void

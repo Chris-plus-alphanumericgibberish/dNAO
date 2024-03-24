@@ -34,6 +34,10 @@ static void set_window_position(int *, int *, int *, int *, int,
 
 /* array to save initial terminal colors for later restoration */
 
+extern struct rgb_color_option *setcolor_opts;
+extern struct rgb_color_option *resetcolor_opts;
+
+
 typedef struct nhrgb_type {
     short r;
     short g;
@@ -426,11 +430,14 @@ curses_init_nhcolors()
         }
 
         if (can_change_color()) {
-            if (iflags.classic_colors == TRUE){
-                for (int nclr = 0; nclr < cnum; nclr++){
-                    color_content(clr_remap[nclr], &(orig_colors[nclr].r), &(orig_colors[nclr].g), &(orig_colors[nclr].b));
+            for (int nclr = 0; nclr < cnum; nclr++){
+                color_content(clr_remap[nclr], &(orig_colors[nclr].r), &(orig_colors[nclr].g), &(orig_colors[nclr].b));
+                if (iflags.classic_colors == TRUE)
                     init_color(clr_remap[nclr], default_colors[nclr].r, default_colors[nclr].g, default_colors[nclr].b);
-                }
+            }
+
+            for (struct rgb_color_option* curr = setcolor_opts; curr; curr = curr->next){
+                init_color(curr->color, curr->r, curr->g, curr->b);
             }
 # ifdef USE_DARKGRAY
             if (COLORS > 16) {
@@ -1130,10 +1137,12 @@ curses_cleanup()
             COLOR_BLUE + 8,
             COLOR_MAGENTA + 8, COLOR_CYAN + 8, COLOR_WHITE + 8
         };
-        if (iflags.classic_colors == TRUE){
-            for (int nclr = 0; nclr < cnum; nclr++){
-                init_color(clr_remap[nclr], orig_colors[nclr].r, orig_colors[nclr].g, orig_colors[nclr].b);
-            }
+        for (int nclr = 0; nclr < cnum; nclr++){
+            init_color(clr_remap[nclr], orig_colors[nclr].r, orig_colors[nclr].g, orig_colors[nclr].b);
+        }
+
+        for (struct rgb_color_option* curr = resetcolor_opts; curr; curr = curr->next){
+            init_color(curr->color, curr->r, curr->g, curr->b);
         }
 # ifdef USE_DARKGRAY
         if (COLORS > 16) {
