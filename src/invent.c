@@ -3603,6 +3603,24 @@ winid *datawin;
 			Sprintf(buf2, "%s.", buf);
 			OBJPUTSTR(buf2);
 		}
+		if(oartifact == ART_AMALGAMATED_SKIES || oartifact == ART_SKY_REFLECTED){
+			buf[0] = '\0';
+#define	ZERTHPROPS(prop, string)	\
+	ADDCLASSPROP(artinstance[ART_SKY_REFLECTED].ZerthUpgrades&prop, string);
+			ZERTHPROPS(ZPROP_WRATH, "missiles of wrath");
+			ZERTHPROPS(ZPROP_STEEL, "scripture of steel");
+			ZERTHPROPS(ZPROP_WILL, "submerge the will");
+			ZERTHPROPS(ZPROP_VILQUAR, "Vilquar's eye");
+			ZERTHPROPS(ZPROP_POWER, "power of one");
+			ZERTHPROPS(ZPROP_BALANCE, "balance in all things");
+			ZERTHPROPS(ZPROP_PATIENCE, "work of patience");
+			ZERTHPROPS(ZPROP_FOCUS, "Zerthimon's focus");
+			if(buf[0] != '\0')
+				Sprintf(buf2, "Known mantras: %s.", buf);
+			else
+				Sprintf(buf2, "No mantras known");
+			OBJPUTSTR(buf2);
+		}
 	}
 	if (olet == ARMOR_CLASS) {
 		/* Armor type */
