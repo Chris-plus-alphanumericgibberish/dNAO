@@ -1068,6 +1068,7 @@ MONSTER[10%]:'s',"man-faced millipede",random
 MONSTER[10%]:'{',"mirrored moonflower",random
 MONSTER[10%]:'w',"crimson writher",random
 MONSTER[10%]:'p',"radiant pyramid",random
+MONSTER[10%]:'g',"grotesque peeper",random
 
 #
 #	The Ogre Stockade for the Lethe branch.
@@ -2845,6 +2846,7 @@ MONSTER[75%]:'s',"man-faced millipede",random
 MONSTER[75%]:'{',"mirrored moonflower",random
 MONSTER[75%]:'w',"crimson writher",random
 MONSTER[75%]:'p',"radiant pyramid",random
+MONSTER[75%]:'g',"grotesque peeper",random
 
 #
 # An alternate introductory level...
@@ -2991,6 +2993,7 @@ MONSTER[75%]:'s',"man-faced millipede",random
 MONSTER[75%]:'{',"mirrored moonflower",random
 MONSTER[75%]:'w',"crimson writher",random
 MONSTER[75%]:'p',"radiant pyramid",random
+MONSTER[75%]:'g',"grotesque peeper",random
 
 #
 # The level with the alhoon's fortress...
@@ -3176,6 +3179,7 @@ MONSTER[75%]:'s',"man-faced millipede",random
 MONSTER[75%]:'{',"mirrored moonflower",random
 MONSTER[75%]:'w',"crimson writher",random
 MONSTER[75%]:'p',"radiant pyramid",random
+MONSTER[75%]:'g',"grotesque peeper",random
 
 #
 # A third gulf level...
@@ -3347,6 +3351,7 @@ MONSTER[75%]:'s',"man-faced millipede",random
 MONSTER[75%]:'{',"mirrored moonflower",random
 MONSTER[75%]:'w',"crimson writher",random
 MONSTER[75%]:'p',"radiant pyramid",random
+MONSTER[75%]:'g',"grotesque peeper",random
 
 #
 #
@@ -3497,6 +3502,7 @@ MONSTER[75%]:'s',"man-faced millipede",random
 MONSTER[75%]:'{',"mirrored moonflower",random
 MONSTER[75%]:'w',"crimson writher",random
 MONSTER[75%]:'p',"radiant pyramid",random
+MONSTER[75%]:'g',"grotesque peeper",random
 
 #	Cthulhu's Sanctum
 #
