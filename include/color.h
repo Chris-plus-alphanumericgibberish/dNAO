@@ -98,5 +98,13 @@ struct text_color_option {
 };
 #endif
 
+struct rgb_color_option {
+	int color;
+	int r;
+	int g;
+	int b;
+
+	struct rgb_color_option *next;
+};
 
 #endif /* COLOR_H */

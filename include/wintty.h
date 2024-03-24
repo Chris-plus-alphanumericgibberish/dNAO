@@ -151,6 +151,8 @@ E int FDECL(has_color,(int color));
 
 #ifdef STATUS_COLORS
 E boolean FDECL(parse_status_color_options, (char *));
+E boolean FDECL(parse_setcolor, (char *));
+E boolean FDECL(parse_resetcolor, (char *));
 #endif /* STATUS_COLOR */
 
 /* ### topl.c ### */
