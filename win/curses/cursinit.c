@@ -10,7 +10,7 @@
 
 /* Global curses variables extern'd in wincurs.h */
 boolean counting;
-int orig_cursor;	         /* Preserve initial cursor state */
+int orig_cursor;             /* Preserve initial cursor state */
 int term_rows, term_cols; /* size of underlying terminal */
 
 WINDOW *base_term;    /* underlying terminal window */
@@ -34,6 +34,10 @@ static void set_window_position(int *, int *, int *, int *, int,
 
 /* array to save initial terminal colors for later restoration */
 
+extern struct rgb_color_option *setcolor_opts;
+extern struct rgb_color_option *resetcolor_opts;
+
+
 typedef struct nhrgb_type {
     short r;
     short g;
@@ -41,6 +45,27 @@ typedef struct nhrgb_type {
 } nhrgb;
 
 nhrgb orig_darkgray;
+
+nhrgb default_colors[16] = {
+    {50  , 50  , 50  }, // black
+    {1000, 0   , 0   }, // red
+    {75  , 630 , 55  }, // green
+    {480 , 290 , 0   }, // yellow (brown)
+    {0   , 215 , 855 }, // blue
+    {530 , 90  , 600  }, // magenta (purple)
+    {215 , 560 , 823 }, // cyan
+    {800 , 800 , 800 }, // white
+    {0   , 0   , 0   }, // bright black (no color)
+    {1000, 500 , 0   }, // bright red (orange)
+    {0   , 1000, 0   }, // bright green
+    {1000, 1000, 0   }, // bright yellow (yellow)
+    {0   , 0   , 1000}, // bright blue
+    {1000, 0   , 1000}, // bright magenta
+    {0   , 1000, 1000}, // bright cyan
+    {1000, 1000, 1000}  // bright white
+};
+
+nhrgb orig_colors[16];
 
 /* Banners used for an optional ASCII splash screen */
 
@@ -405,6 +430,15 @@ curses_init_nhcolors()
         }
 
         if (can_change_color()) {
+            for (int nclr = 0; nclr < cnum; nclr++){
+                color_content(clr_remap[nclr], &(orig_colors[nclr].r), &(orig_colors[nclr].g), &(orig_colors[nclr].b));
+                if (iflags.classic_colors == TRUE)
+                    init_color(clr_remap[nclr], default_colors[nclr].r, default_colors[nclr].g, default_colors[nclr].b);
+            }
+
+            for (struct rgb_color_option* curr = setcolor_opts; curr; curr = curr->next){
+                init_color(curr->color, curr->r, curr->g, curr->b);
+            }
 # ifdef USE_DARKGRAY
             if (COLORS > 16) {
                 color_content(CURSES_DARK_GRAY, &orig_darkgray.r,
@@ -796,34 +830,34 @@ curses_choose_character()
         }
     }
 
-	/* Select descendant status, if necessary */
+    /* Select descendant status, if necessary */
     if (flags.descendant < 0){
-		if (flags.descendant == ROLE_RANDOM || flags.randomall || flags.initrole < 0 || !validdescendant(flags.initrole)) {
+        if (flags.descendant == ROLE_RANDOM || flags.randomall || flags.initrole < 0 || !validdescendant(flags.initrole)) {
            flags.descendant = 0; // never randomly roll descendant
         } else {
             /* Always 2 options - yn */
             choices = (const char **) alloc(sizeof (char *) * (3));
             pickmap = (int *) alloc(sizeof (int) * (3));
-			char * terms[] = {"Inherit from a past adventurer (start with an heirloom artifact but low stats and dangerous foes)",
-								"No past inheritance", '\0'};
+            char * terms[] = {"Inherit from a past adventurer (start with an heirloom artifact but low stats and dangerous foes)",
+                                "No past inheritance", '\0'};
 
             for (i = 0; i < 2; i++) {
-				choices[i] = terms[i];
-				pickmap[i] = i;
+                choices[i] = terms[i];
+                pickmap[i] = i;
             }
             choices[i] = (const char *) 0;
 
-			sel = curses_character_dialog(choices, "Choose one of the following inheritances:");
+            sel = curses_character_dialog(choices, "Choose one of the following inheritances:");
             if (sel >= 0) sel = pickmap[sel];
             else if (sel == ROLE_NONE) {        /* Quit */
                 clearlocks();
                 curses_bail(0);
             }
 
-			/* invert y/n for the sanity for putting "yes" as the first option, but 0 as the default */
-			if (sel == 0) sel = 1;
-			else if (sel == 1) sel = 0;
-			else if (sel == ROLE_RANDOM) sel = rn2(2);
+            /* invert y/n for the sanity for putting "yes" as the first option, but 0 as the default */
+            if (sel == 0) sel = 1;
+            else if (sel == 1) sel = 0;
+            else if (sel == ROLE_RANDOM) sel = rn2(2);
 
             flags.descendant = sel;
             free(choices);
@@ -1094,6 +1128,22 @@ curses_cleanup()
 {
 #ifdef TEXTCOLOR
     if (has_colors() && can_change_color()) {
+        int cnum = COLORS >= 16 ? 16 : 8;
+        int clr_remap[16] = {
+            COLOR_BLACK, COLOR_RED, COLOR_GREEN, COLOR_YELLOW,
+            COLOR_BLUE,
+            COLOR_MAGENTA, COLOR_CYAN, -1, COLOR_WHITE,
+            COLOR_RED + 8, COLOR_GREEN + 8, COLOR_YELLOW + 8,
+            COLOR_BLUE + 8,
+            COLOR_MAGENTA + 8, COLOR_CYAN + 8, COLOR_WHITE + 8
+        };
+        for (int nclr = 0; nclr < cnum; nclr++){
+            init_color(clr_remap[nclr], orig_colors[nclr].r, orig_colors[nclr].g, orig_colors[nclr].b);
+        }
+
+        for (struct rgb_color_option* curr = resetcolor_opts; curr; curr = curr->next){
+            init_color(curr->color, curr->r, curr->g, curr->b);
+        }
 # ifdef USE_DARKGRAY
         if (COLORS > 16) {
             init_color(CURSES_DARK_GRAY, orig_darkgray.r,

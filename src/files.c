@@ -2086,6 +2086,10 @@ char		*tmp_levels;
 #if defined(STATUS_COLORS) && defined(TEXTCOLOR)
             (void) parse_status_color_options(bufp);
 #endif
+	} else if (match_varname(buf, "SETCOLOR", 8)) {
+	    (void) parse_setcolor(bufp);
+	} else if (match_varname(buf, "RESETCOLOR", 10)) {
+	    (void) parse_resetcolor(bufp);
 	} else if (match_varname(buf, "DUNGEON", 4)) {
 	    len = get_uchars(fp, buf, bufp, translate, FALSE,
 			     MAXDCHARS, "DUNGEON");
