@@ -13242,7 +13242,7 @@ int vis;						/* True if action is at all visible to the player */
 	int seardmg = 0;	/* X-hating */
 	int poisdmg = 0;	/* poisons */
 	int elemdmg = 0;	/* artifacts, objproperties, and clockwork heat */
-	int specdmg = 0;	/* sword of blood; sword of mercury */
+	int specdmg = 0;	/* sword of blood; sword of mercury; clawmark thought */
 	int totldmg = 0;	/* total of subtotal and below */
 	
 	int wepspe = weapon ? weapon->spe : 0;		/* enchantment of weapon, saved in case it goes poof. */
@@ -13589,8 +13589,6 @@ int vis;						/* True if action is at all visible to the player */
 
 		/* some of the player's glyphs proc on sneak attacks */
 		if (youagr) {
-			if (active_glyph(CLAWMARK))
-				snekdie = snekdie * 13 / 10;
 			if (active_glyph(BLOOD_RAPTURE))
 				heal(&youmonst, 30);
 			if (active_glyph(WRITHE)){
@@ -15486,6 +15484,11 @@ int vis;						/* True if action is at all visible to the player */
 		pd->mtyp == PM_SHRIEKER &&
 		(subtotl > *hp(mdef)))
 		subtotl = max(*hp(mdef) - 1, 1);
+
+	/*clawmark adjustment*/
+	if(youagr && sneak_attack && active_glyph(CLAWMARK)){
+		specdmg += 3*(subtotl + seardmg + elemdmg + poisdmg + specdmg)/10;
+	}
 
 	/* Final sum of damage */
 	totldmg = subtotl + seardmg + elemdmg + poisdmg + specdmg;
