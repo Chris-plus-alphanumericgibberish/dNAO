@@ -3076,7 +3076,7 @@ winid *datawin;
 					dice, ldamd, (lflat ? sitoa(lflat) : ""));
 				OBJPUTSTR(buf2);
 			}
-			if(is_mercy_blade(obj) & !u.veil){
+			if(mercy_blade_prop(obj) & !u.veil){
 				Sprintf(buf2, "Deals extra damage scaled by insight%s, currently %d%% extra damage.",
 					(u.uinsight >= 25) ? " and charisma" : "",
 					(min(u.uinsight, 50) + ((u.uinsight >= 25) ? min((u.uinsight-25)/2, ACURR(A_CHA)) : 0))*2);
@@ -3618,7 +3618,7 @@ winid *datawin;
 			if(buf[0] != '\0')
 				Sprintf(buf2, "Known mantras: %s.", buf);
 			else
-				Sprintf(buf2, "No mantras known");
+				Sprintf(buf2, "No mantras known.");
 			OBJPUTSTR(buf2);
 		}
 	}
