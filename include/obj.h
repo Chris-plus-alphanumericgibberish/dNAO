@@ -1087,7 +1087,7 @@ struct obj {
 								|| (otmp)->otyp == CLOAK_OF_PROTECTION)
 
 #define is_twoweapable_artifact(otmp) (always_twoweapable_artifact(otmp)\
-				|| ((otmp)->oartifact == uwep->oartifact)\
+				|| (uwep && (otmp)->oartifact == uwep->oartifact)\
 				|| ((otmp)->oartifact == ART_CLARENT && uwep && uwep->oartifact==ART_EXCALIBUR)\
 				|| ((otmp)->oartifact == ART_FROST_BRAND && uwep && uwep->oartifact==ART_FIRE_BRAND)\
 				|| ((otmp)->oartifact == ART_FIRE_BRAND && uwep && uwep->oartifact==ART_FROST_BRAND)\
