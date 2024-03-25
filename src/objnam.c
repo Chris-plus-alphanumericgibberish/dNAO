@@ -3516,6 +3516,7 @@ const char *oldstr;
 			    !BSTRCMPI(bp, p-6, "scales") ||
 				!BSTRCMP(bp, p-6, "wishes") ||	/* ring */
 				!BSTRCMPI(bp, p-10, "Lost Names") || /* book */
+			    !BSTRCMPI(bp, p-17, "Amalgamated Skies") || /* sword (wizmode) */
 				!BSTRCMPI(bp, p-9, "mandibles"))
 				return bp;
 
