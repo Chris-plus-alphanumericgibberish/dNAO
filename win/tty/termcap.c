@@ -889,8 +889,9 @@ init_hilite()
 	register int c;
 	char *setf, *scratch;
 	int length_md;
+	int colors = tgetnum("Co");
 
-	if (tgetnum("Co") < 8
+	if (colors < 8
 	    || (MD == NULL) || (strlen(MD) == 0)
 	    || ((setf = tgetstr("AF", (char **)0)) == (char *)0
 		 && (setf = tgetstr("Sf", (char **)0)) == (char *)0))
@@ -923,44 +924,62 @@ init_hilite()
 	c = 6;
 	while (c--)
 	{
-	    char *work;
-
-	    scratch = tparm(setf,ti_map[c].ti_color);
-	    work = (char *) alloc(strlen(scratch) + length_md + 1);
-	    Strcpy(work,MD);
-	    hilites[ti_map[c].nh_bright_color] = work;
-	    work += length_md;
-	    Strcpy(work,scratch);
-	    hilites[ti_map[c].nh_color] = work;
+		scratch = tparm(setf,ti_map[c].ti_color);
+		hilites[ti_map[c].nh_color] = (char *) alloc(strlen(scratch) + 1);
+		Strcpy(hilites[ti_map[c].nh_color], scratch);
+		if (colors >= 16) {
+			/* Use proper bright colors if terminal supports them. */
+			scratch = tparm(setf,ti_map[c].ti_color|BRIGHT);
+			hilites[ti_map[c].nh_bright_color] = (char *) alloc(strlen(scratch) + 1);
+			Strcpy(hilites[ti_map[c].nh_bright_color], scratch);
+		} else {
+			/* For terminals supporting only 8 colors, use bold + color for
+			 * bright colors. */
+			hilites[ti_map[c].nh_bright_color] = (char *) alloc(strlen(scratch) + length_md + 1);
+			Strcpy(hilites[ti_map[c].nh_bright_color], MD);
+			Strcat(hilites[ti_map[c].nh_bright_color], scratch);
+		}
 	}
 
-	scratch = tparm(setf,COLOR_WHITE);
-	hilites[CLR_WHITE] = (char *) alloc(strlen(scratch) + length_md + 1);
-	Strcpy(hilites[CLR_WHITE],MD);
-	Strcat(hilites[CLR_WHITE],scratch);
+	if (colors >= 16) {
+		scratch = tparm(setf,COLOR_WHITE|BRIGHT);
+		hilites[CLR_WHITE] = (char *) alloc(strlen(scratch) + 1);
+		Strcpy(hilites[CLR_WHITE],scratch);
+	} else {
+		scratch = tparm(setf,COLOR_WHITE);
+		hilites[CLR_WHITE] = (char *) alloc(strlen(scratch) + length_md + 1);
+		Strcpy(hilites[CLR_WHITE],MD);
+		Strcat(hilites[CLR_WHITE],scratch);
+	}
 
 	hilites[CLR_GRAY] = "";
 	hilites[NO_COLOR] = "";
 
 	if (iflags.wc2_darkgray)
 	{
-	    /* On many terminals, esp. those using classic PC CGA/EGA/VGA
-	     * textmode, specifying "hilight" and "black" simultaneously
-	     * produces a dark shade of gray that is visible against a
-	     * black background.  We can use it to represent black objects.
-	     */
-	    scratch = tparm(setf,COLOR_BLACK);
-	    hilites[CLR_BLACK] = (char *) alloc(strlen(scratch) + length_md + 1);
-	    Strcpy(hilites[CLR_BLACK],MD);
-	    Strcat(hilites[CLR_BLACK],scratch);
+		/* On many terminals, esp. those using classic PC CGA/EGA/VGA
+		 * textmode, specifying "hilight" and "black" simultaneously
+		 * produces a dark shade of gray that is visible against a
+		 * black background.  We can use it to represent black objects.
+		 */
+		if (colors >= 16) {
+			scratch = tparm(setf,COLOR_BLACK|BRIGHT);
+			hilites[CLR_BLACK] = (char *) alloc(strlen(scratch) + 1);
+			Strcpy(hilites[CLR_BLACK],scratch);
+		} else {
+			scratch = tparm(setf,COLOR_BLACK);
+			hilites[CLR_BLACK] = (char *) alloc(strlen(scratch) + length_md + 1);
+			Strcpy(hilites[CLR_BLACK],MD);
+			Strcat(hilites[CLR_BLACK],scratch);
+		}
 	}
 	else
 	{
-	    /* But it's concievable that hilighted black-on-black could
-	     * still be invisible on many others.  We substitute blue for
-	     * black.
-	     */
-	    hilites[CLR_BLACK] = hilites[CLR_BLUE];
+		/* But it's concievable that hilighted black-on-black could
+		 * still be invisible on many others.  We substitute blue for
+		 * black.
+		 */
+		hilites[CLR_BLACK] = hilites[CLR_BLUE];
 	}
 }
 
