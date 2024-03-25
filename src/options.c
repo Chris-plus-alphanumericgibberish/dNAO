@@ -441,7 +441,6 @@ static struct Comp_Opt
 	{ "scroll_amount", "amount to scroll map when scroll_margin is reached",
 						20, DISP_IN_GAME }, /*WC*/
 #ifdef CURSES_GRAPHICS
-	{ "setcolor", "set color to specific value", 32, DISP_IN_GAME }, /*WC*/
 #endif
 	{ "scroll_margin", "scroll map when this far from the edge", 20, DISP_IN_GAME }, /*WC*/
 #ifdef SORTLOOT
