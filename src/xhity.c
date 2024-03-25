@@ -2336,7 +2336,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			attk->adtyp = AD_PHYS;
 			attk->damn = 1;
 			attk->damd = 4;
-			*tohitmod = -10 * attacknum;
+			*tohitmod = -10 * (attacknum+1); //Correct off-by-one error, these are the *subout* attacks specifically
 			fromlist = FALSE;
 			if(check_subout(subout, SUBOUT_BARB1)){
 				add_subout(subout, SUBOUT_BARB2);
