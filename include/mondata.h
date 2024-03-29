@@ -856,7 +856,7 @@
 #define helm_size_fits(ptr,obj)	(obj->objsize == ptr->msize || (is_hat(obj) && obj->objsize <= ptr->msize))
 
 #define hates_holy_mon(mon)	((mon) == &youmonst ? hates_holy(youracedata) : hates_holy((mon)->data))
-#define hates_holy(ptr)		(is_demon(ptr) || is_undead(ptr) || (((ptr)->mflagsg&MG_HATESHOLY) != 0))
+#define hates_holy(ptr)		(is_demon(ptr) || (is_undead(ptr) && ptr->mtyp != PM_DREAD_SERAPH) || (((ptr)->mflagsg&MG_HATESHOLY) != 0))
 #define hates_unholy(ptr)	((ptr->mflagsg&MG_HATESUNHOLY) != 0)
 #define hates_unholy_mon(mon)	((mon) == &youmonst ? hates_unholy(youracedata) : hates_unholy((mon)->data))
 #define hates_unblessed(ptr)	((ptr->mflagsg&MG_HATESUNBLESSED) != 0)

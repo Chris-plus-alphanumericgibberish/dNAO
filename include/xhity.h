@@ -50,8 +50,8 @@
 
 /* TODO: put these in their specified header files */
 /* mondata.h */
-#define is_holy_mon(mon)	(is_angel((mon)->data) || has_template(mon, ILLUMINATED))
-#define is_unholy_mon(mon)	(is_demon((mon)->data))
+#define is_holy_mon(mon)	(is_angel((mon)->data) || has_template(mon, ILLUMINATED) || (mon)->mtyp == PM_DREAD_SERAPH)
+#define is_unholy_mon(mon)	(is_demon((mon)->data) || (mon)->mtyp == PM_DREAD_SERAPH)
 #define is_unblessed_mon(mon)	(is_auton((mon)->data) || is_rilmani((mon)->data) || is_kamerel((mon)->data))
 
 #define SUBOUT_SPELLS	 1	/* Spellcasting attack instead (Five Fiends of Chaos1 and Gae) */
