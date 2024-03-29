@@ -1068,6 +1068,7 @@ int how;
 			)) {
 				You_feel("a curse fall upon your soul!");
 				polymon(PM_DEATH_KNIGHT);
+				change_gevurah(16); //cheated death extra (20 total).
 				HUnchanging |= FROMOUTSIDE;
 				lsvd = LSVD_DTHK;
 			}
@@ -1172,6 +1173,9 @@ int how;
 				pline("Your mask falls to pieces!");
 				useup(uskin);
 			}
+			if(youracedata->mtyp == PM_DARK_YOUNG)
+				change_gevurah(16); //cheated death extra.
+
 			polymon(PM_DARK_YOUNG);
 			HUnchanging |= FROMOUTSIDE;
 			remove_mutation(ABHORRENT_SPORE);
@@ -1179,7 +1183,7 @@ int how;
 			lsvd = LSVD_NONE;
 			impossible("Lifesaved with no amulet, ring, or Jack?");
 		}
-		u.gevurah += 4;//cheated death.
+		change_gevurah(4);//cheated death.
 
 		(void) adjattrib(A_CON, -1, TRUE);
 		if((Upolyd ? u.mhmax : u.uhpmax) < 10){
@@ -1248,7 +1252,7 @@ int how;
 			}
 		}
 		savelife(how);
-		u.gevurah += 4;//cheated death.
+		change_gevurah(4);//cheated death.
 		killer = 0;
 		killer_format = 0;
 		return;

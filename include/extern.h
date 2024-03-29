@@ -250,6 +250,10 @@ E boolean FDECL(blockedMentalEdge, (int));
 E int NDECL(uhp);
 E int NDECL(uhpmax);
 E void NDECL(check_brainlessness);
+E boolean FDECL(change_hod, (int));
+E boolean FDECL(change_chokhmah, (int));
+E boolean FDECL(change_gevurah, (int));
+E boolean FDECL(change_keter, (int));
 
 /* ### ball.c ### */
 

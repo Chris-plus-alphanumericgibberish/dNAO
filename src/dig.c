@@ -1520,13 +1520,13 @@ int x, y;
 	if (Role_if(PM_ARCHEOLOGIST)) {
 	    adjalign(-sgn(u.ualign.type)*3);
 		u.ualign.sins++;
-		u.hod++;
+		change_hod(1);
 	    You_feel("like a despicable grave-robber!");
 	} else if (Role_if(PM_SAMURAI)) {
         if(!(uarmh && uarmh->oartifact && uarmh->oartifact == ART_HELM_OF_THE_NINJA)){
 		    adjalign(-sgn(u.ualign.type)*10);//stiffer penalty
 			u.ualign.sins++;
-			u.hod++;
+			change_hod(1);
 		    You("disturb the honorable dead!");
         } else {
 			adjalign(10);

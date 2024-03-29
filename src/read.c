@@ -2488,7 +2488,7 @@ struct obj	*sobj;
 		} else {
 			if(Role_if(PM_MADMAN)){
 				You_feel("ashamed of wiping your own memory.");
-				u.hod += sobj->cursed ? 5 : 2;
+				change_hod(sobj->cursed ? 5 : 2);
 			}
 			exercise(A_WIS, FALSE);
 		}
@@ -3320,8 +3320,10 @@ do_class_genocide()
 				    /* finish genociding this class of
 				       monsters before ultimately dying */
 				    gameover = TRUE;
-				} else
+				} else {
 				    rehumanize();
+					change_gevurah(1); //cheated death.
+				}
 			    }
 			    /* Self-genocide if it matches either your race
 			       or role.  Assumption:  male and female forms
@@ -3329,7 +3331,10 @@ do_class_genocide()
 			    if (i == urole.malenum || i == urace.malenum) {
 				u.uhp = -1;
 				if (Upolyd) {
-				    if (!feel_dead++) You_feel("dead inside.");
+				    if (!feel_dead++){
+						You_feel("dead inside.");
+						change_gevurah(20); //cheated death.
+					}
 				} else {
 				    if (!feel_dead++) You("die.");
 				    gameover = TRUE;
@@ -3499,10 +3504,12 @@ int how;
 			delayed_killer = killer;
 			killer = 0;
 			You_feel("dead inside.");
+			change_gevurah(20); //cheated death.
 		} else
 			done(GENOCIDED);
 	    } else if (ptr == youmonst.data) {
-		rehumanize();
+			rehumanize();
+			change_gevurah(1); //cheated death.
 	    }
 	    reset_rndmonst(mndx);
 	    kill_genocided_monsters();

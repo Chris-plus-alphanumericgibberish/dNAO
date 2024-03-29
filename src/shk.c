@@ -626,11 +626,11 @@ struct obj * otmp;	/* optional: item not in your inventory that is being stolen 
 	    You("feel like an evil rogue.");
 		if(u.ualign.type >= 0){
 			u.ualign.sins++;
-			u.hod++; /* It is deliberate that non-rogues increment hod twice*/
+			change_hod(1); /* It is deliberate that non-rogues increment hod twice*/
 		}
 	}
 	
-	u.hod++;
+	change_hod(1);
 	hot_pursuit(shkp);
 	return TRUE;
 }

@@ -3827,6 +3827,7 @@ drown()
 	 */
 	if (Upolyd && !Unchanging && Race_if(PM_VAMPIRE)) {
 		rehumanize();
+		change_gevurah(1); //cheated death.
 		if(!is_3dwater(u.ux, u.uy)){
 			u.uinwater = 0;
 			u.usubwater = 0;

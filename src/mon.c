@@ -4959,8 +4959,8 @@ register struct monst *mtmp;
 		oep->complete_wards = 1;
 	}
 	if(mtmp->mtyp == PM_CHOKHMAH_SEPHIRAH){
-		u.chokhmah++;
-		u.keter++;
+		change_chokhmah(1);
+		change_keter(1);
 	}
 	//Livelogs
 	if (mtmp->data->mlet == S_VAMPIRE && mtmp->data->geno & G_UNIQ && mtmp->mtyp != PM_VLAD_THE_IMPALER)
@@ -6446,14 +6446,14 @@ cleanup:
 		else
 			You("murderer!");
 		if(u.ualign.type == A_LAWFUL){
-			u.hod += 10;
+			change_hod(10);
 			u.ualign.sins += 5;
 			if(u.usanity > 0){
 				change_usanity(-1*rnd(4), FALSE);
 			}
 		}
 		else{
-			u.hod += 5; 
+			change_hod(5); 
 			u.ualign.sins += 2;
 			if(u.usanity > 0){
 				change_usanity(-1, FALSE);
@@ -6469,7 +6469,7 @@ cleanup:
 		u.ualign.type != A_VOID
 	) {
 		change_luck(-5);
-		u.hod += 10;
+		change_hod(10);
 		You_feel("guilty...");
 	}
 	/*Killing the specimens in the Dungeon of Ill-Regard angers the autons*/
@@ -6500,16 +6500,16 @@ cleanup:
 					// u.uevent.qcompleted ? "probably " : "");
 		} else {/* REAL BAD! */
 			adjalign(-(u.ualign.record+(int)ALIGNLIM/2));
-			u.hod += 30;
+			change_hod(30);
 			pline("That was %sa bad idea...",
 					u.uevent.qcompleted ? "probably " : "");
 		}
 	} else if (mdat->msound == MS_NEMESIS){	/* Real good! */
 	    adjalign((int)(ALIGNLIM/4));
-		u.hod = max(u.hod-10,0);
+		change_hod(-10);
 	} else if (quest_faction(mtmp) && mdat->mtyp == urole.guardnum && mdat->mtyp != PM_THUG) {	/*nobody cares if you kill thugs*/
 	    adjalign(-(int)(ALIGNLIM/8));															/* what's a little murder amongst rogues?*/
-		u.hod += 10;
+		change_hod(10);
 	    if (!Hallucination) pline("That was probably a bad idea...");
 	    else pline("Whoopsie-daisy!");
 	}else if (mtmp->ispriest && !always_hostile(mdat)) {

@@ -1432,7 +1432,7 @@ violated_vegetarian()
 		You_feel("guilty.");
 		adjalign(-1);
 		u.ualign.sins++;
-		if(u.uconduct.unvegetarian%2) u.hod++;
+		if(u.uconduct.unvegetarian%2) change_hod(1);
     }
     return;
 }
@@ -2474,7 +2474,8 @@ register struct obj *otmp;
 			if (!rn2(17)) u.mhmax++;
 			u.mh = u.mhmax;
 		    } else if (u.mh <= 0) {
-			rehumanize();
+				rehumanize();
+				change_gevurah(1); //cheated death.
 		    }
 		} else {
 		    u.uhp += otmp->cursed ? -rnd(20) : rnd(20);
@@ -2497,7 +2498,8 @@ register struct obj *otmp;
 		    if (u.mh > u.mhmax) {
 			u.mh = u.mhmax;
 		    } else if (u.mh <= 0) {
-			rehumanize();
+				rehumanize();
+				change_gevurah(1); //cheated death.
 		    }
 		} else {
 		    u.uhp += otmp->cursed ? -d(4,10) : d(4,10);
@@ -3750,7 +3752,7 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 				} else {
 					if(Role_if(PM_MADMAN)){
 						You_feel("ashamed of wiping your own memory.");
-						u.hod += otmp->cursed ? 5 : 2;
+						change_hod(otmp->cursed ? 5 : 2);
 					}
 					exercise(A_WIS, FALSE);
 				}
@@ -4131,6 +4133,7 @@ register int num;
 				Your("clockwork breaks apart!");
 				if (!Unchanging && Upolyd) {
 					rehumanize();
+					change_gevurah(1); //cheated death.
 				} else {
 					killer_format = KILLED_BY;
 					killer = "overwinding";

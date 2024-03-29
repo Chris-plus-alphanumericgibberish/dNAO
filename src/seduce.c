@@ -1815,7 +1815,10 @@ int effect_num;
 					killer_format = KILLED_BY;
 					done(DIED);
 				}
-				else rehumanize();
+				else {
+					rehumanize();
+					change_gevurah(1); //cheated death.
+				}
 			}
 			break;
 

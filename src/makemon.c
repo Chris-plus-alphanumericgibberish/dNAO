@@ -15006,12 +15006,11 @@ rndmonst()
 	}
 
 	if(u.hod && !rn2(10) && rn2(40+u.hod) > 50){
-		u.hod-=10;
-		if(u.hod<0) u.hod = 0;
+		change_hod(-10);
 		if(!tooweak(PM_HOD_SEPHIRAH, minmlev)){
 			return &mons[PM_HOD_SEPHIRAH];
 		}
-		else u.keter++;
+		else change_keter(1);
 	}
 	if(u.gevurah && !rn2(20) && rn2(u.gevurah + 94) > 100){
 		/* Notes on frequency: cheating death via lifesaving counts as +4
@@ -15020,14 +15019,13 @@ rndmonst()
 			return &mons[PM_GEVURAH_SEPHIRAH];
 		}
 		else{
-			u.gevurah -= 4;
-			if(u.gevurah<0) u.gevurah = 0;
-			u.keter++;
+			change_gevurah(-4);
+			change_keter(1);
 			return &mons[PM_CHOKHMAH_SEPHIRAH];
 		}
 	}
 	if(u.keter && !rn2(100) && rn2(u.keter+10) > 10){
-		u.chokhmah++;
+		change_chokhmah(1);
 		return &mons[PM_CHOKHMAH_SEPHIRAH];
 	}
 	if (u.uz.dnum == tower_dnum)

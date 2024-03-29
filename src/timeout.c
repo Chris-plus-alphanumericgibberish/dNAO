@@ -567,8 +567,10 @@ nh_timeout()
 	if(u.mtimedone && !--u.mtimedone) {
 		if (Unchanging)
 			u.mtimedone = rnd(100*youmonst.data->mlevel + 1);
-		else
+		else {
 			rehumanize();
+			change_gevurah(1); //cheated death.
+		}
 	}
 	if(u.ucreamed) u.ucreamed--;
 

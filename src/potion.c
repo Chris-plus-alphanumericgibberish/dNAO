@@ -632,7 +632,7 @@ boolean force;
 		} else {
 			if(Role_if(PM_MADMAN)){
 				You_feel("ashamed of wiping your own memory.");
-				u.hod += otmp->cursed ? 5 : 2;
+				change_hod(otmp->cursed ? 5 : 2);
 			}
 		    exercise(A_WIS, FALSE);
 		}

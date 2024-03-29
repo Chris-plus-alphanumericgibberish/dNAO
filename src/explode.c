@@ -835,7 +835,8 @@ struct permonst *pa; /* permonst of the attacker (used for disease) */
 
 		if (u.uhp <= 0 || (Upolyd && u.mh <= 0)) {
 		    if (Upolyd) {
-			rehumanize();
+				rehumanize();
+				change_gevurah(1); //cheated death.
 		    } else {
 			if (olet == MON_EXPLODE) {
 			    /* killer handled by caller */

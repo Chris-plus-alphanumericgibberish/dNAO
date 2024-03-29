@@ -2287,4 +2287,49 @@ check_brainlessness()
 		}
 	}
 }
+
+boolean
+change_hod(delta)
+int delta;
+{
+	if(delta < 0 || !Infuture){
+		u.hod += delta;
+		return TRUE;
+	}
+	if(u.hod<0) u.hod = 0;
+	return FALSE;
+}
+
+boolean
+change_chokhmah(delta)
+int delta;
+{
+	if(delta < 0 || !Infuture){
+		u.chokhmah += delta;
+		return TRUE;
+	}
+	return FALSE;
+}
+
+boolean
+change_gevurah(delta)
+int delta;
+{
+	if(delta < 0 || !Infuture){
+		u.gevurah += delta;
+		return TRUE;
+	}
+	return FALSE;
+}
+
+boolean
+change_keter(delta)
+int delta;
+{
+	if(delta < 0 || !Infuture){
+		u.keter += delta;
+		return TRUE;
+	}
+	return FALSE;
+}
 /*attrib.c*/

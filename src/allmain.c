@@ -886,8 +886,10 @@ you_regen_hp()
 	}
 
 	// Sanity check
-	if (Upolyd && (*hp < 1))
+	if (Upolyd && (*hp < 1)){
 		rehumanize();
+		change_gevurah(1); //cheated death.
+	}
 
 	//Androids regenerate from active Hoon and healing doll, 
 	////but not from other sources unless dormant
@@ -1152,8 +1154,10 @@ you_regen_hp()
 			(*hp) = (*hpmax);
 
 		// check for rehumanization
-		if (Upolyd && (*hp < 1))
+		if (Upolyd && (*hp < 1)){
 			rehumanize();
+			change_gevurah(1); //cheated death.
+		}
 	}
 }
 
