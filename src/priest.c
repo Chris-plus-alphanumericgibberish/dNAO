@@ -242,13 +242,12 @@ int sanctum;   /* is it the seat of the high priest? */
 			priest->ispriest = 1;
 			priest->msleeping = 0;
 			priest->mpeaceful = 0;
-			set_malign(priest); /* mpeaceful may have changed */
 		} else {
 			priest->mpeaceful = 1;
 			priest->ispriest = 1;
 			priest->msleeping = 0;
-			set_malign(priest); /* mpeaceful may have changed */
 		}
+		set_malign(priest); /* mpeaceful or murderability may have changed */
 
 		/* now his/her goodies... */
 		if(sanctum && EPRI(priest)->shralign == A_NONE &&
