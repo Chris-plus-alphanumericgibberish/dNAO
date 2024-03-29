@@ -16917,11 +16917,19 @@ struct monst *mtmp;
 			mal = EMIN(mtmp)->min_align;
 		/* unless alignment is none, set mal to -5,0,5 */
 		/* (see align.h for valid aligntyp values)     */
-		if(mal != A_NONE)
+		if(mal == A_NONE)
+			mal = MON_A_NONE;
+		else if(mal == A_VOID)
+			mal = MON_A_VOID;
+		else{
 			mal *= 5;
+		}
 	}
-
-	coaligned = (sgn(mal) == sgn(u.ualign.type));
+	
+	if(mal == MON_A_VOID)
+		coaligned = u.ualign.type == A_VOID;
+	else
+		coaligned = (sgn(mal) == sgn(u.ualign.type)); //A_NONE is coaligned with A_CHAOS because that's the standard vanilla handling
 	if (mtmp->mtyp == urole.ldrnum) {
 		mtmp->malign = -20;
 	} else if (mtmp->mtyp == PM_BLASPHEMOUS_LURKER) {
@@ -16930,11 +16938,16 @@ struct monst *mtmp;
 	} else if (mtmp->mtyp == PM_BLASPHEMOUS_HAND || mtmp->mtyp == PM_LURKING_HAND) {
 		// The Blasphemous Lurker always anomalously counts as a co-aligned priest.
 		mtmp->malign = -5;
-	} else if (mal == A_NONE) {
+	} else if (mal == MON_A_NONE) {
 		if (mtmp->mpeaceful)
 			mtmp->malign = 0;
 		else
 			mtmp->malign = 20;	/* really hostile */
+	} else if (mal == MON_A_VOID) {
+		if (mtmp->mpeaceful)
+			mtmp->malign = 0;
+		else
+			mtmp->malign = 25;	/* highly rewarded */
 	} else if (always_peaceful(mtmp->data)) {
 		int absmal = abs(mal);
 		if (mtmp->mpeaceful)
