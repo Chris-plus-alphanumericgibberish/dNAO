@@ -4544,7 +4544,7 @@ int * truedmgptr;
 	}
 	if(check_oprop(otmp, OPROP_RLYHW)){
 		int bonus = 0;
-		if(magr && (magr->mtyp == PM_LADY_CONSTANCE || is_mind_flayer(magr->data))){
+		if(magr && (magr->mtyp == PM_LADY_CONSTANCE || is_mind_flayer(magr->data) || (youagr && u.sealsActive&SEAL_OSE))){
 			if(mlev(magr)/10 > 1)
 				bonus = d(mlev(magr)/10, 15);
 			else
