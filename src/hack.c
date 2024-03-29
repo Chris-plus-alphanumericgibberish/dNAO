@@ -2052,7 +2052,7 @@ stillinwater:;
 				if (verysmall(youmonst.data)){
 					water_damage(invent, FALSE,FALSE,FALSE,(struct monst *) 0);
 				}
-				else if(rustmessage_turn < monstermoves || (is_rustprone(uarmf) && !uarmf->oerodeproof && uarmf->oeroded != MAX_ERODE)){
+				else if(rustmessage_turn < monstermoves || (uarmf && is_rustprone(uarmf) && !uarmf->oerodeproof && uarmf->oeroded != MAX_ERODE)){
 					(void)rust_dmg(uarmf, "boots", 1, TRUE, &youmonst, FALSE);
 					rustmessage_turn = monstermoves + 100;
 				}
