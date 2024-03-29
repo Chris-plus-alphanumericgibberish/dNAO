@@ -850,6 +850,7 @@ struct obj {
 							obj->where == OBJ_INVENT ? you_merc_chained(obj) : FALSE))
 #define mon_merc_chained(obj) (!mon_merc_kinstealing(obj) && !mon_merc_streaming(obj))
 #define you_merc_chained(obj) (!you_merc_kinstealing(obj) && !you_merc_streaming(obj))
+#define YOU_MERC_SPECIAL	(u.ualign.type == A_CHAOTIC || u.ualign.type == A_NONE || u.sealsActive&SEAL_OSE || u.specialSealsActive&SEAL_MISKA)
 #define force_weapon(otmp)	 ((otmp)->otyp == FORCE_PIKE || \
 						  (otmp)->otyp == DOUBLE_FORCE_BLADE || \
 						  (otmp)->otyp == FORCE_BLADE || \

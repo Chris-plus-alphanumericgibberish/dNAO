@@ -333,7 +333,7 @@ struct monst *magr;
 		attackmask |= WHACK;
 	}
 	if(obj && magr && !litsaber(obj) && is_chained_merc(obj) && (
-		(youagr && u.uinsight > 20 && (u.ualign.type == A_CHAOTIC || u.ualign.type == A_NONE))
+		(youagr && u.uinsight > 20 && YOU_MERC_SPECIAL)
 		|| (!youagr && insightful(magr->data) && is_chaotic_mon(magr))
 	)){
 		attackmask |= WHACK;
