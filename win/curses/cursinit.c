@@ -52,10 +52,10 @@ nhrgb default_colors[16] = {
     {75  , 630 , 55  }, // green
     {480 , 290 , 0   }, // yellow (brown)
     {0   , 215 , 855 }, // blue
-    {530 , 90  , 600  }, // magenta (purple)
+    {530 , 90  , 600 }, // magenta (purple)
     {215 , 560 , 823 }, // cyan
     {800 , 800 , 800 }, // white
-    {0   , 0   , 0   }, // bright black (no color)
+    {600 , 600 , 600 }, // bright black (no color)
     {1000, 500 , 0   }, // bright red (orange)
     {0   , 1000, 0   }, // bright green
     {1000, 1000, 0   }, // bright yellow (yellow)
