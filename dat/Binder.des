@@ -50,6 +50,8 @@ OBJECT:'(',"doll of binding",random,cursed,0
 OBJECT:'(',"doll of binding",random,cursed,0
 OBJECT:'(',"doll of binding",random,cursed,0
 
+OBJECT:'(',"Hyperborean dial",random,cursed,0
+
 GEOMETRY:center,center
 #          1         2         3         4         5         6         7
 #0123456789012345678901234567890123456789012345678901234567890123456789012345
