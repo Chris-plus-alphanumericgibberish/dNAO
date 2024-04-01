@@ -80,7 +80,7 @@ static struct Bool_Opt
 #endif
 #ifdef CURSES_GRAPHICS
 	{"classic_status", &iflags.classic_status, TRUE, SET_IN_FILE},
-	{"classic_colors", &iflags.classic_colors, TRUE, SET_IN_FILE},
+	{"classic_colors", &iflags.classic_colors, TRUE, DISP_IN_GAME},
 #endif
 	{"cmdassist", &iflags.cmdassist, TRUE, SET_IN_GAME},
 # if defined(MICRO) || defined(WIN32) || defined(CURSES_GRAPHICS)
