@@ -6263,7 +6263,7 @@ int spell;
 	 * to cast a spell.  The penalty is not quite so bad for the
 	 * player's role-specific spell.
 	 */
-	int size_adjust = get_your_size();
+	int size_adjust = get_your_shield_size();
 	if(size_adjust < 1)
 		size_adjust = 1;
 	else size_adjust += 1;
