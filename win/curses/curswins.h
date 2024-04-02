@@ -6,6 +6,12 @@
 
 /* Global declarations */
 
+typedef struct nhchar {
+    int ch;                     /* character */
+    int color;                  /* color info for character */
+    int attr;                   /* attributes of character */
+} nethack_char;
+
 WINDOW *curses_create_window(int width, int height, orient orientation);
 
 void curses_destroy_win(WINDOW * win);
@@ -26,6 +32,7 @@ void curses_puts(winid wid, int attr, const char *text);
 void curses_clear_nhwin(winid wid);
 void curses_alert_win_border(winid wid, boolean onoff);
 void curses_alert_main_borders(boolean onoff);
+void curses_write_char(WINDOW * win, int x, int y, nethack_char ch);
 void curses_draw_map(int sx, int sy, int ex, int ey);
 boolean curses_map_borders(int *sx, int *sy, int *ex, int *ey, int ux, int uy);
 

@@ -4,6 +4,7 @@
 #include "hack.h"
 #include "wincurs.h"
 #include "cursinvt.h"
+#include "curswins.h"
 
 /* Permanent inventory for curses interface */
 
@@ -71,14 +72,16 @@ curses_add_inv(int y, int glyph, CHAR_P accelerator, attr_t attr,
 
     if (accelerator && glyph != NO_GLYPH && iflags.use_menu_glyphs) {
         unsigned dummy = 0; /* Not used */
-        int color = 0;
         long int symbol = 0;
-        mapglyph(glyph, &symbol, &color, &dummy,
+        nethack_char nch;
+        nch.attr = NONE;
+        mapglyph(glyph, &symbol, &nch.color, &dummy,
                      u.ux, u.uy);
-        attr_t glyphclr = curses_color_attr(color, 0);
-        wattron(win, glyphclr);
-        wprintw(win, "%c ", (char)symbol);
-        wattroff(win, glyphclr);
+        nch.ch = symbol;
+        int y, x;
+        getyx(win, y, x);
+        curses_write_char(win, x, y, nch);
+        waddch(win, ' ');
     }
 
 #ifdef MENU_COLOR

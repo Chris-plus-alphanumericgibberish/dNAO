@@ -26,19 +26,12 @@ typedef struct nhwd {
     struct nhwd *next_wid;      /* Pointer to next entry */
 } nethack_wid;
 
-typedef struct nhchar {
-    int ch;                     /* character */
-    int color;                  /* color info for character */
-    int attr;                   /* attributes of character */
-} nethack_char;
-
 static boolean map_clipped;     /* Map window smaller than 80x21 */
 static nethack_window nhwins[NHWIN_MAX];        /* NetHack window array */
 static nethack_char map[ROWNO][COLNO];  /* Map window contents */
 static nethack_wid *nhwids = NULL;      /* NetHack wid array */
 
 static boolean is_main_window(winid wid);
-static void write_char(WINDOW * win, int x, int y, nethack_char ch);
 static void clear_map(void);
 
 /* Create a window with the specified size and orientation */
@@ -379,7 +372,7 @@ curses_putch(winid wid, int x, int y, int ch, int color, int attr)
             y++;
         }
 
-        write_char(mapwin, x - sx, y - sy, nch);
+        curses_write_char(mapwin, x - sx, y - sy, nch);
     }
     /* refresh after every character?
      * Fair go, mate! Some of us are playing from Australia! */
@@ -584,14 +577,14 @@ wpututf8char(WINDOW *win, int y, int x, glyph_t c)
 /* Unconditionally write a single character to a window at the given
 coordinates without a refresh.  Currently only used for the map. */
 
-static void
-write_char(WINDOW * win, int x, int y, nethack_char nch)
+void
+curses_write_char(WINDOW * win, int x, int y, nethack_char nch)
 {
     curses_toggle_color_attr(win, nch.color, nch.attr, ON);
 #ifdef UTF8_GLYPHS
     if (iflags.UTF8graphics) {
         wpututf8char(win, y, x, nch.ch);
-    } else if (iflags.IBMgraphics && nch.ch >= 0x80 && nch.ch <= 0xFF) {
+    } else if (iflags.IBMgraphics) {
         wpututf8char(win, y, x, get_unicode_codepoint(nch.ch));
     } else {
 #endif
@@ -643,15 +636,15 @@ curses_draw_map(int sx, int sy, int ex, int ey)
         sbex = (ex * ((float) (ex - sx + 1) / COLNO));
 
         for (count = 0; count < sbsx; count++) {
-            write_char(mapwin, count + bspace, ey - sy + 1 + bspace, hsb_back);
+            curses_write_char(mapwin, count + bspace, ey - sy + 1 + bspace, hsb_back);
         }
 
         for (count = sbsx; count <= sbex; count++) {
-            write_char(mapwin, count + bspace, ey - sy + 1 + bspace, hsb_bar);
+            curses_write_char(mapwin, count + bspace, ey - sy + 1 + bspace, hsb_bar);
         }
 
         for (count = sbex + 1; count <= (ex - sx); count++) {
-            write_char(mapwin, count + bspace, ey - sy + 1 + bspace, hsb_back);
+            curses_write_char(mapwin, count + bspace, ey - sy + 1 + bspace, hsb_back);
         }
     }
 
@@ -661,22 +654,22 @@ curses_draw_map(int sx, int sy, int ex, int ey)
         sbey = (ey * ((float) (ey - sy + 1) / ROWNO));
 
         for (count = 0; count < sbsy; count++) {
-            write_char(mapwin, ex - sx + 1 + bspace, count + bspace, vsb_back);
+            curses_write_char(mapwin, ex - sx + 1 + bspace, count + bspace, vsb_back);
         }
 
         for (count = sbsy; count <= sbey; count++) {
-            write_char(mapwin, ex - sx + 1 + bspace, count + bspace, vsb_bar);
+            curses_write_char(mapwin, ex - sx + 1 + bspace, count + bspace, vsb_bar);
         }
 
         for (count = sbey + 1; count <= (ey - sy); count++) {
-            write_char(mapwin, ex - sx + 1 + bspace, count + bspace, vsb_back);
+            curses_write_char(mapwin, ex - sx + 1 + bspace, count + bspace, vsb_back);
         }
     }
 #endif /* MAP_SCROLLBARS */
 
     for (curx = sx; curx <= ex; curx++) {
         for (cury = sy; cury <= ey; cury++) {
-            write_char(mapwin, curx - sx + bspace, cury - sy + bspace,
+            curses_write_char(mapwin, curx - sx + bspace, cury - sy + bspace,
                        map[cury][curx]);
         }
     }

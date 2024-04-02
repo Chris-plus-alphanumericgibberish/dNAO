@@ -4,6 +4,7 @@
 #include "hack.h"
 #include "wincurs.h"
 #include "cursdial.h"
+#include "curswins.h"
 #include "func_tab.h"
 #include <ctype.h>
 
@@ -1011,12 +1012,15 @@ menu_display_page(nhmenu *menu, WINDOW * win, int page_num)
         }
         if (menu_item_ptr->glyph != NO_GLYPH && iflags.use_menu_glyphs) {
             unsigned bgcolor;   /*notused */
-			glyph_t curglyph = (glyph_t)curletter;//Note: a glyph is a long int
+            glyph_t curglyph = (glyph_t)curletter;//Note: a glyph is a long int
             mapglyph(menu_item_ptr->glyph, &curglyph, &color, &bgcolor, u.ux, u.uy);
-			curletter = (int)curglyph;//This seems bad, but it makes explicit what this code was always doing...
-            curses_toggle_color_attr(win, color, NONE, ON);
-            mvwaddch(win, menu_item_ptr->line_num + 1, start_col, curletter);
-            curses_toggle_color_attr(win, color, NONE, OFF);
+            curletter = (int)curglyph;//This seems bad, but it makes explicit what this code was always doing...
+            nethack_char nch;
+            nch.ch = curletter;
+            nch.color = color;
+            nch.attr = NONE;
+            /* curses_write_char takes coordinates in x,y order, but mvwaddch takes them in y,x order */
+            curses_write_char(win, start_col, menu_item_ptr->line_num + 1, nch);
             mvwaddch(win, menu_item_ptr->line_num + 1, start_col + 1, ' ');
             entry_cols -= 2;
             start_col += 2;
