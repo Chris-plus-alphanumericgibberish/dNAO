@@ -1587,14 +1587,8 @@ opentin()		/* called during each move whilst opening a tin */
 		}
 
 		char buf[BUFSZ];
-		if(tin.tin->corpsenm > NON_PM && tin.tin->spe != 1 && your_race(&mons[tin.tin->corpsenm])
-		   && !is_animal(&mons[tin.tin->corpsenm]) && !mindless(&mons[tin.tin->corpsenm])
-		   && !CANNIBAL_ALLOWED()
-		   /* Always give warning if the tin's contents is known. */
-		   && (tin.tin->known || !Hallucination
-		       || ((u.ualign.record >= 20 || ACURR(A_WIS) >= 20
-			    || u.ualign.record >= rnd(20-ACURR(A_WIS)))
-			   && !roll_madness(MAD_CANNIBALISM))))
+		if(tin.tin->corpsenm > NON_PM && tin.tin->spe != 1 && your_race(&mons[tin.tin->corpsenm]) && !is_animal(&mons[tin.tin->corpsenm]) && !mindless(&mons[tin.tin->corpsenm])
+			&& !CANNIBAL_ALLOWED() && ((u.ualign.record >= 20 || ACURR(A_WIS) >= 20 || u.ualign.record >= rnd(20-ACURR(A_WIS))) && !roll_madness(MAD_CANNIBALISM)))
 			Sprintf(buf, "You feel a deep sense of kinship to the tin!  Eat it anyway?");
 		else
 			Sprintf(buf, "Eat it?");
@@ -2603,16 +2597,10 @@ register struct obj *otmp;
  * return 0 if the food was not dangerous.
  * return 1 if the food was dangerous and you chose to stop.
  * return 2 if the food was dangerous and you chose to eat it anyway.
- *
- * Now triggers on all eating, but gives only vague information and is
- * overly cautious without edibility turned on. The general rule is that
- * edibility can magically check things that would require knowledge of
- * user-invisible information, without it it has to go on public info.
- * (An exception's made for age, where it's overly cautious rather than
- * leaving it out altogether to help avoid instadeath accidents.)
  */
 STATIC_OVL int
-edibility_prompts(struct obj *otmp)
+edibility_prompts(otmp)
+struct obj *otmp;
 {
 	/* blessed food detection granted you a one-use
 	   ability to detect food that is unfit for consumption
@@ -2625,16 +2613,13 @@ edibility_prompts(struct obj *otmp)
 	int material = otmp->obj_material,
 	    mtyp = otmp->corpsenm;
 	long rotted = 0L;
-	boolean edibility = u.uedibility || u.sealsActive&SEAL_BUER || goodsmeller(youracedata);
 
 	Strcpy(foodsmell, Tobjnam(otmp, "smell"));
 	Strcpy(it_or_they, (otmp->quan == 1L) ? "it" : "they");
 	Sprintf(eat_it_anyway, "Eat %s anyway?",
 		(otmp->quan == 1L) ? "it" : "one");
 
-	/* edibility's needed to ID the contents of eggs (and unknown tins if hallucinating) */
-	if (cadaver || (otmp->otyp == EGG && edibility) ||
-	    (otmp->otyp == TIN && (edibility || !Hallucination || otmp->known))) {
+	if (cadaver || otmp->otyp == EGG || otmp->otyp == TIN) {
 		/* These checks must match those in eatcorpse() */
 		stoneorslime = (mtyp != NON_PM && (
 				touch_petrifies(&mons[mtyp]) &&
@@ -2660,17 +2645,10 @@ edibility_prompts(struct obj *otmp)
 	 * order from most detrimental to least detrimental.
 	 */
 
-	/* without edibility, you don't know BCU if not bknown, so deduct 2 in case it's cursed */
-	if (cadaver && mtyp != PM_ACID_BLOB && rotted > ((edibility || otmp->bknown) ? 5L : 3L) &&
-	    !(Sick_resistance || u.sealsActive&SEAL_CHUPOCLOPS)) {
+	if (cadaver && mtyp != PM_ACID_BLOB && rotted > 5L && !(Sick_resistance || u.sealsActive&SEAL_CHUPOCLOPS)) {
 		/* Tainted meat */
-		if (edibility)
-			Sprintf(buf, "%s like %s could be tainted! %s",
-				foodsmell, it_or_they, eat_it_anyway);
-		else
-			Sprintf(buf, "%s too old for you to be certain %s %s "
-				"safe. %s", foodsmell, it_or_they,
-				(otmp->quan == 1L ? "is" : "are"), eat_it_anyway);
+		Sprintf(buf, "%s like %s could be tainted! %s",
+			foodsmell, it_or_they, eat_it_anyway);
 		if (yn_function(buf,ynchars,'n')=='n') return 1;
 		else return 2;
 	}
@@ -2680,7 +2658,7 @@ edibility_prompts(struct obj *otmp)
 		if (yn_function(buf,ynchars,'n')=='n') return 1;
 		else return 2;
 	}
-	if (edibility && (otmp->orotten || (cadaver && rotted > 3L))) {
+	if (otmp->orotten || (cadaver && rotted > 3L)) {
 		/* Rotten */
 		Sprintf(buf, "%s like %s could be rotten! %s",
 			foodsmell, it_or_they, eat_it_anyway);
@@ -2747,8 +2725,7 @@ edibility_prompts(struct obj *otmp)
 		else return 2;
 	}
 
-	if (cadaver && mtyp != PM_ACID_BLOB && rotted > 5L && edibility &&
-	    (Sick_resistance || u.sealsActive&SEAL_CHUPOCLOPS)) {
+	if (cadaver && mtyp != PM_ACID_BLOB && rotted > 5L && (Sick_resistance || u.sealsActive&SEAL_CHUPOCLOPS)) {
 		/* Tainted meat with Sick_resistance */
 		Sprintf(buf, "%s like %s could be tainted! %s",
 			foodsmell, it_or_they, eat_it_anyway);
@@ -2814,7 +2791,7 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 	){
 		if(yn("Eat some of the grass growing here?") == 'y'){
 			You("eat some grass.");
-			if(u.uhunger < (uclockwork ? ((get_uhungermax()*7)/8) : ((get_uhungermax()*3)/4)) || yn_function("You feel awfully full, continue eating?",ynchars,'n') == 'y'){
+			if(u.uhunger < (uclockwork ? ((get_uhungermax()*7)/8) : ((get_uhungermax()*3)/4)) || yn_function("You feel awfully full, stop eating?",ynchars,'y') == 'n'){
 				lesshungry(objects[FOOD_RATION].oc_nutrition/objects[FOOD_RATION].oc_delay);
 			}
 			return MOVE_ATE;
@@ -2842,20 +2819,19 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 	    You_cant("eat %s you're wearing.", something);
 	    return MOVE_CANCELLED;
 	}
-	if(otmp->otyp == CORPSE && your_race(&mons[otmp->corpsenm])
-	   && !is_animal(&mons[otmp->corpsenm]) && !mindless(&mons[otmp->corpsenm])
-	   && !CANNIBAL_ALLOWED())
-        {
+	if(otmp->otyp == CORPSE && your_race(&mons[otmp->corpsenm]) && !is_animal(&mons[otmp->corpsenm]) && !mindless(&mons[otmp->corpsenm])
+		&& !CANNIBAL_ALLOWED() && ((u.ualign.record >= 20 || ACURR(A_WIS) >= 20 || u.ualign.record >= rnd(20-ACURR(A_WIS))) && !roll_madness(MAD_CANNIBALISM))
+	){
 		char buf[BUFSZ];
 		Sprintf(buf, "You feel a deep sense of kinship to %s!  Eat %s anyway?",
 			the(xname(otmp)), (otmp->quan == 1L) ? "it" : "one");
 		if (yn_function(buf,ynchars,'n')=='n') return 0;
 	}
 	
-        {
+	if (u.uedibility || u.sealsActive&SEAL_BUER || goodsmeller(youracedata)) {
 		int res = edibility_prompts(otmp);
 		if (res) {
-			if(u.uedibility && !(u.sealsActive&SEAL_BUER || goodsmeller(youracedata))){
+			if(!(u.sealsActive&SEAL_BUER || goodsmeller(youracedata))){
 				Your("%s stops tingling and your sense of smell returns to normal.",
 					body_part(NOSE));
 				u.uedibility = 0;
@@ -4167,7 +4143,7 @@ register int num;
 					victual.fullwarn = TRUE;
 					if (victual.canchoke && victual.reqtime > 1) {
 						/* a one-gulp food will not survive a stop */
-						if (yn_function("Continue eating?",ynchars,'n')=='n') {
+						if (yn_function("Stop eating?",ynchars,'y')=='y') {
 						reset_eat();
 						nomovemsg = (char *)0;
 						}

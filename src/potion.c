@@ -1383,15 +1383,8 @@ as_extra_healing:
 		break;
 	case POT_BLOOD:
 		unkn++;
-		if(!force && your_race(&mons[otmp->corpsenm])
-		   && !is_animal(&mons[otmp->corpsenm]) && !mindless(&mons[otmp->corpsenm]) && !CANNIBAL_ALLOWED()
-		   /* Always give warning if the potion is known, or will become known. */
-		   && (otmp->known
-		       || ((is_vampire(youracedata) || ((carnivorous(youracedata) && !herbivorous(youracedata))))
-			   && !Hallucination)
-		       || ((u.ualign.record >= 20 || ACURR(A_WIS) >= 20
-			    || u.ualign.record >= rnd(20-ACURR(A_WIS)))
-			   && !roll_madness(MAD_CANNIBALISM)))
+		if(!force && your_race(&mons[otmp->corpsenm]) && !is_animal(&mons[otmp->corpsenm]) && !mindless(&mons[otmp->corpsenm]) && !CANNIBAL_ALLOWED() 
+			&& ((u.ualign.record >= 20 || ACURR(A_WIS) >= 20 || u.ualign.record >= rnd(20-ACURR(A_WIS))) && !roll_madness(MAD_CANNIBALISM))
 		){
 			char buf[BUFSZ];
 			Sprintf(buf, "You feel a deep sense of kinship to %s!  Drink %s anyway?",
