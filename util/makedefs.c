@@ -893,9 +893,9 @@ do_options()
 	build_savebones_compat_string();
 	Fprintf(ofp,
 #ifdef BETA
-		"\n    NetHack version %d.%d.%d [beta]\n",
+		"\n    dNetHack version %d.%d.%d [beta]\n",
 #else
-		"\n    NetHack version %d.%d.%d\n",
+		"\n    dNetHack version %d.%d.%d\n",
 #endif
 		VERSION_MAJOR, VERSION_MINOR, PATCHLEVEL);
 

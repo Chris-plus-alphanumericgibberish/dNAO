@@ -1,5 +1,8 @@
 GAMEDIR = dnethackdir
 
+# only used for generating include/macromagic.h
+PYTHON = python3
+
 # gprof flags
 # CFLAGS = -pg
 CFLAGS = -g
@@ -144,6 +147,8 @@ include/pm.h: util/makedefs
 	cd util && ./makedefs -p  # include/pm.h
 include/verinfo.h: util/makedefs
 	cd util && ./makedefs -w  # include/verinfo.h
+include/macromagic.h: util/MacroMagicMarker.py doc/macromagic.txt
+	$(PYTHON) util/MacroMagicMarker.py  # include/macromagic.h
 AUTO_H += include/date.h include/onames.h include/gnames.h include/pm.h include/verinfo.h
 
 # generating the dependencies of source files requires them to exist,
