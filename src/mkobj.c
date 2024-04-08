@@ -2978,6 +2978,7 @@ struct monst *mtmp;
 	EMON(obj)->minvent  = (struct obj *)0;
 	EMON(obj)->timed    = (struct timer *)0;
 	EMON(obj)->light    = (struct ls_t *)0;
+	EMON(obj)->mgold    = 0;
 	return obj;
 }
 
