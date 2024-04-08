@@ -7896,7 +7896,7 @@ boolean printmessages; /* print generic elemental damage messages */
 			fall_asleep(-rnd(arti_struct->damage ? arti_struct->damage : basedmg ? basedmg : 1), TRUE);
 		}
 		else {
-			if (sleep_monst(mdef, rnd(arti_struct->damage ? arti_struct->damage : basedmg ? basedmg : 1), 0)) {
+			if (sleep_monst(mdef, rnd(arti_struct->damage ? arti_struct->damage : basedmg ? basedmg : 1), youagr ? 0 : WEAPON_CLASS)) {
 				pline("%s falls asleep!",
 					Monnam(mdef));
 				mdef->mstrategy &= ~STRAT_WAITFORU;
