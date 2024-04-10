@@ -817,7 +817,7 @@ draw_vertical(int x, int y, int hp, int hpmax)
 
     print_statdiff("Breath:        ", &prevdive, u.divetimer, STAT_OTHER);
     wmove(win, y++, x);
-    print_statdiff("Armor Class:   ", &prevac, u.uac, STAT_AC);
+    print_statdiff("Armor Class:   ", &prevac, (u.uac + u.ustdy), STAT_AC);
     wmove(win, y++, x);
 	print_statdiff("Damage Resist: ", &prevdr, u.udr, STAT_OTHER);
 	wmove(win, y++, x);
