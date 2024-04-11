@@ -141,7 +141,7 @@ int dam;
 int color;
 int radius;
 {
-	explode_full(x, y, adtyp, olet, dam, color, radius, (struct permonst *) 0, 0);
+	explode_full(x, y, adtyp, olet, dam, color, radius, 0, !flags.mon_moving, (struct permonst *) 0);
 }
 
 void
@@ -154,7 +154,7 @@ int color;
 int radius;
 int dest;
 {
-	explode_full(x, y, adtyp, olet, dam, color, radius, (struct permonst *) 0, dest);
+	explode_full(x, y, adtyp, olet, dam, color, radius, dest, !flags.mon_moving, (struct permonst *) 0);
 }
 
 void
@@ -167,43 +167,9 @@ int color;
 int radius;
 struct permonst *pa;
 {
-	explode_full(x, y, adtyp, olet, dam, color, radius, pa, 0);
+	explode_full(x, y, adtyp, olet, dam, color, radius, 0, !flags.mon_moving, pa);
 }
 
-void
-explode_full(x, y, adtyp, olet, dam, color, radius, pa, dest)
-int x, y;
-int adtyp; /* the same as in zap.c */
-int olet;
-int dam;
-int color;
-int radius;
-struct permonst *pa;
-int dest;
-{
-	ExplodeRegion *area;
-	area = create_explode_region();
-	if (radius == 0)
-	{
-		if (isok(x, y))
-			add_location_to_explode_region(x, y, area);
-	}
-	else if (radius == 1)
-	{	// can use simple method of creating explosions
-		int i, j;
-		for (i = -1; i <= 1; i++)
-		for (j = -1; j <= 1; j++)
-			if (isok(x + i, y + j))
-				add_location_to_explode_region(x + i, y + j, area);
-	}
-	else
-	{	// use circles
-		do_clear_area(x, y, radius, add_location_to_explode_region, (genericptr_t)(area));
-	}
-
-	do_explode(x, y, area, adtyp, olet, dam, color, dest, !flags.mon_moving, pa);
-	free_explode_region(area);
-}
 
 void
 explode_yours(x, y, adtyp, olet, dam, color, radius, yours)
@@ -215,6 +181,25 @@ int color;
 int radius;
 boolean yours; /* is it your fault (for killing monsters) */
 {
+	/* assumes you don't want sound,
+	 * this is used for not-player-caused explosions on the player's turn,
+	 * print your own sound effects
+	 */
+	explode_full(x, y, adtyp, olet, dam, color, radius, 0, yours, (struct permonst *)0);
+}
+
+void
+explode_full(x, y, adtyp, olet, dam, color, radius, dest, yours, pa)
+int x, y;
+int adtyp; /* the same as in zap.c */
+int olet;
+int dam;
+int color;
+int radius;
+int dest;
+boolean yours;
+struct permonst *pa;
+{
 	ExplodeRegion *area;
 	area = create_explode_region();
 	if (radius == 0)
@@ -235,7 +220,7 @@ boolean yours; /* is it your fault (for killing monsters) */
 		do_clear_area(x, y, radius, add_location_to_explode_region, (genericptr_t)(area));
 	}
 
-	do_explode(x, y, area, adtyp, olet, dam, color, 0, yours, (struct permonst *)0);
+	do_explode(x, y, area, adtyp, olet, dam, color, dest, yours, pa);
 	free_explode_region(area);
 }
 
