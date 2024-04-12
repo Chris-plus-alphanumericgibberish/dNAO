@@ -7301,7 +7301,8 @@ boolean printmessages; /* print generic elemental damage messages */
 				x = rn2(COLNO-2)+1;
 				y = rn2(ROWNO-2)+1;
 				cc.x=x;cc.y=y;
-			} while (!(isok(x,y) && ACCESSIBLE(levl[x][y].typ) && (!magr || (distmin(x(magr), y(magr), x, y) > 2))) && tries++ < 1000);
+			} while (!(isok(x,y) && ACCESSIBLE(levl[x][y].typ) && (!magr || (distmin(x(magr), y(magr), x, y) > 2 &&
+					clear_path(x(magr), y(magr), x, y)))) && tries++ < 1000);
 
 			if(u.uinsight >= 72)
 				n = 6;
