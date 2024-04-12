@@ -58,7 +58,7 @@
 #define Shock_resistance	(HShock_resistance || EShock_resistance || \
 				 (species_resists_elec(&youmonst) && !(Race_if(PM_ANDROID) && !Upolyd)) || \
 				 ward_at(u.ux,u.uy) == TRACERY_OF_KARAKAL )
-#define InvShock_resistance	(EShock_resistance || Preservation || ward_at(u.ux,u.uy) == TRACERY_OF_KARAKAL || (HShock_resistance&FROMRACE && Race_if(PM_ANDROID)))
+#define InvShock_resistance	(EShock_resistance || Preservation || ward_at(u.ux,u.uy) == TRACERY_OF_KARAKAL || (HShock_resistance&FROMRACE && (Race_if(PM_ANDROID) || Race_if(PM_PARASITIZED_ANDROID))))
 
 #define HPoison_resistance	u.uprops[POISON_RES].intrinsic
 #define EPoison_resistance	u.uprops[POISON_RES].extrinsic
