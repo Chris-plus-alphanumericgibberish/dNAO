@@ -465,6 +465,7 @@ Helmet_on()
 		    You_feel("%s.",	/* track INT change; ignore WIS */
 		  ACURR(A_INT) <= (ABASE(A_INT) + ABON(A_INT) + ATEMP(A_INT)) ?
 			     "like sitting in a corner" : "giddy");
+		    makeknown(DUNCE_CAP);
 		} else {
 		    Your("mind oscillates briefly.");
 		    makeknown(HELM_OF_OPPOSITE_ALIGNMENT);
