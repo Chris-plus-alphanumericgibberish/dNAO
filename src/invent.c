@@ -3541,6 +3541,21 @@ winid *datawin;
 			Sprintf(buf2, "Slakes the thirst of Yog-Sothoth.");
 			OBJPUTSTR(buf2);
 		}
+		if (check_oprop(obj, OPROP_RWTH))
+		{
+			Sprintf(buf2, "Channels the wrath of the Silver Flame.");
+			OBJPUTSTR(buf2);
+		}
+		if (check_oprop(obj, OPROP_RBRD))
+		{
+			Sprintf(buf2, "The Silver Flame shares burdens.");
+			OBJPUTSTR(buf2);
+		}
+		if (check_oprop(obj, OPROP_SLIF))
+		{
+			Sprintf(buf2, "The Silver Flame will save the wearer's life.");
+			OBJPUTSTR(buf2);
+		}
 	}
 	/* other artifact weapon effects */
 	if (oartifact) {
