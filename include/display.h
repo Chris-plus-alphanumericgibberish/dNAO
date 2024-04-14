@@ -34,7 +34,7 @@
       (Unblind_telepat && (distu(mon->mx, mon->my) <= etele_dist))))
 /* R'lyehian psychic sight, see minds, blocked by water */
 #define rlyehian_sensemon(mon)						\
-	(rlyehiansight(youmonst.data) && !mindless_mon(mon)		\
+	(rlyehiansight(youracedata) && !mindless_mon(mon)		\
 	 && (!is_pool(u.ux, u.uy, FALSE) || Flying || Levitation || Wwalking) \
 	 && (!is_pool(mon->mx, mon->my, FALSE) || !is_underswimmer(mon->data) || \
 	      mon_resistance(mon,FLYING) || mon_resistance(mon,LEVITATION)))
