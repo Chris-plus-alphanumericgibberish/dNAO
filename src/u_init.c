@@ -2161,8 +2161,6 @@ u_init()
 		u.ualign.type = A_CHAOTIC;
 		u.ualign.god = u.ugodbase[UGOD_CURRENT] = u.ugodbase[UGOD_ORIGINAL] = align_to_god(u.ualign.type);
 		flags.initalign = 2; // 2 == chaotic
-        urace.hatemask |= urace.lovemask;   /* Hated by the race's allies */
-        urace.lovemask = 0; /* Convicts are pariahs of their race */
         break;
 #endif	/* CONVICT */
 	case PM_MADMAN:
@@ -2203,8 +2201,6 @@ u_init()
 		u.umadness |= MAD_DELUSIONS; /* Your sanity is not so hot */
 		u.udrunken = 30; /* Your sanity is not so hot (and you may have once been more powerful) */
 
-        urace.hatemask |= urace.lovemask;   /* Hated by the race's allies */
-        urace.lovemask = 0; /* Madmen are pariahs of their race */
         break;
 	case PM_HEALER:
 		if(Race_if(PM_DROW)){

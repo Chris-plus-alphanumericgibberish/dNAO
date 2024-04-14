@@ -2420,6 +2420,15 @@ int newgame;
 		COPY_OBJ_DESCR(objects[HEAVY_MACHINE_GUN], objects[HEAVY_GUN]);
 		COPY_OBJ_DESCR(objects[GRENADE_LAUNCHER], objects[HEAVY_GUN]);
 	}
+	/* Adjust lovemask and hatemask */
+	if(Role_if(PM_CONVICT) || Role_if(PM_MADMAN)){
+        urace.hatemask |= urace.lovemask;   /* Hated by the race's allies */
+        urace.lovemask = 0; /* Pariahs of their race */
+	}
+	else if(Role_if(PM_HEALER) && Race_if(PM_DROW)){
+		urace.lovemask |= MA_FEY|MA_ELF;
+		urace.hatemask = MA_ORC;
+	}
 
 	/* Artifacts are fixed in hack_artifacts() */
 
