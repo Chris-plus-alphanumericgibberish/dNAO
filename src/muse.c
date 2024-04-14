@@ -1004,7 +1004,7 @@ mon_tele:
 	case MUSE_HEALING_SURGE:
 		mon_doturn(mtmp);
 		mtmp->mspec_used = 3;
-		return 2;
+		return DEADMONSTER(mtmp) ? 1 : 2;
 	case 0: return 0; /* i.e. an exploded wand */
 	default: impossible("%s wanted to perform action %d?", Monnam(mtmp),
 			m.has_defense);
@@ -1560,10 +1560,10 @@ struct monst *mtmp;
 	oseen = otmp && canseemon(mtmp);
 
 	switch(m.has_offense) {
-	case MUSE_MON_TURN_UNDEAD:{
+	case MUSE_MON_TURN_UNDEAD:
 		mon_doturn(mtmp);
 		mtmp->mspec_used = 3;
-	}break;
+		return DEADMONSTER(mtmp) ? 1 : 2;
 	case MUSE_CRYSTAL_SKULL:{
 		coord cc;
 		if(!enexto(&cc, mtmp->mx+sgn(tbx), mtmp->my+sgn(tby), (struct permonst *)0)){
