@@ -1,0 +1,189 @@
+/*
+ * How MACROMAGIC works
+ * A guide by the author
+ * 
+ * 
+ * 
+ * Abstract
+ * 
+ * The goal is to, in the context of a constant array declaration,
+ * allow these two things:
+ * 1) psuedo-inheritance
+ * 2) customized individual traits
+ *
+ * Vanilla objects.c has the 1st, but is completely incapable of the 2nd.
+ * For unusual objects like the Book of the Dead, it cannot override any
+ * of SPELLBOOK(), and so must go back up to OBJECT().
+ * 
+ * Variadic macros take in a non-constant number of arguments. With their
+ * help, it is possbile to have macro entries that can be modified at will
+ * to refine a base inherited type into a substantially different end. 
+ * 
+ * 
+ * 
+ * Macro Frontend
+ * 
+ * Knowing that a structure S of type st has N fields, it is declared as
+ * 
+ * > struct st S = {a1, a2, a3, ..., aN };
+ * 
+ * A macro M to fill S would then have N outputs
+ * 
+ * > #define M(???) a1, a2, a3, ..., aN
+ * 
+ * In vanilla nethack, M must have exactly the parameters needed to fill S
+ * 
+ * > #define M(x, y) a1, a2, a3, ..., aN
+ * 
+ * Using variadic macros, M may have additional parameters that must then
+ * somehow be handled by the macro to still create exactly N outputs
+ * 
+ * > #define M(x, y, ...) a1, a2, a3, ..., aN
+ * 
+ * We therefore have specific M for each N
+ * 
+ * > #define MN(a1, a2, ..., aN, ...)
+ * 
+ * Where N is the number of arguments (2 digits, min 1)
+ * 
+ * Additional parameters must specify what they are supposed to do. Unlike
+ * main parameters, where location dictates function, the additional
+ * parameters must in of themselves have a location.
+ * We do this by requiring additional parameters to be wrapped in a targeter
+ * > CN(...)
+ * Where N is the argument (2 digits, 1-indexed) of the macro to replace,
+ * and "..." is what we want to replace argument N with. 
+ * 
+ * We then have a final potential macro usage of
+ * > MN(a1, a2, ..., aN [, C1(b1), C2(b2), ..., CN(bN)])
+ * Technically, this is not the maximum, as multiple Cx() can be specified for
+ * a single argument x; the rightmost one is applied.
+ * 
+ * An example call would be:
+ * > Sprintf(buf, "%d %d %d", SET03(11, 22, 33, C02(-5))
+ * > buf = "11 -5 33"
+ * 
+ * 
+ * 
+ * Macro Backend
+ * 
+ * Step 1: call SETnn with N+ arguments
+ * 
+ * > SET03(a1, a2, a3, C02(b2))
+ * 
+ * Step 2: set up
+ * We will cover _EXPAND32 later, it can be ignored for now.
+ * DSET exists to delay expansion; the preprocessor gets a chance
+ * to expand any macros passed as arguments.
+ * We also add an additional blank entry to the end of the argument list.
+ * This acts as a terminator for a pseudo-loop.
+ * 
+ * > _EXPAND32(                             )
+ *             DSET03(a1, a2, a3, C02(b2), )
+ * 
+ * Step 3: end delay
+ * _EXPAND32 is ignored for now, but happened over to the left.
+ * In this example, no macro expansion was performed in the arguments.
+ * 
+ * > _SET03(a1, a2, a3, C02(b2), )
+ * 
+ * Step 4: grab 1st extra argument
+ * Since this is part of the 03 collection, the 4th argument is taken.
+ * We will break this down into two half-steps; before and after concatenation
+ * 
+ * > SET03_DISC_ ## C02(b2) (a1, a2, a3, _OPEN_ ## C02(b2), )
+ * > SET03_DISC_C02(b2) (a1, a2, a3, _OPEN_C02(b2), )
+ * 
+ * Step 5: discard (b2) argument from SET03-C02 combo, and open C02(b2)
+ * We need a macro that knows it is both SET=3 and C=2 to replace the 2nd arg of 3.
+ * That macro must be passed the whole list of arguments, but simply concatenating
+ * C02(b2) left us with a useless (b2) argument list.
+ * In the same pass, _OPEN_C02(b2) needs to decouple location (C02) from argument (b2).
+ * 
+ * > SET03_REPL_C02(a1, a2, a3, b2, )
+ * 
+ * Step 6: replace a2 with b2 and loop
+ * > ????? (a1, b2, a3, )
+ * If it were so easy, we would simply expand into _SET03() again, and let
+ * it loop until it has used up all the additional arguments.
+ * The C preprocessor does NOT allow this, because otherwise it would be far
+ * too easy to create an infinite loop. However, it is possible to create a
+ * workaround to allow a finite number of additional loops. This was the reason for
+ * the _EXPAND32 macro earlier. See https://stackoverflow.com/a/12540675 for details.
+ * By expanding 32 times, we allow the macro to loop 32 times, and so 
+ * handle up to 32 additional arguments. 
+ * > DEFER(_SET03_ID)()(a1, b2, a3, )
+ * Effectively, we have
+ * 
+ * > _SET03(a1, b2, a3, )
+ * 
+ * Step 7: repeat step 4
+ * This time, the 4th argument is " ", which brings us to the following
+ * 
+ * > SET03_DISC_ (a1, b2, a3, _OPEN_)
+ * 
+ * Step 8: pick and clean arguments
+ * We only want the first 3 arguments. That much is easy.
+ * What's harder is cleaning up parentheses.
+ * _DEPAREN strips a single matched pair of parenthesis from its argument,
+ * if one exists. _DEPARNC is the same, but also appends a comma.
+ * This gives us a final format of "a1, b2, a3" with no trailing comma.
+ * CALL_MACRO_X_FOR_EACH is sourced from
+ * https://codecraft.co/2014/11/25/variadic-macros-tricks/,
+ * and effectively expands to "_DEPARENC(a1) _DEPARENC(b2)" in our example.
+ * 
+ * > CALL_MACRO_X_FOR_EACH(_DEPARENC, a1, b2) _DEPAREN(a3)
+ * 
+ * Step 9: complete
+ * 
+ * > a1, b2, a3
+ * 
+ * 
+ * _DEPAREN() - Why and How
+ * 
+ * Macros separate arguments by commas, unless those commas are in matched parentheses.
+ * When we want to declare a nested structure in C, we need to declare it like such.
+ * No parentheses are allowed whatsoever.
+ * 
+ * > {{10, 11, 12}, {20, 21, 22}, {30, 31, 32}}
+ * 
+ * But to pass along a group "{20, 21, 22}" as a single argument to a macro, it must be
+ * captured in parentheses
+ * 
+ * > ({20, 21, 22})
+ * 
+ * This means we need to strip parentheses exactly once, when we are finished all 
+ * argument shuffling macro expansions.
+ * Stripping parentheses more than once can cause unwanted errors. Consider
+ * 
+ * > ((const char *)0)
+ * 
+ * If all pairs of parentheses were stripped, it would be "const char *0", a fatal error.
+ * 
+ * Copying from my previous write-up of the function,
+ * https://stackoverflow.com/a/62984543/13837464,
+ * with editing to change macro names to align with what is in this file:
+ *   We start with `_DEPAREN(X) _ESC(_APEE X)`. If X has parenthesis, we get `_ESC(_APEE(X))`.
+ *   If X does not have parenthesis, we get `_ESC(_APEE X)`.
+ *   We then expand `_ESC(...)` into `_ESC_(__VA_ARGS__)`, which expands the interior.
+ *   `_APEE(...)` turns into `_APEE __VA_ARGS__`, which strips one layer of parentheses from X.
+ *   Now, regardless of whether or not X originally had parenthesis, we have `_ESC_(_APEE X)`.
+ *   We now need to get rid of `_APEE`. However, because we already defined `_APEE(...)`,
+ *   we can't also define it as `#define _APEE  `.
+ *   That's why we concatenate it with another token (`_ESC`) to get `_ESC_APEE X`.
+ *   `_ESC_APEE` is defined as ` `, so we are finally left with `X`, sans parentheses.
+ * 
+ * 
+ * 
+ * Conclusion
+ * 
+ * Using variadic macros, it is possible to make a structure declaration
+ * pseudo-inheritable (where nested macros refine characteristics) and
+ * customizable (where macros can be overridden as needed)
+ * 
+ * As it turns out, excessive preprocesser abuse can cause compiling
+ * objects.c to take noticably longer. A previous method of performing
+ * macromagic operated on O(arguments^2) operations, and took significantly
+ * longer to compile than this version. If a better system than this is
+ * found, it should be strongly considered. 
+ */

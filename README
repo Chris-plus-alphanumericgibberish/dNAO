@@ -1,12 +1,11 @@
-To read about dNethack, visit the wiki here: https://nethackwiki.com/wiki/User:Chris/dNetHack
+To read about dNetHack, visit the wiki here: https://nethackwiki.com/wiki/dNetHack
 
-To chat about dNethack, visit IRC here: https://web.libera.chat/?channel=##nethack-variants
+To chat about dNetHack, visit IRC here: https://web.libera.chat/?channel=##nethack-variants
                        or Discord here: https://discord.com/invite/vg9WWf2
 
-You can play dNethack online using SSH or HTTPS:
+You can play dNetHack online using SSH or HTTPS:
 * https://www.hardfought.org/nethack/ (servers in USA, UK, and AUS)
-* https://ascension.run/ (located in Germany)
-* if other servers decide to host dNethack, they will be listed here: https://nethackwiki.com/wiki/Public_server
+* if other servers decide to host dNetHack, they will be listed here: https://nethackwiki.com/wiki/Public_server
 
 Setting up dNetHack:
 
@@ -16,12 +15,20 @@ For compiling on Windows:
 * Download Windows Subsystem for Linux (WSL)
 * Open the Terminal in WSL. (Just clicking on the shortcut opens the terminal)
 * Navigate (using `ls` and `cd`) to where you want to install dNAO
-* Install git: `apt-get git`
+* Install git: `apt install git`
 * Download the version of dNAO you want with git: `git clone https://github.com/Chris-plus-alphanumericgibberish/dNAO.git` will get you whatever is the master branch (at the time of writing, currently `compat-3.22.0`)
-* Install the following using `apt-get install <XXXX>`: `bison`, `build-essential`, `libncurses5-dev`, `flex`
+* Install the following using `apt install <XXXX>`: `bison`, `build-essential`, `libncurses5-dev`, `flex`
+  * If you want to rebuild `include/macromagic.h` (this is only required if you modify `util/MacroMagicMarker.py` or `doc/macromagic.txt`), you also need `python3`
 * Build & install by typing `make install`
+  * If you want to enable AddressSanitizer, useful for finding certain types of bugs, add `CFLAGS='-g -fsanitize=address' LDFLAGS=-fsanitize=address`
+  * If you want to rebuild `include/macromagic.h` despite not actually having to, also type `rm include/macromagic.h && make include/macromagic.h`
 * Navigate to the newly-created dnethackdir directory: `cd dnethackdir`
-* Run by typing `./dnethack`. Wizard mode is `./dnethack -d -u wizard`
+* Run by typing `./dnethack`. Wizard mode is `./dnethack -D -u wizard`
 * If you want an rc file (to have custom options and use things like menucolours and autopickup exceptions), edit it via `nano ~/.dnethackrc` (or your preferred text editor)
 
-For Unix, the same steps apply minus installing WSL. 
+For Unix, the same steps apply minus installing WSL.
+
+Copyright:
+
+dNetHack is free software released under the NetHack General Public License, see `dat/license` for details.
+util/MacroMagicMarker.py is released under the MIT/Expat license, see the comment at the beginning of that file for details.

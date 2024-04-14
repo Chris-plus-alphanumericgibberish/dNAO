@@ -32,8 +32,14 @@
 				/* 2b. hero is using a telepathy inducing   */\
 				/*	 object and in range		    */\
       (Unblind_telepat && (distu(mon->mx, mon->my) <= etele_dist))))
+/* R'lyehian psychic sight, see minds, blocked by water */
+#define rlyehian_sensemon(mon)						\
+	(rlyehiansight(youmonst.data) && !mindless_mon(mon)		\
+	 && (!is_pool(u.ux, u.uy, FALSE) || Flying || Levitation || Wwalking) \
+	 && (!is_pool(mon->mx, mon->my, FALSE) || !is_underswimmer(mon->data) || \
+	      mon_resistance(mon,FLYING) || mon_resistance(mon,LEVITATION)))
 
-#define sensemon(mon) (tp_sensemon(mon) || Detect_monsters || MATCH_WARN_OF_MON(mon) || sense_by_scent(mon))
+#define sensemon(mon) (tp_sensemon(mon) || Detect_monsters || MATCH_WARN_OF_MON(mon) || sense_by_scent(mon) || rlyehian_sensemon(mon))
 
 /*
  * mon_warning() is used to warn of any dangerous monsters in your

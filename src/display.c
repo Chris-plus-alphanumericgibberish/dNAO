@@ -699,7 +699,7 @@ feel_location(x, y)
     /* draw monster on top if we can sense it */
     if ((x != u.ux || y != u.uy) && (mon = m_at(x,y)) && sensemon(mon))
 	display_monster(x, y, mon,
-		(tp_sensemon(mon) || MATCH_WARN_OF_MON(mon)) ? PHYSICALLY_SEEN : DETECTED,
+		(tp_sensemon(mon) || MATCH_WARN_OF_MON(mon) || rlyehian_sensemon(mon)) ? PHYSICALLY_SEEN : DETECTED,
 		is_worm_tail(mon));
 }
 
@@ -771,7 +771,7 @@ echo_location(x, y)
     /* draw monster on top if we can sense it */
 		if ((x != u.ux || y != u.uy) && (sensemon(mon) || sensemon(mon) || mon->m_ap_type))
 			display_monster(x, y, mon,
-				(tp_sensemon(mon) || MATCH_WARN_OF_MON(mon)) ? PHYSICALLY_SEEN : DETECTED,
+				(tp_sensemon(mon) || MATCH_WARN_OF_MON(mon) || rlyehian_sensemon(mon)) ? PHYSICALLY_SEEN : DETECTED,
 				is_worm_tail(mon));
 		else if (!(canspotmon(mon) || sensemon(mon) || mon->m_ap_type)) {
 			map_invisible(x, y);
@@ -843,7 +843,8 @@ newsym(x,y)
 	    worm_tail = is_worm_tail(mon);
 	    see_it = mon && (worm_tail
 		? (!mon->minvis || See_invisible(mon->mx, mon->my))
-		: (mon_visible(mon)) || tp_sensemon(mon) || MATCH_WARN_OF_MON(mon) || sense_by_scent(mon));
+		: (mon_visible(mon)) || tp_sensemon(mon) || MATCH_WARN_OF_MON(mon)
+		|| sense_by_scent(mon) || rlyehian_sensemon(mon));
 	    if (mon && (see_it || (!worm_tail && Detect_monsters))) {
 		if (mon->mtrapped) {
 		    struct trap *trap = t_at(x, y);
@@ -876,12 +877,13 @@ newsym(x,y)
 	    if (!restoring && senseself()) display_self();
 	}
 	else if ((mon = m_at(x,y))
-		&& ((see_it = (tp_sensemon(mon) || MATCH_WARN_OF_MON(mon)
-		    		|| ((see_with_infrared(mon) || see_with_bloodsense(mon) || see_with_lifesense(mon) || see_with_senseall(mon))
-				&& mon_visible(mon)) || see_with_earthsense(mon)))
-		    || Detect_monsters
-			|| sense_by_scent(mon))
-		&& !is_worm_tail(mon)) {
+		 && ((see_it = (tp_sensemon(mon) || MATCH_WARN_OF_MON(mon) || rlyehian_sensemon(mon)
+				|| ((see_with_infrared(mon) || see_with_bloodsense(mon)
+				     || see_with_lifesense(mon) || see_with_senseall(mon))
+				    && mon_visible(mon)) || see_with_earthsense(mon)))
+		     || Detect_monsters
+		     || sense_by_scent(mon))
+		 && !is_worm_tail(mon)) {
 	    /* Monsters are printed every time. */
 	    /* This also gets rid of any invisibility glyph */
 	    display_monster(x, y, mon, see_it ? 0 : DETECTED, 0);
