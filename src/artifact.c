@@ -4703,7 +4703,7 @@ int dieroll;
 			boolean notResisted = TRUE;
 			int dsize;
 			for(i = 0; i < SIZE(abil); i++){
-				switch(hash((unsigned long) (nonce + otmp->o_id + youmonst.movement))%4){
+				switch(hash((unsigned long) (nonce + otmp->o_id + youmonst.movement + i))%4){
 					case 0:
 						if(Fire_res(mdef))
 							notResisted = FALSE;
@@ -4721,20 +4721,22 @@ int dieroll;
 							notResisted = FALSE;
 					break;
 				}
-				if(youagr){
-					if(ACURR(abil[i]) >= 15){
-						if(ACURR(abil[i]) >= 25)
-							dsize = (u.uinsight + u.usanity)/10;
-						else if(ACURR(abil[i]) >= 18)
-							dsize = (u.uinsight + u.usanity)/20;
-						else /*>= 15*/
-							dsize = (u.uinsight + u.usanity)/40;
-						
-						*truedmgptr += rnd(dsize);
+				if(notResisted){
+					if(youagr){
+						if(ACURR(abil[i]) >= 15){
+							if(ACURR(abil[i]) >= 25)
+								dsize = (u.uinsight + u.usanity)/10;
+							else if(ACURR(abil[i]) >= 18)
+								dsize = (u.uinsight + u.usanity)/20;
+							else /*>= 15*/
+								dsize = (u.uinsight + u.usanity)/40;
+							
+							*truedmgptr += rnd(dsize);
+						}
 					}
-				}
-				else {
-					*truedmgptr += d(1, mlev(magr)/5);
+					else {
+						*truedmgptr += d(1, mlev(magr)/5);
+					}
 				}
 			}
 		}
