@@ -1169,10 +1169,6 @@ int how;
 			lsvd = LSVD_SPOR;
 			if (how == DISINTEGRATED) pline("Your dust is consumed by the abhorrent spore!");
 			else pline("Your body melts and is consumed by the abhorrent spore!");
-			if (Upolyd && uskin && uskin->oartifact == ART_MIRRORED_MASK) {
-				pline("Your mask falls to pieces!");
-				useup(uskin);
-			}
 			if(youracedata->mtyp == PM_DARK_YOUNG)
 				change_gevurah(16); //cheated death extra.
 
