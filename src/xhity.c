@@ -6816,7 +6816,7 @@ boolean ranged;
 								);
 						}
 						/* kill */
-						killer = "ripped apart by Demogorgon";
+						killer = pa->mtyp == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH ? "ripped apart by Blibdoolpoolp" : "ripped apart by Demogorgon";
 						killer_format = NO_KILLER_PREFIX;
 						return xdamagey(magr, mdef, attk, FATAL_DAMAGE_MODIFIER);
 					}
