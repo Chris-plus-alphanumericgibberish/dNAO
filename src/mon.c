@@ -2834,10 +2834,10 @@ mon_can_see_mon(looker, lookie)
 	if(distmin(looker->mx,looker->my,lookie->mx,lookie->my) <= 1 && !rn2(8))
 		return TRUE;
 	
-	/* R'lyehian psyichic sight, see minds, blocked by water */
+	/* R'lyehian psychic sight, see minds, blocked by water */
 	if(rlyehiansight(looker->data) && !mindless_mon(lookie)
-		&& !(is_pool(looker->mx, looker->my, FALSE) || mon_resistance(looker,FLYING) || mon_resistance(looker,LEVITATION))
-		&& !(is_pool(lookie->mx, lookie->my, FALSE) || !is_underswimmer(lookie->data) || mon_resistance(lookie,FLYING) || mon_resistance(lookie,LEVITATION))
+		&& (!is_pool(looker->mx, looker->my, FALSE) || mon_resistance(looker,FLYING) || mon_resistance(looker,LEVITATION))
+		&& (!is_pool(lookie->mx, lookie->my, FALSE) || !is_underswimmer(lookie->data) || mon_resistance(lookie,FLYING) || mon_resistance(lookie,LEVITATION))
 	)
 		return TRUE;
 	
