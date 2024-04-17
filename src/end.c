@@ -1959,6 +1959,18 @@ num_genocides()
     return n;
 }
 
+/* number of monster species which have been genocided */
+int
+num_extinct()
+{
+    int i, n = 0;
+
+    for (i = LOW_PM; i < NUMMONS; ++i)
+	if ((mvitals[i].mvflags & G_GONE) && !(mons[i].geno & G_UNIQ)) ++n;
+
+    return n;
+}
+
 void
 list_genocided(defquery, ask, want_dump, show_extinct)
 int defquery;

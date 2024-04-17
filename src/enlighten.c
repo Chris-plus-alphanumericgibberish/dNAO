@@ -372,8 +372,8 @@ minimal_enlightenment()
 		//spirits_enlightenment();
 	}
 
-	if (num_genocides() != 0) {
-		Sprintf(buf, "Show genocided monsters.");
+	if (num_genocides() != 0 || num_extinct() != 0) {
+		Sprintf(buf, "Show genocided or extinct monsters.");
 		any.a_int = DOATTRIB_GENOCIDE;
 		add_menu(tmpwin, NO_GLYPH, &any,
 			 'g', 0, ATR_NONE, buf,
@@ -3049,7 +3049,7 @@ mutations_enlightenment()
 STATIC_OVL void
 genocide_enlightenment()
 {
-        list_genocided('y', FALSE, FALSE, FALSE);
+        list_genocided('y', FALSE, FALSE, TRUE);
 }
 
 /*enlighten.c*/
