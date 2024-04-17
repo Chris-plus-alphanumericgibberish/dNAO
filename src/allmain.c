@@ -1250,7 +1250,7 @@ you_regen_pw()
 
 	// Unknown God
 	if (u.specialSealsActive&SEAL_UNKNOWN_GOD){
-		perX += spiritDsize() * 6;
+		perX += spiritDsize() * 10;
 	}
 
 	// power drain from maintained spells
