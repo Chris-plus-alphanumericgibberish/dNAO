@@ -13883,8 +13883,8 @@ int vis;						/* True if action is at all visible to the player */
 				seardmg += rnd(20);
 			}
 			// no jade monsters (yet)
-			else if (youagr && (unarmed_punch || unarmed_kick || unarmed_butt) && u.sealsActive&SEAL_EDEN) {
-				/* Eden's silver hull, for the player attacking with bared hands, feet, or head */
+			else if (youagr && u.sealsActive&SEAL_EDEN) {
+				/* Eden's silver hull, for the player */
 				silverobj |= W_SKIN;
 				seardmg += rnd(20);
 			}
