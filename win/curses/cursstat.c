@@ -520,7 +520,9 @@ draw_horizontal(int x, int y, int hp, int hpmax)
 
     wprintw(win, (u.ualign.type == A_CHAOTIC ? " Chaotic" :
                   u.ualign.type == A_NEUTRAL ? " Neutral" :
-                  u.ualign.type == A_VOID    ? " Gnostic" : " Lawful"));
+                  u.ualign.type == A_VOID    ? " Gnostic" :
+                  u.ualign.type == A_LAWFUL  ? " Lawful"  :
+                  u.ualign.type == A_NONE    ? " Unaligned" : " Other"));
 
 #ifdef SCORE_ON_BOTL
     if (flags.showscore)
@@ -627,7 +629,9 @@ draw_horizontal_new(int x, int y, int hp, int hpmax)
     wprintw(win, "%s the %s %s%s%s", plname,
             (u.ualign.type == A_CHAOTIC ? "Chaotic" :
              u.ualign.type == A_NEUTRAL ? "Neutral" :
-             u.ualign.type == A_VOID    ? "Gnostic" : "Lawful"),
+             u.ualign.type == A_VOID    ? "Gnostic" :
+             u.ualign.type == A_LAWFUL  ? "Lawful"  :
+             u.ualign.type == A_NONE    ? "Unaligned" : "Other"),
             Upolyd ? "" : race, Upolyd ? "" : " ",
             rank);
 
@@ -819,7 +823,9 @@ draw_vertical(int x, int y, int hp, int hpmax)
     wprintw(win,   "Alignment:     ");
     wprintw(win, (u.ualign.type == A_CHAOTIC ? "Chaotic" :
                   u.ualign.type == A_NEUTRAL ? "Neutral" :
-                  u.ualign.type == A_VOID    ? "Gnostic" : "Lawful"));
+                  u.ualign.type == A_VOID    ? "Gnostic" :
+                  u.ualign.type == A_LAWFUL  ? "Lawful"  :
+                  u.ualign.type == A_NONE    ? "Unaligned" : "Other"));
     wmove(win, y++, x);
     wprintw(win,   "Dungeon Level: ");
 
