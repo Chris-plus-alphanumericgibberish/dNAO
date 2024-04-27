@@ -675,6 +675,8 @@ struct obj {
 			 || ((otmp)->otyp >= EFFIGY && (otmp)->otyp <= DOLL_S_TEAR)\
 			 || (otmp)->otyp == HOLY_SYMBOL_OF_THE_BLACK_MOTHE\
 			 || (otmp)->oartifact == ART_ESSCOOAHLIPBOOURRR\
+			 || (otmp)->otyp == FIGURINE\
+			 || (otmp)->otyp == STATUE\
 			 || (otmp)->otyp == MAGIC_LAMP\
 			 || (otmp)->otyp == CANDLE_OF_INVOCATION\
 			 || (otmp)->otyp == RIN_WISHES\
