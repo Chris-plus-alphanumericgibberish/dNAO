@@ -3236,9 +3236,13 @@ int otyp;
 
 /* also for praying; find worn item that confers "Unchanging" attribute */
 struct obj *
-unchanger()
+cursed_unchanger()
 {
-    if (uamul && uamul->otyp == AMULET_OF_UNCHANGING) return uamul;
+	struct obj *otmp;
+	for(otmp = invent; otmp; otmp->nobj){
+		if(otmp->owornmask && item_has_property(otmp, UNCHANGING) && otmp->cursed)
+			return otmp;
+	}
     return 0;
 }
 

@@ -641,7 +641,7 @@ E void NDECL(bumbler);
 E struct obj *FDECL(some_armor,(struct monst *));
 E void FDECL(erode_armor, (struct monst *,BOOLEAN_P));
 E struct obj *FDECL(stuck_ring, (struct obj *,int));
-E struct obj *NDECL(unchanger);
+E struct obj *NDECL(cursed_unchanger);
 E void NDECL(reset_remarm);
 E int NDECL(doddoremarm);
 E int FDECL(destroy_arm, (struct obj *));
