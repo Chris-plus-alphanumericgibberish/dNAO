@@ -6378,6 +6378,8 @@ u_material_next_to_skin(material)
 int material;
 {
 	int count = 0;
+	if(u.sealsActive&SEAL_EDEN)
+		return 0;
 	if(uarmu && uarmu->obj_material == material)
 		count += uarmu->otyp == BODYGLOVE ? 5 : 1;
 	if(uarmu && uarmu->otyp == BODYGLOVE)
@@ -6419,6 +6421,8 @@ int bcu;
 {
 	#define bcu(otmp) (is_unholy(otmp) ? -1 : otmp->blessed ? 1 : 0)
 	int count = 0;
+	if(u.sealsActive&SEAL_EDEN)
+		return 0;
 	if(uarmu && bcu(uarmu) == bcu)
 		count += uarmu->otyp == BODYGLOVE ? 5 : 1;
 	if(uarmu && uarmu->otyp == BODYGLOVE)
