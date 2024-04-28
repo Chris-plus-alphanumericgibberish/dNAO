@@ -2285,8 +2285,10 @@ struct obj* obj;
 	random_mat_list = material_list(obj);
 	if (random_mat_list) {
 		int i = rnd(1000);
+#ifdef REINCARNATION
 		if(Is_rogue_level(&u.uz))
 			i = 1;//No fancy materials
+#endif
 		while (i > 0) {
 			if(random_mat_list->iprob == 0){
 				impossible("init_obj_material random_mat_list out-of-range.");
