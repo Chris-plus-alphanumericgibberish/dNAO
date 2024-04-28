@@ -2108,7 +2108,7 @@ humanoid_sound:
 						pacify_goat_faction();
 					}
 				}
-				switch(rn2(14)){
+				switch(rn2(15)){
 					case 0:
 						verbl_msg = "Ia! Shub-Nugganoth! The Goat with a Thousand Young!";
 					break;
@@ -2148,6 +2148,9 @@ humanoid_sound:
 					break;
 					case 13:
 						verbl_msg = "All things are mingled.";
+					break;
+					case 14:
+						verbl_msg = "Silet per diem universus, lucet nocturnis ignibus.";
 					break;
 				}
 			}
