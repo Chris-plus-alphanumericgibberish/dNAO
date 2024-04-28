@@ -1384,7 +1384,7 @@ as_extra_healing:
 	case POT_BLOOD:
 		unkn++;
 		if(!force && your_race(&mons[otmp->corpsenm]) && !is_animal(&mons[otmp->corpsenm]) && !mindless(&mons[otmp->corpsenm]) && !CANNIBAL_ALLOWED() 
-			&& ((u.ualign.record >= 20 || ACURR(A_WIS) >= 20 || u.ualign.record >= rnd(20-ACURR(A_WIS))) && !roll_madness(MAD_CANNIBALISM))
+			&& (u.ualign.record >= 20 || ACURR(A_WIS) >= 20 || u.ualign.record >= rnd(20-ACURR(A_WIS)))
 		){
 			char buf[BUFSZ];
 			Sprintf(buf, "You feel a deep sense of kinship to %s!  Drink %s anyway?",

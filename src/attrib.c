@@ -1621,7 +1621,7 @@ long int madness;
 	int sanlevel;
 	int usan = u.usanity;
 	unsigned long hashed = hash((unsigned long) (moves + nonce + hash((unsigned long)madness))); //Offset the different madnesses before hashing
-	if((BlockableClearThoughts && madness != MAD_GOAT_RIDDEN) || TimeStop)
+	if((BlockableClearThoughts && madness != MAD_GOAT_RIDDEN && madness != MAD_CANNIBALISM) || TimeStop)
 		return 0;
 	if(madness == MAD_NON_EUCLID && DimensionalLock)
 		return 0;
@@ -1632,7 +1632,7 @@ long int madness;
 	sanlevel = max_ints(1,(int)(((float)hashed/ULONG_MAX) * ((float)hash(hashed)/ULONG_MAX) * 100));
 	
 	//Note: Clear Thoughts plus Walking Nightmare yields partial resistance rather than complete.
-	if(madness != MAD_GOAT_RIDDEN)
+	if(madness != MAD_GOAT_RIDDEN && madness != MAD_CANNIBALISM)
 		usan = NightmareAware_Sanity;
 
 	if(usan < sanlevel)
@@ -1647,7 +1647,7 @@ long int madness;
 	int sanlevel;
 	int usan = u.usanity;
 	unsigned long hashed = hash((unsigned long) (moves + nonce + hash((unsigned long)madness))); //Offset the different madnesses before hashing
-	if((BlockableClearThoughts && madness != MAD_GOAT_RIDDEN) || TimeStop)
+	if((BlockableClearThoughts && madness != MAD_GOAT_RIDDEN && madness != MAD_CANNIBALISM) || TimeStop)
 		return 0;
 	if(madness == MAD_NON_EUCLID && DimensionalLock)
 		return 0;
@@ -1656,7 +1656,7 @@ long int madness;
 		return 0;
 	
 	//Note: Clear Thoughts plus Walking Nightmare yields partial resistance rather than complete.
-	if(madness != MAD_GOAT_RIDDEN)
+	if(madness != MAD_GOAT_RIDDEN && madness != MAD_CANNIBALISM)
 		usan = NightmareAware_Sanity;
 
 	if(usan < hashed%100)

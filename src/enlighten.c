@@ -707,7 +707,7 @@ boolean dumping;
 		}
 		if (u.umadness&MAD_CANNIBALISM){
 			enl_msg("Sometimes, you ", "will vomit", "vomited", " after eating vegetarian or vegan food");
-			enl_msg("Sometimes, you ", "will not be", "weren't", " warned before committing cannibalism");
+			enl_msg("Sometimes, you ", "will receive", "received", " bonus damage on bite attacks, especially vs. your own kind");
 		}
 		if (u.umadness&MAD_RAGE){
 			you_have("reduced AC, reduced spell success, and increased damage");

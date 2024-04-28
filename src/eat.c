@@ -1588,7 +1588,7 @@ opentin()		/* called during each move whilst opening a tin */
 
 		char buf[BUFSZ];
 		if(tin.tin->corpsenm > NON_PM && tin.tin->spe != 1 && your_race(&mons[tin.tin->corpsenm]) && !is_animal(&mons[tin.tin->corpsenm]) && !mindless(&mons[tin.tin->corpsenm])
-			&& !CANNIBAL_ALLOWED() && ((u.ualign.record >= 20 || ACURR(A_WIS) >= 20 || u.ualign.record >= rnd(20-ACURR(A_WIS))) && !roll_madness(MAD_CANNIBALISM)))
+			&& !CANNIBAL_ALLOWED() && (u.ualign.record >= 20 || ACURR(A_WIS) >= 20 || u.ualign.record >= rnd(20-ACURR(A_WIS))))
 			Sprintf(buf, "You feel a deep sense of kinship to the tin!  Eat it anyway?");
 		else
 			Sprintf(buf, "Eat it?");
@@ -2820,7 +2820,7 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 	    return MOVE_CANCELLED;
 	}
 	if(otmp->otyp == CORPSE && your_race(&mons[otmp->corpsenm]) && !is_animal(&mons[otmp->corpsenm]) && !mindless(&mons[otmp->corpsenm])
-		&& !CANNIBAL_ALLOWED() && ((u.ualign.record >= 20 || ACURR(A_WIS) >= 20 || u.ualign.record >= rnd(20-ACURR(A_WIS))) && !roll_madness(MAD_CANNIBALISM))
+		&& !CANNIBAL_ALLOWED() && (u.ualign.record >= 20 || ACURR(A_WIS) >= 20 || u.ualign.record >= rnd(20-ACURR(A_WIS)))
 	){
 		char buf[BUFSZ];
 		Sprintf(buf, "You feel a deep sense of kinship to %s!  Eat %s anyway?",

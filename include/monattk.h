@@ -74,6 +74,19 @@
 	(aatyp) == AT_DSPR || \
 	(aatyp) == AT_ESPR \
 	)
+
+#define is_bite_at(aatyp)	(\
+		(aatyp) == AT_BITE\
+		|| (aatyp) == AT_LNCK\
+		|| (aatyp) == AT_5SBT\
+		|| (aatyp) == AT_OBIT\
+		|| (aatyp) == AT_WBIT\
+	)
+
+#define is_insight_tentacle_at(aatyp)	(\
+		(aatyp) == AT_TENT\
+		|| (aatyp) == AT_WISP\
+	)
 /*	Add new damage types below.
  *
  *	Note that 1-10 correspond to the types of attack used in buzz().

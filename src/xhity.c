@@ -2474,7 +2474,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 				attk->damd += (int)((Insanity/30.0)*(Insanity/30.0) + 0.5);
 
 				/* this is applied to all acceptable attacks; no subout marker is necessary */
-			}	
+			}
 		}
 		else if (!youagr && otmp->otyp == BESTIAL_CLAW && magr->mcrazed) {
 			if (attk->aatyp == AT_XWEP) {
@@ -3616,6 +3616,29 @@ int *shield_margin;
 			/* Stat (INT) (from Dantalion vs telepathically sensed enemies) */
 			if (u.sealsActive&SEAL_DANTALION && tp_sensemon(mdef))
 				bons_acc += max(0, (ACURR(A_INT) - 10) / 2);
+
+			if(attk && is_bite_at(attk->aatyp)
+				&& mdef && (!vegetarian(mdef->data) || your_race(mdef->data))
+				&& mad_turn(MAD_CANNIBALISM)
+			){
+				int can_bon = str_abon();
+
+				if (ACURR(A_CHA) == 25) can_bon += 8;
+				else can_bon += max(0, (ACURR(A_CHA) - 10) / 2);
+
+				if(your_race(mdef->data))
+					can_bon *= 2;
+
+				bons_acc += can_bon;
+			}
+			if(attk && is_insight_tentacle_at(attk->aatyp)
+				&& (u.sealsActive&SEAL_OSE)
+			){
+				if(u.uinsight)
+					bons_acc += rnd(min(u.uinsight, mlev(magr)));
+				if (ACURR(A_CHA) == 25) bons_acc += 8;
+				else bons_acc += max(0, (ACURR(A_CHA) - 10) / 2);
+			}
 			/* intrinsic accuracy bonuses */
 			bons_acc += u.uhitinc;
 			if(uarmg && uarmg->otyp == IMPERIAL_ELVEN_HELM && check_imp_mod(uarmg, IEA_INC_ACC))
@@ -15031,6 +15054,28 @@ int vis;						/* True if action is at all visible to the player */
 					if ((u.sealsActive&SEAL_DANTALION) && !noanatomy(pd)) {
 						if (ACURR(A_INT) == 25) bonsdmg += 8;
 						else bonsdmg += max(0, (ACURR(A_INT) - 10) / 2);
+					}
+					if(attk && is_bite_at(attk->aatyp)
+						&& mdef && (!vegetarian(mdef->data) || your_race(mdef->data))
+						&& mad_turn(MAD_CANNIBALISM)
+					){
+						int can_bon = str_dbon(&youmonst);
+
+						if (ACURR(A_CHA) == 25) can_bon += 8;
+						else can_bon += max(0, (ACURR(A_CHA) - 10) / 2);
+
+						if(your_race(mdef->data))
+							can_bon *= 2;
+
+						bonsdmg += can_bon;
+					}
+					if(attk && is_insight_tentacle_at(attk->aatyp)
+						&& (u.sealsActive&SEAL_OSE)
+					){
+						if(u.uinsight)
+							bonsdmg += rnd(min(u.uinsight, mlev(magr)));
+						if (ACURR(A_CHA) == 25) bonsdmg += 8;
+						else bonsdmg += max(0, (ACURR(A_CHA) - 10) / 2);
 					}
 				}
 				//Monster specific bonuses
