@@ -2196,6 +2196,9 @@ u_init()
 		u.usanity = 75; /* Your sanity is not so hot */
 		u.umadness |= MAD_DELUSIONS; /* Your sanity is not so hot */
 		u.udrunken = 30; /* Your sanity is not so hot (and you may have once been more powerful) */
+		if(Race_if(PM_ELF)){
+			u.gevurah += 4;//cheated death.
+		}
 
         break;
 	case PM_HEALER:
