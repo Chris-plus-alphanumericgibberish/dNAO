@@ -1701,6 +1701,11 @@ struct obj * obj;
 			new_otyp = GOLD_PIECE;
 			break;
 	}
+	if(obj->oclass == TILE_CLASS){
+		if(obj->otyp >= FIRST_GLYPH && obj->otyp <= LAST_GLYPH){
+			new_otyp = rn2(LAST_GLYPH - FIRST_GLYPH + 1) + FIRST_GLYPH;
+		}
+	}
 	/* turn crocodile corpses into shoes */
 	if (obj->otyp == CORPSE && obj->corpsenm == PM_CROCODILE) {
 		new_otyp = LOW_BOOTS;
