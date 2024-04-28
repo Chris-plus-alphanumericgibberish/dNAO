@@ -3239,7 +3239,7 @@ struct obj *
 cursed_unchanger()
 {
 	struct obj *otmp;
-	for(otmp = invent; otmp; otmp->nobj){
+	for(otmp = invent; otmp; otmp = otmp->nobj){
 		if(otmp->owornmask && item_has_property(otmp, UNCHANGING) && otmp->cursed)
 			return otmp;
 	}
