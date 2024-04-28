@@ -2501,7 +2501,7 @@ karemade:
 				}
 			}
 			
-			if(u.sealsActive&SEAL_ASTAROTH && u.uinwater){
+			if(u.sealsActive&SEAL_ASTAROTH && u.uinwater && !Waterproof){
 				losehp(1, "rusting through", KILLED_BY);
 			}
 			if (u.sealsActive&SEAL_ORTHOS && !(Darksight || Catsight || Extramission)
