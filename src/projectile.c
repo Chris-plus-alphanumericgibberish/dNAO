@@ -2776,7 +2776,7 @@ int * dz;
 	if (/* needs a creature to be involved in throwing the projectile */
 		magr && (
 		/* cursed ammo */
-		(ammo->cursed && !(youagr ? is_weldproof(youracedata) : is_weldproof_mon(magr)))
+		(ammo->cursed && !(youagr ? Weldproof : is_weldproof_mon(magr)))
 		||
 		/* or flintlock */
 		(fired && launcher && launcher->otyp == FLINTLOCK)
