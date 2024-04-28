@@ -684,7 +684,7 @@ boolean is_pet;		/* If true, pet should keep wielded/worn items */
 	} else {
 		//Drop everything, I'm dying :(
 		while((otmp = mtmp->minvent)){
-			obj_extract_self(otmp);
+			obj_extract_and_unequip_self(otmp);
 			//Assumes that the only way the jin gang zuo can come into play is via crowning gift.
 			if(otmp->oartifact == ART_JIN_GANG_ZUO){
 				hold_another_object(otmp, "Oops!  The returning %s slips to the floor!", "snare", (const char *)0);
