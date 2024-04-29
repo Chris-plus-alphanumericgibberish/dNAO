@@ -16374,7 +16374,7 @@ int vis;						/* True if action is at all visible to the player */
 		if (otmp && poisons_wipedoff) {
 			/* rings subtract from corpsenm */
 			if (otmp->oclass == RING_CLASS) {
-				if (otmp->opoisonchrgs-- <= 0)
+				if (--otmp->opoisonchrgs <= 0)
 					otmp->opoisoned = OPOISON_NONE;
 			}
 			/* viperwhips also subtract from corpsenm, but do so with a message */
