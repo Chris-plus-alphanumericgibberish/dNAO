@@ -3503,7 +3503,7 @@ E int NDECL(narya);
 E int NDECL(mountedCombat);
 E boolean FDECL(obj_silver_searing, (struct obj *));
 E boolean FDECL(obj_jade_searing, (struct obj *));
-E int FDECL(hatesobjdmg, (struct monst *, struct obj *));
+E int FDECL(hatesobjdmg, (struct monst *, struct obj *, struct monst *));
 E int FDECL(hits_insubstantial, (struct monst *, struct monst *, struct attack *, struct obj *));
 E boolean FDECL(miss_via_insubstantial, (struct monst *, struct monst *, struct attack *, struct obj *, int));
 E int FDECL(destroy_item, (struct monst *, int, int));

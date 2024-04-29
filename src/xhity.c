@@ -13550,6 +13550,7 @@ int vis;						/* True if action is at all visible to the player */
 		sneak_dice++;
 	if (weapon && weapon->owornmask && weapon->oartifact == ART_LOLTH_S_FANG)
 		sneak_dice++;
+	//Offhand attacks as well
 	if (weapon && weapon->owornmask && weapon->otyp == BESTIAL_CLAW && active_glyph(BEASTS_EMBRACE))
 		sneak_dice++;
 	if (weapon && weapon->oartifact == ART_PEN_OF_THE_VOID && weapon->ovar1_seals&SEAL_ANDROMALIUS)
@@ -13866,7 +13867,7 @@ int vis;						/* True if action is at all visible to the player */
 			otherobj |= slot;
 		}
 		/* calculate sear damage */
-		seardmg += hatesobjdmg(mdef, otmp);
+		seardmg += hatesobjdmg(mdef, otmp, magr);
 	}
 	/* direct contact (includes rings) */
 	else {
@@ -13969,7 +13970,7 @@ int vis;						/* True if action is at all visible to the player */
 						unblessedobj |= rslot;
 					}
 					/* calculate sear damage */
-					seardmg += hatesobjdmg(mdef, otmp);
+					seardmg += hatesobjdmg(mdef, otmp, magr);
 				}
 			}
 		}

@@ -2,6 +2,7 @@
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /* NetHack may be freely redistributed.  See license for details. */
 
+#include <math.h>
 #include "hack.h"
 #include "artifact.h"
 #include "monflag.h"
@@ -1366,9 +1367,10 @@ struct obj * obj;
  * 
  */
 int
-hatesobjdmg(mdef, otmp)
+hatesobjdmg(mdef, otmp, magr)
 struct monst * mdef;
 struct obj * otmp;
+struct monst * magr;
 {
 	//boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
@@ -1478,7 +1480,6 @@ struct obj * otmp;
 			}
 		}
 		else if(otmp->where == OBJ_MINVENT){
-			struct monst *magr = otmp->ocarry;
 			if(magr && (mon_knight(magr) || magr->mtyp == PM_OONA) && MON_WEP(magr) == otmp && mlev(magr) >= 14){
 				if(mlev(magr) >= 28)
 					dmg += vd(6, 8);
@@ -1614,7 +1615,6 @@ struct obj * otmp;
 			dmg += vd(ndice, diesize);
 		//wields lawful energies
 		if(otmp->where == OBJ_MINVENT){
-			struct monst *magr = otmp->ocarry;
 			if(magr && (magr->mtyp == PM_OONA) && MON_WEP(magr) == otmp && mlev(magr) >= 14){
 				if(mlev(magr) >= 28)
 					dmg += vd(6, 8);
@@ -1627,18 +1627,33 @@ struct obj * otmp;
 	}
 
 	if (hates_chaos_mon(mdef) &&
-		u.ualign.type != A_LAWFUL && u.ualign.type != A_NEUTRAL && /* Note: allows chaos, void, and none */
 		otmp->obj_material == MERCURIAL &&
+		((magr == &youmonst && u.ualign.type != A_LAWFUL && u.ualign.type != A_NEUTRAL) || /* Note: allows chaos, void, and none */
+		 (magr != &youmonst && (magr->data->maligntyp < 0 || magr->data->maligntyp == MON_A_VOID || magr->data->maligntyp == MON_A_NONE))) &&
 		!(is_lightsaber(otmp) && litsaber(otmp))
 	) {
 		ndice = 1;
-		diesize = mdef->data->maligntyp;
-#define MIN_OF(x,y) x = min(x,y)		
-		MIN_OF(diesize, u.ulevel);
-		MIN_OF(diesize, u.ualign.record);
-		MIN_OF(diesize, ACURR(A_INT));
-		MIN_OF(diesize, ACURR(A_WIS));
-		MIN_OF(diesize, ACURR(A_CHA));
+		diesize = youdef ? u.ualign.record : mdef->data->maligntyp == 0 ? 5 : abs(mdef->data->maligntyp);
+#define MIN_OF(x,y) x = min(x,y)
+		MIN_OF(diesize, mlev(magr));
+		if(magr == &youmonst){
+			MIN_OF(diesize, u.ualign.record);
+			MIN_OF(diesize, ACURR(A_INT));
+			MIN_OF(diesize, ACURR(A_WIS));
+			MIN_OF(diesize, ACURR(A_CHA));
+		}
+		else if(magr){
+			MIN_OF(diesize, abs(magr->data->maligntyp));
+			//Placeholder, cap the die size high
+			// MIN_OF(diesize, ACURR_MON(magr, A_INT));
+			// MIN_OF(diesize, ACURR_MON(magr, A_WIS));
+			// MIN_OF(diesize, ACURR_MON(magr, A_CHA));
+			MIN_OF(diesize, 25);
+		}
+		else {
+			//Raw chaos, cap the die size high.
+			MIN_OF(diesize, 30);
+		}
 #undef MIN_OF
 		
 		diesize = max(1,diesize);
@@ -1855,7 +1870,7 @@ struct obj * weapon;
 		if (weapon->oartifact == ART_GRAYSWANDIR) /* Grayswandir can interact with phantoms */
 			return 2;
 
-		if (hatesobjdmg(mdef, weapon))
+		if (hatesobjdmg(mdef, weapon, magr))
 			return 1;
 
 		if ((hates_silver(pd) && !(youdef && u.sealsActive&SEAL_EDEN)) && (
