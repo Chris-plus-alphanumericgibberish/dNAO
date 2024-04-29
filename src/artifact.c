@@ -14038,7 +14038,7 @@ do_passive_attacks()
 		return;
 
 	if(roll_madness(MAD_GOAT_RIDDEN) && adjacent_mon()){
-		if(!ClearThoughts){
+		if(!ClearThoughts && youracedata->mtyp != PM_DARK_YOUNG){
 			pline("Lashing tentacles erupt from your brain!");
 			losehp(max(1,(Upolyd ? ((d(4,4)*u.mh)/u.mhmax) : ((d(4,4)*u.uhp)/u.uhpmax))), "the black mother's touch", KILLED_BY);
 			morehungry(d(4,4)*get_uhungersizemod());
