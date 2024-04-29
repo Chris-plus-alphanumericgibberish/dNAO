@@ -15235,7 +15235,7 @@ int vis;						/* True if action is at all visible to the player */
 			}
 		}
 		/* misc: train player's Soresu skill if applicable */
-		if (youdef && uwep && is_lightsaber(uwep) && litsaber(uwep) && magr && melee &&
+		if (youdef && uwep && is_lightsaber(uwep) && litsaber(uwep) && magr && melee && P_SKILL(P_SHII_CHO) >= P_BASIC &&
 			(activeFightingForm(FFORM_SHII_CHO) ||
 			(activeFightingForm(FFORM_SORESU))
 			)) use_skill(P_SORESU, 1);
