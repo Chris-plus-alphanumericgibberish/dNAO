@@ -3420,7 +3420,7 @@ char *andromaliusItems[18] = {
 /*09*/	"an egg",
 /*00*/	"a potion",
 /*11*/	"a dead spider",
-/*12*/	"a human skull",
+/*12*/	"a skull",
 /*13*/	"an arm bone",
 /*14*/	"a spellbook",
 /*15*/	"a bell",
@@ -3658,6 +3658,9 @@ int tx,ty;
 						else if(otmp->oclass == POTION_CLASS){ o1 = otmp; t1 = 10;}
 						else if(otmp->otyp == CORPSE && otmp->corpsenm==PM_CAVE_SPIDER){ o1 = otmp; t1 = 11;}
 						else if(otmp->otyp == CORPSE && your_race(&mons[otmp->corpsenm])){ o1 = otmp; t1 = 12;}
+						else if(otmp->otyp == CLOCKWORK_COMPONENT && Race_if(PM_CLOCKWORK_AUTOMATON)){ o1 = otmp; t1 = 12;}
+						else if(otmp->otyp == BROKEN_ANDROID && Race_if(PM_ANDROID)){ o1 = otmp; t1 = 12;}
+						else if(otmp->otyp == BROKEN_GYNOID && Race_if(PM_ANDROID)){ o1 = otmp; t1 = 12;}
 						else if(otmp->otyp == CORPSE && is_andromaliable(&mons[otmp->corpsenm]) ){ o1 = otmp; t1 = 13;}
 						else if(otmp->oclass == SPBOOK_CLASS){ o1 = otmp; t1 = 14;}
 						else if(otmp->otyp == BELL){ o1 = otmp; t1 = 15;}
@@ -3677,6 +3680,9 @@ int tx,ty;
 						else if(otmp->oclass == POTION_CLASS && otmp->oclass != o1->oclass){ o2 = otmp; t2 = 10;}
 						else if(otmp->otyp == CORPSE && otmp->corpsenm==PM_CAVE_SPIDER && t1 != 11){ o2 = otmp; t2 = 11;}
 						else if(otmp->otyp == CORPSE && your_race(&mons[otmp->corpsenm]) && t1 != 12 && otmp != o1){ o2 = otmp; t2 = 12;}
+						else if(otmp->otyp == CLOCKWORK_COMPONENT && Race_if(PM_CLOCKWORK_AUTOMATON) && t1 != 12 && otmp != o1){ o2 = otmp; t2 = 12;}
+						else if(otmp->otyp == BROKEN_ANDROID && Race_if(PM_ANDROID) && t1 != 12 && otmp != o1){ o2 = otmp; t2 = 12;}
+						else if(otmp->otyp == BROKEN_GYNOID && Race_if(PM_ANDROID) && t1 != 12 && otmp != o1){ o2 = otmp; t2 = 12;}
 						else if(otmp->otyp == CORPSE && is_andromaliable(&mons[otmp->corpsenm]) && t1 != 13 && otmp != o1){ o2 = otmp; t2 = 13;}
 						else if(otmp->oclass == SPBOOK_CLASS && otmp->oclass != o1->oclass){ o2 = otmp; t2 = 14;}
 						else if(otmp->otyp == BELL && otmp->otyp != o1->otyp){ o2 = otmp; t2 = 15;}
@@ -3783,15 +3789,28 @@ int tx,ty;
 								doname(otmp), (const char *)0);
 						break;
 						case 12:
-							otmp = mksobj(CORPSE, NO_MKOBJ_FLAGS);
-							otmp->corpsenm = urace.malenum;
-							otmp->oeaten = mons[otmp->corpsenm].cnutrit;
-							consume_oeaten(otmp, 1);
-							otmp->owt = weight(otmp);
+							//Note: "Skull"
+							//Androids need a broken android, clockworks need a mechanism, Vampires need a human
+							if(Race_if(PM_ANDROID)){
+								otmp = mksobj(flags.female ? BROKEN_ANDROID : BROKEN_GYNOID, NO_MKOBJ_FLAGS);
+								otmp->owt = weight(otmp);
+							}
+							else if(Race_if(PM_CLOCKWORK_AUTOMATON)){
+								otmp = mksobj(CLOCKWORK_COMPONENT, NO_MKOBJ_FLAGS);
+								otmp->owt = weight(otmp);
+							}
+							else {
+								otmp = mksobj(CORPSE, NO_MKOBJ_FLAGS);
+								otmp->corpsenm = (Race_if(PM_VAMPIRE) || Race_if(PM_INCANTIFIER)) ? PM_HUMAN : urace.malenum;
+								otmp->oeaten = mons[otmp->corpsenm].cnutrit;
+								consume_oeaten(otmp, 1);
+								otmp->owt = weight(otmp);
+							}
 							hold_another_object(otmp, "You drop %s!",
 								doname(otmp), (const char *)0);
 						break;
 						case 13:
+							//Note: "Arm bone"
 							otmp = mksobj(CORPSE, NO_MKOBJ_FLAGS);
 							otmp->corpsenm = androCorpses[rn2(SIZE(androCorpses))];
 							otmp->oeaten = mons[otmp->corpsenm].cnutrit;
