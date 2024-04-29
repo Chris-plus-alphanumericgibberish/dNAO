@@ -4567,13 +4567,13 @@ int * truedmgptr;
 		if(power > 0){
 			int multiplier = power >= 50 ? 3 : power >= 25 ? 2 : 1; 
 			int chance = power >= 50 ? 4 : power >= 25 ? 3 : 2;
-			if(u.usanity > 80 && artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_FOCUS)
+			if(youagr && u.usanity > 80 && artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_FOCUS)
 				chance += (u.usanity-81)/5;//0, 1, 2, or 3 starting at 81, 86, 91, 96
 			if(rn2(20) < chance){
 				*truedmgptr += multiplier*basedmg;
 				if(otmp->oartifact){
 					const struct artifact *weap = get_artifact(otmp);
-					if((weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART) && activeMentalEdge(GSTYLE_RESONANT)){
+					if(youagr && (weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART) && activeMentalEdge(GSTYLE_RESONANT)){
 						for(struct monst *tmon = fmon; tmon; tmon = tmon->nmon){
 							if(DEADMONSTER(tmon))
 								continue;
