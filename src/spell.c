@@ -6284,6 +6284,19 @@ int spell;
 	 */
 	chance = chance * (20-splcaster) / 15 - splcaster;
 	
+	if(check_mutation(SHUB_RADIANCE)){
+		int insight = u.uinsight;
+		while(insight){
+			chance += 1;
+			insight /= 2;
+		}
+		chance += (ACURR(A_CHA)-10)/2;
+		if(ACURR(A_CHA) == 25)
+			chance += 1; //24 == +7, 25 == +8
+		if(u.ufirst_know)
+			chance += 10;
+	}
+
 	//Many madnesses affect spell casting chances
 	if(u.umadness){
 		int delta = NightmareAware_Insanity;
