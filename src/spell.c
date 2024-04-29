@@ -2025,7 +2025,8 @@ int
 spiritDsize()
 {
     int bonus = 1;
-    if(ublindf && ublindf->oartifact == ART_SOUL_LENS) bonus = 2;
+    // if(ublindf && ublindf->oartifact == ART_SOUL_LENS) bonus = 2;
+    if(ublindf && ublindf->otyp == SOUL_LENS) bonus = 2;
 	if(u.ulevel <= 2) return 1 * bonus;
 	else if(u.ulevel <= 5) return 2 * bonus;
 	else if(u.ulevel <= 9) return 3 * bonus;
