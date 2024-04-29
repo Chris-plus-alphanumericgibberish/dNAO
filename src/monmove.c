@@ -2137,11 +2137,15 @@ register struct monst *mtmp;
 						if (xcasty(mtmp, &youmonst, a, mtmp->mux, mtmp->muy)){
 							tmp = 3;
 							// if(mdat->mtyp != PM_DEMOGORGON) break;
+							if(DEADMONSTER(mtmp) || MIGRATINGMONSTER(mtmp))
+								return 1; //Oops!
 						}
 					} else {
 						if (xcasty(mtmp, (struct monst *)0, a, 0, 0)){
 							tmp = 3;
 							// if(mdat->mtyp != PM_DEMOGORGON) break;
+							if(DEADMONSTER(mtmp) || MIGRATINGMONSTER(mtmp))
+								return 1; //Oops!
 						}
 					}
 				}
