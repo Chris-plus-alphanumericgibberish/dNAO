@@ -131,6 +131,7 @@ struct obj {
 #define STATUE_FEMALE   0x04
 #define STATUE_FACELESS 0x08
 #define STATUE_EPRE		0x10
+#define STATUE_LOYAL	0x20
 
 #define FIGURINE_LOYAL	0x01
 #define FIGURINE_MALE	0x02

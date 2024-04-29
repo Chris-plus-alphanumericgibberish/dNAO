@@ -1297,12 +1297,12 @@ REGION:(66,15,74,18),lit,"temple"
 ALTAR:(67,16),neutral,altar,"_Pen'a"
 MONSTER: '#', "mendicant drider plague-victim", (68,16)
 
-CONTAINER:'`',"statue",(74,18),uncursed,"Panakeian Archon",5
+CONTAINER:'`',"statue",(74,18),uncursed,"Panakeian Archon",37
 OBJECT:'#',"blessed large color_blue cloth robe",contained
 OBJECT:'#',"blessed large color_bright_blue cloth waistcloth",contained
 OBJECT:'#',"blessed color_bright_blue blindfold",contained
 
-CONTAINER:'`',"statue",(74,15),uncursed,"Iksh'na Deva",5
+CONTAINER:'`',"statue",(74,15),uncursed,"Iksh'na Deva",37
 OBJECT:'#',"blessed color_blue robe",contained
 OBJECT:'#',"blessed color_bright_blue waistcloth",contained
 OBJECT:'#',"blessed color_bright_blue blindfold",contained

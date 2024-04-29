@@ -211,9 +211,9 @@ STAIR:(04,04),up
 STAIR:(19,06),down
 
 # Statue
-CONTAINER:'`',"statue",(18,06),uncursed,"Iasoian Archon",5
-CONTAINER:'`',"statue",(20,06),uncursed,"Hygieian Archon",5
-CONTAINER:'`',"statue",(19,05),uncursed,"Panakeian Archon",5
+CONTAINER:'`',"statue",(18,06),uncursed,"Iasoian Archon",37
+CONTAINER:'`',"statue",(20,06),uncursed,"Hygieian Archon",37
+CONTAINER:'`',"statue",(19,05),uncursed,"Panakeian Archon",37
 
 # Non diggable walls
 NON_DIGGABLE:(11,02,21,07)
