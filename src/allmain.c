@@ -2611,8 +2611,9 @@ karemade:
 					destroy_item(&youmonst, WAND_CLASS, AD_ELEC);
 					destroy_item(&youmonst, RING_CLASS, AD_ELEC);
 				}
-				if(roll_madness(MAD_REACHER))
-					explode_yours(u.ux, u.uy, AD_EELC, MON_EXPLODE, d(4,8),EXPL_BBLUE,2,FALSE);
+				if(roll_madness(MAD_REACHER)){
+					explode_yours(u.ux, u.uy, AD_EELC, MON_EXPLODE, d(4,8), EXPL_BBLUE, 2, FALSE);
+				}
 				nomul(0, NULL);
 			}
 

@@ -7307,22 +7307,24 @@ boolean printmessages; /* print generic elemental damage messages */
 				x = rn2(COLNO-2)+1;
 				y = rn2(ROWNO-2)+1;
 				cc.x=x;cc.y=y;
-			} while (!(isok(x,y) && ACCESSIBLE(levl[x][y].typ) && (!magr || (distmin(x(magr), y(magr), x, y) > 2))) && tries++ < 1000);
+			} while (!(isok(x,y) && ACCESSIBLE(levl[x][y].typ) && (!magr || (distmin(x(magr), y(magr), x, y) > 2 &&
+					clear_path(x(magr), y(magr), x, y)))) && tries++ < 1000);
 
 			if(u.uinsight >= 72)
 				n = 6;
 			else
 				n = (u.uinsight - 36)/6;
 			n=rnd(n)+1;
-			explode(x, y,
-				AD_PHYS, 0,
-				d(6,6),
-				EXPL_MUDDY, 1);
+			explode_yours(x, y, AD_PHYS, 0, d(6,6), EXPL_MUDDY, 1, FALSE);
+			if (cansee(x, y)){
+				if (Hallucination || u.uinsight > 96) pline("Another Star Falls.");
+				else pline("A star falls from the %s!", (In_outdoors(&u.uz) ? "sky" : ceiling(x, y)));
+			} else {
+				You_hear("a thunderous crash!");
+			}
+
 			while(n--) {
-				explode_sound(x, y,
-					AD_FIRE, 0,
-					d(6,6),
-					EXPL_FIERY, 1, 4);
+				explode_full(x, y, AD_FIRE, 0, d(6,6), EXPL_FIERY, 1, 4, FALSE, (struct permonst *) 0);
 				
 				x = cc.x+rnd(3)-1; y = cc.y+rnd(3)-1;
 				if (!isok(x,y)) {
@@ -9489,37 +9491,35 @@ arti_invoke(obj)
 	case FALLING_STARS:{
 		int starfall = rnd(u.ulevel/10+1), x, y, n;
 		int tries = 0;
-		boolean getLoc = TRUE;
+		boolean needLoc = FALSE;
 		coord cc;
-		if(throweffect()){
-			x=u.dx;y=u.dy;
-			getLoc = FALSE;
+		cc.x = u.ux;
+		cc.y = u.uy;
+		pline("Where do you want to target?");
+		if (getpos(&cc, TRUE, "the desired position") < 0) {
+			needLoc = TRUE;
 		}
+		x = cc.x;
+		y = cc.y;
+
 		verbalize("Even Stars Fall.");
 		for (; starfall > 0; starfall--){
-			if(getLoc){
+			if(needLoc){
 				x = rn2(COLNO-2)+1;
 				y = rn2(ROWNO-2)+1;
 				if(!isok(x,y) || !ACCESSIBLE(levl[x][y].typ) || distmin(u.ux, u.uy, x, y) < 3){
 					if(tries++ < 1000){
-						starfall++;
 						continue;
 					}
 				}
+				needLoc = FALSE;
 			}
-			else getLoc = TRUE;
-
-			cc.x=x;cc.y=y;
+			cc.x=x;cc.y=y; // spell drifts slightly between iterations
 			n=rnd(8)+1;
-			explode(x, y,
-				AD_PHYS, 0,
-				d(6,6),
-				EXPL_MUDDY, 1);
+			explode(x, y, AD_PHYS, 0, d(6,6), EXPL_MUDDY, 1);
 			while(n--) {
-				explode_sound(x, y,
-					AD_FIRE, 0,
-					d(6,6),
-					EXPL_FIERY, 1, 4);
+				if (rn2(2)) explode_sound(x, y, AD_FIRE, 0, d(6,6), EXPL_FIERY, 1, 4);
+				else 		explode_sound(x, y, AD_PHYS, 0, d(6,6), EXPL_MUDDY, 1, 4);
 				
 				x = cc.x+rnd(3)-1; y = cc.y+rnd(3)-1;
 				if (!isok(x,y)) {
