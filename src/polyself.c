@@ -526,19 +526,21 @@ int	mntmp;
 	
 	if (nohands(youmonst.data) || nolimbs(youmonst.data)) Glib = 0;
 
-	/*
-	mlvl = adj_lev(&mons[mntmp]);
-	 * We can't do the above, since there's no such thing as an
-	 * "experience level of you as a monster" for a polymorphed character.
+	/* Combine both current level & monster base level when factoring initial polyform hp,
+	 * this is to allow for a 'correct' hp value for all players at lvl X and polyform Y to have,
+	 * regardless of when they polymorphed into that monster (since players gain polyform hp
+	 * from leveling up, this needs to be factored in).
 	 */
-	mlvl = (int)mons[mntmp].mlevel;
+	mlvl = (int)mons[mntmp].mlevel + (int)u.ulevel;
+	int hds = hd_size(&mons[mntmp]);
+
 	if (youmonst.data->mlet == S_DRAGON && mntmp >= PM_GRAY_DRAGON) {
-		u.mhrolled = In_endgame(&u.uz) ? (8*mlvl) : (4*mlvl + d(mlvl,4));
+		u.mhrolled = In_endgame(&u.uz) ? (hds*mlvl) : ((hds/2)*mlvl + d(mlvl,(hds/2)));
 	} else if (is_golem(youmonst.data)) {
 		u.mhrolled = golemhp(mntmp);
 	} else {
-		if (!mlvl) u.mhrolled = rnd(4);
-		else u.mhrolled = d(mlvl, 8);
+		if (!mlvl) u.mhrolled = rnd(hds/2);
+		else u.mhrolled = d(mlvl, hds);
 		if (is_home_elemental(&mons[mntmp])) u.mhrolled *= 3;
 	}
 	calc_total_maxhp();
