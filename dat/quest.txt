@@ -5486,7 +5486,23 @@ that brought you here.
 again."
 %E
 %Cc Mad 00090
-UNUSED
+"You have returned with %o!
+
+"I had feared you would die unsung in your search!
+
+"But, I fear that your struggle is not at an end.
+The King seeks %o, all his power is 
+bent on it.
+
+"You must take it far from here, to the Dungeons
+of Doom. May it aid you in your search for the
+amulet of Yendor.
+
+"Travel swiftly, and beware! Do not dream the
+Messenger is the King!
+
+"I dream now of other things.... We will not meet
+again."
 %E
 %Cc Mad 00091
 UNUSED

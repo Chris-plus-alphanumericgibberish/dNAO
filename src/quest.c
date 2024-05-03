@@ -274,7 +274,10 @@ struct obj *obj;	/* quest artifact; possibly null if carrying Amulet */
 			}
 		}
 	} else {
-	    qt_pager((!Qstat(got_thanks) ? QT_OFFEREDIT : is_primary_quest_artifact(obj) ? QT_OFFEREDIT2 : QT_OFFERART2) + (flags.stag ? QT_TURNEDSTAG : 0));
+		if(Role_if(PM_MADMAN) && mvitals[PM_STRANGER].died)
+			qt_pager(QT_MADMAN_OFFEREDIT);
+		else
+			qt_pager((!Qstat(got_thanks) ? QT_OFFEREDIT : is_primary_quest_artifact(obj) ? QT_OFFEREDIT2 : QT_OFFERART2) + (flags.stag ? QT_TURNEDSTAG : 0));
 	    /* should have obtained bell during quest;
 	       if not, suggest returning for it now */
 	    if ((otmp = carrying(BELL_OF_OPENING)) == 0 && !Role_if(PM_ANACHRONONAUT))

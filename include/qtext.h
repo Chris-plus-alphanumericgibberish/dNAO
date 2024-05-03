@@ -96,6 +96,7 @@ struct	qtlists {
 
 #define QT_OFFERART2	83	/* if you throw the alternate artifact to leader after #81 */
 
+#define QT_MADMAN_OFFEREDIT	90	/* Madman alternate use: The Stranger is dead before completing the quest */
 #define QT_POSTHANKS	90
 #define QT_HASAMULET	91
 
