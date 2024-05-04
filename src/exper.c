@@ -290,10 +290,25 @@ boolean expdrain; /* attack drains exp as well */
 	u.uhprolled -= num;
 	if (u.uhprolled < 1) u.uhprolled = 1;
 	u.uhp -= num + conplus(ACURR(A_CON));
+
+	if (Upolyd) {
+		/* loosely - pretends you rolled exactly average on every hit die
+		 * will therefore average out over all levels, making it functionally impossible
+		 * to drain4gain with polyforms past a certain maximum value
+		 */
+		num = u.mhrolled / (u.ulevel + mons[u.umonnum].mlevel);
+		u.mhrolled -= num;
+		u.mh -= num + conplus(ACURR(A_CON));
+		if((int)(conplus(ACURR(A_CON))) != conplus(ACURR(A_CON))){
+			/* Remainder (just lose an extra HP of healing)*/
+			u.mh--;
+		}
+	}
+
 	calc_total_maxhp();
 	
 	if (u.uhp < 1) u.uhp = 1;
-
+	if (u.mh < 1) u.mh = 1;
 	
 	num = newen();
 	u.uenrolled -= num;
