@@ -132,25 +132,29 @@ static int p_type;
  * order to have the values be meaningful.
  */
 
-#define TROUBLE_STONED			19
-#define TROUBLE_BLOOD_DROWN		18
-#define TROUBLE_FROZEN_AIR		17
-#define TROUBLE_SLIMED			16
-#define TROUBLE_STRANGLED		15
-#define TROUBLE_LAVA			14
-#define TROUBLE_SICK			13
-#define TROUBLE_STARVING		12
-#define TROUBLE_HIT			 	11
-#define TROUBLE_WIMAGE		 	10
-#define TROUBLE_MORGUL		 	9
-#define TROUBLE_MROT		 	8
-#define TROUBLE_HPMOD		 	7
-#define TROUBLE_LYCANTHROPE		 6
-#define TROUBLE_COLLAPSING		 5
-#define TROUBLE_STUCK_IN_WALL		 4
-#define TROUBLE_CURSED_LEVITATION	 3
-#define TROUBLE_UNUSEABLE_HANDS		 2
-#define TROUBLE_CURSED_BLINDFOLD	 1
+enum {
+	TROUBLE_CURSED_BLINDFOLD = 1,
+	TROUBLE_EXTREME_SANITY,
+	TROUBLE_UNUSEABLE_HANDS,
+	TROUBLE_CURSED_LEVITATION,
+	TROUBLE_STUCK_IN_WALL,
+	TROUBLE_COLLAPSING,
+	TROUBLE_LYCANTHROPE,
+	TROUBLE_HPMOD,
+	TROUBLE_MROT,
+	TROUBLE_MORGUL,
+	TROUBLE_WIMAGE,
+	TROUBLE_HIT,
+	TROUBLE_STARVING,
+	TROUBLE_SICK,
+	TROUBLE_LAVA,
+	TROUBLE_STRANGLED,
+	TROUBLE_SLIMED,
+	TROUBLE_FROZEN_AIR,
+	TROUBLE_BLOOD_DROWN,
+	TROUBLE_STONED
+};
+
 
 #define TROUBLE_PUNISHED	       (-1)
 #define TROUBLE_FUMBLING	       (-2)
@@ -168,6 +172,7 @@ static int p_type;
 #define TROUBLE_CONFUSED	      (-14)
 #define TROUBLE_HALLUCINATION	  (-15)
 #define TROUBLE_ENERGYMOD	      (-16)
+#define TROUBLE_LOW_SAN	      	  (-17)
 
 /* We could force rehumanize of polyselfed people, but we can't tell
    unintentional shape changes from the other kind. Oh well.
@@ -219,6 +224,7 @@ in_trouble()
 	if(u.umummyrot && on_altar()) return(TROUBLE_MROT);
 	if(u.uhpmod < -18 && on_altar()) return(TROUBLE_HPMOD);
 	if(u.uenbonus < -18 && on_altar()) return(TROUBLE_ENERGYMOD);
+	if((u.usanity < 100 && on_altar()) || u.usanity < 50) return(TROUBLE_LOW_SAN);
 	if(u.ulycn >= LOW_PM) return(TROUBLE_LYCANTHROPE);
 	if(near_capacity() >= EXT_ENCUMBER && AMAX(A_STR)-ABASE(A_STR) > 3)
 		return(TROUBLE_COLLAPSING);
@@ -248,6 +254,7 @@ in_trouble()
 	}
 	if(Role_if(PM_BARD) && welded(uwep))
 		return TROUBLE_UNUSEABLE_HANDS;
+	if(u.usanity < 10) return(TROUBLE_EXTREME_SANITY);
 	if(Blindfolded && ublindf->cursed) return(TROUBLE_CURSED_BLINDFOLD);
 
 	/*
@@ -488,6 +495,10 @@ register int trouble;
 	    case TROUBLE_CURSED_BLINDFOLD:
 		    otmp = ublindf;
 		    goto decurse;
+	    case TROUBLE_EXTREME_SANITY:
+			Your("mind is comforted.");
+			change_usanity(10+ACURR(A_WIS), FALSE);
+		    break;
 	    case TROUBLE_WIMAGE:
 			pline("The image of the weeping angel fades from your mind.");
 		    u.wimage = 0;
@@ -510,6 +521,10 @@ register int trouble;
 			You_feel("charged up.");
 		    u.uenbonus = max(u.uenbonus, 0);
 		    calc_total_maxen();
+		    break;
+	    case TROUBLE_LOW_SAN:
+			Your("mind feels more steady.");
+			change_usanity(ACURR(A_WIS), FALSE);
 		    break;
 	    case TROUBLE_LYCANTHROPE:
 		    you_unwere(TRUE);
