@@ -946,7 +946,8 @@
 #define omnisense(ptr)		((ptr->mflagsv & MV_OMNI))
 
 #define can_betray(ptr)		((ptr->mflagst & MT_TRAITOR))
-#define opaque(ptr)	(((ptr)->mflagsg & MG_OPAQUE))
+// #define opaque(ptr)	(((ptr)->mflagsg & MG_OPAQUE))
+#define opaque(ptr)	(FALSE)
 #define mteleport(ptr)	(((ptr)->mflagsm & MM_TENGTPORT))
 #define is_mplayer(ptr)		(((ptr)->mtyp >= PM_ARCHEOLOGIST) && \
 				 ((ptr)->mtyp <= PM_WIZARD))
