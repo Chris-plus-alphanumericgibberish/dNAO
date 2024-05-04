@@ -2822,6 +2822,56 @@ dopassive()
 
 
 int
+dodropall()
+{
+	struct monst *mtmp;
+	if (!getdir("Indicate pet that drop all non-worn gear, or '.' for all.")) return MOVE_CANCELLED;
+	if(!(u.dx || u.dy)){
+		You("order all your pets to drop their junk.");
+		for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
+			if(mtmp->mtame){
+				boolean keep = TRUE;
+				while(keep){
+					keep = FALSE;
+					for(struct obj *otmp = mtmp->minvent; otmp; otmp = otmp->nobj){
+						if(!(otmp->owornmask)){
+							obj_extract_and_unequip_self(otmp);
+							mdrop_obj(mtmp, otmp, TRUE);
+							keep = TRUE;
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+	else if(isok(u.ux+u.dx, u.uy+u.dy)) {
+		mtmp = m_at(u.ux+u.dx, u.uy+u.dy);
+		if(!mtmp){
+			pline("There is no target there.");
+			return MOVE_INSTANT;
+		}
+		if(mtmp->mtame){
+			You("order %s to drop %s gear.", mon_nam(mtmp), mhis(mtmp));
+			boolean keep = TRUE;
+			while(keep){
+				keep = FALSE;
+				for(struct obj *otmp = mtmp->minvent; otmp; otmp = otmp->nobj){
+					if(!(otmp->owornmask)){
+						obj_extract_and_unequip_self(otmp);
+						mdrop_obj(mtmp, otmp, TRUE);
+						keep = TRUE;
+						break;
+					}
+				}
+			}
+		}
+	} else pline("There is no target there.");
+	return MOVE_INSTANT;
+}
+
+
+int
 dodownboy()
 {
 	u.peaceful_pets = TRUE;

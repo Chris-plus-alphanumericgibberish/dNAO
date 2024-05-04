@@ -538,6 +538,7 @@ E int NDECL(doattack);
 E int NDECL(dopassive);
 E int NDECL(dodownboy);
 E int NDECL(dosickem);
+E int NDECL(dodropall);
 E int FDECL(drop, (struct obj *));
 
 /* ### do_name.c ### */
