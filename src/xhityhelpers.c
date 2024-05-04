@@ -2604,6 +2604,7 @@ struct attack * attk;
 			if(mdef2 == &youmonst || canseemon(mdef2))
 				vis2 |= VIS_MDEF;
 			bhitpos.x = tarx + dx; bhitpos.y = tary + dy;
+			notonhead = (bhitpos.x != x(mdef2) || bhitpos.y != y(mdef2));
 			subresult = xmeleehity(magr, mdef2, attk, &otmp, vis2, tohitmod, TRUE);
 			/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
 			result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
@@ -2636,6 +2637,7 @@ struct attack * attk;
 				if(mdef2 == &youmonst || canseemon(mdef2))
 					vis2 |= VIS_MDEF;
 				bhitpos.x = x(magr) + nx; bhitpos.y = y(magr) + ny;
+				notonhead = (bhitpos.x != x(mdef2) || bhitpos.y != y(mdef2));
 				subresult = xmeleehity(magr, mdef2, attk, &otmp, vis2, tohitmod, TRUE);
 				/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
 				result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
@@ -2665,6 +2667,7 @@ struct attack * attk;
 				if(mdef2 == &youmonst || canseemon(mdef2))
 					vis2 |= VIS_MDEF;
 				bhitpos.x = x(magr) + nx; bhitpos.y = y(magr) + ny;
+				notonhead = (bhitpos.x != x(mdef2) || bhitpos.y != y(mdef2));
 				subresult = xmeleehity(magr, mdef2, attk, &otmp, vis2, tohitmod, TRUE);
 				/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
 				result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
@@ -2722,6 +2725,7 @@ struct attack * attk;
 			if(mdef2 == &youmonst || canseemon(mdef2))
 				vis2 |= VIS_MDEF;
 			bhitpos.x = tarx + dx; bhitpos.y = tary + dy;
+			notonhead = (bhitpos.x != x(mdef2) || bhitpos.y != y(mdef2));
 			subresult = xmeleehity(magr, mdef2, attk, &otmp, vis2, tohitmod, TRUE);
 			/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
 			result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
@@ -2749,6 +2753,7 @@ struct attack * attk;
 				if(mdef2 == &youmonst || canseemon(mdef2))
 					vis2 |= VIS_MDEF;
 				bhitpos.x = x(magr) + nx; bhitpos.y = y(magr) + ny;
+				notonhead = (bhitpos.x != x(mdef2) || bhitpos.y != y(mdef2));
 				subresult = xmeleehity(magr, mdef2, attk, &otmp, vis2, tohitmod, TRUE);
 				/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
 				result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
@@ -2775,6 +2780,7 @@ struct attack * attk;
 				if(mdef2 == &youmonst || canseemon(mdef2))
 					vis2 |= VIS_MDEF;
 				bhitpos.x = x(magr) + nx; bhitpos.y = y(magr) + ny;
+				notonhead = (bhitpos.x != x(mdef2) || bhitpos.y != y(mdef2));
 				subresult = xmeleehity(magr, mdef2, attk, &otmp, vis2, tohitmod, TRUE);
 				/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
 				result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
@@ -2803,6 +2809,7 @@ struct attack * attk;
 				if(mdef2 == &youmonst || canseemon(mdef2))
 					vis2 |= VIS_MDEF;
 				bhitpos.x = x(magr) + nx; bhitpos.y = y(magr) + ny;
+				notonhead = (bhitpos.x != x(mdef2) || bhitpos.y != y(mdef2));
 				subresult = xmeleehity(magr, mdef2, attk, &otmp, vis2, tohitmod, TRUE);
 				/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
 				result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
@@ -2829,6 +2836,7 @@ struct attack * attk;
 				if(mdef2 == &youmonst || canseemon(mdef2))
 					vis2 |= VIS_MDEF;
 				bhitpos.x = x(magr) + nx; bhitpos.y = y(magr) + ny;
+				notonhead = (bhitpos.x != x(mdef2) || bhitpos.y != y(mdef2));
 				subresult = xmeleehity(magr, mdef2, attk, &otmp, vis2, tohitmod, TRUE);
 				/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
 				result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
@@ -2861,6 +2869,7 @@ struct attack * attk;
 				if(mdef2 == &youmonst || canseemon(mdef2))
 					vis2 |= VIS_MDEF;
 				bhitpos.x = x(magr) + nx; bhitpos.y = y(magr) + ny;
+				notonhead = (bhitpos.x != x(mdef2) || bhitpos.y != y(mdef2));
 				subresult = xmeleehity(magr, mdef2, attk, &otmp, vis2, tohitmod, TRUE);
 				/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
 				result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
@@ -2892,6 +2901,7 @@ struct attack * attk;
 				if(mdef2 == &youmonst || canseemon(mdef2))
 					vis2 |= VIS_MDEF;
 				bhitpos.x = x(magr) + nx; bhitpos.y = y(magr) + ny;
+				notonhead = (bhitpos.x != x(mdef2) || bhitpos.y != y(mdef2));
 				subresult = xmeleehity(magr, mdef2, attk, &otmp, vis2, tohitmod, TRUE);
 				/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
 				result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
@@ -2945,6 +2955,7 @@ struct attack * attk;
 			if(mdef2 == &youmonst || canseemon(mdef2))
 				vis2 |= VIS_MDEF;
 			bhitpos.x = tarx + dx; bhitpos.y = tary + dy;
+			notonhead = (bhitpos.x != x(mdef2) || bhitpos.y != y(mdef2));
 			subresult = xmeleehity(magr, mdef2, &blood, (struct obj **)0, vis2, tohitmod, TRUE);
 			/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
 			result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
@@ -3039,6 +3050,7 @@ struct attack * attk;
 			if(mdef2 == &youmonst || canseemon(mdef2))
 				vis2 |= VIS_MDEF;
 			bhitpos.x = x(magr) + nx; bhitpos.y = y(magr) + ny;
+			notonhead = (bhitpos.x != x(mdef2) || bhitpos.y != y(mdef2));
 			subresult = xmeleehity(magr, mdef2, attk, &otmp, vis2, tohitmod, TRUE);
 			/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
 			result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
@@ -3095,6 +3107,7 @@ struct attack * attk;
 			if(mdef2 == &youmonst || canseemon(mdef2))
 				vis2 |= VIS_MDEF;
 			bhitpos.x = tarx + dx; bhitpos.y = tary + dy;
+			notonhead = (bhitpos.x != x(mdef2) || bhitpos.y != y(mdef2));
 			subresult = xmeleehity(magr, mdef2, attk, &otmp, vis2, tohitmod, TRUE);
 			/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
 			result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
@@ -3120,6 +3133,7 @@ struct attack * attk;
 			if(mdef2 == &youmonst || canseemon(mdef2))
 				vis2 |= VIS_MDEF;
 			bhitpos.x = tarx + dx; bhitpos.y = tary + dy;
+			notonhead = (bhitpos.x != x(mdef2) || bhitpos.y != y(mdef2));
 			subresult = xmeleehity(magr, mdef2, attk, &otmp, vis2, tohitmod, TRUE);
 			/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
 			result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
@@ -3174,6 +3188,7 @@ struct attack * attk;
 			if(mdef2 == &youmonst || canseemon(mdef2))
 				vis2 |= VIS_MDEF;
 			bhitpos.x = tarx + dx; bhitpos.y = tary + dy;
+			notonhead = (bhitpos.x != x(mdef2) || bhitpos.y != y(mdef2));
 			subresult = xmeleehity(magr, mdef2, attk, &otmp, vis2, tohitmod, TRUE);
 			/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
 			result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
@@ -3199,6 +3214,7 @@ struct attack * attk;
 			if(mdef2 == &youmonst || canseemon(mdef2))
 				vis2 |= VIS_MDEF;
 			bhitpos.x = tarx + dx; bhitpos.y = tary + dy;
+			notonhead = (bhitpos.x != x(mdef2) || bhitpos.y != y(mdef2));
 			subresult = xmeleehity(magr, mdef2, attk, &otmp, vis2, tohitmod, TRUE);
 			/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
 			result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
