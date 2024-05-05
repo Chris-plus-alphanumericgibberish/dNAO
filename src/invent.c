@@ -2462,7 +2462,7 @@ struct obj *obj;
 		else if(obj->otyp >= APHANACTONAN_RECORD && obj->otyp <= APHANACTONAN_ARCHIVE)
 			add_menu(win, NO_GLYPH, &any, 'r', 0, ATR_NONE,
 					"Study the glyphs on this disk", MENU_UNSELECTED);
-		else if(obj->otyp >= FIRST_WORD && obj->otyp <= WORD_OF_KNOWLEDGE)
+		else if(is_slab(obj))
 			add_menu(win, NO_GLYPH, &any, 'r', 0, ATR_NONE,
 					"Study the glyph on this slab", MENU_UNSELECTED);
 	}

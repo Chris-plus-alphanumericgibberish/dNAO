@@ -3403,6 +3403,7 @@ STATIC_OVL NEARDATA const struct o_range o_ranges[] = {
 #endif
 	{ "slab",	TILE_CLASS,    FIRST_WORD,      NURTURING_WORD },
 	{ "glyph",	TILE_CLASS,    ANTI_CLOCKWISE_METAMORPHOSIS_G,      ORRERY_GLYPH },
+	{ "syllable",	TILE_CLASS,SYLLABLE_OF_STRENGTH__AESH,   SYLLABLE_OF_SPIRIT__VAUL },
 	{ "gray stone",	GEM_CLASS,    LUCKSTONE,      SPIRITUAL_SOULSTONE },
 	{ "grey stone",	GEM_CLASS,    LUCKSTONE,      SPIRITUAL_SOULSTONE },
 	{ "soulstone",	GEM_CLASS,    VITAL_SOULSTONE,      SPIRITUAL_SOULSTONE },

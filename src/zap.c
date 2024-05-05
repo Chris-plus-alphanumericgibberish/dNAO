@@ -1453,7 +1453,7 @@ int ochance, achance;	/* percent chance for ordinary objects, artifacts */
 	} else {
 		int chance = rn2(100);
 
-		return((boolean)(chance < ((obj->oartifact || is_lightsaber(obj)) ? achance : ochance)));
+		return((boolean)(chance < ((obj->oartifact || is_lightsaber(obj) || is_slab(obj)) ? achance : ochance)));
 	}
 }
 
@@ -1704,6 +1704,14 @@ struct obj * obj;
 	if(obj->oclass == TILE_CLASS){
 		if(obj->otyp >= FIRST_GLYPH && obj->otyp <= LAST_GLYPH){
 			new_otyp = rn2(LAST_GLYPH - FIRST_GLYPH + 1) + FIRST_GLYPH;
+		}
+		else if(obj->otyp == APHANACTONAN_ARCHIVE){
+			new_otyp = rn2(SPE_STONE_TO_FLESH - SPE_DIG + 1) + SPE_DIG;
+		}
+		else if(obj->otyp == APHANACTONAN_RECORD){
+			new_otyp = rn2(2) ?
+				(rn2(SPE_STONE_TO_FLESH - SPE_DIG + 1) + SPE_DIG) : 
+				(rn2(SCR_RESISTANCE - SCR_ENCHANT_ARMOR + 1) + SCR_ENCHANT_ARMOR);
 		}
 	}
 	/* turn crocodile corpses into shoes */
