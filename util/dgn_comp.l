@@ -10,6 +10,9 @@
 #include "dgn_comp.h"
 #include "dgn_file.h"
 
+/* We need to declare this here, since lex includes stdio.h before _POSIX_C_SOURCE is set */
+extern int fileno(FILE *);
+
 /*
  * Most of these don't exist in flex, yywrap is macro and
  * yyunput is properly declared in flex.skel.
