@@ -665,18 +665,7 @@ long nmv;		/* number of moves */
 	/* reduce tameness for every 150 moves you are separated */
 	if (get_mx(mtmp, MX_EDOG) && !(EDOG(mtmp)->loyal) && !(EDOG(mtmp)->dominated)
 	 && !(Race_if(PM_VAMPIRE) && is_vampire(mtmp->data))
-	 && !(
-	  In_quest(&u.uz) 
-	  && ((Is_qtown(&u.uz) && !flags.stag) || 
-		 (Is_nemesis(&u.uz) && flags.stag)) &&
-	 !(Race_if(PM_DROW) && Role_if(PM_NOBLEMAN) && !flags.initgend) &&
-	 !(Role_if(PM_ANACHRONONAUT) && quest_status.leader_is_dead) &&
-	 !(Role_if(PM_EXILE))
-	 )
-	 && !In_sokoban(&u.uz)
-	 && !Is_gatetown(&u.uz)
-	 && !Is_minetown_level(&u.uz)
-	 && !on_level(&u.uz, &elshava_level)
+	 && !Is_town_level(&u.uz)
 	) {
 	    int wilder = (imv + 75) / 150;
 		if(mtmp->mwait && !EDOG(mtmp)->friend) wilder = max(0, wilder - 11);
@@ -698,18 +687,7 @@ long nmv;		/* number of moves */
 	 */
 	if (get_mx(mtmp, MX_EDOG) && (carnivorous(mtmp->data) || herbivorous(mtmp->data))){
 	    struct edog *edog = EDOG(mtmp);
-		if(!(In_quest(&u.uz) && 
-			 ((Is_qtown(&u.uz) && !flags.stag) || 
-				(Is_nemesis(&u.uz) && flags.stag)) &&
-			 !(Race_if(PM_DROW) && Role_if(PM_NOBLEMAN) && !flags.initgend) &&
-			 !(Role_if(PM_ANACHRONONAUT) && quest_status.leader_is_dead) &&
-			 !(Role_if(PM_EXILE))
-			)
-			 && !In_sokoban(&u.uz)
-			 && !Is_gatetown(&u.uz)
-			 && !Is_minetown_level(&u.uz)
-			 && !on_level(&u.uz, &elshava_level)
-		) {
+		if(!Is_town_level(&u.uz)) {
 			if ((monstermoves > edog->hungrytime + 500 && mtmp->mhp < 3) ||
 				(monstermoves > edog->hungrytime + 750)
 			){

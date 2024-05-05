@@ -583,11 +583,7 @@ register struct edog *edog;
 {
 	if (monstermoves+900 > edog->hungrytime && (
 		(!carnivorous(mtmp->data) && !herbivorous(mtmp->data)) || 
-		(In_quest(&u.uz) && 
-			((Is_qtown(&u.uz) && !flags.stag) || 
-			 (Is_nemesis(&u.uz) && flags.stag)) &&
-		 !(Race_if(PM_DROW) && Role_if(PM_NOBLEMAN) && !flags.initgend)
-		)
+		Is_town_level(&u.uz)
 	)) {
 		/* Pets don't get hungery on quest home */
 		edog->hungrytime = monstermoves + 1000;

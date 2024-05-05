@@ -228,9 +228,16 @@ typedef struct branch {
 #define Is_minetown_level(x)     (on_level(x, &minetown_level))
 #define Is_mineend_level(x)     (on_level(x, &mineend_level))
 #define Is_sokoend_level(x)     (on_level(x, &sokoend_level))
-#define Is_qtown(x)		(In_quest(&u.uz) && ((Role_if(PM_NOBLEMAN) && Race_if(PM_HALF_DRAGON) && flags.initgend) ?\
-							(qstart_level.dlevel == (u.uz.dlevel-1)) :\
+#define Is_qtown(x)		(!(Race_if(PM_DROW) && Role_if(PM_NOBLEMAN) && !flags.initgend) &&\
+						 !(Role_if(PM_ANACHRONONAUT) && quest_status.leader_is_dead) &&\
+						 !(Role_if(PM_EXILE)) &&\
+							In_quest(x) && ((Role_if(PM_NOBLEMAN) && Race_if(PM_HALF_DRAGON) && flags.initgend) ?\
+							(qstart_level.dlevel == (x.dlevel-1)) :\
 							Role_if(PM_MADMAN) ? TRUE : Is_qstart(x)) )
+
+#define Is_town_level(x)		((Is_qtown(x) && !flags.stag) || (Is_nemesis(x) && flags.stag) || In_sokoban(x) || \
+								 Is_gatetown(x) || Is_minetown_level(x) || on_level(x, &elshava_level)\
+								)
 
 #define In_sokoban(x)	((x)->dnum == sokoban_dnum)
 #define In_tower(x)		((x)->dnum == tower_dnum)
