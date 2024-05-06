@@ -7959,10 +7959,10 @@ do_break_wand(obj)
     char confirm[QBUFSZ], the_wand[BUFSZ], buf[BUFSZ];
 
     Strcpy(the_wand, yname(obj));
-    Sprintf(confirm, "Are you really sure you want to break %s?",
+    Snprintf(confirm, QBUFSZ, "Are you really sure you want to break %s?",
 	safe_qbuf("", sizeof("Are you really sure you want to break ?"),
 				the_wand, ysimple_name(obj), "the wand"));
-    if (yn(confirm) == 'n' ) return MOVE_CANCELLED;
+    if (yesno(confirm, iflags.paranoid_wand_break) != 'y') return MOVE_CANCELLED;
 
     is_fragile = (!strcmp(OBJ_DESCR(objects[obj->otyp]), "balsa"));
 

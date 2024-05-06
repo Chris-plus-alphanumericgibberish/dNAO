@@ -258,28 +258,11 @@ struct obj * wep;	/* uwep for attack(), null for kick_monster() */
 			}
 			else if (iflags.attack_mode == ATTACK_MODE_ASK){
 				char qbuf[QBUFSZ];
-#ifdef PARANOID
-				char buf[BUFSZ];
-				if (iflags.paranoid_hit) {
-					Sprintf(qbuf, "Really attack %s? [no/yes]",
-						mon_nam(mdef));
-					getlin(qbuf, buf);
-					(void)lcase(buf);
-					if (strcmp(buf, "yes")) {
-						flags.move |= MOVE_CANCELLED;
-						return ATTACKCHECK_NONE;
-					}
+				Sprintf(qbuf, "Really attack %s?", mon_nam(mdef));
+				if (yesno(qbuf, iflags.paranoid_hit) != 'y') {
+					flags.move |= MOVE_CANCELLED;
+					return ATTACKCHECK_NONE;
 				}
-				else {
-#endif
-					Sprintf(qbuf, "Really attack %s?", mon_nam(mdef));
-					if (yn(qbuf) != 'y') {
-						flags.move |= MOVE_CANCELLED;
-						return ATTACKCHECK_NONE;
-					}
-#ifdef PARANOID
-				}
-#endif
 			}
 		}
 	}

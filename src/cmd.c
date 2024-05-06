@@ -1655,29 +1655,13 @@ dounmaintain()
 STATIC_PTR int
 enter_explore_mode()
 {
-#ifdef PARANOID
 	char buf[BUFSZ];
-	int really_xplor = FALSE;
-#endif
 	pline("Explore mode is for local games, not public servers.");
 	return MOVE_CANCELLED;
 
 	if(!discover && !wizard) {
 		pline("Beware!  From explore mode there will be no return to normal game.");
-#ifdef PARANOID
-		if (iflags.paranoid_quit) {
-		  getlin ("Do you want to enter explore mode? [yes/no]?",buf);
-		  (void) lcase (buf);
-		  if (!(strcmp (buf, "yes"))) really_xplor = TRUE;
-		} else {
-		  if (yn("Do you want to enter explore mode?") == 'y') {
-		    really_xplor = TRUE;
-		  }
-		}
-		if (really_xplor) {
-#else
-		if (yn("Do you want to enter explore mode?") == 'y') {
-#endif
+		if (yesno("Do you want to enter explore mode?", iflags.paranoid_quit) == 'y') {
 			clear_nhwindow(WIN_MESSAGE);
 			You("are now in non-scoring explore mode.");
 			discover = TRUE;
@@ -4416,5 +4400,26 @@ char def;
 	return (*windowprocs.win_yn_function)(qbuf, resp, def);
 }
 #endif
+
+/*
+ * Replacement for yn() that can give a yes/no prompt instead.
+ *
+ * If paranoid is TRUE, gives a yes/no prompt.  Otherwise gives a y/n
+ * prompt.  Returns 'y' or 'n'.
+ */
+char
+yesno(const char *query, boolean paranoid)
+{
+	if (paranoid) {
+		char qbuf[BUFSZ];
+		char rbuf[BUFSZ];
+	        Snprintf(qbuf, BUFSZ, "%s [yes/no] (no)", query);
+		getlin(qbuf, rbuf);
+	        lcase(rbuf);
+		return !strcmp(rbuf, "yes") ? 'y' : 'n';
+	} else {
+		return yn_function(query, ynchars, 'n');
+	}
+}
 
 /*cmd.c*/

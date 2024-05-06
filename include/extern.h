@@ -370,6 +370,7 @@ E char FDECL(txt2key, (char*));
 E char* FDECL(key2txt, (CHAR_P, char*));
 E char* FDECL(str2txt, (char*, char*));
 E char FDECL(yn_function, (const char *, const char *, CHAR_P));
+E char yesno(const char *, boolean);
 E int NDECL(dotravel);
 
 /* ### crown.c ### */

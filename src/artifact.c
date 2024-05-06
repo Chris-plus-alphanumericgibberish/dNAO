@@ -9285,48 +9285,31 @@ arti_invoke(obj)
 				pline("Silence Wall!");
 				cast_protection();
 			}
-#ifdef PARANOID
 			else if(u.dz > 0 ){
-				char buf[BUFSZ];
-				int really_bdown = FALSE;
-				if (iflags.paranoid_quit) {
-				  getlin ("Are you sure you want to bring down the Silence Glaive? [yes/no]?",buf);
-				  (void) lcase (buf);
-				  if (!(strcmp (buf, "yes"))) really_bdown = TRUE;
-				} else {
-				if (yn("Are you sure you want to bring down the Silence Glaive?") == 'y') {
-				    really_bdown = TRUE;
-				  }
-				}
-				if (really_bdown) {
-#else
-				else if(u.dz > 0 && (yn("Are you sure you want to bring down the Silence Glaive?") == 'y') ){
-#endif
-				register struct monst *mtmp, *mtmp2;
-				int gonecnt = 0;
-				You("touch the tip of the Silence Glaive to the ground.");
-				// pline("The walls of the dungeon quake!");
-				do_earthquake(u.ux, u.uy, 24, 3, FALSE, (struct monst *) 0);
-				do_earthquake(u.ux, u.uy, 12, 3, FALSE, (struct monst *) 0);
-				do_earthquake(u.ux, u.uy,  6, 3, FALSE, (struct monst *) 0);
-				You("call out to the souls and spirits inhabiting this land.");
-				for (mtmp = fmon; mtmp; mtmp = mtmp2) {
-					mtmp2 = mtmp->nmon;
-					if(mtmp->data->geno & G_GENO){
-						if (DEADMONSTER(mtmp)) continue;
-						mongone(mtmp);
-						gonecnt++;
+				if (yesno("Are you sure you want to bring down the Silence Glaive?", iflags.paranoid_quit) == 'y') {
+					struct monst *mtmp, *mtmp2;
+					int gonecnt = 0;
+					You("touch the tip of the Silence Glaive to the ground.");
+					// pline("The walls of the dungeon quake!");
+					do_earthquake(u.ux, u.uy, 24, 3, FALSE, (struct monst *) 0);
+					do_earthquake(u.ux, u.uy, 12, 3, FALSE, (struct monst *) 0);
+					do_earthquake(u.ux, u.uy,  6, 3, FALSE, (struct monst *) 0);
+					You("call out to the souls and spirits inhabiting this land.");
+					for (mtmp = fmon; mtmp; mtmp = mtmp2) {
+						mtmp2 = mtmp->nmon;
+						if(mtmp->data->geno & G_GENO){
+							if (DEADMONSTER(mtmp)) continue;
+							mongone(mtmp);
+							gonecnt++;
+						}
 					}
+					pline("Having gathered %d followers, you set out for a distant place, your charges in tow.",
+						gonecnt);
+					killer_format = KILLED_BY;
+					killer = "leading departed souls to another world";
+					done(DIED);
+					You("return, having delivered your followers to their final destination.");
 				}
-				pline("Having gathered %d followers, you set out for a distant place, your charges in tow.",
-					gonecnt);
-				killer_format = KILLED_BY;
-				killer = "leading departed souls to another world";
-				done(DIED);
-				You("return, having delivered your followers to their final destination.");
-#ifdef PARANOID
-				}
-#endif
 			}
 			else{
 				obj->age = 0;

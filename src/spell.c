@@ -4867,9 +4867,7 @@ dothrowspell:
 						pseudo->otyp != SPE_FULL_HEALING &&
 						pseudo->otyp != SPE_TELEPORT_AWAY)
 				{
-					char buf[BUFSZ];
-					getlin ("Are you sure you want to cast that spell at yourself? [yes/no]?",buf);
-					if ((strcmp (buf, "yes")))
+					if (yesno("Are you sure you want to cast that spell at yourself?", TRUE) != 'y')
 					{
 						pline_The("spell fizzles and dissipates");
 						break;

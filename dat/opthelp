@@ -25,6 +25,11 @@ null           allow nulls to be sent to your terminal            [TRUE]
                try turning this option off (forcing NetHack to use its own
                delay code) if moving objects seem to teleport across rooms
 number_pad     use the number keys to move instead of yuhjklbn    [FALSE]
+paranoid_hit   ask for explicit 'yes' when hitting peacefuls      [FALSE]
+paranoid_quit  ask for explicit 'yes' when quitting               [FALSE]
+paranoid_remove always show menu with the T and R commands        [FALSE]
+paranoid_swim  require 'm' prefix to move into unsafe terrain     [TRUE]
+paranoid_wand_break ask for explicit 'yes' when breaking a wand   [TRUE]
 perm_invent    keep inventory in a permanent window               [FALSE]
 pickup_thrown  autopickup things you threw                        [FALSE]
 prayconfirm    use confirmation prompt when #pray command issued  [TRUE]
