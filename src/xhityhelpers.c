@@ -287,7 +287,7 @@ struct obj * wep;	/* uwep for attack(), null for kick_monster() */
 	/* attack checks specific to the pacifist attack mode */
 	if (iflags.attack_mode == ATTACK_MODE_PACIFIST) {
 		/* Being not in full control of yourself causes you to attack */
-		if (Confusion || Hallucination || Stunned)
+		if (Confusion || Stunned)
 			return ATTACKCHECK_ATTACK;
 		/* Otherwise, be a pacifist. */
 		You("stop for %s.", mon_nam(mdef));
