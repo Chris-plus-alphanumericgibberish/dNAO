@@ -195,6 +195,16 @@ boolean restore;
 				otmp->oartifact = 0;
 				rem_ox(otmp, OX_ENAM);
 				otmp->owt = weight(otmp);
+				//Hilt and focus gem
+				if(!otmp->cobj)
+				{
+					struct obj *gem = mksobj(rn2(6) ? SAPPHIRE : AQUAMARINE, NO_MKOBJ_FLAGS);
+					gem->quan = 1;
+					gem->owt = weight(gem);
+					add_to_container(otmp, gem);
+					container_weight(otmp);
+				}
+				otmp->ovar1_lightsaberHandle = random_saber_hilt();
 			}
 			if (otmp->oartifact == ART_HAND_OF_VECNA ||
 				otmp->oartifact == ART_EYE_OF_VECNA

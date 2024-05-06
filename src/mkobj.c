@@ -11,7 +11,6 @@ STATIC_DCL void FDECL(obj_timer_checks,(struct obj *, XCHAR_P, XCHAR_P, int));
 STATIC_DCL void FDECL(handle_material_specials, (struct obj *, int, int));
 STATIC_DCL void FDECL(init_obj_material, (struct obj *));
 #ifdef OVL1
-STATIC_DCL void FDECL(container_weight, (struct obj *));
 #ifdef WIZARD
 STATIC_DCL const char *FDECL(where_name, (int));
 STATIC_DCL void FDECL(check_contained, (struct obj *,const char *));
@@ -3680,7 +3679,7 @@ add_to_buried(obj)
 }
 
 /* Recalculate the weight of this container and all of _its_ containers. */
-STATIC_OVL void
+void
 container_weight(container)
     struct obj *container;
 {

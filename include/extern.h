@@ -1608,6 +1608,7 @@ E struct obj *FDECL(add_to_magic_chest, (struct obj *, int));
 E struct obj *FDECL(add_to_container, (struct obj *, struct obj *));
 E void FDECL(add_to_migration, (struct obj *));
 E void FDECL(add_to_buried, (struct obj *));
+E void FDECL(container_weight, (struct obj *));
 E void FDECL(dealloc_obj, (struct obj *));
 E int FDECL(hornoplenty, (struct obj *, boolean));
 E void FDECL(obj_ice_effects, (int, int, BOOLEAN_P));
