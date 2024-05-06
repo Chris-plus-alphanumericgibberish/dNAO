@@ -144,7 +144,7 @@ auto_describe(int cx, int cy)
     char tmpbuf[BUFSZ], out_str[LONGBUFSZ];
 	out_str[0] = 0;
     const char *firstmatch = "unknown";
-	boolean force_defsyms;
+	boolean force_defsyms = FALSE;
 
     cc.x = cx;
     cc.y = cy;
