@@ -2323,6 +2323,13 @@ struct obj *otmp;
 			
 			give_intrinsic(DRAIN_RES, 1000L);
 		break;
+	    case AMULET_VERSUS_EVIL_EYES:
+			debugpline("Trying to give gaze resistance");
+			if (!(HGaze_immune))
+				pline(Hallucination ? "If they stare, let them stare." : "You feel ready to stare a god in the face!");
+			
+			give_intrinsic(GAZE_RES, 1000L);
+		break;
 	    case RIN_SUSTAIN_ABILITY:
 	    case AMULET_OF_LIFE_SAVING:
 	    case AMULET_OF_REFLECTION: /* nice try */
