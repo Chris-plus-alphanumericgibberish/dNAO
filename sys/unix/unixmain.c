@@ -162,7 +162,7 @@ char *argv[];
 	check_linux_console();
 #endif
 #ifdef UTF8_GLYPHS
-	check_utf8_console();
+	//check_utf8_console();
 #endif
 
 	initoptions();

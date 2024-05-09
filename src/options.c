@@ -17,6 +17,10 @@ NEARDATA struct instance_flags iflags;	/* provide linkage */
 #endif
 #include <errno.h>
 
+#ifdef HAVE_SETLOCALE
+#include <locale.h>
+#endif
+
 #define WINTYPELEN 16
 
 #ifdef DEFAULT_WC_TILED_MAP
@@ -739,9 +743,14 @@ initoptions()
 		switch_graphics(DEC_GRAPHICS);
 	}
 # endif
-	if (iflags.supports_utf8) {
-		switch_graphics(UTF8_GRAPHICS);
+# ifdef HAVE_SETLOCALE
+	/* try to detect if a utf-8 locale is supported */
+	if (setlocale(LC_ALL, "") &&
+	    (opts = setlocale(LC_CTYPE, NULL)) &&
+	    ((strstri(opts, "utf8") != 0) || (strstri(opts, "utf-8") != 0))) {
+	        switch_graphics(UTF8_GRAPHICS);
 	}
+# endif
 #endif /* UNIX || VMS */
 
 #ifdef MAC_GRAPHICS_ENV

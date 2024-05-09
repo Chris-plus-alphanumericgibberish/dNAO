@@ -10,7 +10,8 @@
 #include "sp_lev.h"
 
 /* We need to declare this here, since lex includes stdio.h before _POSIX_C_SOURCE is set */
-extern int fileno(FILE *);
+/* On FreeBSD and OpenBSD, fileno is a macro, so parenthesize it to prevent expansion */
+extern int (fileno)(FILE *);
 
 /* Most of these don't exist in flex, yywrap is macro and
  * yyunput is properly declared in flex.skel.
