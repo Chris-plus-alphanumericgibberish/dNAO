@@ -949,7 +949,7 @@ level_tele()
 	    if (newlev == 0 && !force_dest) {
 			if (trycnt >= 10)
 				goto random_levtport;
-			if (ynq("Go to Nowhere.  Are you sure?") != 'y') return FALSE;
+			if (yesno("Go to Nowhere.  Are you sure?", iflags.paranoid_quit) != 'y') return FALSE;
 			You("%s in agony as your body begins to warp...",
 				is_silent(youracedata) ? "writhe" : "scream");
 			display_nhwindow(WIN_MESSAGE, FALSE);
