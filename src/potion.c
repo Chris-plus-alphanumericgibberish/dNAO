@@ -424,7 +424,7 @@ dodrink()
         /* not as low as floor level but similar restrictions apply */
         && can_reach_floor()
 	) {
-        if (yn("Drink from the forge?") == 'y') {
+        if (yesno("Drink from the forge?", TRUE) == 'y') {
             drinkforge();
             return 1;
         }
