@@ -1065,6 +1065,7 @@ level_tele()
        		goto random_levtport;
 	
 	if (newlev < 0 && dungeons[u.uz.dnum].depth_start-1 > newlev && !force_dest) {
+		if (yesno("There will be no return. Are you sure?", iflags.paranoid_quit) != 'y') return FALSE;
 		if (*u.ushops0) {
 		    /* take unpaid inventory items off of shop bills */
 		    in_mklev = TRUE;	/* suppress map update */
