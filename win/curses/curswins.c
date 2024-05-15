@@ -553,22 +553,22 @@ static int
 wpututf8char(WINDOW *win, int y, int x, glyph_t c)
 {
     if (c < 0x80) {
-        return mvwprintw(win, y, x, "%c", c);
+        return mvwprintw(win, y, x, "%c", (char)c);
     } else if (c < 0x800) {
         return mvwprintw(win, y, x, "%c%c",
-                         0xC0 | (c >> 6),
-                         0x80 | (c & 0x3F));
+                         (char)(0xC0 | (c >> 6)),
+                         (char)(0x80 | (c & 0x3F)));
     } else if (c < 0x10000) {
         return mvwprintw(win, y, x, "%c%c%c",
-                         0xE0 | (c >> 12),
-                         0x80 | (c >>  6 & 0x3F),
-                         0x80 | (c & 0x3F));
+                         (char)(0xE0 | (c >> 12)),
+                         (char)(0x80 | (c >>  6 & 0x3F)),
+                         (char)(0x80 | (c & 0x3F)));
     } else if (c < 0x200000) {
         return mvwprintw(win, y, x, "%c%c%c%c",
-                         0xF0 | (c >> 18),
-                         0x80 | (c >> 12 & 0x3F),
-                         0x80 | (c >>  6 & 0x3F),
-                         0x80 | (c & 0x3F));
+                         (char)(0xF0 | (c >> 18)),
+                         (char)(0x80 | (c >> 12 & 0x3F)),
+                         (char)(0x80 | (c >>  6 & 0x3F)),
+                         (char)(0x80 | (c & 0x3F)));
     }
 
     return 0;
