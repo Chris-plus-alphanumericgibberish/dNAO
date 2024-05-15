@@ -1395,11 +1395,11 @@ die:
 		if (lastmsg >= 0) {
 		  dump ("", "Latest messages");
 		  for (i = lastmsg + 1; i < DUMPMSGS; i++) {
-		    if (msgs[i] && strcmp(msgs[i], "") )
+		    if (strcmp(msgs[i], "") )
 		      dump ("  ", msgs[i]);
 		  } 
 		  for (i = 0; i <= lastmsg; i++) {
-		    if (msgs[i] && strcmp(msgs[i], "") )
+		    if (strcmp(msgs[i], "") )
 		      dump ("  ", msgs[i]);
 		  } 
 		  dump ("","");
