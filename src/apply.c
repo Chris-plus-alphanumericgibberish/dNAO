@@ -8253,12 +8253,12 @@ struct obj **optr;
 					return MOVE_STANDARD;
 				break;
 				case MAGIC_FURNACE:
-					comp = getobj(apply_corpse, "build a magic furnace with");
+					comp = getobj(tools, "build a magic furnace with");
 					if(!comp || comp->otyp != WAN_DRAINING){
 						pline("Never mind.");
 						return MOVE_CANCELLED;
 					}
-					You("combine the components in the upgrade kit with the disenchanter corpse and build a magic furnace.");
+					You("combine the components in the upgrade kit with the wand and build a magic furnace.");
 					u.clockworkUpgrades |= upgrade;
 					useup(comp);
 					useup(obj);
