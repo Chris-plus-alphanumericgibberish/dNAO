@@ -11,7 +11,7 @@ CFLAGS = -g
 # LDFLAGS += -pg -Wno-knr-promoted-parameter
 LDFLAGS += -Wno-knr-promoted-parameter
 
-GAMELIBS = -lncurses -lm
+GAMELIBS = -lncursesw -lm
 
 -include local.mk
 
