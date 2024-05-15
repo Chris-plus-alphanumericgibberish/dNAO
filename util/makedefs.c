@@ -1330,10 +1330,13 @@ ranged_attk(ptr)	/* returns TRUE if monster can attack at range */
 	register struct permonst *ptr;
 {
 	register int	i, j;
-	register int atk_mask = (1<<AT_BREA) | (1<<AT_SPIT) | (1<<AT_GAZE);
+	long long atk_mask = (1LL << AT_BREA) | (1LL << AT_BRSH) | (1LL << AT_SPIT)
+					| (1LL << AT_GAZE) | (1LL << AT_LRCH) | (1LL << AT_LNCK)
+					| (1LL << AT_MMGC) | (1LL << AT_TNKR) | (1LL << AT_ARRW)
+					| (1LL << AT_BEAM) | (1LL << AT_5SQR) | (1LL << AT_5SBT);
 
 	for(i = 0; i < NATTK; i++) {
-	    if((j=ptr->mattk[i].aatyp) >= AT_WEAP || (atk_mask & (1<<j)))
+	    if((j=ptr->mattk[i].aatyp) >= AT_WEAP || (atk_mask & (1LL<<j)))
 		return TRUE;
 	}
 

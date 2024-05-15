@@ -549,24 +549,9 @@ setrandom()
 #ifdef RANDOM	/* srandom() from sys/share/random.c */
 	srandom((unsigned int) time((time_t *)0));
 #else
-# if defined(__APPLE__) || defined(BSD) || defined(LINUX) || defined(ULTRIX) || defined(CYGWIN32) /* system srandom() */
-#  if defined(BSD) && !defined(POSIX_TYPES)
-#   if defined(SUNOS4)
-	(void)
-#   endif
-		srandom((int) time((long *)0));
-#  else
-	srandom((int) (time((time_t *)0)) + rnd[0]);
-#  endif
-# else
-#  ifdef UNIX	/* system srand48() */
-	srand48((long) time((time_t *)0));
-#  else		/* poor quality system routine */
-	srand((int) time((time_t *)0));
-#  endif
-# endif
+	srandom((unsigned int) (time((time_t *)0)) + rnd[0]);
 #endif
-	srand((int) time((time_t *)0)); /*The basic rand function is always used in a few places, so seed it*/
+	srand((unsigned int) time((time_t *)0)); /*The basic rand function is always used in a few places, so seed it*/
 }
 
 static struct tm *

@@ -33,7 +33,7 @@ check_reseed()
 	if (fptr) {
 	    fread((void *)rndbuf, sizeof(int),2,fptr);
 	    fclose(fptr);
-	    srandom((int) (time((time_t *)0)) + rndbuf[0]);
+	    srandom((unsigned int) (time((time_t *)0)) + rndbuf[0]);
 	    reseed_period = (rndbuf[1] % 700) + 10;
 	    reseed_count = 0;
 	} else {
