@@ -37,7 +37,7 @@ struct Role roles[] = {
 	GOD_QUETZALCOATL, GOD_CAMAXTLI, GOD_HUHETOTL, /* Central American */
 	"Arc", "the College of Archeology", "the Tomb of the Toltec Kings",
 	PM_ARCHEOLOGIST, NON_PM, NON_PM,
-	PM_LORD_CARNARVON, PM_STUDENT, PM_MINION_OF_HUHETOTL,
+	PM_LORD_CARNARVON, PM_STUDENT, PM_MINION_OF_TEZCATLIPOCA,
 	NON_PM, PM_HUMAN_MUMMY, S_SNAKE, S_MUMMY,
 	ART_ITLACHIAYAQUE,
 	MA_HUMAN|MA_DWARF|MA_GNOME|MA_CLOCK|MA_VAMPIRE|MA_DRAGON, ROLE_MALE|ROLE_FEMALE |
@@ -2502,7 +2502,7 @@ long prop;
 void
 give_quest_trophy()
 {
-	if(urole.neminum == PM_MINION_OF_HUHETOTL)
+	if(urole.neminum == PM_MINION_OF_TEZCATLIPOCA)
 		achieve.trophies |= ARC_QUEST;
 	else if(urole.neminum == PM_CHROMATIC_DRAGON)
 		achieve.trophies |= CAV_QUEST;

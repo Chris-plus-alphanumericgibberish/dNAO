@@ -51,6 +51,9 @@ GOD_V2("Camaxtli",              A_NEUTRAL, NEUTRAL_HOLINESS,
 GOD_V2("Huhetotl",              A_CHAOTIC, UNHOLY_HOLINESS,
 	MINIONS(Cdemons)
 	),
+GOD_V2("Tezcatlipoca",          A_NONE, UNHOLY_HOLINESS,
+	MINIONS(Cdemons)
+	),
 /* barbarian */
 GOD_V2("Mitra",                 A_LAWFUL, HOLY_HOLINESS,
 	MINIONS(Langels)

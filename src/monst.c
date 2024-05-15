@@ -6228,26 +6228,26 @@ struct permonst _mons2[] = {
 	0 /*MM*/, MT_STALK|MT_PEACEFUL|MT_OMNIVORE|MT_COLLECT /*MT*/, MF_MARTIAL_E /*MF*/,
 	MB_HUMANOID|MB_STRONG /*MB*/, MG_NOWISH|MG_NOPOLY|MG_MERC|MG_INFRAVISIBLE|MG_COMMANDER /*MG*/,
 	MA_HUMAN /*MA*/,  MV_NORMAL /*MV*/, 0 /*MW*/, CLR_GREEN),
-	MON("aztec warrior", S_HUMAN,//5 /* Needs encyc entry */
+	MON("second-sun warrior", S_YETI,//5 /* Needs encyc entry */
 	LVL(3, 10, 0, 0), (G_LGROUP|G_NOGEN),
 	DEF(NAT_AC(0)),
-	A(ATTK(AT_WEAP, AD_PHYS, 2, 4)),
+	A(ATTK(AT_WEAP, AD_PHYS, 2, 4), OFFHND_ATTK(AT_CLAW, AD_SITM, 0, 0)),
 	SIZ(WT_HUMAN, 400, MS_CUSS, MZ_HUMAN), 0, 0,
 	0 /*MM*/, MT_OMNIVORE|MT_STALK|MT_HOSTILE|MT_COLLECT /*MT*/, MF_MARTIAL_B|MF_BAB_FULL|MF_LEVEL_30 /*MF*/,
 	MB_HUMANOID|MB_STRONG /*MB*/, MG_NOTAME|MG_NOPOLY|MG_INFRAVISIBLE /*MG*/,
 	MA_HUMAN /*MA*/,  MV_INFRAVISION|MV_NORMAL /*MV*/, 0 /*MW*/, CLR_WHITE),
-    MON("aztec spearthrower", S_HUMAN,//8 /* Needs encyc entry */
+    MON("second-sun spearthrower", S_YETI,//8 /* Needs encyc entry */
 	LVL(6, 12, 0, 0), (G_SGROUP|G_NOGEN),
 	DEF(NAT_AC(0)),
-	A(ATTK(AT_WEAP, AD_PHYS, 2, 6)),
+	A(ATTK(AT_WEAP, AD_PHYS, 2, 6), OFFHND_ATTK(AT_CLAW, AD_SITM, 0, 0)),
 	SIZ(WT_HUMAN, 400, MS_CUSS, MZ_HUMAN), 0, 0,
 	0 /*MM*/, MT_OMNIVORE|MT_STALK|MT_HOSTILE|MT_COLLECT /*MT*/, MF_MARTIAL_S|MF_LEVEL_30 /*MF*/,
 	MB_HUMANOID|MB_STRONG /*MB*/, MG_NOTAME|MG_NOPOLY|MG_INFRAVISIBLE /*MG*/,
 	MA_HUMAN /*MA*/,  MV_INFRAVISION|MV_LOWLIGHT2 /*MV*/, 0 /*MW*/, CLR_BLACK),
-    MON("aztec priest", S_HUMAN,//17 /* Needs encyc entry */
+    MON("second-sun priest", S_YETI,//17 /* Needs encyc entry */
 	LVL(14, 10, 0, 0), (G_NOGEN),
 	DEF(NAT_AC(0)),
-	A(ATTK(AT_WEAP, AD_PHYS, 1, 8),
+	A(ATTK(AT_WEAP, AD_PHYS, 1, 8), OFFHND_ATTK(AT_CLAW, AD_SITM, 0, 0),
 	  ATTK(AT_MAGC, AD_SPEL, 0, 0)),
 	SIZ(WT_HUMAN, 400, MS_CUSS, MZ_HUMAN), 0, 0,
 	0 /*MM*/, MT_OMNIVORE|MT_STALK|MT_HOSTILE|MT_COLLECT /*MT*/, MF_MARTIAL_B|MF_LEVEL_30 /*MF*/,
@@ -8336,7 +8336,7 @@ is a red right hand
 /*
  * quest nemeses
  */
-    MON("Minion of Huhetotl", S_DEMON,//23
+    MON("Minion of Tezcatlipoca", S_DEMON,//23
 	LVL(16, 12, 75, -14), (G_NOCORPSE|G_NOGEN|G_UNIQ),
 	DEF(NAT_AC(6), SPE_AC(6), SPE_DR(6)),
 	A(ATTK(AT_WEAP, AD_PHYS, 8, 4), ATTK(AT_WEAP, AD_PHYS, 4, 6),

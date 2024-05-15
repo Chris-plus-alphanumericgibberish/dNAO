@@ -1310,49 +1310,7 @@ boolean greatequip;
 		(void)mongets(mtmp, GAUNTLETS, mkobjflags);
 		(void)mongets(mtmp, KITE_SHIELD, mkobjflags);
 		(void)mongets(mtmp, LONG_SWORD, mkobjflags);
-	}
-	else if(ptr->mtyp == PM_AZTEC_WARRIOR) {
-		otmp = mksobj(TORCH, mkobjflags|MKOBJ_NOINIT);
-		otmp->age = (long) rn1(500,1000);
-		(void) mpickobj(mtmp, otmp);
-		begin_burn(otmp);
-		
-		(void)mongets(mtmp, MACUAHUITL, mkobjflags);
-		(void)mongets(mtmp, STUDDED_LEATHER_ARMOR, mkobjflags);
-		(void)mongets(mtmp, ICHCAHUIPILLI, mkobjflags);
-		otmp = mksobj(HELMET, mkobjflags|MKOBJ_NOINIT);
-		set_material_gm(otmp, WOOD);
-		(void) mpickobj(mtmp,otmp);
 
-	}
-	else if(ptr->mtyp == PM_AZTEC_SPEARTHROWER) {
-		otmp = mksobj(TORCH, mkobjflags|MKOBJ_NOINIT);
-		otmp->age = (long) rn1(500,1000);
-		(void) mpickobj(mtmp, otmp);
-		begin_burn(otmp);
-		
-		(void)mongets(mtmp, ATLATL, mkobjflags);	
-		m_initthrow(mtmp, JAVELIN, rnd(10), mkobjflags);
-		
-		(void)mongets(mtmp, LEATHER_ARMOR, mkobjflags);
-		(void)mongets(mtmp, ICHCAHUIPILLI, mkobjflags);
-		otmp = mksobj(HELMET, mkobjflags|MKOBJ_NOINIT);
-		set_material_gm(otmp, WOOD);
-		(void) mpickobj(mtmp,otmp);
-	}
-	else if(ptr->mtyp == PM_AZTEC_PRIEST) {
-		otmp = mksobj(TORCH, mkobjflags|MKOBJ_NOINIT);
-		otmp->spe = rnd(3);
-		otmp->age = (long) rn1(1000,2000);
-		(void) mpickobj(mtmp, otmp);
-		begin_burn(otmp);
-		
-		(void)mongets(mtmp, TECPATL, mkobjflags);
-		(void)mongets(mtmp, LEATHER_ARMOR, mkobjflags);
-		(void)mongets(mtmp, ICHCAHUIPILLI, mkobjflags);
-		otmp = mksobj(HELMET, mkobjflags|MKOBJ_NOINIT);
-		set_material_gm(otmp, WOOD);
-		(void) mpickobj(mtmp,otmp);
 	}
 	else if (ptr->mtyp == PM_CROESUS) {
 		otmp = mksobj(TWO_HANDED_SWORD, mkobjflags);
@@ -11661,6 +11619,49 @@ boolean greatequip;
 	    case S_YETI:
 			if(ptr->mtyp == PM_GUG){
 				mongets(mtmp, CLUB, mkobjflags);
+			}
+			else if(ptr->mtyp == PM_SECOND_SUN_WARRIOR) {
+				otmp = mksobj(TORCH, mkobjflags|MKOBJ_NOINIT);
+				otmp->age = (long) rn1(500,1000);
+				(void) mpickobj(mtmp, otmp);
+				begin_burn(otmp);
+				
+				(void)mongets(mtmp, MACUAHUITL, mkobjflags);
+				(void)mongets(mtmp, STUDDED_LEATHER_ARMOR, mkobjflags);
+				(void)mongets(mtmp, ICHCAHUIPILLI, mkobjflags);
+				otmp = mksobj(HELMET, mkobjflags|MKOBJ_NOINIT);
+				set_material_gm(otmp, WOOD);
+				(void) mpickobj(mtmp,otmp);
+
+			}
+			else if(ptr->mtyp == PM_SECOND_SUN_SPEARTHROWER) {
+				otmp = mksobj(TORCH, mkobjflags|MKOBJ_NOINIT);
+				otmp->age = (long) rn1(500,1000);
+				(void) mpickobj(mtmp, otmp);
+				begin_burn(otmp);
+				
+				(void)mongets(mtmp, ATLATL, mkobjflags);	
+				m_initthrow(mtmp, JAVELIN, rnd(10), mkobjflags);
+				
+				(void)mongets(mtmp, LEATHER_ARMOR, mkobjflags);
+				(void)mongets(mtmp, ICHCAHUIPILLI, mkobjflags);
+				otmp = mksobj(HELMET, mkobjflags|MKOBJ_NOINIT);
+				set_material_gm(otmp, WOOD);
+				(void) mpickobj(mtmp,otmp);
+			}
+			else if(ptr->mtyp == PM_SECOND_SUN_PRIEST) {
+				otmp = mksobj(TORCH, mkobjflags|MKOBJ_NOINIT);
+				otmp->spe = rnd(3);
+				otmp->age = (long) rn1(1000,2000);
+				(void) mpickobj(mtmp, otmp);
+				begin_burn(otmp);
+				
+				(void)mongets(mtmp, TECPATL, mkobjflags);
+				(void)mongets(mtmp, LEATHER_ARMOR, mkobjflags);
+				(void)mongets(mtmp, ICHCAHUIPILLI, mkobjflags);
+				otmp = mksobj(HELMET, mkobjflags|MKOBJ_NOINIT);
+				set_material_gm(otmp, WOOD);
+				(void) mpickobj(mtmp,otmp);
 			}
 		break;
 	    case S_MUMMY:
