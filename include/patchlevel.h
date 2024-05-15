@@ -15,7 +15,7 @@
    Incremented to 3.11 with the introduction Anachrononauts.
    Incremented to 3.12 with the introduction Magic chests, scrolls of antimagic, resistance, and consecration, YARevison to chaos quest, beter resistance-from-diet, and lightsaber forms.
 */
-#define VERSION_MINOR	22
+#define VERSION_MINOR	23
 /*
  * PATCHLEVEL is updated for each release.
  *
@@ -50,6 +50,7 @@
  * 3.21.3: Blades of mercy, Aphanacts, species favored spells, crystal skulls, magic torch on grue level, tweaks to regular insight monsters,  and misc bug fixes.
  * 3.21.4: War-helm of the dreaming and monster madnesses, Silver flame cult, Chaos 1 revision, Black goat revision, Monk quest revision and move fixes/improvements, ring artifacts, Singing sword is nameable, Jrt Netjer hell vaults, Insight commanders in hell, Golden Knight artifact, halve con bonus to hp, ds undead flasks, better handling for polyform weapons, Inv. weight, daughters of Naunet, move system improvements, #downboy and #getem, and misc bug fixes.
  * 3.22.0: Drow Healer, Elf Madman, Healer quest revision, Human, Vampire, and Gnome madman differentiation, new psychic and goatmom monster spells, center of all balance adjustments, y'ha-talla insight traits, amnesia cures monster madnesses, complex ward handling refactor, blasphemous lurker madness, the many wormy fingers entity (internally the "psurlon" template, but this is an artifact name), tweak glyph code to leak less info to blind PCs, allow option-file setting of template symbols, quest guardian-ship is a faction, named ("semiunique") monsters in hell get max HD and HP, and misc bug fixes and tweaks.
+ * 3.23.0: Yog-Sothoth cult, Cult revisions and mutations system, Descendant option, Knight fighting styles, Advanced spellcasting fixes, Monk moves are free, Samurai "Kendo", Attack and Passive pet commands, Mercurial weapon insight traits and gith artifact "swords", Scorpion Carapace revision, MC3 nerf, Monster smiths and forges v1, Random Insight monsters, Depths monster gen zone, Variable monster Hit Dice sizes, and misc bug fixes and tweaks.
  */
 #define PATCHLEVEL	0
 /*
