@@ -503,7 +503,7 @@ unsigned int type;
        case PM_MONK:
           return MON_AURA_BOLT;
 
-       case PM_MINION_OF_HUHETOTL:
+       case PM_MINION_OF_TEZCATLIPOCA:
            return (rn2(2) ? CURSE_ITEMS : (rn2(2) ? DESTRY_WEPN : DROP_BOULDER));
 
        case PM_TITAN:
