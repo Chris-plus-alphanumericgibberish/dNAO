@@ -41,16 +41,18 @@ ExplodeRegion *reg;
     int i;
     ExplodeLocation *new;
     for(i = 0; i < reg->nlocations; i++)
-	if (reg->locations[i].x == x && reg->locations[i].y == y)
-	    return;
-    if (reg->nlocations == reg->alocations) {
-	reg->alocations = reg->alocations ? 2 * reg->alocations : 32;
-	new = (ExplodeLocation *)
-		alloc(reg->alocations * sizeof(ExplodeLocation));
-	(void) memcpy((genericptr_t)new, (genericptr_t)reg->locations,
-		reg->nlocations * sizeof(ExplodeLocation));
-	free((genericptr_t)reg->locations);
-	reg->locations = new;
+		if (reg->locations[i].x == x && reg->locations[i].y == y)
+			return;
+		if (reg->nlocations == reg->alocations) {
+		reg->alocations = reg->alocations ? 2 * reg->alocations : 32;
+		new = (ExplodeLocation *)
+			alloc(reg->alocations * sizeof(ExplodeLocation));
+		if(reg->nlocations > 0){
+			(void) memcpy((genericptr_t)new, (genericptr_t)reg->locations,
+				reg->nlocations * sizeof(ExplodeLocation));
+		}
+		free((genericptr_t)reg->locations);
+		reg->locations = new;
     }
     reg->locations[reg->nlocations].x = x;
     reg->locations[reg->nlocations].y = y;
