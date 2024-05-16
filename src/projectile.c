@@ -606,8 +606,15 @@ int dy;							/* */
 	boolean youagr = (magr && (magr == &youmonst));
 	int newx = bhitpos.x + dx;
 	int newy = bhitpos.y + dy;
-	struct rm *room = &levl[newx][newy];
+
+	struct rm *room;
 	boolean shopdoor = FALSE, shopwall = FALSE;
+	
+	//If we're out of bounds, return. Can happen if a bolt hits the level boundery.
+	if(!isok(newx, newy))
+		return;
+
+	room = &levl[newx][newy];
 
 	/* Projectile must be a digger */
 	if (!((thrownobj->otyp == BLASTER_BOLT || thrownobj->otyp == HEAVY_BLASTER_BOLT || thrownobj->otyp == CARCOSAN_BOLT || thrownobj->otyp == LASER_BEAM)))
