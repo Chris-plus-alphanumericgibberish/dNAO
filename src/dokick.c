@@ -594,7 +594,7 @@ xchar x, y;
 		(kickobj->otyp == MAGIC_CHEST && kickobj->obolted)) range = 1;
 
 	/* see if the object has a place to move into */
-	if(!ZAP_POS(levl[x+u.dx][y+u.dy].typ) || closed_door(x+u.dx, y+u.dy))
+	if(!isok(x+u.dx, y+u.dy) || !ZAP_POS(levl[x+u.dx][y+u.dy].typ) || closed_door(x+u.dx, y+u.dy))
 		range = 1;
 
 	costly = ((shkp = shop_keeper(*in_rooms(x, y, SHOPBASE))) &&
