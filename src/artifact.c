@@ -2932,6 +2932,9 @@ boolean narrow_only;
 	struct permonst *ptr;
 	boolean youdef;
 
+	if (on_level(&spire_level,&u.uz))
+		return FALSE;
+
 	/* requires some kind of offense in the artilist block */
 	if (!weap || !(weap->adtyp || weap->accuracy || weap->damage))
 		return FALSE;
@@ -5069,7 +5072,7 @@ boolean printmessages;
 		}
 	}
 
-	if(force_weapon(otmp) && otmp->ovar1_charges){
+	if(force_weapon(otmp) && otmp->ovar1_charges && !on_level(&spire_level,&u.uz)){
 		int bonus = 0;
 		//Non-elemental energy attack: 1 die plus the remaining half die
 		bonus += rnd((mdef && bigmonst(pd)) ? 
@@ -5091,7 +5094,7 @@ boolean printmessages;
 		*truedmgptr += bonus;
 	}
 	
-	if(otmp->otyp == DISKOS && u.uinsight >= 15){
+	if(otmp->otyp == DISKOS && u.uinsight >= 15 && !on_level(&spire_level,&u.uz)){
 		int bonus = 0;
 		//Holy/Unholy energy attack
 		if(u.uinsight >= 50){
@@ -5140,7 +5143,7 @@ boolean printmessages;
 		*truedmgptr += bonus;
 	}
 	
-	if(pure_weapon(otmp) && otmp->spe >= 6){
+	if(pure_weapon(otmp) && otmp->spe >= 6 && !on_level(&spire_level,&u.uz)){
 		if(youagr){
 			if(Upolyd && u.mh == u.mhmax)
 				*plusdmgptr += basedmg*.2;
@@ -5152,7 +5155,7 @@ boolean printmessages;
 		}
 	}
 	
-	if(dark_weapon(otmp) && otmp->spe >= 6){
+	if(dark_weapon(otmp) && otmp->spe >= 6 && !on_level(&spire_level,&u.uz)){
 		if(youagr){
 			if(Upolyd && u.mh <= u.mhmax*.3)
 				*plusdmgptr += basedmg*.2;
@@ -5171,7 +5174,7 @@ boolean printmessages;
 			mdef->mstdy += 4;
 		}
 	}
-	if(otmp->otyp == BESTIAL_CLAW){
+	if(otmp->otyp == BESTIAL_CLAW && !on_level(&spire_level,&u.uz)){
 		int insight_mod = 0;
 		int studystack = 0;
 		if(youagr){
@@ -5205,7 +5208,7 @@ boolean printmessages;
 			mdef->mstdy += 3;
 		}
 	}
-	if(otmp->otyp == ISAMUSEI && u.uinsight >= 10){
+	if(otmp->otyp == ISAMUSEI && u.uinsight >= 10 && !on_level(&spire_level,&u.uz)){
 		if(youdef || !resist(mdef, WEAPON_CLASS, 0, TRUE)){
 			int factor = 20;
 			if(u.uinsight >= 70){
@@ -5230,7 +5233,7 @@ boolean printmessages;
 		}
 	}
 
-	if(otmp->otyp == PINCER_STAFF && u.uinsight >= 10){
+	if(otmp->otyp == PINCER_STAFF && u.uinsight >= 10 && !on_level(&spire_level,&u.uz)){
 		if(otmp->ovar1_pincerTarget == mdef->m_id){
 			*plusdmgptr += basedmg;
 			if (u.uinsight >= 20 && otmp->oartifact && otmp->oartifact == ART_FALLINGSTAR_MANDIBLES && !Magic_res(mdef)){
@@ -5296,6 +5299,9 @@ boolean printmessages; /* print generic elemental damage messages */
 	const char *wepdesc;
 
 	const struct artifact *arti_struct = get_artifact(otmp);
+	
+	if(on_level(&spire_level,&u.uz))
+		return MM_HIT;
 
 	/* set msgr to otmp if we weren't given one */
 	/* for artifacts, we must assume they are used properly -- msgr will not override artifact-specific hitmsgs */
