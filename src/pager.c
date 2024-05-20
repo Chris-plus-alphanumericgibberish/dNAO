@@ -2897,9 +2897,9 @@ static const char *help_menu_items[] = {
 #ifdef PORT_HELP
 	"%s-specific help and commands.",
 #define PORT_HELP_ID 100
-#define WIZHLP_SLOT 10
+#define WIZHLP_SLOT 11
 #else
-#define WIZHLP_SLOT 9
+#define WIZHLP_SLOT 10
 #endif
 #ifdef WIZARD
 	"List of wizard-mode commands.",
