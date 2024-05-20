@@ -2915,6 +2915,11 @@ const char *in_str;
 		{ "wererat (human)",	PM_HUMAN_WERERAT },
 		{ "werejackal (human)",	PM_HUMAN_WEREJACKAL },
 		{ "werewolf (human)",	PM_HUMAN_WEREWOLF },
+	    /* and now the dnh specific stuff */
+	    /* myrmidon monster names are from Greek, so use appropriate plurals */
+	        { "myrmidon lochies",	PM_MYRMIDON_LOCHIAS },
+	    	{ "myrmidon ypolochagoi",	PM_MYRMIDON_YPOLOCHAGOS },
+	    	{ "myrmidon lochagoi",	PM_MYRMIDON_LOCHAGOS },
 	    /* end of list */
 		{ 0, 0 }
 	};
