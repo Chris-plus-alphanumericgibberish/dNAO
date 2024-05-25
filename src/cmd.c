@@ -1305,8 +1305,9 @@ doGithForm()
 
 		Strcpy(buf, nameOfMentalEdge(i));
 		Strcat(buf, " (");
-
-		if (i == GSTYLE_PENETRATE)
+		if (u.ulevel < 14)
+			block_reason = "lack of skill";
+		else if (i == GSTYLE_PENETRATE)
 			block_reason = "lack of hate";
 		else if (i == GSTYLE_COLD)
 			block_reason = "lack of wrath";
