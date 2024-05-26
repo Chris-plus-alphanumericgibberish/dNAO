@@ -3404,7 +3404,7 @@ register int held;
 		nomul(-1, "opening a container");
 		nomovemsg = "";
 	    }
-	    return MOVE_STANDARD;
+	    return MOVE_CONTAINER;
 	}
 	current_container = obj;	/* for use by in/out_container */
 	if(Is_real_container(obj)){
@@ -3414,24 +3414,24 @@ register int held;
 			quantum_cat = TRUE;	/* for adjusting "it's empty" message */
 		} else if(obj->spe == 4){
 			open_coffin(obj, FALSE); //FALSE: the box was not destroyed. Use present tense.
-			return MOVE_STANDARD;
+			return MOVE_CONTAINER;
 		} else if(obj->spe == 5){
 			open_sarcophagus(obj, FALSE); //FALSE: the box was not destroyed. Use present tense.
-			return MOVE_STANDARD;
+			return MOVE_CONTAINER;
 		} else if(obj->spe == 6 && u.uinsight >= 10){
 			open_crazy_box(obj, FALSE); //FALSE: the box was not destroyed. Use present tense.
-			return MOVE_STANDARD;
+			return MOVE_CONTAINER;
 		} else if(obj->spe == 7){
 			// Madman reclaims their stuff. Contents handled by the level loader.
 			//FALSE: the box was not destroyed. Use present tense.
 			if(open_madstuff_box(obj, FALSE)){
-				return MOVE_STANDARD;
+				return MOVE_CONTAINER;
 			}
 		} else if(obj->spe == 8){
 			// Nothing. Fulvous desk spawns monsters.
 		} else if(obj->spe == 9){
 			open_giants_sack(obj, FALSE); //FALSE: not destroyed
-			return MOVE_STANDARD;
+			return MOVE_CONTAINER;
 		}
 	}
 	/* Count the number of contained objects. Sometimes toss objects if a cursed magic bag. */
@@ -3476,7 +3476,7 @@ register int held;
 				if (!outokay && !inokay) {
 					pline("%s", emptymsg);
 					You("don't have anything to put in.");
-					return used ? MOVE_STANDARD : MOVE_CANCELLED;
+					return used ? MOVE_CONTAINER : MOVE_CANCELLED;
 				}
 				menuprompt[0] = '\0';
 				if (!cnt) Sprintf(menuprompt, "%s ", emptymsg);
@@ -3493,7 +3493,7 @@ register int held;
 				tipcontainer(current_container);
 				if(current_container->oartifact == ART_ESSCOOAHLIPBOOURRR)
 					current_container->age = monstermoves + rnz(100);
-				used |= MOVE_STANDARD;
+				used |= MOVE_CONTAINER;
 			}
 			if (loot_out) {
 				int sub_used;
@@ -3541,7 +3541,7 @@ ask_again2:
 		    break;
 		case 'q':
 		default:
-		    return used ? MOVE_STANDARD : MOVE_CANCELLED;
+		    return used ? MOVE_CONTAINER : MOVE_CANCELLED;
 		}
 	    }
 	} else {
@@ -3556,7 +3556,7 @@ ask_again2:
 	{
 	    /* nothing to put in, but some feedback is necessary */
 	    You("don't have anything to put in.");
-	    return used ? MOVE_STANDARD : MOVE_CANCELLED;
+	    return used ? MOVE_CONTAINER : MOVE_CANCELLED;
 	}
 	if (flags.menu_style != MENU_FULL) {
 	    Sprintf(qbuf, "Do you wish to put %s in?", something);
@@ -3576,7 +3576,7 @@ ask_again2:
 		    break;
 		case 'q':
 		default:
-		    return used ? MOVE_STANDARD : MOVE_CANCELLED;
+		    return used ? MOVE_CONTAINER : MOVE_CANCELLED;
 	    }
 	}
 	/*
@@ -3631,7 +3631,7 @@ ask_again2:
 	    dealloc_obj(u_gold);
 	}
 #endif
-	return used ? MOVE_STANDARD : MOVE_CANCELLED;
+	return used ? MOVE_CONTAINER : MOVE_CANCELLED;
 }
 
 /* Loot a container (take things out, put things in), using a menu. */

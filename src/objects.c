@@ -1006,7 +1006,7 @@ GLOVES(("gauntlets of power", "riding gloves"),
 GLOVES(("orihalcyon gauntlets", "fighting gloves"),/*Needs tile*/
 		0, 1,  7, 1, 30, 50,  8, 2, 0, METAL, CLR_BROWN, O_POWER(ANTIMAGIC)),
 GLOVES(("gauntlets of dexterity", "fencing gloves"),
-		0, 1,  7, 1, 10, 50,  8, 0, 0, LEATHER, HI_LEATHER),
+		0, 1,  7, 1, 10, 50,  8, 0, 0, LEATHER, HI_LEATHER, O_POWER(QUICK_DRAW)),
 
 /* boots */
 //define BOOTS(names,kn,mgc,prob,delay,wt,cost,ac,dr,can,metal,c) \

@@ -1217,7 +1217,7 @@ A("The Grappler's Grasp",			GAUNTLETS_OF_POWER,	(const char *)0,
 	),
 
 A("The Shield of the Resolute Heart",	GAUNTLETS_OF_DEXTERITY,			(const char *)0,
-	4000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	4000L, GEMSTONE, MZ_DEFAULT, 15,
 	A_NONE, NON_PM, NON_PM, TIER_D, NOFLAG,
 	NO_MONS(),
 	NO_ATTK(), NOFLAG,

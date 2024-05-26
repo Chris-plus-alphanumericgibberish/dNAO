@@ -108,6 +108,7 @@ struct flag {
 #define MOVE_CASTSPELL				0x00100	/* player cast a spell */
 #define MOVE_ATE					0x00200	/* player ate food */
 #define MOVE_FIRED					0x00400	/* player properly fired ammo, using a launcher or intrinsic launching means, NOT a standard thrown object. */
+#define MOVE_CONTAINER				0x00800	/* player used a container */
 
 	int	 end_top, end_around;	/* describe desired score list */
 	unsigned ident;		/* social security number for each monster */

@@ -645,6 +645,11 @@ boolean affect_game_state;
 			current_cost = 0;
 			break;
 
+		case MOVE_CONTAINER:
+			if(QuickDraw)
+				current_cost = 0;
+			break;
+
 		default:
 			impossible("Unhandled MOVE_XYZ case (%d)", current_action);
 			break;
