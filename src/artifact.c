@@ -7940,7 +7940,7 @@ zerth_mantras()
 {
 	pline("There are mantras wound around the grip.");
 	//Reign of Anger (MM)
-	if(ACURR(A_WIS) < 8 && ACURR(A_WIS)+ACURR(A_INT) > 21 && Insanity > 75 && !(artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_WRATH)){
+	if(ACURR(A_WIS) < 8 && ACURR(A_WIS)+ACURR(A_INT) > 19 && Insanity > 75 && !(artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_WRATH)){
 		// Modifies MM spell, +1 damage per die (implemented as +2 faces)
 		You("decipher a new mantra!");
 		pline("\"Greed and hates, pains and joys, jealousies and doubts. All of these fed on each other and the minds of the People were divided. In their division, the People were punished.\"");
