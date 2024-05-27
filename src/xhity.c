@@ -6292,7 +6292,7 @@ boolean ranged;
 		if (uncancelled) {
 			/* player is more detailed */
 			if (youdef) {
-				make_doubtful(itimeout_incr(HDoubt, dmg*50), TRUE);
+				make_doubtful(itimeout_incr(HDoubt, dmg*20), TRUE);
 			}
 			else {
 				mdef->mdoubt = TRUE;
