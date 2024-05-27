@@ -3736,7 +3736,7 @@ int *shield_margin;
 			if(!(youdef && Nightmare && u.umadness&MAD_RAGE))
 				bons_acc += magr->encouraged;
 			if(magr->mtyp == PM_LUCKSUCKER)
-				bons_acc += magr->mvar_lucksucker;
+				bons_acc += 13+magr->mvar_lucksucker;
 			/* Singing Sword */
 			if (uwep && uwep->oartifact == ART_SINGING_SWORD && !mindless_mon(magr) && !is_deaf(magr)){
 				if (uwep->osinging == OSING_DIRGE && !magr->mtame){
