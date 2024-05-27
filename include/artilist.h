@@ -1720,7 +1720,7 @@ A("Clarent",						LONG_SWORD,				(const char *)0,
 /* sdice are a copy of ldice, ocn +=1  */
 A("The Dark Claymore",						TWO_HANDED_SWORD,				(const char *)0,
 	4000L, OBSIDIAN_MT, MZ_LARGE, WT_DEFAULT,
-	A_CHAOTIC, PM_KNIGHT, NON_PM, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR),
+	A_CHAOTIC, PM_KNIGHT, NON_PM, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR|ARTG_FXALGN),
 	NO_MONS(),
 	ATTK(AD_DARK, 1, 6), NOFLAG,
 	PROPS(), NOFLAG,
