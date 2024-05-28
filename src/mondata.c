@@ -43,8 +43,8 @@ boolean state;
 	boolean weap_attack, xwep_attack;
 	mon->mcan = state;
 	set_mon_data_core(mon, mon->data);
-	weap_attack = mon_attacktype(mon, AT_WEAP);
-	xwep_attack = mon_attacktype(mon, AT_XWEP);
+	weap_attack = mon_attacktype(mon, AT_WEAP) ? TRUE : FALSE;
+	xwep_attack = mon_attacktype(mon, AT_XWEP) ? TRUE : FALSE;
 	if(weap_attack && !MON_WEP(mon)){
 		mon->weapon_check = NEED_WEAPON;
 	}

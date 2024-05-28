@@ -1466,18 +1466,14 @@ struct monst *magr;
 #endif /* OVLB */
 #ifdef OVL0
 
-STATIC_DCL struct obj *FDECL(oselect, (struct monst *,int,int));
+STATIC_DCL struct obj *FDECL(oselect, (struct monst *,int,int, boolean));
 STATIC_DCL struct obj *FDECL(oselectBoulder, (struct monst *));
-#define Oselect(x, spot) if ((otmp = oselect(mtmp, x, spot)) != 0) return(otmp);
+#define Oselect(x, spot, mari) if ((otmp = oselect(mtmp, x, spot, mari)) != 0) return(otmp);
 
 STATIC_OVL struct obj *
-oselect(mtmp, x, spot)
-struct monst *mtmp;
-int x;
-int spot;
+oselect(struct monst *mtmp, int x, int spot, boolean marilith)
 {
 	struct obj *otmp, *obest = 0;
-	boolean marilith = mon_attacktype(mtmp, AT_MARI); //Marilith arms don't suffer weight limits, so also don't impose them on the offhand arm.
 
 	for (otmp = mtmp->minvent; otmp; otmp = otmp->nobj) {
 	    if (otmp->otyp == x &&
@@ -1673,9 +1669,10 @@ register struct monst *mtmp;
 	struct obj *tmpprop = &zeroobj;
 
 	char mlet = mtmp->data->mlet;
+	boolean marilith = mon_attacktype(mtmp, AT_MARI) ? TRUE : FALSE; //Marilith arms don't suffer weight limits, so also don't impose them on the offhand arm.
 	
 	propellor = &zeroobj;
-	Oselect(EGG, W_QUIVER); /* cockatrice egg */
+	Oselect(EGG, W_QUIVER, marilith); /* cockatrice egg */
 	if(throws_rocks(mtmp->data))	/* ...boulders for giants */
 	if((otmp = oselectBoulder(mtmp)))
 		return otmp;
@@ -1691,7 +1688,7 @@ register struct monst *mtmp;
 	/* if (dist2(mtmp->mx, mtmp->my, mtmp->mux, mtmp->muy) <= 13 && couldsee(mtmp->mx, mtmp->my)) */
 	{
 	    for (i = 0; i < SIZE(pwep); i++) {
-		if ((otmp = oselect(mtmp, pwep[i], W_WEP)) != 0) {
+		if ((otmp = oselect(mtmp, pwep[i], W_WEP, marilith)) != 0) {
 			propellor = otmp; /* force the monster to wield it */
 			return otmp;
 			}
@@ -1738,42 +1735,42 @@ register struct monst *mtmp;
 	    if (prop < 0) {
 		switch (-prop) {
 		case P_BOW:
-		  propellor = (oselect(mtmp, YUMI, W_WEP));
-		  if (!propellor) propellor = (oselect(mtmp, ELVEN_BOW, W_WEP));
-		  if (!propellor) propellor = (oselect(mtmp, BOW, W_WEP));
-		  if (!propellor) propellor = (oselect(mtmp, ORCISH_BOW, W_WEP));
+		  propellor = (oselect(mtmp, YUMI, W_WEP, marilith));
+		  if (!propellor) propellor = (oselect(mtmp, ELVEN_BOW, W_WEP, marilith));
+		  if (!propellor) propellor = (oselect(mtmp, BOW, W_WEP, marilith));
+		  if (!propellor) propellor = (oselect(mtmp, ORCISH_BOW, W_WEP, marilith));
 		  break;
 		case P_SLING:
-		  propellor = (oselect(mtmp, SLING, W_WEP));
+		  propellor = (oselect(mtmp, SLING, W_WEP, marilith));
 		  break;
 //ifdef FIREARMS
 		case P_FIREARM:
 		  if ((objects[rwep[i]].w_ammotyp) == WP_BULLET) {
-			propellor = (oselect(mtmp, BFG, W_WEP));
-			if (!propellor) propellor = (oselect(mtmp, HEAVY_MACHINE_GUN, W_WEP));
-			if (!propellor) propellor = (oselect(mtmp, ASSAULT_RIFLE, W_WEP));
-			if (!propellor) propellor = (oselect(mtmp, SUBMACHINE_GUN, W_WEP));
-			if (!propellor) propellor = (oselect(mtmp, SNIPER_RIFLE, W_WEP));
-			if (!propellor) propellor = (oselect(mtmp, RIFLE, W_WEP));
-			if (!propellor) propellor = (oselect(mtmp, PISTOL, W_WEP));
-			if (!propellor) propellor = (oselect(mtmp, FLINTLOCK, W_WEP));
+			propellor = (oselect(mtmp, BFG, W_WEP, marilith));
+			if (!propellor) propellor = (oselect(mtmp, HEAVY_MACHINE_GUN, W_WEP, marilith));
+			if (!propellor) propellor = (oselect(mtmp, ASSAULT_RIFLE, W_WEP, marilith));
+			if (!propellor) propellor = (oselect(mtmp, SUBMACHINE_GUN, W_WEP, marilith));
+			if (!propellor) propellor = (oselect(mtmp, SNIPER_RIFLE, W_WEP, marilith));
+			if (!propellor) propellor = (oselect(mtmp, RIFLE, W_WEP, marilith));
+			if (!propellor) propellor = (oselect(mtmp, PISTOL, W_WEP, marilith));
+			if (!propellor) propellor = (oselect(mtmp, FLINTLOCK, W_WEP, marilith));
 		  } else if ((objects[rwep[i]].w_ammotyp) == WP_SHELL) {
-			propellor = (oselect(mtmp, BFG, W_WEP));
-			if (!propellor) propellor = (oselect(mtmp, AUTO_SHOTGUN, W_WEP));
-			if (!propellor) propellor = (oselect(mtmp, SHOTGUN, W_WEP));
+			propellor = (oselect(mtmp, BFG, W_WEP, marilith));
+			if (!propellor) propellor = (oselect(mtmp, AUTO_SHOTGUN, W_WEP, marilith));
+			if (!propellor) propellor = (oselect(mtmp, SHOTGUN, W_WEP, marilith));
 		  } else if ((objects[rwep[i]].w_ammotyp) == WP_ROCKET) {
-			propellor = (oselect(mtmp, BFG, W_WEP));
-			if (!propellor) propellor = (oselect(mtmp, ROCKET_LAUNCHER, W_WEP));
+			propellor = (oselect(mtmp, BFG, W_WEP, marilith));
+			if (!propellor) propellor = (oselect(mtmp, ROCKET_LAUNCHER, W_WEP, marilith));
 		  } else if ((objects[rwep[i]].w_ammotyp) == WP_GRENADE) {
-			propellor = (oselect(mtmp, BFG, W_WEP));
-			if (!propellor) propellor = (oselect(mtmp, GRENADE_LAUNCHER, W_WEP));
+			propellor = (oselect(mtmp, BFG, W_WEP, marilith));
+			if (!propellor) propellor = (oselect(mtmp, GRENADE_LAUNCHER, W_WEP, marilith));
 			if (!propellor) propellor = &zeroobj;  /* can toss grenades */
 		  }
 		break;
 //endif
 		case P_CROSSBOW:
-		  propellor = (oselect(mtmp, DROVEN_CROSSBOW, W_WEP));
-		  if (!propellor) propellor = (oselect(mtmp, CROSSBOW, W_WEP));
+		  propellor = (oselect(mtmp, DROVEN_CROSSBOW, W_WEP, marilith));
+		  if (!propellor) propellor = (oselect(mtmp, CROSSBOW, W_WEP, marilith));
 		}
 		if (!tmpprop) tmpprop = propellor;
 		if (((otmp = MON_WEP(mtmp)) && otmp->cursed && otmp != propellor
@@ -1792,7 +1789,7 @@ register struct monst *mtmp;
 			if (rwep[i] != LOADSTONE) {
 				/* Don't throw a cursed weapon-in-hand or an artifact */
 				/* nor throw the last one (for stacks) of a wielded weapon */
-				if ((otmp = oselect(mtmp, rwep[i], W_QUIVER))
+				if ((otmp = oselect(mtmp, rwep[i], W_QUIVER, marilith))
 					&& !otmp->oartifact
 					&& (!otmp->cursed || otmp != MON_WEP(mtmp))
 					&& !((otmp->quan == 1) && (otmp->owornmask & (W_WEP|W_SWAPWEP))))
@@ -2082,6 +2079,7 @@ register struct monst *mtmp;
 	register int i;
 	boolean strong = strongmonst(mtmp->data);
 	boolean wearing_shield = (mtmp->misc_worn_check & W_ARMS) != 0;
+	boolean marilith = mon_attacktype(mtmp, AT_MARI) ? TRUE : FALSE; //Marilith arms don't suffer weight limits, so also don't impose them on the offhand arm.
 
 	/* needs to be capable of wielding a weapon in the mainhand */
 	if (!mon_attacktype(mtmp, AT_WEAP) &&
@@ -2133,18 +2131,18 @@ register struct monst *mtmp;
 	}
 
 	if(is_giant(mtmp->data))	/* giants just love to use clubs */
-		Oselect(CLUB, W_WEP);
+		Oselect(CLUB, W_WEP, marilith);
 	
 	if(melee_polearms(mtmp->data)){
 		for (i = 0; i < SIZE(hpwep); i++) {
 			if (hpwep[i] == CORPSE && !((mtmp->misc_worn_check & W_ARMG) || resists_ston(mtmp)))
 				continue;
-			Oselect(hpwep[i], W_WEP);
+			Oselect(hpwep[i], W_WEP, marilith);
 		}
 	} else for (i = 0; i < SIZE(hwep); i++) {
 	    if (hwep[i] == CORPSE && !((mtmp->misc_worn_check & W_ARMG) || resists_ston(mtmp)))
 			continue;
-		Oselect(hwep[i], W_WEP);
+		Oselect(hwep[i], W_WEP, marilith);
 	}
 
 	/* failure */
@@ -2159,6 +2157,7 @@ register struct monst *mtmp;
 	register int i;
 	boolean strong = strongmonst(mtmp->data);
 	boolean wearing_shield = (mtmp->misc_worn_check & W_ARMS) != 0;
+	boolean marilith = mon_attacktype(mtmp, AT_MARI) ? TRUE : FALSE; //Marilith arms don't suffer weight limits, so also don't impose them on the offhand arm.
 
 	/* needs to be capable of wielding a weapon in the offhand */
 	if (!mon_attacktype(mtmp, AT_XWEP))
@@ -2211,12 +2210,12 @@ register struct monst *mtmp;
 	}
 
 	if(is_giant(mtmp->data))	/* giants just love to use clubs */
-		Oselect(CLUB, W_SWAPWEP);
+		Oselect(CLUB, W_SWAPWEP, marilith);
 
 	for (i = 0; i < SIZE(hwep); i++) {
 	    if (hwep[i] == CORPSE && !(mtmp->misc_worn_check & W_ARMG))
 		continue;
-		Oselect(hwep[i], W_SWAPWEP);
+		Oselect(hwep[i], W_SWAPWEP, marilith);
 	}
 
 	/* failure */
@@ -2228,15 +2227,16 @@ select_pick(mtmp)
 struct monst *mtmp;
 {
 	struct obj *otmp, *obj;
+	boolean marilith = mon_attacktype(mtmp, AT_MARI) ? TRUE : FALSE; //Marilith arms don't suffer weight limits, so also don't impose them on the offhand arm.
 
 	/* preference to any artifacts (and checks for arti_digs, loop control must use a different variable than otmp, in case Oselect fails for any reason) */
 	for (obj = mtmp->minvent; obj; obj = obj->nobj){
 		if (is_pick(obj) && obj->oartifact)
-			Oselect(obj->otyp, W_WEP);
+			Oselect(obj->otyp, W_WEP, marilith);
 	}
 
-	Oselect(DWARVISH_MATTOCK, W_WEP);
-	Oselect(PICK_AXE, W_WEP);
+	Oselect(DWARVISH_MATTOCK, W_WEP, marilith);
+	Oselect(PICK_AXE, W_WEP, marilith);
 	/* failure */
 	return (struct obj *)0;
 }
@@ -2246,16 +2246,17 @@ select_axe(mtmp)
 struct monst *mtmp;
 {
 	struct obj *otmp, *obj;
+	boolean marilith = mon_attacktype(mtmp, AT_MARI) ? TRUE : FALSE; //Marilith arms don't suffer weight limits, so also don't impose them on the offhand arm.
 
 	/* preference to any artifacts (loop control must use a different variable than otmp, in case Oselect fails for any reason) */
 	for (obj = mtmp->minvent; obj; obj = obj->nobj){
 		if (is_axe(obj) && obj->oartifact)
-			Oselect(obj->otyp, W_WEP);
+			Oselect(obj->otyp, W_WEP, marilith);
 	}
 
-	Oselect(MOON_AXE, W_WEP);
-	Oselect(BATTLE_AXE, W_WEP);
-	Oselect(AXE, W_WEP);
+	Oselect(MOON_AXE, W_WEP, marilith);
+	Oselect(BATTLE_AXE, W_WEP, marilith);
+	Oselect(AXE, W_WEP, marilith);
 	/* failure */
 	return (struct obj *)0;
 }
@@ -2368,6 +2369,7 @@ register struct monst *mon;
 	xchar old_weapon_check = mon->weapon_check;
 	boolean time_taken = FALSE;
 	boolean toreturn = FALSE;
+	boolean marilith = mon_attacktype(mon, AT_MARI) ? TRUE : FALSE; //Marilith arms don't suffer weight limits, so also don't impose them on the offhand arm.
 
 	/* This case actually should never happen */
 	if (mon->weapon_check == NO_WEAPON_WANTED) return 0;
@@ -2484,12 +2486,12 @@ register struct monst *mon;
 					((tobj = m_carrying_charged(mon, CARCOSAN_STING)) && tobj != MON_WEP(mon)) ||
 					/* bullets */
 					((m_carrying(mon, BULLET) || m_carrying(mon, SILVER_BULLET)) &&
-						(((tobj = oselect(mon, ASSAULT_RIFLE, W_SWAPWEP))) ||
-						((tobj = oselect(mon, SUBMACHINE_GUN, W_SWAPWEP))) ||
-						((tobj = oselect(mon, PISTOL, W_SWAPWEP))))) ||
+						(((tobj = oselect(mon, ASSAULT_RIFLE, W_SWAPWEP, marilith))) ||
+						((tobj = oselect(mon, SUBMACHINE_GUN, W_SWAPWEP, marilith))) ||
+						((tobj = oselect(mon, PISTOL, W_SWAPWEP, marilith))))) ||
 					/* shotgun shells */
 					((m_carrying(mon, SHOTGUN_SHELL)) &&
-						((tobj = oselect(mon, SHOTGUN, W_SWAPWEP))))
+						((tobj = oselect(mon, SHOTGUN, W_SWAPWEP, marilith))))
 					) {
 					sobj = tobj;
 				}

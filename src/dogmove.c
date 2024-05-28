@@ -206,15 +206,16 @@ DROPPABLES(mon)
 register struct monst *mon;
 {
 	register struct obj *obj;
+	boolean weapon_user = mon_attacktype(mon, AT_WEAP) ? TRUE : FALSE;
 	struct obj *wep  = MON_WEP(mon),
-                   *hwep = mon_attacktype(mon, AT_WEAP)
+           *hwep = weapon_user
 		           ? select_hwep(mon) : (struct obj *)0,
-		   *proj = mon_attacktype(mon, AT_WEAP)
+		   *proj = weapon_user
 		           ? select_rwep(mon) : (struct obj *)0,
 		   *rwep;
 	boolean item1 = FALSE, item2 = FALSE;
 	boolean intelligent = TRUE;
-	boolean marilith = mon_attacktype(mon, AT_MARI);
+	boolean marilith = mon_attacktype(mon, AT_MARI) ? TRUE : FALSE;
 
 	if(on_level(&valley_level, &u.uz))
 		return (struct obj *)0; //The Dead hold on to their possessions (prevents the "drop whole inventory" bug
@@ -222,7 +223,7 @@ register struct monst *mon;
 	if(is_eeladrin(mon->data) || (mon->mtyp != PM_UNEARTHLY_DROW && is_yochlol(mon->data)))
 		return (struct obj *)0; //Eladrin don't drop objects in their energy form.
 	
-	rwep = mon_attacktype(mon, AT_WEAP) ? propellor : &zeroobj;
+	rwep = weapon_user ? propellor : &zeroobj;
 
 	if (is_animal(mon->data) || mindless_mon(mon)) {
 		intelligent = FALSE;
