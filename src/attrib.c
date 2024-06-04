@@ -2072,7 +2072,10 @@ int fform;
 			return P_GREAT_WEP;
 		break;
 		case FFORM_HALF_SWORD:
-			return P_HALF_SWORD;
+			return P_GENERIC_KNIGHT_FORM;
+		break;
+		case FFORM_POMMEL:
+			return P_GENERIC_KNIGHT_FORM;
 		break;
 		case FFORM_KNI_SACRED:
 			return P_KNI_SACRED;
@@ -2108,6 +2111,7 @@ int fform;
 		case FFORM_SHIELD_BASH:	return "Shield Bash";
 		case FFORM_GREAT_WEP:	return "Great Weapon Fighting";
 		case FFORM_HALF_SWORD:	return "Half-sword style";
+		case FFORM_POMMEL:	return "Pommeling style";
 		case FFORM_KNI_SACRED:	return "Sacred style";
 		case FFORM_KNI_RUNIC:	return "Runic style";
 		case FFORM_KNI_ELDRITCH:return "Eldritch style";
@@ -2178,6 +2182,9 @@ int fform;
 		/* requires longsword and free hand */
 		case FFORM_HALF_SWORD:
 			return !(uwep && uwep->otyp == LONG_SWORD && !uarms && !(u.twoweap && !bimanual(uwep, youracedata)));
+		/* require longsword*/
+		case FFORM_POMMEL:
+			return !(uwep && uwep->otyp == LONG_SWORD);
 		/* require longsword*/
 		case FFORM_KNI_RUNIC:
 			return !(uwep && uwep->otyp == LONG_SWORD && FightingFormSkillLevel(fform) > P_ISRESTRICTED);

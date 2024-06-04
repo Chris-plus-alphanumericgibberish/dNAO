@@ -349,8 +349,11 @@ struct monst *magr;
 		))){
 		attackmask |= PIERCE;
 	}
-	if (youagr && otyp == LONG_SWORD && activeFightingForm(FFORM_HALF_SWORD)){
-		attackmask = PIERCE; // only thrusting
+	if (youagr && otyp == LONG_SWORD){
+		if(activeFightingForm(FFORM_HALF_SWORD))
+			attackmask = PIERCE; // only thrusting
+		else if(activeFightingForm(FFORM_POMMEL))
+			attackmask = WHACK; // only bashing
 	}
 
 	if (   oartifact == ART_LIECLEAVER
@@ -478,10 +481,30 @@ struct monst *magr;
 			ocd = objects[otyp].oc_wldam.oc_damd;
 		}
 
+
 		if (obj->oartifact == ART_FRIEDE_S_SCYTHE)
 			dmod += 2;
 		else if (obj->oartifact == ART_HOLY_MOONLIGHT_SWORD && obj->lamplit)
 			dmod += 2;
+		if (magr == &youmonst && activeFightingForm(FFORM_POMMEL)){
+			if(bimanual_mod(obj, magr) > 1){
+				*wdice = (large ? objects[WAR_HAMMER].oc_wldam : objects[WAR_HAMMER].oc_wsdam);
+				ocn =           (wdice->oc_damn);
+				ocd =           (wdice->oc_damd);
+				bonn =          (wdice->bon_damn);
+				bond =          (wdice->bon_damd);
+				flat =          (wdice->flat);
+
+				dmod -= 1;
+			}
+			else {
+				ocn = large ? 1 : 2;
+				ocd = 2;
+				bonn = 0;
+				bond = 0;
+				flat = 0;
+			}
+		}
 
 		if (obj->oartifact == ART_LIECLEAVER) {
 			ocn = 1;
@@ -3085,7 +3108,7 @@ boolean
 fake_skill(skill)
 int skill;
 {
-	if (skill == P_KNI_RUNIC || skill == P_HALF_SWORD)
+	if (skill == P_KNI_RUNIC || skill == P_GENERIC_KNIGHT_FORM)
 		return TRUE;
 
 	return FALSE;
