@@ -791,7 +791,7 @@ A("The Lifehunt Scythe",SCYTHE,							(const char *)0,
 /* effectively becomes two sizes larger when lit, requiring two hands */
 /* attack bonus only applies vs non-magic resistant targets and only when lit */
 A("The Holy Moonlight Sword",	LONG_SWORD,				(const char *)0, // begging for a description but i couldn't think of a good one
-	4000L, METAL, MZ_DEFAULT, WT_DEFAULT, // if it gets one, it would be sick to have a slightly different one while lit, requires some work tho
+	4000L, METAL, MZ_DEFAULT, WT_SPECIAL, // if it gets one, it would be sick to have a slightly different one while lit, requires some work tho
 	A_NONE, NON_PM, NON_PM, TIER_A, (ARTG_GIFT|ARTG_INHER),
 	NO_MONS(),
 	ATTK(AD_PHYS, 12, 0), NOFLAG,

@@ -481,6 +481,8 @@ struct monst *magr;
 			ocd = objects[otyp].oc_wldam.oc_damd;
 		}
 
+		if (obj->oartifact == ART_HOLY_MOONLIGHT_SWORD)
+			dmod += 1;
 
 		if (obj->oartifact == ART_FRIEDE_S_SCYTHE)
 			dmod += 2;

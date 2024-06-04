@@ -2452,6 +2452,9 @@ struct obj *obj;
 		case ART_DRAGON_PLATE:
 			wt = objects[SILVER_DRAGON_SCALE_MAIL].oc_weight*1.5;
 			break;
+		case ART_HOLY_MOONLIGHT_SWORD:
+			wt = objects[LONG_SWORD].oc_weight*1.5;
+			break;
 		default:
 			impossible("unhandled special artifact weight for %d", obj->oartifact);
 			wt = baseweight;
