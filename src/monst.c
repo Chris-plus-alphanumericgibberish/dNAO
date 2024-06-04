@@ -457,7 +457,7 @@ NEARDATA struct permonst mons[] = {
 //endif
     MON("hound of Tindalos", S_DOG,//18
 	LVL(14, 12, 0, 7), (G_NOGEN),
-	DEF(NAT_AC(8)),
+	DEF(NAT_AC(8), SPE_DR(3)),
 	A(ATTK(AT_LRCH, AD_VAMP, 2, 6),
 	  ATTK(AT_TENT, AD_PHYS, 4, 4), 
 	  ATTK(AT_MAGC, AD_SPEL, 0, 6)),
