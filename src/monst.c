@@ -5896,7 +5896,7 @@ struct permonst _mons2[] = {
 	MB_HUMANOID /*MB*/, MG_NOPOLY|MG_INFRAVISIBLE|MG_HATESIRON|MG_TRACKER /*MG*/,
 	MA_ELF /*MA*/,  MV_LOWLIGHT3|MV_SEE_INVIS /*MV*/, 0 /*MW*/, CLR_GRAY),
     MON("apprentice witch", S_HUMAN,//8 /*Needs encyc entry*/
-	LVL(5, 12, 30, 0),  (`|5),
+	LVL(5, 12, 30, 0),  (G_DEPTHS|5),
 	DEF(SPE_AC(2)),
 	A(ATTK(AT_WEAP, AD_PHYS, 1, 6), ATTK(AT_MAGC, AD_CLRC, 0, 6)),
 	SIZ(WT_HUMAN, 350, MS_HUMANOID, MZ_HUMAN), 0, 0,
