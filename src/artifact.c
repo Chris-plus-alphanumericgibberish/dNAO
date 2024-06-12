@@ -14535,7 +14535,7 @@ int stat;
 		return 0;
 	if(is_streaming_merc(otmp)){
 		if(youagr){
-			if(u.ualign.type != A_CHAOTIC && u.ualign.type != A_NONE)
+			if(!YOU_MERC_SPECIAL)
 				return 0;
 			if(u.uinsight <= 20 || ACURR(stat) < 15)
 				return 0;
