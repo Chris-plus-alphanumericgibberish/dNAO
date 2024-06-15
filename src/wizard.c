@@ -943,7 +943,7 @@ u_recognize_stars()
 	if(Role_if(PM_WIZARD) || Role_if(PM_PRIEST) || Role_if(PM_RANGER))
 		return (Race_if(PM_DROW) || Race_if(PM_DWARF) || Race_if(PM_GNOME)) ? ACURR(A_INT) > 18 : ACURR(A_INT) > 13;
 	// Anas
-	if(Role_if(PM_ANACHRONONAUT))
+	if(Role_if(PM_ANACHRONONAUT) || Role_if(PM_UNDEAD_HUNTER))
 		return ACURR(A_INT) > 13;
 
 	// Catch all

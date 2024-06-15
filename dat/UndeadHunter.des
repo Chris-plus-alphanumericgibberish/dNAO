@@ -1,0 +1,365 @@
+#	SCCS Id: @(#)Priest.des	3.4	2002/04/08
+#	Copyright (c) 1989 by Jean-Christophe Collet
+#	Copyright (c) 1991-2 by M. Stephenson
+# NetHack may be freely redistributed.  See license for details.
+#
+#	The "start" level for the quest.
+#
+#	Here you meet your (besieged) class leader, High Priest
+#	and receive your quest assignment.
+#
+MAZE: "Hnt-strt",' '
+FLAGS: noteleport,hardfloor
+GEOMETRY:center,center
+MAP
+............................................................................
+............................................................................
+............................................................................
+....................------------------------------------....................
+....................|................|.....|.....|.....|....................
+....................|..------------..|--+-----+-----+--|....................
+....................|..|..........|..|.................|....................
+....................|..|..........|..|+---+---+-----+--|....................
+..................---..|..........|......|...|...|.....|....................
+..................+....|..........+......|...|...|.....|....................
+..................+....|..........+......|...|...|.....|....................
+..................---..|..........|......|...|...|.....|....................
+....................|..|..........|..|+-----+---+---+--|....................
+....................|..|..........|..|.................|....................
+....................|..------------..|--+-----+-----+--|....................
+....................|................|.....|.....|.....|....................
+....................------------------------------------....................
+............................................................................
+............................................................................
+............................................................................
+ENDMAP
+# Dungeon Description
+REGION:(00,00,75,19),lit,"ordinary"
+# Portal arrival point
+BRANCH:(05,04,05,04),(0,0,0,0)
+# Stairs
+STAIR:(52,09),down
+# Doors
+DOOR:locked,(18,09)
+DOOR:locked,(18,10)
+DOOR:closed,(34,09)
+DOOR:closed,(34,10)
+DOOR:closed,(40,05)
+DOOR:closed,(46,05)
+DOOR:closed,(52,05)
+DOOR:locked,(38,07)
+DOOR:closed,(42,07)
+DOOR:closed,(46,07)
+DOOR:closed,(52,07)
+DOOR:locked,(38,12)
+DOOR:closed,(44,12)
+DOOR:closed,(48,12)
+DOOR:closed,(52,12)
+DOOR:closed,(40,14)
+DOOR:closed,(46,14)
+DOOR:closed,(52,14)
+# Unattended Altar - unaligned due to conflict - player must align it.
+ALTAR:(28,09),noalign,altar
+# High Priest
+MONSTER:'@',"Vicar Amalia",(28,10)
+# The treasure of High Priest
+CONTAINER:'(',"chest",(27,10)
+OBJECT:'?',"resistance",contained
+OBJECT:'?',"resistance",contained
+OBJECT:'?',"resistance",contained
+# knight guards for the audience chamber
+MONSTER:'@',"verger",(32,07)
+MONSTER:'@',"verger",(32,08)
+MONSTER:'@',"verger",(32,11)
+MONSTER:'@',"verger",(32,12)
+MONSTER:'@',"verger",(33,07)
+MONSTER:'@',"verger",(33,08)
+MONSTER:'@',"verger",(33,11)
+MONSTER:'@',"verger",(33,12)
+
+#
+#	The "locate" level for the quest.
+#
+#	Here you have to locate the Temple of Legion to go
+#	further towards your assigned quest.
+#
+
+MAZE: "Hnt-loca",' '
+FLAGS: hardfloor
+# This is a kludge to init the level as a lit field.
+INIT_MAP: '.' , '.' , false , false , lit , false
+GEOMETRY:center,center
+MAP
+........................................
+........................................
+..........----------+----------.........
+..........|........|.|........|.........
+..........|........|.|........|.........
+..........|----.----.----.----|.........
+..........+...................+.........
+..........+...................+.........
+..........|----.----.----.----|.........
+..........|........|.|........|.........
+..........|........|.|........|.........
+..........----------+----------.........
+........................................
+........................................
+ENDMAP
+# Dungeon Description
+
+# Magic Chest
+OBJECT:'(',"magic chest",(20,07)
+# MONSTER:'@',"aligned priest",(20,07),noalign,hostile
+MONSTER:'Z',"legionnaire",(20,06)
+MONSTER:'Z',"legionnaire",(20,08)
+MONSTER:'Z',"legionnaire",(21,07)
+MONSTER:'Z',"legionnaire",(19,07)
+# Doors
+DOOR:locked,(10,06)
+DOOR:locked,(10,07)
+DOOR:locked,(20,02)
+DOOR:locked,(20,11)
+DOOR:locked,(30,06)
+DOOR:locked,(30,07)
+# Stairs
+# Note:  The up stairs are *intentionally* off of the map.
+STAIR:(43,05),up
+STAIR:(20,06),down
+# Non diggable walls
+NON_DIGGABLE:(10,02,30,13)
+# Objects (inside the antechambers).
+OBJECT:random,random,(14,03)
+OBJECT:random,random,(15,03)
+OBJECT:random,random,(16,03)
+OBJECT:random,random,(14,10)
+OBJECT:random,random,(15,10)
+OBJECT:random,random,(16,10)
+OBJECT:random,random,(17,10)
+OBJECT:random,random,(24,03)
+OBJECT:random,random,(25,03)
+OBJECT:random,random,(26,03)
+OBJECT:random,random,(27,03)
+OBJECT:random,random,(24,10)
+OBJECT:random,random,(25,10)
+OBJECT:random,random,(26,10)
+OBJECT:random,random,(27,10)
+# Random traps
+TRAP:random,(15,04)
+TRAP:random,(25,04)
+TRAP:random,(15,09)
+TRAP:random,(25,09)
+TRAP:random,random
+TRAP:random,random
+# No random monsters - the morgue generation will put them in.
+
+#
+#	The "goal" level for the quest.
+#
+#	Here you meet Legion your nemesis monster.  You have to
+#	defeat Legion in combat to gain the artifact you have
+#	been assigned to retrieve.
+#
+
+MAZE: "Hnt-goal", ' '
+INIT_MAP: 'L' , '.' , false , false , unlit , false
+GEOMETRY:center,center
+MAP
+0.L......L.LLL.......LL....
+1.LLL.......L......LL......
+2LL.LL.............L.LL....
+3..........................
+4......................LL..
+5......................LLL.
+6LL........................
+7.LL.......................
+8.LL................LL.L...
+9..LL.....L.LL.......LLL...
+0.........LLL.........L....
+ENDMAP
+#0123456789012345678901234567890123456789012345678901234567890123456789012345
+#0         1         2   	   3	     4	       5		 6	       7
+# Dungeon Description
+RANDOM_PLACES:(14,04),(13,07)
+REGION:(00,00,25,10),unlit,"ordinary"
+# Stairs
+STAIR:levregion(01,00,74,19),levregion(15,05,60,15),up
+# Objects
+OBJECT:')',"stake",place[0],cursed,0,"Stake of Withering"
+OBJECT:random,random,random
+OBJECT:random,random,random
+OBJECT:random,random,random
+OBJECT:random,random,random
+OBJECT:random,random,random
+OBJECT:random,random,random
+OBJECT:random,random,random
+OBJECT:random,random,random
+OBJECT:random,random,random
+OBJECT:random,random,random
+OBJECT:random,random,random
+OBJECT:random,random,random
+OBJECT:random,random,random
+OBJECT:random,random,random
+# Random traps
+TRAP:"fire",random
+TRAP:"fire",random
+TRAP:"fire",random
+TRAP:"fire",random
+TRAP:random,random
+TRAP:random,random
+# Random monsters.
+MONSTER:'d',"Index Werewolf",place[0]
+
+#
+#	The "fill" levels for the quest.
+#
+#	These levels are used to fill out any levels not occupied by specific
+#	levels as defined above. "filla" is the upper filler, between the
+#	start and locate levels, and "fillb" the lower between the locate
+#	and goal levels.
+#
+
+MAZE: "Hnt-fila", ' '
+#
+FLAGS: hardfloor,shortsighted
+GEOMETRY:center,center
+#0         1         2         3         4         5         6         7  
+#0123456789012345678901234567890123456789012345678901234567890123456789012
+MAP
+0-------------------------------------------------------------------------
+1-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-
+2-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###S###-
+3-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-
+4--+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+------
+5.........................................................................
+6.........................................................................
+7.......--+-------+-------+-------+--.------+-------+-------+------.......
+8.......-###-###-###-###-###-###-###-.-###-###-###-###-###-###-###-.......
+9.......-###-###-###-###-###-###-###-.-###-###-###-###-###-###-###-.......
+0.......-###-###-###-###-###-###-###-.-###-###-###-###-###-###-###-.......
+1.......------+-------+-------+------.--+-------+-------+-------+--.......
+2.........................................................................
+3.........................................................................
+4--+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+--
+5-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-
+6-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-
+7-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-
+8-------------------------------------------------------------------------
+ENDMAP
+#0123456789012345678901234567890123456789012345678901234567890123456789012
+#0         1         2         3         4         5         6         7  
+
+STAIR: (00,05), up
+STAIR: (72,13), down
+
+# Doors
+DOOR:closed,(02,04)
+DOOR:closed,(06,04)
+DOOR:closed,(10,04)
+DOOR:closed,(14,04)
+DOOR:closed,(18,04)
+DOOR:closed,(22,04)
+DOOR:closed,(26,04)
+DOOR:closed,(30,04)
+DOOR:closed,(34,04)
+DOOR:closed,(38,04)
+DOOR:closed,(42,04)
+DOOR:closed,(46,04)
+DOOR:closed,(50,04)
+DOOR:closed,(54,04)
+DOOR:closed,(58,04)
+DOOR:closed,(62,04)
+DOOR:closed,(66,04)
+
+DOOR:closed,(66,04)
+
+DOOR:closed,(02,14)
+DOOR:closed,(06,14)
+DOOR:closed,(10,14)
+DOOR:closed,(14,14)
+DOOR:closed,(18,14)
+DOOR:closed,(22,14)
+DOOR:closed,(26,14)
+DOOR:closed,(30,14)
+DOOR:closed,(34,14)
+DOOR:closed,(38,14)
+DOOR:closed,(42,14)
+DOOR:closed,(46,14)
+DOOR:closed,(50,14)
+DOOR:closed,(54,14)
+DOOR:closed,(58,14)
+DOOR:closed,(62,14)
+DOOR:closed,(66,14)
+DOOR:closed,(70,14)
+
+DOOR:closed,(09,07)
+DOOR:closed,(17,07)
+DOOR:closed,(25,07)
+DOOR:closed,(33,07)
+DOOR:closed,(13,11)
+DOOR:closed,(21,11)
+DOOR:closed,(29,11)
+
+DOOR:closed,(43,07)
+DOOR:closed,(51,07)
+DOOR:closed,(59,07)
+DOOR:closed,(39,11)
+DOOR:closed,(47,11)
+DOOR:closed,(55,11)
+DOOR:closed,(63,11)
+
+# Creatures
+MONSTER:'@',"peasant",random,peaceful
+MONSTER:'@',"peasant",random,peaceful
+MONSTER:'@',"peasant",random,peaceful
+MONSTER:'@',"peasant",random,peaceful
+MONSTER:'@',"peasant",random,peaceful
+MONSTER:'@',"peasant",random,peaceful
+MONSTER:'@',"peasant",random,peaceful
+MONSTER:'@',"peasant",random,peaceful
+MONSTER:'@',"peasant",random,peaceful
+MONSTER:'@',"peasant",random,peaceful
+MONSTER:'@',"peasant",random,peaceful
+MONSTER:'@',"peasant",random,peaceful
+MONSTER:'@',"peasant",random,peaceful
+MONSTER:'@',"peasant",random,peaceful
+MONSTER:'@',"peasant",random,peaceful
+MONSTER:'@',"peasant",random,peaceful
+MONSTER:'@',"peasant",random,peaceful
+MONSTER:'@',"peasant",random,peaceful
+MONSTER:'@',"peasant",random,peaceful
+MONSTER:'@',"peasant",random,peaceful
+
+
+MAZE: "Hnt-filb", ' '
+FLAGS: shortsighted,hardfloor
+INIT_MAP: 'G' , 'T', true, true, unlit, true
+NOMAP
+#
+STAIR: random, up
+STAIR: random, down
+#
+OBJECT: random, random, random
+OBJECT: random, random, random
+OBJECT: random, random, random
+OBJECT: random, random, random
+OBJECT: random, random, random
+OBJECT: random, random, random
+OBJECT: random, random, random
+OBJECT: random, random, random
+OBJECT: random, random, random
+OBJECT: random, random, random
+OBJECT: random, random, random
+#
+TRAP: random, random
+TRAP: random, random
+TRAP: random, random
+TRAP: random, random
+#
+MONSTER:'@',"knight",random,peaceful
+MONSTER: random, random, random
+MONSTER: random, random, random
+MONSTER: random, random, random
+MONSTER: random, random, random
+MONSTER: random, random, random
+MONSTER: random, random, random
+MONSTER: random, random, random

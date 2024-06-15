@@ -1076,6 +1076,7 @@ you_regen_hp()
 			|| Role_if(PM_SAMURAI)
 			|| Role_if(PM_VALKYRIE)
 			|| Role_if(PM_CONVICT)
+			|| Role_if(PM_UNDEAD_HUNTER)
 			|| (u.sealsActive&SEAL_BERITH)
 		))
 			reglevel *= 2;
@@ -1226,6 +1227,8 @@ you_regen_pw()
 			reglevel += 10;
 		}
 		if (Role_if(PM_MADMAN))   reglevel += 9;
+		if (Role_if(PM_UNDEAD_HUNTER) && u.uinsight > 10)
+								  reglevel += 9;
 		if (Role_if(PM_HEALER))   reglevel += 6;
 		if (Role_if(PM_PRIEST))   reglevel += 6;
 		if (Role_if(PM_VALKYRIE)) reglevel += 3;
@@ -1370,10 +1373,12 @@ you_regen_san()
 	if (Role_if(PM_MONK))     reglevel += 8;
 	if (Role_if(PM_PRIEST))   reglevel += 7;
 	if (Role_if(PM_ANACHRONONAUT))   reglevel += 5;
+	if (Role_if(PM_UNDEAD_HUNTER) && u.veil)   reglevel += 5;
 	if (Role_if(PM_EXILE))    reglevel += spiritDsize();
 	if (Role_if(PM_CONVICT))  reglevel -= 3;
 	if (Role_if(PM_NOBLEMAN))  reglevel -= 5;
 	if (Role_if(PM_MADMAN))   reglevel -= 10;
+	if (Role_if(PM_UNDEAD_HUNTER) && u.uinsight >= 50)   reglevel -= 10;
 
 	if (Race_if(PM_ELF))   reglevel += 3;
 	if (Race_if(PM_ORC))   reglevel -= 3;

@@ -48,6 +48,14 @@ struct Role roles[] = {
 	/* Init   Lower  Higher */
 	{ 11, 0,  0, 8,  1, 0 },	/* Hit points */
 	{  1, 0,  1, 0,  0, 1 },14,	/* Energy */
+	/*init alignment
+	    base penalty, 
+	        healing penalty, 
+	          shield penalty,
+			     metal armor penalty,
+				     stat,
+						    favored spell,
+						                         favored penalty*/
 	10, 5, 0, 2, 10, A_INT, SPE_MAGIC_MAPPING,   -9
 },
 {	{"Anachrononaut", 0}, {
@@ -502,6 +510,32 @@ struct Role roles[] = {
 	10, 3,-3, 2, 9, A_INT, SPE_CREATE_MONSTER, -24
 },
 #endif
+{	{"Undead Hunter", 0}, {
+	{"Assistant",   0},
+	{"Berner",      0},
+	{"Beater",      0},
+	{"Inhumer",     0},
+	{"Hunter",      0},
+	{"Eliminator",  0},
+	{"Exterminator",0},
+	{"Vindicator",  0},
+	{"Old Hunter",  0} },
+	GOD_THE_COLLEGE, GOD_THE_CHOIR, GOD_DEFILEMENT, /* Bloodborne-ish */
+	"Hnt", "the Cathedral", "the Queen's Forest",
+	PM_UNDEAD_HUNTER, NON_PM, NON_PM,
+	PM_VICAR_AMALIA, PM_VERGER, PM_INDEX_WEREWOLF,
+	PM_HUMAN_WEREWOLF, PM_MIST_WOLF, S_DOG, S_VORTEX,
+	ART_STAKE_OF_WITHERING,
+	MA_HUMAN|MA_VAMPIRE|MA_ORC|MA_FEY, ROLE_MALE|ROLE_FEMALE |
+	  ROLE_LAWFUL|ROLE_NEUTRAL|ROLE_CHAOTIC,
+	/* Str Int Wis Dex Con Cha */
+	{   7, 10, 10,  7,  7,  7 },
+	{  18, 10, 10, 24, 18, 10 },
+	/* Init   Lower  Higher */
+	{ 14, 0,  0, 8,  1, 0 },	/* Hit points */
+	{  1, 3,  1, 2,  0, 6 },14,	/* Energy */
+	0, 10, -10, 10, 10, A_INT, SPE_FIREBALL,   -19
+},
 {	{"Valkyrie", 0}, {
 	{"Stripling",   0},
 	{"Skirmisher",  0},
@@ -2405,7 +2439,7 @@ int newgame;
 	// }
 	
 	/* Fix up the unknown firearms descriptions */
-	if(Role_if(PM_PIRATE) || Role_if(PM_ANACHRONONAUT)){
+	if(Role_if(PM_PIRATE) || Role_if(PM_ANACHRONONAUT) || Role_if(PM_UNDEAD_HUNTER)){
 		COPY_OBJ_DESCR(objects[FLINTLOCK], objects[HANDGUN]);
 		COPY_OBJ_DESCR(objects[PISTOL], objects[HANDGUN]);
 		

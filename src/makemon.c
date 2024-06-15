@@ -3328,6 +3328,21 @@ boolean greatequip;
 		} else if (mm == PM_GUIDE){
 			(void)mongets(mtmp, CLOAK, mkobjflags);
 			(void)mongets(mtmp, LOW_BOOTS, mkobjflags);
+		} else if (mm == PM_VERGER){
+			(void) mongets(mtmp, SCALPEL, mkobjflags);
+			otmp = mongets(mtmp, ROBE, mkobjflags);
+			if(otmp){
+				otmp->obj_color = CLR_BLACK;
+			}
+			(void) mongets(mtmp, HEALER_UNIFORM, mkobjflags);
+			if(mtmp->female){
+				(void) mongets(mtmp, VICTORIAN_UNDERWEAR, mkobjflags);
+			}
+			(void) mongets(mtmp, HIGH_BOOTS, mkobjflags);
+			(void) mongets(mtmp, GLOVES, mkobjflags);
+			(void) mongets(mtmp, POT_EXTRA_HEALING, mkobjflags);
+			(void) mongets(mtmp, POT_HEALING, mkobjflags);
+			(void)mongets(mtmp, POT_HEALING, mkobjflags);
 		} else if (mm == PM_WARRIOR){
 			(void)mongets(mtmp, !rn2(10) ? LONG_SWORD : ATGEIR, mkobjflags);
 			m_initthrow(mtmp, JAVELIN, d(4,4), mkobjflags);
@@ -3681,6 +3696,34 @@ boolean greatequip;
 			otmp = mksobj(LOW_BOOTS, mkobjflags|MKOBJ_NOINIT);
 			bless(otmp);
 			otmp->spe = 0;
+			(void) mpickobj(mtmp, otmp);
+		} else if (mm == PM_VICAR_AMALIA){
+			otmp = mksobj(BLADE_OF_MERCY, MKOBJ_NOINIT);
+			bless(otmp);
+			otmp->spe = 7;
+			(void) mpickobj(mtmp, otmp);
+			
+			otmp = mksobj(ROBE, MKOBJ_NOINIT);
+			bless(otmp);
+			otmp->spe = 5;
+			otmp->obj_color = CLR_WHITE;
+			(void) mpickobj(mtmp, otmp);
+			
+			otmp = mksobj(HEALER_UNIFORM, MKOBJ_NOINIT);
+			bless(otmp);
+			otmp->spe = 5;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(LONG_GLOVES, MKOBJ_NOINIT);
+			bless(otmp);
+			otmp->spe = 5;
+			otmp->obj_color = CLR_WHITE;
+			(void) mpickobj(mtmp, otmp);
+
+			otmp = mksobj(HIGH_BOOTS, MKOBJ_NOINIT);
+			bless(otmp);
+			otmp->spe = 5;
+			otmp->obj_color = CLR_WHITE;
 			(void) mpickobj(mtmp, otmp);
 		} else if (mm == PM_NORN){
 			/* Nothing */
@@ -8204,7 +8247,7 @@ int mmflags;
 						break;
 						case 5:{
 							long long oprop;
-							mtmp->mvar_deminymph_role = PM_HUNTER;
+							mtmp->mvar_deminymph_role = PM_UNDEAD_HUNTER;
 							switch(rnd(20)){
 								case 1:
 									oprop = OPROP_LIVEW;
@@ -8654,7 +8697,7 @@ int mmflags;
 							case 5:{
 								//Hunter
 								int weapon = rn2(3) ? RAKUYO : BLADE_OF_MERCY;
-								mtmp->mvar_deminymph_role = PM_HUNTER;
+								mtmp->mvar_deminymph_role = PM_UNDEAD_HUNTER;
 								if(weapon == BLADE_OF_MERCY){
 									if(rn2(3)){
 										otmp = mksobj(BLADE_OF_MERCY, mkobjflags|MKOBJ_ARTIF);
@@ -8728,7 +8771,7 @@ int mmflags;
 							case 6:{
 								//Club-claw
 								long long oprop;
-								mtmp->mvar_deminymph_role = PM_HUNTER;
+								mtmp->mvar_deminymph_role = PM_UNDEAD_HUNTER;
 								switch(rnd(10)){
 									case 1:
 										oprop = OPROP_ELECW;
@@ -8799,7 +8842,7 @@ int mmflags;
 							case 7:{
 								//Were claw
 								long long oprop;
-								mtmp->mvar_deminymph_role = PM_HUNTER;
+								mtmp->mvar_deminymph_role = PM_UNDEAD_HUNTER;
 								switch(rnd(20)){
 									case 1:
 										oprop = OPROP_ELECW;
@@ -8844,7 +8887,7 @@ int mmflags;
 							}break;
 							case 8:{
 								//Samurai
-								mtmp->mvar_deminymph_role = PM_HUNTER;
+								mtmp->mvar_deminymph_role = PM_UNDEAD_HUNTER;
 								if(rn2(2)){
 									otmp = mksobj(NAGINATA, mkobjflags|MKOBJ_ARTIF);
 									add_oprop(otmp, OPROP_RAKUW);

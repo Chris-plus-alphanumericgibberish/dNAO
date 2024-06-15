@@ -213,7 +213,7 @@ makedog()
 	int   pettype;
 	static int petname_used = 0;
 
-	if (preferred_pet == 'n' || Role_if(PM_ANACHRONONAUT)) return((struct monst *) 0);
+	if (preferred_pet == 'n' || Role_if(PM_ANACHRONONAUT) || Role_if(PM_UNDEAD_HUNTER)) return((struct monst *) 0);
 
 	pettype = pet_type();
 	if (pettype == PM_LITTLE_DOG)

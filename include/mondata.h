@@ -1232,9 +1232,10 @@
 #define mon_healer(mon)	((mon)->mtyp == PM_HEALER || (mon)->mtyp == PM_HIPPOCRATES || (mon)->mtyp == PM_ATTENDANT || \
 							 (mon)->mtyp == PM_SISTER_T_EIRASTRA || (mon)->mtyp == PM_PEN_A_MENDICANT || (mon)->mtyp == PM_MENDICANT_DRIDER || \
 							 (mon)->mtyp == PM_MENDICANT_SPROW || \
+							 (mon)->mtyp == PM_VERGER || (mon)->mtyp == PM_VICAR_AMALIA || \
 							 ((mon)->mtyp == PM_HOD_SEPHIRAH && Role_if(PM_HEALER)) || \
 							 ((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_HEALER))
-#define mon_undead_hunter(mon)	(((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_HUNTER))
+#define mon_undead_hunter(mon)	(((mon)->mtyp == PM_DEMINYMPH && (mon)->mvar_deminymph_role == PM_UNDEAD_HUNTER))
 #define mon_knight(mon)	((mon)->mtyp == PM_KNIGHT || (mon)->mtyp == PM_KING_ARTHUR || (mon)->mtyp == PM_SIR_GARLAND || \
 						 (mon)->mtyp == PM_GARLAND || (mon)->mtyp == PM_CELEBORN || (mon)->mtyp == PM_DANTRAG || \
 						 ((mon)->mtyp == PM_HOD_SEPHIRAH && Role_if(PM_KNIGHT)) || \

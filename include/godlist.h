@@ -194,6 +194,16 @@ GOD_V2("Lobon",                 A_NEUTRAL, HOLY_HOLINESS,
 GOD_V2("Tamash",                A_CHAOTIC, NEUTRAL_HOLINESS,
 	MINIONS(PM_HOMUNCULUS,PM_COURE_ELADRIN,PM_ANGEL,PM_WARDEN_ARCHON,PM_CAILLEA_ELADRIN)
 	),
+/* undead hunter */
+GOD_V2("the college",              A_LAWFUL, NEUTRAL_HOLINESS,
+	MINIONS()
+	),
+GOD_V2("the choir",                 A_NEUTRAL, HOLY_HOLINESS,
+	MINIONS()
+	),
+GOD_V2("defilement",                A_CHAOTIC, UNHOLY_HOLINESS,
+	MINIONS()
+	),
 /* valkyrie, Norse */
 GOD_V2("Tyr",                   A_LAWFUL, HOLY_HOLINESS,
 	MINIONS(PM_ARCADIAN_AVENGER,PM_SHIELD_ARCHON,PM_ANGEL,PM_WARDEN_ARCHON,PM_THRONE_ARCHON)

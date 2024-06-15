@@ -13581,6 +13581,8 @@ int vis;						/* True if action is at all visible to the player */
 		/* player-only sources of sneak-attacking */
 		if (Role_if(PM_ROGUE) && !Upolyd)
 			sneak_dice++;
+		if (Role_if(PM_UNDEAD_HUNTER) && !Upolyd)
+			sneak_dice++;
 		if (Role_if(PM_ANACHRONONAUT) && Race_if(PM_MYRKALFR) && !Upolyd)
 			sneak_dice++;
 		if (Role_if(PM_CONVICT) && !Upolyd && weapon && weapon->owornmask && weapon->otyp == SPOON)
@@ -13691,7 +13693,11 @@ int vis;						/* True if action is at all visible to the player */
 		}
 
 		/* calculate snekdmg */
-		snekdmg = d(sneak_dice, snekdie);
+		/* Undead Hunters are not as good as Rogues, but any additional source of sneak attack damage upgrades their natural die to a regular-strength one */
+		if(youagr && Role_if(PM_UNDEAD_HUNTER) && !Upolyd && sneak_dice == 1){
+			snekdmg = rnd(2*snekdie/3);
+		}
+		else snekdmg = d(sneak_dice, snekdie);
 		lifehunt_sneak_attacking = (weapon && weapon->oartifact == ART_LIFEHUNT_SCYTHE);
 	}
 	else {

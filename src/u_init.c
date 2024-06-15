@@ -579,6 +579,17 @@ static struct trobj Tourist[] = {
 	{ 0, 0, 0, 0, 0 }
 };
 #endif
+static struct trobj UndeadHunter[] = {
+	{ JACKET, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
+	{ RUFFLED_SHIRT, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
+	{ FEDORA, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
+	{ CLOAK, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
+	{ GLOVES, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
+	{ HIGH_BOOTS, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
+	{ TORCH, 0, TOOL_CLASS, 3, 0 },
+	{ POT_BOOZE, 0, POTION_CLASS, 10, 1 },
+	{ 0, 0, 0, 0, 0 }
+};
 static struct trobj Valkyrie[] = {
 	{ SPEAR, 1, WEAPON_CLASS, 1, UNDEF_BLESS },
 	{ BOW, 	 1, WEAPON_CLASS, 1, UNDEF_BLESS },
@@ -1547,6 +1558,24 @@ static const struct def_skill Skill_T[] = {
 };
 #endif /* TOURIST */
 
+static const struct def_skill Skill_U[] = {
+    { P_LONG_SWORD, P_SKILLED }, { P_WHIP, P_SKILLED },
+    { P_AXE, P_SKILLED }, { P_HARVEST, P_SKILLED },
+    { P_TWO_HANDED_SWORD, P_SKILLED }, { P_HAMMER, P_SKILLED },
+    { P_SABER, P_SKILLED }, { P_BROAD_SWORD, P_SKILLED },
+    { P_SHORT_SWORD, P_SKILLED }, { P_BARE_HANDED_COMBAT, P_EXPERT },
+    { P_CLUB, P_SKILLED }, { P_MACE, P_SKILLED },
+
+    { P_DAGGER, P_EXPERT }, { P_CROSSBOW, P_EXPERT },
+	{ P_FIREARM, P_SKILLED },
+    { P_BOW, P_BASIC }, { P_SLING, P_BASIC },
+    { P_DART, P_BASIC }, { P_SHURIKEN, P_BASIC },
+    { P_BOOMERANG, P_BASIC },
+    { P_MATTER_SPELL, P_BASIC },
+	{ P_ATTACK_SPELL, P_SKILLED }, { P_HEALING_SPELL, P_SKILLED },
+	{ P_DIVINATION_SPELL, P_EXPERT },
+};
+
 static const struct def_skill Skill_V[] = {
     { P_DAGGER, P_BASIC },			{ P_AXE, P_EXPERT },
     { P_PICK_AXE, P_SKILLED },		{ P_SHORT_SWORD, P_SKILLED },
@@ -2445,6 +2474,15 @@ u_init()
 		skill_init(Skill_T);
 		break;
 #endif
+	case PM_UNDEAD_HUNTER:
+		knows_object(POT_HEALING);
+		knows_object(POT_EXTRA_HEALING);
+		knows_object(POT_FULL_HEALING);
+		knows_object(SILVER_BULLET);
+		knows_object(BULLET);
+		ini_inv(UndeadHunter);
+		skill_init(Skill_U);
+	break;
 	case PM_VALKYRIE:
 		ini_inv(Valkyrie);
 		// if(!rn2(6)) ini_inv(Lamp);
@@ -2965,6 +3003,7 @@ int otyp;
 #ifdef TOURIST
      case PM_TOURIST:		skills = Skill_T; break;
 #endif
+     case PM_UNDEAD_HUNTER:	skills = Skill_U; break;
      case PM_VALKYRIE:		skills = Skill_V; break;
      case PM_WIZARD:		skills = Skill_W; break;
      default:			skills = 0; break;	/* lint suppression */
