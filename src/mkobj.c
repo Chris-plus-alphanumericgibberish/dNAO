@@ -257,6 +257,44 @@ static const struct icp bow_materials[] = {
 	{  0, 0 }
 };
 
+static const struct icp cane_materials[] = {
+	{550, 0 }, /* use base material */
+	{250, WOOD },
+	{ 90, COPPER },
+	{ 50, SILVER },
+	{ 25, BONE },
+	{ 20, MITHRIL },
+	{ 10, GOLD },
+	{  5, DRAGON_HIDE },
+	{  0, 0 }
+};
+
+static const struct icp brick_materials[] = {
+	{550, 0 }, /* use base material */
+	{150, WOOD },
+	{100, IRON },//800
+	{ 50, LEAD },
+	{ 25, SILVER },
+	{ 25, PLATINUM },//900
+	{ 25, MITHRIL },//925
+	{ 25, WAX },//950
+	{ 13, GLASS },
+	{ 12, GEMSTONE },
+	{ 10, OBSIDIAN_MT },
+	{  0, 0 }
+};
+
+static const struct icp special_materials[] = {
+	{250, 0 }, /* use base material */
+	{250, SILVER },
+	{150, GOLD },
+	{100, IRON },
+	{ 75, MITHRIL },
+	{ 75, PLATINUM },
+	{ 50, GREEN_STEEL },
+	{ 50, DRAGON_HIDE },
+	{  0, 0 }
+};
 
 struct obj *
 mkobj_at(let, x, y, mkflags)
@@ -662,6 +700,24 @@ int mkflags;
 	otmp->mp = (struct mask_properties *) 0;
 	
 	init_obj_material(otmp);
+	if(otmp->otyp == CANE){
+		int mat_primary = otmp->obj_material;
+		otmp->otyp = WHIP_SAW;
+		init_obj_material(otmp);
+
+		otmp->otyp = CANE;
+		otmp->ovar1_alt_mat = otmp->obj_material;
+		set_material_gm(otmp, mat_primary);
+	}
+	else if(otmp->otyp == WHIP_SAW){
+		int mat_primary = otmp->obj_material;
+		otmp->otyp = CANE;
+		init_obj_material(otmp);
+
+		otmp->otyp = WHIP_SAW;
+		otmp->ovar1_alt_mat = otmp->obj_material;
+		set_material_gm(otmp, mat_primary);
+	}
 	
 	set_object_color(otmp);
 	
@@ -719,7 +775,6 @@ int mkflags;
 			}
 			else	blessorcurse(otmp, 10);
 
-
 			if (is_vibroweapon(otmp)){
 				otmp->ovar1_charges = 80L + rnd(20);
 			}
@@ -761,6 +816,14 @@ int mkflags;
 					otmp->ovar1_moonPhase = FULL_MOON;
 					break;
 				}
+			}
+			else if(otmp->otyp == CHURCH_HAMMER){
+				struct obj *sword = mksobj(HUNTER_S_SHORTSWORD, mkflags);
+				add_to_container(otmp, sword);
+			}
+			else if(otmp->otyp == CHURCH_BLADE){
+				struct obj *sword = mksobj(HUNTER_S_LONGSWORD, mkflags);
+				add_to_container(otmp, sword);
 			}
 			//#ifdef FIREARMS
 			if (otmp->otyp == STICK_OF_DYNAMITE) {
@@ -2142,6 +2205,17 @@ struct obj* obj;
 		return eli_materials;
 	case SOUL_LENS:
 		return lens_materials;
+	case CANE:
+	case CHURCH_BLADE:
+	case CHURCH_SHEATH:
+		return cane_materials;
+	case CHURCH_HAMMER:
+	case CHURCH_BRICK:
+		return brick_materials;
+	case WHIP_SAW:
+	case HUNTER_S_SHORTSWORD:
+	case HUNTER_S_LONGSWORD:
+		return special_materials;
 	default:
 		break;
 	}
@@ -2670,7 +2744,13 @@ register struct obj *obj;
 	if (obj->oartifact)
 		wt = artifact_weight(obj);
 
-	if(obj->obj_material != base_mat) {
+	if(obj->otyp == CANE || obj->otyp == WHIP_SAW){
+		int otyp_alt = obj->otyp == CANE ? WHIP_SAW : CANE;
+		int base_mat_alt = (obj->oartifact && artilist[obj->oartifact].material != MT_DEFAULT && artilist[obj->oartifact].weight != WT_DEFAULT) ? artilist[obj->oartifact].material : objects[otyp_alt].oc_material;
+
+		wt = ((wt * materials[obj->obj_material].density / materials[base_mat].density) + (wt * materials[obj->ovar1_alt_mat].density / materials[base_mat_alt].density))/2;
+	}
+	else if(obj->obj_material != base_mat) {
 		/* do not apply this to artifacts; those are handled in artifact_weight() */
 		wt = wt * materials[obj->obj_material].density / materials[base_mat].density;
 	}
@@ -2708,7 +2788,7 @@ register struct obj *obj;
 				wt += mons[PM_VAMPIRE_LADY].cwt;
 		}
 	}
-	if ((Is_container(obj) && obj->otyp != MAGIC_CHEST) || obj->otyp == STATUE) {
+	if ((Is_container(obj) && obj->otyp != MAGIC_CHEST) || obj->otyp == STATUE || obj->otyp == CHURCH_BLADE || obj->otyp == CHURCH_HAMMER) {
 		struct obj *contents;
 		register int cwt = 0;
 

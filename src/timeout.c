@@ -427,10 +427,10 @@ boolean lifesave_forced;
 				u.uprops[spiritprops[i]].extrinsic &= ~W_SPIRIT;
 
 		} else if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID){
-			uwep->ovar1_seals &= ~spir;
+			uwep->ovara_seals &= ~spir;
 			if(uwep->lamplit && !artifact_light(uwep)) end_burn(uwep, TRUE);
 		} else if(uswapwep  && uswapwep->oartifact == ART_PEN_OF_THE_VOID){
-			uswapwep->ovar1_seals &= ~spir;
+			uswapwep->ovara_seals &= ~spir;
 			if(uswapwep->lamplit && !artifact_light(uswapwep)) end_burn(uswapwep, TRUE);
 		}
 		if(u.spiritTineA == spir){
@@ -607,16 +607,16 @@ nh_timeout()
 					u.uprops[spiritprops[i]].extrinsic &= ~W_SPIRIT;
 			}
 			if(uwep && uwep->oartifact==ART_PEN_OF_THE_VOID){
-				uwep->ovar1_seals = 0;
-				uwep->ovar1_seals |= u.spiritTineA;
-				uwep->ovar1_seals |= u.spiritTineB;
+				uwep->ovara_seals = 0;
+				uwep->ovara_seals |= u.spiritTineA;
+				uwep->ovara_seals |= u.spiritTineB;
 				if(artifact_light(uwep) && !uwep->lamplit) begin_burn(uwep);
 				else if(!artifact_light(uwep) && uwep->lamplit) end_burn(uwep, TRUE);
 			}
 			else if(uswapwep && uswapwep->oartifact==ART_PEN_OF_THE_VOID){
-				uswapwep->ovar1_seals = 0;
-				uswapwep->ovar1_seals |= u.spiritTineA;
-				uswapwep->ovar1_seals |= u.spiritTineB;
+				uswapwep->ovara_seals = 0;
+				uswapwep->ovara_seals |= u.spiritTineA;
+				uswapwep->ovara_seals |= u.spiritTineB;
 				// if(artifact_light(uswapwep) && !uswapwep->lamplit) begin_burn(uswapwep);
 				// else if(!artifact_light(uswapwep) && uswapwep->lamplit) end_burn(uswapwep, TRUE);
 			}

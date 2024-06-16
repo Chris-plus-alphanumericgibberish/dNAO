@@ -295,16 +295,16 @@ long mask;
 
 	/*Handle the pen of the void here*/
 	if(obj && obj->oartifact == ART_PEN_OF_THE_VOID){
-		if(obj->ovar1_seals && !Role_if(PM_EXILE)){
+		if(obj->ovara_seals && !Role_if(PM_EXILE)){
 			long oldseals = u.sealsKnown;
-			u.sealsKnown |= obj->ovar1_seals;
+			u.sealsKnown |= obj->ovara_seals;
 			if(oldseals != u.sealsKnown) You("learned new seals.");
 		}
-		obj->ovar1_seals = u.spiritTineA|u.spiritTineB;
+		obj->ovara_seals = u.spiritTineA|u.spiritTineB;
 		if(u.voidChime){
 			int i;
 			for(i=0; i<u.sealCounts; i++){
-				obj->ovar1_seals |= u.spirit[i];
+				obj->ovara_seals |= u.spirit[i];
 			}
 		}
 	} else if(obj && obj->oartifact == ART_HELM_OF_THE_ARCANE_ARCHER){
@@ -402,8 +402,8 @@ register struct obj *obj;
 		}
 		
 		if(obj->oartifact == ART_GAUNTLETS_OF_THE_BERSERKER){
-//        adj_abon(uarmg, -uarmg->ovar1_gober);
-          uarmg->ovar1_gober = 0;
+//        adj_abon(uarmg, -uarmg->ovara_gober);
+          uarmg->ovara_gober = 0;
         }
 		obj->owornmask &= ~wp->w_mask;
 		if (obj->oartifact)

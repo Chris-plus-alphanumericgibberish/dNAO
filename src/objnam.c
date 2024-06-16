@@ -1172,138 +1172,138 @@ char *buf;
 		return;
 	}
 
-	if (obj->ovar1_seals&SEAL_AHAZU){
+	if (obj->ovara_seals&SEAL_AHAZU){
 		Strcat(buf, "hungry ");
 	}
 
-	if (obj->ovar1_seals&SEAL_AMON){
-		if (obj->ovar1_seals&SEAL_ENKI)
+	if (obj->ovara_seals&SEAL_AMON){
+		if (obj->ovara_seals&SEAL_ENKI)
 			Strcat(buf, "steaming ");
-		else if (obj->ovar1_seals&SEAL_BERITH)
+		else if (obj->ovara_seals&SEAL_BERITH)
 			Strcat(buf, "blood-crusted ");
 		else
 			Strcat(buf, "fiery ");
 	}
 
-	if (obj->ovar1_seals&SEAL_ANDREALPHUS){
+	if (obj->ovara_seals&SEAL_ANDREALPHUS){
 		Strcat(buf, "curved ");
 	}
 
-	if (obj->ovar1_seals&SEAL_ANDROMALIUS){
+	if (obj->ovara_seals&SEAL_ANDROMALIUS){
 		Strcat(buf, "mischievous ");
 	}
 
-	if (obj->ovar1_seals&SEAL_ASTAROTH){
+	if (obj->ovara_seals&SEAL_ASTAROTH){
 		Strcat(buf, "crackling ");
 	}
 
-	if (obj->ovar1_seals&SEAL_BALAM){
+	if (obj->ovara_seals&SEAL_BALAM){
 		Strcat(buf, "freezing ");
 	}
 
-	if (obj->ovar1_seals&SEAL_BERITH){
-		if (obj->ovar1_seals&SEAL_ENKI)
+	if (obj->ovara_seals&SEAL_BERITH){
+		if (obj->ovara_seals&SEAL_ENKI)
 			Strcat(buf, "blood-dripping ");
-		else if (!(obj->ovar1_seals&SEAL_AMON))
+		else if (!(obj->ovara_seals&SEAL_AMON))
 			Strcat(buf, "blood-soaked ");
 	}
 
-	if (obj->ovar1_seals&SEAL_BUER){
+	if (obj->ovara_seals&SEAL_BUER){
 		Strcat(buf, "lively ");
 	}
 
-	if (obj->ovar1_seals&SEAL_CHUPOCLOPS){
+	if (obj->ovara_seals&SEAL_CHUPOCLOPS){
 		Strcat(buf, "webbed ");
 	}
 
-	if (obj->ovar1_seals&SEAL_DANTALION){
+	if (obj->ovara_seals&SEAL_DANTALION){
 		Strcat(buf, "jeweled ");
 	}
 
-	if (obj->ovar1_seals&SEAL_ECHIDNA){
+	if (obj->ovara_seals&SEAL_ECHIDNA){
 		Strcat(buf, "caustic ");
 	}
 
-	if (obj->ovar1_seals&SEAL_EDEN){
+	if (obj->ovara_seals&SEAL_EDEN){
 		// covered in poisoned words
 	}
 
-	if (obj->ovar1_seals&SEAL_ENKI){
-		if (obj->ovar1_seals&SEAL_IRIS)
+	if (obj->ovara_seals&SEAL_ENKI){
+		if (obj->ovara_seals&SEAL_IRIS)
 			Strcat(buf, "dehydrated ");
-		else if (!(obj->ovar1_seals&SEAL_AMON) && !(obj->ovar1_seals&SEAL_BERITH))
+		else if (!(obj->ovara_seals&SEAL_AMON) && !(obj->ovara_seals&SEAL_BERITH))
 			Strcat(buf, "dripping ");
 	}
 
-	if (obj->ovar1_seals&SEAL_EURYNOME){
+	if (obj->ovara_seals&SEAL_EURYNOME){
 		Strcat(buf, "vengeful ");
 	}
 
-	if (obj->ovar1_seals&SEAL_EVE){
+	if (obj->ovara_seals&SEAL_EVE){
 		Strcat(buf, "vine-wrapped ");
 	}
 
-	if (obj->ovar1_seals&SEAL_FAFNIR){
+	if (obj->ovara_seals&SEAL_FAFNIR){
 		Strcat(buf, "ruinous ");
 	}
 
-	if (obj->ovar1_seals&SEAL_HUGINN_MUNINN){
+	if (obj->ovara_seals&SEAL_HUGINN_MUNINN){
 		Strcat(buf, "talon-shaped ");
 	}
 
-	if (obj->ovar1_seals&SEAL_IRIS){
+	if (obj->ovara_seals&SEAL_IRIS){
 		Strcat(buf, "rainbow ");
 	}
 
-	if (obj->ovar1_seals&SEAL_JACK){
+	if (obj->ovara_seals&SEAL_JACK){
 		Strcat(buf, "glowing ");
 	}
 
-	if (obj->ovar1_seals&SEAL_MALPHAS){
+	if (obj->ovara_seals&SEAL_MALPHAS){
 		Strcat(buf, "crow-embossed ");
 	}
 
-	if (obj->ovar1_seals&SEAL_MARIONETTE){
+	if (obj->ovara_seals&SEAL_MARIONETTE){
 		Strcat(buf, "wire-wrapped ");
 	}
 
-	if (obj->ovar1_seals&SEAL_MOTHER){
+	if (obj->ovara_seals&SEAL_MOTHER){
 		Strcat(buf, "eye-marked ");
 	}
 
-	if (obj->ovar1_seals&SEAL_NABERIUS){
+	if (obj->ovara_seals&SEAL_NABERIUS){
 		Strcat(buf, "fanged ");
 	}
 
-	if (obj->ovar1_seals&SEAL_ORTHOS){
+	if (obj->ovara_seals&SEAL_ORTHOS){
 		Strcat(buf, "whistling ");
 	}
 
-	if (obj->ovar1_seals&SEAL_OSE){
+	if (obj->ovara_seals&SEAL_OSE){
 		Strcat(buf, "murmuring ");
 	}
 
-	if (obj->ovar1_seals&SEAL_OTIAX){
+	if (obj->ovara_seals&SEAL_OTIAX){
 		Strcat(buf, "mist-wreathed ");
 	}
 
-	if (obj->ovar1_seals&SEAL_PAIMON){
+	if (obj->ovara_seals&SEAL_PAIMON){
 		Strcat(buf, "ink-stained ");
 	}
 
-	if (obj->ovar1_seals&SEAL_SHIRO){
+	if (obj->ovara_seals&SEAL_SHIRO){
 		Strcat(buf, "distinctive ");
 	}
 
-	if (obj->ovar1_seals&SEAL_SIMURGH){
+	if (obj->ovara_seals&SEAL_SIMURGH){
 		Strcat(buf, "feathered ");
 	}
 
-	if (obj->ovar1_seals&SEAL_TENEBROUS){
+	if (obj->ovara_seals&SEAL_TENEBROUS){
 		Strcat(buf, "shadowed ");
 	}
 
-	if (obj->ovar1_seals&SEAL_YMIR){
+	if (obj->ovara_seals&SEAL_YMIR){
 		// covered in poisoned words
 	}
 
@@ -2108,8 +2108,8 @@ weapon:
 				Sprintf(eos(buf), " (%s)", OBJ_NAME(objects[obj->otyp]));
 			}
 			if (obj->oartifact == ART_SCALPEL_OF_LIFE_AND_DEATH){
-				if (COMMAND_LIFE == obj->ovar1_lifeDeath) Sprintf(eos(buf), " (life)");
-				if (COMMAND_DEATH == obj->ovar1_lifeDeath) Sprintf(eos(buf), " (death)");
+				if (COMMAND_LIFE == obj->ovara_lifeDeath) Sprintf(eos(buf), " (life)");
+				if (COMMAND_DEATH == obj->ovara_lifeDeath) Sprintf(eos(buf), " (death)");
 			}
 			if(obj->oartifact == ART_SINGING_SWORD && uwep == obj){
 				switch(obj->osinging){
@@ -4820,6 +4820,14 @@ int wishflags;
 	if (strncmpi(bp, "heretic doll", 12)) /* not the "heretic" player monster */
 	if (strncmpi(bp, "archaeologist doll", 18)) /* not the "archaeologist" player monster */
 	if (strncmpi(bp, "high priest doll", 16)) /* not the "high priest" monster */
+	if (strncmpi(bp, "monk's staff", 10))
+	if (strncmpi(bp, "soldier's saber", 15))
+	if (strncmpi(bp, "soldier's rapier", 16))
+	if (strncmpi(bp, "nightmare's bullet mold", 23))
+	if (strncmpi(bp, "hunter's axe", 12))
+	if (strncmpi(bp, "hunter's long-axe", 17))
+	if (strncmpi(bp, "hunter's shortsword", 19))
+	if (strncmpi(bp, "hunter's longsword", 18))
 	if (strncmpi(bp, "spear of peace", 14)) /* not the "Peace" monster */
 	if (mntmp < LOW_PM && strlen(bp) > 2 &&
 	    (mntmp = name_to_mon(bp)) >= LOW_PM) {
@@ -4954,6 +4962,12 @@ int wishflags;
 	   strncmpi(bp, "armor of khazad-dum", 19) && 
 	   strncmpi(bp, "black dress", 11) && 
 	   strncmpi(bp, "noble's dress", 13) &&
+	   strncmpi(bp, "monk's staff", 12) &&
+	   strncmpi(bp, "soldier's saber", 15) &&
+	   strncmpi(bp, "soldier's rapier", 16) &&
+	   strncmpi(bp, "nightmare's bullet mold", 23) &&
+	   strncmpi(bp, "hunter's axe", 12) &&
+	   strncmpi(bp, "hunter's long-axe", 17) &&
 	   strncmpi(bp, "sceptre of lolth", 16) && 
 	   strncmpi(bp, "atma weapon", 11) &&
 	   strncmpi(bp, "wand of orcus", 13) &&

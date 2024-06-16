@@ -616,7 +616,7 @@ const char *name;
 	
     if(!strcmp((&artilist[ART_SCALPEL_OF_LIFE_AND_DEATH])->name,name) &&
        obj && obj->otyp == SCALPEL){
-      obj->ovar1_lifeDeath = COMMAND_DEATH;
+      obj->ovara_lifeDeath = COMMAND_DEATH;
     }
     if(((!strcmp((&artilist[ART_FIGURINE_OF_GALATEA])->name,name)) || (!strcmp((&artilist[ART_FIGURINE_OF_PYGMALION])->name,name))) &&
        obj && obj->otyp == FIGURINE){

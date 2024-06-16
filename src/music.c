@@ -957,7 +957,7 @@ int distance;
 		}
 	}
 	if(uwep && uwep->oartifact == ART_SINGING_SWORD){
-		uwep->ovar1_heard |= OHEARD_FEAR;
+		uwep->ovara_heard |= OHEARD_FEAR;
 	}
 }
 
@@ -999,7 +999,7 @@ int distance;
 	    mtmp = mtmp->nmon;
 	}
 	if(uwep && uwep->oartifact == ART_SINGING_SWORD){
-		uwep->ovar1_heard |= OHEARD_LETHARGY;
+		uwep->ovara_heard |= OHEARD_LETHARGY;
 	}
 }
 
@@ -1022,7 +1022,7 @@ int distance;
 	    mtmp = mtmp->nmon;
 	}
 	if(uwep && uwep->oartifact == ART_SINGING_SWORD){
-		uwep->ovar1_heard |= OHEARD_HASTE;
+		uwep->ovara_heard |= OHEARD_HASTE;
 	}
 }
 
@@ -1052,7 +1052,7 @@ int distance;
 	    mtmp = mtmp->nmon;
 	}
 	if(uwep && uwep->oartifact == ART_SINGING_SWORD){
-		uwep->ovar1_heard |= OHEARD_HEALING;
+		uwep->ovara_heard |= OHEARD_HEALING;
 	}
 }
 
@@ -1097,7 +1097,7 @@ int distance;
 		mtmp = mtmp->nmon;
 	}
 	if(uwep && uwep->oartifact == ART_SINGING_SWORD){
-		uwep->ovar1_heard |= OHEARD_COURAGE;
+		uwep->ovara_heard |= OHEARD_COURAGE;
 	}
 }
 
@@ -1118,7 +1118,7 @@ int distance;
 		mtmp = mtmp->nmon;
 	}
 	if(uwep && uwep->oartifact == ART_SINGING_SWORD){
-		uwep->ovar1_heard |= OHEARD_CONFUSE;
+		uwep->ovara_heard |= OHEARD_CONFUSE;
 	}
 }
 
@@ -1140,7 +1140,7 @@ int distance;
 		mtmp = mtmp->nmon;
 	}
 	if(uwep && uwep->oartifact == ART_SINGING_SWORD){
-		uwep->ovar1_heard |= OHEARD_CANCEL;
+		uwep->ovara_heard |= OHEARD_CANCEL;
 	}
 }
 
@@ -1200,7 +1200,7 @@ int distance;
 		mtmp = nextmon;
 	}
 	if(uwep && uwep->oartifact == ART_SINGING_SWORD){
-		uwep->ovar1_heard |= OHEARD_RALLY;
+		uwep->ovara_heard |= OHEARD_RALLY;
 	}
 }
 #endif  /* BARD */
@@ -1323,7 +1323,7 @@ int distance;
 		mtmp = mtmp->nmon;
 	}
 	if(uwep && uwep->oartifact == ART_SINGING_SWORD){
-		uwep->ovar1_heard |= OHEARD_LETHARGY;
+		uwep->ovara_heard |= OHEARD_LETHARGY;
 	}
 }
 #endif /* BARD */
@@ -1814,7 +1814,7 @@ struct obj *instr;
 		put_monsters_to_sleep(u.ulevel * 5);
 		exercise(A_DEX, TRUE);
 		if(uwep && uwep->oartifact == ART_SINGING_SWORD){
-			uwep->ovar1_heard |= OHEARD_LETHARGY;
+			uwep->ovara_heard |= OHEARD_LETHARGY;
 		}
 		break;
 	    } /* else FALLTHRU */
@@ -1845,8 +1845,8 @@ struct obj *instr;
 		}
 		makeknown(instr->otyp);
 		if(uwep && uwep->oartifact == ART_SINGING_SWORD){
-			if(instr->otyp == FROST_HORN) uwep->ovar1_heard |= OHEARD_FROST;
-			if(instr->otyp == FIRE_HORN) uwep->ovar1_heard |= OHEARD_FIRE;
+			if(instr->otyp == FROST_HORN) uwep->ovara_heard |= OHEARD_FROST;
+			if(instr->otyp == FIRE_HORN) uwep->ovara_heard |= OHEARD_FIRE;
 		}
 		break;
 	    } /* else FALLTHRU */
@@ -1889,7 +1889,7 @@ struct obj *instr;
 		awaken_monsters(ROWNO * COLNO);
 		makeknown(DRUM_OF_EARTHQUAKE);
 		if(uwep && uwep->oartifact == ART_SINGING_SWORD){
-			uwep->ovar1_heard |= OHEARD_QUAKE;
+			uwep->ovara_heard |= OHEARD_QUAKE;
 		}
 		break;
 	    } /* else FALLTHRU */

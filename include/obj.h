@@ -341,14 +341,8 @@ struct obj {
 #define ovar1_secretsSecret ovar1
 #define ovar1_iea_upgrades ovar1
 #define ovar1_puzzle_steps ovar1
+#define ovar1_alt_mat ovar1
 
-#define ovar1_gober ovar1
-#define ovar1_seals ovar1
-#define ovar1_timeout ovar1
-#define ovar1_lifeDeath ovar1
-#define ovar1_artiTheftType ovar1
-#define ovar1_heard ovar1
-#define ovar1_carapace ovar1
 	/* Number of viperwhip heads */
 	/* Moon axe phase */
 	/* Acid venom non-1d6 damage */
@@ -375,6 +369,8 @@ struct obj {
 	|| (otmp)->oclass == RING_CLASS \
 	|| (otmp)->otyp == DOLL_S_TEAR \
 	|| (otmp)->otyp == PINCER_STAFF \
+	|| (otmp)->otyp == CANE \
+	|| (otmp)->otyp == WHIP_SAW \
 	|| is_imperial_elven_armor(otmp) \
 	)
 #define ECLIPSE_MOON	0
@@ -383,7 +379,7 @@ struct obj {
 #define GIBBOUS_MOON	3
 #define FULL_MOON	 	4
 
-#define check_carapace_mod(obj, prop) ((obj)->ovar1_carapace&(prop))
+#define check_carapace_mod(obj, prop) ((obj)->ovara_carapace&(prop))
 
 #define check_imp_mod(obj, prop) ((obj)->ovar1_iea_upgrades&(prop))
 #define add_imp_mod(obj, prop) ((obj)->ovar1_iea_upgrades |= (prop))
@@ -426,13 +422,22 @@ struct obj {
 
 
 
+	long ovar_art;		/* extra variable. Specifies: */
+
+#define ovara_gober ovar_art
+#define ovara_seals ovar_art
+#define ovara_timeout ovar_art
+#define ovara_lifeDeath ovar_art
+#define ovara_artiTheftType ovar_art
+#define ovara_heard ovar_art
+#define ovara_carapace ovar_art
 	/* Songs that the Singing Sword has heard */
 	/* Spirits bound into the Pen of the Void */
 	/* The ema of damage taken for gloves of the berserker */
 	/* Life/Death for the scalpel of life and death */
 	/* Theft type for stealing artifacts (reaver (scimitar) and avarice (shortsword) */
 	/* Misc data for the artifact spellbooks */
-#define obj_art_uses_ovar1(otmp) (\
+#define obj_art_uses_ovar_art(otmp) (\
 	   (otmp)->oartifact == ART_SINGING_SWORD \
 	|| (otmp)->oartifact == ART_PEN_OF_THE_VOID \
 	|| (otmp)->oartifact == ART_GAUNTLETS_OF_THE_BERSERKER \
@@ -478,6 +483,19 @@ struct obj {
 #define	CPROP_WINGS			0x00002000L
 #define	CPROP_CLAWS			0x00004000L
 #define	CPROP_CROWN			0x00008000L
+
+	long ovar2;		/* extra variable. Specifies: */
+#define obj_type_uses_ovar2(otmp) (\
+	   (otmp)->otyp == CANE \
+	|| (otmp)->otyp == WHIP_SAW \
+	)
+#define ovar2_alt_erosion ovar2
+#define store_oeroded(field, value) ((field) = ((field)&~(0x3L))|(value))
+#define store_oeroded2(field, value) ((field) = ((field)&~(0x3L<<2))|((value)<<2))
+#define store_oeroded3(field, value) ((field) = ((field)&~(0x3L<<4))|((value)<<4))
+#define access_oeroded(field) ((field)&(0x3L))
+#define access_oeroded2(field) (((field)&(0x3L<<2))>>2)
+#define access_oeroded3(field) (((field)&(0x3L<<4))>>4)
 
 	schar gifted; /*gifted is of type aligntyp.  For some reason aligntyp isn't being seen at compile*/
 	
@@ -625,7 +643,7 @@ struct obj {
 			 otmp->oartifact == ART_LASH_OF_THE_COLD_WASTE || \
 			 otmp->oartifact == ART_GOLDEN_SWORD_OF_Y_HA_TALLA || \
 			 otmp->oartifact == ART_RUINOUS_DESCENT_OF_STARS || \
-			 (otmp->oartifact == ART_PEN_OF_THE_VOID && otmp->ovar1_seals&SEAL_OSE) ||\
+			 (otmp->oartifact == ART_PEN_OF_THE_VOID && otmp->ovara_seals&SEAL_OSE) ||\
 			 otmp->obj_material == MERCURIAL || \
 			 is_mercy_blade(otmp) || \
 			 mercy_blade_prop(otmp) || \
@@ -723,16 +741,18 @@ struct obj {
 			  objects[(otmp)->otyp].oc_skill == P_LANCE || \
 			  (otmp)->otyp==AKLYS || \
 			  (otmp)->otyp==DISKOS || \
+			  (otmp)->otyp==HUNTER_S_LONG_AXE || \
 			  (is_cclub_able(otmp) && u.uinsight >= 15) || \
 			  (otmp)->oartifact==ART_SOL_VALTIVA || \
 			  (otmp)->oartifact==ART_SHADOWLOCK || \
 			  (otmp)->oartifact==ART_RUYI_JINGU_BANG || \
 			  ((otmp)->oartifact==ART_GOLDEN_SWORD_OF_Y_HA_TALLA && (otmp)->otyp == BULLWHIP) || \
 			  (otmp)->oartifact==ART_DEATH_SPEAR_OF_KEPTOLO || \
-			  ((otmp)->oartifact==ART_PEN_OF_THE_VOID && (otmp)->ovar1_seals&SEAL_MARIONETTE ) \
+			  ((otmp)->oartifact==ART_PEN_OF_THE_VOID && (otmp)->ovara_seals&SEAL_MARIONETTE ) \
 			 ))
 #define is_bad_melee_pole(otmp) (!((otmp)->otyp == POLEAXE ||\
 									(otmp)->otyp == DISKOS ||\
+									(otmp)->otyp == HUNTER_S_LONG_AXE ||\
 									is_vibropike(otmp) ||\
 									(otmp)->oartifact == ART_WEBWEAVER_S_CROOK ||\
 									(otmp)->oartifact == ART_SILENCE_GLAIVE ||\
@@ -772,7 +792,7 @@ struct obj {
 			 ((otmp) && (ltmp) && (\
 			  (\
 			   (ltmp->otyp == BFG) ||\
-			   (ltmp->oartifact == ART_PEN_OF_THE_VOID && ltmp->ovar1_seals&SEAL_EVE) ||\
+			   (ltmp->oartifact == ART_PEN_OF_THE_VOID && ltmp->ovara_seals&SEAL_EVE) ||\
 			   (ltmp->otyp == MASS_SHADOW_PISTOL && ltmp->cobj && (otmp->otyp == ltmp->cobj->otyp)) ||\
 			   (ltmp->otyp == ATLATL && is_spear(otmp)) ||\
 			   (\
@@ -801,6 +821,15 @@ struct obj {
 			 (o)->otyp == PRAYER_WARDED_WRAPPING)
 #define is_slab(o)	((o)->otyp >= FIRST_WORD && \
 			 (o)->otyp <= WORD_OF_KNOWLEDGE)
+#define is_serrated(o)	((o)->otyp == WHIP_SAW \
+						|| (o)->otyp == SAW_CLEAVER \
+						|| (o)->otyp == DISKOS \
+						)
+#define is_self_righteous(o)	((o)->otyp == CANE \
+						|| (o)->otyp == CHURCH_HAMMER \
+						|| (o)->otyp == CHURCH_BLADE \
+						)
+
 #define is_lightsaber(otmp) ((otmp)->otyp == LIGHTSABER || \
 							 (otmp)->otyp == KAMEREL_VAJRA || \
 							 (otmp)->otyp == ROD_OF_FORCE || \

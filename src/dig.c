@@ -1938,6 +1938,10 @@ struct obj *obj;
 	if(!getdir(qbuf))
 		return(res);
 
+	if((obj->otyp == HUNTER_S_AXE || obj->otyp == HUNTER_S_LONG_AXE) && !u.dx && !u.dy && !u.dz){
+		return use_hunter_axe(obj);
+	}
+
 	res &= ~MOVE_CANCELLED;
 	res |= use_pick_axe2(obj);
 	return res; /*Pickaxe might be an attack. It will not cancel*/

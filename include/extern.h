@@ -68,6 +68,7 @@ E void FDECL(fig_transform, (genericptr_t, long));
 E int FDECL(use_whip, (struct obj *));
 E int FDECL(use_nunchucks, (struct obj *));
 E int FDECL(use_force_sword, (struct obj *));
+E int FDECL(use_hunter_axe, (struct obj *));
 E int FDECL(do_bloodletter, (struct obj *));
 E void FDECL(pyramid_effects, (struct obj *, int, int));
 E boolean FDECL(use_ring_of_wishes, (struct obj *));
@@ -3517,6 +3518,7 @@ E int FDECL(hit_with_iwarp, (struct monst *,struct obj *, int, int, int, struct 
 E int FDECL(hit_with_rblood, (struct monst *,struct obj *, int, int, int, struct attack *));
 E int FDECL(hit_with_dance, (struct monst *,struct obj *, int, int, int, struct attack *));
 E int FDECL(hit_with_streaming, (struct monst *,struct obj *, int, int, int, struct attack *));
+E boolean FDECL(is_serration_vulnerable, (struct monst *));
 
 /* ### zap.c ### */
 

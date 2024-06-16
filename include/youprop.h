@@ -123,7 +123,7 @@
 
 #define HCleaving		u.uprops[CLEAVING].intrinsic
 #define ECleaving		u.uprops[CLEAVING].extrinsic
-#define Cleaving		(HCleaving || ECleaving)
+#define Cleaving		(HCleaving || ECleaving || (uwep && uwep->otyp == RAZOR_CLEAVER && !u.twoweap))
 
 #define HGoodHealth		u.uprops[GOOD_HEALTH].intrinsic
 #define EGoodHealth		u.uprops[GOOD_HEALTH].extrinsic

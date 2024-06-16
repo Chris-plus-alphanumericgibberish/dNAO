@@ -2321,7 +2321,7 @@ int mode;
 
 	    case WEAPON_CLASS:
 		if (otmp->oartifact == ART_PEN_OF_THE_VOID &&
-				mvitals[PM_ACERERAK].died > 0 && (otmp->ovar1_seals & SEAL_ANDREALPHUS)
+				mvitals[PM_ACERERAK].died > 0 && (otmp->ovara_seals & SEAL_ANDREALPHUS)
 		) {
 			type = BURN;
 		} else if (is_lightsaber(otmp)) {
@@ -3391,7 +3391,7 @@ int describe;
 				MENU_UNSELECTED);
 			incntlet = (incntlet != 'z') ? (incntlet + 1) : 'A';
 		}
-		if (uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && uwep->ovar1_seals&SEAL_ANDREALPHUS){
+		if (uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && uwep->ovara_seals&SEAL_ANDREALPHUS){
 			Sprintf(buf, "Hypergeometric transit solution");
 			any.a_int = ANDREALPHUS_TRANSIT;	/* must be non-zero */
 			add_menu(tmpwin, NO_GLYPH, &any,
@@ -3399,7 +3399,7 @@ int describe;
 				MENU_UNSELECTED);
 			incntlet = (incntlet != 'z') ? (incntlet + 1) : 'A';
 		}
-		if (uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && uwep->ovar1_seals&SEAL_ANDREALPHUS){
+		if (uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && uwep->ovara_seals&SEAL_ANDREALPHUS){
 			Sprintf(buf, "Hypergeometric stabilization solution");
 			any.a_int = ANDREALPHUS_STABILIZE;	/* must be non-zero */
 			add_menu(tmpwin, NO_GLYPH, &any,

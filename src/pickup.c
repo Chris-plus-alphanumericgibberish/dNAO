@@ -2384,19 +2384,19 @@ register struct obj *obj;
 	}
 
 	if(obj->oartifact && !touch_artifact(obj, &youmonst, FALSE)) return 0;
-	// if(obj->oartifact && obj->oartifact == ART_PEN_OF_THE_VOID && !Role_if(PM_EXILE)) u.sealsKnown |= obj->ovar1_seals;
+	// if(obj->oartifact && obj->oartifact == ART_PEN_OF_THE_VOID && !Role_if(PM_EXILE)) u.sealsKnown |= obj->ovara_seals;
 	/*Handle the pen of the void here*/
 	if(obj && obj->oartifact == ART_PEN_OF_THE_VOID){
-		if(obj->ovar1_seals && !Role_if(PM_EXILE)){
+		if(obj->ovara_seals && !Role_if(PM_EXILE)){
 			long oldseals = u.sealsKnown;
-			u.sealsKnown |= obj->ovar1_seals;
+			u.sealsKnown |= obj->ovara_seals;
 			if(oldseals != u.sealsKnown) You("learned new seals.");
 		}
-		obj->ovar1_seals = u.spiritTineA|u.spiritTineB;
+		obj->ovara_seals = u.spiritTineA|u.spiritTineB;
 		if(u.voidChime){
 			int i;
 			for(i=0; i<u.sealCounts; i++){
-				obj->ovar1_seals |= u.spirit[i];
+				obj->ovara_seals |= u.spirit[i];
 			}
 		}
 	}

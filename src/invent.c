@@ -1288,6 +1288,12 @@ register const char *let,*word;
 			  otmp->otyp != RAKUYO && otmp->otyp != RAKUYO_SABER && 
 			  otmp->otyp != BLADE_OF_MERCY && otmp->otyp != BLADE_OF_GRACE && 
 			  otmp->otyp != DOUBLE_FORCE_BLADE && otmp->otyp != FORCE_BLADE &&
+			  otmp->otyp != HUNTER_S_AXE && otmp->otyp != HUNTER_S_LONG_AXE &&
+			  otmp->otyp != SAW_CLEAVER && otmp->otyp != RAZOR_CLEAVER &&
+			  otmp->otyp != SOLDIER_S_RAPIER && otmp->otyp != SOLDIER_S_RAPIER &&
+			  otmp->otyp != CANE && otmp->otyp != WHIP_SAW &&
+			  otmp->otyp != HUNTER_S_LONGSWORD && otmp->otyp != CHURCH_BLADE && otmp->otyp != CHURCH_SHEATH &&
+			  otmp->otyp != HUNTER_S_SHORTSWORD && otmp->otyp != CHURCH_HAMMER && otmp->otyp != CHURCH_BRICK &&
 			  !(otmp->oartifact == ART_SKY_REFLECTED && carrying_art(ART_SILVER_SKY)) &&
 			  !(otmp->oartifact == ART_SILVER_SKY && carrying_art(ART_SKY_REFLECTED)) &&
 			  otmp->otyp != MASS_SHADOW_PISTOL
@@ -2216,7 +2222,7 @@ struct obj *obj;
 	else if (obj->otyp == BULLWHIP || obj->otyp == VIPERWHIP)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Lash out with this whip", MENU_UNSELECTED);
-	else if (obj->otyp == FORCE_WHIP)
+	else if (obj->otyp == FORCE_WHIP || obj->otyp == WHIP_SAW)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Lock or lash out with this whip", MENU_UNSELECTED);
 	else if (obj->otyp == GRAPPLING_HOOK)
@@ -2352,6 +2358,23 @@ struct obj *obj;
 	else if (obj->otyp == FORCE_SWORD)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Unlock your force whip", MENU_UNSELECTED);
+	else if (obj->otyp == CANE)
+		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
+				"Unlock your whip saw", MENU_UNSELECTED);
+	else if (obj->otyp == HUNTER_S_AXE || obj->otyp == HUNTER_S_LONG_AXE)
+		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
+				"Extend or collapse your hunter's axe", MENU_UNSELECTED);
+	else if (obj->otyp == SAW_CLEAVER || obj->otyp == RAZOR_CLEAVER)
+		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
+				"Open or close your cleaver", MENU_UNSELECTED);
+	else if (obj->otyp == SOLDIER_S_RAPIER || obj->otyp == SOLDIER_S_SABER)
+		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
+				"Latch or unlatch your rapier", MENU_UNSELECTED);
+	else if (obj->otyp == CHURCH_HAMMER || obj->otyp == HUNTER_S_SHORTSWORD || obj->otyp == CHURCH_BRICK
+		|| obj->otyp == CHURCH_BLADE || obj->otyp == HUNTER_S_LONGSWORD || obj->otyp == CHURCH_SHEATH
+	)
+		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
+				"Sheath or unsheath your sword", MENU_UNSELECTED);
 	else if (obj->oartifact == ART_SILVER_SKY)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Merge skies", MENU_UNSELECTED);
@@ -2370,7 +2393,7 @@ struct obj *obj;
 	else if (obj->otyp == HYPOSPRAY)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Inject an ampule with this hypospray", MENU_UNSELECTED);
-	else if ((is_knife(obj) && !(obj->oartifact == ART_PEN_OF_THE_VOID && obj->ovar1_seals&SEAL_MARIONETTE))
+	else if ((is_knife(obj) && !(obj->oartifact == ART_PEN_OF_THE_VOID && obj->ovara_seals&SEAL_MARIONETTE))
 		&& (u.wardsknown & (WARD_TOUSTEFNA | WARD_DREPRUN | WARD_OTTASTAFUR | WARD_KAUPALOKI | WARD_VEIOISTAFUR | WARD_THJOFASTAFUR)))
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Carve a stave with this knife", MENU_UNSELECTED);
@@ -2764,7 +2787,7 @@ winid *datawin;
 				Sprintf(buf, "Thrown %smissile.", buf2);
 			}
 			/* special cases */
-			if (oartifact == ART_PEN_OF_THE_VOID && obj && (obj->ovar1_seals & SEAL_EVE))
+			if (oartifact == ART_PEN_OF_THE_VOID && obj && (obj->ovara_seals & SEAL_EVE))
 				Strcpy(eos(buf)-1, ", and launcher.");
 			if (oartifact == ART_LIECLEAVER || oartifact == ART_ROGUE_GEAR_SPIRITS || oartifact == ART_WAND_OF_ORCUS || otyp == CARCOSAN_STING)
 				Sprintf(eos(buf)-1, ", and %smelee weapon.", buf2);
@@ -2785,7 +2808,7 @@ winid *datawin;
 						Strcpy(buf2, " at range, and your pickaxe skill in melee.");
 						break;
 					case ART_PEN_OF_THE_VOID:
-						if(obj->ovar1_seals & SEAL_EVE) {
+						if(obj->ovara_seals & SEAL_EVE) {
 							Strcpy(buf2, " in melee, and your ammo's skill at range.");
 						}
 						else
@@ -2909,14 +2932,14 @@ winid *datawin;
 				if (mvitals[PM_ACERERAK].died > 0)
 				{
 					Sprintf(buf, "Deals double damage");
-					if (obj->ovar1_seals)
+					if (obj->ovara_seals)
 						Strcat(buf, ", and enhanced spirit bonus damage.");
 					else
 						Strcat(buf, ".");
 				}
 				else
 				{
-					if (obj->ovar1_seals)
+					if (obj->ovara_seals)
 						Sprintf(buf, "Deals bonus damage from the spirit bound into it.");
 					else
 						buf[0] = '\0';

@@ -39,6 +39,12 @@ STATIC_DCL int FDECL(ilmater_touch, (struct obj *));
 STATIC_DCL int FDECL(use_rakuyo, (struct obj *));
 STATIC_DCL int FDECL(use_mercy_blade, (struct obj *));
 STATIC_DCL int FDECL(use_force_blade, (struct obj *));
+STATIC_DCL int FDECL(use_saw_cleaver, (struct obj *));
+STATIC_DCL int FDECL(use_soldier_rapier, (struct obj *));
+STATIC_DCL int FDECL(use_threaded_cane, (struct obj *));
+STATIC_DCL int FDECL(use_church_weapon, (struct obj *));
+STATIC_DCL int FDECL(use_church_sword, (struct obj *));
+STATIC_DCL int FDECL(use_church_sheath, (struct obj *));
 STATIC_DCL void FDECL(light_cocktail, (struct obj *));
 STATIC_DCL void FDECL(light_torch, (struct obj *));
 STATIC_DCL void FDECL(use_trephination_kit, (struct obj *));
@@ -1248,7 +1254,7 @@ int spiritseal;
 	    consume_obj_charge(obj, TRUE);
 		
 		if(uwep && uwep->oartifact == ART_SINGING_SWORD){
-			uwep->ovar1_heard |= OHEARD_OPEN;
+			uwep->ovara_heard |= OHEARD_OPEN;
 		}
 		
 	    if (u.uswallow) {
@@ -2121,6 +2127,224 @@ struct obj *obj;
 		You("lock %s.",the(xname(obj)));
 		obj->otyp = FORCE_SWORD;
 	}
+	fix_object(obj);
+	update_inventory();
+	return MOVE_INSTANT;
+}
+
+int
+use_hunter_axe(obj)
+struct obj *obj;
+{
+	if(obj->unpaid){
+		You("need to buy it.");
+		return MOVE_CANCELLED;
+	}
+	
+	if(obj->otyp == HUNTER_S_AXE){
+		You("lenthen the handle.");
+		obj->otyp = HUNTER_S_LONG_AXE;
+	} else {
+		You("shorten the handle.");
+		obj->otyp = HUNTER_S_AXE;
+	}
+	fix_object(obj);
+	update_inventory();
+	return MOVE_INSTANT;
+}
+
+int
+use_saw_cleaver(obj)
+struct obj *obj;
+{
+	if(obj->unpaid){
+		You("need to buy it.");
+		return MOVE_CANCELLED;
+	}
+	
+	if(obj->otyp == SAW_CLEAVER){
+		You("open %s.",the(xname(obj)));
+		obj->otyp = RAZOR_CLEAVER;
+	} else {
+		You("close %s.",the(xname(obj)));
+		obj->otyp = SAW_CLEAVER;
+	}
+	fix_object(obj);
+	update_inventory();
+	return MOVE_INSTANT;
+}
+
+int
+use_soldier_rapier(obj)
+struct obj *obj;
+{
+	if(obj->unpaid){
+		You("need to buy it.");
+		return MOVE_CANCELLED;
+	}
+	
+	if(obj->otyp == SOLDIER_S_RAPIER){
+		You("open %s.",the(xname(obj)));
+		obj->otyp = SOLDIER_S_SABER;
+	} else {
+		You("close %s.",the(xname(obj)));
+		obj->otyp = SOLDIER_S_RAPIER;
+	}
+	fix_object(obj);
+	update_inventory();
+	return MOVE_INSTANT;
+}
+
+int
+use_threaded_cane(obj)
+struct obj *obj;
+{
+	if(obj->unpaid){
+		You("need to buy it.");
+		return MOVE_CANCELLED;
+	}
+	int current_material = obj->obj_material;
+	
+	if(obj->otyp == CANE){
+		You("unlock %s.",the(xname(obj)));
+		obj->otyp = WHIP_SAW;
+	} else {
+		You("latch %s.",the(xname(obj)));
+		obj->otyp = CANE;
+	}
+	int o1 = obj->oeroded, o2 = obj->oeroded2, o3 = obj->oeroded3;
+	set_material_gm(obj, obj->ovar1_alt_mat);
+	obj->ovar1_alt_mat = current_material;
+	obj->oeroded = access_oeroded(obj->ovar2_alt_erosion);
+	obj->oeroded2 = access_oeroded2(obj->ovar2_alt_erosion);
+	obj->oeroded3 = access_oeroded3(obj->ovar2_alt_erosion);
+	store_oeroded(obj->ovar2_alt_erosion,o1);
+	store_oeroded2(obj->ovar2_alt_erosion,o2);
+	store_oeroded3(obj->ovar2_alt_erosion,o3);
+	fix_object(obj);
+	update_inventory();
+	return MOVE_INSTANT;
+}
+
+int
+use_church_weapon(obj)
+struct obj *obj;
+{
+	if(obj->unpaid){
+		You("need to buy it.");
+		return MOVE_CANCELLED;
+	}
+	struct obj *sword = 0;
+	
+	if(obj->otyp == CHURCH_BLADE){
+		You("draw the sword from the sheath-blade.");
+		obj->otyp = CHURCH_SHEATH;
+	} else {
+		You("draw the sword from the stone.");
+		obj->otyp = CHURCH_BRICK;
+	}
+	if(obj->cobj){
+		sword = obj->cobj;
+		obj_extract_self(sword);
+	}
+	else if(obj->otyp == CHURCH_BLADE){
+		pline("Church blade with no sword inside, recovering from error by creating a new sword.");
+		sword = mksobj(HUNTER_S_LONGSWORD, MKOBJ_NOINIT);
+	}
+	else {
+		pline("Church hammer with no sword inside, recovering from error by creating a new sword.");
+		sword = mksobj(HUNTER_S_SHORTSWORD, MKOBJ_NOINIT);
+	}
+	fix_object(obj);
+	sword = hold_another_object(sword, "You fumble %s!",
+				  doname(sword), (const char *)0);
+	if(obj == uwep){
+		if(sword->where == OBJ_INVENT)
+			setuwep(sword);
+		else
+			setuwep((struct obj *) 0);
+	}
+	else if(obj == uswapwep){
+		if(sword->where == OBJ_INVENT)
+			setuswapwep(sword);
+		else
+			setuswapwep((struct obj *) 0);
+	}
+	update_inventory();
+	return MOVE_INSTANT;
+}
+
+int
+use_church_sword(obj)
+struct obj *obj;
+{
+	if(obj->unpaid){
+		You("need to buy it.");
+		return MOVE_CANCELLED;
+	}
+	struct obj *sheath = 0;
+	int type = obj->otyp == HUNTER_S_LONGSWORD ? CHURCH_SHEATH : CHURCH_BRICK;
+	for(sheath = invent; sheath; sheath = sheath->nobj){
+		if(sheath->otyp == type && !sheath->unpaid)
+			break;
+	}
+	if(!sheath){
+		You("need the sheath!");
+		return MOVE_CANCELLED;
+	}
+	if(sheath->otyp == CHURCH_SHEATH){
+		You("sheath the sword in the blade.");
+		sheath->otyp = CHURCH_BLADE;
+	} else {
+		You("sheath the sword in the stone.");
+		sheath->otyp = CHURCH_HAMMER;
+	}
+	if(obj == uwep){
+		setuwep(sheath);
+	}
+	else if(obj == uswapwep){
+		setuswapwep(sheath);
+	}
+	obj_extract_and_unequip_self(obj);
+	add_to_container(sheath, obj);
+	fix_object(sheath);
+	update_inventory();
+	return MOVE_INSTANT;
+}
+
+int
+use_church_sheath(obj)
+struct obj *obj;
+{
+	if(obj->unpaid){
+		You("need to buy it.");
+		return MOVE_CANCELLED;
+	}
+	struct obj *sword = 0;
+	int type = obj->otyp == CHURCH_SHEATH ? HUNTER_S_LONGSWORD : HUNTER_S_SHORTSWORD;
+	for(sword = invent; sword; sword = sword->nobj){
+		if(sword->otyp == type && !sword->unpaid)
+			break;
+	}
+	if(!sword){
+		You("need the sword!");
+		return MOVE_CANCELLED;
+	}
+	if(obj->otyp == CHURCH_SHEATH){
+		You("sheath the sword in the blade.");
+		obj->otyp = CHURCH_BLADE;
+	} else {
+		You("sheath the sword in the stone.");
+		obj->otyp = CHURCH_HAMMER;
+	}
+	if(sword == uwep){
+		setuwep(obj);
+	}
+	else if(sword == uswapwep){
+		setuswapwep(obj);
+	}
+	obj_extract_and_unequip_self(sword);
+	add_to_container(obj, sword);
 	fix_object(obj);
 	update_inventory();
 	return MOVE_INSTANT;
@@ -4431,7 +4655,10 @@ struct obj *obj;
 	if(obj->otyp == FORCE_WHIP && !u.dx && !u.dy && !u.dz){
 		return use_force_sword(obj);
 	}
-
+	else if(obj->otyp == WHIP_SAW && !u.dx && !u.dy && !u.dz){
+		return use_threaded_cane(obj);
+	}
+	
     if (Stunned || (Confusion && !rn2(5))) confdir();
     rx = u.ux + u.dx;
     ry = u.uy + u.dy;
@@ -4923,6 +5150,15 @@ struct obj *pole;
 		else if(!flags.relative_polearms)
 			incntlet++; /* always increment, so that the same direction is always the same letter*/
 	}
+	
+	/* add an option to shorten axe */
+	if(pole->otyp == HUNTER_S_LONG_AXE){
+		Sprintf(buf, "(shorten handle)");
+		any.a_int = N_POLEDIRS+2;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			's', 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
 
 	/* add an option to target manually */
 	Sprintf(buf, "(some location)");
@@ -4995,6 +5231,10 @@ coord *ccp;
 			ccp->x = 0; ccp->y = 0;
 			return res;	/* user pressed ESC */
 		}
+		if((obj->otyp == HUNTER_S_AXE || obj->otyp == HUNTER_S_LONG_AXE) && ccp->x == u.ux && ccp->y == u.uy){
+			ccp->x = 0; ccp->y = 0;
+			return use_hunter_axe(obj);
+		}
 	}
 	else {
 		if((i = polearm_menu(uwep))){
@@ -5003,6 +5243,10 @@ coord *ccp;
 				ccp->x = u.ux + pole_dx[i];
 				ccp->y = u.uy + pole_dy[i];
 			}
+			else if(i == N_POLEDIRS+1){
+				ccp->x = 0; ccp->y = 0;
+				return use_hunter_axe(obj);
+			}
 			else {
 				/* use standard targeting; save retval to return */
 				flags.standard_polearms = TRUE;
@@ -5010,6 +5254,8 @@ coord *ccp;
 				flags.standard_polearms = FALSE;
 				if(res == MOVE_STANDARD || retval == MOVE_STANDARD)
 					return MOVE_STANDARD;
+				if(res == MOVE_CANCELLED)
+					return retval;
 				return res | retval;
 			}
 		}
@@ -8379,7 +8625,7 @@ doapply()
 	    return do_soul_coin(obj);
 	else if (obj->oclass == RING_CLASS || obj->oclass == AMULET_CLASS)
 	    return do_present_item(obj);
-	else if(is_knife(obj) && !(obj->oartifact==ART_PEN_OF_THE_VOID && obj->ovar1_seals&SEAL_MARIONETTE)) 
+	else if(is_knife(obj) && !(obj->oartifact==ART_PEN_OF_THE_VOID && obj->ovara_seals&SEAL_MARIONETTE)) 
 		return do_carve_obj(obj);
 	
 	if(obj->oartifact == ART_SILVER_STARLIGHT) res = do_play_instrument(obj);
@@ -8396,6 +8642,18 @@ doapply()
 		return use_mercy_blade(obj);
 	} else if(obj->otyp == DOUBLE_FORCE_BLADE || obj->otyp == FORCE_BLADE){
 		return use_force_blade(obj);
+	} else if(obj->otyp == SAW_CLEAVER || obj->otyp == RAZOR_CLEAVER){
+		return use_saw_cleaver(obj);
+	} else if(obj->otyp == SOLDIER_S_RAPIER || obj->otyp == SOLDIER_S_SABER){
+		return use_soldier_rapier(obj);
+	} else if(obj->otyp == CANE){
+		return use_threaded_cane(obj);
+	} else if(obj->otyp == CHURCH_HAMMER || obj->otyp == CHURCH_BLADE){
+		return use_church_weapon(obj);
+	} else if(obj->otyp == HUNTER_S_LONGSWORD || obj->otyp == HUNTER_S_SHORTSWORD){
+		return use_church_sword(obj);
+	} else if(obj->otyp == CHURCH_SHEATH || obj->otyp == CHURCH_BRICK){
+		return use_church_sheath(obj);
 	} else switch(obj->otyp){
 	case BLINDFOLD:
 	case ANDROID_VISOR:
@@ -8429,6 +8687,7 @@ doapply()
 	case FORCE_WHIP:
 	case VIPERWHIP:
 	case BULLWHIP:
+	case WHIP_SAW:
 		res = use_whip(obj);
 		break;
 	case NUNCHAKU:

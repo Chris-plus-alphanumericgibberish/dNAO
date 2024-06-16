@@ -618,7 +618,7 @@ boolean affect_game_state;
 
 			/* some weapons are slower */
 			if (uwep
-				&& (uwep->otyp == RAKUYO || uwep->otyp == DOUBLE_FORCE_BLADE || uwep->otyp == DOUBLE_SWORD || 
+				&& (uwep->otyp == RAKUYO || uwep->otyp == DOUBLE_FORCE_BLADE || uwep->otyp == DOUBLE_SWORD || uwep->otyp == RAZOR_CLEAVER || 
 					((uwep->otyp == DOUBLE_LIGHTSABER || uwep->otyp == BEAMSWORD || uwep->otyp == LIGHTSABER || uwep->otyp == ROD_OF_FORCE) && uwep->altmode)
 				)
 				&& !u.twoweap
@@ -3041,10 +3041,10 @@ karemade:
 		hpDiff = (hpDiff > 0) ? hpDiff : 0;
 		if(uarmg && ART_GAUNTLETS_OF_THE_BERSERKER == uarmg->oartifact){
 			float a = .1; /* closer to 1 -> discard older faster */
-			long next = (long)(a * hpDiff + (1 - a) * uarmg->ovar1_gober);
+			long next = (long)(a * hpDiff + (1 - a) * uarmg->ovara_gober);
 			next = (next > 10) ? 10 : next;
-			long diff = next - uarmg->ovar1_gober;
-			uarmg->ovar1_gober = next;
+			long diff = next - uarmg->ovara_gober;
+			uarmg->ovara_gober = next;
 			//if(diff) adj_abon(uarmg, diff);
 		}
 		didmove = FALSE;

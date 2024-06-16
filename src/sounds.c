@@ -1122,7 +1122,7 @@ asGuardian:
 				cast_spell(mtmp, (struct monst *)0, &fakesummonspell, !rn2(4) ? SUMMON_ANGEL : SUMMON_MONS, 0, 0);
 			}
 			if(uwep && uwep->oartifact == ART_SINGING_SWORD){
-				uwep->ovar1_heard |= OHEARD_RALLY;
+				uwep->ovara_heard |= OHEARD_RALLY;
 			}
 		}
 	}break;
@@ -1139,7 +1139,7 @@ asGuardian:
 				}
 			}
 			if(uwep && uwep->oartifact == ART_SINGING_SWORD){
-				uwep->ovar1_heard |= OHEARD_RALLY;
+				uwep->ovara_heard |= OHEARD_RALLY;
 			}
 		}
 	}break;
@@ -1211,7 +1211,7 @@ asGuardian:
 				} else shieldeff(u.ux, u.uy);
 				stop_occupation();
 				if(uwep && uwep->oartifact == ART_SINGING_SWORD){
-					uwep->ovar1_heard |= OHEARD_DEATH;
+					uwep->ovara_heard |= OHEARD_DEATH;
 				}
 				}break;
 				case 2:{
@@ -1223,7 +1223,7 @@ asGuardian:
 					}
 				}
 				if(uwep && uwep->oartifact == ART_SINGING_SWORD){
-					uwep->ovar1_heard |= OHEARD_LIFE;
+					uwep->ovara_heard |= OHEARD_LIFE;
 				}
 				}break;
 				case 3:
@@ -1245,7 +1245,7 @@ asGuardian:
 				make_hallucinated(HHallucination + ix*15, FALSE, 0L);
 				stop_occupation();
 				if(uwep && uwep->oartifact == ART_SINGING_SWORD){
-					uwep->ovar1_heard |= OHEARD_INSANE;
+					uwep->ovara_heard |= OHEARD_INSANE;
 				}
 				break;
 				case 4:
@@ -1255,7 +1255,7 @@ asGuardian:
 				stop_occupation();
 				doredraw();
 				if(uwep && uwep->oartifact == ART_SINGING_SWORD){
-					uwep->ovar1_heard |= OHEARD_QUAKE;
+					uwep->ovara_heard |= OHEARD_QUAKE;
 				}
 				break;
 				case 5:{
@@ -1515,7 +1515,7 @@ asGuardian:
 						You_feel("%s!", u.uencouraged >= BASE_DOG_ENCOURAGED_MAX ? "berserk" : "wild");
 					}
 					if(distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 5 && uwep && uwep->oartifact == ART_SINGING_SWORD){
-						uwep->ovar1_heard |= OHEARD_COURAGE;
+						uwep->ovara_heard |= OHEARD_COURAGE;
 					}
 				break;
 				case 2:
@@ -1576,7 +1576,7 @@ asGuardian:
 						use_unicorn_horn((struct obj *)0);
 					}
 					if(distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 5 && uwep && uwep->oartifact == ART_SINGING_SWORD){
-						uwep->ovar1_heard |= OHEARD_HEALING;
+						uwep->ovara_heard |= OHEARD_HEALING;
 					}
 				break;
 				case 3:
@@ -1623,7 +1623,7 @@ asGuardian:
 						}
 					}
 					if(distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 5 && uwep && uwep->oartifact == ART_SINGING_SWORD){
-						uwep->ovar1_heard |= OHEARD_HASTE;
+						uwep->ovara_heard |= OHEARD_HASTE;
 					}
 				break;
 			}
@@ -1658,19 +1658,19 @@ asGuardian:
 						case AD_FIRE:
 							pline("%s sings the lament of flames.", Monnam(mtmp));
 							if(distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 4 && uwep && uwep->oartifact == ART_SINGING_SWORD){
-								uwep->ovar1_heard |= OHEARD_FIRE;
+								uwep->ovara_heard |= OHEARD_FIRE;
 							}
 						break;
 						case AD_COLD:
 							pline("%s sings the lament of ice.", Monnam(mtmp));
 							if(distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 4 && uwep && uwep->oartifact == ART_SINGING_SWORD){
-								uwep->ovar1_heard |= OHEARD_FROST;
+								uwep->ovara_heard |= OHEARD_FROST;
 							}
 						break;
 						case AD_ELEC:
 							pline("%s sings the lament of storms.", Monnam(mtmp));
 							if(distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 4 && uwep && uwep->oartifact == ART_SINGING_SWORD){
-								uwep->ovar1_heard |= OHEARD_ELECT;
+								uwep->ovara_heard |= OHEARD_ELECT;
 							}
 						break;
 					}
@@ -1767,7 +1767,7 @@ asGuardian:
 						You_feel("%s!", u.uencouraged <= -1*BASE_DOG_ENCOURAGED_MAX ? "inconsolable" : "depressed");
 					}
 					if(distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 4 && uwep && uwep->oartifact == ART_SINGING_SWORD){
-						uwep->ovar1_heard |= OHEARD_DIRGE;
+						uwep->ovara_heard |= OHEARD_DIRGE;
 					}
 				break;
 				case 3:
@@ -1811,7 +1811,7 @@ asGuardian:
 						}
 					}
 					if(distmin(mtmp->mx,mtmp->my,u.ux,u.uy) < 4 && uwep && uwep->oartifact == ART_SINGING_SWORD){
-						uwep->ovar1_heard |= OHEARD_LETHARGY;
+						uwep->ovara_heard |= OHEARD_LETHARGY;
 					}
 				break;
 			}
@@ -3516,7 +3516,7 @@ int tx,ty;
 				else if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && (!u.spiritTineA || (!u.spiritTineB && quest_status.killed_nemesis && Role_if(PM_EXILE)))){
 					pline("A voice whispers from below:");
 					pline("\"All shall feed the shattered night.\"");
-					uwep->ovar1_seals |= SEAL_AHAZU;
+					uwep->ovara_seals |= SEAL_AHAZU;
 					if(!u.spiritTineA){ 
 						u.spiritTineA = SEAL_AHAZU;
 						u.spiritTineTA= moves + bindingPeriod;
@@ -3562,7 +3562,7 @@ int tx,ty;
 					pline("No sooner are the shadows born than they rise up against their creator, smothering the flame under a tide of darkness.");
 					pline("Even as it dies, a voice speaks from the blood-red flame:");
 					pline("\"Cursed are you who calls me forth. I damn you to bear my flames, alone in this world of darkness!\"");
-					uwep->ovar1_seals |= SEAL_AMON;
+					uwep->ovara_seals |= SEAL_AMON;
 					if(!u.spiritTineA){ 
 						u.spiritTineA = SEAL_AMON;
 						u.spiritTineTA= moves + bindingPeriod;
@@ -3608,7 +3608,7 @@ int tx,ty;
 				else if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && (!u.spiritTineA || (!u.spiritTineB && quest_status.killed_nemesis && Role_if(PM_EXILE)))){
 					pline("\"I am Andrealphus, born of angles. In this soft world of curves, I alone am straight and true.\"");
 					pline("\"Though your instrument is born of the point, by my square it shall rectify the world.\"");
-					uwep->ovar1_seals |= SEAL_ANDREALPHUS;
+					uwep->ovara_seals |= SEAL_ANDREALPHUS;
 					if(!u.spiritTineA){ 
 						u.spiritTineA = SEAL_ANDREALPHUS;
 						u.spiritTineTA= moves + bindingPeriod;
@@ -3859,7 +3859,7 @@ int tx,ty;
 				else if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && (!u.spiritTineA || (!u.spiritTineB && quest_status.killed_nemesis && Role_if(PM_EXILE)))){
 					pline("Suddenly, the hands toss one of the whirling objects to you.");
 					pline("It's the Pen of the Void. You didn't notice it had been taken!");
-					uwep->ovar1_seals |= SEAL_ANDROMALIUS;
+					uwep->ovara_seals |= SEAL_ANDROMALIUS;
 					if(!u.spiritTineA){
 						u.spiritTineA = SEAL_ANDROMALIUS;
 						u.spiritTineTA= moves + bindingPeriod;
@@ -3954,7 +3954,7 @@ int tx,ty;
 				pline("There is the sound of shrieking metal, and a cracked porcelain face swings into view on a metallic armature.");
 				pline("A voice speaks to you, as the immobile white face studies you and weeps tears of black oil.");
 				pline("*I am Astaroth, the Clockmaker. You shall hold my instrument, to repair this broken world.*");
-				uwep->ovar1_seals |= SEAL_ASTAROTH;
+				uwep->ovara_seals |= SEAL_ASTAROTH;
 				if(!u.spiritTineA){
 					u.spiritTineA = SEAL_ASTAROTH;
 					u.spiritTineTA= moves + bindingPeriod;
@@ -4030,7 +4030,7 @@ int tx,ty;
 					}
 					pline("\"I am Balam, offered up as the last sacrifice; condemned to bleed until the end of all suffering.\"");
 					pline("\"By your hand was this done, therefore you shall be stained by my blood.\"");
-					uwep->ovar1_seals |= SEAL_BALAM;
+					uwep->ovara_seals |= SEAL_BALAM;
 					if(!u.spiritTineA){ 
 						u.spiritTineA = SEAL_BALAM;
 						u.spiritTineTA= moves + bindingPeriod;
@@ -4090,7 +4090,7 @@ int tx,ty;
 					pline("\"I am Berith, %s.",rn2(2) ? "war-leader of the forgotten" : "god of the covenant of blood");
 					pline("I anoint your blade with Blood, for blood calls to blood.");
 					pline("That is the covenant and curse of Berith.\"");
-					uwep->ovar1_seals |= SEAL_BERITH;
+					uwep->ovara_seals |= SEAL_BERITH;
 					if(!u.spiritTineA){ 
 						u.spiritTineA = SEAL_BERITH;
 						u.spiritTineTA= moves + bindingPeriod;
@@ -4131,7 +4131,7 @@ int tx,ty;
 			}
 			else if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && (!u.spiritTineA || (!u.spiritTineB && quest_status.killed_nemesis && Role_if(PM_EXILE)))){
 				pline("I will walk beside you.\"");
-				uwep->ovar1_seals |= SEAL_BUER;
+				uwep->ovara_seals |= SEAL_BUER;
 				if(!u.spiritTineA){
 					u.spiritTineA = SEAL_BUER;
 					u.spiritTineTA= moves + bindingPeriod;
@@ -4174,7 +4174,7 @@ int tx,ty;
 				}
 				else if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && (!u.spiritTineA || (!u.spiritTineB && quest_status.killed_nemesis && Role_if(PM_EXILE)))){
 					pline("She wraps your blade tight in her bitter cords, making it an anchor for her web.");
-					uwep->ovar1_seals |= SEAL_CHUPOCLOPS;
+					uwep->ovara_seals |= SEAL_CHUPOCLOPS;
 					if(!u.spiritTineA){
 						u.spiritTineA = SEAL_CHUPOCLOPS;
 						u.spiritTineTA= moves + bindingPeriod;
@@ -4228,7 +4228,7 @@ int tx,ty;
 					}
 					pline("\"You, who bear my sceptre,\"");
 					pline("\"go forth, in my name!\"");
-					uwep->ovar1_seals |= SEAL_DANTALION;
+					uwep->ovara_seals |= SEAL_DANTALION;
 					if(!u.spiritTineA){ 
 						u.spiritTineA = SEAL_DANTALION;
 						u.spiritTineTA= moves + bindingPeriod;
@@ -4277,7 +4277,7 @@ int tx,ty;
 				else if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && (!u.spiritTineA || (!u.spiritTineB && quest_status.killed_nemesis && Role_if(PM_EXILE)))){
 					pline("\"That looks like a pretty distinctive weapon.\"");
 					pline("\"Let me follow you and see how you use it.\"");
-					uwep->ovar1_seals |= SEAL_SHIRO;
+					uwep->ovara_seals |= SEAL_SHIRO;
 					if(!u.spiritTineA){
 						u.spiritTineA = SEAL_SHIRO;
 						u.spiritTineTA= moves + bindingPeriod;
@@ -4317,7 +4317,7 @@ int tx,ty;
 				else if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && (!u.spiritTineA || (!u.spiritTineB && quest_status.killed_nemesis && Role_if(PM_EXILE)))){
 					pline("\"I am Echidna, %s.\"",echidnaTitles[rn2(SIZE(echidnaTitles))]);
 					pline("\"Cut my bonds, and I shall lend my wrath to your cause.\"");
-					uwep->ovar1_seals |= SEAL_ECHIDNA;
+					uwep->ovara_seals |= SEAL_ECHIDNA;
 					if(!u.spiritTineA){ 
 						u.spiritTineA = SEAL_ECHIDNA;
 						u.spiritTineTA= moves + bindingPeriod;
@@ -4365,7 +4365,7 @@ int tx,ty;
 				else if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && (!u.spiritTineA || (!u.spiritTineB && quest_status.killed_nemesis && Role_if(PM_EXILE)))){
 					pline("Radiant light falls on your weapon.");
 					pline("The gates are angled such that you can't see past.");
-					uwep->ovar1_seals |= SEAL_EDEN;
+					uwep->ovara_seals |= SEAL_EDEN;
 					if(!u.spiritTineA){ 
 						u.spiritTineA = SEAL_EDEN;
 						u.spiritTineTA= moves + bindingPeriod;
@@ -4413,7 +4413,7 @@ int tx,ty;
 				else if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && (!u.spiritTineA || (!u.spiritTineB && quest_status.killed_nemesis && Role_if(PM_EXILE)))){
 					pline("I am Enki, god of Eridu.");
 					pline("Bow to me, and I shall lend aid from within the Abzu.");
-					uwep->ovar1_seals |= SEAL_ENKI;
+					uwep->ovara_seals |= SEAL_ENKI;
 					if(!u.spiritTineA){ 
 						u.spiritTineA = SEAL_ENKI;
 						u.spiritTineTA= moves + bindingPeriod;
@@ -4461,7 +4461,7 @@ int tx,ty;
 						pline("She dances up to you and performs a sword dance with her claws.");
 					}
 					else You_hear("splashing.");
-					uwep->ovar1_seals |= SEAL_EURYNOME;
+					uwep->ovara_seals |= SEAL_EURYNOME;
 					if(!u.spiritTineA){ 
 						u.spiritTineA = SEAL_EURYNOME;
 						u.spiritTineTA= moves + bindingPeriod;
@@ -4500,7 +4500,7 @@ int tx,ty;
 				else if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && (!u.spiritTineA || (!u.spiritTineB && quest_status.killed_nemesis && Role_if(PM_EXILE)))){
 					You("try to help her, but she is unable to stand.");
 					pline("She blesses your blade as thanks.");
-					uwep->ovar1_seals |= SEAL_EVE;
+					uwep->ovara_seals |= SEAL_EVE;
 					if(!u.spiritTineA){ 
 						u.spiritTineA = SEAL_EVE;
 						u.spiritTineTA= moves + bindingPeriod;
@@ -4545,7 +4545,7 @@ int tx,ty;
 					if(!Blind) pline("The dragon tries to steal your weapon!");
 					else pline("Something tries to steal your weapon!");
 					You("fight it off.");
-					uwep->ovar1_seals |= SEAL_FAFNIR;
+					uwep->ovara_seals |= SEAL_FAFNIR;
 					if(!u.spiritTineA){ 
 						u.spiritTineA = SEAL_FAFNIR;
 						u.spiritTineTA= moves + bindingPeriod;
@@ -4589,7 +4589,7 @@ int tx,ty;
 			else if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && (!u.spiritTineA || (!u.spiritTineB && quest_status.killed_nemesis && Role_if(PM_EXILE)))){
 				if(!Blind) pline("They croak raucously at your weapon.");
 				else You_hear("Raucous croaking.");
-				uwep->ovar1_seals |= SEAL_HUGINN_MUNINN;
+				uwep->ovara_seals |= SEAL_HUGINN_MUNINN;
 				if(!u.spiritTineA){ 
 					u.spiritTineA = SEAL_HUGINN_MUNINN;
 					u.spiritTineTA= moves + bindingPeriod;
@@ -4635,7 +4635,7 @@ int tx,ty;
 				else if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && (!u.spiritTineA || (!u.spiritTineB && quest_status.killed_nemesis && Role_if(PM_EXILE)))){
 					pline("Something grabs your weapon!");
 					pline("\"Let me play with that!\"");
-					uwep->ovar1_seals |= SEAL_IRIS;
+					uwep->ovara_seals |= SEAL_IRIS;
 					if(!u.spiritTineA){ 
 						u.spiritTineA = SEAL_IRIS;
 						u.spiritTineTA= moves + bindingPeriod;
@@ -4669,7 +4669,7 @@ int tx,ty;
 				else if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && (!u.spiritTineA || (!u.spiritTineB && quest_status.killed_nemesis && Role_if(PM_EXILE)))){
 					pline("A will-o-wisp drifts out of the seal to hover near your weapon.");
 					pline("\"Please let me stay with you!\"");
-					uwep->ovar1_seals |= SEAL_JACK;
+					uwep->ovara_seals |= SEAL_JACK;
 					if(!u.spiritTineA){ 
 						u.spiritTineA = SEAL_JACK;
 						u.spiritTineTA= moves + bindingPeriod;
@@ -4776,7 +4776,7 @@ int tx,ty;
 				else if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && (!u.spiritTineA || (!u.spiritTineB && quest_status.killed_nemesis && Role_if(PM_EXILE)))){
 					if(!Blind) pline("A large black feather setles within the seal.");
 					pline("\"I am Malphas. With that instrument, you feed my flock.\"");
-					uwep->ovar1_seals |= SEAL_MALPHAS;
+					uwep->ovara_seals |= SEAL_MALPHAS;
 					if(!u.spiritTineA){ 
 						u.spiritTineA = SEAL_MALPHAS;
 						u.spiritTineTA= moves + bindingPeriod;
@@ -4817,7 +4817,7 @@ int tx,ty;
 				else if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && (!u.spiritTineA || (!u.spiritTineB && quest_status.killed_nemesis && Role_if(PM_EXILE)))){
 					if(!Blind) pline("The wires wrap around your weapon!");
 					else pline("Something tangles around your weapon!");
-					uwep->ovar1_seals |= SEAL_MARIONETTE;
+					uwep->ovara_seals |= SEAL_MARIONETTE;
 					if(!u.spiritTineA){ 
 						u.spiritTineA = SEAL_MARIONETTE;
 						u.spiritTineTA= moves + bindingPeriod;
@@ -4852,7 +4852,7 @@ int tx,ty;
 				}
 				else if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && (!u.spiritTineA || (!u.spiritTineB && quest_status.killed_nemesis && Role_if(PM_EXILE)))){
 					pline("You're pretty sure something is staring at your weapon....");
-					uwep->ovar1_seals |= SEAL_MOTHER;
+					uwep->ovara_seals |= SEAL_MOTHER;
 					if(!u.spiritTineA){ 
 						u.spiritTineA = SEAL_MOTHER;
 						u.spiritTineTA= moves + bindingPeriod;
@@ -4901,7 +4901,7 @@ int tx,ty;
 					} else pline("Something steals your weapon!");
 					pline("You begin to chase the animal,");
 					pline("and it abandons your blade in the center of the seal.");
-					uwep->ovar1_seals |= SEAL_NABERIUS;
+					uwep->ovara_seals |= SEAL_NABERIUS;
 					if(!u.spiritTineA){ 
 						u.spiritTineA = SEAL_NABERIUS;
 						u.spiritTineTA= moves + bindingPeriod;
@@ -4938,7 +4938,7 @@ int tx,ty;
 				}
 				else if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && (!u.spiritTineA || (!u.spiritTineB && quest_status.killed_nemesis && Role_if(PM_EXILE)))){
 					Your("blade vibrates for a moment.");
-					uwep->ovar1_seals |= SEAL_ORTHOS;
+					uwep->ovara_seals |= SEAL_ORTHOS;
 					if(!u.spiritTineA){ 
 						u.spiritTineA = SEAL_ORTHOS;
 						u.spiritTineTA= moves + bindingPeriod;
@@ -4979,7 +4979,7 @@ int tx,ty;
 				}
 				else if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && (!u.spiritTineA || (!u.spiritTineB && quest_status.killed_nemesis && Role_if(PM_EXILE)))){
 					if(!Blind) pline("The sea bottom swirls below your weapon, forming into thousands of reaching arms.");
-					uwep->ovar1_seals |= SEAL_OSE;
+					uwep->ovara_seals |= SEAL_OSE;
 					if(!u.spiritTineA){ 
 						u.spiritTineA = SEAL_OSE;
 						u.spiritTineTA= moves + bindingPeriod;
@@ -5006,7 +5006,7 @@ int tx,ty;
 				}
 				else if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && (!u.spiritTineA || (!u.spiritTineB && quest_status.killed_nemesis && Role_if(PM_EXILE)))){
 					if(!Blind) pline("The dust swirls below your weapon, forming into thousands of reaching arms.");
-					uwep->ovar1_seals |= SEAL_OSE;
+					uwep->ovara_seals |= SEAL_OSE;
 					if(!u.spiritTineA){ 
 						u.spiritTineA = SEAL_OSE;
 						u.spiritTineTA= moves + bindingPeriod;
@@ -5043,7 +5043,7 @@ int tx,ty;
 				}
 				else if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && (!u.spiritTineA || (!u.spiritTineB && quest_status.killed_nemesis && Role_if(PM_EXILE)))){
 					if(!Blind) pline("The mist fingers curl around your blade.");
-					uwep->ovar1_seals |= SEAL_OTIAX;
+					uwep->ovara_seals |= SEAL_OTIAX;
 					if(!u.spiritTineA){ 
 						u.spiritTineA = SEAL_OTIAX;
 						u.spiritTineTA= moves + bindingPeriod;
@@ -5102,7 +5102,7 @@ int tx,ty;
 					pline("\"Sometimes, a subtle approach is better.\"");
 					if(!Blind) pline("She dips her fingers into the ink of %s and writes on your weapon.", xname(o));
 					o->spestudied++;
-					uwep->ovar1_seals |= SEAL_PAIMON;
+					uwep->ovara_seals |= SEAL_PAIMON;
 					if(!u.spiritTineA){
 						u.spiritTineA = SEAL_PAIMON;
 						u.spiritTineTA= moves + bindingPeriod;
@@ -5144,7 +5144,7 @@ int tx,ty;
 				else if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && (!u.spiritTineA || (!u.spiritTineB && quest_status.killed_nemesis && Role_if(PM_EXILE)))){
 					pline("Loose feathers rain down around your blade,");
 					pline("each feather a memory of ruin and of loss.");
-					uwep->ovar1_seals |= SEAL_SIMURGH;
+					uwep->ovara_seals |= SEAL_SIMURGH;
 					if(!u.spiritTineA){ 
 						u.spiritTineA = SEAL_SIMURGH;
 						u.spiritTineTA= moves + bindingPeriod;
@@ -5187,7 +5187,7 @@ int tx,ty;
 				else if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && (!u.spiritTineA || (!u.spiritTineB && quest_status.killed_nemesis && Role_if(PM_EXILE)))){
 					if(!Blind) pline("The darkness inside the seal flows out to stain your weapon.");
 					pline("\"None shall rest until my vengeance is complete.\"");
-					uwep->ovar1_seals |= SEAL_TENEBROUS;
+					uwep->ovara_seals |= SEAL_TENEBROUS;
 					if(!u.spiritTineA){ 
 						u.spiritTineA = SEAL_TENEBROUS;
 						u.spiritTineTA= moves + bindingPeriod;
@@ -5251,7 +5251,7 @@ int tx,ty;
 					pline("\"I was Ymir, god of poison,");
 					pline("this steel is the steel of my teeth,");
 					pline("and the gods shall feel their bite.\"");
-					uwep->ovar1_seals |= SEAL_YMIR;
+					uwep->ovara_seals |= SEAL_YMIR;
 					if(!u.spiritTineA){
 						u.spiritTineA = SEAL_YMIR;
 						u.spiritTineTA= moves + bindingPeriod;

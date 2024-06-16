@@ -323,6 +323,9 @@ struct monst *magr;
 	if(otyp == CARCOSAN_STING){
 		attackmask = PIERCE;
 	}
+	if(otyp == SOLDIER_S_SABER){
+		attackmask = SLASH;
+	}
 
 	/* catch special cases */
 	if (   oartifact == ART_YORSHKA_S_SPEAR
@@ -532,6 +535,11 @@ struct monst *magr;
 				bond = 5;
 				spe_mult += 1;
 			}
+		}
+		else if (otyp == SOLDIER_S_SABER)
+		{
+			ocn = 1;
+			ocd = 8;
 		}
 		else if (otyp == WIND_AND_FIRE_WHEELS)
 		{
@@ -4328,6 +4336,15 @@ const struct def_skill *class_skill;
 	    skill = weapon_type(obj);
 	    if (skill != P_NONE)
 			OLD_P_SKILL(skill) = Role_if(PM_PIRATE) ? P_SKILLED : P_BASIC;
+
+		if (obj->otyp == CHURCH_HAMMER)
+			OLD_P_SKILL(P_SHORT_SWORD) = Role_if(PM_PIRATE) ? P_SKILLED : P_BASIC;
+		else if (obj->otyp == CHURCH_BLADE)
+			OLD_P_SKILL(P_LONG_SWORD) = Role_if(PM_PIRATE) ? P_SKILLED : P_BASIC;
+		else if (obj->otyp == CANE)
+			OLD_P_SKILL(P_WHIP) = Role_if(PM_PIRATE) ? P_SKILLED : P_BASIC;
+		else if (obj->otyp == SOLDIER_S_RAPIER)
+			OLD_P_SKILL(P_FIREARM) = Role_if(PM_PIRATE) ? P_SKILLED : P_BASIC;
 	}
 
 	/* set skills for magic */

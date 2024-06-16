@@ -1352,7 +1352,7 @@ struct obj * obj;
 	if (
 		(obj->otyp == JADE) ||
 		(obj->oclass == RING_CLASS && obj->otyp == jadeRing) ||
-		(obj->obj_material == GEMSTONE && !obj_type_uses_ovar1(obj) && !obj_art_uses_ovar1(obj) && obj->sub_material == JADE)
+		(obj->obj_material == GEMSTONE && obj->sub_material == JADE)
 		)
 		return TRUE;
 
@@ -1497,13 +1497,16 @@ struct monst * magr;
 			diesize = 20;
 		else if (otmp->oartifact == ART_SPEAR_OF_PEACE)
 			diesize = 20;
-		else if (otmp->otyp == KHAKKHARA)
+
+		if (otmp->otyp == KHAKKHARA)
 			ndice = khakharadice;
 		/* gold has a particular affinity to blessings and curses */
 		if ((otmp->obj_material == GOLD || otmp->oartifact == ART_RUYI_JINGU_BANG) &&
 			!(is_lightsaber(otmp) && litsaber(otmp))) {
 			diesize = 20;
 		}
+		if (is_self_righteous(otmp))
+			diesize *= 2.5;
 		/* calculate dice */
 		dmg += vd(ndice, diesize);
 	}
@@ -1550,6 +1553,8 @@ struct monst * magr;
 			!(is_lightsaber(otmp) && litsaber(otmp))) {
 			ndice *= 2;
 		}
+		if (is_self_righteous(otmp))
+			diesize *= 2.5;
 		/* calculate */
 		if (ndice)
 			dmg += vd(ndice, diesize);
@@ -3224,4 +3229,20 @@ struct attack * attk;
 }
 
 
+boolean
+is_serration_vulnerable(struct monst *mon){
+	if((mon->misc_worn_check&W_ARM) || (mon->misc_worn_check&W_ARMU) || (mon->misc_worn_check&W_ARMC))
+		return FALSE;
+
+	int dr = avg_mdr(mon);
+	if(dr >= 8)
+		return FALSE;
+	if(resist_slash(mon->data))
+		return FALSE;
+	if(resists_all(mon->data))
+		return FALSE;
+	if(resist_attacks(mon->data))
+		return FALSE;
+	return TRUE;
+}
 

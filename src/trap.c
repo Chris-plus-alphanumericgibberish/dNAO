@@ -498,12 +498,12 @@ boolean td;	/* td == TRUE : trap door or hole */
 	else if(Levitation || u.ustuck || !Can_fall_thru(&u.uz)
 	   || Flying || is_clinger(youracedata)
 	   || (Role_if(PM_ARCHEOLOGIST) && uwep && 
-			(uwep->otyp == BULLWHIP || uwep->otyp == VIPERWHIP || uwep->otyp == FORCE_WHIP))
+			(uwep->otyp == BULLWHIP || uwep->otyp == VIPERWHIP || uwep->otyp == FORCE_WHIP || uwep->otyp == WHIP_SAW))
 	   || (Inhell && !u.uevent.invoked &&
 					newlevel == (dunlevs_in_dungeon(&u.uz) - 1))/*seal off sanctum and square level until the invocation is performed*/
 		) {
 		if (Role_if(PM_ARCHEOLOGIST) && uwep && 
-			(uwep->otyp == BULLWHIP || uwep->otyp == VIPERWHIP || uwep->otyp == FORCE_WHIP)
+			(uwep->otyp == BULLWHIP || uwep->otyp == VIPERWHIP || uwep->otyp == FORCE_WHIP || uwep->otyp == WHIP_SAW)
 		)            
 		pline("But thanks to your trusty whip ...");
 	    dont_fall = "don't fall in.";

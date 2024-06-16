@@ -2228,7 +2228,7 @@ boolean
 arti_poisoned(obj)
 struct obj *obj;
 {
-    return (obj && obj->oartifact && ((arti_attack_prop(obj, ARTA_POIS)) || (obj->oartifact == ART_PEN_OF_THE_VOID && obj->ovar1_seals&SEAL_YMIR)));
+    return (obj && obj->oartifact && ((arti_attack_prop(obj, ARTA_POIS)) || (obj->oartifact == ART_PEN_OF_THE_VOID && obj->ovara_seals&SEAL_YMIR)));
 }
 
 /* used so that callers don't need to known about SPFX_ codes */
@@ -2238,7 +2238,7 @@ struct obj *obj;
 {
     return (obj && obj->oartifact && (arti_attack_prop(obj, ARTA_SILVER) || 
 									  (obj->oartifact == ART_PEN_OF_THE_VOID &&
-									   obj->ovar1_seals & SEAL_EDEN) ||
+									   obj->ovara_seals & SEAL_EDEN) ||
 									  ((obj->oartifact == ART_HOLY_MOONLIGHT_SWORD) && !obj->lamplit))
 			);
 }
@@ -2265,7 +2265,7 @@ struct obj *obj;
 	}
     return (obj && obj->oartifact && (arti_attack_prop(obj, ARTA_BRIGHT) || 
 									  (obj->oartifact == ART_PEN_OF_THE_VOID &&
-									   obj->ovar1_seals & SEAL_JACK)));
+									   obj->ovara_seals & SEAL_JACK)));
 }
 
 boolean
@@ -3539,14 +3539,14 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 		*dmgptr -= pen->spe;
 	}
 	
-	if (pen->ovar1_seals&SEAL_AHAZU && dieroll < 5){
+	if (pen->ovara_seals&SEAL_AHAZU && dieroll < 5){
 	    *dmgptr += d(dnum,4);
 		if(vis) {
 			pline("The blade's shadow catches on %s.", hittee);
 		}
 		mdef->movement -= 3;
 	}
-	if (pen->ovar1_seals&SEAL_AMON) {
+	if (pen->ovara_seals&SEAL_AMON) {
 	    if (vis){
 			Sprintf(buf, "fiery"); // profane
 			and = TRUE;
@@ -3563,7 +3563,7 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 			*dmgptr += d(dnum,4);
 		}
 	} // triggers narrow_voidPen_hit - fire res
-	if (pen->ovar1_seals&SEAL_ASTAROTH) {
+	if (pen->ovara_seals&SEAL_ASTAROTH) {
 	    if (vis){ 
 			and ? Strcat(buf, " and crackling") : Sprintf(buf, "crackling");
 			and = TRUE;
@@ -3576,7 +3576,7 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 			*dmgptr += d(dnum,4);
 		}
 	} // nvPh - shock res
-	if (pen->ovar1_seals&SEAL_BALAM) {
+	if (pen->ovara_seals&SEAL_BALAM) {
 	    if (vis){ 
 			and ? Strcat(buf, " yet freezing") : Sprintf(buf, "freezing");
 			and = TRUE;
@@ -3588,7 +3588,7 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 			*dmgptr += d(dnum,4);
 		}
 	} // nvPh - cold res
-	if (pen->ovar1_seals&SEAL_BERITH){
+	if (pen->ovara_seals&SEAL_BERITH){
 		berithdamage = d(dnum,4);
 #ifndef GOLDOBJ
 		if (!youattack || u.ugold >= berithdamage)
@@ -3608,16 +3608,16 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 		}
 		
 		if(vis && berithdamage > 0){
-			if(pen->ovar1_seals&SEAL_AMON) and ? Strcat(buf, " and blood-crusted") : Sprintf(buf, "blood-crusted");
+			if(pen->ovara_seals&SEAL_AMON) and ? Strcat(buf, " and blood-crusted") : Sprintf(buf, "blood-crusted");
 			else and ? Strcat(buf, " and blood-soaked") : Sprintf(buf, "blood-soaked");
 			and = TRUE;
 		}
 	}
-	if (pen->ovar1_seals&SEAL_BUER){
+	if (pen->ovara_seals&SEAL_BUER){
 		if(youattack) healup(d(dnum,4), 0, FALSE, FALSE);
 		else magr->mhp = min(magr->mhp + d(dnum,4),magr->mhpmax);
 	}
-	if (pen->ovar1_seals&SEAL_CHUPOCLOPS && dieroll < 3){
+	if (pen->ovara_seals&SEAL_CHUPOCLOPS && dieroll < 3){
 		struct trap *ttmp2 = maketrap(mdef->mx, mdef->my, WEB);
 	    *dmgptr += d(dnum,4);
 		if (ttmp2){
@@ -3634,7 +3634,7 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 			else mintrap(mdef);
 		}
 	}
-	if (pen->ovar1_seals&SEAL_DANTALION){
+	if (pen->ovara_seals&SEAL_DANTALION){
 		if(youdefend || !mindless_mon(mdef))
 			*dmgptr += d(dnum,4);
 		if(dieroll < 3){
@@ -3642,7 +3642,7 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 			else probe_monster(mdef);
 		}
 	} // nvPh - !mindless
-	if (pen->ovar1_seals&SEAL_ECHIDNA) {
+	if (pen->ovara_seals&SEAL_ECHIDNA) {
 	    if (vis){ 
 			and ? Strcat(buf, " and sizzling") : Sprintf(buf, "sizzling");
 			and = TRUE;
@@ -3652,9 +3652,9 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 			*dmgptr += d(dnum,4);
 		}
 	} // nvPh - acid res
-	if (pen->ovar1_seals&SEAL_ENKI) {
+	if (pen->ovara_seals&SEAL_ENKI) {
 	    if (vis){ 
-			if(pen->ovar1_seals&SEAL_AMON) and ? Strcat(buf, " and steaming") : Sprintf(buf, "steaming");
+			if(pen->ovara_seals&SEAL_AMON) and ? Strcat(buf, " and steaming") : Sprintf(buf, "steaming");
 			else and ? Strcat(buf, " and dripping") : Sprintf(buf, "dripping");
 			and = TRUE;
 		}
@@ -3693,7 +3693,7 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 			}
 		}
 	} // nvPh - water res
-	if (pen->ovar1_seals&SEAL_FAFNIR){
+	if (pen->ovara_seals&SEAL_FAFNIR){
 		if (vis){
 			and ? Strcat(buf, " and ruinous") : Sprintf(buf, "ruinous");
 			and = TRUE;
@@ -3704,7 +3704,7 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 			*dmgptr += d(dnum,4);
 		}
 	} // nvPh - golem/nonliving
-	if (pen->ovar1_seals&SEAL_HUGINN_MUNINN){
+	if (pen->ovara_seals&SEAL_HUGINN_MUNINN){
 		if(youdefend){
 			if(!Blind){
 				make_blinded(Blinded+1L,FALSE);
@@ -3719,9 +3719,9 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 			}
 		}
 	} // nvPh - blind
-	if (pen->ovar1_seals&SEAL_IRIS) {
+	if (pen->ovara_seals&SEAL_IRIS) {
 	    if (vis){ 
-			if(pen->ovar1_seals&SEAL_ENKI) and ? Strcat(buf, " yet thirsty") : Sprintf(buf, "thirsty");
+			if(pen->ovara_seals&SEAL_ENKI) and ? Strcat(buf, " yet thirsty") : Sprintf(buf, "thirsty");
 			else and ? Strcat(buf, " and thirsty") : Sprintf(buf, "thirsty");
 			and = TRUE;
 		}
@@ -3729,21 +3729,21 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 			*dmgptr += d(dnum,4);
 		}
 	} // nvPh - hydrous
-	if (pen->ovar1_seals&SEAL_MOTHER && dieroll <= dnum){
+	if (pen->ovara_seals&SEAL_MOTHER && dieroll <= dnum){
 		if(youdefend) nomul(5,"held by the Pen of the Void");
 	    else if(mdef->mcanmove || mdef->mfrozen){
 			mdef->mcanmove = 0;
 			mdef->mfrozen = max(mdef->mfrozen, 5);
 		}
 	}
-	if (pen->ovar1_seals&SEAL_NABERIUS){
+	if (pen->ovara_seals&SEAL_NABERIUS){
 		if(youdefend && (Upolyd ? u.mh < .25*u.mhmax : u.uhp < .25*u.uhpmax)) *dmgptr += d(dnum,4);
 		else if(!youdefend){
 			if(mdef->mflee) *dmgptr += d(dnum,4);
 			if(mdef->mpeaceful) *dmgptr += d(dnum,4);
 		}
 	} // nvPh - peaceful/fleeing
-	if (pen->ovar1_seals&SEAL_ORTHOS && dieroll < 3){
+	if (pen->ovara_seals&SEAL_ORTHOS && dieroll < 3){
 	    *dmgptr += d(2*dnum,8);
 		if(youdefend){
 			You("are addled by the gusting winds!");
@@ -3756,11 +3756,11 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 		}
 		and = TRUE;
 	}
-	if (pen->ovar1_seals&SEAL_OSE){
+	if (pen->ovara_seals&SEAL_OSE){
 		if(youdefend && !Tele_blind && (Blind_telepat || !rn2(5))) *dmgptr += d(dnum,15);
 		else if(!youdefend && !mindless_mon(mdef) && (mon_resistance(mdef,TELEPAT) || !rn2(5))) *dmgptr += d(dnum,15);
 	} // nvPh - telepathy
-	if (pen->ovar1_seals&SEAL_OTIAX){
+	if (pen->ovara_seals&SEAL_OTIAX){
 		char bufO[BUFSZ];
 		bufO[0] = '\0';
 	    *dmgptr += d(1,dnum);
@@ -3865,17 +3865,17 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 			}
 		}
 	}
-	if (pen->ovar1_seals&SEAL_PAIMON){
+	if (pen->ovara_seals&SEAL_PAIMON){
 		if(youattack) u.uen = min(u.uen+dnum,u.uenmax);
 		else magr->mspec_used = max(magr->mspec_used - dnum,0);
 	} // nvPh - !cancelled
-	if (pen->ovar1_seals&SEAL_SHIRO){
+	if (pen->ovara_seals&SEAL_SHIRO){
 		struct obj *otmp;
 		otmp = mksobj((mvitals[PM_ACERERAK].died > 0) ? BOULDER : ROCK, MKOBJ_NOINIT);
 		projectile(magr, otmp, (void *)0, HMON_PROJECTILE|HMON_FIRED, mdef->mx, mdef->my, 0, 0, 0, 0, TRUE, FALSE, FALSE);
 		if(mdef->mhp <= 0) return vis;//Monster was killed by throw and we should stop.
 	} // nvPh potential - invisible?
-	if (pen->ovar1_seals&SEAL_SIMURGH){
+	if (pen->ovara_seals&SEAL_SIMURGH){
 		if(youdefend && !Blind){
 			You("are dazzled by prismatic feathers!");
 			make_stunned((HStun + 5), FALSE);
@@ -3889,7 +3889,7 @@ char *hittee;			/* target's name: "you" or mon_nam(mdef) */
 		}
 		and = TRUE;
 	} // nvPh - blind
-	if (pen->ovar1_seals&SEAL_TENEBROUS && dieroll <= dnum){
+	if (pen->ovara_seals&SEAL_TENEBROUS && dieroll <= dnum){
 		if(youdefend && !Drain_resistance){
 			if (Blind)
 				You_feel("an unholy blade drain your life!");
@@ -3950,26 +3950,26 @@ struct obj *pen;	/* Pen of the Void */
 	*/
 	// I went ahead and implemented these, not sure if they're balanced so commented out - riker	
 	
-	if (pen->ovar1_seals&SEAL_AMON) {
+	if (pen->ovara_seals&SEAL_AMON) {
 		if(youdefend ? !Fire_resistance : !resists_fire(mdef)){
 			return TRUE;
 		}
 	}
-	if (pen->ovar1_seals&SEAL_ASTAROTH) {
+	if (pen->ovara_seals&SEAL_ASTAROTH) {
 		if(youdefend ? !Shock_resistance : !resists_elec(mdef)){
 			return TRUE;
 		}
 	}
-	if (pen->ovar1_seals&SEAL_BALAM) {
+	if (pen->ovara_seals&SEAL_BALAM) {
 		if(youdefend ? !Cold_resistance : !resists_cold(mdef)){
 			return TRUE;
 		}
 	}
-	if (pen->ovar1_seals&SEAL_DANTALION){
+	if (pen->ovara_seals&SEAL_DANTALION){
 	    if(youdefend || !mindless_mon(mdef))
 			return TRUE;
 	}
-	if (pen->ovar1_seals&SEAL_ENKI) {
+	if (pen->ovara_seals&SEAL_ENKI) {
 		if(youdefend){
 			if(!Waterproof && !(uarmc && uarmc->greased))
 				return TRUE;
@@ -3980,19 +3980,19 @@ struct obj *pen;	/* Pen of the Void */
 			}
 		}
 	}
-	if (pen->ovar1_seals&SEAL_ECHIDNA) {
+	if (pen->ovara_seals&SEAL_ECHIDNA) {
 		if(youdefend ? !Acid_resistance : !resists_acid(mdef)){
 			return TRUE;
 		}
 	}
-	if (pen->ovar1_seals&SEAL_FAFNIR){
+	if (pen->ovara_seals&SEAL_FAFNIR){
 		if(youdefend ? is_golem(youracedata) : is_golem(mdef->data)){
 			return TRUE;
 		} else if(youdefend ? nonliving(youracedata) : nonliving(mdef->data)){
 			return TRUE;
 		}
 	}
-	if (pen->ovar1_seals&SEAL_HUGINN_MUNINN){
+	if (pen->ovara_seals&SEAL_HUGINN_MUNINN){
 		if(youdefend && !Blind){
 			return TRUE;
 		}
@@ -4000,12 +4000,12 @@ struct obj *pen;	/* Pen of the Void */
 			return TRUE;
 		}
 	}
-	if (pen->ovar1_seals&SEAL_IRIS) {
+	if (pen->ovara_seals&SEAL_IRIS) {
 		if(youdefend ? !(nonliving(youracedata) || is_anhydrous(youracedata)) : !(nonliving(mdef->data) || is_anhydrous(mdef->data))){
 			return TRUE;
 		}
 	}
-	if (pen->ovar1_seals&SEAL_NABERIUS){
+	if (pen->ovara_seals&SEAL_NABERIUS){
 		if(youdefend && (Upolyd ? u.mh < .25*u.mhmax : u.uhp < .25*u.uhpmax)){
 			return TRUE;
 		}
@@ -4013,7 +4013,7 @@ struct obj *pen;	/* Pen of the Void */
 			return TRUE;
 		}
 	}
-	if (pen->ovar1_seals&SEAL_OSE){
+	if (pen->ovara_seals&SEAL_OSE){
 		if(youdefend && Blind_telepat){
 			return TRUE;
 		}
@@ -4021,7 +4021,7 @@ struct obj *pen;	/* Pen of the Void */
 			return TRUE;
 		}
 	}
-	if (pen->ovar1_seals&SEAL_PAIMON){
+	if (pen->ovara_seals&SEAL_PAIMON){
 		if(youdefend && (u.uen < u.uenmax/4)){
 			return TRUE;
 		}
@@ -4029,7 +4029,7 @@ struct obj *pen;	/* Pen of the Void */
 			return TRUE;
 		}
 	}
-	if (pen->ovar1_seals&SEAL_SIMURGH){
+	if (pen->ovara_seals&SEAL_SIMURGH){
 		if(youdefend && !Blind){
 			return TRUE;
 		}
@@ -4037,7 +4037,7 @@ struct obj *pen;	/* Pen of the Void */
 			return TRUE;
 		}
 	}
-	if (pen->ovar1_seals&SEAL_TENEBROUS){
+	if (pen->ovara_seals&SEAL_TENEBROUS){
 		if(youdefend && !Drain_resistance){
 			return TRUE;
 		}
@@ -5043,6 +5043,10 @@ boolean printmessages;
 				else mdef->mblinded += rnd_tmp;
 			}
 		}
+	}
+	
+	if (otmp->otyp == STAKE && is_vampire(mdef->data) && !naoid(mdef->data)) {
+		*plusdmgptr += d(1, 6);
 	}
 
 	if (otmp->otyp == KAMEREL_VAJRA && litsaber(otmp)) {
@@ -6367,7 +6371,7 @@ boolean printmessages; /* print generic elemental damage messages */
 					}
 					/* Ask the player if they want to keep the object */
 					pline("Your blade sweeps %s away from %s.", doname(otmp2), mon_nam(mdef));
-					if (otmp->ovar1_artiTheftType == 0 && yn("Do you try to grab it for yourself?") == 'y'){
+					if (otmp->ovara_artiTheftType == 0 && yn("Do you try to grab it for yourself?") == 'y'){
 						/* give the object to the character */
 						otmp2 = Role_if(PM_PIRATE) ?
 							hold_another_object(otmp2, "Ye snatched but dropped %s.",
@@ -6383,7 +6387,7 @@ boolean printmessages; /* print generic elemental damage messages */
 						}
 					}
 					else{
-						if (otmp->ovar1_artiTheftType == 0){
+						if (otmp->ovara_artiTheftType == 0){
 							getdir((char *)0);
 							if (u.dx || u.dy){
 								You("toss it away.");
@@ -6554,7 +6558,9 @@ boolean printmessages; /* print generic elemental damage messages */
 	}
 
 	/* vorpal weapons */
-	if (arti_attack_prop(otmp, ARTA_VORPAL) || check_oprop(otmp,OPROP_VORPW)) {
+	if (arti_attack_prop(otmp, ARTA_VORPAL) || check_oprop(otmp,OPROP_VORPW)
+		|| (otmp->otyp == STAKE && is_vampire(mdef->data) && !naoid(mdef->data))
+	) {
 		char buf[BUFSZ];
 		int vorpaldamage = (basedmg * 20) + d(8, 20);
 		int method = 0;
@@ -6660,6 +6666,8 @@ boolean printmessages; /* print generic elemental damage messages */
 			{
 				if(check_oprop(otmp,OPROP_GSSDW) && has_head_mon(mdef))
 					method = VORPAL_BEHEAD;
+				else if (otmp->otyp == STAKE && is_vampire(mdef->data) && !naoid(mdef->data))
+					method = VORPAL_PIERCE;
 				else if (is_slashing(msgr) && is_stabbing(msgr))
 					method = VORPAL_BEHEAD;
 				else if (is_slashing(msgr))
@@ -8242,14 +8250,14 @@ struct obj *obj;
 	*buf = '\0';
 	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
 	
-	if(!(obj->ovar1_carapace&CPROP_HARD_SCALE)){
+	if(!(obj->ovara_carapace&CPROP_HARD_SCALE)){
 		Sprintf(buf, "Harden exoskeletal scales (1 point)");
 		any.a_int = CPROP_HARD_SCALE;
 		add_menu(tmpwin, NO_GLYPH, &any,
 			inclet, 0, ATR_NONE, buf,
 			MENU_UNSELECTED);
 	}
-	else if(!(obj->ovar1_carapace&CPROP_PLATES)){
+	else if(!(obj->ovara_carapace&CPROP_PLATES)){
 		Sprintf(buf, "Grow exoskeletal Plates (2 points)");
 		any.a_int = CPROP_PLATES;
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -8258,7 +8266,7 @@ struct obj *obj;
 	}
 	inclet++;
 
-	if(!(obj->ovar1_carapace&CPROP_FLEXIBLE)){
+	if(!(obj->ovara_carapace&CPROP_FLEXIBLE)){
 		Sprintf(buf, "Flexible chitin links (1 point)");
 		any.a_int = CPROP_FLEXIBLE;
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -8267,7 +8275,7 @@ struct obj *obj;
 	}
 	inclet++;
 
-	if(!(obj->ovar1_carapace&CPROP_WHIPPING)){
+	if(!(obj->ovara_carapace&CPROP_WHIPPING)){
 		Sprintf(buf, "Whipping tail (2 points)");
 		any.a_int = CPROP_WHIPPING;
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -8276,7 +8284,7 @@ struct obj *obj;
 	}
 	inclet++;
 
-	if(!(obj->ovar1_carapace&CPROP_ILL_STING)){
+	if(!(obj->ovara_carapace&CPROP_ILL_STING)){
 		Sprintf(buf, "Illness-inducing stinger (3 points)");
 		any.a_int = CPROP_ILL_STING;
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -8285,7 +8293,7 @@ struct obj *obj;
 	}
 	inclet++;
 
-	if(!(obj->ovar1_carapace&CPROP_SWIMMING)){
+	if(!(obj->ovara_carapace&CPROP_SWIMMING)){
 		Sprintf(buf, "Swimming (2 points)");
 		any.a_int = CPROP_SWIMMING;
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -8294,7 +8302,7 @@ struct obj *obj;
 	}
 	inclet++;
 
-	if(!(obj->ovar1_carapace&CPROP_ACID_RES) && mvitals[PM_SOLDIER_ANT].seen){
+	if(!(obj->ovara_carapace&CPROP_ACID_RES) && mvitals[PM_SOLDIER_ANT].seen){
 		Sprintf(buf, "Acid resistance (1 point)");
 		any.a_int = CPROP_ACID_RES;
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -8303,7 +8311,7 @@ struct obj *obj;
 	}
 	inclet++;
 
-	if(!(obj->ovar1_carapace&CPROP_FIRE_RES) && mvitals[PM_FIRE_ANT].seen){
+	if(!(obj->ovara_carapace&CPROP_FIRE_RES) && mvitals[PM_FIRE_ANT].seen){
 		Sprintf(buf, "Fire resistance (1 point)");
 		any.a_int = CPROP_FIRE_RES;
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -8312,7 +8320,7 @@ struct obj *obj;
 	}
 	inclet++;
 
-	if(!(obj->ovar1_carapace&CPROP_SHIELDS) && mvitals[PM_GIANT_BEETLE].seen){
+	if(!(obj->ovara_carapace&CPROP_SHIELDS) && mvitals[PM_GIANT_BEETLE].seen){
 		Sprintf(buf, "Arm shields (2 points)");
 		any.a_int = CPROP_SHIELDS;
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -8321,7 +8329,7 @@ struct obj *obj;
 	}
 	inclet++;
 
-	if(!(obj->ovar1_carapace&CPROP_TELEPORT) && mvitals[PM_PHASE_SPIDER].seen){
+	if(!(obj->ovara_carapace&CPROP_TELEPORT) && mvitals[PM_PHASE_SPIDER].seen){
 		Sprintf(buf, "Teleportation (1 point)");
 		any.a_int = CPROP_TELEPORT;
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -8330,7 +8338,7 @@ struct obj *obj;
 	}
 	inclet++;
 
-	if(!(obj->ovar1_carapace&CPROP_TCONTROL) && mvitals[PM_PHASE_SPIDER].seen){
+	if(!(obj->ovara_carapace&CPROP_TCONTROL) && mvitals[PM_PHASE_SPIDER].seen){
 		Sprintf(buf, "Teleport control (1 point)");
 		any.a_int = CPROP_TCONTROL;
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -8339,7 +8347,7 @@ struct obj *obj;
 	}
 	inclet++;
 
-	if(!(obj->ovar1_carapace&CPROP_DRAINRES) && mvitals[PM_DEMONIC_BLACK_WIDOW].seen){
+	if(!(obj->ovara_carapace&CPROP_DRAINRES) && mvitals[PM_DEMONIC_BLACK_WIDOW].seen){
 		Sprintf(buf, "Drain resistance (1 point)");
 		any.a_int = CPROP_DRAINRES;
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -8348,7 +8356,7 @@ struct obj *obj;
 	}
 	inclet++;
 
-	if(!(obj->ovar1_carapace&CPROP_IMPURITY) && u.uinsight >= 5){
+	if(!(obj->ovara_carapace&CPROP_IMPURITY) && u.uinsight >= 5){
 		Sprintf(buf, "Armor of impurity (2 points)");
 		any.a_int = CPROP_IMPURITY;
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -8357,7 +8365,7 @@ struct obj *obj;
 	}
 	inclet++;
 
-	if(!(obj->ovar1_carapace&CPROP_WINGS) && mvitals[PM_VERMIURGE].seen){
+	if(!(obj->ovara_carapace&CPROP_WINGS) && mvitals[PM_VERMIURGE].seen){
 		Sprintf(buf, "Wings (2 points)");
 		any.a_int = CPROP_WINGS;
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -8366,7 +8374,7 @@ struct obj *obj;
 	}
 	inclet++;
 
-	if(!(obj->ovar1_carapace&CPROP_CLAWS) && mvitals[PM_VERMIURGE].seen){
+	if(!(obj->ovara_carapace&CPROP_CLAWS) && mvitals[PM_VERMIURGE].seen){
 		Sprintf(buf, "Claws (2 points)");
 		any.a_int = CPROP_CLAWS;
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -8375,7 +8383,7 @@ struct obj *obj;
 	}
 	inclet++;
 
-	if(!(obj->ovar1_carapace&CPROP_CROWN) && mvitals[PM_VERMIURGE].seen && mvitals[PM_VERMIURGE].died > 0){
+	if(!(obj->ovara_carapace&CPROP_CROWN) && mvitals[PM_VERMIURGE].seen && mvitals[PM_VERMIURGE].died > 0){
 		Sprintf(buf, "Crown (3 points)");
 		any.a_int = CPROP_CROWN;
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -8470,7 +8478,7 @@ struct obj *obj;
 
 	if(msg)
 		pline("%s", msg);
-	obj->ovar1_carapace |= picked;
+	obj->ovara_carapace |= picked;
 	if(obj == uarm){
 		if(picked == CPROP_FIRE_RES)
 			EFire_resistance |= W_ARM;
@@ -9543,10 +9551,10 @@ arti_invoke(obj)
 		awaken_monsters(ROWNO * COLNO);
 	} break;
 	case THEFT_TYPE:
-		if(obj->ovar1_artiTheftType == 0){
-			if(yn("Switch to autopickup mode")) obj->ovar1_artiTheftType = 1;
+		if(obj->ovara_artiTheftType == 0){
+			if(yn("Switch to autopickup mode")) obj->ovara_artiTheftType = 1;
 		} else {
-			if(yn("Switch to interactive mode")) obj->ovar1_artiTheftType = 0;
+			if(yn("Switch to interactive mode")) obj->ovara_artiTheftType = 0;
 		}
 	break;
 	case SHADOW_FLARE:
@@ -10891,8 +10899,8 @@ arti_invoke(obj)
 						pline("What is this strange function.");
 					break;
 				}
-				if(annulusFunc >= COMMAND_ANNUL) obj->ovar1_timeout = monstermoves + (long)(rnz(1000)*(Role_if(PM_PRIEST) ? .8 : 1)); 
-				else if(annulusFunc >= COMMAND_BELL) obj->ovar1_timeout = monstermoves + (long)(rnz(100)*(Role_if(PM_PRIEST) ? .8 : 1)); 
+				if(annulusFunc >= COMMAND_ANNUL) obj->ovara_timeout = monstermoves + (long)(rnz(1000)*(Role_if(PM_PRIEST) ? .8 : 1)); 
+				else if(annulusFunc >= COMMAND_BELL) obj->ovara_timeout = monstermoves + (long)(rnz(100)*(Role_if(PM_PRIEST) ? .8 : 1)); 
 			} else You_feel("that you should be wielding %s.", the(xname(obj)));
 		break;
 		case VOID_CHIME:
@@ -10901,8 +10909,8 @@ arti_invoke(obj)
 				int * spiritprops;
 				u.voidChime = 5;
 				pline("You strike the twin-bladed athame like a tuning fork. The beautiful chime is like nothing you have ever heard.");
-				obj->ovar1_seals |= u.sealsActive;
-				u.sealsActive |= obj->ovar1_seals;
+				obj->ovara_seals |= u.sealsActive;
+				u.sealsActive |= obj->ovara_seals;
 				set_spirit_powers(u.spiritTineA);
 					if(u.spiritTineA&wis_spirits) u.wisSpirits++;
 					if(u.spiritTineA&int_spirits) u.intSpirits++;
@@ -11221,7 +11229,7 @@ arti_invoke(obj)
           if(uwep && uwep == obj){
             if(!getdir((char *)0))
               break;
-            switch(obj->ovar1_lifeDeath){
+            switch(obj->ovara_lifeDeath){
               case COMMAND_DEATH: {
                 struct monst *mtmp;
                 if((u.dx || u.dy) && (mtmp = m_at(u.ux+u.dx,u.uy+u.dy))){
@@ -11229,7 +11237,7 @@ arti_invoke(obj)
                     if(!(nonliving(mtmp->data) || is_demon(mtmp->data) || is_angel(mtmp->data))){
                       pline("%s withers under the touch of %s.", The(Monnam(mtmp)), The(xname(obj)));
                       xkilled(mtmp, 1);
-                      obj->ovar1_lifeDeath = COMMAND_LIFE;
+                      obj->ovara_lifeDeath = COMMAND_LIFE;
                     } else {
                       pline("%s seems no deader than before.", The(Monnam(mtmp)));
                     }
@@ -11251,7 +11259,7 @@ arti_invoke(obj)
                       revive(ocur, FALSE);
                       if((mtmp = m_at(u.ux+u.dx,u.uy+u.dy))){
                         pline("%s resurrects!", Monnam(mtmp));
-                        obj->ovar1_lifeDeath = COMMAND_DEATH;
+                        obj->ovara_lifeDeath = COMMAND_DEATH;
                         break;
                       } else {
                         pline("You fail to resurrect %s.", the(xname(ocur)));
@@ -12633,7 +12641,7 @@ struct obj *obj;
 			MENU_UNSELECTED);
 	}
 
-	if(obj->ovar1_timeout < monstermoves){
+	if(obj->ovara_timeout < monstermoves){
 		if(obj->otyp == KHAKKHARA){
 			Sprintf(buf, "Ring Out");
 			any.a_int = COMMAND_BELL;	/* must be non-zero */
@@ -12914,119 +12922,119 @@ struct obj *obj;
 	add_menu(tmpwin, NO_GLYPH, &any,
 		'n', 0, ATR_NONE, buf,
 		MENU_UNSELECTED);
-	if(obj->ovar1_heard&OHEARD_FEAR){
+	if(obj->ovara_heard&OHEARD_FEAR){
 		Sprintf(buf, "Chant ominously.");
 		any.a_int = OSING_FEAR;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
 			'o', 0, ATR_NONE, buf,
 			MENU_UNSELECTED);
 	}
-	if(obj->ovar1_heard&OHEARD_HEALING){
+	if(obj->ovara_heard&OHEARD_HEALING){
 		Sprintf(buf, "Hum soothingly.");
 		any.a_int = OSING_HEALING;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
 			's', 0, ATR_NONE, buf,
 			MENU_UNSELECTED);
 	}
-	if(obj->ovar1_heard&OHEARD_RALLY){
+	if(obj->ovara_heard&OHEARD_RALLY){
 		Sprintf(buf, "Rally my forces.");
 		any.a_int = OSING_RALLY;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
 			'r', 0, ATR_NONE, buf,
 			MENU_UNSELECTED);
 	}
-	if(obj->ovar1_heard&OHEARD_CONFUSE){
+	if(obj->ovara_heard&OHEARD_CONFUSE){
 		Sprintf(buf, "Confuse my foes.");
 		any.a_int = OSING_CONFUSE;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
 			'c', 0, ATR_NONE, buf,
 			MENU_UNSELECTED);
 	}
-	if(obj->ovar1_heard&OHEARD_CANCEL){
+	if(obj->ovara_heard&OHEARD_CANCEL){
 		Sprintf(buf, "Disrupt spellcasting.");
 		any.a_int = OSING_CANCEL;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
 			'd', 0, ATR_NONE, buf,
 			MENU_UNSELECTED);
 	}
-	if(obj->ovar1_heard&OHEARD_HASTE){
+	if(obj->ovara_heard&OHEARD_HASTE){
 		Sprintf(buf, "A marching song.");
 		any.a_int = OSING_HASTE;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
 			'm', 0, ATR_NONE, buf,
 			MENU_UNSELECTED);
 	}
-	if(obj->ovar1_heard&OHEARD_LETHARGY){
+	if(obj->ovara_heard&OHEARD_LETHARGY){
 		Sprintf(buf, "A lethargic song.");
 		any.a_int = OSING_LETHARGY;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
 			'l', 0, ATR_NONE, buf,
 			MENU_UNSELECTED);
 	}
-	if(obj->ovar1_heard&OHEARD_COURAGE){
+	if(obj->ovara_heard&OHEARD_COURAGE){
 		Sprintf(buf, "An inspiring song.");
 		any.a_int = OSING_COURAGE;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
 			'i', 0, ATR_NONE, buf,
 			MENU_UNSELECTED);
 	}
-	if(obj->ovar1_heard&OHEARD_DIRGE){
+	if(obj->ovara_heard&OHEARD_DIRGE){
 		Sprintf(buf, "A dismal dirge.");
 		any.a_int = OSING_DIRGE;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
 			'D', 0, ATR_NONE, buf,
 			MENU_UNSELECTED);
 	}
-	if(obj->ovar1_heard&OHEARD_FIRE){
+	if(obj->ovara_heard&OHEARD_FIRE){
 		Sprintf(buf, "A fiery song.");
 		any.a_int = OSING_FIRE;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
 			'F', 0, ATR_NONE, buf,
 			MENU_UNSELECTED);
 	}
-	if(obj->ovar1_heard&OHEARD_FROST){
+	if(obj->ovara_heard&OHEARD_FROST){
 		Sprintf(buf, "A chilling song.");
 		any.a_int = OSING_FROST;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
 			'C', 0, ATR_NONE, buf,
 			MENU_UNSELECTED);
 	}
-	if(obj->ovar1_heard&OHEARD_ELECT){
+	if(obj->ovara_heard&OHEARD_ELECT){
 		Sprintf(buf, "An electrifying song.");
 		any.a_int = OSING_ELECT;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
 			'E', 0, ATR_NONE, buf,
 			MENU_UNSELECTED);
 	}
-	if(obj->ovar1_heard&OHEARD_QUAKE){
+	if(obj->ovara_heard&OHEARD_QUAKE){
 		Sprintf(buf, "An earthshaking chant.");
 		any.a_int = OSING_QUAKE;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
 			'Q', 0, ATR_NONE, buf,
 			MENU_UNSELECTED);
 	}
-	if(obj->ovar1_heard&OHEARD_OPEN){
+	if(obj->ovara_heard&OHEARD_OPEN){
 		Sprintf(buf, "A tune of opening.");
 		any.a_int = OSING_OPEN;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
 			'O', 0, ATR_NONE, buf,
 			MENU_UNSELECTED);
 	}
-	if(obj->ovar1_heard&OHEARD_DEATH){
+	if(obj->ovara_heard&OHEARD_DEATH){
 		Sprintf(buf, "Of the passing of life.");
 		any.a_int = OSING_DEATH;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
 			'P', 0, ATR_NONE, buf,
 			MENU_UNSELECTED);
 	}
-	if(obj->ovar1_heard&OHEARD_LIFE){
+	if(obj->ovara_heard&OHEARD_LIFE){
 		Sprintf(buf, "Beat to the Cadence.");
 		any.a_int = OSING_LIFE;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
 			'L', 0, ATR_NONE, buf,
 			MENU_UNSELECTED);
 	}
-	if(obj->ovar1_heard&OHEARD_INSANE){
+	if(obj->ovara_heard&OHEARD_INSANE){
 		Sprintf(buf, "A hymn to the creator.");
 		any.a_int = OSING_INSANE;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
@@ -13715,7 +13723,7 @@ artifact_light(obj)
 struct obj *obj;
 {
 
-	if (obj && obj->oartifact == ART_PEN_OF_THE_VOID && obj->ovar1_seals&SEAL_JACK) return TRUE;
+	if (obj && obj->oartifact == ART_PEN_OF_THE_VOID && obj->ovara_seals&SEAL_JACK) return TRUE;
 
 	return (obj && obj->oartifact && arti_is_prop(obj, ARTI_LIGHT));
 }

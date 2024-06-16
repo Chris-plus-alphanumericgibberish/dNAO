@@ -1316,7 +1316,7 @@ struct obj *obj;
 	artinstance[ART_SCORPION_CARAPACE].CarapaceLevel -= price;
 	artinstance[ART_SCORPION_CARAPACE].CarapaceXP = newuexp(artinstance[ART_SCORPION_CARAPACE].CarapaceLevel) - 1;
 	
-	obj->ovar1_carapace &= ~flag;
+	obj->ovara_carapace &= ~flag;
 	return TRUE;
 }
 

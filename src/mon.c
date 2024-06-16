@@ -5184,7 +5184,7 @@ boolean was_swallowed;			/* digestion */
 	else if(mdat->mtyp == PM_CHOKHMAH_SEPHIRAH)
 		return FALSE;
 	
-	if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && uwep->ovar1_seals&SEAL_MALPHAS && rn2(20) <= (mvitals[PM_ACERERAK].died > 0 ? 4 : 1)){
+	if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && uwep->ovara_seals&SEAL_MALPHAS && rn2(20) <= (mvitals[PM_ACERERAK].died > 0 ? 4 : 1)){
 		struct monst *mtmp;
 		mtmp = makemon(&mons[PM_CROW], u.ux, u.uy, MM_EDOG|MM_ADJACENTOK);
 		initedog(mtmp);
@@ -5573,7 +5573,7 @@ boolean was_swallowed;			/* digestion */
 	
 	tmp = (int)(2 + ((int)(mdat->geno & G_FREQ)<2) + verysmall(mdat));
 	return (u.sealsActive&SEAL_EVE) ? (!rn2(tmp)||!rn2(tmp)) : 
-		  (uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && uwep->ovar1_seals&SEAL_EVE) ?  (!rn2(tmp)||!rn2(2*tmp - 1)) :
+		  (uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && uwep->ovara_seals&SEAL_EVE) ?  (!rn2(tmp)||!rn2(2*tmp - 1)) :
 		  !rn2(tmp);
 }
 

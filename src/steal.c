@@ -317,7 +317,7 @@ nothing_to_steal:
 gotobj:
 	if(otmp->o_id == stealoid) return(0);
 	
-	if(otmp->oartifact == ART_PEN_OF_THE_VOID && otmp->ovar1_seals&SEAL_ANDROMALIUS){
+	if(otmp->oartifact == ART_PEN_OF_THE_VOID && otmp->ovara_seals&SEAL_ANDROMALIUS){
 		pline("%s tries to steal your weapon, but is prevented!",Monnam(mtmp));
 		return 0;
 	}

@@ -1101,7 +1101,7 @@ int dx, dy;
 					short frtype = treefruit->otyp;
 					int frtspe = treefruit->spe;
 					if(u.sealsActive&SEAL_EVE) nfruit *= 1.5L;
-					else if(uwep && uwep->oartifact==ART_PEN_OF_THE_VOID && uwep->ovar1_seals&SEAL_EVE) nfruit *= 1.2L;
+					else if(uwep && uwep->oartifact==ART_PEN_OF_THE_VOID && uwep->ovara_seals&SEAL_EVE) nfruit *= 1.2L;
 					treefruit->quan = nfruit;
 					if (is_plural(treefruit))
 					    pline("Some %s fall from the tree!", xname(treefruit));
@@ -1155,7 +1155,7 @@ int dx, dy;
 					short frtype = treefruit->otyp;
 					int frtspe = treefruit->spe;
 					if(u.sealsActive&SEAL_EVE) nfruit *= 1.5L;
-					else if(uwep && uwep->oartifact==ART_PEN_OF_THE_VOID && uwep->ovar1_seals&SEAL_EVE) nfruit *= 1.2L;
+					else if(uwep && uwep->oartifact==ART_PEN_OF_THE_VOID && uwep->ovara_seals&SEAL_EVE) nfruit *= 1.2L;
 					treefruit->quan = nfruit;
 					if (is_plural(treefruit))
 					    pline("Some %s fall from the tree!", xname(treefruit));

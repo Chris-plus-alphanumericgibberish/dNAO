@@ -580,6 +580,7 @@ static struct trobj Tourist[] = {
 };
 #endif
 static struct trobj UndeadHunter[] = {
+	{ CANE, 0, WEAPON_CLASS, 1, 1 },
 	{ JACKET, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ RUFFLED_SHIRT, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ FEDORA, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
@@ -2475,6 +2476,29 @@ u_init()
 		break;
 #endif
 	case PM_UNDEAD_HUNTER:
+		switch(rn2(5)){
+			case 0:
+				//UndeadHunter[0].trotyp = CANE;
+			break;
+			case 1:
+				UndeadHunter[0].trotyp = CHURCH_HAMMER;
+				knows_object(HUNTER_S_SHORTSWORD);
+				knows_object(CHURCH_BRICK);
+			break;
+			case 2:
+				UndeadHunter[0].trotyp = CHURCH_BLADE;
+				knows_object(HUNTER_S_LONGSWORD);
+				knows_object(CHURCH_SHEATH);
+			break;
+			case 3:
+				UndeadHunter[0].trotyp = HUNTER_S_AXE;
+				knows_object(HUNTER_S_LONG_AXE);
+			break;
+			case 4:
+				UndeadHunter[0].trotyp = SAW_CLEAVER;
+				knows_object(RAZOR_CLEAVER);
+			break;
+		}
 		knows_object(POT_HEALING);
 		knows_object(POT_EXTRA_HEALING);
 		knows_object(POT_FULL_HEALING);

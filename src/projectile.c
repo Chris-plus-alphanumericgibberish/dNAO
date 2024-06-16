@@ -2153,11 +2153,11 @@ int * hurtle_dist;
 		/* some things maximize range */
 		if ((launcher->oartifact == ART_LONGBOW_OF_DIANA) ||
 			(launcher->oartifact == ART_XIUHCOATL) ||
-			(launcher->oartifact == ART_PEN_OF_THE_VOID && launcher->ovar1_seals&SEAL_EVE && mvitals[PM_ACERERAK].died > 0)
+			(launcher->oartifact == ART_PEN_OF_THE_VOID && launcher->ovara_seals&SEAL_EVE && mvitals[PM_ACERERAK].died > 0)
 			) {
 			range = 1000;
 		}
-		else if (launcher->oartifact == ART_PEN_OF_THE_VOID && launcher->ovar1_seals&SEAL_EVE) {
+		else if (launcher->oartifact == ART_PEN_OF_THE_VOID && launcher->ovara_seals&SEAL_EVE) {
 			/* the pen, being an athame, has a conflict between oc_range and oc_wsdam */
 			range = 8;	/* arbitrary */
 		}
