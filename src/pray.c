@@ -740,9 +740,10 @@ int godnum;
 	register int	maxanger;
 	char buf[BUFSZ];
 
-	if(godnum == GOD_THE_VOID || godnum == GOD_BOKRUG__THE_WATER_LIZARD) {
+	if(godnum == GOD_THE_VOID || godnum == GOD_BOKRUG__THE_WATER_LIZARD || philosophy_index(godnum)) {
 		/* the void does not get angry */
 		/* Bokrug DOES get angry, but has really bad aim. */
+		/* the various philosophies don't have gods per se. */
 		return;
 	}
 
@@ -1222,6 +1223,8 @@ const char *words;
 	quot = "\"";
     else
 	words = "";
+	if(philosophy_index(godnum))
+		return;
 	
 	if(godnum == GOD_THE_VOID){
 		You("think you hear a voice in the distance: %s%s%s", quot, words, quot);
@@ -1262,7 +1265,9 @@ void
 gods_upset(godnum)
 int godnum;
 {
-	if(godnum == GOD_THE_VOID) return;
+	if(godnum == GOD_THE_VOID || philosophy_index(godnum)) return;
+
+	IMPURITY_UP(u.uimp_god_anger)
 
 	if (godnum == u.ualign.god)
 		godlist[godnum].anger++;
@@ -1704,6 +1709,12 @@ dosacrifice()
 		pline1(nothing_happens);
 		return MOVE_STANDARD;
 	}
+	if (no_altar_index(altargod)){
+		if (otmp->otyp == CORPSE)
+			feel_cockatrice(otmp, TRUE);
+		pline1(nothing_happens);
+		return MOVE_STANDARD;
+	}
 
 #define MAXVALUE 24 /* Highest corpse value (besides Wiz) */
 
@@ -2108,7 +2119,7 @@ dosacrifice()
 			You("sense a conference between %s and %s.",
 				u_gname(), a_gname());
 			pline("But nothing else occurs.");
-		} else if(u.ualign.god == GOD_BOKRUG__THE_WATER_LIZARD){
+		} else if(u.ualign.god == GOD_BOKRUG__THE_WATER_LIZARD || philosophy_index(u.ualign.god)){
 			You("sense %s prepare for a conflict....",
 				a_gname());
 			pline("But nothing else occurs.");
@@ -2388,6 +2399,11 @@ dopray()
 		return MOVE_CANCELLED;
 	}
 	
+	if(philosophy_index(u.ualign.god)){
+		pline("While you are devoted to your philosophy, there is nothing in it that could answer a prayer.");
+		return MOVE_CANCELLED;
+	}
+
     /* Confirm accidental slips of Alt-P */
     if (flags.prayconfirm)
 	if (yn("Are you sure you want to pray?") == 'n')
@@ -2967,7 +2983,10 @@ void
 altar_wrath(x, y)
 register int x, y;
 {
-	if(god_at_altar(x, y) == u.ualign.god) {
+	int godnum = god_at_altar(x, y);
+	if(godnum == GOD_THE_VOID || godnum == GOD_BOKRUG__THE_WATER_LIZARD || no_altar_index(godnum))
+		return;
+	if(godnum == u.ualign.god) {
 		godvoice(u.ualign.god, "How darest thou desecrate my altar!");
 	(void) adjattrib(A_WIS, -1, FALSE);
 	} else {
@@ -4892,6 +4911,10 @@ int sanctum;   /* is it the seat of the high priest? */
 	else if(Is_bridge_temple(&u.uz)){
 		/* the Blasphemous Lurker in Neutral */
 		priest = makemon(&mons[PM_BLASPHEMOUS_LURKER], sx, sy, NO_MM_FLAGS);
+	}
+	else if(philosophy_index(godnum)){
+		/* philosophy altars in general lack gods */
+		priest = (struct monst *) 0;
 	}
 	else {
 		struct obj *otmp;

@@ -272,11 +272,17 @@ const char *verb;
 #ifdef OVLB
 
 void
-doaltarobj(obj)  /* obj is an object dropped on an altar */
-	register struct obj *obj;
+doaltarobj(struct obj *obj, int god_index)  /* obj is an object dropped on an altar */
 {
 	if (Blind || Misotheism)
 		return;
+
+	/* Hunter "gods" are semi-atheistic philosophies */
+	if (no_altar_index(god_index)){
+		pline("%s %s on the altar.", Doname2(obj),
+			otense(obj, "land"));
+		return;
+	}
 
 	/* KMH, conduct */
 	u.uconduct.gnostic++;
@@ -658,7 +664,7 @@ register struct obj *obj;
 	if (!u.uswallow) {
 	    if (ship_object(obj, u.ux, u.uy, FALSE)) return;
 	    if (IS_ALTAR(levl[u.ux][u.uy].typ))
-		doaltarobj(obj); /* set bknown */
+			doaltarobj(obj, god_at_altar(u.ux,u.uy)); /* set bknown */
 	}
 	dropy(obj);
 }

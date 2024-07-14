@@ -4218,7 +4218,7 @@ struct obj *box; /* or bag */
 				hitfloor2(&youmonst, &otmp, (struct obj *)0, FALSE, FALSE);
 			} else {
 				if (altarizing) {
-					doaltarobj(otmp);
+					doaltarobj(otmp, god_at_altar(ox, oy));
 				} else if (!terse) {
 					pline("%s %s to the %s.", Doname2(otmp),
 						  otense(otmp, "drop"), surface(ox, oy));

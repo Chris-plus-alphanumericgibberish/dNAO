@@ -172,8 +172,11 @@ do_present_item(obj)
 				struct engr *engrHere = engr_at(u.ux,u.uy);
 				if(u.ualign.type == A_LAWFUL) exercise(A_WIS, FALSE);
 				if (IS_ALTAR(levl[u.ux][u.uy].typ)) {
-					altar_wrath(u.ux, u.uy);
-					return MOVE_INSTANT;
+					int godnum = god_at_altar(u.ux,u.uy);
+					if(!no_altar_index(godnum)){
+						altar_wrath(u.ux, u.uy);
+						return MOVE_INSTANT;
+					}
 				}
 				if(!engrHere){
 					make_engr_at(u.ux, u.uy,	"", (moves - multi), DUST); /* absense of text =  dust */

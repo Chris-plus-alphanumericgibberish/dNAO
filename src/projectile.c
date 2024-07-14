@@ -1161,7 +1161,7 @@ boolean forcedestroy;
 	/* specific effects before end_projectile, if thrownobj still exists */
 	if (youagr) {
 		if (IS_ALTAR(levl[bhitpos.x][bhitpos.y].typ))
-			doaltarobj((*obj_p));
+			doaltarobj((*obj_p), god_at_altar(bhitpos.x,bhitpos.y));
 		else
 			pline("%s hit%s the %s.", Doname2((*obj_p)),
 			((*obj_p)->quan == 1L) ? "s" : "", surface(bhitpos.x, bhitpos.y));

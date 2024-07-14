@@ -3088,7 +3088,7 @@ int dz;
 				do_earthquake(u.ux, u.uy, 10, 2, FALSE, (struct monst *)0);
 				optr = uwep;
 				uwepgone();
-				if(optr->gifted != GOD_NONE && optr->gifted != GOD_THE_VOID){
+				if(optr->gifted != GOD_NONE && optr->gifted != GOD_THE_VOID && !philosophy_index(optr->gifted)){
 					gods_angry(optr->gifted);
 					gods_upset(optr->gifted);
 				}
@@ -3133,7 +3133,7 @@ int dz;
 
 				optr = uwep;
 				uwepgone();
-				if(optr->gifted != GOD_NONE && optr->gifted != GOD_THE_VOID){
+				if(optr->gifted != GOD_NONE && optr->gifted != GOD_THE_VOID && !philosophy_index(optr->gifted)){
 					gods_angry(optr->gifted);
 					gods_upset(optr->gifted);
 				}

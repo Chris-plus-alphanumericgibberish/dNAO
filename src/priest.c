@@ -151,7 +151,24 @@ int roomno;
 	struct rm *lev;
 
 	shrine_spot = shrine_pos(roomno);
+	if(!IS_ALTAR(levl[shrine_spot->x][shrine_spot->y].typ)){
+		shrine_spot = find_shrine_altar(roomno);
+	}
 	return (a_align(shrine_spot->x, shrine_spot->y));
+}
+
+int
+temple_god(int roomno)
+{
+	char *ptr;
+	coord *shrine_spot;
+	struct rm *lev;
+
+	shrine_spot = shrine_pos(roomno);
+	if(!IS_ALTAR(levl[shrine_spot->x][shrine_spot->y].typ)){
+		shrine_spot = find_shrine_altar(roomno);
+	}
+	return (god_at_altar(shrine_spot->x, shrine_spot->y));
 }
 #endif /* OVL0 */
 #ifdef OVLB
@@ -568,6 +585,9 @@ register int roomno;
 				else You("experience a strange sense of peace.");
 			}
 		} else {
+			int godnum = temple_god(roomno);
+			if(philosophy_index(godnum))
+				return;
 			switch(rn2(3)) {
 			  case 0: You("have an eerie feeling..."); break;
 			  case 1: You_feel("like you are being watched."); break;

@@ -8140,6 +8140,23 @@ int roomno;
 	return(&buf);
 }
 
+coord *
+find_shrine_altar(roomno)
+int roomno;
+{
+	static coord buf;
+	struct mkroom *troom = &rooms[roomno - ROOMOFFSET];
+	
+	for(buf.x = troom->lx; buf.x <= troom->hx; buf.x++){
+		for(buf.y = troom->ly; buf.y <= troom->hy; buf.y++){
+			if(IS_ALTAR(levl[buf.x][buf.y].typ)){
+				return &buf;
+			}
+		}
+	}
+	return(&buf);
+}
+
 STATIC_OVL void
 mkisland() /* John Harris, modified from mktemple & mkshop,
 				with ideas and aid from Pasi Kallinen.*/

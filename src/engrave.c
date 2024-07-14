@@ -2025,9 +2025,12 @@ int mode;
 		return MOVE_CANCELLED;
 	}
 	if (IS_ALTAR(levl[u.ux][u.uy].typ)) {
-		You("make a motion towards the altar with your %s.", writer);
-		altar_wrath(u.ux, u.uy);
-		return MOVE_INSTANT;
+		int godnum = god_at_altar(u.ux,u.uy);
+		if(!no_altar_index(godnum)){
+			You("make a motion towards the altar with your %s.", writer);
+			altar_wrath(u.ux, u.uy);
+			return MOVE_INSTANT;
+		}
 	}
 	if(mode == ENGRAVE_MODE){
 		if (IS_GRAVE(levl[u.ux][u.uy].typ)) {

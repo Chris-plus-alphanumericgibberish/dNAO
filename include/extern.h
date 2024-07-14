@@ -505,7 +505,7 @@ E int NDECL(wipeoff);
 E int NDECL(dodrop);
 E boolean FDECL(boulder_hits_pool, (struct obj *,int,int,BOOLEAN_P));
 E boolean FDECL(flooreffects, (struct obj *,int,int,const char *));
-E void FDECL(doaltarobj, (struct obj *));
+E void FDECL(doaltarobj, (struct obj *, int));
 E boolean FDECL(canletgo, (struct obj *,const char *));
 E void FDECL(dropx, (struct obj *));
 E void FDECL(dropy, (struct obj *));
@@ -2429,7 +2429,9 @@ E boolean FDECL(god_accepts_you, (int));
 /* ### priest.c ### */
 
 E coord * FDECL(shrine_pos, (int));
+E coord * FDECL(find_shrine_altar, (int));
 E aligntyp FDECL(temple_alignment, (int));
+E int FDECL(temple_god, (int));
 E int FDECL(move_special, (struct monst *,BOOLEAN_P,SCHAR_P,BOOLEAN_P,BOOLEAN_P,
 			   XCHAR_P,XCHAR_P,XCHAR_P,XCHAR_P));
 E char FDECL(temple_occupied, (char *));
