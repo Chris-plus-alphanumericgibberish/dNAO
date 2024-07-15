@@ -3882,7 +3882,7 @@ boolean tipping; /* caller emptying entire contents; affects shop handling */
                 //hitfloor(obj, TRUE); /* does altar check, message, drop */
             } else {
                 if (IS_ALTAR(levl[u.ux][u.uy].typ))
-                    doaltarobj(obj); /* does its own drop message */
+                    doaltarobj(obj, god_at_altar(u.ux,u.uy)); /* does its own drop message */
                 else
                     pline("%s %s to the %s.", Doname2(obj),
                           otense(obj, "drop"), surface(u.ux, u.uy));
