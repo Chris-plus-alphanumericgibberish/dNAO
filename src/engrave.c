@@ -3012,6 +3012,7 @@ int mode;
 		break;
 	    case ENGR_BLOOD:
 			multi = -(len/10);
+			IMPURITY_UP(u.uimp_blood)
 			if (multi) nomovemsg =	"You finish scrawling.";
 		break;
 	}

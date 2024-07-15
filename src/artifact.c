@@ -6059,6 +6059,8 @@ boolean printmessages; /* print generic elemental damage messages */
 		}
 		if (spec_dbon_applies && !(otmp->oartifact == ART_BLOODLETTER && artinstance[otmp->oartifact].BLactive < monstermoves)){
 			*truedmgptr += mlev(mdef);
+			if(youagr)
+				*plusdmgptr += u.uimpurity/2;
 			if (otmp->oartifact == ART_BLOODLETTER)
 				artinstance[otmp->oartifact].BLactive -= max(0, mlev(mdef)/10 - rn2(5));
 		}
@@ -6348,6 +6350,8 @@ boolean printmessages; /* print generic elemental damage messages */
 
 				/* Still has handling for worn items, incase that changes */
 				if (otmp2 != 0){
+					/*stealing is impure*/
+					IMPURITY_UP(u.uimp_theft)
 					/* take the object away from the monster */
 					if (otmp2->quan > 1L){
 						otmp2 = splitobj(otmp2, 1L);
@@ -7429,11 +7433,13 @@ boolean printmessages; /* print generic elemental damage messages */
 			if(has_blood_mon(mdef)){
 				if (youdef) {
 					Your("blood is being drained!");
+					IMPURITY_UP(u.uimp_blood)
 				}
 				/* aggressor lifesteals by dmg dealt */
 				heal(magr, min(basedmg, *hp(mdef)));
 				if(youagr && !youdef){
 					yog_credit(mdef->data->cnutrit/500);
+					IMPURITY_UP(u.uimp_blood)
 				}
 				if(!Drain_res(mdef) && !rn2(3)){
 					if(youagr && !youdef){
@@ -11150,6 +11156,7 @@ arti_invoke(obj)
               case COMMAND_FILTH:
                 obj->opoisoned = OPOISON_FILTH;
                 pline("A filthy coating forms on %s.", The(xname(obj)));
+				IMPURITY_UP(u.uimp_dirtiness)
                 break;
           }
         } break;
@@ -11522,6 +11529,7 @@ arti_invoke(obj)
 				pline("%s vibrates softly.", The(xname(obj)));
 			}
 			/* while monstermoves < duration, arrows will be filthed (done in xhity.c) */
+			IMPURITY_UP(u.uimp_dirtiness)
 			artinstance[ART_PLAGUE].PlagueDuration = monstermoves + 13;
 		break;
 		case INVOKE_DARK:{

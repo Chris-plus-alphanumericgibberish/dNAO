@@ -1962,6 +1962,7 @@ register int n;
 	register int newalign = u.ualign.record + n;
 
 	if(n < 0) {
+		IMPURITY_UP(u.uimp_bloodlust)
 		if(newalign < u.ualign.record)
 			u.ualign.record = newalign;
 		if(u.ualign.record > ALIGNLIM)

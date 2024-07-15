@@ -1652,6 +1652,12 @@ boolean adjective;
 		if(obj->where == OBJ_MINVENT || obj->where == OBJ_INVENT)
 			return (adjective ? (is_streaming_merc(obj) ? "streaming" : is_kinstealing_merc(obj) ? "kinstealing" : "chained") : "chaos stuff");
 		return (adjective ? "melting" : "chaos stuff");
+	case HEMARGYOS:
+		if(obj->otyp == CHIKAGE){
+			return (adjective ? "bloody" : "strangely-tarnished blood");
+		}
+		else
+			return (adjective ? "silver" : "strangely-liquid silver");
 	case FIRMAMENT:
 		return objects[obj->otyp].oc_name_known ? "firmament" : "glittering dark ceramic";
 	default:
@@ -3929,6 +3935,8 @@ int wishflags;
 			return mklolthvaultitem();
 		if(!strcmpi(bp, "jewel"))
 			return mkjewel();
+		if(!strcmpi(bp, "my blood"))
+			return mkyourblood();
 	}
 
 	for(;;) {

@@ -580,15 +580,28 @@ static struct trobj Tourist[] = {
 };
 #endif
 static struct trobj UndeadHunter[] = {
+#define U_WEAPON		0
 	{ CANE, 0, WEAPON_CLASS, 1, 1 },
+#define U_GUN			1
+	{ FLINTLOCK, 0, WEAPON_CLASS, 1, 0 },
+#define U_SMITH_HAMMER	2
+	{ SMITHING_HAMMER, 0, WEAPON_CLASS, 1, 0 },
+#define U_JACKET		3
 	{ JACKET, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
+#define U_SHIRT			4
 	{ RUFFLED_SHIRT, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
+#define U_HAT			5
 	{ FEDORA, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ CLOAK, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ GLOVES, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
 	{ HIGH_BOOTS, 0, ARMOR_CLASS, 1, UNDEF_BLESS },
-	{ TORCH, 0, TOOL_CLASS, 3, 0 },
-	{ POT_BOOZE, 0, POTION_CLASS, 10, 1 },
+#define U_BULLETS		9
+	{ BLOOD_BULLET, 0, WEAPON_CLASS, 20, 0 },
+	{ NIGHTMARE_S_BULLET_MOLD, 0, TOOL_CLASS, 1, 0 },
+	{ PHLEBOTOMY_KIT, 0, TOOL_CLASS, 1, 0 },
+	{ TORCH, 0, TOOL_CLASS, 1, 0 },
+	{ POT_BOOZE, 0, POTION_CLASS, 2, 1 },
+	{ POT_BLOOD, 0, POTION_CLASS, 3, 1 },
 	{ 0, 0, 0, 0, 0 }
 };
 static struct trobj Valkyrie[] = {
@@ -1572,6 +1585,9 @@ static const struct def_skill Skill_U[] = {
     { P_BOW, P_BASIC }, { P_SLING, P_BASIC },
     { P_DART, P_BASIC }, { P_SHURIKEN, P_BASIC },
     { P_BOOMERANG, P_BASIC },
+
+    { P_TWO_WEAPON_COMBAT, P_SKILLED },
+
     { P_MATTER_SPELL, P_BASIC },
 	{ P_ATTACK_SPELL, P_SKILLED }, { P_HEALING_SPELL, P_SKILLED },
 	{ P_DIVINATION_SPELL, P_EXPERT },
@@ -2476,26 +2492,48 @@ u_init()
 		break;
 #endif
 	case PM_UNDEAD_HUNTER:
-		switch(rn2(5)){
+		if(Race_if(PM_VAMPIRE)){
+			switch(rn2(4)){
 			case 0:
-				//UndeadHunter[0].trotyp = CANE;
+				//UndeadHunter[U_WEAPON].trotyp = CANE;
 			break;
 			case 1:
-				UndeadHunter[0].trotyp = CHURCH_HAMMER;
+				UndeadHunter[U_WEAPON].trotyp = SOLDIER_S_RAPIER;
+				knows_object(SOLDIER_S_SABER);
+				UndeadHunter[U_GUN].trotyp = BUCKLER;
+			break;
+			case 2:
+				UndeadHunter[U_WEAPON].trotyp = CHIKAGE;
+			break;
+			case 3:
+				UndeadHunter[U_WEAPON].trotyp = RAKUYO;
+				knows_object(RAKUYO_SABER);
+				knows_object(RAKUYO_DAGGER);
+			break;
+			}
+			UndeadHunter[U_BULLETS].trspe = 1;
+			UndeadHunter[U_JACKET].trotyp = flags.female ? GENTLEWOMAN_S_DRESS : GENTLEMAN_S_SUIT;
+		}
+		else switch(rn2(5)){
+			case 0:
+				//UndeadHunter[U_WEAPON].trotyp = CANE;
+			break;
+			case 1:
+				UndeadHunter[U_WEAPON].trotyp = CHURCH_HAMMER;
 				knows_object(HUNTER_S_SHORTSWORD);
 				knows_object(CHURCH_BRICK);
 			break;
 			case 2:
-				UndeadHunter[0].trotyp = CHURCH_BLADE;
+				UndeadHunter[U_WEAPON].trotyp = CHURCH_BLADE;
 				knows_object(HUNTER_S_LONGSWORD);
 				knows_object(CHURCH_SHEATH);
 			break;
 			case 3:
-				UndeadHunter[0].trotyp = HUNTER_S_AXE;
+				UndeadHunter[U_WEAPON].trotyp = HUNTER_S_AXE;
 				knows_object(HUNTER_S_LONG_AXE);
 			break;
 			case 4:
-				UndeadHunter[0].trotyp = SAW_CLEAVER;
+				UndeadHunter[U_WEAPON].trotyp = SAW_CLEAVER;
 				knows_object(RAZOR_CLEAVER);
 			break;
 		}
@@ -2781,9 +2819,11 @@ u_init()
 	case PM_VAMPIRE:
 	    /* Vampires start off with gods not as pleased, luck penalty */
 	    knows_object(POT_BLOOD);
-	    adjalign(-5); 
+	    adjalign(-5);
 		u.ualign.sins += 5;
 	    change_luck(-1);
+		u.uimpurity += 3;
+		u.uimp_blood = 15;
 	    break;
 	case PM_YUKI_ONNA:
 	    knows_object(POT_OBJECT_DETECTION);
@@ -3063,7 +3103,7 @@ register struct trobj *trop;
 			set_material_gm(obj, objects[otyp].oc_material);
 
 			if(obj->otyp == POT_BLOOD) 
-				obj->corpsenm = PM_HUMAN;
+				obj->corpsenm = Role_if(PM_UNDEAD_HUNTER) ? youracedata->mtyp : PM_HUMAN;
 			if(obj->oclass == WEAPON_CLASS || obj->oclass == ARMOR_CLASS || is_weptool(obj))
 				set_obj_size(obj, youracedata->msize);
 			if(obj->oclass == ARMOR_CLASS){

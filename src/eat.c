@@ -1434,6 +1434,7 @@ violated_vegetarian()
 		u.ualign.sins++;
 		if(u.uconduct.unvegetarian%2) change_hod(1);
     }
+	IMPURITY_UP(u.uimp_meat)
     return;
 }
 
@@ -3660,6 +3661,7 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 			}
 			if(otmp->opoisoned & OPOISON_FILTH){
 				pline("Ulch - that was tainted with filth!");
+				IMPURITY_UP(u.uimp_dirtiness)
 				if (Sick_resistance) {
 					pline("It doesn't seem at all sickening, though...");
 				} else {

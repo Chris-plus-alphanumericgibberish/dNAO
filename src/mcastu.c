@@ -3583,6 +3583,9 @@ int tary;
 			else {
 				dmg = d(8, 6);
 				dmg = reduce_dmg(mdef,dmg,FALSE,TRUE);
+				if(youdef){
+					IMPURITY_UP(u.uimp_disaster)
+				}
 			}
 
 			/* destroy items if it hit */
@@ -3658,6 +3661,9 @@ int tary;
 			else {
 				dmg = d(8, 6);
 				dmg = reduce_dmg(mdef,dmg,FALSE,TRUE);
+			}
+			if(youdef){
+				IMPURITY_UP(u.uimp_disaster)
 			}
 
 			if (!UseInvFire_res(mdef)) {
@@ -3741,6 +3747,9 @@ int tary;
 				/* this is physical damage, not magical damage */
 				dmg = d(8, 6);
 				dmg = reduce_dmg(mdef,dmg,TRUE,FALSE);
+				if(youdef){
+					IMPURITY_UP(u.uimp_disaster)
+				}
 
 				if (boots && boots->otyp == find_mboots()) {
 					if(youdef) pline("Good thing you're wearing mud boots!");
@@ -3790,6 +3799,9 @@ int tary;
 				/* check resistance and override damage */
 				dmg = d(8, 6);
 				dmg = reduce_dmg(mdef,dmg,FALSE,TRUE);
+				if(youdef){
+					IMPURITY_UP(u.uimp_disaster)
+				}
 				if (Acid_res(mdef)) {
 					shieldeff(x(mdef), y(mdef));
 					if (youdef)
@@ -3884,6 +3896,10 @@ int tary;
 					change_usanity(save_vs_sanloss() ? 0 : -1*d(1,4), TRUE);
 			}
 			else {
+				if(youdef){
+					IMPURITY_UP(u.uimp_blood)
+					IMPURITY_UP(u.uimp_disaster)
+				}
 				/* check resistance and override damage */
 				dmg = flaming(mdef->data) ? d(8, 6) : 0;
 				if(dmg)
@@ -3911,6 +3927,9 @@ int tary;
 				pline("%s pummel %s from all sides!",
 					(spell == ICE_STORM ? "Chunks of ice" : "Hailstones"),
 					youdef ? "you" : mon_nam(mdef));
+			}
+			if(youdef){
+				IMPURITY_UP(u.uimp_disaster)
 			}
 
 			/* calculate physical damage */
@@ -4130,6 +4149,9 @@ int tary;
 			else if (canseemon(mdef))
 				pline("%s's using the touch of death!", upstart(heshe));
 
+			if(youagr || youdef){
+				IMPURITY_UP(u.uimp_death_magic)
+			}
 			/* check resistance cases and do effects */
 			if (nonliving(mdef->data) || is_demon(mdef->data)) {
 				if (youdef || canseemon(mdef)) {
@@ -4333,7 +4355,9 @@ int tary;
 				pline("A cascade of filth pours onto %s!",
 					youdef ? "you" : mon_nam(mdef));
 			}
-
+			if(youdef){
+				IMPURITY_UP(u.uimp_dirtiness)
+			}
 			/* glib your hands (player-only) */
 			if (youdef && freehand() && rn2(3)) {
 				boolean wasGlib = !!Glib;
@@ -5022,6 +5046,9 @@ int tary;
 				dy = y(magr) - u.uy;
 				pline("Mesmerized, you stumble towards %s!", mhim(magr));
 				hurtle(sgn(dx), sgn(dy), 1, FALSE, FALSE);
+				if(youdef){
+					IMPURITY_UP(u.uimp_seduction)
+				}
 			}
 		}
 			
@@ -5075,6 +5102,9 @@ int tary;
 
 			/* only summons creatures if targeting the player */
 			do_earthquake(tarx, tary, min((mlev(magr) - 1) / 3 + 1, 24), min((mlev(magr) - 1) / 6 + 1, 8), youdef, magr);
+			if(youdef){
+				IMPURITY_UP(u.uimp_disaster)
+			}
 
 			aggravate(); /* wake up without scaring */
 			stop_occupation();	/* even if you weren't targeted, you certainly noticed! */

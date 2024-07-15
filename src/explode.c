@@ -715,7 +715,8 @@ struct permonst *pa; /* permonst of the attacker (used for disease) */
 				mdam *= 2;
 			else if (has_blood_mon(mtmp) && adtyp == AD_BLUD)
 				mdam += mlev(mtmp);
-			
+			if(yours && adtyp == AD_BLUD)
+				mdam += u.uimpurity/2;
 			if(adtyp == AD_WET){
 				water_damage(mtmp->minvent, FALSE, FALSE, FALSE, mtmp);
 			}

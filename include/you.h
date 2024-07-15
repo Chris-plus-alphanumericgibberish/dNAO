@@ -647,6 +647,33 @@ struct you {
 	/*Insight rate calculation: 40: "high insight" 300: "Approximate per-turn WoYendor intervention rate" 5: "total number of harmful effects" */
 #define INSIGHT_RATE (40*300*5)
 #define COA_PROB	 (max(1, 10000*pow(.95,u.uinsight)))
+	int 	uimpurity;	/* to record level of impurity */
+	Bitfield(uimp_meat, 4);
+	Bitfield(uimp_blood, 4);
+	Bitfield(uimp_bodies, 4);
+	Bitfield(uimp_death_magic, 4);
+	Bitfield(uimp_theft, 4);
+	Bitfield(uimp_murder, 4);
+	Bitfield(uimp_bloodlust, 4);
+	Bitfield(uimp_graverobbery, 4);
+	Bitfield(uimp_god_anger, 4);
+	Bitfield(uimp_illness, 4);
+	Bitfield(uimp_dirtiness, 4);
+	Bitfield(uimp_disaster, 4);
+	Bitfield(uimp_seduction, 4);
+	Bitfield(uimp_deep_one, 4);
+	Bitfield(uimp_kuo_toa, 4);
+	Bitfield(uimp_ibite, 4);
+	Bitfield(uimp_mind_flayers, 4); //51/+25 eve/+12 bullets?
+
+#define IMPURITY_UP(counter) 	if((counter) < 15){\
+		if((counter) == 0 || !rn2((counter))){\
+			((counter))++;\
+			if((counter) == 1 || (counter) == 4 || (counter) == 15)\
+				u.uimpurity++;\
+		}\
+	}\
+
 	uchar 	wimage;		/* to record if you have the image of a Weeping Angel in your mind */
 	int 	umorgul;	/* to record the number of morgul wounds */
 	int 	utaneggs;	/* tannin eggs */

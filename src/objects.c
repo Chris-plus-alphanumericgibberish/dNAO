@@ -411,7 +411,7 @@ WEAPON(("katana", "samurai sword"),
 	0, 0, MZ_MEDIUM,  4, 40, 80,  1, S,   P_LONG_SWORD, IRON, FALSE, HI_METAL),
 WEAPON(("chikage", "ornate samurai sword"),
 	DMG(D(10)), DMG(D(12)),
-	0, 0, MZ_MEDIUM,  1, 60,500,  1, S,   P_LONG_SWORD, METAL, FALSE, HI_METAL),
+	0, 0, MZ_MEDIUM,  1, 60,500,  1, S,   P_LONG_SWORD, METAL, FALSE, HI_METAL, O_MAGIC(1)),
 WEAPON(("cane"),
 	DMG(D(8)), DMG(D(10)),
 	1, 0, MZ_MEDIUM,  1, 60,100,  1, B|P,   P_LONG_SWORD, METAL, FALSE, HI_METAL),
@@ -615,6 +615,7 @@ WEAPON(("katar"), /*Needs encyc entry*/
  /*Needs encyc entry*/
 GUN(("flintlock", "broken hand-crossbow"),            0,   MZ_SMALL, 0,  10,   50,  8, -2, -2, WP_BULLET, IRON, P_FIREARM, HI_METAL), /*Needs tile*/
 
+GUN(("evelyn", "ornate broken hand-crossbow"),        0,   MZ_SMALL, 0,  10,   50,  8, -2,  2, WP_BULLET, IRON, P_FIREARM, HI_METAL), /*Needs tile*/
 
 GUN(("pistol", "broken hand-crossbow"),               0,   MZ_SMALL, 0,  12,  100, 15,  1,  2, WP_BULLET, IRON, P_FIREARM, HI_METAL), /*Needs tile*/
 GUN(("submachine gun", "strange broken crossbow"),    0,   MZ_SMALL, 0,  25,  250, 10,  3,  0, WP_BULLET, IRON, P_FIREARM, HI_METAL), /*Needs tile*/
@@ -648,6 +649,9 @@ BULLET(("bullet", "pellet"),
 BULLET(("silver bullet", "silver pellet"),
 	DMG(D(2, 8), F(4)), DMG(D(2, 6), F(4)),
 	0,    MZ_TINY, 0,  1,  15, 0,  WP_BULLET,   P,  SILVER, -P_FIREARM, HI_SILVER),/*Needs tile*/
+BULLET(("blood-bullet", "silver pellet"),
+	DMG(D(2, 8), F(4)), DMG(D(2, 6), F(4)),
+	0,    MZ_TINY, 0,  1,  15, 0,  WP_BULLET,   P|S|B,  HEMARGYOS, -P_FIREARM, HI_SILVER),/*Needs tile*/
 BULLET(("shotgun shell", "red tube", "tube"),
 	DMG(D(2, 12), F(4)), DMG(D(2, 6), F(4)),
 	0,    MZ_TINY, 0,  1,  10,10,   WP_SHELL,   S,   LEAD, -P_FIREARM, CLR_RED),/*Needs tile*/
@@ -1288,17 +1292,16 @@ TOOL(("android visor", "black blindfold", "blindfold"), /*Needs encyc entry*/
 								0,   MZ_TINY, 0, 0, 0,   0,  2,  40, CLOTH, CLR_BLACK),
 TOOL(("soul-lens", "smooth-gemmed head-chain"),		0,   MZ_TINY, 0, 1, 0,   0,  3, 333, GLASS, HI_GOLD), /*Needs encyc entry*/
 TOOL(("towel"),        1,   MZ_TINY, 0, 0, 0,  45,  2,  50, CLOTH, CLR_MAGENTA),
-#ifdef STEED
 TOOL(("saddle"),       1,  MZ_LARGE, 0, 0, 0,   5,200, 150, LEATHER, HI_LEATHER),
-TOOL(("leash"),        1,  MZ_SMALL, 0, 0, 0,  60, 12,  20, LEATHER, HI_LEATHER),
-#else
-TOOL(("leash"),        1,  MZ_SMALL, 0, 0, 0,  65, 12,  20, LEATHER, HI_LEATHER),
-#endif
+TOOL(("leash"),        1,  MZ_SMALL, 0, 0, 0,  55, 12,  20, LEATHER, HI_LEATHER),
 /*Needs encyc entry*/
 TOOL(("stethoscope"),  1,  MZ_SMALL, 0, 0, 0,  25,  4,  75, IRON, HI_METAL),
 TOOL(("tinning kit"),  1, MZ_MEDIUM, 0, 0, 1,  15,100,  30, IRON, HI_METAL),
+TOOL(("phlebotomy kit"),  1, MZ_MEDIUM, 0, 0, 1,  5,25, 500, LEATHER, CLR_BROWN),
 TOOL(("bullet fabber", "white box with a yellow fiddly bit", "fiddly box"),/*Needs tile*/ /*Needs encyc entry*/
 								0, MZ_MEDIUM, 0, 1, 0,   0, 20,  30, PLASTIC, CLR_WHITE),
+TOOL(("nightmare's bullet mold", "blade-tipped mold"),/*Needs tile*/ /*Needs encyc entry*/
+								0, MZ_SMALL, 0, 1, 0,   0, 15, 300, IRON, HI_METAL),
 TOOL(("upgrade kit"),  1, MZ_MEDIUM, 0, 0, 0,  40,100,  30, COPPER, HI_COPPER),/*Needs encyc entry*//*Needs tile*/
 TOOL(("power pack", "little white cube", "little cube"), /*Needs encyc entry*//*Needs tile*/
 								0,   MZ_TINY, 1, 1, 0,   0,  1,  300, PLASTIC, CLR_WHITE),

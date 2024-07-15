@@ -1327,6 +1327,10 @@ domove()
 				if(!(result&(MM_AGR_DIED|MM_AGR_STOP)) && u.uinsight >= 20 && otmp && rakuyo_prop(otmp)){
 					result |= hit_with_rblood(&youmonst, otmp, x, y, 0, attk);
 				}
+				/* Chikage launch blood iff you DON'T have a primary target, if your insight is high enough to percieve the blood */
+				if(!(result&(MM_AGR_DIED|MM_AGR_STOP)) && u.uinsight >= 20 && otmp && otmp->otyp == CHIKAGE && otmp->obj_material == HEMARGYOS){
+					result |= hit_with_cblood(&youmonst, otmp, x, y, 0, attk);
+				}
 				/* Club-claw insight weapons strike additional targets if your insight is high enough to perceive the claw */
 				if(!(result&(MM_AGR_DIED|MM_AGR_STOP)) && u.uinsight >= 15 && otmp && is_cclub_able(otmp)){
 					result |= hit_with_cclaw(&youmonst, otmp, x, y, 0, attk);

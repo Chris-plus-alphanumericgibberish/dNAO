@@ -42,6 +42,7 @@ STATIC_DCL int FDECL(use_force_blade, (struct obj *));
 STATIC_DCL int FDECL(use_saw_cleaver, (struct obj *));
 STATIC_DCL int FDECL(use_soldier_rapier, (struct obj *));
 STATIC_DCL int FDECL(use_threaded_cane, (struct obj *));
+STATIC_DCL int FDECL(use_chikage, (struct obj *));
 STATIC_DCL int FDECL(use_church_weapon, (struct obj *));
 STATIC_DCL int FDECL(use_church_sword, (struct obj *));
 STATIC_DCL int FDECL(use_church_sheath, (struct obj *));
@@ -393,6 +394,7 @@ use_towel(obj)
 		    Glib += rn1(10, 3);
 		    Your("%s %s!", makeplural(body_part(HAND)),
 			(old ? "are filthier than ever" : "get slimy"));
+			IMPURITY_UP(u.uimp_dirtiness)
 		    return MOVE_STANDARD;
 		case 1:
 		    if (!ublindf) {
@@ -401,6 +403,7 @@ use_towel(obj)
 			pline("Yecch! Your %s %s gunk on it!", body_part(FACE),
 			      (old ? "has more" : "now has"));
 			make_blinded(Blinded + (long)u.ucreamed - old, TRUE);
+			IMPURITY_UP(u.uimp_dirtiness)
 		    } else {
 			const char *what = (ublindf->otyp == LENSES || ublindf->otyp == SUNGLASSES) ? "lenses" 
 						: (ublindf->otyp == SOUL_LENS) ? "lens"
@@ -2230,6 +2233,49 @@ struct obj *obj;
 }
 
 int
+use_chikage(obj)
+struct obj *obj;
+{
+	if(obj->unpaid){
+		You("need to buy it.");
+		return MOVE_CANCELLED;
+	}
+	
+	if(obj->obj_material == HEMARGYOS){
+		if (u.uinsight < 13)
+			You("wipe the blood from your sword.");
+		else
+			You("wipe your blood from the sword.");
+		set_material_gm(obj, obj->ovar1_alt_mat);
+		set_object_color(obj);
+		obj->oeroded = access_oeroded(obj->ovar2_alt_erosion);
+		obj->oeroded2 = access_oeroded2(obj->ovar2_alt_erosion);
+		obj->oeroded3 = access_oeroded3(obj->ovar2_alt_erosion);
+		(void) stop_timer(REVERT_OBJECT, obj->timed);
+	} else {
+		if(u.uinsight < 27)
+			You("sheath your sword in your saya and draw it forth bloody.");
+		else
+			You("sheath your sword in your %s and draw it forth bloody.", body_part(HEART));
+
+		if(obj->obj_material != obj->ovar1_alt_mat)
+			obj->ovar1_alt_mat = obj->obj_material;
+		IMPURITY_UP(u.uimp_blood)
+		set_material_gm(obj, HEMARGYOS);
+		obj->obj_color = CLR_RED;
+		store_oeroded(obj->ovar2_alt_erosion,obj->oeroded);
+		store_oeroded2(obj->ovar2_alt_erosion,obj->oeroded2);
+		store_oeroded3(obj->ovar2_alt_erosion,obj->oeroded3);
+		obj->oeroded = obj->oeroded2 = obj->oeroded3 = 0;
+		start_timer(1, TIMER_OBJECT,
+					REVERT_OBJECT, (genericptr_t)obj);
+	}
+	fix_object(obj);
+	update_inventory();
+	return MOVE_INSTANT;
+}
+
+int
 use_church_weapon(obj)
 struct obj *obj;
 {
@@ -2608,6 +2654,109 @@ light_torch(obj)
 				      doname(obj), (const char *)0);
 	} else
 	    begin_burn(obj);
+}
+
+
+STATIC_OVL int
+transfusion(struct obj *obj)
+{
+	struct obj *phleb_kit = find_object_type(invent, PHLEBOTOMY_KIT);
+	char qbuf[BUFSZ];
+	
+	if(!phleb_kit){
+		pline("Sorry, I don't know how to use that.");
+		return MOVE_CANCELLED;
+	}
+	if (is_vampire(youracedata) || (carnivorous(youracedata) && !herbivorous(youracedata))) {
+		pline("It smells like %s%s.", 
+				!type_is_pname(&mons[obj->corpsenm]) ||
+				!(mons[obj->corpsenm].geno & G_UNIQ) ||
+				Hallucination ? 
+					"the " : 
+					"", 
+				Hallucination ? 
+					makeplural(rndmonnam()) : 
+					mons[obj->corpsenm].geno & G_UNIQ ? 
+					mons[obj->corpsenm].mname : 
+					makeplural(mons[obj->corpsenm].mname)
+		);
+		if(!Hallucination) obj->known = TRUE;
+	}
+	Sprintf(qbuf, "Trasfuse yourself with %s?", the(xname(obj)));
+	if(yn(qbuf) != 'y'){
+		pline("Never mind");
+		return MOVE_CANCELLED;
+	}
+	if(your_race(&mons[obj->corpsenm])){
+		if(obj->cursed && !Race_if(PM_VAMPIRE)){
+			Your("%s stops!", body_part(HEART));
+			losehp(*hpmax(&youmonst)/3, "heat attack", KILLED_BY_AN);
+			pline("When it finally beats again, it is weak and thready.");
+		}
+		else {
+			You_feel("invigorated.");
+			healup((*hpmax(&youmonst)+2)/3, 0, obj->blessed, FALSE);
+			exercise(A_CON, TRUE);
+		}
+		if(Race_if(PM_VAMPIRE)){
+			lesshungry((obj->odiluted ? 1 : 2) *
+				(obj->cursed ? mons[(obj)->corpsenm].cnutrit*1.5/5 : mons[(obj)->corpsenm].cnutrit/5 ));
+		}
+		cprefx(obj->corpsenm, TRUE, TRUE);
+	}
+	else if(Race_if(PM_VAMPIRE)){
+		You_feel("invigorated.");
+		healup(d(2,8), 0, obj->blessed, FALSE);
+		lesshungry((obj->odiluted ? 1 : 2) *
+			(obj->cursed ? mons[(obj)->corpsenm].cnutrit*1.5/5 : mons[(obj)->corpsenm].cnutrit/5 ));
+		exercise(A_CON, TRUE);
+		cprefx(obj->corpsenm, TRUE, FALSE);
+	}
+	else {
+		//Most likely a poor idea
+		if(obj->cursed){
+			Your("%s stops!", body_part(HEART));
+			losehp(*hpmax(&youmonst)/3, "heat attack", KILLED_BY_AN);
+			pline("When it finally beats again, it is weak and thready.");
+		}
+		make_sick(100L, "bad blood", TRUE, SICK_NONVOMITABLE);
+		cprefx(obj->corpsenm, TRUE, FALSE);
+	}
+	cpostfx(obj->corpsenm, FALSE, FALSE, FALSE);
+	useup(obj);
+	if(phleb_kit->spe < 15)
+		phleb_kit->spe++;
+	return MOVE_STANDARD;
+}
+
+STATIC_OVL int
+blood_draw(struct obj *obj)
+{
+	if(yn("Draw your own blood?") != 'y'){
+		pline("Never mind");
+		return MOVE_CANCELLED;
+	}
+	if(*hp(&youmonst) <= (*hpmax(&youmonst)+2)/3){
+		pline("You're too injured!");
+		return MOVE_CANCELLED;
+	}
+	struct obj *blood = mksobj(POT_BLOOD, MKOBJ_NOINIT);
+	blood->corpsenm = youracedata->mtyp;
+	if(u.uhs > NOT_HUNGRY)
+		blood->odiluted = TRUE;
+	losehp((*hpmax(&youmonst)+2)/3, "bad blood draw", KILLED_BY_AN);
+	nightmare_mold_lose_experience();
+	morehungry((blood->odiluted ? 1 : 2) * (mons[(blood)->corpsenm].cnutrit/5 ));
+	exercise(A_CON, FALSE);
+
+	if(obj->spe > 0)
+		obj->spe--;
+	blood->cursed = obj->cursed;
+	blood->blessed = obj->blessed;
+	blood->bknown = obj->bknown;
+	blood->known = TRUE;
+	blood = hold_another_object(blood, "You drop %s!", doname(blood), (const char *)0);
+	return MOVE_STANDARD;
 }
 
 static NEARDATA const char cuddly[] = { TOOL_CLASS, GEM_CLASS, 0 };
@@ -6105,6 +6254,8 @@ use_doll(obj)
 						}
 					}
 #endif
+					/*stealing is impure*/
+					IMPURITY_UP(u.uimp_theft)
 					res = MOVE_STANDARD;
 					if(!Blind)
 						pline("The %s vanishes in a flash of moonlight.", OBJ_DESCR(objects[obj->otyp]));
@@ -7140,6 +7291,7 @@ struct obj *obj;
 				else {
 					if(mtmp == &youmonst){
 						BloodDrown += obj->cursed ? 9 : 4;
+						IMPURITY_UP(u.uimp_blood)
 					}
 					else {
 						water_damage(mtmp->minvent, FALSE, FALSE, WD_BLOOD, mtmp);
@@ -8584,7 +8736,7 @@ doapply()
 
 	if(check_capacity((char *)0)) return MOVE_CANCELLED;
 
-	if (carrying(POT_OIL) || uhave_graystone())
+	if (carrying(POT_OIL) || carrying(POT_BLOOD) || uhave_graystone())
 		Strcpy(class_list, tools_too);
 	else
 		Strcpy(class_list, tools);
@@ -8618,7 +8770,12 @@ doapply()
 	    return MOVE_STANDARD;	/* evading your grasp costs a turn; just be
 			   grateful that you don't drop it as well */
 
-	if(obj->ostolen && u.sealsActive&SEAL_ANDROMALIUS) unbind(SEAL_ANDROMALIUS, TRUE);
+	if(obj->ostolen){
+		if(u.sealsActive&SEAL_ANDROMALIUS)
+			unbind(SEAL_ANDROMALIUS, TRUE);
+		/*stealing is impure*/
+		IMPURITY_UP(u.uimp_theft)
+	}
 
 	if (obj->oclass == WAND_CLASS)
 	    return do_break_wand(obj);
@@ -8651,6 +8808,8 @@ doapply()
 		return use_soldier_rapier(obj);
 	} else if(obj->otyp == CANE){
 		return use_threaded_cane(obj);
+	} else if(obj->otyp == CHIKAGE){
+		return use_chikage(obj);
 	} else if(obj->otyp == CHURCH_HAMMER || obj->otyp == CHURCH_BLADE){
 		return use_church_weapon(obj);
 	} else if(obj->otyp == HUNTER_S_LONGSWORD || obj->otyp == HUNTER_S_SHORTSWORD){
@@ -8803,6 +8962,34 @@ doapply()
 	case CANDLE_OF_INVOCATION:
 	case GNOMISH_POINTY_HAT:
 		use_candle(&obj);
+	break;
+	case NIGHTMARE_S_BULLET_MOLD:{
+		You("jab the bullet mold into your %s!", u.uinsight < 18 ? body_part(LEG) : body_part(HEAD));
+		if(u.uexp > 7 && *hp(&youmonst) > 3*(*hpmax(&youmonst))/10){
+			struct obj *bullets = mksobj(BLOOD_BULLET, MKOBJ_NOINIT);
+			bullets->dknown = bullets->known = bullets->rknown = bullets->sknown = TRUE;
+			bullets->bknown = obj->bknown;
+			bullets->blessed = obj->blessed;
+			bullets->cursed = obj->cursed;
+			bullets->quan = u.ulevel > 21 ? 20 : u.ulevel > 12 ? 10 : 5;
+			bullets->spe = u.uimpurity/4;
+			fix_object(bullets);
+			nightmare_mold_lose_experience();
+			*hp(&youmonst) -= 3*(*hp(&youmonst))/10;
+			flags.botl = 1;
+			bullets = hold_another_object(bullets, u.uswallow ?
+					   "Oops!  %s out of your reach!" :
+					(Weightless ||
+					 Is_waterlevel(&u.uz) ||
+					 levl[u.ux][u.uy].typ < IRONBARS ||
+					 levl[u.ux][u.uy].typ >= ICE) ?
+						   "Oops!  %s away from you!" :
+						   "Oops!  %s to the floor!",
+						   The(aobjnam(bullets, "slip")),
+						   (const char *)0);
+		}
+		else pline("But nothing flows into the mold!");
+	}
 	break;
 	case BULLET_FABBER:
 	if(!(Role_if(PM_ANACHRONONAUT) || Role_if(PM_TOURIST))) pline("It seems inert.");
@@ -8999,6 +9186,11 @@ doapply()
 	case POT_OIL:
 		light_cocktail(obj);
 		obj = 0; //May have been dealocated, just get rid of it
+	break;
+	case PHLEBOTOMY_KIT:
+		return blood_draw(obj);
+	case POT_BLOOD:
+		return transfusion(obj);
 	break;
 	case SHADOWLANDER_S_TORCH:
 		light_torch(obj);

@@ -1539,6 +1539,8 @@ dumb:
 			else
 			    You_hear("someone yell:");
 			verbalize("Halt, thief!  You're under arrest!");
+			/*stealing is impure*/
+			IMPURITY_UP(u.uimp_theft)
 			(void) angry_guards(FALSE);
 			break;
 		    }
@@ -1711,6 +1713,8 @@ boolean yourfault;
 			    pline("%s is infuriated!", Monnam(shkp));
 			else pline("\"%s, you are a thief!\"", plname);
 		    } else  You_hear("a scream, \"Thief!\"");
+			/*stealing is impure*/
+			IMPURITY_UP(u.uimp_theft)
 		    hot_pursuit(shkp);
 		    (void) angry_guards(FALSE);
 		    return;

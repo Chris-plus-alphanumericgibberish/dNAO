@@ -326,6 +326,11 @@ struct obj *obj;
 		set_artifact_intrinsic(obj, 1, W_ART);
 	}
 
+	/* Picking up dead bodies increases impurity */
+	if (obj->otyp == CORPSE && !vegan(&mons[obj->corpsenm]) && !obj->invlet){
+		IMPURITY_UP(u.uimp_bodies)
+	}
+
 #ifdef RECORD_ACHIEVE
 	if(obj->otyp == LUCKSTONE && obj->record_achieve_special) {
 			achieve.get_luckstone = 1;
@@ -1096,6 +1101,7 @@ register const char *let,*word;
 	boolean useboulder = FALSE;
 	boolean usethrowing = FALSE;
 	boolean usemirror = FALSE;
+	boolean phlebot_kit = !!find_object_type(invent, PHLEBOTOMY_KIT);
 	xchar foox = 0;
 	long cnt;
 	boolean prezero = FALSE;
@@ -1292,6 +1298,7 @@ register const char *let,*word;
 			  otmp->otyp != SAW_CLEAVER && otmp->otyp != RAZOR_CLEAVER &&
 			  otmp->otyp != SOLDIER_S_RAPIER && otmp->otyp != SOLDIER_S_RAPIER &&
 			  otmp->otyp != CANE && otmp->otyp != WHIP_SAW &&
+			  otmp->otyp != CHIKAGE &&
 			  otmp->otyp != HUNTER_S_LONGSWORD && otmp->otyp != CHURCH_BLADE && otmp->otyp != CHURCH_SHEATH &&
 			  otmp->otyp != HUNTER_S_SHORTSWORD && otmp->otyp != CHURCH_HAMMER && otmp->otyp != CHURCH_BRICK &&
 			  !(otmp->oartifact == ART_SKY_REFLECTED && carrying_art(ART_SILVER_SKY)) &&
@@ -1304,11 +1311,13 @@ register const char *let,*word;
 				  || otyp == LIFELESS_DOLL) /* Note: Joke */
 			 ) ||
 		     (otmp->oclass == POTION_CLASS &&
-		     /* only applicable potion is oil, and it will only
-			be offered as a choice when already discovered */
-		     ((otyp != POT_OIL &&
-			 otyp != POT_WATER) || !otmp->dknown ||
-		      !objects[POT_OIL].oc_name_known)) ||
+		     ((otyp != POT_OIL && otyp != POT_BLOOD &&
+			   otyp != POT_WATER) || !otmp->dknown
+		      || (otyp == POT_OIL && !objects[POT_OIL].oc_name_known)
+		      || (otyp == POT_WATER && !objects[POT_WATER].oc_name_known)
+		      || (otyp == POT_BLOOD && !(phlebot_kit && objects[POT_BLOOD].oc_name_known))
+			 )
+			  ) ||
 		     (otmp->oclass == FOOD_CLASS &&
 		      otyp != CREAM_PIE && otyp != EUCALYPTUS_LEAF) ||
 		     /* MRKR: mining helmets */
@@ -2204,6 +2213,7 @@ struct obj *obj;
 	int NDECL((*feedback_fn)) = 0;
 	anything any;
 	menu_item *selected = 0;
+	boolean phlebot_kit = !!find_object_type(invent, PHLEBOTOMY_KIT);
 
 	struct monst *mtmp;
 	char prompt[BUFSIZ];
@@ -2285,6 +2295,9 @@ struct obj *obj;
 	else if (obj->otyp == POT_OIL && objects[obj->otyp].oc_name_known)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Light or extinguish this oil", MENU_UNSELECTED);
+	else if (obj->otyp == POT_BLOOD && phlebot_kit && objects[obj->otyp].oc_name_known)
+		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
+				"Inject yourself with this vial of blood.", MENU_UNSELECTED);
 #if 0 /* TODO */
 	else if (obj->oclass == POTION_CLASS) {
 		any.a_void = (genericptr_t) dodip;
@@ -2372,6 +2385,7 @@ struct obj *obj;
 				"Latch or unlatch your rapier", MENU_UNSELECTED);
 	else if (obj->otyp == CHURCH_HAMMER || obj->otyp == HUNTER_S_SHORTSWORD || obj->otyp == CHURCH_BRICK
 		|| obj->otyp == CHURCH_BLADE || obj->otyp == HUNTER_S_LONGSWORD || obj->otyp == CHURCH_SHEATH
+		|| obj->otyp == CHIKAGE
 	)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Sheath or unsheath your sword", MENU_UNSELECTED);
@@ -4779,6 +4793,21 @@ int otyp;
 		list = list->nobj;
 	}
 	return FALSE;
+}
+
+/*
+ * Finds the first item of matching otyp within the given list. Does not check contained objects.
+ */
+struct obj *
+find_object_type(list, otyp)
+struct obj *list;
+int otyp;
+{
+	while (list) {
+		if (list->otyp == otyp) return list;
+		list = list->nobj;
+	}
+	return (struct obj *) 0;
 }
 
 /*

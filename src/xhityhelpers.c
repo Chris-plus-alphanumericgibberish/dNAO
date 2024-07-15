@@ -489,6 +489,9 @@ struct attack *mattk;
 	    *minvent_ptr = stealoid;	/* put armor back into minvent */
 	}
 
+	/*stealing is impure*/
+	IMPURITY_UP(u.uimp_theft)
+
 	if (stealoid) {		/* we will be taking everything */
 	    if (gender(mdef) == (int) (Upolyd ? u.mfemale : flags.female) &&
 			youracedata->mlet == S_NYMPH)
@@ -1320,7 +1323,7 @@ struct obj * obj;
 	if (is_lightsaber(obj) && litsaber(obj))
 		return FALSE;
 
-	if ((obj->obj_material == SILVER || arti_silvered(obj)) ||
+	if ((obj->obj_material == SILVER || obj->obj_material == HEMARGYOS || arti_silvered(obj)) ||
 		(obj->oclass == RING_CLASS && obj->ohaluengr
 		&& (isEngrRing(obj->otyp) || isSignetRing(obj->otyp))
 		&& obj->oward >= LOLTH_SYMBOL && obj->oward <= LOST_HOUSE) ||
@@ -1534,6 +1537,10 @@ struct monst * magr;
 		{	ndice = 3; diesize = 4; }
 		else if (otmp->oartifact == ART_TECPATL_OF_HUHETOTL) /* SCOPECREEP: add ART_TECPATL_OF_HUHETOTL to is_unholy() macro */
 		{	ndice = (otmp->cursed ? 4 : 2); diesize = 4; }
+
+		if(otmp->otyp == CHIKAGE && otmp->obj_material == HEMARGYOS){
+			dmg += (u.uimpurity+1)/2;
+		}
 
 		if (activeFightingForm(FFORM_KNI_SACRED) && otmp == uwep){
 			if (((Holiness_if(HOLY_HOLINESS) || Holiness_if(NEUTRAL_HOLINESS)) && u.ualign.record < 0) ||
@@ -2917,9 +2924,9 @@ struct attack * attk;
 }
 
 
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
 /* Rakuyo hit additional targets, if your insight is high enough to percieve the blood */
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////
 int
 hit_with_rblood(magr, otmp, tarx, tary, tohitmod, attk)
 struct monst * magr;
@@ -2969,6 +2976,94 @@ struct attack * attk;
 		  && ((youagr) ? couldsee(tarx + dx, tary + dy) : clear_path(magr->mx, magr->my, tarx + dx, tary + dy))
 		){
 			explode(tarx + dx, tary + dy, AD_FIRE, -1, d(6,6), EXPL_FIERY, 1);
+		}
+	}
+	return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+/* Chikage may hit additional targets, if your insight is high enough to percieve the blood */
+/////////////////////////////////////////////////////////////////////////////////////////////
+int
+hit_with_cblood(magr, otmp, tarx, tary, tohitmod, attk)
+struct monst * magr;
+struct obj * otmp;
+int tarx;
+int tary;
+int tohitmod;
+struct attack * attk;
+{
+	int subresult = 0;
+	boolean youagr = magr == &youmonst;
+	/* try to find direction (u.dx and u.dy may be incorrect) */
+	int dx = sgn(tarx - x(magr));
+	int dy = sgn(tary - y(magr));
+	struct attack blood = {AT_ESPR, AD_BLUD, 1, 12};
+	int result = 0;
+	struct monst *mdef2;
+	if(youagr)
+		blood.damd += u.uimpurity;
+	else
+		blood.damd += otmp->spe*2;
+	if(!(isok(tarx - dx, tary - dy) &&
+		x(magr) == tarx - dx &&
+		y(magr) == tary - dy)
+	)
+		return result;
+
+	if (isok(tarx + dx, tary + dy)){
+		mdef2 = !youagr ? m_u_at(tarx + dx, tary + dy) : 
+								u.uswallow ? u.ustuck : 
+								(dx || dy) ? m_at(tarx + dx, tary + dy) : 
+								(struct monst *)0;
+		if (mdef2 
+			&& (!DEADMONSTER(mdef2))
+			&& ((youagr || mdef2 == &youmonst) ? couldsee(mdef2->mx,mdef2->my) : clear_path(magr->mx, magr->my, mdef2->mx, mdef2->my))
+			&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
+				(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
+				(youagr && !mdef2->mpeaceful))
+		) { //Can hit a worm multiple times
+			int vis2 = VIS_NONE;
+			if(youagr || canseemon(magr))
+				vis2 |= VIS_MAGR;
+			if(mdef2 == &youmonst || canseemon(mdef2))
+				vis2 |= VIS_MDEF;
+			bhitpos.x = tarx + dx; bhitpos.y = tary + dy;
+			notonhead = (bhitpos.x != x(mdef2) || bhitpos.y != y(mdef2));
+			subresult = xmeleehity(magr, mdef2, &blood, (struct obj **)0, vis2, tohitmod, TRUE);
+			/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
+			result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
+		}
+		int n = (u.uinsight - 20)/15;
+		if (n > 2)
+			n = 2;
+		for(int i = 0; i < n; i++){
+			dx += dx;
+			dy += dy;
+			if (!isok(tarx + dx, tary + dy))
+				break;
+			mdef2 = !youagr ? m_u_at(tarx + dx, tary + dy) : 
+									u.uswallow ? u.ustuck : 
+									(dx || dy) ? m_at(tarx + dx, tary + dy) : 
+									(struct monst *)0;
+			if (mdef2 
+				&& (!DEADMONSTER(mdef2))
+				&& ((youagr || mdef2 == &youmonst) ? couldsee(mdef2->mx,mdef2->my) : clear_path(magr->mx, magr->my, mdef2->mx, mdef2->my))
+				&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
+					(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
+					(youagr && !mdef2->mpeaceful))
+			) { //Can hit a worm multiple times
+				int vis2 = VIS_NONE;
+				if(youagr || canseemon(magr))
+					vis2 |= VIS_MAGR;
+				if(mdef2 == &youmonst || canseemon(mdef2))
+					vis2 |= VIS_MDEF;
+				bhitpos.x = tarx + dx; bhitpos.y = tary + dy;
+				notonhead = (bhitpos.x != x(mdef2) || bhitpos.y != y(mdef2));
+				subresult = xmeleehity(magr, mdef2, &blood, (struct obj **)0, vis2, tohitmod, TRUE);
+				/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
+				result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
+			}
 		}
 	}
 	return result;

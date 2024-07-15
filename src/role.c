@@ -2441,6 +2441,7 @@ int newgame;
 	/* Fix up the unknown firearms descriptions */
 	if(Role_if(PM_PIRATE) || Role_if(PM_ANACHRONONAUT) || Role_if(PM_UNDEAD_HUNTER)){
 		COPY_OBJ_DESCR(objects[FLINTLOCK], objects[HANDGUN]);
+		COPY_OBJ_DESCR(objects[EVELYN], objects[HANDGUN]);
 		COPY_OBJ_DESCR(objects[PISTOL], objects[HANDGUN]);
 		
 		COPY_OBJ_DESCR(objects[RIFLE], objects[LONG_GUN]);

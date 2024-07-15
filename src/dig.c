@@ -1517,6 +1517,7 @@ int x, y;
 		/* Grave-robbing is frowned upon... */
 		exercise(A_WIS, FALSE);
 	}
+	IMPURITY_UP(u.uimp_graverobbery)
 	if (Role_if(PM_ARCHEOLOGIST)) {
 	    adjalign(-sgn(u.ualign.type)*3);
 		u.ualign.sins++;

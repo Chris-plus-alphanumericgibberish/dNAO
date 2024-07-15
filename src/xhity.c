@@ -5927,6 +5927,9 @@ boolean ranged;
 			if (youdef) {
 				Your("blood is being drained!");
 			}
+			if(youdef || youagr){
+				IMPURITY_UP(u.uimp_blood)
+			}
 
 			/* blood bloaters heal*/
 			if (pa->mtyp == PM_BLOOD_BLOATER) {
@@ -13792,7 +13795,7 @@ int vis;						/* True if action is at all visible to the player */
 			(dieroll <= (Role_if(PM_BARBARIAN) ? 4 : 2)) &&	// good roll
 			(
 			(weapon->oclass == WEAPON_CLASS && bimanual(weapon, youracedata)) ||	// twohanded weapon OR
-			(Role_if(PM_SAMURAI) && weapon->otyp == KATANA && !uarms) ||			// samurai w/ a katana and no shield OR
+			(Role_if(PM_SAMURAI) && (weapon->otyp == KATANA || weapon->otyp == CHIKAGE) && !uarms) ||			// samurai w/ a katana and no shield OR
 			(weapon->oartifact == ART_PEN_OF_THE_VOID && weapon->ovara_seals&SEAL_BERITH)	// berith bound into the Pen
 			) &&
 			(weapon_type(weapon) != P_NONE) && (P_SKILL(weapon_type(weapon)) >= P_SKILLED) &&	// must be Skilled+
@@ -14068,6 +14071,17 @@ int vis;						/* True if action is at all visible to the player */
 			poisons |= OPOISON_ACID;
 		if (poisonedobj->otyp == FANG_OF_APEP)
 			poisons |= OPOISON_DIRE;
+		if (poisonedobj->otyp == CHIKAGE && poisonedobj->obj_material == HEMARGYOS){
+			poisons |= OPOISON_BASIC;
+			if(youagr){
+				if(u.uinsight >= 20 && u.uimpurity >= 10){
+					poisons |= OPOISON_FILTH;
+				}
+				if(u.uinsight >= 50 && *hp(magr) <= (u.uimpurity*(*hpmax(magr)))/50){
+					poisons |= OPOISON_DIRE;
+				}
+			}
+		}
 		/* Plague adds poisons to its launched ammo */
 		if (launcher && launcher->oartifact == ART_PLAGUE) {
 			if (monstermoves < artinstance[ART_PLAGUE].PlagueDuration)
@@ -15163,6 +15177,9 @@ int vis;						/* True if action is at all visible to the player */
 					/* atlatls get 2x STR bonus */
 					else if (launcher && launcher->otyp == ATLATL)
 						bonsdmg += dbon(launcher, magr) * 2;
+					/* Bonus impurity damage */
+					else if (launcher && launcher->otyp == EVELYN)
+						bonsdmg += u.uimpurity/2;
 					/* other launchers get no STR bonus */
 					else if (launcher)
 						bonsdmg += 0;
@@ -15837,6 +15854,16 @@ int vis;						/* True if action is at all visible to the player */
 		else {
 			impossible("Monsters using staggering strikes? Someone forgot to fully implement this...");
 		}
+	}
+	if(weapon && weapon->obj_material == HEMARGYOS){
+		if(youagr && !youdef && !mdef->mstun){
+			if(mdef->mattackedu /* || !resist_impurity(mdef, magr)*/){
+				pline("%s %s!", Monnam(mdef), makeplural(stagger(mdef, "stagger")));
+				mdef->mstun = TRUE;
+			}
+		}
+		// else if(!resist_impurity(mdef, magr)){
+		// }
 	}
 	/* disarming strike */
 	if (disarming_strike && !lethaldamage) {
@@ -16841,6 +16868,32 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 	/* set permonst pointers */
 	struct permonst * pa = youagr ? youracedata : magr->data;
 
+	/* Handle contact impurity */
+	if(magr && youdef && !youagr && endofchain){
+		if(has_template(magr, ZOMBIFIED) || has_template(magr, SKELIFIED)){
+			IMPURITY_UP(u.uimp_bodies)
+		}
+		if(magr->mtyp == PM_DEEP_ONE
+		|| magr->mtyp == PM_DEEPER_ONE
+		|| (rn2(2) && magr->mtyp == PM_DEEPEST_ONE)
+		/*NOT Dagon and Hydra*/
+		){
+			IMPURITY_UP(u.uimp_deep_one)
+		}
+		if(magr->mtyp == PM_KUO_TOA
+		|| magr->mtyp == PM_KUO_TOA_WHIP
+		){
+			IMPURITY_UP(u.uimp_kuo_toa)
+		}
+		if(magr->mtyp == PM_BEING_OF_IB
+		|| magr->mtyp == PM_PRIEST_OF_IB
+		){
+			IMPURITY_UP(u.uimp_ibite)
+		}
+		if(is_mind_flayer(magr->data)){
+			IMPURITY_UP(u.uimp_mind_flayers)
+		}
+	}
 	/* check that magr is still alive */
 	if (DEADMONSTER(magr))
 		return result;

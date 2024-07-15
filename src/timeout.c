@@ -2754,6 +2754,32 @@ long timeout;
 	}
 }
 
+void
+revert_object(arg, timeout)
+genericptr_t arg;
+long timeout;
+{
+	struct obj *obj = (struct obj *) arg;
+	if(obj->owornmask&(W_WEP)){
+		start_timer(1, TIMER_OBJECT,
+					REVERT_OBJECT, (genericptr_t)obj);
+	}
+	else if((obj->owornmask&(W_SWAPWEP)) && (obj->where == OBJ_MINVENT || u.twoweap)){
+		start_timer(1, TIMER_OBJECT,
+					REVERT_OBJECT, (genericptr_t)obj);
+	}
+	else {
+		if(obj->obj_material == HEMARGYOS){
+			set_material_gm(obj, obj->ovar1_alt_mat);
+			obj->oeroded = access_oeroded(obj->ovar2_alt_erosion);
+			obj->oeroded2 = access_oeroded2(obj->ovar2_alt_erosion);
+			obj->oeroded3 = access_oeroded3(obj->ovar2_alt_erosion);
+			fix_object(obj);
+			update_inventory();
+		}
+	}
+}
+
 
 #ifdef OVL0
 /* ------------------------------------------------------------------------- */
@@ -2848,7 +2874,8 @@ static const ttable timeout_funcs[NUM_TIME_FUNCS] = {
 	TTAB(desummon_mon,		cleanup_msummon,	"desummon_mon"),
 	TTAB(desummon_obj,		(timeout_proc)0,	"desummon_obj"),
 	TTAB(larvae_die,		(timeout_proc)0,	"larvae_die"),
-	TTAB(revive_mon_pickup,	(timeout_proc)0,	"revive_mon_pickup")
+	TTAB(revive_mon_pickup,	(timeout_proc)0,	"revive_mon_pickup"),
+	TTAB(revert_object,		(timeout_proc)0,	"revert_object"),
 };
 #undef TTAB
 

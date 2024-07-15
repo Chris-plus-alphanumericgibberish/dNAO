@@ -237,6 +237,17 @@ register struct obj *obj;
 	 * lava, probably not the smartest thing to do. This is gonna hurt.
 	 * Non-metallic objects are handled by lava_damage().
 	 */
+	if(obj->otyp == CHIKAGE && obj->obj_material == HEMARGYOS){
+		pline("The blood burns off the sword!");
+		set_material_gm(obj, obj->ovar1_alt_mat);
+		set_object_color(obj);
+		obj->oeroded = access_oeroded(obj->ovar2_alt_erosion);
+		obj->oeroded2 = access_oeroded2(obj->ovar2_alt_erosion);
+		obj->oeroded3 = access_oeroded3(obj->ovar2_alt_erosion);
+		(void) stop_timer(REVERT_OBJECT, obj->timed);
+		fix_object(obj);
+		update_inventory();
+	}
 	if (is_metallic(obj) && (obj->owornmask & (W_ARMOR | W_ACCESSORY))) {
 		if (!Fire_resistance) {
 			You("dip your worn %s into the forge.  You burn yourself!",

@@ -179,6 +179,8 @@ struct monst * mon;
 	else if (u.ualign.type == A_CHAOTIC || u.ualign.type == A_NONE)
 		adjalign(1);
 
+	IMPURITY_UP(u.uimp_seduction)
+
 	/* select sedu effect */
 	effect = sedu_select_effect(mon, badeffect);
 

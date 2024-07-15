@@ -816,6 +816,26 @@ you_calc_movement()
 	}
 	else if(!TimeStop && artinstance[ART_TENSA_ZANGETSU].ZangetsuSafe < u.ulevel && !(moves%10)) artinstance[ART_TENSA_ZANGETSU].ZangetsuSafe++;
 	
+	int chikhp = 0;
+	if(uwep && uwep->otyp == CHIKAGE && uwep->obj_material == HEMARGYOS)
+		chikhp += *hpmax(&youmonst);
+	if(uswapwep && u.twoweap && uswapwep->otyp == CHIKAGE && uswapwep->obj_material == HEMARGYOS)
+		chikhp += *hpmax(&youmonst);
+	if(chikhp > 0){
+		int hploss = 85*chikhp/1000;
+		if(HPoison_resistance)
+			hploss /= 2;
+		if(hploss < 10)
+			hploss = 10;
+		losehp(hploss/10, "poisoned blood", KILLED_BY);
+		if(hploss%10){
+			if (((moves)*(hploss%10)) / 10 >((moves - 1)*(hploss%10)) / 10)
+				losehp(1, "poisoned blood", KILLED_BY);
+		}
+		stop_occupation();
+		nomul(0, NULL);
+	}
+	
 	if (u.usleep && u.usleep < monstermoves && roll_madness(MAD_FORMICATION)) {
 		multi = -1;
 		nomovemsg = "The crawling bugs awaken you.";

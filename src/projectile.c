@@ -1536,6 +1536,7 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 				(thrownobj->oartifact == ART_HOUCHOU) ||
 				(fired && thrownobj->otyp == BULLET) || 
 				(fired && thrownobj->otyp == SILVER_BULLET) || 
+				(fired && thrownobj->otyp == BLOOD_BULLET) || 
 				(fired && thrownobj->otyp == SHOTGUN_SHELL) || 
 				(fired && thrownobj->otyp == ROCKET) || 
 				(fired && thrownobj->otyp == BLASTER_BOLT) ||

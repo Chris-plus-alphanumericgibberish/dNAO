@@ -98,7 +98,7 @@ struct objclass {
 
 	/*Bitfield(oc_subtyp,3);*/	/* Now too big for a bitfield... see below */
 
-	Bitfield(oc_material,5); //31 max
+	Bitfield(oc_material,6); //63 max
 #define LIQUID		1	/* currently only for venom */
 #define WAX			2
 #define VEGGY		3	/* foodstuffs */
@@ -128,8 +128,9 @@ struct objclass {
 #define SALT		27
 #define SHADOWSTEEL	28
 #define MERCURIAL	29	/* Not actually Hg - mercurial chaos matter */
-#define FIRMAMENT	30
- //Note: 31 max, coordinate with obj.h
+#define HEMARGYOS 	30	/* Not actually Hg - liquid blood-silver */
+#define FIRMAMENT	31
+ //Note: 63 max, coordinate with obj.h
 	Bitfield(oc_showmat,4);
 #define UNIDED	1	/* always show material when base object type is unknown */
 #define IDED	2	/* always show material when base object type is known */

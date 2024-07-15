@@ -348,6 +348,9 @@ gotobj:
 	    }
 	}
 
+	/*stealing is impure*/
+	IMPURITY_UP(u.uimp_theft)
+
 	if (otmp->otyp == LEASH && otmp->leashmon) {
 	    if (monkey_business && otmp->cursed) goto cant_take;
 	    o_unleash(otmp);
@@ -392,18 +395,24 @@ gotobj:
 				  curssv ? "let him take" :
 				  slowly ? "start removing" : "hand over",
 				  equipname(otmp));
-			else if(charms)
+			else if(charms){
 			    pline("%s charms you.  You gladly %s your %s.",
 				  !seen ? SheHeIt(mtmp) : Monnam(mtmp),
 				  curssv ? "let her take" :
 				  slowly ? "start removing" : "hand over",
 				  equipname(otmp));
-			else
+				  if(!rn2(2+u.uimp_seduction)){
+					IMPURITY_UP(u.uimp_seduction)
+				  }
+			}
+			else {
 			    pline("%s seduces you and %s off your %s.",
 				  !seen ? SheHeIt(mtmp) : Adjmonnam(mtmp, "beautiful"),
 				  curssv ? "helps you to take" :
 				  slowly ? "you start taking" : "you take",
 				  equipname(otmp));
+				  IMPURITY_UP(u.uimp_seduction)
+			}
 			named++;
 			}
 			/* the following is to set multi for later on */

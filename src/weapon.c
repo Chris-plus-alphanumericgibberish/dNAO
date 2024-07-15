@@ -484,6 +484,14 @@ struct monst *magr;
 			ocd = objects[otyp].oc_wldam.oc_damd;
 		}
 
+		if(obj->otyp == CHIKAGE && obj->obj_material == HEMARGYOS){
+			ocn *= 2;
+			bonn *= 2;
+			flat *= 2;
+			if(magr)
+				flat += min(mlev(magr)/3, 10);
+		}
+
 		if (obj->oartifact == ART_HOLY_MOONLIGHT_SWORD)
 			dmod += 1;
 
@@ -1577,7 +1585,7 @@ static NEARDATA const int rwep[] =
 	ROPE_OF_ENTANGLING/*lost turns*/, 
 	LOADSTONE/*1d30 plus weight*/, 
 // #ifdef FIREARMS
-	FRAG_GRENADE, GAS_GRENADE, ROCKET, SILVER_BULLET, BULLET, SHOTGUN_SHELL,
+	FRAG_GRENADE, GAS_GRENADE, ROCKET, BLOOD_BULLET, SILVER_BULLET, BULLET, SHOTGUN_SHELL,
 // #endif
 	DROVEN_BOLT/*1d9+1/1d6+1*/, 
 	DWARVISH_SPEAR/*1d9/1d9*/, 
@@ -1878,6 +1886,7 @@ static const NEARDATA short hwep[] = {
 	  DWARVISH_MATTOCK/*1d12/1d8*/, 
 	  RAKUYO/*1d8+1d4/1d8+1d3*/, 
 	  ELVEN_BROADSWORD/*1d6+1d4/1d6+2*/, 
+	  CHIKAGE/*1d10/1d12*/,
 	  KATANA/*1d10/1d12*/,
 	  CRYSKNIFE/*1d10/1d10*/, 
 	  BESTIAL_CLAW/*1d10/1d8*/, 
@@ -1985,6 +1994,7 @@ static const NEARDATA short hpwep[] = {
 	  ELVEN_BROADSWORD/*1d6+1d4/1d6+2*/, 
 	  POLEAXE, /*1d10/2d6*/
 	  HALBERD, /*1d10/2d6*/
+	  CHIKAGE/*1d10/1d12*/,
 	  KATANA/*1d10/1d12*/,
 	  DROVEN_LANCE, /*1d10/1d10*/
 	  CRYSKNIFE/*1d10/1d10*/, 
@@ -2518,7 +2528,7 @@ register struct monst *mon;
 					((tobj = m_carrying_charged(mon, HAND_BLASTER)) && tobj != MON_WEP(mon)) ||
 					((tobj = m_carrying_charged(mon, CARCOSAN_STING)) && tobj != MON_WEP(mon)) ||
 					/* bullets */
-					((m_carrying(mon, BULLET) || m_carrying(mon, SILVER_BULLET)) &&
+					((m_carrying(mon, BULLET) || m_carrying(mon, SILVER_BULLET) || m_carrying(mon, BLOOD_BULLET)) &&
 						(((tobj = oselect(mon, ASSAULT_RIFLE, W_SWAPWEP, marilith))) ||
 						((tobj = oselect(mon, SUBMACHINE_GUN, W_SWAPWEP, marilith))) ||
 						((tobj = oselect(mon, PISTOL, W_SWAPWEP, marilith))))) ||
@@ -2906,13 +2916,18 @@ struct monst *mtmp;
 
 	if (otmp){
 		damage_bon = (int)(strbon * atr_dbon(otmp, mtmp, A_STR));
-		for (int i = A_DEX; i < A_MAX; i++){
+		for (int i = A_INT; i < A_MAX; i++){
 			stat = acurr(i, (youagr) ? ((struct monst *) 0) : mtmp);
 			statbon = (stat == 25) ? 8 : ((stat-10)/2);
 			damage_bon += (int)(statbon * atr_dbon(otmp, mtmp, i));
 		}
-		if (youagr && otmp->oartifact == ART_IBITE_ARM){
-			if(bare_bonus > 0) damage_bon += ACURR(A_CHA)/5 + bare_bonus*2;
+		if(youagr){
+			if (otmp->oartifact == ART_IBITE_ARM){
+				if(bare_bonus > 0) damage_bon += ACURR(A_CHA)/5 + bare_bonus*2;
+			}
+			if (otmp->otyp == CHIKAGE && otmp->obj_material == HEMARGYOS){
+				damage_bon += u.uimpurity/2;
+			}
 		}
 	} else {
 		damage_bon = strbon;

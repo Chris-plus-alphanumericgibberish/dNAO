@@ -269,6 +269,13 @@ static const struct icp cane_materials[] = {
 	{  0, 0 }
 };
 
+static const struct icp chikage_materials[] = {
+	{550, 0 }, /* use base material */
+	{250, GOLD },
+	{200, GREEN_STEEL },
+	{  0, 0 }
+};
+
 static const struct icp brick_materials[] = {
 	{550, 0 }, /* use base material */
 	{150, WOOD },
@@ -2209,6 +2216,8 @@ struct obj* obj;
 	case CHURCH_BLADE:
 	case CHURCH_SHEATH:
 		return cane_materials;
+	case CHIKAGE:
+		return chikage_materials;
 	case CHURCH_HAMMER:
 	case CHURCH_BRICK:
 		return brick_materials;
@@ -2484,7 +2493,9 @@ int mat;
 		/* bullets */
 		case BULLET:
 		case SILVER_BULLET:
+		case BLOOD_BULLET:
 			if (mat == SILVER)			obj->otyp = SILVER_BULLET;
+			else if (mat == HEMARGYOS)	obj->otyp = BLOOD_BULLET;
 			else						obj->otyp = BULLET;
 		break;
 		case CRYSKNIFE:
@@ -2749,6 +2760,10 @@ register struct obj *obj;
 		int base_mat_alt = (obj->oartifact && artilist[obj->oartifact].material != MT_DEFAULT && artilist[obj->oartifact].weight != WT_DEFAULT) ? artilist[obj->oartifact].material : objects[otyp_alt].oc_material;
 
 		wt = ((wt * materials[obj->obj_material].density / materials[base_mat].density) + (wt * materials[obj->ovar1_alt_mat].density / materials[base_mat_alt].density))/2;
+	}
+	else if(obj->otyp == CHIKAGE && obj->obj_material == HEMARGYOS){
+		if(obj->ovar1_alt_mat != base_mat)
+			wt = wt * materials[obj->ovar1_alt_mat].density / materials[base_mat].density;
 	}
 	else if(obj->obj_material != base_mat) {
 		/* do not apply this to artifacts; those are handled in artifact_weight() */

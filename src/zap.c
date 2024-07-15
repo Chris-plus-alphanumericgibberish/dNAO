@@ -3399,6 +3399,11 @@ register struct	obj	*obj;
 	if (objects[otyp].oc_dir == IMMEDIATE) {
 	    obj_zapped = FALSE;
 
+		/* Death magic is impure */
+		if(otyp == SPE_DRAIN_LIFE || otyp == WAN_DRAINING ){
+			IMPURITY_UP(u.uimp_death_magic)
+		}
+
 	    if (u.uswallow) {
 		(void) bhitm(u.ustuck, obj);
 		/* [how about `bhitpile(u.ustuck->minvent)' effect?] */
@@ -3419,8 +3424,12 @@ register struct	obj	*obj;
 		int range = rn1(7, 7);
 	    /* neither immediate nor directionless */
 
-		if(u.sealsActive&SEAL_BUER && (otyp == SPE_FINGER_OF_DEATH || otyp == WAN_DEATH ))
-			unbind(SEAL_BUER,TRUE);
+		/* Wands of death are impure, unbind buer */
+		if(otyp == SPE_FINGER_OF_DEATH || otyp == WAN_DEATH ){
+			IMPURITY_UP(u.uimp_death_magic)
+			if(u.sealsActive&SEAL_BUER)
+				unbind(SEAL_BUER,TRUE);
+		}
 		
 	    if (otyp == WAN_DIGGING || otyp == SPE_DIG)
 			zap_dig(-1,-1,-1);//-1-1-1 = "use defaults"

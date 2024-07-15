@@ -371,6 +371,7 @@ struct obj {
 	|| (otmp)->otyp == PINCER_STAFF \
 	|| (otmp)->otyp == CANE \
 	|| (otmp)->otyp == WHIP_SAW \
+	|| (otmp)->otyp == CHIKAGE \
 	|| is_imperial_elven_armor(otmp) \
 	)
 #define ECLIPSE_MOON	0
@@ -488,6 +489,7 @@ struct obj {
 #define obj_type_uses_ovar2(otmp) (\
 	   (otmp)->otyp == CANE \
 	|| (otmp)->otyp == WHIP_SAW \
+	|| (otmp)->otyp == CHIKAGE \
 	)
 #define ovar2_alt_erosion ovar2
 #define store_oeroded(field, value) ((field) = ((field)&~(0x3L))|(value))
@@ -629,11 +631,10 @@ struct obj {
 			 otmp->otyp == BLADE_OF_PITY)
 #define rakuyo_prop(otmp)	(check_oprop(otmp, OPROP_RAKUW))
 #define mercy_blade_prop(otmp)	(check_oprop(otmp, OPROP_MRCYW))
-#define is_insight_weapon(otmp) (is_cclub_able(otmp) || \
+#define is_insight_weapon(otmp) (is_full_insight_weapon(otmp) || \
 			 is_rakuyo(otmp) ||\
-			 rakuyo_prop(otmp) || \
-			 otmp->otyp == PINCER_STAFF || \
 			 otmp->otyp == CARCOSAN_STING || \
+			 otmp->otyp == CHIKAGE || \
 			 check_oprop(otmp,OPROP_GSSDW) || \
 			 check_oprop(otmp,OPROP_INSTW) || \
 			 check_oprop(otmp,OPROP_ELFLW) || \
@@ -644,8 +645,12 @@ struct obj {
 			 otmp->oartifact == ART_GOLDEN_SWORD_OF_Y_HA_TALLA || \
 			 otmp->oartifact == ART_RUINOUS_DESCENT_OF_STARS || \
 			 (otmp->oartifact == ART_PEN_OF_THE_VOID && otmp->ovara_seals&SEAL_OSE) ||\
+			 is_mercy_blade(otmp))
+
+#define is_full_insight_weapon(otmp) (is_cclub_able(otmp) || \
+			 rakuyo_prop(otmp) || \
+			 otmp->otyp == PINCER_STAFF || \
 			 otmp->obj_material == MERCURIAL || \
-			 is_mercy_blade(otmp) || \
 			 mercy_blade_prop(otmp) || \
 			 otmp->otyp == ISAMUSEI ||\
 			 otmp->otyp == DISKOS ||\

@@ -454,6 +454,14 @@ mkjewel()
 }
 
 struct obj *
+mkyourblood()
+{
+	struct obj *otmp = mksobj(POT_BLOOD, MKOBJ_NOINIT);
+	otmp->corpsenm = youracedata->mtyp;
+	return otmp;
+}
+
+struct obj *
 mklolthvaultitem()
 {
 	struct obj *otmp;

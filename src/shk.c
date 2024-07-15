@@ -3088,6 +3088,8 @@ register boolean peaceful, silent;
 		} else  Norep("You hear a scream, \"Thief!\"");
 	    }
 		if(u.sealsActive&SEAL_ANDROMALIUS) unbind(SEAL_ANDROMALIUS,TRUE);
+		/*stealing is impure*/
+		IMPURITY_UP(u.uimp_theft)
 	    hot_pursuit(shkp);
 	    (void) angry_guards(FALSE);
 	}
@@ -5442,10 +5444,12 @@ struct monst *shkp;
 					obj->opoisonchrgs = 1;
 					obj->opoisoned = OPOISON_FILTH;
 				}
+				IMPURITY_UP(u.uimp_dirtiness)
 			}
 			else if (is_poisonable(obj)){
 				obj->opoisoned = OPOISON_FILTH;
 				update_inventory();
+				IMPURITY_UP(u.uimp_dirtiness)
 			}
 			else {
 				verbalize("All done!");

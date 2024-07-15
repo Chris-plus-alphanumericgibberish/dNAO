@@ -6448,6 +6448,7 @@ cleanup:
 			You("...murderer!?");
 		else
 			You("murderer!");
+		IMPURITY_UP(u.uimp_murder)
 		if(u.ualign.type == A_LAWFUL){
 			change_hod(10);
 			u.ualign.sins += 5;

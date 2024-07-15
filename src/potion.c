@@ -165,6 +165,7 @@ int type;
 
 	if (xtime > 0L) {
 	    if (Sick_resistance) return;
+		IMPURITY_UP(u.uimp_illness)
 	    if (!old) {
 		/* newly sick */
 		if(talk) You_feel("deathly sick.");
@@ -1433,6 +1434,7 @@ as_extra_healing:
 					(otmp->blessed ? mons[(otmp)->corpsenm].cnutrit*1.5/5 : mons[(otmp)->corpsenm].cnutrit/5 ));
 			}
 		}
+		IMPURITY_UP(u.uimp_blood)
 		//Note: clockworks that use potions of blood as oil gain the intrinsics!
 		//Incantifiers likewise gain intrinsics but not nutrition.
 		cprefx(otmp->corpsenm, TRUE, FALSE);
@@ -1613,6 +1615,7 @@ boolean your_fault;
 			delayed_killer = killer_buf;
 		    }
 		}
+		IMPURITY_UP(u.uimp_blood)
 	}break;
 	case POT_AMNESIA:
 		/* Uh-oh! */
