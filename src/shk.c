@@ -1869,7 +1869,7 @@ shk_other_services()
 	}
 	
 	/* Do you want to use other services */
-	if (yn("What can I help you with today?") != 'y' ) return;
+	if (yn("Do you wish to try our other services?") != 'y' ) return;
 
 	if (!ESHK(shkp)->services) return;
 
