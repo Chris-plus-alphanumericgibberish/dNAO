@@ -2413,6 +2413,10 @@ int mat;
 			if (mat == SILVER)			obj->otyp = SILVER_BULLET;
 			else						obj->otyp = BULLET;
 		break;
+		case CRYSKNIFE:
+			if(mat > CHITIN && mat != MINERAL)
+				obj->otyp = KNIFE;
+		break;
 		/* elven helmets */
 		case ELVEN_HELM:
 		case HIGH_ELVEN_HELM:
