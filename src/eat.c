@@ -2566,10 +2566,12 @@ register struct obj *otmp;
 		}
 		break;
 	    case BRAINROOT:
-			if(mvitals[PM_BRAINBLOSSOM_PATCH].insight_gained <= 0){
+			if(mvitals[PM_BRAINBLOSSOM_PATCH].insight_gained < 3){
 				pline("Alien impulses assault your mind!");
-				mvitals[PM_BRAINBLOSSOM_PATCH].insight_gained++;
-				change_uinsight(1);
+				if(mvitals[PM_BRAINBLOSSOM_PATCH].insight_gained == 0 || !rn2(mvitals[PM_BRAINBLOSSOM_PATCH].insight_gained+1)){
+					mvitals[PM_BRAINBLOSSOM_PATCH].insight_gained++;
+					change_uinsight(1);
+				}
 				make_hallucinated(HHallucination + 200,FALSE,0L);
 			}
 			else pline("Alien impulses intrude upon your mind.");
