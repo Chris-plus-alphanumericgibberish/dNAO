@@ -2298,7 +2298,7 @@ struct obj *obj;
 		sword = obj->cobj;
 		obj_extract_self(sword);
 	}
-	else if(obj->otyp == CHURCH_BLADE){
+	else if(obj->otyp == CHURCH_SHEATH){
 		pline("Church blade with no sword inside, recovering from error by creating a new sword.");
 		sword = mksobj(HUNTER_S_LONGSWORD, MKOBJ_NOINIT);
 	}
