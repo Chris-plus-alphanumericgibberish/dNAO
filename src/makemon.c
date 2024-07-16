@@ -12183,7 +12183,6 @@ boolean greatequip;
 				fix_object(otmp);
 				(void) mpickobj(mtmp, otmp);
 				
-				otmp->spe = 8;
 				otmp = mksobj(VIPERWHIP, mkobjflags);
 				otmp = oname(otmp, artiname(ART_SCOURGE_OF_LOLTH));
 				otmp->blessed = TRUE;
