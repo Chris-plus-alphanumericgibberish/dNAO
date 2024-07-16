@@ -14932,7 +14932,7 @@ int vis;						/* True if action is at all visible to the player */
 	if (attk && attk->adtyp == AD_MERC)
 	{
 		if (!Cold_res(mdef)) {
-			specdmg += basedmg;
+			elemdmg += basedmg;
 		}
 		/* abuse player's stats */
 		if (youdef) {
