@@ -14458,27 +14458,13 @@ struct monst *mon;
 		)
 			return 1;
 	} else {
-		if(has_template(mon, ZOMBIFIED) || has_template(mon, YELLOW_TEMPLATE)){
-			if((otmp->wrathdata >> 2) == PM_ZOMBIE)
-				return 1;
-		} else if(has_template(mon, SKELIFIED)){
-			if((otmp->wrathdata >> 2) == PM_SKELETON)
-				return 1;
-		} else if(has_template(mon, VAMPIRIC)){
-			if((otmp->wrathdata >> 2) == PM_VAMPIRE)
-				return 1;
-		} else if(has_template(mon, PSEUDONATURAL)){
-			if((otmp->wrathdata >> 2) == PM_MIND_FLAYER)
-				return 1;
-		} else {
-			if((otmp->wrathdata >> 2) == mon->mtyp)
-				return 1;
-			
-			if(mons[(otmp->wrathdata >> 2)].mflagsa && 
-			 ((mons[(otmp->wrathdata >> 2)].mflagsa&(mon->data->mflagsa)) != 0)
-			){
-				return 1;
-			}
+		if((otmp->wrathdata >> 2) == mon->mtyp)
+			return 1;
+		
+		if(mons[(otmp->wrathdata >> 2)].mflagsa && 
+		 ((mons[(otmp->wrathdata >> 2)].mflagsa&(mon->data->mflagsa)) != 0)
+		){
+			return 1;
 		}
 	}
 	return 0;

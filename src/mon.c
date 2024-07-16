@@ -6229,14 +6229,14 @@ xkilled(mtmp, dest)
 			if((otmp->wrathdata&0x3L) < 3) otmp->wrathdata++;
 		}
 		else {
-			if(has_template(mtmp, ZOMBIFIED)){
-				otmp->wrathdata = PM_ZOMBIE<<2;
+			if(has_template(mtmp, ZOMBIFIED) || has_template(mtmp, YELLOW_DEAD)){
+				otmp->wrathdata = PM_GHOUL<<2;
 			} else if(has_template(mtmp, SKELIFIED)){
 				otmp->wrathdata = PM_SKELETON<<2;
 			} else if(has_template(mtmp, VAMPIRIC)){
 				otmp->wrathdata = PM_VAMPIRE<<2;
 			} else if(has_template(mtmp, PSEUDONATURAL)){
-				otmp->wrathdata = PM_MIND_FLAYER<<2;
+				otmp->wrathdata = PM_PARASITIC_MIND_FLAYER<<2;
 			} else {
 				otmp->wrathdata = monsndx(mtmp->data)<<2;
 			}
@@ -6248,14 +6248,14 @@ xkilled(mtmp, dest)
 			if((otmp->wrathdata&0xFF) < 3) otmp->wrathdata++;
 		}
 		else {
-			if(has_template(mtmp, ZOMBIFIED)){
-				otmp->wrathdata = PM_ZOMBIE<<2;
+			if(has_template(mtmp, ZOMBIFIED) || has_template(mtmp, YELLOW_DEAD)){
+				otmp->wrathdata = PM_GHOUL<<2;
 			} else if(has_template(mtmp, SKELIFIED)){
 				otmp->wrathdata = PM_SKELETON<<2;
 			} else if(has_template(mtmp, VAMPIRIC)){
 				otmp->wrathdata = PM_VAMPIRE<<2;
 			} else if(has_template(mtmp, PSEUDONATURAL)){
-				otmp->wrathdata = PM_MIND_FLAYER<<2;
+				otmp->wrathdata = PM_PARASITIC_MIND_FLAYER<<2;
 			} else {
 				otmp->wrathdata = monsndx(mtmp->data)<<2;
 			}

@@ -16208,14 +16208,14 @@ struct monst *mtmp, *victim;
 				if((otmp->wrathdata&0x3L) < 3) otmp->wrathdata++;
 			}
 			else {
-				if(has_template(victim, ZOMBIFIED)){
-					otmp->wrathdata = PM_ZOMBIE<<2;
+				if(has_template(victim, ZOMBIFIED) || has_template(victim, YELLOW_DEAD)){
+					otmp->wrathdata = PM_GHOUL<<2;
 				} else if(has_template(victim, SKELIFIED)){
 					otmp->wrathdata = PM_SKELETON<<2;
 				} else if(has_template(victim, VAMPIRIC)){
 					otmp->wrathdata = PM_VAMPIRE<<2;
 				} else if(has_template(victim, PSEUDONATURAL)){
-					otmp->wrathdata = PM_MIND_FLAYER<<2;
+					otmp->wrathdata = PM_PARASITIC_MIND_FLAYER<<2;
 				} else {
 					otmp->wrathdata = monsndx(victim->data)<<2;
 				}
@@ -16227,14 +16227,14 @@ struct monst *mtmp, *victim;
 				if((otmp->wrathdata&0xFF) < 3) otmp->wrathdata++;
 			}
 			else {
-				if(has_template(victim, ZOMBIFIED)){
-					otmp->wrathdata = PM_ZOMBIE<<2;
+				if(has_template(victim, ZOMBIFIED) || has_template(victim, YELLOW_DEAD)){
+					otmp->wrathdata = PM_GHOUL<<2;
 				} else if(has_template(victim, SKELIFIED)){
 					otmp->wrathdata = PM_SKELETON<<2;
 				} else if(has_template(victim, VAMPIRIC)){
 					otmp->wrathdata = PM_VAMPIRE<<2;
 				} else if(has_template(victim, PSEUDONATURAL)){
-					otmp->wrathdata = PM_MIND_FLAYER<<2;
+					otmp->wrathdata = PM_PARASITIC_MIND_FLAYER<<2;
 				} else {
 					otmp->wrathdata = monsndx(victim->data)<<2;
 				}
