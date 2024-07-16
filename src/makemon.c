@@ -13593,36 +13593,6 @@ int faction;
 	}
 	set_mon_data(mtmp, mndx);
 
-	if(!get_mx(mtmp, MX_ESUM) && intelligent_mon(mtmp) && is_smith_mtyp(mtmp->mtyp)){
-		add_mx(mtmp, MX_ESMT);
-		if(HAS_ESMT(mtmp)){
-			ESMT(mtmp)->smith_mtyp = mtmp->mtyp; //In case the monster is later polymorphed
-			initialize_smith_stocks(mtmp);
-		}
-		if(needs_forge_mon(mtmp)){
-			for(int ix = mtmp->mx-1; ix < mtmp->mx+2; ix++){
-				for(int iy = mtmp->my-1; iy < mtmp->my+2; iy++){
-					if(isok(ix, iy) && IS_FORGE(levl[ix][iy].typ)){
-						ESMT(mtmp)->frgpos.x = ix;
-						ESMT(mtmp)->frgpos.y = iy;
-						ESMT(mtmp)->frglevel = u.uz;
-					}
-				}
-			}
-		}
-		if(mtmp->mtyp == PM_TREESINGER){
-			for(int ix = mtmp->mx-1; ix < mtmp->mx+2; ix++){
-				for(int iy = mtmp->my-1; iy < mtmp->my+2; iy++){
-					if(isok(ix, iy) && levl[ix][iy].typ == TREE){
-						ESMT(mtmp)->frgpos.x = ix;
-						ESMT(mtmp)->frgpos.y = iy;
-						ESMT(mtmp)->frglevel = u.uz;
-					}
-				}
-			}
-		}
-	}
-	
 	ABASE_MON(A_STR, mtmp) = 7 + d(1,6);
 	if (strongmonst(mtmp->data)) ABASE_MON(A_STR, mtmp) = STR19(18);
 	if (throws_rocks(mtmp->data)) ABASE_MON(A_STR, mtmp) = STR19(25);
@@ -13832,6 +13802,36 @@ int faction;
 
 	mtmp->mspec_used = 3;
 	mtmp->encouraged = 0;
+	
+	if(!get_mx(mtmp, MX_ESUM) && intelligent_mon(mtmp) && is_smith_mtyp(mtmp->mtyp)){
+		add_mx(mtmp, MX_ESMT);
+		if(HAS_ESMT(mtmp)){
+			ESMT(mtmp)->smith_mtyp = mtmp->mtyp; //In case the monster is later polymorphed
+			initialize_smith_stocks(mtmp);
+		}
+		if(needs_forge_mon(mtmp)){
+			for(int ix = mtmp->mx-1; ix < mtmp->mx+2; ix++){
+				for(int iy = mtmp->my-1; iy < mtmp->my+2; iy++){
+					if(isok(ix, iy) && IS_FORGE(levl[ix][iy].typ)){
+						ESMT(mtmp)->frgpos.x = ix;
+						ESMT(mtmp)->frgpos.y = iy;
+						ESMT(mtmp)->frglevel = u.uz;
+					}
+				}
+			}
+		}
+		if(mtmp->mtyp == PM_TREESINGER){
+			for(int ix = mtmp->mx-1; ix < mtmp->mx+2; ix++){
+				for(int iy = mtmp->my-1; iy < mtmp->my+2; iy++){
+					if(isok(ix, iy) && levl[ix][iy].typ == TREE){
+						ESMT(mtmp)->frgpos.x = ix;
+						ESMT(mtmp)->frgpos.y = iy;
+						ESMT(mtmp)->frglevel = u.uz;
+					}
+				}
+			}
+		}
+	}
 	
 	//"Living" creatures generated in heaven or hell are in fact already dead (and should not leave corpses).
 	if((In_hell(&u.uz) || In_endgame(&u.uz)) 
