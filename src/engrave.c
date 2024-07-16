@@ -440,6 +440,7 @@ static const char *haluMesg[] = {
 
 		"What's the Bureau's vacation policy?",
 		"I'm interested to hear about your expenditure plan.", /* Awkward Zombie */
+	"It's dangerous to go alone.", /*Zelda I*/
 	"WHEN ALL ELSE FAILS USE FIRE", /*Zelda II*/
 	"Don't you see? All of you... YOUR GODS DESTROYED YOU", /*Wind Waker*/
 		"The wind... It is blowing...",
@@ -452,6 +453,8 @@ static const char *haluMesg[] = {
 
 	"This land is peaceful, its inhabitants kind.", /* Dark Souls */
 	"Long may the sun shine!", /* Dark Souls 3 */
+	"A bottomless curse, a bottomless sea, accepting of all that there is... and can be.", /*Bloodborne*/
+	"Heresy is not native to the world; it is but a contrivance. All things can be conjoined.", /*Elden Ring*/
 
 	"Why are you sad?", /*Blood-C*/
 	"Only accurate information has practical application.", /* not sure where this originated, possibly Aron Ra?*/
@@ -4085,6 +4088,7 @@ static const char *epitaphs[] = {
 	"The sun of the desert consumes what it never can cheer.", /* HP Lovecraft */
 	
 	"Summer Rose - Thus Kindly I Scatter", /* RWBY */
+		"Black out the sky, all things must die.",
 	
 	"Hold my beer and watch this!", /* Rango */
 	
@@ -4097,6 +4101,7 @@ static const char *epitaphs[] = {
 		"Fear not the dark, my friend. And let the feast begin.",
 
 	"Let the winds lift you, to a higher place.", /* Elden Ring */
+		"Felled by King Morgott! Last of all kings.",
 
 	"For every hero commemorated, a thousand martyrs die unmourned and unremembered.", /*Warhammer 40k*/
 	
