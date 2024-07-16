@@ -3400,7 +3400,7 @@ MONSTER:'@',"Daemon", place[1]
 
 MONSTER:'&', "ancient of ice", place[2], "the Ambassador of Cania"
 MONSTER:'&', "fallen angel", place[2], "the Ambassador of Maladomini"
-MONSTER:'&', "bone devil", place[2], "the Ambassador of Malbloge"
+MONSTER:'&', "bone devil", place[2], "the Ambassador of Malbolge"
 MONSTER:'&', "ice devil", place[2], "the Ambassador of Cania"
 MONSTER:'&', "nessian pit fiend", place[2], "the Warden of Nessus"
 MONSTER:'&', "pit fiend", place[2], "the Ambassador of Phlegethos"
