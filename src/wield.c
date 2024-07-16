@@ -825,7 +825,7 @@ register int amount;
 
 	if (otmp && otmp->oclass == SCROLL_CLASS) otyp = otmp->otyp;
 
-	if(uwep->otyp == WORM_TOOTH && amount >= 0) {
+	if(uwep->otyp == WORM_TOOTH && amount >= 0 && (is_organic(uwep) || uwep->obj_material == MINERAL)) {
 		uwep->otyp = CRYSKNIFE;
 		uwep->oerodeproof = 0;
 		Your("weapon seems sharper now.");

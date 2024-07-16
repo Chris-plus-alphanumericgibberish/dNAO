@@ -5321,10 +5321,11 @@ struct monst *shkp;
 			Your("%s to evaporate into thin air!", aobjnam(obj, "seem"));
 			/* ...No actual vibrating and no evaporating */
 
-			if (obj->otyp == WORM_TOOTH) {
-			obj->otyp = CRYSKNIFE;
-			Your("weapon seems sharper now.");
-			obj->cursed = 0;
+			if (obj->otyp == WORM_TOOTH && (is_organic(obj) || obj->obj_material == MINERAL)) {
+				obj->otyp = CRYSKNIFE;
+				Your("weapon seems sharper now.");
+				obj->cursed = 0;
+				fix_object(obj);
 			break;
 			}
 
