@@ -666,6 +666,9 @@ struct you {
 	Bitfield(uimp_ibite, 4);
 	Bitfield(uimp_mind_flayers, 4); //51/+25 eve/+12 bullets?
 
+	Bitfield(ublood_smithing, 1);
+	Bitfield(umagic_smithing, 1);
+	Bitfield(uring_lore, 1);
 #define IMPURITY_UP(counter) 	if((counter) < 15){\
 		if((counter) == 0 || !rn2((counter))){\
 			((counter))++;\

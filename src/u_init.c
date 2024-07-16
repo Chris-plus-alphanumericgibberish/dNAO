@@ -1183,6 +1183,16 @@ static const struct def_skill Skill_Elf_Music[] = {
     { P_NONE, 0 }
 };
 
+static const struct def_skill Skill_Dwarf_Smithing[] = {
+    { P_SMITHING, P_EXPERT },
+    { P_NONE, 0 }
+};
+
+static const struct def_skill Skill_Gnome_Smithing[] = {
+    { P_SMITHING, P_SKILLED },
+    { P_NONE, 0 }
+};
+
 static const struct def_skill Skill_Elf_Ana[] = {
     { P_ENCHANTMENT_SPELL, P_EXPERT },
     { P_MARTIAL_ARTS, P_GRAND_MASTER },
@@ -1591,6 +1601,7 @@ static const struct def_skill Skill_U[] = {
     { P_MATTER_SPELL, P_BASIC },
 	{ P_ATTACK_SPELL, P_SKILLED }, { P_HEALING_SPELL, P_SKILLED },
 	{ P_DIVINATION_SPELL, P_EXPERT },
+    { P_SMITHING, P_EXPERT },
 };
 
 static const struct def_skill Skill_V[] = {
@@ -2537,6 +2548,7 @@ u_init()
 				knows_object(RAZOR_CLEAVER);
 			break;
 		}
+		u.ublood_smithing = TRUE;
 		knows_object(POT_HEALING);
 		knows_object(POT_EXTRA_HEALING);
 		knows_object(POT_FULL_HEALING);
@@ -2744,6 +2756,7 @@ u_init()
 			knows_object(DWARVISH_CLOAK);
 			knows_object(DWARVISH_ROUNDSHIELD);
 		}
+		if(!Role_if(PM_UNDEAD_HUNTER)) skill_add(Skill_Dwarf_Smithing);
 		/* Dwarves know all carved wards */
 		u.wardsknown |= WARD_TOUSTEFNA;
 		u.wardsknown |= WARD_DREPRUN;
@@ -2761,6 +2774,7 @@ u_init()
 		skill_add(Skill_G);
 		skill_up(Skill_G_Spe);
 		ini_inv(TallowCandles);
+		if(!Role_if(PM_UNDEAD_HUNTER)) skill_add(Skill_Gnome_Smithing);
 		if(!Role_if(PM_MADMAN)){ /*Madmen have been amnesticized*/
 			knows_object(GNOMISH_POINTY_HAT);
 			knows_object(AKLYS);

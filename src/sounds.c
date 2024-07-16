@@ -5725,6 +5725,7 @@ int floorID;
 	case ASTAROTH:
 		skillchain[i++] = P_CROSSBOW;
 		skillchain[i++] = P_SHURIKEN;
+		skillchain[i++] = P_SMITHING;
 		break;
 	case BALAM:
 		skillchain[i++] = P_WHIP;

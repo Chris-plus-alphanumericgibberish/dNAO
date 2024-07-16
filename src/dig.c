@@ -8,6 +8,8 @@
 
 #ifdef OVLB
 
+extern const int monstr[];
+
 static NEARDATA boolean did_dig_msg;
 
 STATIC_DCL void NDECL(fakerocktrap);
@@ -2693,6 +2695,22 @@ long timeout;	/* unused */
 			setmnotwielded(obj->ocarry,obj);
 			MON_NOSWEP(obj->ocarry);
 	    }
+	}
+	if(on_floor){
+		if(u.ublood_smithing && has_blood(&mons[obj->corpsenm]) && !rn2(20)){
+			struct obj *otmp = mksobj_at(CRYSTAL, x, y, MKOBJ_NOINIT);
+			if(otmp){
+				set_material_gm(otmp, HEMARGYOS);
+				if(monstr[obj->corpsenm] >= 20)
+					otmp->spe = 4;
+				else if(monstr[obj->corpsenm] >= 14)
+					otmp->spe = 3;
+				else if(monstr[obj->corpsenm] >= 5)
+					otmp->spe = 2;
+				else
+					otmp->spe = 1;
+			}
+		}
 	}
 	// rot_organic(arg, timeout); //This is not for corpses, it is for buried containers.
 	obj_extract_self(obj);

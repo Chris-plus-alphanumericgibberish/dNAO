@@ -2754,8 +2754,10 @@ register struct obj *obj;
 
 	if (obj->oartifact)
 		wt = artifact_weight(obj);
-
-	if(obj->otyp == CANE || obj->otyp == WHIP_SAW){
+	if(obj->otyp == INGOT){
+		return obj->quan * wt;
+	}
+	else if(obj->otyp == CANE || obj->otyp == WHIP_SAW){
 		int otyp_alt = obj->otyp == CANE ? WHIP_SAW : CANE;
 		int base_mat_alt = (obj->oartifact && artilist[obj->oartifact].material != MT_DEFAULT && artilist[obj->oartifact].weight != WT_DEFAULT) ? artilist[obj->oartifact].material : objects[otyp_alt].oc_material;
 

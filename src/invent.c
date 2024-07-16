@@ -1268,6 +1268,8 @@ register const char *let,*word;
 		|| (!strncmp(word, "replace with", 12)
 		    && otmp->otyp != HELLFIRE_COMPONENT
 			&& otmp->otyp != CLOCKWORK_COMPONENT)
+		|| (!strncmp(word, "forge with", 10)
+		    && (otmp->otyp != INGOT || !is_metallic(otmp) ))
 		|| (!strncmp(word, "salve", 5) && !salve_target(otmp))
 		|| ((!strcmp(word, "use or apply") ||
 			!strcmp(word, "untrap with")) &&
@@ -1301,6 +1303,7 @@ register const char *let,*word;
 			  otmp->otyp != CHIKAGE &&
 			  otmp->otyp != HUNTER_S_LONGSWORD && otmp->otyp != CHURCH_BLADE && otmp->otyp != CHURCH_SHEATH &&
 			  otmp->otyp != HUNTER_S_SHORTSWORD && otmp->otyp != CHURCH_HAMMER && otmp->otyp != CHURCH_BRICK &&
+			  otmp->otyp != SMITHING_HAMMER &&
 			  !(otmp->oartifact == ART_SKY_REFLECTED && carrying_art(ART_SILVER_SKY)) &&
 			  !(otmp->oartifact == ART_SILVER_SKY && carrying_art(ART_SKY_REFLECTED)) &&
 			  otmp->otyp != MASS_SHADOW_PISTOL

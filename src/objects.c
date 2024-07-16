@@ -1843,6 +1843,10 @@ ROCK(("silver slingstone", "silver"),
 							0,  0,   1, 10, 6, 6, 2, 0,  0, 5, SILVER, HI_SILVER),/*Needs tile*/
 ROCK(("rock"),		1,100,   1, 0, 6, 6, 0, 0, 10, 7, MINERAL, CLR_GRAY),
 
+ROCK(("ingot"),		1,  0,   1, 0, 8, 8, -1, 0, 10, 4.5, IRON, HI_METAL, O_MATSPEC(IDED|UNIDED)),
+
+ROCK(("crystal"),		1,  0,   1, 0, 6, 6, 0, 0, 10, 4.5, IRON, HI_METAL, O_MATSPEC(IDED|UNIDED),  O_DTYPE(SLASH|PIERCE)),
+
 GEM(("antimagic rift", "black-flawed white"),  0,  1, 4500, 15,  6, GEMSTONE, CLR_BLACK),
 GEM(("catapsi vortex",  "gray-flawed white"),  0,  1, 4500, 15,  6, GEMSTONE, CLR_GRAY),
 #undef GEM

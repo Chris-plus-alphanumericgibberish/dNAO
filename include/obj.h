@@ -97,6 +97,7 @@ enum {
 	OPROP_BYAK,
 	OPROP_MRCYW,
 	OPROP_RLYHW,
+	OPROP_SMITHU,
 	MAX_OPROP
 };
 
@@ -693,27 +694,30 @@ struct obj {
 		typ == PROTEIN_PILL\
 		)
 
-#define ensouled_item(otmp)	(((otmp)->otyp >= WAGE_OF_SLOTH && (otmp)->otyp <= WAGE_OF_PRIDE)\
-			 || (otmp)->otyp == VITAL_SOULSTONE\
-			 || (otmp)->otyp == SPIRITUAL_SOULSTONE\
-			 || ((otmp)->otyp >= EFFIGY && (otmp)->otyp <= DOLL_S_TEAR)\
-			 || (otmp)->otyp == HOLY_SYMBOL_OF_THE_BLACK_MOTHE\
+#define ensouled_item(otmp)	(ensouled_otyp((otmp)->otyp)\
 			 || (otmp)->oartifact == ART_ESSCOOAHLIPBOOURRR\
-			 || (otmp)->otyp == FIGURINE\
-			 || (otmp)->otyp == STATUE\
-			 || (otmp)->otyp == MAGIC_LAMP\
-			 || (otmp)->otyp == CANDLE_OF_INVOCATION\
-			 || (otmp)->otyp == RIN_WISHES\
-			 || (otmp)->otyp == AMULET_OF_LIFE_SAVING\
-			 || (otmp)->otyp == MISOTHEISTIC_PYRAMID\
-			 || (otmp)->otyp == MISOTHEISTIC_FRAGMENT\
-			 || (otmp)->otyp == DIMENSIONAL_LOCK\
-			 || (otmp)->otyp == PRESERVATIVE_ENGINE\
-			 || (otmp)->otyp == ARMOR_SALVE\
-			 || (otmp)->otyp == LIVING_MASK\
-			 || (otmp)->oclass == TILE_CLASS\
-			 || (otmp)->otyp == ANTIMAGIC_RIFT\
-			 || (otmp)->otyp == CATAPSI_VORTEX\
+			)
+
+#define ensouled_otyp(otyp)	(((otyp) >= WAGE_OF_SLOTH && (otyp) <= WAGE_OF_PRIDE)\
+			 || objects[(otyp)].oc_class == TILE_CLASS\
+			 || (otyp) == VITAL_SOULSTONE\
+			 || (otyp) == SPIRITUAL_SOULSTONE\
+			 || ((otyp) >= EFFIGY && (otyp) <= DOLL_S_TEAR)\
+			 || (otyp) == HOLY_SYMBOL_OF_THE_BLACK_MOTHE\
+			 || (otyp) == FIGURINE\
+			 || (otyp) == STATUE\
+			 || (otyp) == MAGIC_LAMP\
+			 || (otyp) == CANDLE_OF_INVOCATION\
+			 || (otyp) == RIN_WISHES\
+			 || (otyp) == AMULET_OF_LIFE_SAVING\
+			 || (otyp) == MISOTHEISTIC_PYRAMID\
+			 || (otyp) == MISOTHEISTIC_FRAGMENT\
+			 || (otyp) == DIMENSIONAL_LOCK\
+			 || (otyp) == PRESERVATIVE_ENGINE\
+			 || (otyp) == ARMOR_SALVE\
+			 || (otyp) == LIVING_MASK\
+			 || (otyp) == ANTIMAGIC_RIFT\
+			 || (otyp) == CATAPSI_VORTEX\
 			)
 #define goat_acidable(otmp)	(accepts_weapon_oprops(otmp)\
 				&& !check_oprop((otmp), OPROP_GOATW) && !check_oprop((otmp), OPROP_ACIDW) && !check_oprop((otmp), OPROP_LESSER_ACIDW))
@@ -1018,9 +1022,12 @@ struct obj {
 			 objects[otmp->otyp].oc_armcat == ARM_SHIRT)
 #define is_suit(otmp)	(otmp->oclass == ARMOR_CLASS && \
 			 objects[otmp->otyp].oc_armcat == ARM_SUIT)
-#define is_harmonium_armor(otmp)	((otmp)->otyp == HARMONIUM_HELM || (otmp)->otyp == HARMONIUM_PLATE\
-								|| (otmp)->otyp == HARMONIUM_SCALE_MAIL || (otmp)->otyp == HARMONIUM_GAUNTLETS\
-								|| (otmp)->otyp == HARMONIUM_BOOTS)
+			 
+#define is_harmonium_armor(otmp)	is_harmonium_otyp((otmp)->otyp)
+
+#define is_harmonium_otyp(otyp)	((otyp) == HARMONIUM_HELM || (otyp) == HARMONIUM_PLATE\
+								|| (otyp) == HARMONIUM_SCALE_MAIL || (otyp) == HARMONIUM_GAUNTLETS\
+								|| (otyp) == HARMONIUM_BOOTS)
 
 #define is_light_armor(otmp)	(((otmp)->otyp == IMPERIAL_ELVEN_ARMOR && check_imp_mod(otmp, IEA_MITHRIL)) || ((otmp)->oartifact == ART_SCORPION_CARAPACE && check_carapace_mod(otmp, CPROP_FLEXIBLE)) || objects[(otmp)->otyp].oc_dexclass == ARMSZ_LIGHT)
 #define is_medium_armor(otmp)	(objects[(otmp)->otyp].oc_dexclass == ARMSZ_MEDIUM)

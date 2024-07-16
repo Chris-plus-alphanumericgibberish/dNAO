@@ -8,6 +8,7 @@
 #include "xhity.h"
 #ifdef OVLB
 
+static const char gems[] = { GEM_CLASS, 0 };
 static const char tools[] = { CHAIN_CLASS, SCOIN_CLASS, TOOL_CLASS, WEAPON_CLASS, WAND_CLASS, 0 };
 static const char tools_too[] = { ALL_CLASSES, SCOIN_CLASS, TOOL_CLASS, POTION_CLASS,
 				  WEAPON_CLASS, WAND_CLASS, GEM_CLASS, CHAIN_CLASS, 0 };
@@ -46,6 +47,7 @@ STATIC_DCL int FDECL(use_chikage, (struct obj *));
 STATIC_DCL int FDECL(use_church_weapon, (struct obj *));
 STATIC_DCL int FDECL(use_church_sword, (struct obj *));
 STATIC_DCL int FDECL(use_church_sheath, (struct obj *));
+STATIC_DCL int FDECL(use_smithing_hammer, (struct obj *));
 STATIC_DCL void FDECL(light_cocktail, (struct obj *));
 STATIC_DCL void FDECL(light_torch, (struct obj *));
 STATIC_DCL void FDECL(use_trephination_kit, (struct obj *));
@@ -3205,6 +3207,246 @@ register struct obj *obj;
 						  doname(bld), (const char *)0);
 		} else impossible("Tinning failed.");
 	}
+}
+
+STATIC_OVL int
+use_smithing_hammer(struct obj *obj)
+{
+	winid tmpwin;
+	anything any;
+	any.a_void = 0;         /* zero out all bits */
+	menu_item *selected;
+	int otyp = -1;
+	int n, c, i, b;
+	char ch = 'a';
+	char buffer[BUFSZ] = {0};
+	int classes[] = {WEAPON_CLASS, ARMOR_CLASS, TOOL_CLASS, 0};
+	int banned_items[] = {SILVER_ARROW, GOLDEN_ARROW, ANCIENT_ARROW,
+		UPGRADE_KIT, BULLET, SILVER_BULLET,
+		CAN_OF_GREASE, LAND_MINE, SUNROD, SPOON, TIN, INGOT, CRYSTAL,
+		MASS_OF_STUFF, SCRAP, HELLFIRE_COMPONENT, BROKEN_ANDROID, BROKEN_GYNOID,
+	0};
+
+    if(!IS_FORGE(levl[u.ux][u.uy].typ)) {
+		pline("You'll need a forge to use this!");
+		return MOVE_CANCELLED;
+	}
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	for(c = 0; classes[c]; c++){
+		for(i = bases[classes[c]]; i < NUM_OBJECTS; i++){
+			if(objects[i].oc_class != classes[c]
+			 || !objects[i].oc_name_known
+			 || objects[i].oc_magic
+			)
+				continue;
+			if(is_future_otyp(i) 
+				|| ensouled_otyp(i)
+				|| is_harmonium_otyp(i)
+			)
+				continue;
+			if(i != CHURCH_HAMMER && i != BOX && !metallic_material(objects[i].oc_material))
+				continue;
+			if(objects[i].oc_class == WEAPON_CLASS){
+				if(P_SKILL(objects[i].oc_skill) < P_SKILLED && (P_SKILL(P_SMITHING) < P_SKILLED || !has_object_type(invent, i)))
+					continue;
+			}
+			else if(objects[i].oc_class == ARMOR_CLASS){
+				if(P_SKILL(P_SMITHING) < P_EXPERT && 2*P_SKILL(P_SMITHING) < a_acdr(objects[i]))
+					continue;
+			}
+			for(b = 0; banned_items[b]; b++){
+				if(banned_items[b] == i)
+					break;
+			}
+			if(banned_items[b])
+				continue;
+			//Add to menu
+			any.a_int = i;
+			add_menu(tmpwin, NO_GLYPH, &any , ch, 0, ATR_NONE,
+				 obj_descr[i].oc_name, MENU_UNSELECTED);
+			if(ch == 'z'){
+				ch = 'A';
+			}
+			else if(ch == 'Z'){
+				ch = 'a';
+			}
+			else ch++;
+		}
+	}
+	end_menu(tmpwin, "Items Known:");
+	n = select_menu(tmpwin, PICK_ONE, &selected);
+	destroy_nhwindow(tmpwin);
+	if(n <= 0){
+		return MOVE_CANCELLED;
+	}
+	int picked = selected[0].item.a_int;
+	free(selected);
+	
+	struct obj *metal_ingots = getobj(gems, "forge with");
+	struct obj *metal_ingots_2 = 0;
+	struct obj *sword = 0;
+	if(!metal_ingots || !is_metallic(metal_ingots) || metal_ingots->otyp != INGOT){
+		return MOVE_CANCELLED;
+	}
+	struct obj *product = mksobj(picked, MKOBJ_NOINIT);
+	set_material(product, metal_ingots->obj_material);
+	fix_object(product);
+
+	if(picked == CANE || picked == WHIP_SAW || picked == CHURCH_BLADE || picked == CHURCH_HAMMER){
+		metal_ingots_2 = getobj(gems, "forge with");
+		if(!metal_ingots_2 || !is_metallic(metal_ingots_2) || metal_ingots_2->otyp != INGOT){
+			obfree(product, (struct obj *)0);
+			return MOVE_CANCELLED;
+		}
+		if(metal_ingots == metal_ingots_2){
+			if(picked == CANE || picked == WHIP_SAW){
+				product->ovar1_alt_mat = metal_ingots_2->obj_material;
+				fix_object(product);
+				if(product->owt > metal_ingots->quan){
+					pline("Not enough ingots!");
+					obfree(product, (struct obj *)0);
+					return MOVE_CANCELLED;
+				}
+				if(product->owt > 1)
+					metal_ingots->quan -= (product->owt-1);
+				useup(metal_ingots);
+			}
+			else if(product->cobj){
+				sword = product->cobj;
+				set_material(sword, metal_ingots->obj_material);
+				fix_object(sword);
+				fix_object(product);
+				if(product->owt > metal_ingots->quan){
+					pline("Not enough ingots!");
+					obfree(product, (struct obj *)0);
+					return MOVE_CANCELLED;
+				}
+				if(product->owt > 1)
+					metal_ingots->quan -= (product->owt-1);
+				useup(metal_ingots);
+			}
+		}
+		else {
+			if(picked == CANE || picked == WHIP_SAW){
+				int weight1 = product->owt/2;
+				product->ovar1_alt_mat = metal_ingots_2->obj_material;
+				fix_object(product);
+				int weight2 = product->owt - weight1;
+				if(weight1 > metal_ingots->quan){
+					pline("Not enough %s!", xname(metal_ingots));
+					obfree(product, (struct obj *)0);
+					return MOVE_CANCELLED;
+				}
+				if(weight2 > metal_ingots_2->quan){
+					pline("Not enough %s!", xname(metal_ingots_2));
+					obfree(product, (struct obj *)0);
+					return MOVE_CANCELLED;
+				}
+				if(weight1 > 1)
+					metal_ingots->quan -= (weight1-1);
+				useup(metal_ingots);
+				if(weight2 > 1)
+					metal_ingots_2->quan -= (weight2-1);
+				useup(metal_ingots_2);
+			}
+			else if(product->cobj){
+				sword = product->cobj;
+				set_material(sword, metal_ingots_2->obj_material);
+				fix_object(sword);
+				fix_object(product);
+				if((product->owt - sword->owt) > metal_ingots->quan){
+					pline("Not enough %s!", xname(metal_ingots));
+					obfree(product, (struct obj *)0);
+					return MOVE_CANCELLED;
+				}
+				if(sword->owt > metal_ingots_2->quan){
+					pline("Not enough %s!", xname(metal_ingots_2));
+					obfree(product, (struct obj *)0);
+					return MOVE_CANCELLED;
+				}
+				if((product->owt - sword->owt) > 1)
+					metal_ingots->quan -= ((product->owt - sword->owt)-1);
+				useup(metal_ingots);
+				if(sword->owt > 1)
+					metal_ingots_2->quan -= (sword->owt-1);
+				useup(metal_ingots_2);
+			}
+		}
+	}
+	else {
+		if(product->owt > metal_ingots->quan){
+			pline("Not enough ingots!");
+			obfree(product, (struct obj *)0);
+			return MOVE_CANCELLED;
+		}
+		if(product->owt == metal_ingots->quan){
+			useupall(metal_ingots);
+		}
+		else {
+			if(product->owt > 1)
+				metal_ingots->quan -= (product->owt-1);
+			useup(metal_ingots);
+		}
+	}
+	
+	if((metal_ingots->blessed && obj->cursed)
+		|| (obj->blessed && metal_ingots->cursed)
+	){
+		product->blessed = FALSE;
+		product->cursed = FALSE;
+	}
+	else if(metal_ingots->blessed || obj->blessed){
+		product->blessed = TRUE;
+		product->cursed = FALSE;
+	}
+	else if(metal_ingots->cursed || obj->cursed){
+		product->blessed = FALSE;
+		product->cursed = TRUE;
+	}
+	if(sword){
+		struct obj *ingots = metal_ingots_2 ? metal_ingots_2 : metal_ingots;
+		sword->bknown = ingots->bknown;
+		sword->dknown = TRUE;
+		sword->sknown = TRUE;
+		if((ingots->blessed && obj->cursed)
+			|| (obj->blessed && ingots->cursed)
+		){
+			sword->blessed = FALSE;
+			sword->cursed = FALSE;
+		}
+		else if(ingots->blessed || obj->blessed){
+			sword->blessed = TRUE;
+			sword->cursed = FALSE;
+		}
+		else if(ingots->cursed || obj->cursed){
+			sword->blessed = FALSE;
+			sword->cursed = TRUE;
+		}
+		sword->bknown = ingots->bknown;
+		sword->dknown = TRUE;
+		sword->sknown = TRUE;
+	}
+
+	if(product->oclass == WEAPON_CLASS || product->oclass == ARMOR_CLASS
+		|| (product->oclass == TOOL_CLASS && is_weptool(product))
+	){
+		product->spe = smithing_bonus();
+		product->known = TRUE;
+		if(sword){
+			sword->spe = smithing_bonus();
+			sword->known = TRUE;
+		}
+		use_skill(P_SMITHING, 1+smithing_bonus());
+		exercise(A_STR, TRUE);
+		exercise(A_STR, TRUE);
+		exercise(A_DEX, TRUE);
+	}
+
+	product = hold_another_object(product, "You can't pick up %s.",
+				   doname(product), (const char *)0);
+	return MOVE_DEFAULT;
 }
 
 void
@@ -8891,6 +9133,9 @@ doapply()
 	case DWARVISH_MATTOCK:
 	case SEISMIC_HAMMER:
 		res = use_pick_axe(obj);
+		break;
+	case SMITHING_HAMMER:
+		res = use_smithing_hammer(obj);
 		break;
 	case TINNING_KIT:
 		use_tinning_kit(obj);

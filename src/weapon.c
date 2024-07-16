@@ -34,9 +34,7 @@ STATIC_DCL int FDECL(enhance_skill, (boolean));
 #define PN_HARVEST				(-15)
 #define PN_BEAST_MASTERY		(-16)
 #define PN_FIREARMS				(-17)
-#ifdef BARD
 #define PN_MUSICALIZE			(-18)
-#endif
 #define PN_SHII_CHO				(-19)
 #define PN_MAKASHI				(-20)
 #define PN_SORESU				(-21)
@@ -53,6 +51,7 @@ STATIC_DCL int FDECL(enhance_skill, (boolean));
 #define PN_KNI_RUNIC			(-32)
 #define PN_WAND_DAMAGE			(-33)
 #define PN_SHIELD				(-34)
+#define PN_SMITHING				(-35)
 
 #define holy_damage(mon)	((mon == &youmonst) ? \
 							hates_holy(youracedata) :\
@@ -85,9 +84,8 @@ STATIC_VAR NEARDATA const short skill_names_indices[P_NUM_SKILLS] = {
 	PN_CLERIC_SPELL,     PN_ESCAPE_SPELL,
 	PN_MATTER_SPELL,
 	PN_WAND_DAMAGE,
-#ifdef BARD
 	PN_MUSICALIZE,
-#endif
+	PN_SMITHING,
 	PN_BARE_HANDED,   PN_TWO_WEAPONS, PN_SHIELD,
 	PN_BEAST_MASTERY,
 	PN_SHII_CHO, PN_MAKASHI, PN_SORESU, PN_ATARU,
@@ -138,6 +136,7 @@ STATIC_VAR NEARDATA const char * const odd_skill_names[] = {
 	"runic weapon techniques",
     "wand damage",
     "shield",
+    "smithing",
 };
 /* indexed vis `is_martial() */
 STATIC_VAR NEARDATA const char * const barehands_or_martial[] = {

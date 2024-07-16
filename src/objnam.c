@@ -1788,6 +1788,16 @@ boolean getting_obj_base_desc;
 		if(u.uinsight >= 15)
 			actualn = "arm";
 	}
+	if(obj->otyp == CRYSTAL && obj->obj_material == HEMARGYOS){
+		if(obj->spe == 1)
+			actualn = "columnar crystal rod";
+		else if(obj->spe == 2)
+			actualn = "twin-columnar crystal";
+		else if(obj->spe == 3)
+			actualn = "columnar chunk";
+		else if(obj->spe == 4)
+			actualn = "columnar mass";
+	}
 	
 	buf[0] = '\0';
 	/*

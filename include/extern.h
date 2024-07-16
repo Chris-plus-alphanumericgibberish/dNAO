@@ -1076,6 +1076,16 @@ E void FDECL(dogushforth, (int));
 E void FDECL(gush, (int,int,genericptr_t));
 # endif
 E void FDECL(dryup, (XCHAR_P,XCHAR_P, BOOLEAN_P));
+E int NDECL(smithing_bonus);
+E boolean FDECL(have_blood_smithing_crystal, (struct obj *));
+E struct obj * FDECL(find_blood_smithing_crystal, (struct obj *));
+E boolean FDECL(have_blood_smithing_fire, (struct obj *));
+E boolean FDECL(have_blood_smithing_cold, (struct obj *));
+E boolean FDECL(have_blood_smithing_lightning, (struct obj *));
+E boolean FDECL(have_blood_smithing_acid, (struct obj *));
+E boolean FDECL(have_blood_smithing_buc, (struct obj *));
+E boolean FDECL(have_blood_smithing_x, (struct obj *, int));
+E boolean FDECL(get_blood_smithing_x, (int, struct obj **, int *));
 E void NDECL(drinkfountain);
 E void FDECL(dipfountain, (struct obj *));
 E void FDECL(breakforge, (int, int));
