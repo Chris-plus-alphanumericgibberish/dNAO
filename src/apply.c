@@ -8607,9 +8607,11 @@ doapply()
 							   The(aobjnam(otmp, "slip")),
 							   (const char *)0);
 			break;
-			case BULLET:
+			case BULLET:{
+				int material = otmp->obj_material;
 				obj_extract_self(otmp);
 				otmp = poly_obj(otmp,SHOTGUN_SHELL);
+				set_material_gm(otmp, material);
 				otmp = hold_another_object(otmp, u.uswallow ?
 						   "Oops!  %s out of your reach!" :
 						(Weightless ||
@@ -8620,10 +8622,13 @@ doapply()
 							   "Oops!  %s to the floor!",
 							   The(aobjnam(otmp, "slip")),
 							   (const char *)0);
+			}
 			break;
-			case SHOTGUN_SHELL:
+			case SHOTGUN_SHELL:{
+				int material = otmp->obj_material;
 				obj_extract_self(otmp);
 				otmp = poly_obj(otmp,BULLET);
+				set_material_gm(otmp, material);
 				otmp = hold_another_object(otmp, u.uswallow ?
 						   "Oops!  %s out of your reach!" :
 						(Weightless ||
@@ -8634,6 +8639,7 @@ doapply()
 							   "Oops!  %s to the floor!",
 							   The(aobjnam(otmp, "slip")),
 							   (const char *)0);
+			}
 			break;
 			case SILVER_BULLET:
 			if(otmp->quan >= 10){
@@ -8674,6 +8680,7 @@ doapply()
 				bullets->bknown = otmp->bknown;
 				bullets->rknown = otmp->rknown;
 				bullets->sknown = otmp->sknown;
+				set_material_gm(bullets, otmp->obj_material);
 				useupall(otmp);
 				bullets->owt = weight(bullets);
 				bullets = hold_another_object(bullets, u.uswallow ?
