@@ -3092,7 +3092,7 @@ int dz;
 					gods_angry(optr->gifted);
 					gods_upset(optr->gifted);
 				}
-				useup(optr);
+				useupall(optr);
 				u.regifted++;
 				mongone(mtmp);
 				if(u.regifted == 5){
