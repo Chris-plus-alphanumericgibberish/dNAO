@@ -765,6 +765,19 @@ MONSTER:monster[5],random,(08,15),asleep
 MONSTER:monster[6],random,(08,16),asleep
 MONSTER:monster[7],random,(08,17),asleep
 
+# Loot
+OBJECT:'(',"chest",(59,11)
+OBJECT:'%',random,random
+OBJECT:'%',random,random
+OBJECT:'%',random,random
+OBJECT:'%',random,random
+OBJECT:'%',random,random
+OBJECT:random,random,random
+OBJECT:random,random,random
+OBJECT:random,random,random
+OBJECT:random,random,random
+OBJECT:random,random,random
+
 # Prisoners
 OBJECT:'_', "chain", (00,16), uncursed,+1
 OBJECT:'_', "chain", (00,18), uncursed,+1
@@ -785,18 +798,7 @@ MONSTER:'Y',"monkey",(18,06)
 OBJECT:'(',"drum",(18,06)
 MONSTER:'Y',"monkey",(28,04)
 OBJECT:'(',"tooled horn",(28,04)
-# Loot
-OBJECT:'(',"chest",(59,11)
-OBJECT:'%',random,random
-OBJECT:'%',random,random
-OBJECT:'%',random,random
-OBJECT:'%',random,random
-OBJECT:'%',random,random
-OBJECT:random,random,random
-OBJECT:random,random,random
-OBJECT:random,random,random
-OBJECT:random,random,random
-OBJECT:random,random,random
+
 # Traps outside the door
 TRAP:"spiked pit",(16,14)
 TRAP:"spiked pit",(17,14)
