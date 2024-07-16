@@ -3467,8 +3467,10 @@ const char *oldstr;
 	if (p >= bp+1 && p[-1] == 's') {
 		if (p >= bp+2 && p[-2] == 'e') {
 			if (p >= bp+3 && p[-3] == 'i') {
-				if(!BSTRCMP(bp, p-7, "cookies") ||
-				   !BSTRCMP(bp, p-4, "pies"))
+				if(!BSTRCMP(bp, p-7, "cookies")
+				   || !BSTRCMP(bp, p-4, "pies")
+				   || !BSTRCMPI(bp, p-17, "Amalgamated Skies") /* sword (wizmode) */
+				)
 					goto mins;
 				Strcpy(p-3, "y");
 				return bp;
@@ -3518,7 +3520,6 @@ const char *oldstr;
 			    !BSTRCMPI(bp, p-6, "scales") ||
 				!BSTRCMP(bp, p-6, "wishes") ||	/* ring */
 				!BSTRCMPI(bp, p-10, "Lost Names") || /* book */
-			    !BSTRCMPI(bp, p-17, "Amalgamated Skies") || /* sword (wizmode) */
 				!BSTRCMPI(bp, p-9, "mandibles"))
 				return bp;
 
