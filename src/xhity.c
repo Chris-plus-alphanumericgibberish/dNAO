@@ -13566,7 +13566,7 @@ int vis;						/* True if action is at all visible to the player */
 		if (Role_if(PM_HEALER) && !Upolyd && weapon && weapon->owornmask && weapon->otyp == KNIFE)
 			sneak_dice++;
 	}
-	if (magr && is_backstabber(pa))
+	if (magr && !youagr && is_backstabber(pa))
 		sneak_dice++;
 	if (weapon && weapon->owornmask && weapon->oartifact == ART_SPINESEEKER)
 		sneak_dice++;
