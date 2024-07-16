@@ -5616,15 +5616,10 @@ use_doll_tear(obj)
 			return MOVE_CANCELLED;
 		}
 		
-		if(get_ox(dollobj, OX_EMON))
+		if(!get_ox(dollobj, OX_EMON))
 			mtmp = get_mtraits(dollobj, FALSE);
-		else {
-			pline("Nothing happens....");
-			return MOVE_CANCELLED;
-		}
-		
-		//I don't think this is possible given the above, but I'm feeling paranoid....
-		if(!mtmp){
+
+		if(!mtmp || !is_dollable(mtmp->data)){
 			pline("Nothing happens....");
 			return MOVE_CANCELLED;
 		}
