@@ -3625,7 +3625,7 @@ int tx,ty;
 					// u.sealTimeout[ANDREALPHUS-FIRST_SEAL] = moves + bindingPeriod/10;
 				}
 			} else{
-				pline("Thoughts intersecting lines rise to the forefront of your mind.");
+				pline("Thoughts of intersecting lines rise to the forefront of your mind.");
 				// u.sealTimeout[ANDREALPHUS-FIRST_SEAL] = moves + bindingPeriod/10;
 			}
 		} else pline("You can't feel the spirit.");
