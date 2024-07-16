@@ -6926,7 +6926,7 @@ boolean ranged;
 						else nomul(-1, "being tickled to death");
 						exercise(A_DEX, FALSE);
 						exercise(A_CON, FALSE);
-						if (uwep && !welded(uwep)){
+						if ((uwep && !welded(uwep)) || (u.twoweap && uswapwep)){
 							if (d(1, 100) - min(ACURR(A_DEX), ACURR(A_CON)) > 0){
 								if (u.twoweap && uswapwep){//You may be twoweaponing offhand martial arts.
 									You("lose hold of your weapons.");
