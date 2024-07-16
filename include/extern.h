@@ -2462,6 +2462,7 @@ E boolean FDECL(mdofire, (struct monst *, struct monst *, int, int));
 E boolean FDECL(umetgaze, (struct monst *));
 E int NDECL(dothrow);
 E int NDECL(dofire);
+E int FDECL(uthrow, (struct obj *, struct obj *, int, boolean));
 E int FDECL(mthrow, (struct monst *, struct obj *, struct obj *, int, int, boolean));
 E void FDECL(return_ammo, (genericptr_t, long));
 

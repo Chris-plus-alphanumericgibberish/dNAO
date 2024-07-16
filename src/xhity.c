@@ -696,6 +696,14 @@ int tary;
 				){
 				continue;									// not allowed, don't attack
 			}
+			/*4a: PC's ranged offhand */
+			if(youagr && aatyp == AT_XWEP && (!uwep || !is_launcher(uwep))
+				&& uswapwep && is_launcher(uswapwep)
+				&& ((uquiver && ammo_and_launcher(uquiver, uswapwep)) || is_blaster(uswapwep))
+			){
+				//Handle after the end of the attack chain
+				continue;
+			}
 
 			/* get correct weapon */
 			if (aatyp == AT_WEAP || aatyp == AT_DEVA) {
@@ -1275,6 +1283,15 @@ int tary;
 		is_null_attk(attk)											/* no more attacks */
 		));
 
+	/*4b: PC's ranged offhand */
+	if(youagr && u.twoweap && (!Upolyd || could_twoweap(youracedata)) && (!uwep || !is_launcher(uwep))
+		&& uswapwep && is_launcher(uswapwep)
+		&& ((uquiver && ammo_and_launcher(uquiver, uswapwep)) || is_blaster(uswapwep))
+	){
+		uthrow(uquiver, uswapwep, 0, FALSE);
+		if(DEADMONSTER(mdef))
+			allres |= MM_DEF_DIED;
+	}
 	/* make per-round counterattacks -- note that these cannot use otmp or attk, as those are per-attack */
 	if (dopassive)
 		allres = xpassivey(magr, mdef, (struct attack *)0, (struct obj *)0, vis, allres, pd, TRUE);

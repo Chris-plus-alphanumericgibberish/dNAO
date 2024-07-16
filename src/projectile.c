@@ -11,7 +11,6 @@ STATIC_DCL void FDECL(return_thrownobj, (struct monst *, struct obj *));
 STATIC_DCL void FDECL(toss_up, (struct obj *, boolean));
 STATIC_DCL int FDECL(calc_multishot, (struct monst *, struct obj *, struct obj *, int));
 STATIC_DCL int FDECL(calc_range, (struct monst *, struct obj *, struct obj *, int *));
-STATIC_DCL int FDECL(uthrow, (struct obj *, struct obj *, int, boolean));
 STATIC_DCL boolean FDECL(misthrow, (struct monst *, struct obj *, struct obj *, boolean, int *, int *, int *));
 STATIC_DCL struct obj * FDECL(blaster_ammo, (struct obj *));
 
@@ -2671,8 +2670,14 @@ boolean forcedestroy;
 		if (ammo->ostolen && u.sealsActive&SEAL_ANDROMALIUS) unbind(SEAL_ANDROMALIUS, TRUE);
 		if (breaktest(ammo) && u.sealsActive&SEAL_ASTAROTH) unbind(SEAL_ASTAROTH, TRUE);
 		if ((ammo->otyp == EGG) && u.sealsActive&SEAL_ECHIDNA) unbind(SEAL_ECHIDNA, TRUE);
-		/* degrade engravings on this spot */
-		u_wipe_engr(2);
+		if(launcher && is_firearm(launcher)){
+			/* degrade engravings on this spot (less) */
+			u_wipe_engr(1);
+		}
+		else {
+			/* degrade engravings on this spot */
+			u_wipe_engr(2);
+		}
 	}
 
 	/* you touch the rubber chicken */
@@ -2724,6 +2729,10 @@ boolean forcedestroy;
 				multishot,
 				(multishot != 1 ? "s" : ""));	/* (might be 1 if player gave shotlimit) */
 		}
+	}
+	if(launcher && is_firearm(launcher)){
+		/* bang! */
+		wake_nearto_noisy(u.ux, u.uy, (multishot+1)*2);
 	}
 
 	/* get range calculation */
