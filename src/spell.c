@@ -1460,7 +1460,7 @@ void
 update_externally_granted_spells()
 {
 	int i, j, n = 0;
-	int exspells[MAXSPELL];
+	int exspells[MAXSPELL] = {0};
 
 	/* reset all sp_ext for recalc */
 	for (i = 0; i < MAXSPELL; i++)
