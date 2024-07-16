@@ -11,72 +11,174 @@
 MAZE: "Hnt-strt",' '
 FLAGS: noteleport,hardfloor
 GEOMETRY:center,center
+#0         1         2         3         4         5         6         7  
+#0123456789012345678901234567890123456789012345678901234567890123456789012345
 MAP
-............................................................................
-............................................................................
-............................................................................
-....................------------------------------------....................
-....................|................|.....|.....|.....|....................
-....................|..------------..|--+-----+-----+--|....................
-....................|..|..........|..|.................|....................
-....................|..|..........|..|+---+---+-----+--|....................
-..................---..|..........|......|...|...|.....|....................
-..................+....|..........+......|...|...|.....|....................
-..................+....|..........+......|...|...|.....|....................
-..................---..|..........|......|...|...|.....|....................
-....................|..|..........|..|+-----+---+---+--|....................
-....................|..|..........|..|.................|....................
-....................|..------------..|--+-----+-----+--|....................
-....................|................|.....|.....|.....|....................
-....................------------------------------------....................
-............................................................................
-............................................................................
-............................................................................
+0----------------------------------------------------------------------------
+1|            |-.....--.....--.....-...-                                    |
+2| |-------   |-.....--.....--..... ...-                                    |
+3| |      |   |-.....--.....--.....-...- ------------------------------------
+4| |          |-.....--.....--.....-...- |................|     |     |     |
+5| |      |   |-.....--.....--.....----- |..------------..| - - - - - - - - |
+6| -- -----   |--- ------ ------ ---     |..|..........|..|.................|
+7|            |                          |..|          |..| --- --- ----- --|
+8|            |                        ---..|          |......|...|...|.....|
+9                                       ....|           ......|...|...|.....|
+0                                       ....|           ......|...|...|.....|
+1|            |                        ---..|          |......|...|...|.....|
+2|            |                          |..|          |..| ----- --- --- --|
+3|            |  --- ------ ------ ---   |..|..........|..|.................|
+4|            |  -.....--.....--.....-   |..------------..| - - - - - - - - |
+5|            |  -.....--.....--.....-   |................|     |     |     |
+6|            |  -.....--.....--.....-   ------------------------------------
+7|            |  -.....--.....--.....-                                      |
+8|            |  -.....--.....--.....-                                      |
+9----------------------------------------------------------------------------
 ENDMAP
-# Dungeon Description
-REGION:(00,00,75,19),lit,"ordinary"
-# Portal arrival point
-BRANCH:(05,04,05,04),(0,0,0,0)
-# Stairs
-STAIR:(52,09),down
-# Doors
-DOOR:locked,(18,09)
-DOOR:locked,(18,10)
-DOOR:closed,(34,09)
-DOOR:closed,(34,10)
-DOOR:closed,(40,05)
-DOOR:closed,(46,05)
-DOOR:closed,(52,05)
-DOOR:locked,(38,07)
-DOOR:closed,(42,07)
-DOOR:closed,(46,07)
-DOOR:closed,(52,07)
-DOOR:locked,(38,12)
-DOOR:closed,(44,12)
-DOOR:closed,(48,12)
-DOOR:closed,(52,12)
-DOOR:closed,(40,14)
-DOOR:closed,(46,14)
-DOOR:closed,(52,14)
-# Unattended Altar - unaligned due to conflict - player must align it.
-ALTAR:(28,09),noalign,altar
-# High Priest
-MONSTER:'@',"Vicar Amalia",(28,10)
-# The treasure of High Priest
-CONTAINER:'(',"chest",(27,10)
-OBJECT:'?',"resistance",contained
-OBJECT:'?',"resistance",contained
-OBJECT:'?',"resistance",contained
-# knight guards for the audience chamber
-MONSTER:'@',"verger",(32,07)
-MONSTER:'@',"verger",(32,08)
-MONSTER:'@',"verger",(32,11)
-MONSTER:'@',"verger",(32,12)
-MONSTER:'@',"verger",(33,07)
-MONSTER:'@',"verger",(33,08)
-MONSTER:'@',"verger",(33,11)
-MONSTER:'@',"verger",(33,12)
+#0123456789012345678901234567890123456789012345678901234567890123456789012345
+#0         1         2         3         4         5         6         7  
 
+OBJECT:random,random,random
+OBJECT:random,random,random
+OBJECT:random,random,random
+OBJECT:random,random,random
+OBJECT:random,random,random
+OBJECT:random,random,random
+OBJECT:random,random,random
+OBJECT:random,random,random
+OBJECT:random,random,random
+OBJECT:random,random,random
+OBJECT:random,random,random
+OBJECT:random,random,random
+OBJECT:random,random,random
+OBJECT:random,random,random
+
+GEOMETRY:center,center
+#0         1         2         3         4         5         6         7  
+#0123456789012345678901234567890123456789012345678901234567890123456789012345
+MAP
+0----------------------------------------------------------------------------
+1|eeeeeeeeeeee|-#####--#####--#####-###-....................................|
+2|e|-------eee|-#####--#####--#####+###-....................................|
+3|e|......|eee|-#####--#####--#####-###-.------------------------------------
+4|e|......+.ee|-#####--#####--#####-###-.|................|.....|.....|.....|
+5|e|......|.ee|-#####--#####--#####-----.|..------------..|F-+-F-F-+-F-F-+-F|
+6|e--+-----.ee|---+------+------+---.....|..|..........|..|.................|
+7|eee.eeeee.ee|..........................|..|..........|..|+---+---+-----+--|
+8|eee.eeeee.ee|........................---..|..........|......|...|...|.....|
+9......................................+....|..........+......|...|...|.....|
+0......................................+....|..........+......|...|...|.....|
+1|FFF.FFFFF.FF|........................---..|..........|......|...|...|.....|
+2|eeeeeeeeeeee|..........................|..|..........|..|+-----+---+---+--|
+3|eeeeeeeeeeee|..---+------+------+---...|..|..........|..|.................|
+4|eeeeeeeeeeee|..-#####--#####--#####-...|..------------..|F-+-F-F-+-F-F-+-F|
+5|eeeeeeeeeeee|..-#####--#####--#####-...|................|.....|.....|.....|
+6|eeeeeeeeeeee|..-#####--#####--#####-...------------------------------------
+7|eeeeeeeeeeee|..-#####--#####--#####-......................................|
+8|eeeeeeeeeeee|..-#####--#####--#####-......................................|
+9----------------------------------------------------------------------------
+ENDMAP
+#0123456789012345678901234567890123456789012345678901234567890123456789012345
+#0         1         2         3         4         5         6         7  
+# Dungeon Description
+REGION:(00,00,75,19),unlit,"ordinary"
+# Portal arrival point
+BRANCH:(14,07,37,12),(0,0,0,0)
+# Stairs
+STAIR:(00,10),down
+# Doors
+DOOR:locked,(17,06)
+DOOR:locked,(24,06)
+DOOR:locked,(31,06)
+DOOR:locked,(34,02)
+
+DOOR:locked,(19,13)
+DOOR:locked,(26,13)
+DOOR:locked,(33,13)
+
+DOOR:locked,(38,09)
+DOOR:locked,(38,10)
+DOOR:closed,(54,09)
+DOOR:closed,(54,10)
+DOOR:locked,(60,05)
+DOOR:locked,(66,05)
+DOOR:locked,(72,05)
+DOOR:locked,(58,07)
+DOOR:closed,(62,07)
+DOOR:closed,(66,07)
+DOOR:closed,(72,07)
+DOOR:locked,(58,12)
+DOOR:closed,(64,12)
+DOOR:closed,(68,12)
+DOOR:closed,(72,12)
+DOOR:locked,(60,14)
+DOOR:locked,(66,14)
+DOOR:locked,(72,14)
+
+ALTAR:(48,09),neutral,altar
+# High Priest
+MONSTER:'@',"Vicar Amalia",(48,10)
+# The treasure of High Priest
+# Magic Chest
+OBJECT:'(',"magic chest",(47,10)
+
+# guards for the audience chamber
+MONSTER:'@',"verger",(52,07)
+MONSTER:'@',"verger",(52,08)
+MONSTER:'@',"verger",(52,11)
+MONSTER:'@',"verger",(52,12)
+MONSTER:'@',"verger",(53,07)
+MONSTER:'@',"verger",(53,08)
+MONSTER:'@',"verger",(53,11)
+MONSTER:'@',"verger",(53,12)
+MONSTER:'@',"nurse",(53,12),peaceful
+
+MONSTER:'@',"priest",(17,03),peaceful
+MONSTER:'@',"noblewoman",(17,02),peaceful
+MONSTER:'@',"priest",(24,03),peaceful
+MONSTER:'@',"priestess",(24,02),peaceful
+MONSTER:'@',"priest",(31,03),peaceful
+MONSTER:'@',"werewolf",(36,03)
+
+MONSTER:'@',"priest",(19,16),peaceful
+MONSTER:'@',"noblewoman",(19,17),peaceful
+MONSTER:'@',"priest",(26,16),peaceful
+MONSTER:'@',"noblewoman",(26,17),peaceful
+MONSTER:'@',"priestess",(33,16),peaceful
+MONSTER:'@',"nobleman",(33,17)
+
+MONSTER:'@',"madwoman",(60,04)
+MONSTER:'@',"madman",(66,04)
+MONSTER:'@',"madwoman",(72,04)
+
+MONSTER:'@',"madman",(60,15)
+MONSTER:'@',"madwoman",(66,15)
+MONSTER:'@',"noblewoman",(72,15)
+
+CONTAINER:'(',"chest",(08,03)
+OBJECT:')',"pistol",contained
+OBJECT:'(',"nightmare's bullet mold",contained
+OBJECT[90%]:')',"saw cleaver",contained
+OBJECT[90%]:')',"hunter's axe",contained
+OBJECT[90%]:')',"church-hammer",contained
+OBJECT[90%]:')',"church blade",contained
+OBJECT[90%]:')',"cane",contained
+OBJECT[50%]:')',"moon axe",contained
+OBJECT[50%]:')',"soldier's rapier",contained
+OBJECT[50%]:')',"blade of mercy",contained
+OBJECT:'?',"resistance",contained
+OBJECT:'?',"resistance",contained
+OBJECT:'?',"resistance",contained
+OBJECT:'#',"my blood",contained
+OBJECT:'#',"my blood",contained
+
+ALTAR:(03,04),law,altar
+OBJECT:'(',"trephination kit",(03,04)
+
+FORGE:(05,03)
+OBJECT:')',"smithing hammer",(05,03)
+
+OBJECT:'_',"lifeless doll",(09,07)
 #
 #	The "locate" level for the quest.
 #
@@ -87,70 +189,122 @@ MONSTER:'@',"verger",(33,12)
 MAZE: "Hnt-loca",' '
 FLAGS: hardfloor
 # This is a kludge to init the level as a lit field.
-INIT_MAP: '.' , '.' , false , false , lit , false
+
 GEOMETRY:center,center
+#0         1         2         3         4         5         6         7     
+#0123456789012345678901234567890123456789012345678901234567890123456789012
 MAP
-........................................
-........................................
-..........----------+----------.........
-..........|........|.|........|.........
-..........|........|.|........|.........
-..........|----.----.----.----|.........
-..........+...................+.........
-..........+...................+.........
-..........|----.----.----.----|.........
-..........|........|.|........|.........
-..........|........|.|........|.........
-..........----------+----------.........
-........................................
-........................................
+0-------------------------------------------------------------------------
+1-###-###-###-eee-###-###-###-###-###-###-###-###-###-###-###-###-###-###-
+2-###-###-###-ete-###-###-###-###-###-###-###-###-###-###-###-###-###-###-
+3-###-###-###-e.e-###-###-###-###-###-###-###-###-###-###-###-###-###-###-
+4--+---+---+--F.F--+---+---+---+---+---+---+---+---+---+---+---+---+---+--
+5Tt.ttT...................................................................
+6Te..TT..TTt.......                                  .................-.-.
+7TeT.t...Teeet                                                ............
+8TeT...TTTeeT                                                   ......-.-.
+9TTTte.......eT |-------------------------------------------| ...-F.F-....
+0TTeeeeeTe...eTT|###|###|###|###|###|###|###|###|###|###|###|....FeeeF....
+1TTTTTeTTt...TTT|###|###|###|###|###|###|###|###|###|###|###|.....eTe.....
+2TTtTeeeee.....T|###|###|###|###|###|###|###|###|###|###|###|....Fe,eF....
+3TTTeeeeee.....T|-+---+---+---+---+---+---+---+---+---+---+-|....-F.F-....
+4Teeteeetee...............................................................
+5TTeeeteTTTee--+---+---+---+---+---+---+---+---+---+---+---+---+---+---+--
+6TeeeeeeeTTT.-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-
+7TTeteTTeeTTT-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-
+8TTTTTTTTTTTT-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-
+9            -------------------------------------------------------------
 ENDMAP
+#0123456789012345678901234567890123456789012345678901234567890123456789012
+#0         1         2         3         4         5         6         7     
+
+MONSTER:'@',"peasant",random,peaceful
+MONSTER:'@',"peasant",random,peaceful
+MONSTER:'@',"peasant",random,peaceful
+MONSTER:'@',"peasant",random,peaceful
+MONSTER:'@',"peasant",random,peaceful
+MONSTER:'@',"peasant",random,peaceful
+MONSTER:'@',"peasant",random,peaceful
+MONSTER:'@',"peasant",random,peaceful
+MONSTER:'@',"peasant",random,peaceful
+MONSTER:'@',"peasant",random,peaceful
+MONSTER:'@',"peasant",random,peaceful
+MONSTER:'@',"peasant",random,peaceful
+MONSTER:'@',"peasant",random,peaceful
+MONSTER:'@',"peasant",random,peaceful
+MONSTER:'@',"peasant",random,peaceful
+MONSTER:'@',"peasant",random,peaceful
+MONSTER:'@',"peasant",random,peaceful
+MONSTER:'@',"peasant",random,peaceful
+MONSTER:'@',"peasant",random,peaceful
+MONSTER:'@',"peasant",random,peaceful
+
+MONSTER:random,random,random
+MONSTER:random,random,random
+MONSTER:random,random,random
+MONSTER:random,random,random
+MONSTER:random,random,random
+MONSTER:random,random,random
+MONSTER:random,random,random
+MONSTER:random,random,random
+MONSTER:random,random,random
+MONSTER:random,random,random
+MONSTER:random,random,random
+
 # Dungeon Description
 
-# Magic Chest
-OBJECT:'(',"magic chest",(20,07)
-# MONSTER:'@',"aligned priest",(20,07),noalign,hostile
-MONSTER:'Z',"legionnaire",(20,06)
-MONSTER:'Z',"legionnaire",(20,08)
-MONSTER:'Z',"legionnaire",(21,07)
-MONSTER:'Z',"legionnaire",(19,07)
+
 # Doors
-DOOR:locked,(10,06)
-DOOR:locked,(10,07)
-DOOR:locked,(20,02)
-DOOR:locked,(20,11)
-DOOR:locked,(30,06)
-DOOR:locked,(30,07)
+DOOR:closed,(02,04)
+DOOR:closed,(06,04)
+DOOR:closed,(10,04)
+
+DOOR:closed,(18,04)
+DOOR:closed,(22,04)
+DOOR:closed,(26,04)
+DOOR:closed,(30,04)
+DOOR:closed,(34,04)
+DOOR:closed,(38,04)
+DOOR:closed,(42,04)
+DOOR:closed,(46,04)
+DOOR:closed,(50,04)
+DOOR:closed,(54,04)
+DOOR:closed,(58,04)
+DOOR:closed,(62,04)
+DOOR:closed,(66,04)
+
+DOOR:closed,(14,15)
+DOOR:closed,(18,15)
+DOOR:closed,(22,15)
+DOOR:closed,(26,15)
+DOOR:closed,(30,15)
+DOOR:closed,(34,15)
+DOOR:closed,(38,15)
+DOOR:closed,(42,15)
+DOOR:closed,(46,15)
+DOOR:closed,(50,15)
+DOOR:closed,(54,15)
+DOOR:closed,(58,15)
+DOOR:closed,(62,15)
+DOOR:closed,(66,15)
+DOOR:closed,(70,15)
+
+DOOR:closed,(17,13)
+DOOR:closed,(21,13)
+DOOR:closed,(25,13)
+DOOR:closed,(29,13)
+DOOR:closed,(33,13)
+DOOR:closed,(37,13)
+DOOR:closed,(41,13)
+DOOR:closed,(45,13)
+DOOR:closed,(49,13)
+DOOR:closed,(53,13)
+DOOR:closed,(57,13)
+
+
 # Stairs
-# Note:  The up stairs are *intentionally* off of the map.
-STAIR:(43,05),up
-STAIR:(20,06),down
-# Non diggable walls
-NON_DIGGABLE:(10,02,30,13)
-# Objects (inside the antechambers).
-OBJECT:random,random,(14,03)
-OBJECT:random,random,(15,03)
-OBJECT:random,random,(16,03)
-OBJECT:random,random,(14,10)
-OBJECT:random,random,(15,10)
-OBJECT:random,random,(16,10)
-OBJECT:random,random,(17,10)
-OBJECT:random,random,(24,03)
-OBJECT:random,random,(25,03)
-OBJECT:random,random,(26,03)
-OBJECT:random,random,(27,03)
-OBJECT:random,random,(24,10)
-OBJECT:random,random,(25,10)
-OBJECT:random,random,(26,10)
-OBJECT:random,random,(27,10)
-# Random traps
-TRAP:random,(15,04)
-TRAP:random,(25,04)
-TRAP:random,(15,09)
-TRAP:random,(25,09)
-TRAP:random,random
-TRAP:random,random
-# No random monsters - the morgue generation will put them in.
+STAIR: (70,07), up
+STAIR: (03,16), down
 
 #
 #	The "goal" level for the quest.
@@ -161,23 +315,25 @@ TRAP:random,random
 #
 
 MAZE: "Hnt-goal", ' '
-INIT_MAP: 'L' , '.' , false , false , unlit , false
+INIT_MAP: 'T' , 'e' , false , false , unlit , false
 GEOMETRY:center,center
+#0         1         2     
+#01234567890123456789012345
 MAP
-0.L......L.LLL.......LL....
-1.LLL.......L......LL......
-2LL.LL.............L.LL....
-3..........................
-4......................LL..
-5......................LLL.
-6LL........................
-7.LL.......................
-8.LL................LL.L...
-9..LL.....L.LL.......LLL...
-0.........LLL.........L....
+0eTeeeeeeteTTTeeeeeeeTTeeee
+1eTTTeeeeeeeteeeeeeTTeeeeee
+2TTeTteeeeeeeeeeeeeteTTeeee
+3eeeeeeee-----eeeeeeeeeeeee
+4eeeeeeee#...|eeeeeeeeetTee
+5eeeeeeee|...|eeeeeeeeetTTe
+6Tteeeeee|...|eeeeeeeeeeeee
+7eTteeeee--+#-eeeeeeeeeeeee
+8eTTeeeeeeeeeeeeeeeetteteee
+9eeTteeeeetetteeeeeeeTTTeee
+0eeeeeeeeeTtTeeeeeeeeeTeeee
 ENDMAP
-#0123456789012345678901234567890123456789012345678901234567890123456789012345
-#0         1         2   	   3	     4	       5		 6	       7
+#01234567890123456789012345
+#0         1         2     
 # Dungeon Description
 RANDOM_PLACES:(14,04),(13,07)
 REGION:(00,00,25,10),unlit,"ordinary"
@@ -185,6 +341,14 @@ REGION:(00,00,25,10),unlit,"ordinary"
 STAIR:levregion(01,00,74,19),levregion(15,05,60,15),up
 # Objects
 OBJECT:')',"stake",place[0],cursed,0,"Stake of Withering"
+OBJECT:'[',"ruffled shirt",random
+OBJECT:'[',"fedora",random
+OBJECT:'[',"cloak",random
+OBJECT:'[',"studded leather armor",random
+OBJECT:'[',"gloves",random
+OBJECT:'[',"high boots",random
+OBJECT:')',"evelyn",random
+OBJECT:'(',"nightmare's bullet mold",random
 OBJECT:random,random,random
 OBJECT:random,random,random
 OBJECT:random,random,random
@@ -207,7 +371,9 @@ TRAP:"fire",random
 TRAP:random,random
 TRAP:random,random
 # Random monsters.
-MONSTER:'d',"Index Werewolf",place[0]
+MONSTER:'d',"index wolf",(10,06)
+MONSTER:'U',"Moon's Chosen",(11,04)
+OBJECT:'\\',"bed",(11,04)
 
 #
 #	The "fill" levels for the quest.
@@ -232,11 +398,11 @@ MAP
 4--+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+------
 5.........................................................................
 6.........................................................................
-7.......--+-------+-------+-------+--.------+-------+-------+------.......
-8.......-###-###-###-###-###-###-###-.-###-###-###-###-###-###-###-.......
-9.......-###-###-###-###-###-###-###-.-###-###-###-###-###-###-###-.......
-0.......-###-###-###-###-###-###-###-.-###-###-###-###-###-###-###-.......
-1.......------+-------+-------+------.--+-------+-------+-------+--.......
+7.-F.F-.--+-------+-------+-------+--.------+-------+-------+------.-F.F-.
+8.F,eeF.-###-###-###-###-###-###-###-.-###-###-###-###-###-###-###-.F,,,F.
+9..ete..-###-###-###-###-###-###-###-.-###-###-###-###-###-###-###-..,T,..
+0.Fe,,F.-###-###-###-###-###-###-###-.-###-###-###-###-###-###-###-.F,,,F.
+1.-F.F-.------+-------+-------+------.--+-------+-------+-------+--.-F.F-.
 2.........................................................................
 3.........................................................................
 4--+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+--
@@ -248,8 +414,8 @@ ENDMAP
 #0123456789012345678901234567890123456789012345678901234567890123456789012
 #0         1         2         3         4         5         6         7  
 
-STAIR: (00,05), up
-STAIR: (72,13), down
+STAIR: (00,05), down
+STAIR: (72,13), up
 
 # Doors
 DOOR:closed,(02,04)
@@ -268,8 +434,6 @@ DOOR:closed,(50,04)
 DOOR:closed,(54,04)
 DOOR:closed,(58,04)
 DOOR:closed,(62,04)
-DOOR:closed,(66,04)
-
 DOOR:closed,(66,04)
 
 DOOR:closed,(02,14)
@@ -332,7 +496,7 @@ MONSTER:'@',"peasant",random,peaceful
 
 MAZE: "Hnt-filb", ' '
 FLAGS: shortsighted,hardfloor
-INIT_MAP: 'G' , 'T', true, true, unlit, true
+INIT_MAP: 'e' , 'T', true, true, unlit, true
 NOMAP
 #
 STAIR: random, up
@@ -355,7 +519,6 @@ TRAP: random, random
 TRAP: random, random
 TRAP: random, random
 #
-MONSTER:'@',"knight",random,peaceful
 MONSTER: random, random, random
 MONSTER: random, random, random
 MONSTER: random, random, random

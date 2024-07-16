@@ -9002,7 +9002,7 @@ is a red right hand
 	 * Note: the Master of Thieves was defined above.
 	 */
 #endif
-    MON("Index Werewolf", S_DOG,//29
+    MON("index wolf", S_DOG,//29
 	LVL(18, 12, 20, -7), (G_NOGEN|G_UNIQ),
 	DEF(DEX_AC(12)),
 	A(ATTK(AT_BITE, AD_WERE, 3, 8), ATTK(AT_CLAW, AD_PHYS, 1, 6), OFFHND_ATTK(AT_CLAW, AD_PHYS, 1, 6)),
