@@ -5045,6 +5045,20 @@ boolean printmessages;
 		}
 	}
 	
+	if (otmp->otyp == TONITRUS && otmp->lamplit){
+		int modifier = (youdef ? Blind_telepat : mon_resistance(mdef, TELEPAT)) ? 2 : 1;
+		if (!Shock_res(mdef)) {
+			if(magr)
+				(*truedmgptr) += modifier*(rnd(10) + otmp->spe) + atr_dbon(otmp, magr, A_INT);
+			else
+				(*truedmgptr) += modifier*(rnd(10) + otmp->spe);
+		}
+		if (!UseInvShock_res(mdef)){
+			if (!rn2(3)) destroy_item(mdef, WAND_CLASS, AD_ELEC);
+			if (!rn2(3)) destroy_item(mdef, RING_CLASS, AD_ELEC);
+		}
+	}
+
 	if (otmp->otyp == STAKE && is_vampire(mdef->data) && !naoid(mdef->data)) {
 		*plusdmgptr += d(1, 6);
 	}

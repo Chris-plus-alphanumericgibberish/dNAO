@@ -1301,6 +1301,7 @@ register const char *let,*word;
 			  otmp->otyp != SOLDIER_S_RAPIER && otmp->otyp != SOLDIER_S_RAPIER &&
 			  otmp->otyp != CANE && otmp->otyp != WHIP_SAW &&
 			  otmp->otyp != CHIKAGE &&
+			  otmp->otyp != TONITRUS &&
 			  otmp->otyp != HUNTER_S_LONGSWORD && otmp->otyp != CHURCH_BLADE && otmp->otyp != CHURCH_SHEATH &&
 			  otmp->otyp != HUNTER_S_SHORTSWORD && otmp->otyp != CHURCH_HAMMER && otmp->otyp != CHURCH_BRICK &&
 			  otmp->otyp != SMITHING_HAMMER &&
@@ -2404,6 +2405,9 @@ struct obj *obj;
 	else if (obj->otyp == SUNROD && !obj->lamplit)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Light this sunrod", MENU_UNSELECTED);
+	else if (obj->otyp == TONITRUS)
+		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
+				"Strike this tonitrus", MENU_UNSELECTED);
 	else if (obj->otyp == SENSOR_PACK)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Use this sensor pack", MENU_UNSELECTED);
@@ -3060,6 +3064,10 @@ winid *datawin;
 			}
 			if(obj->otyp == SUNROD){
 				Sprintf(buf2, "When lit, deals +1d10%s lightning and acid damage and may blind struck targets.", (obj->spe ? sitoa(obj->spe) : ""));
+				OBJPUTSTR(buf2);
+			}
+			if(obj->otyp == TONITRUS){
+				Sprintf(buf2, "When lit, deals +1d10%s lightning damage.", (obj->spe ? sitoa(obj->spe) : ""));
 				OBJPUTSTR(buf2);
 			}
 			if(obj->otyp == KAMEREL_VAJRA){

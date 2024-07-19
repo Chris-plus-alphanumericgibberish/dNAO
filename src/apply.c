@@ -2412,8 +2412,26 @@ struct obj *obj;
 		return;
 	}
 	if(Underwater && obj->oartifact != ART_HOLY_MOONLIGHT_SWORD) {
-		pline("This is not a diving lamp.");
+		if(obj->otyp == TONITRUS)
+			pline("That seems both unwise and inefective.");
+		else
+			pline("This is not a diving lamp.");
 		return;
+	}
+	if(obj->otyp == TONITRUS){
+		if(obj->lamplit) {
+			You("re-strike %s", the(xname(obj)));
+			end_burn(obj, TRUE);
+			begin_burn(obj);
+			obj->age = 0;
+			return;
+		}
+		else {
+			You("strike %s", the(xname(obj)));
+			begin_burn(obj);
+			obj->age = 0;
+			return;
+		}
 	}
 	if(obj->lamplit) {
 		if(obj->otyp == OIL_LAMP || obj->otyp == MAGIC_LAMP ||
@@ -9032,6 +9050,7 @@ doapply()
 	
 	if(obj->oartifact == ART_SILVER_STARLIGHT) res = do_play_instrument(obj);
 	else if(obj->oartifact == ART_HOLY_MOONLIGHT_SWORD && !u.veil) use_lamp(obj);
+	else if(obj->otyp == TONITRUS) use_lamp(obj);
 	else if(obj->oartifact == ART_BLOODLETTER && artinstance[obj->oartifact].BLactive >= monstermoves) res = do_bloodletter(obj);
 	else if(obj->oartifact == ART_AEGIS) res = swap_aegis(obj);
 	else if(obj->oartifact == ART_STAFF_OF_AESCULAPIUS) res = aesculapius_poke(obj);

@@ -1641,6 +1641,23 @@ long timeout;
 		    obj = (struct obj *) 0;
 		    break;
 
+	    case TONITRUS:
+			/* even if blind you'll know if holding it */
+			if (canseeit || obj->where == OBJ_INVENT) {
+			    switch (obj->where) {
+				case OBJ_INVENT:
+				case OBJ_MINVENT:
+					pline("%s %s has gone out.",
+					    whose, xname(obj));
+				    break;
+				case OBJ_FLOOR:
+					You("see %s go out.",
+					    an(xname(obj)));
+				    break;
+			    }
+			}
+			end_burn(obj, FALSE);
+			break;
    	    case DWARVISH_HELM:
 	    case LANTERN:
 	    case LANTERN_PLATE_MAIL:
@@ -2184,6 +2201,7 @@ struct obj * obj;
 	case GNOMISH_POINTY_HAT:
 	case POT_STARLIGHT:
 	case SUNLIGHT_MAGGOT:
+	case TONITRUS:
 		radius = 2;
 		break;
 	case CHUNK_OF_FOSSIL_DARK:
@@ -2260,6 +2278,10 @@ struct obj * obj;
 		turns = obj->age;
 		break;
 
+	case TONITRUS:
+		turns = 7;
+		break;
+
 	case GNOMISH_POINTY_HAT:
 		turns = obj->age;
 		if (obj->age > 75L)
@@ -2325,6 +2347,7 @@ struct obj * obj;
 {
 	return (obj && (
 		(obj->oartifact == ART_HOLY_MOONLIGHT_SWORD) ||	/* ??? Chris: The timer's used to extinquish it when it's dropped. */
+		(obj->otyp == TONITRUS) ||
 		(obj->otyp == DOUBLE_LIGHTSABER) ||
 		(obj->otyp == LIGHTSABER) ||
 		(obj->otyp == BEAMSWORD) ||
@@ -2393,6 +2416,7 @@ begin_burn(obj)
 		obj->otyp != POT_STARLIGHT && 
 		obj->otyp != SUNLIGHT_MAGGOT && 
 		obj->otyp != CHUNK_OF_FOSSIL_DARK && 
+		obj->otyp != TONITRUS && 
 		!artifact_light(obj) && 
 		!arti_light(obj) && 
 		obj->oartifact != ART_HOLY_MOONLIGHT_SWORD &&

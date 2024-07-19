@@ -2218,6 +2218,9 @@ weapon:
 			else if (obj->oartifact == ART_HOLY_MOONLIGHT_SWORD && obj->lamplit) {
 				Strcat(buf, " (lit)");
 			}
+			else if (obj->otyp == TONITRUS && obj->lamplit) {
+				Strcat(buf, " (crackling)");
+			}
 			else if (is_lightsaber(obj)) {
 				if (litsaber(obj)){
 					if (obj->oartifact == ART_INFINITY_S_MIRRORED_ARC){
@@ -3589,6 +3592,7 @@ const char *oldstr;
 #endif
 			   !BSTRCMPI(bp, p-5, "aklys") ||
 			   !BSTRCMPI(bp, p-6, "diskos") ||
+			   !BSTRCMPI(bp, p-8, "tonitrus") ||
 			   !BSTRCMPI(bp, p-13, "rotated cross") ||
 			   !BSTRCMPI(bp, p-8, "caduceus") ||
 			   !BSTRCMPI(bp, p-14, "vertical lines") ||
