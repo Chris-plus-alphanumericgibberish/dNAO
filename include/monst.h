@@ -213,7 +213,8 @@ struct monst {
 	
 	int entangled_otyp;/* The monster is entangled, and in what? */
 	long entangled_oid;/* The monster is entangled, and in what? */
-#define imprisoned(mon)	((mon)->entangled_otyp == SHACKLES || ((mon)->mtrapped && t_at((mon)->mx, (mon)->my) && t_at((mon)->mx, (mon)->my)->ttyp == VIVI_TRAP))
+#define vivitrapped(mon)	((mon)->mtrapped && t_at((mon)->mx, (mon)->my) && t_at((mon)->mx, (mon)->my)->ttyp == VIVI_TRAP)
+#define imprisoned(mon)	((mon)->entangled_otyp == SHACKLES || vivitrapped(mon))
 #define noactions(mon)	((mon)->entangled_oid || imprisoned(mon))
 #define nonthreat(mon)	(imprisoned(mon) || has_template(mon, PLAGUE_TEMPLATE))
 #define helpless(mon) (mon->msleeping || !(mon->mcanmove) || !(mon->mnotlaugh) || noactions(mon))	

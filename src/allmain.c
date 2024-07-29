@@ -1581,8 +1581,9 @@ moveloop()
 			}
 			if (!DEADMONSTER(mtmp)
 				&& mon_attacktype(mtmp, AT_WDGZ)
-				&& !(controlledwidegaze(mtmp->data) && (mtmp->mpeaceful || mtmp->mtame))
+				&& !(controlledwidegaze(mtmp->data) && (mtmp->mpeaceful || mtmp->mtame || helpless(mtmp)))
 				&& !(hideablewidegaze(mtmp->data) && hiddenwidegaze(mtmp))
+				&& !vivitrapped(mtmp)
 				&& couldsee(mtmp->mx, mtmp->my)
 			) m_widegaze(mtmp);
 		}
