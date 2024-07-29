@@ -2185,16 +2185,17 @@ struct monst *mtmp;
 			}
 		}
 		nomore(MUSE_POT_HOLY);
-		if(obj->otyp == POT_WATER && obj->blessed && !is_weldproof_mon(mtmp))
+		if(obj->otyp == POT_WATER && obj->blessed)
 		{
-                        register struct obj *otmp;
+			struct obj *otmp;
 			for (otmp = mtmp->minvent;
 			     otmp; otmp = otmp->nobj)
 			{
-			    if (otmp->cursed && 
-			        (otmp->otyp == LOADSTONE ||
-				 otmp->owornmask))
-			    {
+			    if (otmp->cursed
+			      && (otmp->otyp == LOADSTONE ||
+					otmp->owornmask)
+				  && !is_weldproof_mon(mtmp)
+				){
 			        m.misc = obj;
 			        m.has_misc = MUSE_POT_HOLY;
 			    }
