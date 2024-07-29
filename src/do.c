@@ -922,9 +922,6 @@ dodown()
 	if (u.usteed && !u.usteed->mcanmove) {
 		pline("%s won't move!", Monnam(u.usteed));
 		return MOVE_CANCELLED;
-	} else if (u.usteed && u.usteed->meating) {
-		pline("%s is still eating.", Monnam(u.usteed));
-		return MOVE_CANCELLED;
 	} else
 #endif
 	if (Levitation) {
@@ -1069,9 +1066,6 @@ doup()
 #ifdef STEED
 	if (u.usteed && !u.usteed->mcanmove) {
 		pline("%s won't move!", Monnam(u.usteed));
-		return MOVE_CANCELLED;
-	} else if (u.usteed && u.usteed->meating) {
-		pline("%s is still eating.", Monnam(u.usteed));
 		return MOVE_CANCELLED;
 	} else
 #endif

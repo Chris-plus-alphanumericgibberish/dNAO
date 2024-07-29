@@ -787,10 +787,6 @@ boolean portal;
 				if (canspotmon(mtmp))
 					pline("%s obediently waits for you to return.", Monnam(mtmp));
 				stay_behind = TRUE;
-			} else if (mtmp->mtame && mtmp->meating && mtmp != u.usteed) {
-				if (canspotmon(mtmp))
-					pline("%s is still eating.", Monnam(mtmp));
-				stay_behind = TRUE;
 			} else if (mon_has_amulet(mtmp)) {
 				if (canspotmon(mtmp))
 					pline("%s seems very disoriented for a moment.",
