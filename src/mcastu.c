@@ -6365,20 +6365,17 @@ int tary;
 				float_up();
 				/* reverse kludge */
 				HLevitation = 0;
-				if (!Is_waterlevel(&u.uz)) {
-					if ((u.ux != xupstair || u.uy != yupstair)
-						&& (u.ux != sstairs.sx || u.uy != sstairs.sy || !sstairs.up)
-						&& (!xupladder || u.ux != xupladder || u.uy != yupladder)
-						) {
-						You("hit your %s on the %s.",
-							body_part(HEAD),
-							ceiling(u.ux, u.uy));
-						losehp(uarmh ? 1 : rnd(10),
-							"colliding with the ceiling",
-							KILLED_BY);
-					}
-					else (void)doup();
-				}
+			}
+			if (!Is_waterlevel(&u.uz) && !In_outdoors(&u.uz)) {
+				You("hit your %s on the %s.",
+					body_part(HEAD),
+					ceiling(u.ux, u.uy));
+				losehp(uarmh ? 1 : rnd(10),
+					"colliding with the ceiling",
+					KILLED_BY);
+			}
+			else {
+				You("jerk upwards.");
 			}
 			incr_itimeout(&HLevitation, (d(1, 4) + 1) * 100);
 			spoteffects(FALSE);	/* for sinks */
