@@ -1070,7 +1070,7 @@ you_regen_hp()
 
 		//Additive bonuses
 		// Elf bonus
-		if (Race_if(PM_ELF) && !Upolyd)
+		if ((Race_if(PM_ELF) || Race_if(PM_MYRKALFR)) && !Upolyd)
 			reglevel += 7;
 		if (Race_if(PM_DROW) && !Upolyd)
 			reglevel += flags.female ? 4 : 8; //Note: blessing of Lolth
@@ -1220,7 +1220,7 @@ you_regen_pw()
 		}
 		//Additive bonuses
 		// Elf bonus
-		if (Race_if(PM_ELF) && !Upolyd)
+		if ((Race_if(PM_ELF) || Race_if(PM_MYRKALFR)) && !Upolyd)
 			reglevel += 7;
 		if (Race_if(PM_DROW) && !Upolyd)
 			reglevel += flags.female ? 8 : 4;//Note: blessing of Lolth
