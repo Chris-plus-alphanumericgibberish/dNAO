@@ -8901,7 +8901,10 @@ boolean ranged;
 			xyhitmsg(magr, mdef, originalattk);
 		}
 		/* big picture: can stunlock monsters, can't stunlock you because it uses the Screaming status effect */
-		if(!nonliving(pd) || is_android(pd)){
+		if((!nonliving(pd) || is_android(pd)) 
+			&& pd->mflagsa != MA_ELEMENTAL /*not a PURE elemental like a vortex, sphere, or elemental*/
+			&& !is_great_old_one(pd)
+		){
 			static long ulastscreamed = 0;
 			static long lastscreamed = 0;
 			static struct monst *lastmon = 0;
