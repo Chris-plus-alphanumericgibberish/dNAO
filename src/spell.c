@@ -3515,7 +3515,7 @@ spiriteffects(power, atme)
 		case PWR_GREAT_LEAP:
 			if(level_tele()){
 				You("plunge through the ceiling!");
-				morehungry(max_ints(1, rnd(625)*get_uhungersizemod()));
+				morehungry(max_ints(1, rnd(125)*get_uhungersizemod()));
 			}
 		break;
 		case PWR_MASTER_OF_DOORWAYS:{
