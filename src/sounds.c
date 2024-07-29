@@ -2099,7 +2099,7 @@ humanoid_sound:
 			if((ptr->mtyp == PM_ITINERANT_PRIESTESS || ptr->mtyp == PM_PRIESTESS || ptr->mtyp == PM_DEMINYMPH)
 				&& has_template(mtmp, MISTWEAVER)
 			){
-				if(mtmp->mtame && has_object_type(invent, HOLY_SYMBOL_OF_THE_BLACK_MOTHE)){
+				if(mtmp->mtame){
 					if(!u.shubbie_atten){
 						godlist[GOD_THE_BLACK_MOTHER].anger = 0;
 						u.shubbie_atten = 1;
@@ -2155,7 +2155,7 @@ humanoid_sound:
 				}
 			}
 			else if(ptr->mtyp == PM_DARK_YOUNG){
-				if(mtmp->mtame && has_object_type(invent, HOLY_SYMBOL_OF_THE_BLACK_MOTHE)){
+				if(mtmp->mtame){
 					if(!u.shubbie_atten){
 						godlist[GOD_THE_BLACK_MOTHER].anger = 0;
 						u.shubbie_atten = 1;
