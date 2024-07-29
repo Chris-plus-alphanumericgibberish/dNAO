@@ -500,6 +500,9 @@ unsigned int type;
        case PM_MASTER_KAEN:
           return (!rn2(3) ? MON_AURA_BOLT : rn2(2) ? WEAKEN_YOU : EARTHQUAKE);
 
+       case PM_MONK:
+          return MON_AURA_BOLT;
+
        case PM_MINION_OF_HUHETOTL:
            return (rn2(2) ? CURSE_ITEMS : (rn2(2) ? DESTRY_WEPN : DROP_BOULDER));
 
