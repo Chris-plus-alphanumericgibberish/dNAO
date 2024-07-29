@@ -4138,6 +4138,8 @@ static const char *epitaphs[] = {
 	
 	"I suddenly have a LOT of regrets.", /*Water Phoenix King is very quotable...*/
 	
+	"I GOT A 4!", /*Order of the Stick*/
+	
 	"You either die a hero, or you live long enough to see yourself become the villain.", /* Batman, the Dark Knight */
 	
 	"What can men do against such reckless hate?", /* the Lord of the Rings (Two Towers movie) */
