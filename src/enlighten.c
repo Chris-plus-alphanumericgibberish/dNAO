@@ -1446,7 +1446,7 @@ resistances_enlightenment()
 		}
 		if(has_blood(youracedata)){
 			if (u.umadness&MAD_FRENZY){
-				Sprintf(buf, "You feel your %s seethes below your %s.", body_part(BLOOD), body_part(BODY_SKIN));
+				Sprintf(buf, "You feel your %s seething below your %s.", body_part(BLOOD), body_part(BODY_SKIN));
 				putstr(en_win, 0, buf);
 				messaged++;
 			}
