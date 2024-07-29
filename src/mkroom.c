@@ -7252,8 +7252,14 @@ struct mkroom *sroom;
 			} else if(rn2(2)) make_grave(sx, sy, (char *)0);
 			break;
 		    case BEEHIVE:
-			if(!rn2(3))
-			    (void) mksobj_at(LUMP_OF_ROYAL_JELLY, sx, sy, NO_MKOBJ_FLAGS);
+			if(!rn2(3)){
+				if(In_law(&u.uz) && rn2(2)){
+					(void) mksobj_at(rn2(LUMP_OF_RHETOR_S_JELLY - LUMP_OF_ROYAL_JELLY)+LUMP_OF_SOLDIER_S_JELLY, sx, sy, NO_MKOBJ_FLAGS);
+				}
+				else {
+					(void) mksobj_at(LUMP_OF_ROYAL_JELLY, sx, sy, NO_MKOBJ_FLAGS);
+				}
+			}
 			if(rn2(3))
 			    (void) mksobj_at(HONEYCOMB,  sx, sy, NO_MKOBJ_FLAGS);
 			break;
