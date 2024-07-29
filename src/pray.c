@@ -2583,7 +2583,9 @@ doturn()
 
 	if(!Race_if(PM_VAMPIRE)) u.uconduct.gnostic++;
 
-	if(!Race_if(PM_VAMPIRE) && u.uen >= 30 && yn("Use abbreviated liturgy?") == 'y'){
+	if(Race_if(PM_VAMPIRE))
+		fast = 1;
+	else if(u.uen >= 30 && yn("Use abbreviated liturgy?") == 'y'){
 		fast = 1;
 	}
 	
@@ -2619,7 +2621,7 @@ doturn()
 			distu(mtmp->mx,mtmp->my) > range
 		) continue;
 
-	    if (!mtmp->mpeaceful && (is_undead(mtmp->data) ||
+	    if ((!mtmp->mpeaceful || Race_if(PM_VAMPIRE)) && (is_undead(mtmp->data) ||
 		   (is_demon(mtmp->data) && (u.ulevel > (MAXULEV/2))))) {
 
 		    mtmp->msleeping = 0;
@@ -2658,7 +2660,7 @@ doturn()
 	}
 	//Altered turn undead to consume energy if possible, otherwise take full time.
 	if(fast){
-		losepw(30);
+		if(!Race_if(PM_VAMPIRE)) losepw(30);
 		nomul(-1, "trying to turn the undead");
 	}
 	else
