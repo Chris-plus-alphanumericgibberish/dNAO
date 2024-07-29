@@ -1863,9 +1863,9 @@ CHAINCORPSE(("lifeless doll"),   750, WOOD, CLR_BRIGHT_MAGENTA), /*Needs encyc e
 #define CHAINROPE(names,dtyp,mat,color,...)\
 	CHAIN(names,DMG(D(4)),DMG(D(4)),200,120,0,0,dtyp,mat,color,O_MERGE(0),__VA_ARGS__)
 
-CHAINROPE(("rope of entangling"),   B, VEGGY, CLR_BROWN),	/*Needs encyc entry*/
-CHAINROPE(("bands"),           		B, IRON,  HI_METAL, O_MATSPEC(IDED|UNIDED)),	/*Needs encyc entry*/
-CHAINROPE(("razor wire"),           S, METAL, HI_METAL),	/*Needs encyc entry*/
+CHAINROPE(("rope of entangling"),   B, VEGGY, CLR_BROWN, O_MAGIC(1)),	/*Needs encyc entry*/
+CHAINROPE(("bands"),           		B, IRON,  HI_METAL, O_MAGIC(1), O_MATSPEC(IDED|UNIDED)),	/*Needs encyc entry*/
+CHAINROPE(("razor wire"),           S, METAL, HI_METAL, O_MAGIC(1)),	/*Needs encyc entry*/
 CHAINROPE(("shackles"),             B, IRON,  HI_METAL),	/*Needs encyc entry*/
 
 #undef CHAINROPE
