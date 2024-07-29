@@ -1295,8 +1295,8 @@ dovampminion()
 	} else {
 		struct monst * mtmp = revive(corpse, FALSE);
 		if (mtmp) {
-			tamedog_core(mtmp, (struct obj *)0, TRUE);
 			set_template(mtmp, VAMPIRIC);
+			tamedog_core(mtmp, (struct obj *)0, TRUE);
 			losexp("donating blood", TRUE, TRUE, FALSE);
 		}
 		else {
