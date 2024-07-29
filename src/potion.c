@@ -1088,7 +1088,7 @@ boolean force;
 	case POT_HEALING:
 		You_feel("better.");
         enhanced = uarmg && uarmg->oartifact == ART_GAUNTLETS_OF_THE_HEALING_H;
-		healup(d((enhanced ? 2 : 1) * (6 + 2 * bcsign(otmp)), 4),
+		healup(d((enhanced ? 2 : 1) * (6 + 2 * bcsign(otmp)), 4)+ (enhanced ? 2 : 1) * mlev(&youmonst),
 		       !(get_ox(otmp, OX_ESUM)) * ((enhanced ? 2 : 1) * (!otmp->cursed ? 1 : 0)),
 			   otmp->blessed, !otmp->cursed);
 		exercise(A_CON, TRUE);
@@ -1097,7 +1097,7 @@ boolean force;
 as_extra_healing:
 		You_feel("much better.");
         enhanced = uarmg && uarmg->oartifact == ART_GAUNTLETS_OF_THE_HEALING_H;
-		healup(d((enhanced ? 2 : 1) * (6 + 2 * bcsign(otmp)), 8),
+		healup(d((enhanced ? 2 : 1) * (6 + 2 * bcsign(otmp)), 8)+d((enhanced ? 2 : 1) * max(1, mlev(&youmonst)),8),
 		       !(get_ox(otmp, OX_ESUM)) * (enhanced ? 2 : 1) * (otmp->blessed ? 5 : !otmp->cursed ? 2 : 0),
 		       !otmp->cursed, TRUE);
 		(void) make_hallucinated(0L,TRUE,0L);

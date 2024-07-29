@@ -3702,7 +3702,7 @@ struct obj *hypo;
 					break;
 				}
 				if(mtarg->mhp < mtarg->mhpmax) {
-					mtarg->mhp = min_ints(mtarg->mhpmax,mtarg->mhp+d(6 + 2 * bcsign(amp), 4));
+					mtarg->mhp = min_ints(mtarg->mhpmax,mtarg->mhp+d(6 + 2 * bcsign(amp), 4)+mlev(mtarg));
 					if (canseemon(mtarg))
 					pline("%s looks better.", Monnam(mtarg));
 				}
@@ -3714,7 +3714,7 @@ struct obj *hypo;
 					break;
 				}
 				if(mtarg->mhp < mtarg->mhpmax) {
-					mtarg->mhp = min_ints(mtarg->mhpmax,mtarg->mhp+d(6 + 2 * bcsign(amp), 8));
+					mtarg->mhp = min_ints(mtarg->mhpmax,mtarg->mhp+d(6 + 2 * bcsign(amp), 8)+d(max(1, mlev(mtarg)),8));
 					if (canseemon(mtarg))
 					pline("%s looks much better.", Monnam(mtarg));
 				}
@@ -3952,13 +3952,13 @@ struct obj *hypo;
 			break;
 			case POT_HEALING:
 				You_feel("better.");
-				healup(d(6 + 2 * bcsign(amp), 4),
+				healup(d(6 + 2 * bcsign(amp), 4)+mlev(&youmonst),
 					   (!amp->cursed ? 1 : 0), amp->blessed, !amp->cursed);
 				exercise(A_CON, TRUE);
 			break;
 			case POT_EXTRA_HEALING:
 				You_feel("much better.");
-				healup(d(6 + 2 * bcsign(amp), 8),
+				healup(d(6 + 2 * bcsign(amp), 8)+d(max(1, mlev(&youmonst)),8),
 					    (1+1*bcsign(amp)), !amp->cursed, TRUE);
 				(void) make_hallucinated(0L,TRUE,0L);
 				exercise(A_CON, TRUE);

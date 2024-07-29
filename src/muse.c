@@ -7,6 +7,7 @@
  */
 
 #include "hack.h"
+#include "xhity.h"
 
 
 extern const int monstr[];
@@ -922,7 +923,7 @@ mon_tele:
 		goto mon_tele;
 	case MUSE_POT_HEALING:
 		mquaffmsg(mtmp, otmp);
-		i = d(6 + 2 * bcsign(otmp), 4);
+		i = d(6 + 2 * bcsign(otmp), 4)+mlev(mtmp);
 		mtmp->mhp += i;
 		if (mtmp->mhp > mtmp->mhpmax) mtmp->mhp = ++mtmp->mhpmax;
 		if (!otmp->cursed && !mtmp->mcansee) {
@@ -942,7 +943,7 @@ mon_tele:
 		return 2;
 	case MUSE_POT_EXTRA_HEALING:
 		mquaffmsg(mtmp, otmp);
-		i = d(6 + 2 * bcsign(otmp), 8);
+		i = d(6 + 2 * bcsign(otmp), 8)+d(max(1, mlev(mtmp)),8);
 		mtmp->mhp += i;
 		if (mtmp->mhp > mtmp->mhpmax)
 			mtmp->mhp = (mtmp->mhpmax += (otmp->blessed ? 5 : 2));
