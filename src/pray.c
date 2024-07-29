@@ -1849,7 +1849,7 @@ dosacrifice()
 			/* If sacrificing unicorn of your alignment to altar not of */
 			/* your alignment, your god gets angry and it's a conversion */
 			if (unicalign == u.ualign.type) {
-				u.ualign.record = -1;
+				u.ualign.record = min(-1,u.ualign.record-20);
 				value = 1;
 			} else value += 3;
 		}
