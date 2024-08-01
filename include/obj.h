@@ -580,7 +580,7 @@ struct obj {
 									|| (o)->otyp == GAUNTLETS) : \
 									(u.brand_otyp == (o)->otyp)) : \
 							(a)->otyp == (o)->otyp)
-#define is_blade(otmp)	(otmp->oclass == WEAPON_CLASS && \
+#define is_blade(otmp)	((otmp->oclass == WEAPON_CLASS || is_weptool(otmp)) && \
 			 ((objects[otmp->otyp].oc_skill >= P_DAGGER && \
 			 objects[otmp->otyp].oc_skill <= P_SABER) || \
 			 otmp->otyp == DOUBLE_SWORD))
