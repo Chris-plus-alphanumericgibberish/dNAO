@@ -1558,11 +1558,11 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 				* we still don't want anything to survive unconditionally,
 				* but we need ammo to stay around longer on average.
 				*/
-				int break_chance = 3 + greatest_erosion(thrownobj) - thrownobj->spe;
+				int break_chance = 3 + greatest_erosion(thrownobj) - thrownobj->spe - ((launcher && launcher->oartifact == ART_UNSTOPPABLE) ? 3 : 0);
 				if (break_chance > 1)
 					broken = rn2(break_chance);
 				else
-					broken = !rn2(4);
+					broken = !rn2(4 - break_chance);
 				if (thrownobj->blessed && rnl(100) < 25)
 					broken = FALSE;
 			}
