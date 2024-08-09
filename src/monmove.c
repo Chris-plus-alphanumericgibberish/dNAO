@@ -857,6 +857,9 @@ int *inrange, *nearby, *scared;
 	
 	if(*scared && get_mx(mtmp, MX_ESUM)) {
 		abjure_summon(mtmp, timer_duration_remaining(get_timer(mtmp->timed, DESUMMON_MON))/2);
+		/*Abjuration may desummon monster*/
+		if(DEADMONSTER(mtmp))
+			return;
 	}
 	
 	if(mtmp->mtyp == PM_DAUGHTER_OF_BEDLAM && !rn2(20)) *scared = TRUE;
@@ -1441,6 +1444,9 @@ register struct monst *mtmp;
 	
 	/* check distance and scariness of attacks */
 	distfleeck(mtmp,&inrange,&nearby,&scared);
+	/* summoned monster was abjured as a result of wards etc. */
+	if(DEADMONSTER(mtmp))
+		return 1;
 
 	if(find_defensive(mtmp)) {
 		if (use_defensive(mtmp) != 0)
@@ -2154,6 +2160,8 @@ register struct monst *mtmp;
 
 		tmp = m_move(mtmp, 0);
 		distfleeck(mtmp,&inrange,&nearby,&scared);	/* recalc */
+		if(DEADMONSTER(mtmp))
+			return 1; //Summoned monster was abjured.
 
 		switch (tmp) {
 		    case 0:	/* no movement, but it can still attack you */
