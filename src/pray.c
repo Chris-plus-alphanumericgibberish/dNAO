@@ -1138,6 +1138,8 @@ int godnum;
 	{
 		struct monst *tmpm;
 		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
+			if(DEADMONSTER(tmpm))
+				continue;
 			if(!tmpm->mpeaceful){
 				monflee(tmpm, 77, TRUE, TRUE);
 			}
