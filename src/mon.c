@@ -1881,6 +1881,9 @@ movemon()
 	
 	//Current Movement Loop///////////////////////////////////////////////////
     for(mtmp = fmon; mtmp; mtmp = nmtmp) {
+	if (flags.run_timers){
+		run_timers();
+	}
 	/* check that mtmp wasn't migrated by previous mtmp's actions */
 	if (!(mtmp->mx || mtmp->my)) {
 		/* uh oh -- it looks like mtmp is marked as on migrating_mons. Confirm. */

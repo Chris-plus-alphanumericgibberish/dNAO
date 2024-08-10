@@ -1610,9 +1610,9 @@ moveloop()
 		flags.mon_moving = TRUE;
 		do { /* Monster turn loop */
 		    monscanmove = movemon();
-			  /****************************************/
-			 /*once-per-monster-moving things go here*/
-			/****************************************/
+			  /********************************************/
+			 /*once-per-all-monsters-moved things go here*/
+			/********************************************/
 ////////////////////////////////////////////////////////////////////////////////////////////////
 			if (flags.run_timers){
 				run_timers();
@@ -2959,6 +2959,11 @@ karemade:
 		if(u.ustdy > 0) u.ustdy -= 1;
 		if(u.ustdy < 0) u.ustdy += 1;
 		
+////////////////////////////////////////////////////////////////////////////////////////////////
+		if (flags.run_timers){
+			run_timers();
+		}
+////////////////////////////////////////////////////////////////////////////////////////////////
 		if(u.specialSealsActive&SEAL_LIVING_CRYSTAL)
 			average_dogs();
 		
