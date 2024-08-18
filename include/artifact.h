@@ -354,6 +354,8 @@ struct artinstance{
 #define C_CROWN_AURA_ADD 10
 #define C_CROWN_AURA_DIVISOR 100
 #define C_CROWN_AURA_MAX 333
+	int spawn_dnum;
+	int spawn_dlevel;
 };
 
 

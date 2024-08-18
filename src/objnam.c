@@ -5904,6 +5904,17 @@ typfnd:
 			if (otmp->oartifact) {
 				isartifact = TRUE;
 			} else {
+				/* Bad kludge that seems to go against the design of this function to print where an arti was created, because I don't want to rewrite this function to return arbitrary wish context. */
+				if(!(wishflags&WISH_QUIET)){
+					char tbuf[BUFSZ];
+					int arti = get_already_exists_byname(otmp->otyp, aname);
+					d_level lev;
+					lev.dnum = artinstance[arti].spawn_dnum;
+					lev.dlevel = artinstance[arti].spawn_dlevel;
+					name_by_lev(tbuf, &lev);	
+					verbalize("Born of %s.", tbuf);
+					
+				}
 				obfree(otmp, (struct obj *) 0);		// Is this necessary?
 				otmp = &zeroobj;					// Is this necessary?
 				*wishreturn = WISH_ARTEXISTS;

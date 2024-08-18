@@ -125,6 +125,7 @@ E void FDECL(copy_oprop_list, (struct obj *, unsigned long int *));
 E const char *FDECL(artifact_name, (const char *,short *, int *));
 E boolean FDECL(art_already_exists, (int));
 E boolean FDECL(art_already_exists_byname, (int,const char *));
+E int FDECL(get_already_exists_byname, (int,const char *));
 E void FDECL(flag_existance, (int, int));
 E void FDECL(artifact_exists, (struct obj *,const char *,BOOLEAN_P));
 E struct obj * FDECL(mksartifact, (int));
@@ -831,6 +832,7 @@ E void FDECL(assign_rnd_level, (d_level *,d_level *,int));
 E int FDECL(induced_align, (int));
 E boolean FDECL(Invocation_lev, (d_level *));
 E int NDECL(level_difficulty);
+E void FDECL(name_by_lev, (char *, d_level *));
 E schar FDECL(lev_by_name, (const char *));
 #ifdef WIZARD
 E boolean FDECL(print_dungeon, (BOOLEAN_P,BOOLEAN_P,schar *,int *));
