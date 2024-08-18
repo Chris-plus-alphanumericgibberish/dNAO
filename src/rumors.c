@@ -5,6 +5,8 @@
 #include "hack.h"
 #include "lev.h"
 #include "dlb.h"
+#include "artifact.h"
+
 
 /*	[note: this comment is fairly old, but still accurate for 3.1]
  * Rumors have been entirely rewritten to speed up the access.  This is
@@ -339,6 +341,9 @@ outgmaster()
 #define GLIMPSE_OOONA 5
 #define GLIMPSE_ABYSS 6
 #define GLIMPSE_HELLL 7
+#define GLIMPSE_ARTIS 8
+
+#define arti_selector(c) (('a' + c%52 > 'z') ? 'A' + ((c%52) - 26) : 'a' + c % 52)
 
 int
 doconsult(oracl)
@@ -535,6 +540,12 @@ register struct monst *oracl;
 					'h', 0, ATR_NONE, buf,
 					MENU_UNSELECTED);
 
+				Sprintf(buf, "Knowledge of artifact birthplaces");
+				any.a_int = GLIMPSE_ARTIS;	/* must be non-zero */
+				add_menu(tmpwin, NO_GLYPH, &any,
+					'A', 0, ATR_NONE, buf,
+					MENU_UNSELECTED);
+
 				end_menu(tmpwin, "What glimpses dost thou ask for?");
 
 				how = PICK_ONE;
@@ -544,7 +555,7 @@ register struct monst *oracl;
 					n = selected[0].item.a_int;
 					free(selected);
 				}
-				else n = rnd(7);
+				else n = rnd(8);
 				switch (n){
 					case GLIMPSE_ELDRN:
 						switch(dungeon_topology.alt_tulani){
@@ -713,6 +724,44 @@ register struct monst *oracl;
 							}
 						}
 					break;
+					case GLIMPSE_ARTIS:{
+						int arti_count = 0;
+						char tbuf[BUFSZ];
+						int i;
+						d_level lev;
+						tmpwin = create_nhwindow(NHW_MENU);
+						start_menu(tmpwin);
+						any.a_void = 0;		/* zero out all bits */
+	    					for (i = 1; artilist[i].otyp; i++){
+							if(!artinstance[i].exists)
+								continue;
+							Sprintf(buf, "%s", artilist[i].name);
+							any.a_int = i;	/* must be non-zero */
+							add_menu(tmpwin, NO_GLYPH, &any,
+								arti_selector(arti_count), 0, ATR_NONE, buf,
+								MENU_UNSELECTED);
+							arti_count++;
+						}
+
+
+						end_menu(tmpwin, "Know the birthplace of which artifact?");
+
+						how = PICK_ONE;
+						n = select_menu(tmpwin, how, &selected);
+						destroy_nhwindow(tmpwin);
+						if(n <= 0){
+							free(selected);
+							break;
+						}
+						n = selected[0].item.a_int;
+						free(selected);
+						lev.dnum = artinstance[n].spawn_dnum;
+						lev.dlevel = artinstance[n].spawn_dlevel;
+						name_by_lev(tbuf, &lev);	
+						pline("%s was born on %s.", artilist[n].name, tbuf);
+						
+					}
+					break;
 					default:
 						impossible("Oracle rolled a non-existent dungeon hint? :(");
 					break;
@@ -749,4 +798,5 @@ register struct monst *oracl;
 #undef GLIMPSE_OOONA
 #undef GLIMPSE_ABYSS
 #undef GLIMPSE_HELLL
+#undef arti_selector
 /*rumors.c*/
