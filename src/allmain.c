@@ -5,6 +5,8 @@
 /* various code that was replicated in *main.c */
 
 #include <math.h>
+#include <time.h>
+#include <errno.h>    
 #include "hack.h"
 #include "artifact.h"
 #include "xhity.h"
@@ -49,6 +51,20 @@ STATIC_DCL void FDECL(invisible_twin_act, (struct monst *));
 #ifdef OVL0
 
 extern const int monstr[];
+
+/* gosleep(): no more than 100 inputs per second */
+int gosleep()
+{
+    struct timespec ts = {0, 10*1000*1000};
+    // struct timespec ts = {1, 0};
+    int res;
+
+    do {
+        res = nanosleep(&ts, &ts);
+    } while (res && errno == EINTR);
+
+    return res;
+}
 
 STATIC_OVL void
 digcrater(mtmp)
@@ -1525,6 +1541,7 @@ moveloop()
 	// printBodies();
 	// printSanAndInsight();
     for(;;) {/////////////////////////MAIN LOOP/////////////////////////////////
+	gosleep();
     hpDiff = u.uhp;
 	get_nh_event();
 #ifdef POSITIONBAR
