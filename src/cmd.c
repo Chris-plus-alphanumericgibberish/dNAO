@@ -4175,7 +4175,7 @@ parse()
 		foo = readchar();
 		if (foo >= '0' && foo <= '9') {
 		    multi = 10 * multi + foo - '0';
-		    if (multi < 0 || multi >= LARGEST_INT) multi = LARGEST_INT;
+		    if (multi < 0 || multi >= 200) multi = 200;
 		    if (multi > 9) {
 			clear_nhwindow(WIN_MESSAGE);
 			Sprintf(in_line, "Count: %d", multi);
