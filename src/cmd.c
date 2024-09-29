@@ -1180,11 +1180,11 @@ doKnightForm()
 	int curskill;
 	char* block_reason;
 
-	for (i = FIRST_KNI_FFORM; i <= LAST_KNI_FFORM; i++) {
+	for (i = FIRST_BASIC_KNI_FFORM; i <= LAST_ADV_KNI_FFORM; i++) {
+		if (i > LAST_BASIC_KNI_FFORM && i < FIRST_ADV_KNI_FFORM) continue;
 		if (FightingFormSkillLevel(i) >= P_BASIC)
 			remotely_competent = TRUE;
 	}
-
 	tmpwin = create_nhwindow(NHW_MENU);
 	start_menu(tmpwin);
 	any.a_void = 0;		/* zero out all bits */
@@ -1193,7 +1193,9 @@ doKnightForm()
 	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
 
 
-	for (i = FIRST_KNI_FFORM; i <= LAST_KNI_FFORM; i++) {
+	for (i = FIRST_BASIC_KNI_FFORM; i <= LAST_ADV_KNI_FFORM; i++) {
+		if (i > LAST_BASIC_KNI_FFORM && i < FIRST_ADV_KNI_FFORM) continue;
+
 		curskill = FightingFormSkillLevel(i);
 		if (curskill == P_ISRESTRICTED)
 			continue;
@@ -1456,7 +1458,8 @@ hasfightingforms(){
 			formmask |= LIGHTSABER_FORMS;
 	}
 
-	for (i = FIRST_KNI_FFORM; i <= LAST_KNI_FFORM; i++) {
+	for (i = FIRST_BASIC_KNI_FFORM; i <= LAST_ADV_KNI_FFORM; i++) {
+		if (i > LAST_BASIC_KNI_FFORM && i < FIRST_ADV_KNI_FFORM) continue;
 		if (FightingFormSkillLevel(i) >= P_BASIC)
 			formmask |= KNIGHT_FORMS;
 	}

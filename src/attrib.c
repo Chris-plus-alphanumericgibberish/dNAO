@@ -1978,16 +1978,19 @@ int fform;
 	if (fform >= FIRST_LS_FFORM && fform <= LAST_LS_FFORM){
 		first = FIRST_LS_FFORM;
 		last = LAST_LS_FFORM;
-	} else if (fform >= FIRST_KNI_FFORM && fform <= LAST_KNI_FFORM){
-		first = FIRST_KNI_FFORM;
-		last = LAST_KNI_FFORM;
+	} else if (fform >= FIRST_BASIC_KNI_FFORM && fform <= LAST_BASIC_KNI_FFORM){
+		first = FIRST_BASIC_KNI_FFORM;
+		last = LAST_BASIC_KNI_FFORM;
+	} else if (fform >= FIRST_ADV_KNI_FFORM && fform <= LAST_ADV_KNI_FFORM){
+		first = FIRST_ADV_KNI_FFORM;
+		last = LAST_ADV_KNI_FFORM;
 	} else {
 		first = 0;
-		last = FFORM_LISTSIZE*32;
+		last = FFORM_LISTSIZE*16;
 	}
 
-	/* this code assumes that each batch of 32 fighting forms are mutually exclusive, but not with other batches of 32 */
-	for(i=first/32; i <= last/32; i++)
+	/* this code assumes that each batch of 16 fighting forms are mutually exclusive, but not with other batches of 16 */
+	for(i=first/16; i <= last/16; i++)
 		u.fightingForm[i] = 0L;
 
 }
@@ -1996,9 +1999,9 @@ void
 setFightingForm(fform)
 int fform;
 {
-	/* this code assumes that each batch of 32 fighting forms are mutually exclusive, but not with other batches of 32 */
+	/* this code assumes that each batch of 16 fighting forms are mutually exclusive, but not with other batches of 16 */
 	unSetFightingForm(fform);
-	u.fightingForm[(fform-1)/32] |= (0x1L << ((fform-1)%32));
+	u.fightingForm[(fform-1)/16] |= (0x1L << ((fform-1)%16));
 }
 
 boolean
@@ -2033,7 +2036,7 @@ int fform;
 		return TRUE; //Found no fighting forms, return TRUE
 	}
 	
-	return !!(u.fightingForm[(fform-1)/32] & (0x1L << ((fform-1)%32)));
+	return !!(u.fightingForm[(fform-1)/16] & (0x1L << ((fform-1)%16)));
 }
 
 int
