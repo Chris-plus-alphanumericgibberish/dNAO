@@ -37,6 +37,7 @@ STATIC_DCL void NDECL(cthulhu_mind_blast);
 STATIC_DCL void FDECL(unseen_actions, (struct monst *));
 STATIC_DCL void FDECL(blessed_spawn, (struct monst *));
 STATIC_DCL void FDECL(alkilith_spawn, (struct monst *));
+STATIC_DCL void FDECL(befouled_wraith, (struct monst *));
 STATIC_DCL void FDECL(good_neighbor, (struct monst *));
 STATIC_DCL void FDECL(dark_pharaoh, (struct monst *));
 STATIC_DCL void FDECL(dark_pharaoh_visible, (struct monst *));
@@ -472,7 +473,7 @@ mercurial_repair()
 	else regto = 3;
 
 	for (i = 0; i < SIZE(uequip); i++) {
-		if (uequip[i] && uequip[i]->obj_material == MERCURIAL
+		if (uequip[i] && obj_is_material(uequip[i], MERCURIAL)
 			&& uequip[i]->spe < regto && is_enchantable(uequip[i])
 			&& rnd(20) < ACURR(A_CHA)
 		){
@@ -618,8 +619,9 @@ boolean affect_game_state;
 
 			/* some weapons are slower */
 			if (uwep
-				&& (uwep->otyp == RAKUYO || uwep->otyp == DOUBLE_FORCE_BLADE || uwep->otyp == DOUBLE_SWORD || uwep->otyp == RAZOR_CLEAVER || 
-					((uwep->otyp == DOUBLE_LIGHTSABER || uwep->otyp == BEAMSWORD || uwep->otyp == LIGHTSABER || uwep->otyp == ROD_OF_FORCE) && uwep->altmode)
+				&& (uwep->otyp == RAKUYO || uwep->otyp == DOUBLE_FORCE_BLADE || uwep->otyp == DOUBLE_SWORD || uwep->otyp == RAZOR_CLEAVER
+					|| uwep->otyp == BLADED_BOW
+					|| ((uwep->otyp == DOUBLE_LIGHTSABER || uwep->otyp == BEAMSWORD || uwep->otyp == LIGHTSABER || uwep->otyp == ROD_OF_FORCE) && uwep->altmode)
 				)
 				&& !u.twoweap
 				){
@@ -817,9 +819,9 @@ you_calc_movement()
 	else if(!TimeStop && artinstance[ART_TENSA_ZANGETSU].ZangetsuSafe < u.ulevel && !(moves%10)) artinstance[ART_TENSA_ZANGETSU].ZangetsuSafe++;
 	
 	int chikhp = 0;
-	if(uwep && uwep->otyp == CHIKAGE && uwep->obj_material == HEMARGYOS)
+	if(uwep && uwep->otyp == CHIKAGE && obj_is_material(uwep, HEMARGYOS))
 		chikhp += *hpmax(&youmonst);
-	if(uswapwep && u.twoweap && uswapwep->otyp == CHIKAGE && uswapwep->obj_material == HEMARGYOS)
+	if(uswapwep && u.twoweap && uswapwep->otyp == CHIKAGE && obj_is_material(uswapwep, HEMARGYOS))
 		chikhp += *hpmax(&youmonst);
 	if(chikhp > 0){
 		int hploss = 85*chikhp/1000;
@@ -1031,6 +1033,15 @@ you_regen_hp()
 	// Corruption thought
 	if(active_glyph(CORRUPTION) && (*hp < (*hpmax)*.3)){
 		perX += HEALCYCLE;
+	}
+	// Defilement thought
+	if(active_glyph(DEFILEMENT)){
+		if(*hp < (*hpmax)*.1)
+			perX += HEALCYCLE;
+		else if(*hp < (*hpmax)*.2)
+			perX += 2*HEALCYCLE/3;
+		else if(*hp < (*hpmax)*.3)
+			perX += HEALCYCLE/3;
 	}
 
 	// "Natural" regeneration has stricter limitations
@@ -1398,7 +1409,8 @@ you_regen_san()
 	if (Role_if(PM_CONVICT))  reglevel -= 3;
 	if (Role_if(PM_NOBLEMAN))  reglevel -= 5;
 	if (Role_if(PM_MADMAN))   reglevel -= 10;
-	if (Role_if(PM_UNDEAD_HUNTER) && u.uinsight >= 50)   reglevel -= 10;
+	if (Role_if(PM_UNDEAD_HUNTER) && (u.uinsight >= 50 || quest_status.moon_close))   reglevel -= 10;
+	//Maybe scale undead hunter based on how well they did on the quest as well.
 
 	if (Race_if(PM_ELF))   reglevel += 3;
 	if (Race_if(PM_ORC))   reglevel -= 3;
@@ -1416,6 +1428,9 @@ you_regen_san()
 
 	if(active_glyph(TRANSPARENT_SEA))
 		reglevel += 30;
+
+	if(active_glyph(ROTTEN_EYES))
+		reglevel += 10;
 
 	//Worn Vilya bonus ranges from -4 (penalty) to +7
 	if(uring_art(ART_VILYA))
@@ -1512,7 +1527,10 @@ moveloop()
 	static int oldsanity = 100;
 
     flags.moonphase = phase_of_the_moon();
-    if(flags.moonphase == FULL_MOON) {
+    if(flags.moonphase == HUNTING_MOON) {
+	pline("The moon hangs low.");
+	change_luck(2);
+    } else if(flags.moonphase == FULL_MOON) {
 	You("are lucky!  Full moon tonight.");
 	change_luck(1);
     } else if(flags.moonphase == NEW_MOON) {
@@ -1974,6 +1992,8 @@ moveloop()
 				/* Dominated monsters stay tame */
 				if(mtmp->mtame && get_mx(mtmp, MX_EDOG) && EDOG(mtmp)->dominated)
 					mtmp->mtame = 100;
+				if(mtmp->mtame && is_vampire(mtmp->data) && check_vampire(VAMPIRE_THRALLS))
+					mtmp->mtame = 100;
 				/*Tannin eggs may hatch, monster may die*/
 				if(mtmp->mtaneggs){
 					for(int i = mtmp->mtaneggs; i > 0; i--) if(!rn2(6)){
@@ -2356,6 +2376,11 @@ karemade:
 			if(!Infuture && !mvitals[PM_CENTER_OF_ALL].died && !rn2(COA_PROB)){
 				coa_arrive();
 			}
+			//Dream wolf attack
+			if(!mvitals[PM_MOON_S_CHOSEN].died && urole.neminum == PM_INDEX_WOLF && check_insight()){
+				You("are surrounded by howling wind!");
+				dream_wolves(u.ux, u.uy);
+			}
 			//Random monster generation block
 			if(In_mithardir_terminus(&u.uz) &&
 				mvitals[PM_ASPECT_OF_THE_SILENCE].born == 0 &&
@@ -2434,6 +2459,7 @@ karemade:
 							if(canspotmon(mtmp) && !messaged){
 								pline("A terrible hand reaches into the world!");
 								messaged = TRUE;
+								TRANSCENDENCE_IMPURITY_UP(FALSE)
 							}
 							mark_mon_as_summoned(mtmp, (struct monst *)0, NightmareAware_Insanity+u.uinsight, 0);
 						}
@@ -2626,6 +2652,7 @@ karemade:
 						Your("breath crystallizes in the airless void!");
 					FrozenAir += (100-u.usanity)/12;
 					delayed_killer = "the cold night";
+					TRANSCENDENCE_IMPURITY_UP(FALSE)
 					nomul(0, NULL);
 				}
 				roll_av_frigophobia();
@@ -2649,6 +2676,7 @@ karemade:
 				if(!rn2(11) && roll_madness(MAD_OVERLORD)){
 					u.ustdy += 90;
 					destroy_item(&youmonst, SPBOOK_CLASS, AD_FIRE);
+					TRANSCENDENCE_IMPURITY_UP(FALSE)
 				}
 				nomul(0, NULL);
 			}
@@ -2692,6 +2720,12 @@ karemade:
 		    moves++;
 			if(Is_qstart(&u.uz) && !(monstermoves%20) && quest_status.time_on_home < MAX_HOME_TIMER)
 				quest_status.time_on_home++;
+			if(Role_if(PM_UNDEAD_HUNTER) && !mvitals[PM_MOON_S_CHOSEN].died){
+				quest_status.time_doing_quest++;
+				if(quest_status.time_doing_quest >= UH_QUEST_TIME_4 && !Is_astralevel(&u.uz) && !u.veil){
+					quest_status.moon_close = TRUE; /*The moon draws close to the astral plane*/
+				}
+			}
 			nonce = rand();
 
 		      /********************************/
@@ -2699,6 +2733,28 @@ karemade:
 		    /********************************/
 			/* Environment effects */
 			dust_storm();
+			/* Unseen monsters may take action */
+			if(check_reanimation(LAMP_PHASE)){
+				for (struct obj *otmp = invent; otmp; otmp = otmp->nobj)
+					if (otmp->lamplit && (
+						otmp->otyp == TORCH
+						|| otmp->otyp == SHADOWLANDER_S_TORCH
+						|| otmp->otyp == SUNROD
+						|| otmp->otyp == OIL_LAMP
+						|| otmp->otyp == POT_OIL
+						|| otmp->otyp == WAX_CANDLE
+						|| otmp->otyp == TALLOW_CANDLE
+						|| otmp->otyp == GNOMISH_POINTY_HAT
+						|| otmp->otyp == LANTERN
+						|| otmp->otyp == LANTERN_PLATE_MAIL
+						|| otmp->otyp == DWARVISH_HELM
+						)
+					){
+						if((HPasses_walls&TIMEOUT) < 2)
+							incr_itimeout(&HPasses_walls, 2-(HPasses_walls&TIMEOUT));
+						break;
+					}
+			}
 			/* Unseen monsters may take action */
 			for(mtmp = migrating_mons; mtmp; mtmp = nxtmon){
 				nxtmon = mtmp->nmon;
@@ -4488,6 +4544,8 @@ printAttacks(buf, ptr)
 		"unnerving",			/*153*/
 		"madness-fire",			/*154*/
 		"force to attack",		/*155*/
+		"drain bonus HP",		/*155*/
+		"monstrous tongue lick",/*156*/
 		// "[[ahazu abduction]]",	/**/
 		"[[stone choir]]",		/* */
 		"[[water vampire]]",	/* */
@@ -4585,10 +4643,13 @@ cthulhu_mind_blast()
 		make_stunned(itimeout_incr(HStun, dmg*10), TRUE);
 		if (Sleep_resistance){
 			if(!on_level(&rlyeh_level,&u.uz)) fall_asleep(-1*dmg, TRUE);
-			if(!rn2(10)) change_usanity(-1, FALSE);
+			if(!rn2(10)){
+				change_usanity(-1, FALSE);
+			}
 		} else {
 			if(!on_level(&rlyeh_level,&u.uz)) fall_asleep(-100*dmg, TRUE);
 			change_usanity(-1, FALSE);
+			TRANSCENDENCE_IMPURITY_UP(FALSE)
 		}
 	}
 	for(mon=fmon; mon; mon = nmon) {
@@ -4693,6 +4754,8 @@ struct monst *mon;
 	//Note: May cause mon to change its state, including moving to a different monster chain.
 	if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && mon->mtyp == PM_BLESSED)
 		blessed_spawn(mon);
+	else if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && mon->mtyp == PM_BEFOULED_WRAITH)
+		befouled_wraith(mon);
 	else if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && mon->mtyp == PM_GOOD_NEIGHBOR)
 		good_neighbor(mon);
 	else if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && mon->mtyp == PM_HMNYW_PHARAOH)
@@ -4779,6 +4842,54 @@ struct monst *mon;
 					set_malign(mtmp);
 				}
 			}
+		}
+	}
+}
+
+STATIC_OVL
+void
+befouled_wraith(mon)
+struct monst *mon;
+{
+	struct monst *mtmp;
+	xchar xlocale, ylocale, xyloc;
+	xyloc	= mon->mtrack[0].x;
+	xlocale = mon->mtrack[1].x;
+	ylocale = mon->mtrack[1].y;
+	if(xyloc == MIGR_EXACT_XY){
+		if(u.ux == xlocale && u.uy == ylocale && !mon->mpeaceful){
+			if(!rn2(20)){
+				if(rn2(10) || u.uhpbonus == 0){
+					You_feel("someone step on your grave!");
+					change_luck(-1);
+				}
+				else {
+					You_feel("like you've been stabbed!");
+					u.uhpbonus = max(u.uhpbonus-5, 0);
+					calc_total_maxhp();
+				}
+			}
+		}
+		//Raise zombies
+		else if(Role_if(PM_UNDEAD_HUNTER)
+			&& In_quest(&u.uz)
+			&& !m_at(xlocale, ylocale)
+			&& (distmin(u.ux, u.uy, xlocale, ylocale) > 10)
+			&& !rn2(800)
+		){
+			mtmp = makemon(&mons[PM_WOODLAND_ELF], xlocale, ylocale, MM_ADJACENTOK|MM_NOCOUNTBIRTH);
+			if(mtmp){
+				set_template(mtmp, ZOMBIFIED);
+				set_faction(mtmp, MOON_FACTION);
+				mtmp->mpeaceful = 0;
+				set_malign(mtmp);
+			}
+		}
+		xlocale += rn2(3) - 1;
+		ylocale += rn2(3) - 1;
+		if(isok(xlocale, ylocale)){
+			mon->mtrack[1].x = xlocale;
+			mon->mtrack[1].y = ylocale;
 		}
 	}
 }
@@ -6165,8 +6276,9 @@ struct monst *magr;
 	if(pa->mtyp == PM_ANCIENT_NAGA){
 		max = youagr ? 5 : magr->m_id%2 ? 7 : 5;
 	}
-	else if(pa->mtyp == PM_MEDUSA){
+	else if(pa->mtyp == PM_MEDUSA || pa->mtyp == PM_MOON_S_CHOSEN){
 		//Medusa's hair bites 1-3 times
+		// ditto the moon's chosen's cranial wolfpack
 		mult = rnd(3);
 	}
 	
@@ -6306,6 +6418,82 @@ struct monst *magr;
 		xmeleehity(magr, mdef, attk, (struct obj **)0, -1, 0, FALSE);
 	}
 	return attacked;
+}
+
+void
+dojellysting(magr)
+struct monst *magr;
+{
+	struct monst *mdef;
+	extern const int clockwisex[8];
+	extern const int clockwisey[8];
+	int i = rnd(8),j;
+	int ax, ay;
+	struct attack * attk;
+	struct attack attkbuff = {0};
+	boolean youagr = (magr == &youmonst);
+	boolean youdef;
+	boolean attacked = FALSE;
+	struct permonst *pa;
+	struct attack symbiote = { AT_TENT, AD_PAIN, u.jellyfish, 1 };
+	int max = u.jellyfish*2;
+	int mult = u.jellyfish/3+1;
+
+	pa = youagr ? youracedata : magr->data;
+
+	//Attack all surrounding foes
+	for(j=8*mult;j>=1;j--){
+		ax = x(magr)+clockwisex[(i+j)%8];
+		ay = y(magr)+clockwisey[(i+j)%8];
+		if(youagr && u.ustuck && u.uswallow)
+			mdef = u.ustuck;
+		else if(!isok(ax, ay))
+			continue;
+		else if(onscary(ax, ay, magr))
+			continue;
+		else mdef = m_at(ax, ay);
+		
+		if(u.ux == ax && u.uy == ay)
+			mdef = &youmonst;
+		
+		if(!mdef)
+			continue;
+		
+		if(rn2(2)) //1/2 chance to just skip anyway, stings are too powerful if they attack too frequently.
+			continue;
+
+		youdef = (mdef == &youmonst);
+
+		if(youagr && (mdef->mpeaceful))
+			continue;
+		if(youdef && (magr->mpeaceful))
+			continue;
+		if(youdef && Invulnerable)
+			continue;
+		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
+			continue;
+
+		if(youdef && u.uswallow)
+			continue;
+		if(!youdef && nonthreat(mdef))
+			continue;
+
+		if(symbiote.aatyp != AT_MAGC && symbiote.aatyp != AT_GAZE){
+			if((touch_petrifies(mdef->data)
+				|| mdef->mtyp == PM_MEDUSA)
+			 && (youagr ? !Stone_resistance : !resists_ston(magr))
+			) continue;
+			
+			if(mdef->mtyp == PM_PALE_NIGHT)
+				continue;
+		}
+		
+		xmeleehity(magr, mdef, &symbiote, (struct obj **)0, -1, 0, FALSE);
+		// Limited stings
+		if(--max <= 0)
+			return;
+	}
+	return;
 }
 
 void

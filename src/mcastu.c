@@ -669,6 +669,7 @@ choose_magic_special(struct monst *mtmp, unsigned int type, int i)
 	case PM_ALIGNED_PRIEST:
 	case PM_HIGH_PRIEST:
 	case PM_ARCH_PRIEST:
+	case PM_HIGH_PRIEST_WOLF:
 		quake = !mtmp->mtame; //Casts earthquake instead of tremor
 	break;
 	case PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH:
@@ -773,6 +774,50 @@ choose_magic_special(struct monst *mtmp, unsigned int type, int i)
 			//case "0", "5", "10", "15"
 			default:
 				return CURE_SELF;
+		}
+	break;
+	case PM_VICAR_WOLF:
+		switch (rnd(7)) {
+			case 1:
+				return MASS_CURE_CLOSE;
+			break;
+			case 2:
+				return MON_PROTECTION;
+			break;
+			case 3:
+				return PARALYZE;
+			break;
+			case 4:
+				return NIGHTMARE;
+			break;
+			default:
+				return CURE_SELF;
+			break;
+		}
+	break;
+	case PM_MOON_S_CHOSEN:
+		switch (rnd(7)) {
+			case 1:
+				return MIST_WOLVES;
+			break;
+			case 2:
+				return MASS_CURE_CLOSE;
+			break;
+			case 3:
+				return MASS_CURE_FAR;
+			break;
+			case 4:
+				return MON_PROTECTION;
+			break;
+			case 5:
+				return PARALYZE;
+			break;
+			case 6:
+				return NIGHTMARE;
+			break;
+			case 7:
+				return NAIL_TO_THE_SKY;
+			break;
 		}
 	break;
 	case PM_DWARF_CLERIC:
@@ -2171,6 +2216,8 @@ const char * spellname[] =
 	"CRUSH_BOLT",
 	"MADF_BURST",
 	"HOLY_BOLT",
+	"MIST_WOLVES",
+	//106
 };
 
 
@@ -3522,6 +3569,9 @@ int tary;
 			otmp->spe = 0;
 			if(magr && magr->mtyp == PM_SUZERAIN){
 				add_oprop(otmp, OPROP_LESSER_FLAYW);
+				if(magr->mtyp == PM_SUZERAIN){
+					TRANSCENDENCE_IMPURITY_UP(FALSE)
+				}
 			}
 
 			/* call projectile() to shoot fire all the weapons */
@@ -5532,8 +5582,15 @@ int tary;
 			mk_yellow_undead(&mm, TRUE, NO_MINVENT, YELLOW_FACTION);
 			stop_occupation();
 		}
+		TRANSCENDENCE_IMPURITY_UP(FALSE)
 		return MM_HIT;
 
+	case MIST_WOLVES:
+			if (canseemon(magr))
+				pline("Howling mist pours from the craters in %s %s!", s_suffix(mon_nam(magr)),  mbodypart(magr, HEAD));
+			dream_wolves(tarx, tary);
+			return MM_HIT;
+		break;
 	case MON_CANCEL:
 		if (!mdef) {
 			impossible("debuff spell with no target?");
@@ -5682,6 +5739,13 @@ int tary;
 				else {
 					alignment = sgn(magr->data->maligntyp);
 					gnum = align_to_god(alignment);
+					//Replace undead hunter "gods" with Egyptian gods
+					if(gnum == GOD_THE_COLLEGE)
+						gnum = GOD_PTAH;
+					else if(gnum == GOD_THE_CHOIR)
+						gnum = GOD_THOTH;
+					else if(gnum == GOD_DEFILEMENT)
+						gnum = GOD_ANHUR;
 				}
 				mtmp->isminion = TRUE;
 				EMIN(mtmp)->min_align = alignment;
@@ -6479,6 +6543,7 @@ int tary;
 			return cast_spell(magr, mdef, attk, OPEN_WOUNDS, tarx, tary);
 		}
 		else {
+			TRANSCENDENCE_IMPURITY_UP(FALSE)
 			switch(rn2(3)){
 				case 0:
 				case 1:
@@ -7235,6 +7300,21 @@ pick_tannin(struct monst *mon)
 		break;
 	}
 	return PM_AKKABISH_TANNIN;
+}
+
+void
+dream_wolves(int tx, int ty)
+{
+	int x, y;
+	struct monst *mtmp;
+	for(int i = d(u.ulevel/10+1, 4); i > 0; i--){
+		do {
+			x = tx + rnd(9) - 5;
+			y = ty + rnd(9) - 5;
+		} while (!isok(x,y) || distmin(tx, ty, x, y) < 3);
+		mtmp = makemon(&mons[PM_MIST_CLOUD], x, y, MM_ADJACENTOK|NO_MINVENT);
+	}
+	aggravate();
 }
 
 #endif /* OVL0 */

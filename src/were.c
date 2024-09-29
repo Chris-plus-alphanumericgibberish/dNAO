@@ -20,12 +20,33 @@ register struct monst *mon;
 		&& !(mon->mtyp == PM_LURKING_HAND || mon->mtyp == PM_BLASPHEMOUS_HAND)
 	) return;
 
+	if(mon->mtyp == PM_MIST_WOLF && u.veil)
+		return;
+
 	if(u.ustuck == mon && u.uswallow)
 		return;
 
 	if(mon->mtyp == PM_NOVIERE_ELADRIN && !is_pool(mon->mx, mon->my, FALSE)) return;
 	
-	if (humanoid_torso(mon->data)) {
+	if (healing_were(mon->data)){
+		if(!Protection_from_shape_changers && 
+			!rn2(flags.moonphase == HUNTING_MOON ? 2
+				: night() ? (flags.moonphase == FULL_MOON ?  3 : 30)
+				: (flags.moonphase == FULL_MOON ? 10 : 50))
+		){
+			if(canseemon(mon)){
+				pline("%s fur ripples.", s_suffix(Monnam(mon)));
+			}
+			if (mon->msleeping || !mon->mcanmove) {
+				/* transformation wakens and/or revitalizes */
+				mon->msleeping = 0;
+				mon->mfrozen = 0;	/* not asleep or paralyzed */
+				mon->mcanmove = 1;
+			}
+			/* regenerate by 1/4 of the lost hit points */
+			mon->mhp += (mon->mhpmax - mon->mhp) / 4;
+		}
+	} else if (humanoid_torso(mon->data)) {
 		if (mon->mtyp == PM_INCUBUS || mon->mtyp == PM_SUCCUBUS){
 			if(!Protection_from_shape_changers 
 			&& !canseemon(mon) 
@@ -68,8 +89,9 @@ register struct monst *mon;
 				}
 			}
 	    } else if (
-			!rn2(night() ? (flags.moonphase == FULL_MOON ?  3 : 30)
-					 : (flags.moonphase == FULL_MOON ? 10 : 50))
+			!rn2(flags.moonphase == HUNTING_MOON ? 2
+				: night() ? (flags.moonphase == FULL_MOON ?  3 : 30)
+				: (flags.moonphase == FULL_MOON ? 10 : 50))
 		){
 			if(!Protection_from_shape_changers){
 				new_were(mon);		/* change into animal form */
@@ -99,8 +121,10 @@ register struct monst *mon;
 			mon->mflee = 0;
 			mon->mfleetim = 0;
 		}
-	    new_were(mon);		/* change back into human form */
-		if(is_yochlol(mon->data)) mon->movement += 12;
+		if(!Protection_from_shape_changers || mon->mtyp != PM_MIST_CLOUD){
+			new_were(mon);		/* change back into human form */
+			if(is_yochlol(mon->data)) mon->movement += 12;
+		}
 	}
 }
 
@@ -120,6 +144,10 @@ int pm;
 	    case PM_HUMAN_WERERAT:    return(PM_WERERAT);
 		case PM_ANUBITE:		  return(PM_ANUBAN_JACKAL);
 		case PM_ANUBAN_JACKAL:	  return(PM_ANUBITE);
+		case PM_MIST_WOLF:		  return(PM_MIST_CLOUD);
+		case PM_MIST_CLOUD:	      return(PM_MIST_WOLF);
+		case PM_AETHER_WOLF:	  return(PM_AETHER_CYCLONE);
+		case PM_AETHER_CYCLONE:   return(PM_AETHER_WOLF);
 		case PM_COURE_ELADRIN:	  return(PM_MOTE_OF_LIGHT);
 		case PM_MOTE_OF_LIGHT:	  return(PM_COURE_ELADRIN);
 		case PM_NOVIERE_ELADRIN:  return(PM_WATER_DOLPHIN);
@@ -220,13 +248,23 @@ int mtyp;
 		return PM_WEREJACKAL;
 	case PM_WEREWOLF:
 	case PM_HUMAN_WEREWOLF:
+	case PM_MIST_WOLF:
+	case PM_INDEX_WOLF:
+	case PM_VICAR_WOLF:
+	case PM_HIGH_PRIEST_WOLF:
+	case PM_MOON_S_CHOSEN:
+	case PM_MOON_ENTITY_MANIPALP:
+	case PM_DEATH:
+	case PM_PESTILENCE:
+	case PM_FAMINE:
+	case PM_AETHER_WOLF:
 		return PM_WEREWOLF;
 	case PM_WERERAT:
 	case PM_HUMAN_WERERAT:
 		return PM_WERERAT;
 	}
 	impossible("Unhandled were-foo transmission %d", mtyp);
-	return mtyp;
+	return PM_WEREWOLF;
 }
 
 void
@@ -333,6 +371,10 @@ struct monst *mon;
 			pline("%s relaxes its gesture.", Monnam(mon));
 		else if(mon->mtyp == PM_LURKING_HAND)
 			pline("%s adopts a blasphemous gesture.", Monnam(mon));
+		else if(mon->mtyp == PM_MIST_WOLF || mon->mtyp == PM_AETHER_WOLF)
+			pline("%s evaporates.", Monnam(mon));
+		else if(mon->mtyp == PM_MIST_CLOUD || mon->mtyp == PM_AETHER_CYCLONE)
+			pline("%s condenses into a wolf.", Monnam(mon));
 		else if(mon->mtyp != PM_ANUBITE && mon->mtyp != PM_ANUBAN_JACKAL
 		  && !is_eladrin(mon->data) && !is_yochlol(mon->data)
 		  && !(mon->mtyp == PM_SELKIE || mon->mtyp == PM_SEAL)
@@ -379,6 +421,31 @@ char *genbuf;
 		case PM_WEREWOLF:
 		case PM_HUMAN_WEREWOLF:
 			typ = rn2(5) ? PM_WOLF : PM_WINTER_WOLF ;
+			if (genbuf) Strcpy(genbuf, "wolf");
+			break;
+		case PM_MIST_WOLF:
+		case PM_MIST_CLOUD:
+			typ = rn2(2) ? PM_WOLF : rn2(3) ? PM_WARG : PM_WINTER_WOLF ;
+			if (genbuf) Strcpy(genbuf, "wolf");
+			break;
+		case PM_AETHER_WOLF:
+			typ = rn2(5) ? PM_WEREWOLF : PM_MIST_WOLF;
+			if (genbuf) Strcpy(genbuf, "wolf");
+			break;
+		case PM_AETHER_CYCLONE:
+			typ = rn2(5) ? PM_WEREWOLF : PM_MIST_CLOUD;
+			if (genbuf) Strcpy(genbuf, "windstorm");
+			break;
+		case PM_INDEX_WOLF:
+			typ = rn2(2) ? PM_WOLF : rn2(3) ? PM_WARG : PM_WEREWOLF ;
+			if (genbuf) Strcpy(genbuf, "wolf");
+			break;
+		case PM_MOON_S_CHOSEN:
+			typ = rn2(2) ? PM_WINTER_WOLF : rn2(3) ? PM_WEREWOLF : PM_MIST_WOLF ;
+			if (genbuf) Strcpy(genbuf, "wolf");
+			break;
+		case PM_HIGH_PRIEST_WOLF:
+			typ = rn2(2) ? PM_MIST_CLOUD : rn2(3) ? PM_AETHER_CYCLONE : PM_FOETID_ANGEL;
 			if (genbuf) Strcpy(genbuf, "wolf");
 			break;
 		case PM_ANUBITE:

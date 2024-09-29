@@ -98,6 +98,7 @@ enum {
 	OPROP_MRCYW,
 	OPROP_RLYHW,
 	OPROP_SMITHU,
+	OPROP_ANTAW,
 	MAX_OPROP
 };
 
@@ -226,6 +227,8 @@ struct obj {
 	Bitfield(forceconf,1);	/* when set on a scroll, forces the confusion effect. Meant for use with pseudo objects, isn't checked while merging */
 	Bitfield(ohaluengr,1);	/* engraving on item isn't a "real" ward */
 	/* 15 free bits in this field, I think -CM */
+	Bitfield(researched,1);	/* already disected */
+	Bitfield(blood_smithed,1);	/* improved by blood smithing */
 	
 	int obj_material;		/*Object material (from lookup table)*/
 	int sub_material;		/*Sub-material*/
@@ -729,6 +732,7 @@ struct obj {
 			 || ((otmp)->oartifact == ART_IBITE_ARM && artinstance[ART_IBITE_ARM].IbiteUpgrades&IPROP_REFLECT)\
 			 || ((otmp)->oartifact == ART_AMALGAMATED_SKIES)\
 			 )
+#define sflm_active(otmp)	(sflm_able(otmp) || (otmp)->obj_material == HEMARGYOS)
 #define sflm_offerable(otmp)	(accepts_weapon_oprops(otmp) && sflm_able(otmp) && !check_oprop(otmp, OPROP_SFLMW))
 #define sflm_mirrorable(otmp)	(((otmp)->oclass == WEAPON_CLASS || is_weptool(otmp) || is_suit(otmp) || is_shield(otmp))\
 				 && sflm_able(otmp) && !check_oprop(otmp, OPROP_REFL))
@@ -789,6 +793,8 @@ struct obj {
 #define is_melee_launcher(otmp)	(otmp->otyp == CARCOSAN_STING || \
 				otmp->oartifact == ART_LIECLEAVER || \
 				otmp->oartifact == ART_ROGUE_GEAR_SPIRITS  || \
+				otmp->otyp == SOLDIER_S_SABER  || \
+				otmp->otyp == BLADED_BOW  || \
 				check_oprop(otmp, OPROP_BLADED) || \
 				check_oprop(otmp, OPROP_SPIKED))
 #define is_ammo(otmp)	((otmp->oclass == WEAPON_CLASS || \
@@ -832,6 +838,8 @@ struct obj {
 			 (o)->otyp <= WORD_OF_KNOWLEDGE)
 #define is_serrated(o)	((o)->otyp == WHIP_SAW \
 						|| (o)->otyp == SAW_CLEAVER \
+						|| (o)->otyp == SAW_SPEAR \
+						|| (o)->otyp == LONG_SAW \
 						|| (o)->otyp == DISKOS \
 						)
 #define is_self_righteous(o)	((o)->otyp == CANE \
@@ -925,7 +933,7 @@ struct obj {
 			 // objects[otmp->otyp].oc_skill <= -P_BOW)
 //#ifdef FIREARMS
 #define is_unpoisonable_firearm_ammo(otmp)	\
-			 (is_bullet(otmp) || (otmp)->otyp == STICK_OF_DYNAMITE)
+			 ((is_bullet(otmp) && otmp->otyp != BLOOD_SPEAR) || (otmp)->otyp == STICK_OF_DYNAMITE)
 //#else
 //#define is_unpoisonable_firearm_ammo(otmp)	0
 //#endif
@@ -985,6 +993,7 @@ struct obj {
 /* like multistriking, but all ends always roll attacks. multi_ended() is 0-based so that only actual multi_ended weapons return multi_ended!=0 */
 #define multi_ended(otmp)	(!(otmp) ? 0 : \
 	(otmp)->otyp == DOUBLE_SWORD ? 1 : \
+	(otmp)->otyp == BLADED_BOW ? 1 : \
 	((otmp) == uwep && martial_bonus() && (otmp)->otyp == QUARTERSTAFF && P_SKILL(P_QUARTERSTAFF) >= P_EXPERT && P_SKILL(P_BARE_HANDED_COMBAT) >= P_EXPERT && !uarms && !(u.twoweap && uswapwep)) ? 1 : \
 	0)
 /*  */
@@ -1113,15 +1122,7 @@ struct obj {
 				|| (otmp)->otyp == WIDE_HAT \
 				|| (otmp)->otyp == WITCH_HAT )
 
-#define is_plusten(otmp)	(arti_plusten(otmp)\
-								|| is_rakuyo(otmp)\
-								|| rakuyo_prop(otmp)\
-								|| is_mercy_blade(otmp)\
-								|| mercy_blade_prop(otmp)\
-								|| otmp->otyp == ISAMUSEI\
-								|| otmp->otyp == BESTIAL_CLAW\
-								|| check_oprop(otmp, OPROP_CCLAW)\
-								)
+#define is_plusten(otmp)	(arti_plusten(otmp))
 #define is_plussev_armor(otmp)	(is_elven_armor((otmp))\
 								|| arti_plussev((otmp))\
 								|| ((otmp)->otyp == CORNUTHAUM && Role_if(PM_WIZARD))\
@@ -1440,7 +1441,7 @@ struct obj {
 		(depth&(W_ARMC|W_GLYPH)) ? FALSE :\
 		(depth&(W_ARMS|W_WEP|W_QUIVER|W_SWAPWEP|W_AMUL|W_SADDLE|W_CHAIN)) ? (armdepth == W_ARMC) :\
 		(depth&(W_ARMH|W_ARMG|W_ARMF|W_ARM|W_RINGL|W_RINGR|W_TOOL)) ? (armdepth != W_ARMU) :\
-		(depth&(W_ARMU|W_SKIN)) ? TRUE :\
+		(depth&(W_ARMU|W_SKIN|W_UPGRADE)) ? TRUE :\
 		FALSE))
 
 #define PURIFIED_CHAOS	(mvitals[PM_CHAOS].died)

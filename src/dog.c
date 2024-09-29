@@ -55,6 +55,17 @@ pet_type()
 	if(Role_if(PM_MADMAN)){
 		return PM_SECRET_WHISPERER;
 	}
+	else if(Role_if(PM_UNDEAD_HUNTER) && philosophy_index(u.ualign.god)){
+		if(u.ualign.god == GOD_THE_COLLEGE){
+			return PM_FLOATING_EYE;
+		}
+		else if(u.ualign.god == GOD_THE_CHOIR){
+			return PM_PARASITIC_MIND_FLAYER;
+		}
+		else { //Defilement
+			return PM_CENTIPEDE;
+		}
+	}
 	else if(Race_if(PM_DROW)){
 		if (Role_if(PM_HEALER)){
 			return (PM_KNIGHT);
@@ -117,7 +128,7 @@ boolean quietly;
 			// No tame uniqs or nowish creatures
 			if ((pm->geno & G_UNIQ) || is_unwishable(pm)){
 				pline_The("figurine warps strangely!");
-				pm = rndmonst();
+				pm = rndmonst(0,0);
 			}
 			/* activating a figurine provides one way to exceed the
 			   maximum number of the target critter created--unless
@@ -137,7 +148,7 @@ boolean quietly;
 	    } else if (!rn2(3)) {
 			pm = &mons[pet_type()];
 	    } else {
-			pm = rndmonst();
+			pm = rndmonst(0,0);
 			if (!pm) {
 			  if (!quietly)
 				There("seems to be nothing available for a familiar.");
@@ -737,6 +748,7 @@ boolean portal;
 	boolean stay_behind;
 	boolean all_pets = FALSE;
 	int pet_dist = P_SKILL(P_BEAST_MASTERY);
+	int follow_dist;
 	if(pet_dist < 1)
 		pet_dist = 1;
 	if(uwep && uwep->otyp == SHEPHERD_S_CROOK)
@@ -756,10 +768,22 @@ boolean portal;
 	    if (DEADMONSTER(mtmp)) continue;
 	    if (pets_only && !mtmp->mtame) continue;
 	    if (mtmp->mtyp == PM_DANCING_BLADE) continue;
+		follow_dist = pet_dist;
+		if(Race_if(PM_VAMPIRE)){
+			if(is_vampire(mtmp->data)){
+				follow_dist++;
+				if(check_vampire(VAMPIRE_MASTERY))
+					follow_dist++;
+			}
+			if(is_undead(mtmp->data)){
+				follow_dist++;
+			}
+		}
 	    if (((monnear(mtmp, u.ux, u.uy) && levl_follower(mtmp)) || 
 			(mtmp->mtame && (all_pets ||
-							// (u.sealsActive&SEAL_MALPHAS && mtmp->mtyp == PM_CROW) || //Allow distant crows to get left behind.
-							(distmin(mtmp->mx, mtmp->my, u.ux, u.uy) <= pet_dist)
+							(distmin(mtmp->mx, mtmp->my, u.ux, u.uy) <= follow_dist)
+							|| (get_mx(mtmp, MX_EDOG) && EDOG(mtmp)->dominated) //Crystal skull monsters always follow
+							// || (u.sealsActive&SEAL_MALPHAS && mtmp->mtyp == PM_CROW) //Allow distant crows to get left behind.
 							)
 							&& !(get_mx(mtmp, MX_ESUM) && !mtmp->mextra_p->esum_p->sticky)	// cannot be a summon marked as not-a-follower
 			) ||
@@ -1143,7 +1167,7 @@ rock:
 			obj->otyp == RIN_SLOW_DIGESTION)
 			return TABU;
 	    if (hates_silver(mon->data) &&
-		obj->obj_material == SILVER)
+		obj_is_material(obj, SILVER))
 			return(TABU);
 	    if (hates_iron(mon->data) &&
 		is_iron_obj(obj))
@@ -1152,7 +1176,7 @@ rock:
 		is_unholy(obj))
 			return(TABU);
 	    if (hates_unholy_mon(mon) &&
-		obj->obj_material == GREEN_STEEL)
+		obj_is_material(obj, GREEN_STEEL))
 			return(TABU);
 	    if (hates_unblessed_mon(mon) &&
 		(is_unholy(obj) || obj->blessed))
@@ -1303,7 +1327,7 @@ int numdogs;
 	// finds weakest pet, and if there's more than 6 pets that count towards your limit
 	// it sets the weakest friendly
 	struct monst *curmon = 0, *weakdog = 0;
-	int witches = 0, familiars = 0;
+	int witches = 0, familiars = 0, vampires = 0;
 	for(curmon = fmon; curmon; curmon = curmon->nmon){
 		if(curmon->mtame && !(EDOG(curmon)->friend) && !(EDOG(curmon)->loyal) && !(EDOG(curmon)->dominated) && !is_suicidal(curmon->data)
 			&& !curmon->mspiritual && !(get_timer(curmon->timed, DESUMMON_MON) && !(get_mx(curmon, MX_ESUM) && curmon->mextra_p->esum_p->permanent))
@@ -1317,6 +1341,12 @@ int numdogs;
 				if(familiars >= witches)
 					numdogs++;
 				familiars++;
+			}
+			else if(is_vampire(curmon->data) && check_vampire(VAMPIRE_THRALLS)){
+				//50% (if count is odd)
+				if(vampires&1)
+					numdogs++;
+				vampires++;
 			}
 			else
 				numdogs++;
@@ -1454,7 +1484,8 @@ int enhanced;
 		return((struct monst *)0);
 	}
 
-	if(flags.moonphase == FULL_MOON && night() && rn2(6) && obj 
+	if((flags.moonphase == FULL_MOON || flags.moonphase == HUNTING_MOON)
+		&& night() && rn2(6) && obj 
 		&& !is_instrument(obj) && obj->otyp != DOLL_OF_FRIENDSHIP
 		&& obj->oclass != SPBOOK_CLASS && obj->oclass != SCROLL_CLASS
 		&& mtmp->data->mlet == S_DOG
@@ -1665,7 +1696,10 @@ boolean was_dead;
 	}
     } else {
 	/* chance it goes wild anyway - Pet Semetary */
-	if (!(edog && (edog->loyal || edog->dominated)) && !rn2(mtmp->mtame)) {
+	if (!(edog && (edog->loyal || edog->dominated)) 
+		&& !(mtmp->mtame && is_vampire(mtmp->data) && check_vampire(VAMPIRE_THRALLS))
+		&& !rn2(mtmp->mtame)
+	) {
       untame(mtmp, 0);
       edog = (struct edog *)0;
 	}

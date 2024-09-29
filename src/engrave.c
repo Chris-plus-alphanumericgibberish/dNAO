@@ -4535,7 +4535,11 @@ int x, y;
 const char *str;
 {
 	/* Can we put a grave here? */
-	if ((levl[x][y].typ != ROOM && levl[x][y].typ != GRAVE) || t_at(x,y)) return;
+	if ((levl[x][y].typ != ROOM
+		&& levl[x][y].typ != GRAVE
+		&& levl[x][y].typ != SOIL
+		&& levl[x][y].typ != GRASS
+	) || t_at(x,y)) return;
 
 	/* Make the grave */
 	levl[x][y].typ = GRAVE;

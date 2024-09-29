@@ -961,7 +961,7 @@ asGuardian:
 	}
 	break;
 	case MS_WERE:
-		if (flags.moonphase == FULL_MOON && (night() ^ !rn2(13))) {
+		if (flags.moonphase == HUNTING_MOON || (flags.moonphase == FULL_MOON && (night() ^ !rn2(13)))) {
 			pline("%s throws back %s head and lets out a blood curdling %s!",
 				  Monnam(mtmp), mhis(mtmp),
 				  ptr->mtyp == PM_HUMAN_WERERAT ? "shriek" : "howl");
@@ -971,7 +971,7 @@ asGuardian:
 				 "whispers inaudibly.  All you can make out is \"moon\".";
 	break;
 	case MS_BARK:
-	    if (flags.moonphase == FULL_MOON && night()) {
+	    if (flags.moonphase == HUNTING_MOON || (flags.moonphase == FULL_MOON && night())) {
 		pline_msg = "howls.";
 	    } else if (mtmp->mpeaceful) {
 		if (mtmp->mtame &&
@@ -1365,6 +1365,9 @@ asGuardian:
 		if((ptr->mtyp == PM_INTONER && !rn2(5)) || ptr->mtyp == PM_BLACK_FLOWER){
 			if (!canspotmon(mtmp))
 				map_invisible(mtmp->mx, mtmp->my);
+			if(ptr->mtyp == PM_BLACK_FLOWER){
+				TRANSCENDENCE_IMPURITY_UP(FALSE)
+			}
 			switch(rnd(4)){
 				case 1:
 					if(ptr->mtyp == PM_INTONER && u.uinsight > Insanity+10) pline("%s screams melodiously.", Monnam(mtmp));
@@ -2434,6 +2437,28 @@ humanoid_sound:
 					if((Role_if(PM_NOBLEMAN) || Role_if(PM_KNIGHT)) && In_quest(&u.uz)){
 						if(Race_if(PM_DWARF)) pline_msg = "talks about fishing.";
 						else pline_msg = "talks about farming.";
+					}
+					else if(Role_if(PM_UNDEAD_HUNTER) && In_quest(&u.uz)){
+						switch(mtmp->m_id%6){
+							case 0:
+								pline_msg = "spits at your feet.";
+								break;
+							case 1:
+								verbl_msg = "Oh, brave hunter, the city is in such disarray.";
+								break;
+							case 2:
+								verbl_msg = "Oh, brave hunter, the city is in such disarray.";
+								break;
+							case 3:
+								verbl_msg = "Blessings to you... Blessings to the whole damn Church!";
+								break;
+							case 4:
+								verbl_msg = "Good hunting.";
+								break;
+							case 5:
+								verbl_msg = "What a horrible night to have a curse.";
+								break;
+						}
 					}
 					else if (is_elf(ptr))
 					pline_msg = "curses orcs.";
@@ -6140,6 +6165,15 @@ boolean inc_penalties;
 	else if(u.specialSealsActive&SEAL_NUMINA) maxskill = max(P_SKILLED,maxskill);
 	
 	//if(roleSkill(p_skill)) maxskill = P_EXPERT;
+	if(p_skill == P_ENCHANTMENT_SPELL){
+		if(u.cuckoo && active_glyph(LUMEN)){
+			INCR_MAXSKILL;
+			//Now at least basic
+			if(u.cuckoo > 1){
+				maxskill = min(maxskill + u.cuckoo - 1, P_EXPERT);
+			}
+		}
+	}
 
 	if(Air_crystal){
 		if(WIND_SKILL(p_skill))
@@ -6230,6 +6264,15 @@ boolean inc_penalties;
 		if(OLD_P_SKILL(P_SHIEN) >= P_EXPERT) curskill++;
 	}
 
+	if(p_skill == P_ENCHANTMENT_SPELL){
+		if(u.cuckoo && active_glyph(LUMEN)){
+			INCR_CURSKILL;
+			//Now at least basic
+			if(u.cuckoo > 1){
+				curskill = min(curskill + u.cuckoo - 1, P_EXPERT);
+			}
+		}
+	}
 	curskill = min(curskill, maxskill);
 
 	if(Air_crystal){

@@ -284,7 +284,7 @@ WEAPON(("fang of apep"),
 
 WEAPON(("sickle"), /* Vs plants: +6 to hit and double damage */
 	DMG(D(4)), DMG(D(1)),
-	1, 1,  MZ_SMALL, 21, 20,  4, -2, S,   P_HARVEST, IRON, FALSE, HI_METAL),
+	1, 1,  MZ_SMALL, 20, 20,  4, -2, S,   P_HARVEST, IRON, FALSE, HI_METAL),
 WEAPON(("elven sickle", "runed sickle"), /* Vs plants: +6 to hit and double damage *//*Needs tile*/
 	DMG(D(6)), DMG(D(3)),
 	0, 1,  MZ_SMALL,  0,  5,  4,  0, S,   P_HARVEST, WOOD, FALSE, HI_WOOD),
@@ -294,6 +294,12 @@ WEAPON(("saw cleaver"),
 WEAPON(("razor cleaver"),
 	DMG(D(6), F(1)), DMG(D(8)),
 	1, 0,  MZ_SMALL,  0, 60,  4, 0, S,   P_HARVEST, IRON, FALSE, HI_METAL),
+WEAPON(("long saw"),
+	DMG(D(8)), DMG(D(6)),
+	1, 0,  MZ_MEDIUM, 1, 75, 15, 1, S,   P_HARVEST, IRON, FALSE, HI_METAL),
+WEAPON(("saw spear"),
+	DMG(D(8)), DMG(D(10)),
+	1, 0,  MZ_LARGE,  0, 75, 15, 0, P|S,   P_SPEAR, IRON, FALSE, HI_METAL),
 
 WEAPON(("axe"),
 	DMG(D(6)), DMG(D(4)),
@@ -351,17 +357,22 @@ WEAPON(("blade of pity", "curved dagger"),
 
 WEAPON(("church-hammer"),
 	DMG(D(2,8), F(2)), DMG(D(2,8)),
-	1, 0,  MZ_HUGE,  1, 220,100,  -2, B,   P_HAMMER, MINERAL, FALSE, CLR_GRAY, O_MATSPEC(IDED|UNIDED)),
+	1, 0,  MZ_HUGE,  1, 170,100,  -2, B,   P_HAMMER, MINERAL, FALSE, CLR_GRAY, O_MATSPEC(IDED|UNIDED)),
 WEAPON(("hunter's shortsword"),
 	DMG(D(6)), DMG(D(8)),
 	1, 0,  MZ_SMALL,  0, 30, 20,  2, S|P,   P_SHORT_SWORD, SILVER, FALSE, HI_SILVER),
 
 WEAPON(("scimitar", "curved sword"),
 	DMG(D(8)), DMG(D(8)),
-	0, 0, MZ_MEDIUM, 14, 40, 15,  0, S,   P_SCIMITAR, IRON, FALSE, HI_METAL),
+	0, 0, MZ_MEDIUM, 13, 40, 15,  0, S,   P_SCIMITAR, IRON, FALSE, HI_METAL),
 WEAPON(("high-elven warsword", "runed curved sword"), /*Needs encyc entry*/
 	DMG(D(10), D(6)), DMG(D(10), D(6)),
 	0, 0, MZ_HUGE,    1, 75,150,  2, S,   P_SCIMITAR, MITHRIL, UNIDED, HI_MITHRIL),
+
+WEAPON(("bow-blade", "recurved sword"),
+	DMG(D(8)), DMG(D(8)),
+	0, 0,  MZ_MEDIUM, 1, 60, 75, 1, P|S,   P_SCIMITAR, IRON, FALSE, HI_METAL),
+
 WEAPON(("rapier"), /*Needs encyc entry*/
 	DMG(D(6)), DMG(D(4)),
 	1, 0, MZ_MEDIUM,  5, 28, 20,  2, P,   P_SABER, METAL, FALSE, HI_METAL),
@@ -409,7 +420,7 @@ WEAPON(("droven greatsword", "two-handed sword"), /*Needs encyc entry*//*Needs t
 WEAPON(("katana", "samurai sword"),
 	DMG(D(10)), DMG(D(12)),
 	0, 0, MZ_MEDIUM,  4, 40, 80,  1, S,   P_LONG_SWORD, IRON, FALSE, HI_METAL),
-WEAPON(("chikage", "ornate samurai sword"),
+WEAPON(("chikage", "ornate samurai saber"),
 	DMG(D(10)), DMG(D(12)),
 	0, 0, MZ_MEDIUM,  1, 60,500,  1, S,   P_LONG_SWORD, METAL, FALSE, HI_METAL, O_MAGIC(1)),
 WEAPON(("cane"),
@@ -655,6 +666,9 @@ BULLET(("silver bullet", "silver pellet"),
 BULLET(("blood-bullet", "silver pellet"),
 	DMG(D(2, 8), F(4)), DMG(D(2, 6), F(4)),
 	0,    MZ_TINY, 0,  1,  15, 0,  WP_BULLET,   P|S|B,  HEMARGYOS, -P_FIREARM, HI_SILVER),/*Needs tile*/
+BULLET(("blood-spear", "silver spike"),
+	DMG(D(4, 4), F(5)), DMG(D(2, 10), F(5)),
+	0,    MZ_TINY, 0,  1,  15, 0,  WP_BULLET,   P|S|B,  HEMARGYOS, -P_FIREARM, HI_SILVER),/*Needs tile*/
 BULLET(("shotgun shell", "red tube", "tube"),
 	DMG(D(2, 12), F(4)), DMG(D(2, 6), F(4)),
 	0,    MZ_TINY, 0,  1,  10,10,   WP_SHELL,   S,   LEAD, -P_FIREARM, CLR_RED),/*Needs tile*/
@@ -698,6 +712,8 @@ BOW(("crossbow"),                                     1,  MZ_LARGE, 45, 50,  40,
 BOW(("droven crossbow", "spider-emblemed crossbow"),  0,  MZ_LARGE,  0, 50, 120,  4, SILVER, P_CROSSBOW, CLR_BLACK), /*Needs encyc entry*/
  /*Needs encyc entry, see aklys*/
 BOW(("atlatl", "notched stick"),                      0, MZ_MEDIUM,  0, 12,  30,  0, WOOD, P_SPEAR, HI_WOOD), /*Needs encyc entry*/
+
+BOW(("bladed bow"), 1,  MZ_LARGE, 0, 60,  75,  0, IRON, P_BOW, HI_METAL),
 
 #undef WEAPON
 #undef PROJECTILE
@@ -1305,6 +1321,8 @@ TOOL(("bullet fabber", "white box with a yellow fiddly bit", "fiddly box"),/*Nee
 								0, MZ_MEDIUM, 0, 1, 0,   0, 20,  30, PLASTIC, CLR_WHITE),
 TOOL(("nightmare's bullet mold", "blade-tipped mold"),/*Needs tile*/ /*Needs encyc entry*/
 								0, MZ_SMALL, 0, 1, 0,   0, 15, 300, IRON, HI_METAL),
+TOOL(("portable electrode", "ball-topped spike"),/*Needs tile*/ /*Needs encyc entry*/
+								0, MZ_SMALL, 0, 1, 0,   0, 15, 300, IRON, HI_METAL),
 TOOL(("upgrade kit"),  1, MZ_MEDIUM, 0, 0, 0,  40,100,  30, COPPER, HI_COPPER),/*Needs encyc entry*//*Needs tile*/
 TOOL(("power pack", "little white cube", "little cube"), /*Needs encyc entry*//*Needs tile*/
 								0,   MZ_TINY, 1, 1, 0,   0,  1,  300, PLASTIC, CLR_WHITE),
@@ -1346,7 +1364,7 @@ TOOL(("Hyperborean dial", "silvery mechanism"), /*Needs encyc entry*/
 								0,   MZ_SMALL, 0, 1, 0,   0, 66,8000, METAL, HI_SILVER),
 TOOL(("magic marker"), 1,   MZ_TINY, 0, 1, 1,  15,  2,  50, PLASTIC, CLR_RED),
 TOOL(("church-brick", "engraved brick"), /*Needs encyc entry*/
-								0,   MZ_HUGE, 0, 1, 0,   0, 220,100, MINERAL, CLR_GRAY, O_MATSPEC(IDED|UNIDED)),
+								0,   MZ_HUGE, 0, 1, 0,   0, 170,100, MINERAL, CLR_GRAY, O_MATSPEC(IDED|UNIDED)),
 TOOL(("church sheath", "engraved sheath"), /*Needs encyc entry*/
 								0,   MZ_HUGE, 0, 1, 0,   0, 110,100, IRON, HI_METAL),
 /* traps */
@@ -1459,6 +1477,7 @@ FOOD(("meatball"),                0,   MZ_TINY,  1,  1, 0, FLESH,   5, CLR_BROWN
 FOOD(("meat stick"),              0,   MZ_TINY,  1,  1, 0, FLESH,   5, CLR_BROWN),
 FOOD(("massive chunk of meat"),   0,MZ_GIGANTIC,20,400, 0, FLESH,2000, CLR_BROWN),
 FOOD(("meat ring"),               0,   MZ_TINY,  1,  1, 0, FLESH,   5, CLR_BROWN, O_MERGE(0)),
+FOOD(("parasite"),                0,   MZ_TINY,  1,  1, 0, VEGGY,  25, CLR_BRIGHT_BLUE),
 
 /* Body parts.... eeeww */
 FOOD(("eyeball"),                 0,   MZ_TINY,  1,  0, 0, FLESH,  10, CLR_WHITE),/*Needs tile*/
@@ -1626,6 +1645,9 @@ POTION(("blood", "blood-red"),            0, 18, 50,  CLR_RED, O_USKWN(1)),	/* e
 	BONE_TILE(("writhe glyph",  "writhing vesica piscis"),   0),				// WRITHE
 	BONE_TILE(("radiance glyph",  "eyed triangle"),   0),						// RADIANCE
 	BONE_TILE(("beast's embrace glyph",  "curling beast's claw"),   0),		// BEASTS_EMBRACE
+	BONE_TILE(("defilement glyph",  "broken-fingered handprint"),   0),		// DEFILEMENT
+	BONE_TILE(("weed glyph",  "set of wavy weedy lines"),   0),				// LUMEN
+	BONE_TILE(("vacuous glyph",  "mass of wobbly circles"),   0),				// ROTTEN_EYES
 	BONE_TILE(("orrery glyph",  "set of nested dotted circles"),   0),		// SIGHT
 #undef BONE_TILE
 #define GOLD_DISK(names, clr, wt, sz,...) OBJECT( \

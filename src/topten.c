@@ -841,9 +841,14 @@ boolean so;
 		*bp = (t1->deathdnum == astral_level.dnum) ? '\0' : ' ';
 	    second_line = FALSE;
 	} else if (!strncmp("ascended", t1->death, 8)) {
-	    Sprintf(eos(linebuf), "ascended to demigod%s-hood",
-		    (t1->plgend[0] == 'F') ? "dess" : "");
-	    second_line = FALSE;
+		if (!strcmp("ascended", t1->death)) {
+			Sprintf(eos(linebuf), "ascended to demigod%s-hood",
+				(t1->plgend[0] == 'F') ? "dess" : "");
+		}
+		else {
+			Sprintf(eos(linebuf), "%s", t1->death);
+		}
+		second_line = FALSE;
 	} else {
 	    if (!strncmp(t1->death, "quit", 4)) {
 		Strcat(linebuf, "quit");

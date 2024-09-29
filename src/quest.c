@@ -161,6 +161,10 @@ boolean talk;
     aligntyp original_alignment = galign(u.ugodbase[UGOD_ORIGINAL]);
 	int racemod = Race_if(PM_VAMPIRE) ? 5 : 0;
 
+	/*As quasi-atheist unethical weasels your quest faction doesn't impose purity tests*/
+	if(Role_if(PM_UNDEAD_HUNTER))
+		return TRUE;
+
 #ifdef WIZARD
     if (wizard && talk) {
 	if (u.ualign.type != original_alignment) {
@@ -295,12 +299,89 @@ struct obj *obj;	/* quest artifact; possibly null if carrying Amulet */
 }
 
 STATIC_OVL void
+chat_with_leader_uh()
+{
+/*	It is possible for you to get the amulet without completing
+ *	the quest.  If so, try to induce the player to quest.
+ */
+	if(Qstat(got_thanks)) {
+/*	Rule 1:	You've gone back with/without the amulet.	*/
+	    if(u.uhave.amulet){
+			//Warn about moon and research
+		}
+/*	Rule 2:	You've gone back before going for the amulet.	*/
+	    else		qt_pager(QT_POSTHANKS + (flags.stag ? QT_TURNEDSTAG : 0));
+	}
+
+/*	Rule 3: You've killed the "new" quest nemesis. */
+	else if(mvitals[PM_MOON_S_CHOSEN].died) {
+		//Thank, but the moon is close
+		string_pager(
+"\"This would be a day to celebrate, but I fear this is still not over.\n\
+\n\
+\"The moon hangs low. You have drawn the gaze of a Great One, and nowhere\n\
+you go will be safe. You must finish your studies, claim the Amulet, and\n\
+turn this misfortune to your advantage.");
+		Qstat(got_thanks) = TRUE;
+/*	Rule 4: You haven't finished the "second" quest yet.	*/
+	} else if(Qstat(got_final)) {
+		switch(rn2(10)){
+			case 0:
+				verbalize("I'm sure you can prevail, if you devote yourself to your studies of %s.", (char *)align_gname(galign(u.ugodbase[UGOD_ORIGINAL])));
+			break;
+			case 1:
+				verbalize("Beware the werewolf's bite.");
+			break;
+			case 2:
+				verbalize("Beasts fear fire.");
+			break;
+			case 3:
+				verbalize("Beware the insubstantial ghosts of the Haunted Forest.");
+			break;
+			case 4:
+				verbalize("Carry the Stake of Withering.  It will assist you against the beasts.");
+			break;
+			case 5:
+				verbalize("May you finally Lay to Rest this scourge of beasts.");
+			break;
+			case 6:
+				verbalize("The undead legions are weakest during the daylight hours.");
+			break;
+			case 7:
+				verbalize("Be sure you are immune to cold.  The strange wolves have the touch of ice.");
+			break;
+			case 8:
+				verbalize("Beware the graveyard-city in the Haunted Forest. The ancient elves were destroyed long ago, but their spirits linger.");
+			break;
+			case 9:
+				verbalize("Something has infected the Stake of Withering. Its efficacy wanes.");
+			break;
+		}
+/*	Rule 5: Allways acceptable, give the "second" quest */
+	} else {
+		string_pager(
+"\"Something is wrong. The plague of beasts has continued to spread\n\
+into the city, even though you have slain the index wolf and reclaimed\n\
+the Stake of Withering.\n\
+\n\
+\"You must travel back through the Haunted Forest, find the true\n\
+source of this scourge, and Lay it to Rest.\"");
+		Qstat(got_final) = TRUE;
+		//Re-give quest
+		livelog_write_string("was re-given their Quest");
+	}
+}
+
+STATIC_OVL void
 chat_with_leader()
 {
 /*	Rule 0:	Cheater checks.		No -C_ANG			*/
 	// if(u.uhave.questart && !Qstat(met_nemesis))
 	    // Qstat(cheater) = TRUE;
-
+	if(Role_if(PM_UNDEAD_HUNTER) && u.uevent.qrecalled){
+		chat_with_leader_uh();
+		return;
+	}
 /*	It is possible for you to get the amulet without completing
  *	the quest.  If so, try to induce the player to quest.
  */
@@ -489,10 +570,45 @@ nemesis_speaks()
 }
 
 STATIC_OVL void
+chat_with_guardian_uh()
+{
+	if (u.uevent.qrecalled){
+		if(mvitals[PM_MOON_S_CHOSEN].died){
+			qt_pager(rn1(5, QT_GUARDTALK2 + (flags.stag ? QT_TURNEDSTAG : 0)));
+		}
+		else {
+			switch(rn2(5)){
+				case 0:
+					verbalize("There you are, %s!  What has happened, %s told us youu had succeeded.", rank_of(u.ulevel, Role_switch, flags.female), ldrname());
+				break;
+				case 1:
+					verbalize("Ah, %s!  Surely you can help us in our hour of need.", plname);
+				break;
+				case 2:
+					verbalize("%s.  %s has great need of your help.", (flags.female) ? "Sister" : "Brother", ldrname());
+				break;
+				case 3:
+					verbalize("We are glad you have returned.  The plague of beasts is spreading inside the city!");
+				break;
+				case 4:
+					verbalize("Good Evening %s.  Have you Laid To Rest many recently?", plname);
+				break;
+			}
+		}
+	}
+	else if (u.uhave.questart && Qstat(killed_nemesis))
+	    qt_pager(rn1(5, QT_GUARDTALK2 + (flags.stag ? QT_TURNEDSTAG : 0)));
+	else
+	    qt_pager(rn1(5, QT_GUARDTALK + (flags.stag ? QT_TURNEDSTAG : 0)));
+}
+
+STATIC_OVL void
 chat_with_guardian()
 {
-/*	These guys/gals really don't have much to say... */
-	if (u.uhave.questart && Qstat(killed_nemesis))
+	/*	These guys/gals really don't have much to say... */
+	if (Role_if(PM_UNDEAD_HUNTER))
+		chat_with_guardian_uh();
+	else if (u.uhave.questart && Qstat(killed_nemesis))
 	    qt_pager(rn1(5, QT_GUARDTALK2 + (flags.stag ? QT_TURNEDSTAG : 0)));
 	else
 	    qt_pager(rn1(5, QT_GUARDTALK + (flags.stag ? QT_TURNEDSTAG : 0)));

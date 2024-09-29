@@ -471,6 +471,10 @@ boolean	inc_or_dec;
 	/* no physical exercise while polymorphed; the body's temporary */
 	if (Upolyd && i != A_WIS && i != A_INT) return;
 
+	//Prevent abuse.
+	if(check_preservation(PRESERVE_PREVENT_ABUSE) && !inc_or_dec)
+		return;
+
 	if(abs(AEXE(i)) < AVAL) {
 		/*
 		 *	Law of diminishing returns (Part I):
@@ -1218,6 +1222,11 @@ calc_total_maxhp()
 			rawmax *= 1.3;
 			hpcap *= 1.3;
 		}
+		/*Calculate Eyes *before* the max bonus is determined*/
+		if(active_glyph(ROTTEN_EYES)){
+			rawmax *= 1.05;
+			hpcap *= 1.05;
+		}
 		
 		maxbonus = hpcap - rawmax;
 		
@@ -1237,6 +1246,11 @@ calc_total_maxhp()
 		if(active_glyph(CLOCKWISE_METAMORPHOSIS)){
 			rawmax *= 1.3;
 			hpcap *= 1.3;
+		}
+
+		if(active_glyph(ROTTEN_EYES)){
+			rawmax *= 1.05;
+			hpcap *= 1.05;
 		}
 		
 		if(u.uhpmultiplier)
@@ -1410,7 +1424,21 @@ struct monst *mon;
 		if (armh && armh->otyp == DUNCE_CAP) return(6);
 		else if(is_player && u.sealsActive&SEAL_HUGINN_MUNINN) return 25;
 	}
-	return((schar)((tmp >= 25) ? 25 : (tmp <= 3) ? 3 : tmp));
+	//Clamp
+	int max = 25;
+	if(x == A_INT || x == A_WIS){
+		tmp -= u.mental_scores_down/3;
+		if(preservation_count() > 5)
+			max -= 2;
+		else if(preservation_count() > 2)
+			max -= 1;
+		if(parasite_count() > 5)
+			max -= 2;
+		else if(parasite_count() > 2)
+			max -= 1;
+		if(max < 3) max = 3;
+	}
+	return((schar)((tmp >= max) ? max : (tmp <= 3) ? 3 : tmp));
 
 }
 

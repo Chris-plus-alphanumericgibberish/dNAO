@@ -483,7 +483,7 @@ void
 nh_timeout()
 {
 	register struct prop *upp;
-	int sleeptime, i, m_idx, baseluck = (flags.moonphase == FULL_MOON) ? 1 : 0;
+	int sleeptime, i, m_idx, baseluck = (flags.moonphase == HUNTING_MOON) ? 2 : (flags.moonphase == FULL_MOON) ? 1 : 0;
 	
 	if (flags.friday13) baseluck -= 1;
 	

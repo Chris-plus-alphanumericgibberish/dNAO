@@ -281,13 +281,13 @@ static const struct icp brick_materials[] = {
 	{150, WOOD },
 	{100, IRON },//800
 	{ 50, LEAD },
-	{ 25, SILVER },
-	{ 25, PLATINUM },//900
-	{ 25, MITHRIL },//925
-	{ 25, WAX },//950
-	{ 13, GLASS },
-	{ 12, GEMSTONE },
-	{ 10, OBSIDIAN_MT },
+	{ 30, SILVER },
+	{ 25, PLATINUM },//905
+	{ 25, MITHRIL },//930
+	{ 25, WAX },//955
+	{ 18, GLASS },//973
+	{ 17, GEMSTONE },//990
+	{ 10, OBSIDIAN_MT },//1000
 	{  0, 0 }
 };
 
@@ -449,7 +449,7 @@ rndmonnum()	/* select a random, common monster type */
 	register int	i;
 
 	/* Plan A: get a level-appropriate common monster */
-	ptr = rndmonst();
+	ptr = rndmonst(0, 0);
 	if (ptr) return(monsndx(ptr));
 
 	/* Plan B: get any common monster */
@@ -759,16 +759,58 @@ int mkflags;
 		add_oprop(otmp, OPROP_RAKUW);
 	if (is_mercy_blade(otmp))
 		add_oprop(otmp, OPROP_MRCYW);
+	//Always-init otyps
 	if (otmp->otyp == WHITE_VIBROSWORD
 		|| otmp->otyp == WHITE_VIBROSPEAR
 		|| otmp->otyp == WHITE_VIBROZANBATO
 		)
 		add_oprop(otmp, OPROP_HOLYW);
-	if (otmp->otyp == GOLD_BLADED_VIBROSWORD
+	else if (otmp->otyp == GOLD_BLADED_VIBROSWORD
 		|| otmp->otyp == GOLD_BLADED_VIBROSPEAR
 		|| otmp->otyp == GOLD_BLADED_VIBROZANBATO
 		)
 		add_oprop(otmp, OPROP_UNHYW);
+	else if (otmp->otyp == MOON_AXE){
+		switch (phase_of_the_moon()){
+		case 0:
+			otmp->ovar1_moonPhase = ECLIPSE_MOON;
+			break;
+		case 1:
+		case 7:
+			otmp->ovar1_moonPhase = CRESCENT_MOON;
+			break;
+		case 2:
+		case 6:
+			otmp->ovar1_moonPhase = HALF_MOON;
+			break;
+		case 3:
+		case 5:
+			otmp->ovar1_moonPhase = GIBBOUS_MOON;
+			break;
+		case 4:
+			otmp->ovar1_moonPhase = FULL_MOON;
+			break;
+		case 8:
+			otmp->ovar1_moonPhase = HUNTING_MOON;
+			break;
+		}
+	}
+	else if(otmp->otyp == CHURCH_HAMMER){
+		struct obj *sword = mksobj(HUNTER_S_SHORTSWORD, mkflags);
+		add_to_container(otmp, sword);
+	}
+	else if(otmp->otyp == CHURCH_BLADE){
+		struct obj *sword = mksobj(HUNTER_S_LONGSWORD, mkflags);
+		add_to_container(otmp, sword);
+	}
+	else if (otmp->otyp == MASS_SHADOW_PISTOL){
+		struct obj *stone = mksobj(ROCK, NO_MKOBJ_FLAGS);
+		stone->quan = 1;
+		stone->owt = weight(stone);
+		add_to_container(otmp, stone);
+		container_weight(otmp);
+	}
+
 	if (init) {
 		switch (let) {
 		case WEAPON_CLASS:
@@ -790,47 +832,12 @@ int mkflags;
 				otmp->altmode = AD_SLEE;
 			}
 			else if (otmp->otyp == MASS_SHADOW_PISTOL){
-				struct obj *stone = mksobj(ROCK, NO_MKOBJ_FLAGS);
 				otmp->ovar1_charges = 800L + rnd(200);
-				stone->quan = 1;
-				stone->owt = weight(stone);
-				add_to_container(otmp, stone);
-				container_weight(otmp);
 			}
 			else if (is_blaster(otmp)){ //Rayguns and mass-shadow pistols are also blasters, so this has to go under that case
 				otmp->ovar1_charges = 80L + rnd(20);
 				if (otmp->otyp == ARM_BLASTER) otmp->altmode = WP_MODE_SINGLE;
 				if (otmp->otyp == RAYGUN) otmp->altmode = AD_FIRE;	// I think this is never reached?
-			}
-			else if (otmp->otyp == MOON_AXE){
-				switch (phase_of_the_moon()){
-				case 0:
-					otmp->ovar1_moonPhase = ECLIPSE_MOON;
-					break;
-				case 1:
-				case 7:
-					otmp->ovar1_moonPhase = CRESCENT_MOON;
-					break;
-				case 2:
-				case 6:
-					otmp->ovar1_moonPhase = HALF_MOON;
-					break;
-				case 3:
-				case 5:
-					otmp->ovar1_moonPhase = GIBBOUS_MOON;
-					break;
-				case 4:
-					otmp->ovar1_moonPhase = FULL_MOON;
-					break;
-				}
-			}
-			else if(otmp->otyp == CHURCH_HAMMER){
-				struct obj *sword = mksobj(HUNTER_S_SHORTSWORD, mkflags);
-				add_to_container(otmp, sword);
-			}
-			else if(otmp->otyp == CHURCH_BLADE){
-				struct obj *sword = mksobj(HUNTER_S_LONGSWORD, mkflags);
-				add_to_container(otmp, sword);
 			}
 			//#ifdef FIREARMS
 			if (otmp->otyp == STICK_OF_DYNAMITE) {
@@ -1020,6 +1027,9 @@ int mkflags;
 			case CAN_OF_GREASE:	otmp->spe = rnd(25);
 				blessorcurse(otmp, 10);
 				break;
+			case PHLEBOTOMY_KIT:
+				otmp->spe = rnd(5);
+				break;
 			case CRYSTAL_BALL:	otmp->spe = rnd(5);
 				blessorcurse(otmp, 2);
 				break;
@@ -1183,7 +1193,8 @@ int mkflags;
 						PM_STAR_ELF, PM_STAR_ELF, PM_STAR_EMPEROR, PM_STAR_EMPRESS,
 						PM_ARCHEOLOGIST, PM_BARBARIAN, PM_HALF_DRAGON, PM_CAVEMAN, PM_CAVEWOMAN, 
 						PM_KNIGHT, PM_KNIGHT, PM_MADMAN, PM_MADWOMAN, PM_PRIEST, PM_PRIESTESS,
-						PM_RANGER, PM_ROGUE, PM_ROGUE, PM_SAMURAI, PM_VALKYRIE, PM_WIZARD 
+						PM_RANGER, PM_ROGUE, PM_ROGUE, PM_SAMURAI, PM_UNDEAD_HUNTER, PM_VALKYRIE,
+						PM_WIZARD 
 					};
 					skull = ROLL_FROM(skulls);
 				}
@@ -2406,7 +2417,7 @@ struct obj * obj;
 			int i = rnd(1000);
 			while (i > 0) {
 				if(random_mat_list->iprob == 0){
-					impossible("init_obj_material random_mat_list out-of-range.");
+					impossible("rand_interesting_obj_material random_mat_list out-of-range.");
 					break;
 				}
 				if (i <= random_mat_list->iprob)
@@ -2494,6 +2505,7 @@ int mat;
 		case BULLET:
 		case SILVER_BULLET:
 		case BLOOD_BULLET:
+		case BLOOD_SPEAR:
 			if (mat == SILVER)			obj->otyp = SILVER_BULLET;
 			else if (mat == HEMARGYOS)	obj->otyp = BLOOD_BULLET;
 			else						obj->otyp = BULLET;
@@ -2773,7 +2785,8 @@ register struct obj *obj;
 	}
 	
 	if(obj->otyp == MOON_AXE && obj->oartifact != ART_SCEPTRE_OF_LOLTH){
-		if(obj->ovar1_moonPhase) wt =  wt/4*obj->ovar1_moonPhase;
+		if(obj->ovar1_moonPhase == HUNTING_MOON) wt =  wt/3;
+		else if(obj->ovar1_moonPhase) wt =  wt/4*obj->ovar1_moonPhase;
 		else wt = wt/4;
 	}
 

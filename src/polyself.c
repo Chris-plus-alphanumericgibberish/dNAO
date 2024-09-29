@@ -667,11 +667,11 @@ int	mntmp;
 		unpunish();
 	    }
 	}
-	if (u.utrap && (u.utraptype == TT_WEB || u.utraptype == TT_BEARTRAP || u.utraptype == TT_FLESH_HOOK) &&
+	if (u.utrap && (u.utraptype == TT_WEB || u.utraptype == TT_SALIVA || u.utraptype == TT_BEARTRAP || u.utraptype == TT_FLESH_HOOK) &&
 		(amorphous(youmonst.data) || is_whirly(youmonst.data) || unsolid(youmonst.data) ||
 		  (youmonst.data->msize <= MZ_SMALL && u.utraptype == TT_BEARTRAP))) {
 	    You("are no longer stuck in the %s.",
-		    u.utraptype == TT_WEB ? "web" : u.utraptype == TT_FLESH_HOOK ? "flesh hook" : "bear trap");
+		    u.utraptype == TT_WEB ? "web" : u.utraptype == TT_SALIVA ? "gooey saliva" :u.utraptype == TT_FLESH_HOOK ? "flesh hook" : "bear trap");
 	    /* probably should burn webs too if PM_FIRE_ELEMENTAL */
 	    u.utrap = 0;
 	}
@@ -1366,6 +1366,10 @@ dogaze()
 			for (a = &youracedata->mattk[0]; a < &youracedata->mattk[NATTK]; a++){
 				if (a->aatyp == AT_GAZE) 
 					result |= xgazey(&youmonst, mtmp, a, -1);
+			}
+			if(!Upolyd && check_vampire(VAMPIRE_GAZE)){
+				struct attack gaze = {AT_GAZE, AD_PLYS, 1, 4};
+				result |= xgazey(&youmonst, mtmp, &gaze, -1);
 			}
 
 			if (!result) {
@@ -2095,9 +2099,14 @@ boolean silently;
 #ifdef OVL1
 
 const char *
-mbodypart(mon, part)
-struct monst *mon;
-int part;
+mbodypart(struct monst *mon, int part)
+{
+	struct permonst *mptr = mon->data;
+	return ptrbodypart(mptr, part, mon);
+}
+
+const char *
+ptrbodypart(struct permonst *mptr, int part, struct monst *mon)
 {
 	static NEARDATA const char
 	*humanoid_parts[] = { 
@@ -2369,7 +2378,6 @@ int part;
 		S_ORC, S_GIANT,		/* quest nemeses */
 		'\0'		/* string terminator; assert( S_xxx != 0 ); */
 	};
-	struct permonst *mptr = mon->data;
 
 	//Specific overrides
 	if ((mptr->mtyp == PM_MUMAK || mptr->mtyp == PM_MASTODON) &&
@@ -2487,9 +2495,7 @@ int part;
 	    if (mptr->mlet == S_DOG || mptr->mlet == S_FELINE ||
 		    mptr->mlet == S_YETI)
 		return part == HAND ? "paw" : "pawed";
-		if(mon == &youmonst && youracedata->mtyp == PM_HALF_DRAGON)
-			return part == HAND ? "claw" : "clawed";
-		if(mon->mtyp == PM_HALF_DRAGON)
+		if(mon ? (mon == &youmonst && youracedata->mtyp == PM_HALF_DRAGON) : mptr->mtyp == PM_HALF_DRAGON)
 			return part == HAND ? "claw" : "clawed";
 	    if (humanoid(mptr) && attacktype(mptr, AT_CLAW) &&
 		    !index(not_claws, mptr->mlet) &&
@@ -2504,7 +2510,7 @@ int part;
 	    return snakeleg_humanoid_parts[part];
 	if (centauroid(mptr))
 	    return centauroid_parts[part];
-	if ((mon != &youmonst && is_clockwork(mptr)) || (mon == &youmonst && uclockwork))
+	if (mon ? ((mon != &youmonst && is_clockwork(mptr)) || (mon == &youmonst && uclockwork)) : is_clockwork(mptr))
 	    return clockwork_parts[part];
 	if (humanoid(mptr))
 	    return humanoid_parts[part];

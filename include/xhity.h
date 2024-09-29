@@ -71,7 +71,8 @@
 #define SUBOUT_SHUBTONG	15	/* Mind-stealing tongue attack */
 #define SUBOUT_V_CLAWS1	16	/* Extra vermiurge claws 1 */
 #define SUBOUT_V_CLAWS2	17	/* Extra vermiurge claws 2 */
-#define MAX_SUBOUT		18
+#define SUBOUT_BRAINSUCK	18	/* Brain suckers */
+#define MAX_SUBOUT		19
 #define SUBOUT_ARRAY_SIZE (MAX_SUBOUT/8+1)
 
 #endif

@@ -162,6 +162,8 @@ struct monst *mtmp;
 	/* Nitocris's wrappings are especially warded against Nyarlathotep, and accidently work vs. summons generally */
 	if(u.ux == x && u.uy == y && !mtmp->mpeaceful && (get_mx(mtmp, MX_ESUM) || is_mask_of_nyarlathotep(mtmp->data)) && uarmc && uarmc->oartifact == ART_SPELL_WARDED_WRAPPINGS_OF_)
 		return TRUE;
+	if(u.ux == x && u.uy == y && !mtmp->mpeaceful && Withering_stake && quest_status.time_doing_quest < UH_QUEST_TIME_2 && !quest_status.moon_close && (mtmp->data->mflagsa&MA_ANIMAL || mtmp->data->mflagsa&MA_DEMIHUMAN || mtmp->data->mflagsa&MA_WERE) && !resists_fire(mtmp))
+		return TRUE;
 	if(!no_upos(mtmp) && mtmp->mux == x && mtmp->muy == y && !mtmp->mpeaceful && (get_mx(mtmp, MX_ESUM) || is_mask_of_nyarlathotep(mtmp->data)) && uarmc && uarmc->oartifact == ART_SPELL_WARDED_WRAPPINGS_OF_)
 		return TRUE;
 	if(mat && (get_mx(mtmp, MX_ESUM) || is_mask_of_nyarlathotep(mtmp->data)) && which_armor(mat, W_ARMC) && which_armor(mat, W_ARMC)->oartifact == ART_SPELL_WARDED_WRAPPINGS_OF_)
@@ -1840,8 +1842,12 @@ register struct monst *mtmp;
 		int dmg = 0;
 		int power = 0;
 
-		if (canseemon(mtmp))
-			pline("%s concentrates.", Monnam(mtmp));
+		if (canseemon(mtmp)){
+			if(mtmp->mtyp == PM_FOETID_ANGEL)
+				pline("%s black tar bubbles.", s_suffix(Monnam(mtmp)));
+			else
+				pline("%s concentrates.", Monnam(mtmp));
+		}
 		// if (distu(mtmp->mx, mtmp->my) > BOLT_LIM * BOLT_LIM) {
 			// You("sense a faint wave of psychic energy.");
 		// }
@@ -1876,6 +1882,11 @@ register struct monst *mtmp;
 						Blind_telepat ? "through your latent telepathy" : "into your mind");
 				}
 			}
+			else if(mdat->mtyp == PM_FOETID_ANGEL){
+				pline("It screams %s!",
+					m_sen ? "at you through your telepathy" :
+					Blind_telepat ? "at you through your latent telepathy" : "into your mind");
+			}
 			else if (m_sen || (Blind_telepat && rn2(2)) || !rn2(10)) {
 				pline("It locks on to your %s!",
 					m_sen ? "telepathy" :
@@ -1891,6 +1902,9 @@ register struct monst *mtmp;
 				if(mdat->mtyp == PM_GREAT_CTHULHU){
 					make_stunned(HStun + dmg*10, TRUE);
 					u.umadness |= MAD_DREAMS;
+				}
+				if(mdat->mtyp == PM_FOETID_ANGEL){
+					make_doubtful((long) u.uinsight,TRUE);
 				}
 				if (mdat->mtyp == PM_ELDER_BRAIN) {
 					for (m2 = fmon; m2; m2 = nmon) {
@@ -2010,6 +2024,9 @@ register struct monst *mtmp;
 					if(!DEADMONSTER(m2)){
 						if(mdat->mtyp == PM_GREAT_CTHULHU) 
 							m2->mconf=TRUE;
+						else if(mdat->mtyp == PM_FOETID_ANGEL){
+							m2->mdoubt = TRUE;
+						}
 						else if(mdat->mtyp == PM_CLAIRVOYANT_CHANGED){
 							if(power >= 3){
 								m2->mconf=TRUE;
@@ -3329,12 +3346,17 @@ register struct monst *mtmp;
 	/* Can also learn your position via hearing you */
 	if(couldsee(mtmp->mx,mtmp->my) &&
 		distu(mtmp->mx,mtmp->my) <= 100 &&
-		(!Stealth || (mtmp->mtyp == PM_ETTIN && rn2(10))) &&
-		(Aggravate_monster || ((sensitive_ears(mtmp->data) || !rn2(7)) && !is_deaf(mtmp)))
+		((sensitive_ears(mtmp->data) || !rn2(7)) && !is_deaf(mtmp)) &&
+		(!Stealth || (mtmp->mtyp == PM_ETTIN && rn2(10)))
 	) {
 		notseen = FALSE;
 	}
-	
+	/* Or by magical means */
+	if(Aggravate_monster 
+			|| (Withering_stake && mvitals[PM_MOON_S_CHOSEN].died && (mtmp->data->mflagsa&MA_ANIMAL || mtmp->data->mflagsa&MA_DEMIHUMAN || mtmp->data->mflagsa&MA_WERE))
+	) {
+		notseen = FALSE;
+	}
 	/* add cases as required.  eg. Displacement ... */
 	if(notseen){
 		if((distmin(mtmp->mx,mtmp->my,mx,my) <= 1 && distmin(mtmp->mx,mtmp->my,u.ux,u.uy) > 1) || !rn2(100)){

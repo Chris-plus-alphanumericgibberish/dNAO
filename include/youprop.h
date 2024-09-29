@@ -618,6 +618,10 @@
 #define EBlack_crystal	u.uprops[BLACK_CRYSTAL].extrinsic
 #define Black_crystal	(HBlack_crystal || EBlack_crystal)
 
+#define HWithering_stake	u.uprops[WITHERING_STAKE].intrinsic
+#define EWithering_stake	u.uprops[WITHERING_STAKE].extrinsic
+#define Withering_stake	(HWithering_stake || EWithering_stake)
+
 #define HSterile	u.uprops[STERILE].intrinsic
 #define ESterile	u.uprops[STERILE].extrinsic
 #define Sterile		((HSterile || ESterile) && !GoodHealth)

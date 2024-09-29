@@ -680,6 +680,18 @@ int godnum;
 	altars[altarindex].shrine = shrine;
 	altars[altarindex].god = godnum;
 
+	if(!In_endgame(&u.uz) && !In_quest(&u.uz)){
+		if(godnum == GOD_THE_COLLEGE || (godnum == GOD_NONE && align_to_god(alignment) == GOD_THE_COLLEGE)){
+			mksobj_at(rn2(2) ? PORTABLE_ELECTRODE : BELL, x, y, NO_MKOBJ_FLAGS);
+		}
+		else if(godnum == GOD_THE_CHOIR || (godnum == GOD_NONE && align_to_god(alignment) == GOD_THE_CHOIR)){
+			mksobj_at(TREPHINATION_KIT, x, y, NO_MKOBJ_FLAGS);
+		}
+		else if(godnum == GOD_DEFILEMENT || (godnum == GOD_NONE && align_to_god(alignment) == GOD_DEFILEMENT)){
+			mksobj_at(PHLEBOTOMY_KIT, x, y, NO_MKOBJ_FLAGS);
+		}
+	}
+	
 	altarindex++;
 }
 
@@ -2078,7 +2090,6 @@ struct mkroom *croom;
 				ESMT(smith)->frglevel = u.uz;
 			}
 		}
-		level.flags.nforges++;
 		break;
 	case SINK:
 		/* Put a sink at m.x, m.y */

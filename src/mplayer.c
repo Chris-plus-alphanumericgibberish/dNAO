@@ -511,6 +511,26 @@ char *nam;
 		};
 		sprintf(nam, "%s", fmlkind ? ROLL_FROM(feminine) : ROLL_FROM(masculine));
 	}break;
+	case PM_UNDEAD_HUNTER:{
+		//Bloodborne, Castlevania, Buffy, Brotherhood of the Wolf
+		const char *masculine[] = {
+			"Alfred", "Brador", "Djura", "Gascoigne", "Gilbert", "Henryk", "Yamamura",
+			"Simon", "Valtr", "Damian", "Wallar", "Olek", "Henryk", "Antal", "Vitus",
+			"Jozef",
+			"Grant", "Hector", "Maxim", "Albus", "Nathan", "Cornell", "Henry", "Eric",
+			"Jonathan",
+			"Xander","Rupert",
+			"Gregoire", "Jean-Francois", "Thomas", "Mani", "Henri", "Antoine",
+		};
+		const char *feminine[] = {
+			"Adella", "Eileen", "Iosefka", "Adeline", "Henriet", 
+			"Sypha", "Maria", "Shanoa", "Carrie", "Stella", "Loretta",
+			"Charlotte", "Yoko", "Mina",
+			"Willow", "Cordelia", "Anya", "Dawn", "Tara",
+			"Marianne", "Sylvia", "Genevieve",
+		};
+		sprintf(nam, "%s", fmlkind ? ROLL_FROM(feminine) : ROLL_FROM(masculine));
+	}break;
 	case PM_VALKYRIE:
 	case PM_AWAKENED_VALKYRIE:
 	case PM_TRANSCENDENT_VALKYRIE:{
@@ -583,18 +603,6 @@ boolean special;
 int *weapon, *secweapon, *rweapon, *rwammo, *armor, *shirt, *cloak, *helm, *boots, *gloves, *shield, *tool;
 {
 	//Default to nothing
-	*weapon = STRANGE_OBJECT;
-	*secweapon = STRANGE_OBJECT;
-	*rweapon = STRANGE_OBJECT;
-	*rwammo = STRANGE_OBJECT;
-	*armor = STRANGE_OBJECT;
-	*shirt = STRANGE_OBJECT;
-	*cloak = STRANGE_OBJECT;
-	*helm = STRANGE_OBJECT;
-	*boots = STRANGE_OBJECT;
-	*gloves = STRANGE_OBJECT;
-	*shield = STRANGE_OBJECT;
-	*tool = STRANGE_OBJECT;
 	switch(ptr->mtyp) {
 	case PM_ARCHEOLOGIST:
 		*weapon = BULLWHIP;
@@ -853,6 +861,61 @@ int *weapon, *secweapon, *rweapon, *rwammo, *armor, *shirt, *cloak, *helm, *boot
 		*tool = CREDIT_CARD;
 	break;
 #endif
+	case PM_UNDEAD_HUNTER:
+		switch(rn2(rn2(15))){
+			case 0:
+				*weapon = WHIP_SAW;
+			break;
+			case 1:
+				*weapon = CANE;
+			break;
+			case 2:
+				*weapon = SOLDIER_S_RAPIER;
+			break;
+			case 3:
+				*weapon = SOLDIER_S_SABER;
+			break;
+			case 4:
+				*weapon = CHIKAGE;
+			break;
+			case 5:
+				*weapon = RAKUYO;
+			break;
+			case 6:
+				*weapon = RAKUYO_SABER;
+				*secweapon = RAKUYO_DAGGER;
+			break;
+			case 7:
+				*weapon = CHURCH_HAMMER;
+			break;
+			case 8:
+				*weapon = HUNTER_S_SHORTSWORD;
+			break;
+			case 9:
+				*weapon = CHURCH_BLADE;
+			break;
+			case 10:
+				*weapon = HUNTER_S_LONGSWORD;
+			break;
+			case 11:
+				*weapon = HUNTER_S_AXE;
+			break;
+			case 12:
+				*weapon = HUNTER_S_LONG_AXE;
+			break;
+			case 13:
+				*weapon = SAW_CLEAVER;
+			break;
+			case 14:
+				*weapon = RAZOR_CLEAVER;
+			break;
+		}
+		*armor = JACKET;
+		*helm = FEDORA;
+		*cloak = CLOAK;
+		*gloves = GLOVES;
+		*boots = HIGH_BOOTS;
+	break;
 	case PM_VALKYRIE:
 	case PM_AWAKENED_VALKYRIE:
 	case PM_TRANSCENDENT_VALKYRIE:
@@ -902,13 +965,13 @@ int *weapon, *secweapon, *rweapon, *rwammo, *armor, *shirt, *cloak, *helm, *boot
 
 struct monst *
 mk_mplayer(ptr, x, y, flags)
-register struct permonst *ptr;
+struct permonst *ptr;
 xchar x, y;
 long flags;
 {
 	boolean special = (flags&MM_GOODEQUIP) == MM_GOODEQUIP;
 	boolean endgame = (flags&MM_ENDGEQUIP) == MM_ENDGEQUIP;
-	register struct monst *mtmp;
+	struct monst *mtmp;
 	char nam[PL_NSIZ] = {0};
 
 	flags &= ~(MM_GOODEQUIP|MM_ENDGEQUIP);
@@ -929,8 +992,16 @@ long flags;
 	    int quan;
 	    struct obj *otmp;
 		int weapon, secweapon, rweapon, rwammo, armor, shirt, cloak, helm, boots, gloves, shield, tool;
-		
-		init_mplayer_gear(ptr, mtmp->female, special, &weapon, &secweapon, &rweapon, &rwammo, &armor, &shirt, &cloak, &helm, &boots, &gloves, &shield, &tool);
+		boolean uh_patient = In_quest(&u.uz) && Role_if(PM_UNDEAD_HUNTER) && in_mklev && (
+			mtmp->mtyp == PM_MADMAN
+			|| mtmp->mtyp == PM_MADWOMAN
+			|| ((mtmp->mtyp == PM_NOBLEMAN || mtmp->mtyp == PM_NOBLEWOMAN) && mtmp->mx > 57));
+		//Default to nothing
+		weapon = secweapon = rweapon = rwammo = armor = shirt = cloak = helm = boots = gloves = shield = tool = STRANGE_OBJECT;
+		if(uh_patient){
+			armor = STRAITJACKET;
+		}
+		else init_mplayer_gear(ptr, mtmp->female, special, &weapon, &secweapon, &rweapon, &rwammo, &armor, &shirt, &cloak, &helm, &boots, &gloves, &shield, &tool);
 		
 		if(mtmp && ptr->mtyp == PM_INCANTIFIER && Infuture){
 			give_mintrinsic(mtmp, TELEPAT);
@@ -1083,17 +1154,19 @@ long flags;
 			init_mon_wield_item(mtmp);
 			m_level_up_intrinsic(mtmp);
 		}
+		if(!uh_patient){
 #define In_plat_tower (dungeon_topology.alt_tower && (Is_arcadiatower2(&u.uz) || Is_arcadiatower3(&u.uz) || Is_arcadiadonjon(&u.uz)))
-	    quan = In_plat_tower ? 1 : rnd(3);
-	    while(quan--)
-			(void)mongets(mtmp, rnd_offensive_item(mtmp), NO_MKOBJ_FLAGS);
-	    quan = In_plat_tower ? 1 : rnd(3);
-	    while(quan--)
-			(void)mongets(mtmp, rnd_defensive_item(mtmp), NO_MKOBJ_FLAGS);
-	    quan = In_plat_tower ? 1 : rnd(3);
-	    while(quan--)
-			(void)mongets(mtmp, rnd_misc_item(mtmp), NO_MKOBJ_FLAGS);
+			quan = In_plat_tower ? 1 : rnd(3);
+			while(quan--)
+				(void)mongets(mtmp, rnd_offensive_item(mtmp), NO_MKOBJ_FLAGS);
+			quan = In_plat_tower ? 1 : rnd(3);
+			while(quan--)
+				(void)mongets(mtmp, rnd_defensive_item(mtmp), NO_MKOBJ_FLAGS);
+			quan = In_plat_tower ? 1 : rnd(3);
+			while(quan--)
+				(void)mongets(mtmp, rnd_misc_item(mtmp), NO_MKOBJ_FLAGS);
 #undef In_plat_tower
+		}
 
 		if((special && (mtmp->mtyp == PM_MADMAN || mtmp->mtyp == PM_MADWOMAN))
 			|| (Role_if(PM_MADMAN) && In_quest(&u.uz) && (mtmp->mtyp == PM_NOBLEMAN || mtmp->mtyp == PM_NOBLEWOMAN || mtmp->mtyp == PM_HEALER))
@@ -1129,6 +1202,14 @@ long flags;
 				mtmp->entangled_otyp = SHACKLES;
 				mtmp->entangled_oid = otmp->o_id;
 			}
+		}
+		if(uh_patient){
+			for(struct obj *otmp = mtmp->minvent; otmp; otmp = otmp->nobj){
+				if(otmp->otyp == STRAITJACKET){
+					curse(otmp);
+				}
+			}
+			set_mcan(mtmp, TRUE);
 		}
 	}
 

@@ -124,6 +124,7 @@
 #define is_tracker(ptr)			(((ptr)->mflagsg & MG_TRACKER) != 0L)
 #define eyecount(ptr)			(!haseyes(ptr) ? 0 : \
 				 ((ptr)->mtyp == PM_CYCLOPS || \
+				  (ptr)->mtyp == PM_INDEX_WOLF || \
 				  (ptr)->mtyp == PM_MONOTON || \
 				  (ptr)->mtyp == PM_FLOATING_EYE) ? 1 : 2)
 #define sensitive_ears(ptr)		(((ptr)->mflagsv & MV_ECHOLOCATE) != 0L || (ptr)->mtyp == PM_APHANACTONAN_AUDIENT)
@@ -268,9 +269,11 @@
 #define detached_from_purpose_mon(mon) (mon && detached_from_purpose((mon)->data))
 #define mindless_muse_mon(mon)	(mindless_mon(mon) && !(!on_level(&valley_level, &u.uz) && detached_from_purpose_mon(mon)))
 #define intelligent_mon(mon)	(!mindless_mon(mon) && !is_animal((mon)->data))
+#define intelligent(ptr)	(!mindless(ptr) && !is_animal(ptr))
 #define murderable_mon(mon)	((mon) && ((intelligent_mon(mon) && always_peaceful((mon)->data) && !always_hostile_mon(mon)) || (mon)->isshk || (mon)->isgd || (mon)->ispriest))
 
-#define mortal_race(mon)	(intelligent_mon(mon) && !nonliving((mon)->data) && !is_minion((mon)->data) && !is_demon((mon)->data) && !is_primordial((mon)->data) && !is_great_old_one((mon)->data))
+#define mortal_race(mon)	(intelligent_mon(mon) || mortal_race_data((mon)->data))
+#define mortal_race_data(ptr)	(intelligent(ptr) && !nonliving(ptr) && !is_minion(ptr) && !is_demon(ptr) && !is_primordial(ptr) && !is_great_old_one(ptr))
 #define dark_immune(mon)	(is_unalive((mon)->data) || is_primordial((mon)->data))
 
 #define slithy(ptr)			((ptr)->mflagsb & MB_SLITHY)
@@ -619,7 +622,9 @@
 									|| (ptr)->mtyp == PM_MOUTH_OF_THE_GOAT)
 #define	is_goat_tentacle_mon(mon)	(is_goat_tentacle_mtyp((mon)->data) || has_template(mon, MISTWEAVER))
 #define	is_snake_bite_mtyp(ptr)	((ptr)->mtyp == PM_MEDUSA \
-									|| (ptr)->mtyp == PM_ANCIENT_NAGA)
+									|| (ptr)->mtyp == PM_ANCIENT_NAGA\
+									|| (ptr)->mtyp == PM_MOON_S_CHOSEN\
+								)
 #define	is_snake_bite_mon(mon)	(is_snake_bite_mtyp((mon)->data) || has_template(mon, MOLY_TEMPLATE))
 #define	is_tailslap_mtyp(ptr)	(is_true_adult_dragon(ptr) || (ptr)->mtyp == PM_UISCERRE_ELADRIN || (ptr)->mtyp == PM_DISENCHANTER || (ptr)->mtyp == PM_GRAY_DEVOURER)
 #define	is_tailslap_mon(mon)	(is_tailslap_mtyp((mon)->data))
@@ -727,6 +732,7 @@
 #define yields_insight(ptr)	(((ptr)->mflagsg & MG_INSIGHT) != 0L)
 #define is_render(mtyp)		(mtyp == PM_SECRET_WHISPERER || mtyp == PM_TRUTH_SEER || mtyp == PM_DREAM_EATER || mtyp == PM_VEIL_RENDER)
 #define banish_kill(mtyp)	(is_render(mtyp))
+#define banish_kill_mon(mon)	(get_mx(mon, MX_ESUM) || banish_kill((mon)->mtyp))
 
 #define mon_insane(mtmp)	(mtmp->mcrazed \
 							 || mtmp->mberserk \
@@ -853,7 +859,7 @@
 #define helm_match(ptr,obj)	((!has_horns(ptr) || obj->otyp == find_gcirclet() || is_flimsy(obj)) && !nohat(ptr) && \
 						(is_hat(obj) || (has_head(ptr) && (ptr->mflagsb&MB_HEADMODIMASK) == (obj->bodytypeflag&MB_HEADMODIMASK))))
 /*Note: No-modifier helms are "normal"*/
-#define helm_size_fits(ptr,obj)	(obj->objsize == ptr->msize || (is_hat(obj) && obj->objsize <= (ptr->msize+1)))
+#define helm_size_fits(ptr,obj)	((ptr->mtyp == PM_MOON_S_CHOSEN ? obj->objsize == MZ_GIGANTIC : obj->objsize == ptr->msize) || (is_hat(obj) && obj->objsize <= (ptr->msize+1)))
 
 #define hates_holy_mon(mon)	((mon) == &youmonst ? hates_holy(youracedata) : hates_holy((mon)->data))
 #define hates_holy(ptr)		(is_demon(ptr) || (is_undead(ptr) && ptr->mtyp != PM_DREAD_SERAPH) || (((ptr)->mflagsg&MG_HATESHOLY) != 0))
@@ -917,6 +923,10 @@
 							  || (ptr)->mtyp == PM_DREAM_QUASIELEMENTAL\
 							  || is_were(ptr)\
 							  || (ptr)->mlet == S_MIMIC\
+								 )
+#define healing_were(ptr)	((ptr)->mtyp == PM_INDEX_WOLF\
+							  || (ptr)->mtyp == PM_VICAR_WOLF\
+							  || (ptr)->mtyp == PM_HIGH_PRIEST_WOLF\
 								 )
 #define wants_bell(ptr)	((ptr->mflagst & MT_WANTSBELL))
 #define wants_book(ptr)	((ptr->mflagst & MT_WANTSBOOK))
@@ -1061,6 +1071,7 @@
 				 || (ptr)->mtyp == PM_MADWOMAN \
 				 || (ptr)->mtyp == PM_MAD_SEER \
 				 || (ptr)->mtyp == PM_CLAIRVOYANT_CHANGED \
+				 || (ptr)->mtyp == PM_FOETID_ANGEL \
 				 || ((ptr)->mtyp == PM_TWIN_SIBLING && check_mutation(TWIN_DREAMS)) \
 				)
 

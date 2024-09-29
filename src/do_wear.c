@@ -2618,6 +2618,9 @@ base_uac()
 	if(u.uuur_duration)
 		uac -= 10;
 	uac -= u.uuur/2;
+	if(mvitals[PM_MOON_S_CHOSEN].died){
+		uac += 12;
+	}
 	if(u.edenshield > moves) uac -= 7;
 	if(u.specialSealsActive&SEAL_BLACK_WEB && (
 		(u.utrap && u.utraptype == TT_WEB) ||
@@ -2787,6 +2790,12 @@ int base_nat_udr()
 		}
 	}
 	if(uarm && uarm->oartifact == ART_SCORPION_CARAPACE && check_carapace_mod(uarm, CPROP_IMPURITY) && u.uinsight >= 5){
+		udr += 3;
+	}
+	if(check_preservation(PRESERVE_GAIN_DR)){
+		udr += 3;
+	}
+	if(check_preservation(PRESERVE_GAIN_DR_2)){
 		udr += 3;
 	}
 	
@@ -2981,6 +2990,17 @@ uchar aatyp;
 	/* Having the Deep Sea glyph increase magical DR by 3 */
 	if (active_glyph(DEEP_SEA))
 		bas_udr += 3;
+
+	if(mvitals[PM_MOON_S_CHOSEN].died){
+		if (slot == HEAD_DR)
+			bas_udr -= 8;
+		else if (slot == UPPER_TORSO_DR)
+			bas_udr -= 2;
+		else if (slot == LOWER_TORSO_DR)
+			bas_udr -= 1;
+		else if (slot == ARM_DR)
+			bas_udr -= 1;
+	}
 	
 	//Star spawn reach extra-dimensionally past all armor, even bypassing natural armor.
 	if(magr && (is_extradimensional(magr) || (aatyp == AT_BUTT && magr_helm && magr_helm->oartifact == ART_APOTHEOSIS_VEIL))){

@@ -116,6 +116,7 @@ struct flag {
 	unsigned long suppress_alert;
 #define NEW_MOON	0
 #define FULL_MOON	4
+#define HUNTING_MOON	8
 	unsigned no_of_wizards; /* 0, 1 or 2 (wizard and his shadow) */
 	boolean  travel;	/* find way automatically to u.tx,u.ty */
 	unsigned run;		/* 0: h (etc), 1: H (etc), 2: fh (etc) */

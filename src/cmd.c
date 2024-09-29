@@ -594,7 +594,7 @@ boolean you_abilities;
 	if (you_abilities && hasfightingforms() > 0) {	/* I can't wait until fighting forms are mainstream */
 		add_ability('F', "Pick a fighting form", MATTK_U_STYLE);
 	}
-	if (mon_abilities && attacktype(youracedata, AT_GAZE)){
+	if (mon_abilities && (attacktype(youracedata, AT_GAZE) || (!Upolyd && check_vampire(VAMPIRE_GAZE)))){
 		add_ability('g', "Gaze at something", MATTK_GAZE);
 	}
 	if (mon_abilities && is_hider(youracedata)){
@@ -2645,6 +2645,7 @@ struct ext_func_tab extcmdlist[] = {
 	{"ride", "ride (or stop riding) a monster", doride, !IFBURIED, AUTOCOMPLETE},
 #endif
 	{"rub", "rub a lamp", dorub, !IFBURIED, AUTOCOMPLETE},
+	{"research", "perform research", doresearch, !IFBURIED, AUTOCOMPLETE},
 	{"style", "switch fighting style", dofightingform, !IFBURIED, AUTOCOMPLETE},
 	{"sit", "sit down", dosit, !IFBURIED, AUTOCOMPLETE},
 	{"swim", "swim under water", dodeepswim, !IFBURIED, AUTOCOMPLETE},
@@ -3328,7 +3329,7 @@ wiz_migrate_mons()
 		    assign_level(&tolevel, &valley_level);
 		else
 		    get_level(&tolevel, depth(&u.uz) + 1);
-		ptr = rndmonst();
+		ptr = rndmonst(0, 0);
 		mtmp = makemon(ptr, 0, 0, NO_MM_FLAGS);
 		if (mtmp) migrate_to_level(mtmp, ledger_no(&tolevel),
 				MIGR_RANDOM, (coord *)0);

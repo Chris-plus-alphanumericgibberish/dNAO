@@ -1244,6 +1244,13 @@ register const char *let,*word;
 		     otyp != SEVERED_HAND &&                    
 		     otyp != EYEBALL &&	/* KMH -- fixed */
 		     otyp != AMULET_OF_YENDOR && otyp != FAKE_AMULET_OF_YENDOR))
+		|| (!strcmp(word, "research") &&
+		    ((otyp != CORPSE &&
+		      otyp != SEVERED_HAND &&                    
+		      otyp != EYEBALL &&	/* KMH -- fixed */
+		      otyp != AMULET_OF_YENDOR && otyp != FAKE_AMULET_OF_YENDOR
+			) || otmp->researched
+		   ))
 		|| (!strcmp(word, "write with") &&
 		    ((otmp->oclass == TOOL_CLASS &&
 		     otyp != MAGIC_MARKER && otyp != TOWEL 
@@ -1298,7 +1305,9 @@ register const char *let,*word;
 			  otmp->otyp != DOUBLE_FORCE_BLADE && otmp->otyp != FORCE_BLADE &&
 			  otmp->otyp != HUNTER_S_AXE && otmp->otyp != HUNTER_S_LONG_AXE &&
 			  otmp->otyp != SAW_CLEAVER && otmp->otyp != RAZOR_CLEAVER &&
-			  otmp->otyp != SOLDIER_S_RAPIER && otmp->otyp != SOLDIER_S_RAPIER &&
+			  otmp->otyp != SAW_SPEAR && otmp->otyp != LONG_SAW &&
+			  otmp->otyp != SOLDIER_S_RAPIER && otmp->otyp != SOLDIER_S_SABER &&
+			  otmp->otyp != BOW_BLADE && otmp->otyp != BLADED_BOW &&
 			  otmp->otyp != CANE && otmp->otyp != WHIP_SAW &&
 			  otmp->otyp != CHIKAGE &&
 			  otmp->otyp != TONITRUS &&
@@ -2384,6 +2393,12 @@ struct obj *obj;
 	else if (obj->otyp == SAW_CLEAVER || obj->otyp == RAZOR_CLEAVER)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Open or close your cleaver", MENU_UNSELECTED);
+	else if (obj->otyp == LONG_SAW || obj->otyp == SAW_SPEAR)
+		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
+				"Open or close your saw", MENU_UNSELECTED);
+	else if (obj->otyp == BOW_BLADE || obj->otyp == BLADED_BOW)
+		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
+				"Open or close your bow", MENU_UNSELECTED);
 	else if (obj->otyp == SOLDIER_S_RAPIER || obj->otyp == SOLDIER_S_SABER)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Latch or unlatch your rapier", MENU_UNSELECTED);

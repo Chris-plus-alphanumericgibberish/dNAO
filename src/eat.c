@@ -3988,6 +3988,10 @@ gethungry()	/* as time goes by - called by moveloop() and domove() */
 	if(Race_if(PM_INCANTIFIER))
 		hungermod *= 10;
 	
+	//Preservation upgrade reduces hunger
+	if(check_preservation(PRESERVE_REDUCE_HUNGER))
+		hungermod *= 2;
+	
 	//Unusually-sized creatures have more or less hunger
 	if(get_uhungersizemod() < 1){
 		hungermod /= get_uhungersizemod();
@@ -4631,12 +4635,13 @@ boolean incr;
 struct obj *
 floorfood(verb,corpsecheck)	/* get food from floor or pack */
 	const char *verb;
-	int corpsecheck; /* 0, no check, 1, corpses, 2, tinnable corpses */
+	int corpsecheck; /* 0, no check, 1, corpses, 2, tinnable corpses, 3, corpses with blood */
 {
 	register struct obj *otmp;
 	char qbuf[QBUFSZ];
 	char c;
 	boolean feeding = (!strcmp(verb, "eat"));
+	boolean researching = (!strcmp(verb, "research"));
 
 	/* if we can't touch floor objects then use invent food only */
 	if (!can_reach_floor() ||
@@ -4687,9 +4692,15 @@ floorfood(verb,corpsecheck)	/* get food from floor or pack */
 	/* Is there some food (probably a heavy corpse) here on the ground? */
 	for (otmp = level.objects[u.ux][u.uy]; otmp; otmp = otmp->nexthere) {
 		if(corpsecheck ?
-		(otmp->otyp==CORPSE && (corpsecheck == 1 || tinnable(otmp))) :
+		(otmp->otyp==CORPSE && (corpsecheck == 1 
+							|| (corpsecheck == 2 && tinnable(otmp))
+							|| (corpsecheck == 3 && !otmp->odrained && has_blood(&mons[otmp->corpsenm]))
+							) ) :
 		    feeding ? (otmp->oclass != COIN_CLASS && is_edible(otmp)) :
-						otmp->oclass==FOOD_CLASS) {
+						otmp->oclass==FOOD_CLASS
+		) {
+			if(researching && otmp->researched)
+				continue;
 			Sprintf(qbuf, "There %s %s here; %s %s?",
 				otense(otmp, "are"),
 				doname(otmp), verb,

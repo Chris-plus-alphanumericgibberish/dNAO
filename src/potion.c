@@ -1058,7 +1058,9 @@ boolean force;
 		if (otmp->cursed) {
 			unkn++;
 			/* they went up a level */
-			if((ledger_no(&u.uz) == 1 && u.uhave.amulet) ||
+			if((ledger_no(&u.uz) == 1 && u.uhave.amulet
+				&& !(Role_if(PM_UNDEAD_HUNTER) && philosophy_index(u.ualign.god) && (!quest_status.moon_close || research_incomplete() || u.veil))
+			) ||
 				Can_rise_up(u.ux, u.uy, &u.uz)) {
 			    const char *riseup ="rise up, through the %s!";
 			    if(ledger_no(&u.uz) == 1) {

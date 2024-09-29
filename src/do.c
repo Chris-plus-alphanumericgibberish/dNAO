@@ -1092,6 +1092,24 @@ doup()
 			return MOVE_CANCELLED;
 		if (yn("Beware, there will be no return! Still climb?") != 'y')
 			return MOVE_CANCELLED;
+		if(Role_if(PM_UNDEAD_HUNTER) && u.uevent.udemigod){
+			if(u.veil){
+				if(philosophy_index(u.ualign.god)
+				 && yn("You feel that there is a deeper truth still to be uncovered here. Still climb?") != 'y'
+				){
+					return MOVE_CANCELLED;
+				}
+			}
+			else {
+				if (!quest_status.moon_close && yn("You have the nagging feeling you have incomplete buisness here. Still climb?") != 'y')
+					return MOVE_CANCELLED;
+				if (philosophy_index(u.ualign.god)
+				 && research_incomplete()
+				 && yn("You worry that you have not completed your research! Still climb?") != 'y'
+				)
+					return MOVE_CANCELLED;
+			}
+		}
 	}
 	if(!next_to_u()) {
 		You("are held back by your pet!");
@@ -1695,9 +1713,17 @@ misc_levelport:
 	if (newdungeon && In_V_tower(&u.uz) && In_hell(&u.uz0))
 		pline_The("heat and smoke are gone.");
 
+	boolean restart_quest = (!u.uevent.qrecalled && Role_if(PM_UNDEAD_HUNTER) && !mvitals[PM_MOON_S_CHOSEN].died && u.uevent.qcompleted && quest_status.time_doing_quest >= UH_QUEST_TIME_1);
+	boolean recalled = u.uevent.qrecalled && (Role_if(PM_UNDEAD_HUNTER) && !mvitals[PM_MOON_S_CHOSEN].died);
 	/* the message from your quest leader */
-	if (!In_quest(&u.uz0) && at_dgn_entrance("The Quest") &&
-		!(u.uevent.qexpelled || u.uevent.qcompleted || quest_status.leader_is_dead)) {
+	if (((!In_quest(&u.uz0) && at_dgn_entrance("The Quest"))
+		|| (restart_quest && !In_quest(&u.uz0) && In_quest(&u.uz))
+	  ) &&
+		!(u.uevent.qexpelled 
+		  || (u.uevent.qcompleted && !(recalled || restart_quest))
+		  || quest_status.leader_is_dead
+		)
+	) {
 		if(Role_if(PM_EXILE)){
 			You("sense something reaching out to you....");
 		} else if(Role_if(PM_MADMAN)){
@@ -1718,6 +1744,26 @@ misc_levelport:
 				pline("Your help is urgently needed at Menzoberranzan!  Look for a ...ic transporter.");
 				pline("You couldn't quite make out that last message.");
 			}
+		} else if(Role_if(PM_UNDEAD_HUNTER) && restart_quest){
+			u.uevent.qrecalled = TRUE;
+			quest_status.got_thanks = FALSE;
+			if(quest_status.time_doing_quest >= UH_QUEST_TIME_4){
+				You("again sense Vicar Amalia pleading for help.");
+				pline("But it's garbled and confused.");
+			}
+			else if(quest_status.time_doing_quest >= UH_QUEST_TIME_2){
+				You("again sense Vicar Amalia pleading for help:");
+				pline("Something is wrong. The infection is spreading in the upper city!");
+			}
+			else if(quest_status.time_doing_quest >= UH_QUEST_TIME_1){
+				You("again sense Vicar Amalia pleading for help:");
+				pline("Somthing is wrong. The infection is now spreading in the city!");
+			}
+			//Futureproof, but I don't think this can be reached.
+			else {
+				You("again sense Vicar Amalia pleading for help:");
+				pline("Somthing is wrong. The infection is still spreading.");
+			}
 		} else {
 			if (u.uevent.qcalled) {
 				com_pager(Role_if(PM_ROGUE) ? 4 : 3);
@@ -1736,7 +1782,7 @@ misc_levelport:
 		    if (!DEADMONSTER(mtmp) && mtmp->msleeping) mtmp->msleeping = 0;
 	}
 
-	if (on_level(&u.uz, &astral_level))
+	if (Is_astralevel(&u.uz))
 	    final_level();
 	else
 	    onquest();
@@ -1821,6 +1867,43 @@ final_level()
 		makemon(&mons[PM_CARCOSAN_COURTIER], 0, 0, MM_ADJACENTOK);
 		makemon(&mons[PM_CARCOSAN_COURTIER], 0, 0, MM_ADJACENTOK);
 	}
+	else if(Role_if(PM_UNDEAD_HUNTER) && quest_status.moon_close){
+		makemon(&mons[PM_MOON_ENTITY_TONGUE], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_MOON_ENTITY_EYE_CLUSTER], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_MOON_ENTITY_MANIPALP], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_MOON_ENTITY_MANIPALP], 0, 0, MM_ADJACENTOK);
+
+		makemon(&mons[PM_MOON_ENTITY_TONGUE], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_MOON_ENTITY_EYE_CLUSTER], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_MOON_ENTITY_MANIPALP], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_MOON_ENTITY_MANIPALP], 0, 0, MM_ADJACENTOK);
+
+		makemon(&mons[PM_MOON_ENTITY_TONGUE], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_MOON_ENTITY_EYE_CLUSTER], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_MOON_ENTITY_MANIPALP], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_MOON_ENTITY_MANIPALP], 0, 0, MM_ADJACENTOK);
+
+		makemon(&mons[PM_MIST_WOLF], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_MIST_WOLF], 0, 0, MM_ADJACENTOK);
+
+		makemon(&mons[PM_MIST_WOLF], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_MIST_WOLF], 0, 0, MM_ADJACENTOK);
+
+		makemon(&mons[PM_MIST_WOLF], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_MIST_WOLF], 0, 0, MM_ADJACENTOK);
+
+		makemon(&mons[PM_MOON_FLEA], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_MOON_FLEA], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_MOON_FLEA], 0, 0, MM_ADJACENTOK);
+
+		makemon(&mons[PM_MOON_FLEA], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_MOON_FLEA], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_MOON_FLEA], 0, 0, MM_ADJACENTOK);
+
+		makemon(&mons[PM_MOON_FLEA], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_MOON_FLEA], 0, 0, MM_ADJACENTOK);
+		makemon(&mons[PM_MOON_FLEA], 0, 0, MM_ADJACENTOK);
+	}
 	/* create a guardian angel next to player, if worthy */
 	if(!u.veil){
 		You("notice the air thrums with hidden holy energy.");
@@ -1840,7 +1923,7 @@ final_level()
 				     mm.x, mm.y, FALSE);
 	    }
 
-	} else if (u.ualign.record > 8) {	/* fervent */
+	} else if (u.ualign.record > 8 && !philosophy_index(u.ualign.god)) {	/* fervent */
 	    pline("A voice whispers: \"Thou hast been worthy of me!\"");
 	    mm.x = u.ux;
 	    mm.y = u.uy;
@@ -2125,6 +2208,9 @@ int different;
 		break;
 	}
 	newsym(mtmp->mx,mtmp->my);
+	if(is_great_old_one(mtmp->data)){
+		TRANSCENDENCE_IMPURITY_UP(FALSE)
+	}
 	return TRUE;
     }
     return FALSE;

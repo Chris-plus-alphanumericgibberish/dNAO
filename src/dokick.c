@@ -779,6 +779,7 @@ int dx, dy;
 		    case TT_WEB:
 		    case TT_BEARTRAP:
 		    case TT_LAVA:
+		    case TT_SALIVA:
 			You_cant("move your %s!", body_part(LEG));
 			break;
 		    default:

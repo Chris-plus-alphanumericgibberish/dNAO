@@ -1343,6 +1343,10 @@ domove()
 				if(!(result&(MM_AGR_DIED|MM_AGR_STOP)) && is_dancer(&youmonst)){
 					result |= hit_with_dance(&youmonst, otmp, x, y, 0, attk);
 				}
+				/* Rejection antenae hit additional targets (last) */
+				if(!(result&(MM_AGR_DIED|MM_AGR_STOP)) && otmp && check_oprop(otmp, OPROP_ANTAW) && check_reanimation(ANTENNA_REJECT)){
+					result |= hit_with_rreject(&youmonst, otmp, x, y, 0, attk);
+				}
 				
 				if(!u.twoweap)
 					break;
@@ -1510,6 +1514,32 @@ domove()
 			else
 #endif
 			You("disentangle yourself.");
+		    }
+			}
+		} else if (u.utraptype == TT_SALIVA) {
+			if(u.spiritPColdowns[PWR_PHASE_STEP] >= moves+20){
+				You("phase free from the gooey saliva.");
+				u.utrap=0;
+			} else {
+		    if(--u.utrap) {
+			if(flags.verbose) {
+			    predicament = "glued down";
+#ifdef STEED
+			    if (u.usteed)
+				Norep("%s is %s.", upstart(y_monnam(u.usteed)),
+				      predicament);
+			    else
+#endif
+			    Norep("You are %s.", predicament);
+			}
+		    } else {
+#ifdef STEED
+			if (u.usteed)
+			    pline("%s pulls loose from the gooey saliva.",
+				  upstart(y_monnam(u.usteed)));
+			else
+#endif
+			You("unstick yourself.");
 		    }
 			}
 		} else if (u.utraptype == TT_INFLOOR) {
@@ -3017,6 +3047,7 @@ weight_cap()
 	carrcap += u.ucarinc;
 	if(u.sealsActive&SEAL_FAFNIR) carrcap *= 1+((double) u.ulevel)/100;
 	if(active_glyph(COMMUNION)) carrcap *= 1.25;
+	if(active_glyph(LUMEN)) carrcap *= 1.064;
 	if(animaloid(mdat) || naoid(mdat)){
 		carrcap *= 1.5;
 	}

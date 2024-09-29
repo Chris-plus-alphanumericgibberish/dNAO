@@ -185,6 +185,8 @@ dosave0()
 	/* undo date-dependent luck adjustments made at startup time */
 	if(flags.moonphase == FULL_MOON)	/* ut-sally!fletcher */
 		change_luck(-1);		/* and unido!ab */
+	if(flags.moonphase == HUNTING_MOON)
+		change_luck(-2);
 	if(flags.friday13)
 		change_luck(1);
 	if(iflags.window_inited)

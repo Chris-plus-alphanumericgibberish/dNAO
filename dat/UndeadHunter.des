@@ -58,14 +58,14 @@ GEOMETRY:center,center
 #0123456789012345678901234567890123456789012345678901234567890123456789012345
 MAP
 0----------------------------------------------------------------------------
-1|eeeeeeeeeeee|-#####--#####--#####-###-....................................|
+1|eeeeeeeeeeee|-#####--#####--#####-#K#-....................................|
 2|e|-------eee|-#####--#####--#####+###-....................................|
 3|e|......|eee|-#####--#####--#####-###-.------------------------------------
 4|e|......+.ee|-#####--#####--#####-###-.|................|.....|.....|.....|
 5|e|......|.ee|-#####--#####--#####-----.|..------------..|F-+-F-F-+-F-F-+-F|
 6|e--+-----.ee|---+------+------+---.....|..|..........|..|.................|
-7|eee.eeeee.ee|..........................|..|..........|..|+---+---+-----+--|
-8|eee.eeeee.ee|........................---..|..........|......|...|...|.....|
+7|eee.ee{ee.ee|..........................|..|..........|..|+---+---+-----+--|
+8|eee.{eeee.ee|........................---..|..........|......|...|...|.....|
 9......................................+....|..........+......|...|...|.....|
 0......................................+....|..........+......|...|...|.....|
 1|FFF.FFFFF.FF|........................---..|..........|......|...|...|.....|
@@ -82,11 +82,15 @@ ENDMAP
 #0         1         2         3         4         5         6         7  
 # Dungeon Description
 REGION:(00,00,75,19),unlit,"ordinary"
+REGION:(01,12,12,18),unlit,"morgue"
 # Portal arrival point
 BRANCH:(14,07,37,12),(0,0,0,0)
 # Stairs
 STAIR:(00,10),down
 # Doors
+DOOR:locked,(09,04)
+DOOR:locked,(04,06)
+
 DOOR:locked,(17,06)
 DOOR:locked,(24,06)
 DOOR:locked,(31,06)
@@ -145,7 +149,7 @@ MONSTER:'@',"noblewoman",(19,17),peaceful
 MONSTER:'@',"priest",(26,16),peaceful
 MONSTER:'@',"noblewoman",(26,17),peaceful
 MONSTER:'@',"priestess",(33,16),peaceful
-MONSTER:'@',"nobleman",(33,17)
+MONSTER:'@',"nobleman",(33,17),peaceful
 
 MONSTER:'@',"madwoman",(60,04)
 MONSTER:'@',"madman",(66,04)
@@ -157,6 +161,7 @@ MONSTER:'@',"noblewoman",(72,15)
 
 CONTAINER:'(',"chest",(08,03)
 OBJECT:')',"pistol",contained
+OBJECT:'#',"20 uncursed +0 blood-bullets",contained
 OBJECT:'(',"nightmare's bullet mold",contained
 OBJECT[90%]:')',"saw cleaver",contained
 OBJECT[90%]:')',"hunter's axe",contained
@@ -164,22 +169,31 @@ OBJECT[90%]:')',"church-hammer",contained
 OBJECT[90%]:')',"church blade",contained
 OBJECT[90%]:')',"cane",contained
 OBJECT[90%]:')',"tonitrus",contained
+OBJECT[90%]:')',"long saw",contained
 OBJECT[50%]:')',"moon axe",contained
 OBJECT[50%]:')',"soldier's rapier",contained
 OBJECT[50%]:')',"blade of mercy",contained
+OBJECT[50%]:')',"chikage",contained
+OBJECT[50%]:')',"bow-blade",contained
 OBJECT:'?',"resistance",contained
 OBJECT:'?',"resistance",contained
 OBJECT:'?',"resistance",contained
 OBJECT:'#',"my blood",contained
 OBJECT:'#',"my blood",contained
+OBJECT:'#',"columnar crystal rod",contained
+OBJECT:'#',"columnar crystal rod",contained
+OBJECT:'#',"columnar crystal rod",contained
+OBJECT:'#',"columnar crystal rod",contained
+OBJECT:'#',"columnar crystal rod",contained
 
-ALTAR:(03,04),law,altar
-OBJECT:'(',"trephination kit",(03,04)
+ALTAR:(04,04),law,altar
+OBJECT:'(',"trephination kit",(04,04)
 
 FORGE:(05,03)
 OBJECT:')',"smithing hammer",(05,03)
 
-OBJECT:'_',"lifeless doll",(09,07)
+OBJECT:'_',"lifeless doll",(03,05)
+OBJECT:'`',"statue",(03,04),"priestess",1
 #
 #	The "locate" level for the quest.
 #
@@ -196,9 +210,9 @@ GEOMETRY:center,center
 #0123456789012345678901234567890123456789012345678901234567890123456789012
 MAP
 0-------------------------------------------------------------------------
-1-###-###-###-eee-###-###-###-###-###-###-###-###-###-###-###-###-###-###-
-2-###-###-###-ete-###-###-###-###-###-###-###-###-###-###-###-###-###-###-
-3-###-###-###-e.e-###-###-###-###-###-###-###-###-###-###-###-###-###-###-
+1-www-###-###-eee-###-###-###-###-###-###-###-###-###-###-###-###-###-###-
+2-w.w-###-###-ete-###-###-###-###-###-###-###-###-###-###-###-###-###-###-
+3-www-###-###-e.e-###-###-###-###-###-###-###-###-###-###-###-###-###-###-
 4--+---+---+--F.F--+---+---+---+---+---+---+---+---+---+---+---+---+---+--
 5Tt.ttT...................................................................
 6Te..TT..TTt.......                                  .................-.-.
@@ -218,6 +232,8 @@ MAP
 ENDMAP
 #0123456789012345678901234567890123456789012345678901234567890123456789012
 #0         1         2         3         4         5         6         7     
+
+ALTAR:(02,02),chaos,altar
 
 MONSTER:'@',"peasant",random,peaceful
 MONSTER:'@',"peasant",random,peaceful
@@ -256,7 +272,7 @@ MONSTER:random,random,random
 
 
 # Doors
-DOOR:closed,(02,04)
+DOOR:locked,(02,04)
 DOOR:closed,(06,04)
 DOOR:closed,(10,04)
 
@@ -341,7 +357,6 @@ REGION:(00,00,25,10),unlit,"ordinary"
 # Stairs
 STAIR:levregion(01,00,74,19),levregion(15,05,60,15),up
 # Objects
-OBJECT:')',"stake",place[0],cursed,0,"Stake of Withering"
 OBJECT:'[',"ruffled shirt",random
 OBJECT:'[',"fedora",random
 OBJECT:'[',"cloak",random
@@ -349,6 +364,8 @@ OBJECT:'[',"studded leather armor",random
 OBJECT:'[',"gloves",random
 OBJECT:'[',"high boots",random
 OBJECT:')',"evelyn",random
+OBJECT:')',"chikage",random
+OBJECT:'#',"columnar chunk",random
 OBJECT:'(',"nightmare's bullet mold",random
 OBJECT:random,random,random
 OBJECT:random,random,random
@@ -365,10 +382,10 @@ OBJECT:random,random,random
 OBJECT:random,random,random
 OBJECT:random,random,random
 # Random traps
-TRAP:"fire",random
-TRAP:"fire",random
-TRAP:"fire",random
-TRAP:"fire",random
+TRAP:"bear",random
+TRAP:"bear",random
+TRAP:"bear",random
+TRAP:"bear",random
 TRAP:random,random
 TRAP:random,random
 # Random monsters.
@@ -393,23 +410,23 @@ GEOMETRY:center,center
 #0123456789012345678901234567890123456789012345678901234567890123456789012
 MAP
 0-------------------------------------------------------------------------
-1-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-
-2-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###S###-
-3-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-
-4--+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+------
-5.........................................................................
-6.........................................................................
-7.-F.F-.--+-------+-------+-------+--.------+-------+-------+------.-F.F-.
-8.F,eeF.-###-###-###-###-###-###-###-.-###-###-###-###-###-###-###-.F,,,F.
-9..ete..-###-###-###-###-###-###-###-.-###-###-###-###-###-###-###-..,T,..
-0.Fe,,F.-###-###-###-###-###-###-###-.-###-###-###-###-###-###-###-.F,,,F.
-1.-F.F-.------+-------+-------+------.--+-------+-------+-------+--.-F.F-.
-2.........................................................................
+1-###-###-###-###-eee,,e,,e,e-###-###-........|..-###-###-###-###-.......-
+2-###-###-###-###-,e,ee,,e,ee-###-###-........+..-###-###-###-###+.......-
+3-###-###-###-###-.FFFFFFFFF.-###-###---------|..-###-###-###-###-.......-
+4--+---+---+---+--...........--+---+--...........--+---+---+---+--.......-
+5................................................................---------
+6.................----+----...........|-------|...........................
+7.-F.F-.--+------.-.......-.------+--.|.......|-----+-------+------.-F.F-.
+8.F,eeF.-###-###-.-.......-.-###-###-.|.......|###-###-###-###-###-.F,w,F.
+9..ete..-###-###-.-.......-.-###-###-.|.......|###-###-###-###-###-..wTw..
+0.Fe,,F.-###-###-.-.......-.-###-###-.|.......|###-###-###-###-###-.F,w,F.
+1.-F.F-.------+--.-.......-.--+------.--+-------+-------+-------+--.-F.F-.
+2.................---------...............................................
 3.........................................................................
-4--+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+--
-5-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-
-6-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-
-7-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-###-
+4--+---+---+---+--...........--+---+---+---+---+---+---+---+---+---+---+--
+5-###-###-###-###-..----------###-###-###-###-###-###-###-###-###-###-###-
+6-###-###-###-###-..+........-###-###-###-###-###-###-###-###-###-###-###-
+7-###-###-###-###-..|........-###-###-###-###-###-###-###-###-###-###-###-
 8-------------------------------------------------------------------------
 ENDMAP
 #0123456789012345678901234567890123456789012345678901234567890123456789012
@@ -423,27 +440,30 @@ DOOR:closed,(02,04)
 DOOR:closed,(06,04)
 DOOR:closed,(10,04)
 DOOR:closed,(14,04)
-DOOR:closed,(18,04)
-DOOR:closed,(22,04)
-DOOR:closed,(26,04)
+
+
+DOOR:closed,(21,06)
 DOOR:closed,(30,04)
 DOOR:closed,(34,04)
-DOOR:closed,(38,04)
-DOOR:closed,(42,04)
-DOOR:closed,(46,04)
+
+
+
+DOOR:closed,(45,02)
 DOOR:closed,(50,04)
 DOOR:closed,(54,04)
 DOOR:closed,(58,04)
 DOOR:closed,(62,04)
-DOOR:closed,(66,04)
+
+DOOR:closed,(64,02)
 
 DOOR:closed,(02,14)
 DOOR:closed,(06,14)
 DOOR:closed,(10,14)
 DOOR:closed,(14,14)
-DOOR:closed,(18,14)
-DOOR:closed,(22,14)
-DOOR:closed,(26,14)
+
+
+
+DOOR:closed,(19,16)
 DOOR:closed,(30,14)
 DOOR:closed,(34,14)
 DOOR:closed,(38,14)
@@ -457,20 +477,26 @@ DOOR:closed,(66,14)
 DOOR:closed,(70,14)
 
 DOOR:closed,(09,07)
-DOOR:closed,(17,07)
-DOOR:closed,(25,07)
+
+
 DOOR:closed,(33,07)
 DOOR:closed,(13,11)
-DOOR:closed,(21,11)
+
 DOOR:closed,(29,11)
 
-DOOR:closed,(43,07)
+
 DOOR:closed,(51,07)
 DOOR:closed,(59,07)
 DOOR:closed,(39,11)
 DOOR:closed,(47,11)
 DOOR:closed,(55,11)
 DOOR:closed,(63,11)
+
+REGION:(65,01,71,04),lit,"shop"
+REGION:(37,01,44,02),lit,"shop"
+REGION:(38,07,44,10),lit,"shop"
+REGION:(18,07,24,11),lit,"shop"
+REGION:(20,16,27,17),lit,"shop"
 
 # Creatures
 MONSTER:'@',"peasant",random,peaceful
@@ -527,3 +553,39 @@ MONSTER: random, random, random
 MONSTER: random, random, random
 MONSTER: random, random, random
 MONSTER: random, random, random
+
+MONSTER: '.', "ghost", random
+MONSTER: '.', "ghost", random
+MONSTER: '.', "ghost", random
+MONSTER: '.', "ghost", random
+
+MONSTER: 'Z', random, random
+MONSTER: 'Z', random, random
+MONSTER: 'Z', random, random
+
+MONSTER: '#', "hostile Woodland-elf zombie", random
+MONSTER: '#', "hostile Woodland-elf zombie", random
+MONSTER: '#', "hostile Woodland-elf zombie", random
+
+MONSTER[90%]: '#', "hostile Woodland-elf zombie", random
+MONSTER[90%]: '#', "hostile Woodland-elf zombie", random
+MONSTER[90%]: '#', "hostile Woodland-elf zombie", random
+
+MONSTER[50%]: '#', "hostile Woodland-elf zombie", random
+MONSTER[50%]: '#', "hostile Woodland-elf zombie", random
+MONSTER[50%]: '#', "hostile Woodland-elf zombie", random
+
+MONSTER[90%]:'W',"befouled wraith", random
+MONSTER[90%]:'W',"befouled wraith", random
+MONSTER[90%]:'W',"befouled wraith", random
+MONSTER[90%]:'W',"befouled wraith", random
+MONSTER[90%]:'W',"befouled wraith", random
+
+MONSTER[90%]:'W',"befouled wraith", random
+MONSTER[90%]:'W',"befouled wraith", random
+MONSTER[90%]:'W',"befouled wraith", random
+MONSTER[90%]:'W',"befouled wraith", random
+MONSTER[90%]:'W',"befouled wraith", random
+
+MONSTER[90%]:'W',"befouled wraith", random
+MONSTER[90%]:'W',"befouled wraith", random

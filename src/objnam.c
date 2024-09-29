@@ -844,6 +844,8 @@ boolean dofull;
 			}
 			else if (obj->oeaten)
 				Strcat(buf, "partly eaten ");
+			if (obj->researched)
+				Strcat(buf, "disected ");
 
 #if 0	/* corpses don't tell if they're stale either */
 			if (obj->otyp == EGG && obj->known && stale_egg(obj))
@@ -1359,6 +1361,18 @@ add_insight_words(obj, buf)
 struct obj *obj;
 char *buf;
 {
+	if (obj->oartifact == ART_STAKE_OF_WITHERING && obj->where == OBJ_INVENT){
+		if(quest_status.moon_close)
+			Strcat(buf, "blooming ");
+		else if(quest_status.time_doing_quest < UH_QUEST_TIME_1)
+			Strcat(buf, "faintly-burning ");
+		else if(quest_status.time_doing_quest < UH_QUEST_TIME_2)
+			Strcat(buf, "faintly-guttering ");
+		else if(u.veil)
+			Strcat(buf, "charred ");
+		else
+			Strcat(buf, "budding ");
+	}
 	if (rakuyo_prop(obj)){
 		if(u.uinsight >= 40)
 			Strcat(buf, "burning ");
@@ -1598,6 +1612,8 @@ boolean adjective;
 		/* items made out of specific gemstones */
 		else if ((obj->oclass == GEM_CLASS) || obj->sub_material) {
 			int gemtype = (obj->oclass == GEM_CLASS) ? obj->otyp : obj->sub_material;
+			if(obj->otyp == CRYSTAL && obj->sub_material)
+				gemtype = obj->sub_material;
 
 			if (!objects[gemtype].oc_name_known) {
 				static char str[BUFSZ];
@@ -1655,6 +1671,9 @@ boolean adjective;
 	case HEMARGYOS:
 		if(obj->otyp == CHIKAGE){
 			return (adjective ? "bloody" : "strangely-tarnished blood");
+		}
+		else if(obj->otyp == CRYSTAL){
+			return (adjective ? "silver" : "strangely-cancellous silver");
 		}
 		else
 			return (adjective ? "silver" : "strangely-liquid silver");
@@ -1743,6 +1762,7 @@ char *buf;
 		case HALF_MOON:     Strcat(buf, "half ");     break;
 		case GIBBOUS_MOON:  Strcat(buf, "gibbous ");  break;
 		case FULL_MOON:     Strcat(buf, "full ");     break;
+		case HUNTING_MOON:  Strcat(buf, "staring ");     break;
 		}
 	}
 }
@@ -3952,6 +3972,14 @@ int wishflags;
 		if(!strcmpi(bp, "my blood"))
 			return mkyourblood();
 	}
+	if(!strcmpi(bp, "columnar crystal rod"))
+		return mkcolumnarcrystal(1);
+	if(!strcmpi(bp, "twin-columnar crystal"))
+		return mkcolumnarcrystal(2);
+	if(!strcmpi(bp, "columnar chunk"))
+		return mkcolumnarcrystal(3);
+	if(!strcmpi(bp, "columnar mass"))
+		return mkcolumnarcrystal(4);
 
 	for(;;) {
 		register int l;
@@ -4370,6 +4398,8 @@ int wishflags;
 			mat = SHADOWSTEEL;
 		} else if (!strncmpi(bp, "mercurial ", l=10)) {
 			mat = MERCURIAL;
+		} else if (!strncmpi(bp, "hemargyos ", l=10)) {
+			mat = HEMARGYOS;
 		} else if (!strncmpi(bp, "woolen ", l=7) || !strncmpi(bp, "wool-lined ", l=11)) {
 			add_oprop_list(oprop_list, OPROP_WOOL);
 
@@ -4878,8 +4908,6 @@ int wishflags;
 			{
 				if (gemtype != 0)
 					typ = gemtype;
-				else if (!strncmpi(bp, "crystal", 7))
-					typ = rn2(2) ? MAGICITE_CRYSTAL : DILITHIUM_CRYSTAL;
 			}
 			goto typfnd;
 		}

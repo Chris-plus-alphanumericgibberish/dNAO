@@ -849,6 +849,8 @@ struct monst *mon;
 		
 		if(u.usteed && mon==u.usteed) base -= rnd(def_mountedCombat());
 		
+		if(is_vampire(mon->data) && check_vampire(VAMPIRE_MASTERY)) base -= rnd(5);
+		
 		if(uring_art(ART_VILYA) && def_vilya())
 			base -=  sgn(def_vilya())*rnd(abs(def_vilya()));
 
@@ -1084,6 +1086,8 @@ struct monst *mon;
 		if(u.specialSealsActive&SEAL_COSMOS) base -= spiritDsize();
 		if(u.usteed && mon==u.usteed) base -= def_mountedCombat();
 		
+		if(is_vampire(mon->data) && check_vampire(VAMPIRE_MASTERY)) base -= 5;
+
 		if (uarm && uarm->oartifact == ART_BEASTMASTER_S_DUSTER && is_animal(mon->data))
 			base -= def_beastmastery(); // the duster doubles for tame animals
 
@@ -1233,8 +1237,15 @@ struct monst *mon;
 
 	if(mon->mtame){
 		if(active_glyph(IMPURITY)) base += 3;
+		if(active_glyph(DEFILEMENT)) base += 3;
 		if(uarm && uarm->oartifact == ART_SCORPION_CARAPACE && check_carapace_mod(uarm, CPROP_IMPURITY) && u.uinsight >= 5){
 			base += 3;
+		}
+		if(active_glyph(DEFILEMENT)){
+			if(active_glyph(IMPURITY))
+				base += max(0, u.uimpurity/3-3);
+			if(uarm && uarm->oartifact == ART_SCORPION_CARAPACE && check_carapace_mod(uarm, CPROP_IMPURITY) && u.uinsight >= 5)
+				base += max(0, (u.uimpurity+4)/3-3);
 		}
 		if(Role_if(PM_HEALER))
 			base += heal_mlevel_bonus();
@@ -1276,8 +1287,15 @@ struct monst *mon;
 	
 	if(mon->mtame){
 		if(active_glyph(IMPURITY)) base += 3;
+		if(active_glyph(DEFILEMENT)) base += 3;
 		if(uarm && uarm->oartifact == ART_SCORPION_CARAPACE && check_carapace_mod(uarm, CPROP_IMPURITY) && u.uinsight >= 5){
 			base += 3;
+		}
+		if(active_glyph(DEFILEMENT)){
+			if(active_glyph(IMPURITY))
+				base += max(0, u.uimpurity/3-3);
+			if(uarm && uarm->oartifact == ART_SCORPION_CARAPACE && check_carapace_mod(uarm, CPROP_IMPURITY) && u.uinsight >= 5)
+				base += max(0, (u.uimpurity+4)/3-3);
 		}
 		if(Role_if(PM_HEALER))
 			base += heal_mlevel_bonus();

@@ -54,6 +54,7 @@ NEARDATA int altarindex = 0;
 NEARDATA char *save_cm = 0;
 NEARDATA int killer_format = 0;
 const char *killer = 0;
+const char *title_override = 0;
 const char *delayed_killer = 0;
 #ifdef GOLDOBJ
 NEARDATA long done_money = 0;

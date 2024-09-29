@@ -15,6 +15,7 @@ STATIC_DCL void NDECL(signs_enlightenment);
 STATIC_DCL void NDECL(spirits_enlightenment);
 STATIC_DCL void NDECL(mutations_enlightenment);
 STATIC_DCL void NDECL(genocide_enlightenment);
+STATIC_DCL void NDECL(research_enlightenment);
 
 #define DOATTRIB_RESISTS	1
 #define DOATTRIB_ARMOR		2
@@ -23,6 +24,7 @@ STATIC_DCL void NDECL(genocide_enlightenment);
 #define DOATTRIB_SPIRITS	5
 #define DOATTRIB_MUTATIONS	6
 #define DOATTRIB_GENOCIDE	7
+#define DOATTRIB_UH_RESEARCH	8
 
 /* -enlightenment and conduct- */
 static winid en_win;
@@ -152,6 +154,8 @@ doattributes()
 			break;
 		case DOATTRIB_GENOCIDE:
 			genocide_enlightenment();
+		case DOATTRIB_UH_RESEARCH:
+			research_enlightenment();
 		default:
 			return MOVE_INSTANT;
 		}
@@ -377,6 +381,15 @@ minimal_enlightenment()
 		any.a_int = DOATTRIB_GENOCIDE;
 		add_menu(tmpwin, NO_GLYPH, &any,
 			 'g', 0, ATR_NONE, buf,
+			 MENU_UNSELECTED);
+	}
+
+	//Role-specific info goes here (currently just undead-hunter research.
+	if (Role_if(PM_UNDEAD_HUNTER)) {
+		Sprintf(buf, "Research progress.");
+		any.a_int = DOATTRIB_UH_RESEARCH;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			 'h', 0, ATR_NONE, buf,
 			 MENU_UNSELECTED);
 	}
 
@@ -667,6 +680,15 @@ boolean dumping;
 	}
 	if (active_glyph(BEASTS_EMBRACE)){
 		enl_msg("The hidden figure inside of you ", "lets", "let", " you succumb to the inner beast");
+	}
+	if (active_glyph(DEFILEMENT)){
+		enl_msg("The bloodless hand ", "heals you and protects", "healed you and protected", " your companions");
+	}
+	if (active_glyph(LUMEN)){
+		enl_msg("The nurturing florets ", "increases", "increased", " your carrying capacity and item discovery");
+	}
+	if (active_glyph(ROTTEN_EYES)){
+		enl_msg("The milky eyes ", "increase", "increased", " your energy recovery, hit points, experience gain, and item discovery");
 	}
 	if (active_glyph(SIGHT)){
 		enl_msg("The recursive eye ", "lets", "let", " you strike more accurately at monsters.");
@@ -1313,6 +1335,9 @@ resistances_enlightenment()
 	if (active_glyph(WRITHE)) putstr(en_win, 0, "A subtle mucus covers your brain.");
 	if (active_glyph(RADIANCE)) putstr(en_win, 0, "Your mind is impaled on a golden pyramid.");
 	if (active_glyph(BEASTS_EMBRACE)) putstr(en_win, 0, "A bestial figure hides inside of you.");
+	if (active_glyph(DEFILEMENT)) putstr(en_win, 0, "A reaching bloodless hand shoves through your every thought.");
+	if (active_glyph(LUMEN)) putstr(en_win, 0, "Waving florets nurture glassy invertebrates in the ruins of your skull.");
+	if (active_glyph(ROTTEN_EYES)) putstr(en_win, 0, "The milky eyes writhe in your brain.");
 	if (active_glyph(SIGHT)) putstr(en_win, 0, "Your brain is but the lid of an eye within an eye within an eye....");
 	
 	/*** Troubles ***/
@@ -3050,6 +3075,186 @@ STATIC_OVL void
 genocide_enlightenment()
 {
         list_genocided('y', FALSE, FALSE, TRUE);
+}
+
+STATIC_OVL void
+research_enlightenment()
+{
+	char buf[BUFSZ];
+	int i;
+	en_win = create_nhwindow(NHW_MENU);
+	if(active_glyph(DEFILEMENT) || u.ualign.god == GOD_DEFILEMENT || u.udefilement_research){
+		if(defile_count() >= 6){
+			putstr(en_win, 0, "You have made a great breakthrough in the philosophy of defilement!");
+		}
+		else {
+			putstr(en_win, 0, "You still have much to learn of defilement.");
+		}
+		if(!(active_glyph(DEFILEMENT) || (u.ualign.god == GOD_DEFILEMENT && known_glyph(DEFILEMENT)))){
+			putstr(en_win, 0, "Though, you are not currently a serious student of that philosophy.");
+		}
+		else {
+			if(!(u.upreservation_upgrades&PRESERVE_MAX) || (Race_if(PM_VAMPIRE) && vampire_count() < VAMPIRE_COUNT)){
+				if(defile_ok()){
+					putstr(en_win, 0, "You are ready to conduct another experiment into the nature of defilement.");
+					putstr(en_win, 0, "Use your phlebotomy kit while standing at a workbench-altar to defilement.");
+				}
+				else {
+					putstr(en_win, 0, "You are unable to devise further experiments into the nature of defilement.");
+					if(!impurity_ok())
+						putstr(en_win, 0, "You must immerse yourself in the ritually unclean to make progress.");
+					else
+						putstr(en_win, 0, "You must conduct more dissections to make progress.");
+				}
+			}
+			else {
+				putstr(en_win, 0, "You have progressed your study of defilement as far as can be done in the Dungeons of Doom.");
+			}
+		}
+		//Upgrade list
+		if(check_preservation(PRESERVE_REDUCE_HUNGER)){
+			putstr(en_win, 0, "    You have slowed your metabolism.");
+		}
+		if(check_preservation(PRESERVE_PREVENT_ABUSE)){
+			putstr(en_win, 0, "    You have made your body resistant to decay.");
+		}
+		if(check_preservation(PRESERVE_GAIN_DR)){
+			if(check_preservation(PRESERVE_GAIN_DR_2)){
+				putstr(en_win, 0, "    You have greatly toughened your skin.");
+			}
+			else putstr(en_win, 0, "    You have toughened your skin.");
+		}
+		if(check_preservation(PRESERVE_COLD_RES)){
+			putstr(en_win, 0, "    You no longer feel cold.");
+		}
+		if(check_preservation(PRESERVE_SLEEP_RES)){
+			putstr(en_win, 0, "    You no longer feel sleepy.");
+		}
+		if(check_preservation(PRESERVE_DEAD_TRUCE)){
+			putstr(en_win, 0, "    You no longer interest the undead.");
+		}
+		if(check_vampire(VAMPIRE_THRALLS)){
+			putstr(en_win, 0, "    You have improved your control over your spawn.");
+		}
+		if(check_vampire(VAMPIRE_MASTERY)){
+			putstr(en_win, 0, "    You have improved your spawns' attacks.");
+		}
+		if(check_vampire(VAMPIRE_BLOOD_RIP)){
+			putstr(en_win, 0, "    You have learned to manipulate the blood of your victims.");
+		}
+		if(check_vampire(VAMPIRE_BLOOD_SPIKES)){
+			putstr(en_win, 0, "    You have improved your blood-bullets to spears.");
+		}
+		if(check_vampire(VAMPIRE_GAZE)){
+			putstr(en_win, 0, "    You have learned to hypnotize your prey.");
+		}
+	}
+	if(active_glyph(LUMEN) || u.ualign.god == GOD_THE_CHOIR || u.uparasitology_research){
+		if(parasite_count() >= 6){
+			putstr(en_win, 0, "You have made a breakthrough in the philosophy of the choir!");
+		}
+		else {
+			putstr(en_win, 0, "You still have much to learn of parasitology.");
+		}
+		if(!(active_glyph(LUMEN) || (u.ualign.god == GOD_THE_CHOIR && known_glyph(LUMEN)))){
+			putstr(en_win, 0, "Though, you are not currently a serious student of that philosophy.");
+		}
+		else {
+			if(parasite_ok()){
+				putstr(en_win, 0, "You are ready to conduct another experiment into the song of the parasite choir.");
+				if(carrying(PARASITE))
+					putstr(en_win, 0, "Use your trephination kit while standing at a workbench-altar to the choir.");
+				else {
+					sprintf(buf, "You will need to find %s parasite first, though.", parasite_count() > 0 ? "another" : "a");
+					putstr(en_win, 0, buf);
+				}
+			}
+			else {
+				putstr(en_win, 0, "You are unable to devise further surgical experiments.");
+				putstr(en_win, 0, "You must conduct more dissections to make progress.");
+			}
+		}
+		//Upgrade list
+		if(u.brainsuckers){
+			sprintf(buf, "    You have positioned %d parasite%s to suck out your enemies' brains.", u.brainsuckers, u.brainsuckers > 1 ? "s" : "");
+			putstr(en_win, 0, buf);
+		}
+		if(u.cuckoo){
+			sprintf(buf, "    You have positioned %d parasite%s to empower your charm spells.", u.cuckoo, u.cuckoo > 1 ? "s" : "");
+			putstr(en_win, 0, buf);
+		}
+		if(u.explosion_up){
+			sprintf(buf, "    You have positioned %d parasite%s to empower your explosive spells.", u.explosion_up, u.explosion_up > 1 ? "s" : "");
+			putstr(en_win, 0, buf);
+		}
+		if(u.mm_up){
+			sprintf(buf, "    You have positioned %d parasite%s to empower your ray and beam spells.", u.mm_up, u.mm_up > 1 ? "s" : "");
+			putstr(en_win, 0, buf);
+		}
+		if(u.jellyfish){
+			sprintf(buf, "    You have positioned %d parasite%s to sting adjacent enemies.", u.jellyfish, u.jellyfish > 1 ? "s" : "");
+			putstr(en_win, 0, buf);
+		}
+	}
+	if(active_glyph(ROTTEN_EYES) || u.ualign.god == GOD_THE_COLLEGE || u.ureanimation_research){
+		if(reanimation_count() >= 6){
+			putstr(en_win, 0, "You have made a breakthrough in the philosophy of the college!");
+		}
+		else {
+			putstr(en_win, 0, "You still have much to learn of reanimation.");
+		}
+		if(!(active_glyph(ROTTEN_EYES) || (u.ualign.god == GOD_THE_COLLEGE && known_glyph(ROTTEN_EYES)))){
+			putstr(en_win, 0, "Though, you are not currently a serious student of that philosophy.");
+		}
+		else {
+			if(reanimation_count() < REANIMATION_COUNT){
+				if(reanimation_ok()){
+					putstr(en_win, 0, "You are ready to conduct another experiment into the great animating thoughts pursued by the college.");
+					putstr(en_win, 0, "Use your portable electrode while standing at a workbench-altar to the college.");
+				}
+				else {
+					putstr(en_win, 0, "You are unable to devise further Galvanic experiments.");
+					if(!reanimation_insight_ok())
+						putstr(en_win, 0, "You must hunt the strange creatures of the veil to make progress.");
+					else
+						putstr(en_win, 0, "You must conduct more dissections and reanimations to make progress.");
+				}
+			}
+			else {
+				putstr(en_win, 0, "You have progressed your study of the animating thoughts as far as can be done in the Dungeons of Doom.");
+			}
+		}
+		//Upgrade list
+		if(check_reanimation(RE_BOLT_RES)){
+			putstr(en_win, 0, "    You have made yourself lightning resistant.");
+		}
+		if(check_reanimation(RE_WATER_RES)){
+			putstr(en_win, 0, "    You have made yourself waterproof.");
+		}
+		if(check_reanimation(RE_CLAIR)){
+			putstr(en_win, 0, "    You have given yourself clairvoyance.");
+		}
+		if(check_reanimation(RE_CLONE_SELF)){
+			putstr(en_win, 0, "    You can create blood clones.");
+		}
+		if(check_reanimation(ANTENNA_ERRANT)){
+			putstr(en_win, 0, "    You have attuned your antennae weapons to conduct the errant thoughts of the cosmos.");
+		}
+		if(check_reanimation(ANTENNA_BOLT)){
+			putstr(en_win, 0, "    You have attuned your antennae weapons to conduct the cosmic static.");
+		}
+		if(check_reanimation(ANTENNA_REJECT)){
+			putstr(en_win, 0, "    You have attuned your antennae weapons to rebroadcast rejecting forces.");
+		}
+		if(check_reanimation(LAMP_PHASE)){
+			putstr(en_win, 0, "    You have learned to use light to reveal the insubstantial world.");
+		}
+	}
+	
+	
+	display_nhwindow(en_win, TRUE);
+	destroy_nhwindow(en_win);
+	return;
 }
 
 /*enlighten.c*/

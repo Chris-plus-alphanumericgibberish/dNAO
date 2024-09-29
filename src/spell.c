@@ -917,6 +917,8 @@ run_maintained_spells()
 		if (u.uhave.amulet)
 			spell_level *= 2;
 		int hungr = spellhunger(spellenergy(spell_index)) * MAINTAINED_SPELL_HUNGER_MULTIPLIER * get_uhungersizemod();
+		if(check_preservation(PRESERVE_REDUCE_HUNGER))
+			hungr = (hungr+1)/2;
 		if (u.uen < spell_level){
 			You("lack the energy to maintain %s.",
 				spellname(spell_index));
@@ -3217,6 +3219,9 @@ spiriteffects(power, atme)
 							deltrap(t_at(u.ux,u.uy));
 						}
 						break;
+						case TT_SALIVA:
+						pline(pullmsg, "saliva");
+						break;
 						case TT_LAVA:
 						pline(pullmsg, "lava");
 						break;
@@ -4667,6 +4672,8 @@ spelleffects(int spell, boolean atme, int spelltyp)
 		} else {
 			if (spellid(spell) != SPE_DETECT_FOOD) {
 				int hungr = spellhunger(energy) * get_uhungersizemod();
+				if(check_preservation(PRESERVE_REDUCE_HUNGER))
+					hungr = (hungr+1)/2;
 				/* don't put player (quite) into fainting from
 				 * casting a spell, particularly since they might
 				 * not even be hungry at the beginning; however,
@@ -4750,6 +4757,22 @@ spelleffects(int spell, boolean atme, int spelltyp)
 								inacc = 0;
 								goto dothrowspell;
 dothrowspell:
+		if(u.explosion_up){
+			if(n > 1)
+				n += u.explosion_up;
+			else {
+				int out = 2;
+				int count = u.explosion_up;
+				while(count >= out){
+					count -= out;
+					n++;
+					out += 1;
+				}
+				if(count > rn2(out)){
+					n++;
+				}
+			}
+		}
 		if (Double_spell_size){
 			n = n * 3 / 2;
 			if (pseudo->otyp != SPE_LIGHTNING_STORM)
@@ -4859,7 +4882,26 @@ dothrowspell:
 				Sprintf(buf, "zapped %sself with a spell", uhim());
 				losehp(damage, buf, NO_KILLER_PREFIX);
 			    }
-			} else weffects(pseudo);
+			} else {
+				weffects(pseudo);
+				if(u.mm_up && active_glyph(LUMEN)){
+					int n = 0;
+					int out = 2;
+					int count = u.mm_up;
+					while(count >= out){
+						count -= out;
+						n++;
+						out += 1;
+					}
+					if(count > rn2(out)){
+						n++;
+					}
+					while(n > 0){
+						weffects(pseudo);
+						n--;
+					}
+				}
+			}
 		} else{
 			weffects(pseudo);
 		}
@@ -6321,7 +6363,14 @@ int spell;
 			}
 		}
 	}
-	
+
+	//Parasitology, uh, upgrades
+	if(active_glyph(LUMEN)){
+		chance += (u.mm_up + u.explosion_up + u.cuckoo)*5;
+		if(skill == P_ENCHANTMENT_SPELL)
+			chance += u.cuckoo*5;
+	}
+
 	if(flags.silence_level){
 		struct monst *cmon;
 		int dist = 0;

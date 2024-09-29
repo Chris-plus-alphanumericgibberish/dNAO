@@ -101,12 +101,13 @@
 #define OVERWOUND 	13
 #define WEEPING 	14
 #define DISINTEGRATED 15
-#define GENOCIDED	16
-#define PANICKED	17
-#define TRICKED		18
-#define QUIT		19
-#define ESCAPED		20
-#define ASCENDED	21
+#define GENOCIDED	16 //Life saving triggers here and below, including wizard lifesaving
+#define APOCALYPSE	17
+#define PANICKED	18 //Below this, umortality is incremented
+#define TRICKED		19
+#define QUIT		20
+#define ESCAPED		21
+#define ASCENDED	22
 
 #include "align.h"
 #include "dungeon.h"
@@ -375,6 +376,7 @@ NEARDATA extern coord bhitpos;	/* place where throw or zap hits or stops */
 #define ugod_is_angry() (u.ualign.record < 0)
 #define on_altar()	(IS_ALTAR(levl[u.ux][u.uy].typ) || goat_mouth_at(u.ux, u.uy) || bokrug_idol_at(u.ux, u.uy))
 #define on_shrine()	(IS_ALTAR(levl[u.ux][u.uy].typ) && altars[levl[u.ux][u.uy].altar_num].shrine)
+#define on_god_altar(god)	(IS_ALTAR(levl[u.ux][u.uy].typ) && god_at_altar(u.ux,u.uy) == (god))
 
 /*  */
 

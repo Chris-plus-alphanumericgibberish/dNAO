@@ -423,6 +423,7 @@ int template;
 			ptr->mmove = max(6, ptr->mmove / 2);
 		break;
 	case SKELIFIED:
+	case SPARK_SKELETON:
 		/* flags: */
 		ptr->geno |= (G_NOCORPSE);
 		ptr->mflagsm |= (MM_BREATHLESS);
@@ -927,6 +928,47 @@ int template;
 			ptr->mflagsv = MV_DETECTION|MV_OMNI;
 			ptr->mflagsw = MW_ELDER_EYE_PLANES;
 		break;
+	case TONGUE_PUPPET:
+		/* flags: */
+		ptr->mflagsm |= (MM_FLY|MM_FLOAT|MM_WEBRIP|MM_DOORBUST);
+		if(ptr->mflagsm&MM_NEEDPICK)
+			ptr->mflagsm &= ~(MM_TUNNEL|MM_NEEDPICK);
+		ptr->mflagst |= (MT_MINDLESS | MT_HOSTILE | MT_STALK | MT_CARNIVORE);
+		ptr->mflagst &= ~(MT_ANIMAL | MT_PEACEFUL | MT_ITEMS | MT_HIDE | MT_CONCEAL | MT_HERBIVORE);
+		ptr->mflagsg &= ~(MG_RSLASH);
+		ptr->mflagsg |= MG_INFRAVISIBLE | MG_SANLOSS | MG_INSIGHT;
+		ptr->mflagsa = (MA_G_O_O|MA_ANIMAL|MA_ET);
+		ptr->mflagsw = (MW_EYE_OF_YGG);
+		
+		ptr->maligntyp = -28;
+
+		/*Note: The actual effect of this is to zero out mflagsf, but flags are removed explicitly for futureproofing reasons.*/
+		ptr->mflagsf &= ~(MF_MARTIAL_B|MF_MARTIAL_S|MF_MARTIAL_E);
+		ptr->mflagsf &= ~(MF_BAB_FULL|MF_BAB_HALF);
+		ptr->mflagsf &= ~(MF_LEVEL_30|MF_LEVEL_45);
+		ptr->mflagsf &= ~(MF_PHYS_SCALING);
+		/* defense: */
+		ptr->mr = 90;
+		ptr->nac = max(ptr->nac+4, 12);
+		ptr->dac += 2;
+		ptr->pac = 12;
+		ptr->hdr += 4;
+		ptr->bdr += 4;
+		ptr->gdr += 4;
+		ptr->ldr += 4;
+		ptr->fdr += 4;
+		ptr->spe_hdr = 8;
+		ptr->spe_bdr = 8;
+		ptr->spe_gdr = 8;
+		ptr->spe_ldr = 8;
+		ptr->spe_fdr = 8;
+		/* resists: */
+		ptr->mresists |= (MR_POISON|MR_STONE|MR_COLD|MR_MAGIC);
+		/* misc: */
+		ptr->msound = MS_SILENT;
+
+		ptr->mmove = 15;
+		break;
 	}
 #undef MT_ITEMS
 
@@ -944,7 +986,7 @@ int template;
 		insert = FALSE;
 
 		/* some templates completely skip specific attacks */
-		while ((template == ZOMBIFIED || template == SKELIFIED || template == SPORE_ZOMBIE) &&
+		while ((template == ZOMBIFIED || template == SKELIFIED || template == SPORE_ZOMBIE || template == SPARK_SKELETON) &&
 			(
 			attk->lev_req > ptr->mlevel ||
 			attk->aatyp == AT_SPIT ||
@@ -1143,7 +1185,7 @@ int template;
 #define end_insert_okay(specvar) (!(specvar) && (is_null_attk(attk) || attk->aatyp == AT_NONE) && (insert = TRUE))
 #define maybe_insert() if(insert) {for(j=NATTK-i-1;j>0;j--)attk[j]=attk[j-1];*attk=noattack;insert=FALSE;}
 		/* zombies/skeletons get a melee attack if they don't have any (likely due to disallowed aatyp) */
-		if ((template == ZOMBIFIED || template == SKELIFIED || template == MINDLESS) && (
+		if ((template == ZOMBIFIED || template == SPORE_ZOMBIE || template == SKELIFIED || template == SPARK_SKELETON || template == MINDLESS) && (
 			i == 0 && (!nolimbs(ptr) || has_head(ptr)) && (
 			is_null_attk(attk) ||
 			(attk->aatyp == AT_NONE || attk->aatyp == AT_BOOM)
@@ -1158,7 +1200,7 @@ int template;
 		}
 
 		/* skeletons get a paralyzing touch */
-		if (template == SKELIFIED && (
+		if ((template == SKELIFIED || template == SPARK_SKELETON) && (
 			insert_okay(special)
 			))
 		{
@@ -1168,6 +1210,19 @@ int template;
 			attk->damn = 1;
 			attk->damd = max(ptr->msize * 2, 4);
 			special = TRUE;
+		}
+		
+		/* spark skeletons get a bolt touch */
+		if (template == SPARK_SKELETON && (
+			insert_okay(special_2)
+			))
+		{
+			maybe_insert();
+			attk->aatyp = AT_TUCH;
+			attk->adtyp = AD_ELEC;
+			attk->damn = 2;
+			attk->damd = max(ptr->msize * 3, 6);
+			special_2 = TRUE;
 		}
 		
 		/* vitreans get a cold touch */
@@ -1477,6 +1532,17 @@ int template;
 			attk->adtyp = AD_SVPN;
 			attk->damn = 6;
 			attk->damd = 6;
+			special = TRUE;
+		}
+		if (template == TONGUE_PUPPET && (
+			end_insert_okay(special)
+			))
+		{
+			maybe_insert();
+			attk->aatyp = AT_TONG;
+			attk->adtyp = AD_FATK;
+			attk->damn = 1;
+			attk->damd = 3;
 			special = TRUE;
 		}
 	}
@@ -2052,7 +2118,7 @@ int atyp, dtyp;
     struct attack *a;
 
     for (a = &ptr->mattk[0]; a < &ptr->mattk[NATTK]; a++){
-		if (a->aatyp == atyp && (dtyp == AD_ANY || a->adtyp == dtyp)) 
+		if (a->ins_req <= u.uinsight && a->aatyp == atyp && (dtyp == AD_ANY || a->adtyp == dtyp)) 
 			return a;
 	}
 
@@ -2067,7 +2133,7 @@ int dtyp;
     struct attack *a;
 
     for (a = &ptr->mattk[0]; a < &ptr->mattk[NATTK]; a++){
-		if ((dtyp == AD_ANY || a->adtyp == dtyp)) 
+		if (a->ins_req <= u.uinsight && (dtyp == AD_ANY || a->adtyp == dtyp)) 
 			return a;
 	}
 

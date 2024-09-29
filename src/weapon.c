@@ -255,7 +255,11 @@ struct monst *magr;
 	}
 
 	if (is_insight_weapon(otmp)){
-		if(youagr && (Role_if(PM_MADMAN) || u.sealsActive&SEAL_OSE)){
+		if(youagr && (Role_if(PM_MADMAN) 
+						|| u.sealsActive&SEAL_OSE
+						|| (Role_if(PM_UNDEAD_HUNTER) && mvitals[PM_MOON_S_CHOSEN].died)
+					)
+		){
 			if(u.uinsight)
 				tmp += rnd(min(u.uinsight, mlev(magr)));
 		}
@@ -322,7 +326,7 @@ struct monst *magr;
 	if(otyp == CARCOSAN_STING){
 		attackmask = PIERCE;
 	}
-	if(otyp == SOLDIER_S_SABER){
+	if(otyp == SOLDIER_S_SABER || otyp == BLADED_BOW){
 		attackmask = SLASH;
 	}
 
@@ -548,6 +552,11 @@ struct monst *magr;
 			ocn = 1;
 			ocd = 8;
 		}
+		else if (otyp == BLADED_BOW)
+		{
+			ocn = 1;
+			ocd = 8;
+		}
 		else if (otyp == WIND_AND_FIRE_WHEELS)
 		{
 			if(large){
@@ -561,17 +570,26 @@ struct monst *magr;
 		}
 		else if (otyp == MOON_AXE)
 		{
-			/*
-			ECLIPSE_MOON	0  -  2d4 v small, 2d12 v large
-			CRESCENT_MOON	1  -  2d6
-			HALF_MOON		2  -  2d8
-			GIBBOUS_MOON	3  - 2d10
-			FULL_MOON	 	4  - 2d12 
-			 */
-			ocn = 2;
-			ocd = max(4 + 2 * obj->ovar1_moonPhase + 2 * dmod, 2);	// die size is based on axe's phase of moon (0 <= ovar1_moonPhase <= 4)
-			if (!large && obj->ovar1_moonPhase == ECLIPSE_MOON)		// eclipse moon axe is surprisingly effective against small creatures (2d12)
-				ocd = max(12 + 2 * dmod, 2);
+			if(obj->ovar1_moonPhase == HUNTING_MOON){
+				ocn = 2;
+				if(large)
+					ocd = 9;
+				else
+					ocd = 12;
+			}
+			else {
+				/*
+				ECLIPSE_MOON	0  -  2d4 v large, 2d12 v small
+				CRESCENT_MOON	1  -  2d6
+				HALF_MOON		2  -  2d8
+				GIBBOUS_MOON	3  - 2d10
+				FULL_MOON	 	4  - 2d12 
+				 */
+				ocn = 2;
+				ocd = max(4 + 2 * obj->ovar1_moonPhase + 2 * dmod, 2);	// die size is based on axe's phase of moon (0 <= ovar1_moonPhase <= 4)
+				if (!large && obj->ovar1_moonPhase == ECLIPSE_MOON)		// eclipse moon axe is surprisingly effective against small creatures (2d12)
+					ocd = max(12 + 2 * dmod, 2);
+			}
 		}
 
 		/* shield bash skill buffs shield damage to d4/6/8 with skill, affected by dmod */
@@ -1584,7 +1602,7 @@ static NEARDATA const int rwep[] =
 	ROPE_OF_ENTANGLING/*lost turns*/, 
 	LOADSTONE/*1d30 plus weight*/, 
 // #ifdef FIREARMS
-	FRAG_GRENADE, GAS_GRENADE, ROCKET, BLOOD_BULLET, SILVER_BULLET, BULLET, SHOTGUN_SHELL,
+	FRAG_GRENADE, GAS_GRENADE, ROCKET, BLOOD_SPEAR, BLOOD_BULLET, SILVER_BULLET, BULLET, SHOTGUN_SHELL,
 // #endif
 	DROVEN_BOLT/*1d9+1/1d6+1*/, 
 	DWARVISH_SPEAR/*1d9/1d9*/, 
@@ -1870,12 +1888,14 @@ static const NEARDATA short hwep[] = {
 	  VIBROBLADE,/*2d6+3/2d8+4*/
 	  ROD_OF_FORCE/*2d8/2d12*/,
 	  CRYSTAL_SWORD/*2d8/2d12*/,
+	  CHURCH_HAMMER,/*2d8+2/2d8*/
 	  DOUBLE_SWORD,/*2d8/2d12*/
 	  DROVEN_GREATSWORD/*1d18/1d30*/, 
 	  SET_OF_CROW_TALONS/*2d4/2d3/+6 study*/,
 	  TSURUGI/*1d16/1d8+2d6*/, 
 	  MOON_AXE/*variable, 2d6 to 2d12*/,
 	  HIGH_ELVEN_WARSWORD/*1d10+1d6/1d10+1d6*/,
+	  CHURCH_BLADE/*1d12+1/3d8*/, 
 	  RUNESWORD/*1d10+1d4/1d10+1*/, 
 	  BATTLE_AXE/*1d8+1d4/1d6+2d4*/,
 	  TWO_HANDED_SWORD/*1d12/3d6*/, 
@@ -1888,7 +1908,9 @@ static const NEARDATA short hwep[] = {
 	  CHIKAGE/*1d10/1d12*/,
 	  KATANA/*1d10/1d12*/,
 	  CRYSKNIFE/*1d10/1d10*/, 
+	  WHIP_SAW/*1d10/1d8*/, 
 	  BESTIAL_CLAW/*1d10/1d8*/, 
+	  SOLDIER_S_RAPIER/*1d10/1d6*/, 
 	  VIPERWHIP/*2d4/2d3/poison*/,
 	  DROVEN_SHORT_SWORD/*1d9/1d9*/, 
 	  DWARVISH_SPEAR/*1d9/1d9*/, 
@@ -1903,7 +1925,9 @@ static const NEARDATA short hwep[] = {
 	  TRIDENT/*1d8+1/3d6*/, 
 	  SABER/*1d8/1d8*/,
 	  NAGINATA, /*1d8/1d10*/
+	  HUNTER_S_LONGSWORD/*1d8/1d12*/,
 	  LONG_SWORD/*1d8/1d12*/,
+	  CANE/*1d8/1d10*/,
 	  FLAIL/*1d6+1/2d4*/, 
 	  NAGINATA/*1d6+1/2d4*/, 
 	  SCIMITAR/*1d8/1d8*/,
@@ -1920,6 +1944,7 @@ static const NEARDATA short hwep[] = {
 	  DISKOS/*1d6/1d8*/,
 	  SPEAR/*1d6/1d8*/,
 	  BLADE_OF_GRACE/*1d6/1d8*/,
+	  HUNTER_S_SHORTSWORD/*1d6/1d8*/,
 	  SHORT_SWORD/*1d6/1d8*/,
 	  RAPIER/*1d6/1d4*/, 
 	  AXE/*1d6/1d4*/, 
@@ -1982,6 +2007,7 @@ static const NEARDATA short hpwep[] = {
 	  TSURUGI/*1d16/1d8+2d6*/, 
 	  MOON_AXE/*variable, 2d6 to 2d12*/,
 	  HIGH_ELVEN_WARSWORD/*1d10+1d6/1d10+1d6*/,
+	  CHURCH_BLADE/*1d12+1/3d8*/, 
 	  RUNESWORD/*1d10+1d4/1d10+1*/, 
 	  BATTLE_AXE/*1d8+1d4/1d6+2d4*/,
 	  TWO_HANDED_SWORD/*1d12/3d6*/, 
@@ -1997,7 +2023,9 @@ static const NEARDATA short hpwep[] = {
 	  KATANA/*1d10/1d12*/,
 	  DROVEN_LANCE, /*1d10/1d10*/
 	  CRYSKNIFE/*1d10/1d10*/, 
+	  WHIP_SAW/*1d10/1d8*/, 
 	  BESTIAL_CLAW/*1d10/1d8*/, 
+	  SOLDIER_S_RAPIER/*1d10/1d6*/, 
 	  VIPERWHIP/*2d4/2d3/poison*/,
 	  BARDICHE, /*2d4/3d4*/ 
 	  DROVEN_SHORT_SWORD/*1d9/1d9*/, 
@@ -2019,7 +2047,9 @@ static const NEARDATA short hpwep[] = {
 	  TRIDENT/*1d8+2/3d6*/, 
 	  SABER/*1d8/1d8*/,
 	  NAGINATA, /*1d8/1d10*/
+	  HUNTER_S_LONGSWORD/*1d8/1d12*/,
 	  LONG_SWORD/*1d8/1d12*/,
+	  CANE/*1d8/1d10*/,
 	  FLAIL/*1d6+1/2d4*/, 
 	  NAGINATA/*1d6+1/2d4*/, 
 	  ELVEN_LANCE, /*1d8/1d8*/
@@ -2041,6 +2071,7 @@ static const NEARDATA short hpwep[] = {
 	  LANCE, /*1d6/1d8*/
 	  SPEAR/*1d6/1d8*/,
 	  BLADE_OF_GRACE/*1d6/1d8*/,
+	  HUNTER_S_SHORTSWORD/*1d6/1d8*/,
 	  SHORT_SWORD/*1d6/1d8*/,
 	  PARTISAN, /*1d6/1d6*/
 	  RAPIER/*1d6/1d4*/, 
@@ -2527,7 +2558,7 @@ register struct monst *mon;
 					((tobj = m_carrying_charged(mon, HAND_BLASTER)) && tobj != MON_WEP(mon)) ||
 					((tobj = m_carrying_charged(mon, CARCOSAN_STING)) && tobj != MON_WEP(mon)) ||
 					/* bullets */
-					((m_carrying(mon, BULLET) || m_carrying(mon, SILVER_BULLET) || m_carrying(mon, BLOOD_BULLET)) &&
+					((m_carrying(mon, BULLET) || m_carrying(mon, SILVER_BULLET) || m_carrying(mon, BLOOD_BULLET) || m_carrying(mon, BLOOD_SPEAR)) &&
 						(((tobj = oselect(mon, ASSAULT_RIFLE, W_SWAPWEP, marilith))) ||
 						((tobj = oselect(mon, SUBMACHINE_GUN, W_SWAPWEP, marilith))) ||
 						((tobj = oselect(mon, PISTOL, W_SWAPWEP, marilith))))) ||

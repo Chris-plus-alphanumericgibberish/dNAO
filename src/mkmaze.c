@@ -735,6 +735,10 @@ fixup_special()
 			}
 		}
 	}
+	/* Undead Hunter quest: Haunted forest features */
+	if (Role_if(PM_UNDEAD_HUNTER) && In_quest(&u.uz) && qlocate_level.dlevel < u.uz.dlevel && !Is_nemesis(&u.uz)) {
+		place_haunted_forest_features();
+	}
 	/* DROW QUEST: transfer equip */
 	if (urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH && In_quest(&u.uz)) {
 		if(qlocate_level.dlevel < u.uz.dlevel)
@@ -1500,7 +1504,7 @@ register const char *s;
 	}
 	/* quick hack for Binders entering Astral -- change the gods out before loading the level, so that
 	 * the altars are all generated to the correct gods */
-	if (Role_if(PM_EXILE) && on_level(&u.uz, &astral_level)) {
+	if (Role_if(PM_EXILE) && Is_astralevel(&u.uz)) {
 		/* the Deities on Astral are those that stand at the Gate, not the creational ones governing the Dungeon */
 		urole.lgod = GOD_PISTIS_SOPHIA;
 		urole.ngod = GOD_THE_VOID;

@@ -329,7 +329,7 @@ have_blood_smithing_x(struct obj * obj, int oprop)
 	if(obj->oartifact && !is_malleable_artifact(&artilist[obj->oartifact]))
 		return FALSE;
 
-	if(obj->obj_material == MERCURIAL)
+	if(obj_is_material(obj, MERCURIAL))
 		return FALSE;
 
 	if(check_oprop(obj, oprop) || (oprop_lesser && check_oprop(obj, oprop_lesser)))
@@ -412,17 +412,20 @@ smithing_object(struct obj *obj)
 	menu_item *selected;
 	anything any;
 	int selection;
+	boolean upgradeable = obj->oclass == WEAPON_CLASS || is_weptool(obj) || obj->oclass == ARMOR_CLASS;
+	boolean upgrade_gem_required; 
 
 	while(TRUE){
 		tmpwin = create_nhwindow(NHW_MENU);
 		start_menu(tmpwin);
 		any.a_void = 0;		/* zero out all bits */
 		n = 0;
+		upgrade_gem_required = (obj->spe >= smithing_bonus()) || (!is_metallic(obj) && obj->oclass == ARMOR_CLASS);
 
 		// Sprintf(buf, "Functions");
 		// add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
 
-		if((obj->spe <= 0 || obj->spe < smithing_bonus()) && check_oprop(obj, OPROP_NONE) && !obj->oartifact){
+		if(is_metallic(obj) && (obj->spe <= 0 || obj->spe < smithing_bonus()) && check_oprop(obj, OPROP_NONE) && !obj->oartifact){
 			n++;
 			incntlet = 'm';
 			Sprintf(buf, "Melt for scrap");
@@ -431,7 +434,7 @@ smithing_object(struct obj *obj)
 				incntlet, 0, ATR_NONE, buf,
 				MENU_UNSELECTED);
 		}
-		if (greatest_erosion(obj) > 0) {
+		if (is_metallic(obj) && greatest_erosion(obj) > 0) {
 			n++;
 			incntlet = 'r';
 			Sprintf(buf, "Repair damage");
@@ -440,11 +443,7 @@ smithing_object(struct obj *obj)
 				incntlet, 0, ATR_NONE, buf,
 				MENU_UNSELECTED);
 		}
-		else if((obj->oclass == WEAPON_CLASS || is_weptool(obj) || obj->oclass == ARMOR_CLASS)
-			&& (obj->spe < smithing_bonus()
-				|| (u.ublood_smithing && have_blood_smithing_crystal(obj))
-			)
-		){
+		else if(upgradeable && (!upgrade_gem_required || (u.ublood_smithing && have_blood_smithing_crystal(obj)))){
 			n++;
 			incntlet = 'i';
 			Sprintf(buf, "Improve %s", xname(obj));
@@ -512,15 +511,35 @@ smithing_object(struct obj *obj)
 			&& (u.ublood_smithing && have_blood_smithing_buc(obj))
 		){
 			n++;
-			incntlet = 'g';
+			incntlet = 's';
 			Sprintf(buf, "Imbue %s with spiritual energy", xname(obj));
 			any.a_int = 9;	/* must be non-zero */
 			add_menu(tmpwin, NO_GLYPH, &any,
 				incntlet, 0, ATR_NONE, buf,
 				MENU_UNSELECTED);
 		}
-		if(!n)
+		if(obj->otyp == CRYSTAL && obj_is_material(obj, HEMARGYOS) && obj->spe > 1){
+			n++;
+			incntlet = 'b';
+			Sprintf(buf, "Break down into smaller crystals");
+			any.a_int = 10;	/* must be non-zero */
+			add_menu(tmpwin, NO_GLYPH, &any,
+				incntlet, 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+		}
+		if(check_oprop(obj, OPROP_SMITHU)){
+			n++;
+			incntlet = 'e';
+			Sprintf(buf, "Extract energy from %s", xname(obj));
+			any.a_int = 11;	/* must be non-zero */
+			add_menu(tmpwin, NO_GLYPH, &any,
+				incntlet, 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+		}
+		if(!n){
+			destroy_nhwindow(tmpwin);
 			return;
+		}
 
 		Sprintf(buf, "Smithing %s:", doname(obj));
 		end_menu(tmpwin, buf);
@@ -574,8 +593,11 @@ smithing_object(struct obj *obj)
 				exercise(A_DEX, TRUE);
 			break;
 			case 3:
-				if(obj->spe < smithing_bonus()){
+				if(!upgrade_gem_required){
 					obj->spe++;
+					if(obj->otyp == CHURCH_HAMMER || obj->otyp == CHURCH_BLADE)
+						if(obj->cobj && obj->spe > obj->cobj->spe) /*Note: base obj already incremented*/
+							obj->cobj->spe++;
 					You("successfully improve your %s.", xname(obj));
 					use_skill(P_SMITHING, 1);
 					exercise(A_DEX, TRUE);
@@ -584,8 +606,24 @@ smithing_object(struct obj *obj)
 				else {
 					if(u.ublood_smithing && have_blood_smithing_crystal(obj)){
 						struct obj *crystal = find_blood_smithing_crystal(obj);
+						obj->blood_smithed = TRUE;
 						obj->spe++;
+						if(obj->otyp == CHURCH_HAMMER || obj->otyp == CHURCH_BLADE)
+							if(obj->cobj && obj->spe > obj->cobj->spe){ /*Note: base obj already incremented*/
+								obj->cobj->spe++;
+								obj->cobj->blood_smithed = TRUE;
+							}
 						You("successfully improve your %s using %s.", xname(obj), an(singular(crystal, xname)));
+						if(Role_if(PM_UNDEAD_HUNTER)){
+							if(crystal->spe == 2 && OLD_P_MAX_SKILL(P_SMITHING) < P_SKILLED){
+								pline("The knowledge from the crystal sinks into your subconscious.");
+								skilled_weapon_skill(P_SMITHING);
+							}
+							else if(crystal->spe > 2 && OLD_P_MAX_SKILL(P_SMITHING) < P_EXPERT){
+								pline("The knowledge from the crystal sinks into your subconscious.");
+								expert_weapon_skill(P_SMITHING);
+							}
+						}
 						useup(crystal);
 						use_skill(P_SMITHING, crystal->spe);
 						exercise(A_STR, TRUE);
@@ -665,7 +703,10 @@ smithing_object(struct obj *obj)
 				else if(spellnum < MAXSPELL){
 					percdecrnknow(spellnum, 100);
 				}
-				add_oprop(obj, OPROP_ACIDW);
+				if(is_full_insight_weapon(obj))
+					add_oprop(obj, OPROP_LESSER_ACIDW);
+				else
+					add_oprop(obj, OPROP_ACIDW);
 				add_oprop(obj, OPROP_INSTW);
 				add_oprop(obj, OPROP_SMITHU);
 				use_skill(P_SMITHING, 4);
@@ -714,6 +755,249 @@ smithing_object(struct obj *obj)
 				use_skill(P_SMITHING, 5);
 			}
 			break;
+			case 10:{
+				struct obj *new;
+				if(obj->spe == 2){
+					You("split the twin columnar crystals appart.");
+					new = mksobj(CRYSTAL, MKOBJ_NOINIT);
+					new->spe = 1;
+					new->quan = 2;
+					set_material_gm(new, HEMARGYOS);
+					fix_object(new);
+					useup(obj);
+					hold_another_object(new, u.uswallow ?
+							   "Oops!  %s out of your reach!" :
+							(Weightless ||
+							 Is_waterlevel(&u.uz) ||
+							 levl[u.ux][u.uy].typ < IRONBARS ||
+							 levl[u.ux][u.uy].typ >= ICE) ?
+								   "Oops!  %s away from you!" :
+								   "Oops!  %s to the floor!",
+								   The(aobjnam(new, "slip")),
+								   (const char *)0);
+					exercise(A_DEX, TRUE);
+					use_skill(P_SMITHING, 2);
+				}
+				else if(obj->spe == 3){
+					You("break up the chunk of columnar crystals.");
+					int n = 2+rn2(2);
+					new = mksobj(CRYSTAL, MKOBJ_NOINIT);
+					new->spe = 2;
+					new->quan = n;
+					set_material_gm(new, HEMARGYOS);
+					fix_object(new);
+					useup(obj);
+					hold_another_object(new, u.uswallow ?
+							   "Oops!  %s out of your reach!" :
+							(Weightless ||
+							 Is_waterlevel(&u.uz) ||
+							 levl[u.ux][u.uy].typ < IRONBARS ||
+							 levl[u.ux][u.uy].typ >= ICE) ?
+								   "Oops!  %s away from you!" :
+								   "Oops!  %s to the floor!",
+								   The(aobjnam(new, "slip")),
+								   (const char *)0);
+					n = 4-n;
+					new = mksobj(CRYSTAL, MKOBJ_NOINIT);
+					new->spe = 1;
+					new->quan = 2*n;
+					set_material_gm(new, HEMARGYOS);
+					fix_object(new);
+					useup(obj);
+					hold_another_object(new, u.uswallow ?
+							   "Oops!  %s out of your reach!" :
+							(Weightless ||
+							 Is_waterlevel(&u.uz) ||
+							 levl[u.ux][u.uy].typ < IRONBARS ||
+							 levl[u.ux][u.uy].typ >= ICE) ?
+								   "Oops!  %s away from you!" :
+								   "Oops!  %s to the floor!",
+								   The(aobjnam(new, "slip")),
+								   (const char *)0);
+					exercise(A_DEX, TRUE);
+					exercise(A_STR, TRUE);
+					use_skill(P_SMITHING, 4);
+				}
+				else if(obj->spe == 4){
+					You("break up the mass of columnar crystals.");
+					new = mksobj(CRYSTAL, MKOBJ_NOINIT);
+					//2 or more chunks
+					int c = 2+rn2(3);
+					new->spe = 3;
+					new->quan = c;
+					set_material_gm(new, HEMARGYOS);
+					fix_object(new);
+					useup(obj);
+					hold_another_object(new, u.uswallow ?
+							   "Oops!  %s out of your reach!" :
+							(Weightless ||
+							 Is_waterlevel(&u.uz) ||
+							 levl[u.ux][u.uy].typ < IRONBARS ||
+							 levl[u.ux][u.uy].typ >= ICE) ?
+								   "Oops!  %s away from you!" :
+								   "Oops!  %s to the floor!",
+								   The(aobjnam(new, "slip")),
+								   (const char *)0);
+					//4 or more twins
+					int n = 2+d(2,3);
+					new = mksobj(CRYSTAL, MKOBJ_NOINIT);
+					new->spe = 2;
+					new->quan = n + (4-c)*2;
+					set_material_gm(new, HEMARGYOS);
+					fix_object(new);
+					useup(obj);
+					hold_another_object(new, u.uswallow ?
+							   "Oops!  %s out of your reach!" :
+							(Weightless ||
+							 Is_waterlevel(&u.uz) ||
+							 levl[u.ux][u.uy].typ < IRONBARS ||
+							 levl[u.ux][u.uy].typ >= ICE) ?
+								   "Oops!  %s away from you!" :
+								   "Oops!  %s to the floor!",
+								   The(aobjnam(new, "slip")),
+								   (const char *)0);
+					//8 or more singles
+					n = 12-n;
+					new = mksobj(CRYSTAL, MKOBJ_NOINIT);
+					new->spe = 1;
+					new->quan = 2*n;
+					set_material_gm(new, HEMARGYOS);
+					fix_object(new);
+					useup(obj);
+					hold_another_object(new, u.uswallow ?
+							   "Oops!  %s out of your reach!" :
+							(Weightless ||
+							 Is_waterlevel(&u.uz) ||
+							 levl[u.ux][u.uy].typ < IRONBARS ||
+							 levl[u.ux][u.uy].typ >= ICE) ?
+								   "Oops!  %s away from you!" :
+								   "Oops!  %s to the floor!",
+								   The(aobjnam(new, "slip")),
+								   (const char *)0);
+					exercise(A_DEX, TRUE);
+					exercise(A_STR, TRUE);
+					exercise(A_STR, TRUE);
+					use_skill(P_SMITHING, 8);
+				}
+				return;
+			}
+			break;
+			case 11:{
+				int count_energy = 0;
+				long latest_oprop = 0;
+				long latest_energy = 0;
+				if(check_oprop(obj, OPROP_FIREW) && !is_full_insight_weapon(obj)){
+					count_energy++;
+					latest_oprop = OPROP_FIREW;
+					latest_energy = OPROP_FIREW;
+				}
+				else if(check_oprop(obj, OPROP_LESSER_FIREW) && is_full_insight_weapon(obj)){
+					count_energy++;
+					latest_oprop = OPROP_LESSER_FIREW;
+					latest_energy = OPROP_FIREW;
+				}
+
+				if(check_oprop(obj, OPROP_COLDW) && !is_full_insight_weapon(obj)){
+					count_energy++;
+					latest_oprop = OPROP_COLDW;
+					latest_energy = OPROP_COLDW;
+				}
+				else if(check_oprop(obj, OPROP_LESSER_COLDW) && is_full_insight_weapon(obj)){
+					count_energy++;
+					latest_oprop = OPROP_LESSER_COLDW;
+					latest_energy = OPROP_COLDW;
+				}
+
+				if(check_oprop(obj, OPROP_ELECW) && !is_full_insight_weapon(obj)){
+					count_energy++;
+					latest_oprop = OPROP_ELECW;
+					latest_energy = OPROP_ELECW;
+				}
+				else if(check_oprop(obj, OPROP_LESSER_ELECW) && is_full_insight_weapon(obj)){
+					count_energy++;
+					latest_oprop = OPROP_LESSER_ELECW;
+					latest_energy = OPROP_ELECW;
+				}
+
+				if(check_oprop(obj, OPROP_ACIDW) && !is_full_insight_weapon(obj)){
+					count_energy++;
+					latest_oprop = OPROP_ACIDW;
+					latest_energy = OPROP_ACIDW;
+				}
+				else if(check_oprop(obj, OPROP_LESSER_ACIDW) && is_full_insight_weapon(obj)){
+					count_energy++;
+					latest_oprop = OPROP_LESSER_ACIDW;
+					latest_energy = OPROP_ACIDW;
+				}
+
+				if(check_oprop(obj, OPROP_MAGCW) && !is_full_insight_weapon(obj)){
+					count_energy++;
+					latest_oprop = OPROP_MAGCW;
+					latest_energy = OPROP_MAGCW;
+				}
+				else if(check_oprop(obj, OPROP_LESSER_MAGCW) && is_full_insight_weapon(obj)){
+					count_energy++;
+					latest_oprop = OPROP_LESSER_MAGCW;
+					latest_energy = OPROP_MAGCW;
+				}
+
+				// Didn't have a smith upgrade :(
+				// if(check_oprop(obj, OPROP_HOLYW) && check_oprop(obj, OPROP_UNHYW) && !is_full_insight_weapon(obj)){
+					// count_energy++;
+					// latest_oprop = OPROP_HOLYW;
+					// latest_energy = OPROP_HOLYW;
+				// }
+				// else if(check_oprop(obj, OPROP_LESSER_HOLYW) && check_oprop(obj, OPROP_LESSER_UNHYW) && is_full_insight_weapon(obj)){
+					// count_energy++;
+					// latest_oprop = OPROP_LESSER_HOLYW;
+					// latest_energy = OPROP_HOLYW;
+				// }
+				
+				if(count_energy == 0)
+					break;
+				else if(count_energy > 1){
+				}
+				remove_oprop(obj, latest_oprop);
+				// if(latest_oprop == OPROP_HOLYW)
+					// remove_oprop(obj, OPROP_UNHYW);
+				// else if(latest_oprop == OPROP_LESSER_HOLYW)
+					// remove_oprop(obj, OPROP_LESSER_UNHYW);
+				remove_oprop(obj, OPROP_INSTW);
+				remove_oprop(obj, OPROP_SMITHU);
+				struct obj *crystal = mksobj(CRYSTAL, MKOBJ_NOINIT);
+				add_oprop(crystal, latest_energy);
+
+				set_material_gm(crystal, GEMSTONE);
+				if(latest_energy == OPROP_FIREW){
+					set_submat(crystal, RUBY);
+				}
+				else if(latest_energy == OPROP_COLDW){
+					set_submat(crystal, DIAMOND);
+				}
+				else if(latest_energy == OPROP_ELECW){
+					set_submat(crystal, TOPAZ);
+				}
+				else if(latest_energy == OPROP_ACIDW){
+					set_submat(crystal, EMERALD);
+				}
+				else if(latest_energy == OPROP_MAGCW){
+					set_submat(crystal, SAPPHIRE);
+				}
+				// else if(latest_energy == OPROP_HOLYW){
+					// set_submat(crystal, );
+				// }
+				hold_another_object(crystal, u.uswallow ?
+						   "Oops!  %s out of your reach!" :
+						(Weightless ||
+						 Is_waterlevel(&u.uz) ||
+						 levl[u.ux][u.uy].typ < IRONBARS ||
+						 levl[u.ux][u.uy].typ >= ICE) ?
+							   "Oops!  %s away from you!" :
+							   "Oops!  %s to the floor!",
+							   The(aobjnam(crystal, "slip")),
+							   (const char *)0);
+			}
+			break;
 		}
 	}
 }
@@ -728,12 +1012,14 @@ dipforge(struct obj *obj)
 
 	burn_away_slime();
 	melt_frozen_air();
+	
+	boolean forgeable = (u.ublood_smithing && (!is_flammable(obj) || obj->oerodeproof)) || is_metallic(obj);
 
 	/* Dipping something you're still wearing into a forge filled with
 	 * lava, probably not the smartest thing to do. This is gonna hurt.
 	 * Non-metallic objects are handled by lava_damage().
 	 */
-	if(obj->otyp == CHIKAGE && obj->obj_material == HEMARGYOS){
+	if(obj->otyp == CHIKAGE && obj_is_material(obj, HEMARGYOS)){
 		pline("The blood burns off the sword!");
 		set_material_gm(obj, obj->ovar1_alt_mat);
 		set_object_color(obj);
@@ -744,11 +1030,11 @@ dipforge(struct obj *obj)
 		fix_object(obj);
 		update_inventory();
 	}
-	if(!P_RESTRICTED(P_SMITHING) && !is_metallic(obj)){
+	if(!P_RESTRICTED(P_SMITHING) && !forgeable){
 		if(yn("Are you sure you want to forge a non-metal object?") != 'y')
 			return;
 	}
-	if (is_metallic(obj) && (obj->owornmask & (W_ARMOR | W_ACCESSORY))) {
+	if ((forgeable || is_metallic(obj)) && (obj->owornmask & (W_ARMOR | W_ACCESSORY))) {
 		if (!Fire_resistance) {
 			You("dip your worn %s into the forge.  You burn yourself!",
 				xname(obj));
@@ -791,7 +1077,7 @@ dipforge(struct obj *obj)
 	}
 
 result:
-	if(!P_RESTRICTED(P_SMITHING) && !Confusion && !Stunned && is_metallic(obj)){
+	if(!P_RESTRICTED(P_SMITHING) && !Confusion && !Stunned && forgeable){
 		if(!Blind){
 			Your("%s glows in the heat.", xname(obj));
 			if(!((obj->known || obj->oartifact || !check_oprop(obj, OPROP_NONE)) && obj->rknown && obj->sknown)){

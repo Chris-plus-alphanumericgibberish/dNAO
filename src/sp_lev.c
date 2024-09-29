@@ -905,8 +905,18 @@ struct mkroom	*croom;
 				(Race_if(PM_DWARF) || Race_if(PM_GNOME)) && rn2(3))
 			pm = (struct permonst *) 0;
 		/* replace priests with angels on Binder's Astral */
-		if (Role_if(PM_EXILE) && on_level(&u.uz, &astral_level) && m->id == PM_ALIGNED_PRIEST) {
+		if (Role_if(PM_EXILE) && Is_astralevel(&u.uz) && m->id == PM_ALIGNED_PRIEST) {
 			pm = &mons[PM_ANGEL];
+		}
+		/* replace angels with aether wolves on Undead Hunter Moon Astral */
+		if (Role_if(PM_UNDEAD_HUNTER) && quest_status.moon_close && Is_astralevel(&u.uz) && m->id == PM_ANGEL) {
+			if(alignment == A_NONE){
+				pm = &mons[PM_FOETID_ANGEL];
+			}
+			else {
+				pm = &mons[PM_AETHER_WOLF];
+			}
+			m->align = -12;
 		}
 
 		x = m->x;
@@ -1007,11 +1017,13 @@ struct mkroom	*croom;
 	    }
 
 	    if (m->peaceful >= 0) {
-		mtmp->mpeaceful = m->peaceful;
-		/* changed mpeaceful again; have to reset malign */
-		set_malign(mtmp);
-		if(mtmp->mpeaceful && Infuture && !Race_if(PM_ANDROID))
-			set_faction(mtmp, QUEST_FACTION);
+			mtmp->mpeaceful = m->peaceful;
+			/* changed mpeaceful again; have to reset malign */
+			set_malign(mtmp);
+			if(mtmp->mpeaceful && Infuture && !Race_if(PM_ANDROID))
+				set_faction(mtmp, QUEST_FACTION);
+			if(mtmp->mpeaceful && mtmp->mfaction == MOON_FACTION)
+				set_faction(mtmp, CITY_FACTION);
 	    }
 	    if (m->asleep >= 0) {
 #ifdef UNIXPC
@@ -1024,6 +1036,19 @@ struct mkroom	*croom;
 		mtmp->msleeping = m->asleep;
 #endif
 	    }
+		if(Role_if(PM_UNDEAD_HUNTER) && quest_status.moon_close && Is_astralevel(&u.uz)){
+		// if(Role_if(PM_UNDEAD_HUNTER) && Is_astralevel(&u.uz)){
+			if(mtmp->mtyp != PM_DEATH
+				&& mtmp->mtyp != PM_PESTILENCE
+				&& mtmp->mtyp != PM_FAMINE
+				&& mtmp->mtyp != PM_HIGH_PRIEST
+				&& mtmp->mtyp != PM_ANGEL
+				&& mtmp->mtyp != PM_FOETID_ANGEL
+				&& mtmp->mtyp != PM_AETHER_WOLF
+			){
+				set_template(mtmp, TONGUE_PUPPET);
+			}
+		}
 	}
 
     }		/* if (rn2(100) < m->chance) */
@@ -2392,7 +2417,26 @@ create_altar(a, croom)
 
 	if (a->shrine && !a->god) {
 		/* shrines should be to a god, pick most appropriate god. */
-		a->god = align_to_god(alignment);
+		if(Role_if(PM_UNDEAD_HUNTER) && (Is_bridge_temple(&u.uz) || (!quest_status.moon_close && In_endgame(&u.uz)))){
+			switch(alignment) {
+				case A_LAWFUL:
+					a->god = GOD_PTAH;
+				break;
+				case A_NEUTRAL:
+					a->god = GOD_THOTH;
+				break;
+				case A_CHAOTIC:
+					a->god = GOD_ANHUR;
+				break;
+				case A_VOID:
+					a->god = GOD_THE_VOID;
+				break;
+				case A_NONE:
+					a->god = GOD_MOLOCH;
+				break;
+			}
+		}
+		else a->god = align_to_god(alignment);
 	}
 
 	add_altar(x, y, alignment, a->shrine, a->god);
@@ -2841,6 +2885,26 @@ boolean prefilled;
 			// } else {
 				// croom->rtype = ELSHAROOM;
 			// }
+		}
+		if(Role_if(PM_UNDEAD_HUNTER) && In_quest(&u.uz) && croom->rtype == GENERALSHOP){
+			if(!quest_status.uh_shop_created)
+				quest_status.uh_shop_created = TRUE;
+			else if(rn2(3)){
+				switch(rnd(10)){
+					case  1: croom->rtype = GENERALSHOP; break;
+					case  2: croom->rtype = ARMORSHOP; break;
+					case  3: croom->rtype = SCROLLSHOP; break;
+					case  4: croom->rtype = POTIONSHOP; break;
+					case  5: croom->rtype = WEAPONSHOP; break;
+					case  6: croom->rtype = RINGSHOP; break;
+					case  7: croom->rtype = WANDSHOP; break;
+					case  8: croom->rtype = TOOLSHOP; break;
+					case  9: croom->rtype = BOOKSHOP; break;
+					case 10: croom->rtype = MUSICSHOP; break;
+				}
+			} else {
+				croom->rtype = OROOM;
+			}
 		}
 	    /* Shop ? */
 	    if (croom->rtype >= SHOPBASE) {

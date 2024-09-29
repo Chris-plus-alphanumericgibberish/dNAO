@@ -267,6 +267,8 @@ struct monst {
 #define	YELLOW_FACTION	    FACTION_PADDING+10	/* Hastur faction, not the same as the Yendorian faction, despite filling the same role in the Madman quest */
 #define	YOG_FACTION	    	FACTION_PADDING+11	/* Yog-Sothoth faction */
 #define	NECROMANCY_FACTION	FACTION_PADDING+12	/* Elf Necromacer's faction */
+#define	CITY_FACTION		FACTION_PADDING+13	/* Undead Hunter city faction */
+#define	MOON_FACTION		FACTION_PADDING+14	/* Undead Hunter lycanthrope faction */
 
 /* template applied to monster to create a new-ish monster */
 	int mtemplate;
@@ -298,7 +300,9 @@ struct monst {
 #define CORDYCEPS		26	/* spore shedder */
 #define PSURLON			27	/* psychic worm */
 #define CONSTELLATION	28	/* star creature */
-#define MAXTEMPLATE	CONSTELLATION
+#define SPARK_SKELETON	29	/* spark skeleton */
+#define TONGUE_PUPPET	30	/* moon-tongue puppet */
+#define MAXTEMPLATE	TONGUE_PUPPET
 
 //define	HALF_DEMON	FACTION_PADDING+1	/* half-demon  ??? */
 //define	HALF_DEVIL	FACTION_PADDING+2	/* half-devil  ??? */

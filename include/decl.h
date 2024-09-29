@@ -404,6 +404,7 @@ E NEARDATA char *save_cm;
 #define NO_KILLER_PREFIX 2
 E NEARDATA int killer_format;
 E const char *killer;
+E const char *title_override;
 E const char *delayed_killer;
 #ifdef GOLDOBJ
 E long done_money;
@@ -552,6 +553,8 @@ E NEARDATA struct mvitals {
 	uchar	born; /*How many of this monster have been created in a way that respects extinction*/
 	uchar	died; /*How many of this monster have died of any cause*/
 	uchar	killed; /*How many of this monster have died at the PC's hands*/
+	uchar	dissected; /*How many of this monster has the PC dissected*/
+	uchar	reanimated; /*How many of this monster has the PC reanimated*/
 	long long mvflags;
 	int	san_lost;
 	int	insight_gained;

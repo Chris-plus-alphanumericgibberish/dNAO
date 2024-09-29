@@ -6127,6 +6127,9 @@ int mat;
 		CRYSTAL_HELM, CRYSTAL_PLATE_MAIL, CRYSTAL_SHIELD, CRYSTAL_GAUNTLETS, CRYSTAL_BOOTS, 
 		FANG_OF_APEP, MIRRORBLADE, 
 		RUNESWORD, CLAWED_HAND, KAMEREL_VAJRA,
+		PINCER_STAFF, ISAMUSEI, DISKOS, BESTIAL_CLAW, CARCOSAN_STING, CHIKAGE,
+		RAKUYO, RAKUYO_SABER, RAKUYO_DAGGER,
+		BLADE_OF_MERCY, BLADE_OF_GRACE, BLADE_OF_PITY,
 		LIVING_MASK,
 		UNIVERSAL_KEY, CREDIT_CARD, LANTERN, OIL_LAMP, 
 		EXPENSIVE_CAMERA, MIRROR, PURIFIED_MIRROR, R_LYEHIAN_FACEPLATE,
@@ -6151,7 +6154,7 @@ int mat;
 			if(unduplicatable_otyps[i] == example->otyp)
 				return 0;
 		}
-		if(is_insight_weapon(example) || is_future_otyp(example->otyp) 
+		if(is_future_otyp(example->otyp) 
 			|| ensouled_item(example) || objects[example->otyp].oc_magic
 			|| is_firearm(example) || is_harmonium_armor(example)
 			|| Is_dragon_armor(example)
@@ -6298,7 +6301,7 @@ pickeladrin()
 	return picked;
 }
 
-STATIC_OVL void
+void
 smith_resizeArmor(smith, otmp)
 	struct monst *smith;
 	struct obj *otmp;
@@ -7302,7 +7305,6 @@ d_weapon:
 		else obj->corpsenm = rndmonnum();
 	}
 	else if(objects[otyp].oc_class == ARMOR_CLASS){
-		int element = 0;
 		if(yn("Size it to a particular creature?")=='y')
 			smith_resizeArmor(smith, obj);
 		else {
@@ -7311,6 +7313,12 @@ d_weapon:
 			set_obj_shape(obj, youracedata->mflagsb);
 		}
 		fix_object(obj);
+	}
+	else if(objects[otyp].oc_class == WEAPON_CLASS || is_weptool(obj)){
+		if(example)
+			obj->objsize = example->objsize;
+		else
+			obj->objsize = youracedata->msize;
 	}
 	// Make shadowsteel stuff fixed
 	if(mat == SHADOWSTEEL){

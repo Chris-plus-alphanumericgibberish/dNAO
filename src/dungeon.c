@@ -1529,7 +1529,7 @@ d_level *lev;
 		|| Role_if(PM_PIRATE) || Role_if(PM_PRIEST) || Role_if(PM_SAMURAI)
 		|| Role_if(PM_VALKYRIE) || Role_if(PM_WIZARD)){
 			return lev->dlevel <= qlocate_level.dlevel;
-		} else if(Role_if(PM_HEALER) || Role_if(PM_NOBLEMAN)){
+		} else if(Role_if(PM_HEALER) || Role_if(PM_NOBLEMAN) || Role_if(PM_UNDEAD_HUNTER)){
 			return TRUE;
 		} else if(Role_if(PM_RANGER)){
 			return lev->dlevel < qlocate_level.dlevel;

@@ -1750,6 +1750,16 @@ struct obj * weapon;
 	if (youagr && u.sealsActive&SEAL_CHUPOCLOPS)
 		return 2;
 
+	/* Can touch cursed wraiths if you are also "cursed" (here defined as impure or insane rather than buc cursed) */
+	if(mdef->mtyp == PM_BEFOULED_WRAITH){
+		if(youagr && (u.uimpurity >= 25 || u.usanity < 50 || u.uhpbonus <= 0))
+			return 2;
+		else if(!youagr){
+			if(magr && insightful(magr->data))
+				return 2;
+		}
+	}
+
 	/* no weapon */
 	if (!weapon) {
 		/* some worn armor may be involved depending on the attack type */
@@ -3069,6 +3079,58 @@ struct attack * attk;
 	return result;
 }
 
+/////////////////////////////////////////////
+/* Rejection weapons hit targets at range */
+///////////////////////////////////////////
+int
+hit_with_rreject(magr, otmp, tarx, tary, tohitmod, attk)
+struct monst * magr;
+struct obj * otmp;
+int tarx;
+int tary;
+int tohitmod;
+struct attack * attk;
+{
+	int subresult = 0;
+	boolean youagr = magr == &youmonst;
+	/* try to find direction (u.dx and u.dy may be incorrect) */
+	int dx = sgn(tarx - x(magr));
+	int dy = sgn(tary - y(magr));
+	struct attack blood = {AT_WISP, AD_PUSH, 2, 6+otmp->spe*2};
+	int result = 0;
+	if(!(isok(tarx - dx, tary - dy) &&
+		x(magr) == tarx - dx &&
+		y(magr) == tary - dy)
+	)
+		return result;
+
+	if (isok(tarx + dx, tary + dy)){
+		struct monst *mdef2 = !youagr ? m_u_at(tarx + dx, tary + dy) : 
+								u.uswallow ? u.ustuck : 
+								(dx || dy) ? m_at(tarx + dx, tary + dy) : 
+								(struct monst *)0;
+		if (mdef2 
+			&& (!DEADMONSTER(mdef2))
+			&& ((youagr || mdef2 == &youmonst) ? couldsee(mdef2->mx,mdef2->my) : clear_path(magr->mx, magr->my, mdef2->mx, mdef2->my))
+			&& ((!youagr && mdef2 != &youmonst && mdef2->mpeaceful != magr->mpeaceful) ||
+				(!youagr && mdef2 == &youmonst && !magr->mpeaceful) ||
+				(youagr && !mdef2->mpeaceful))
+		) { //Can hit a worm multiple times
+			int vis2 = VIS_NONE;
+			if(youagr || canseemon(magr))
+				vis2 |= VIS_MAGR;
+			if(mdef2 == &youmonst || canseemon(mdef2))
+				vis2 |= VIS_MDEF;
+			bhitpos.x = tarx + dx; bhitpos.y = tary + dy;
+			notonhead = (bhitpos.x != x(mdef2) || bhitpos.y != y(mdef2));
+			subresult = xmeleehity(magr, mdef2, &blood, (struct obj **)0, vis2, tohitmod, TRUE);
+			/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
+			result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
+		}
+	}
+	return result;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 /* Blade-dancing monsters hit multiple targets                               */
 ///////////////////////////////////////////////////////////////////////////////
@@ -3341,3 +3403,10 @@ is_serration_vulnerable(struct monst *mon){
 	return TRUE;
 }
 
+boolean
+obj_is_material(struct obj *obj, int mat)
+{
+	if(obj->obj_material == mat)
+		return TRUE;
+	return FALSE;
+}

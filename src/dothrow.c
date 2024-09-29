@@ -516,9 +516,16 @@ hurtle(dx, dy, range, verbose, do_nomul)
 	You_feel("a tug from the iron ball.");
 	if(do_nomul) nomul(0, NULL);
 	return;
+    } else if (u.utrap && u.utraptype == TT_SALIVA) {
+		if(IS_AIR(levl[u.ux][u.uy].typ) && Weightless){
+			pline("The gooey mass of saliva hurtles through the air!");
+		}
+		else {
+			pline("The gooey mass of saliva slides along the %s!", surface(u.ux,u.uy));
+		}
     } else if (u.utrap) {
 	You("are anchored by the %s.",
-	    u.utraptype == TT_WEB ? "web" : u.utraptype == TT_LAVA ? "lava" :
+	    u.utraptype == TT_WEB ? "web" : u.utraptype == TT_LAVA ? "lava" : 
 		u.utraptype == TT_INFLOOR ? surface(u.ux,u.uy) : "trap");
 	if(do_nomul) nomul(0, NULL);
 	return;

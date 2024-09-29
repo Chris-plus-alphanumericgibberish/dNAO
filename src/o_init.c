@@ -1579,7 +1579,7 @@ int submat;
 		return;
 	}
 	otmp->sub_material = submat;
-	object_color(otmp);
+	set_object_color(otmp);
 }
 
 void

@@ -1601,7 +1601,7 @@ static const struct def_skill Skill_U[] = {
     { P_MATTER_SPELL, P_BASIC },
 	{ P_ATTACK_SPELL, P_SKILLED }, { P_HEALING_SPELL, P_SKILLED },
 	{ P_DIVINATION_SPELL, P_EXPERT },
-    { P_SMITHING, P_EXPERT },
+    { P_SMITHING, P_BASIC },/*Improves to expert over the game*/
 };
 
 static const struct def_skill Skill_V[] = {
@@ -2556,6 +2556,14 @@ u_init()
 		knows_object(BULLET);
 		ini_inv(UndeadHunter);
 		skill_init(Skill_U);
+		/*Extra thought for philosophy (will only come on-line later)*/
+		u.render_thought = TRUE;
+		if(u.ualign.type == A_CHAOTIC)
+			give_thought(DEFILEMENT);
+		else if(u.ualign.type == A_NEUTRAL)
+			give_thought(LUMEN);
+		else if(u.ualign.type == A_LAWFUL)
+			give_thought(ROTTEN_EYES);
 	break;
 	case PM_VALKYRIE:
 		ini_inv(Valkyrie);

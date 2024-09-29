@@ -965,7 +965,7 @@ int oprop;
 	if((oprop == OPROP_SFLMW || oprop == OPROP_MORTW || oprop == OPROP_TDTHW || oprop == OPROP_SFUWW
 	 || oprop == OPROP_CGLZ || oprop == OPROP_RWTH || oprop == OPROP_RBRD || oprop == OPROP_SLIF
 	)
-		&& !sflm_able(obj)
+		&& !sflm_active(obj)
 	)
 		return FALSE;
 
@@ -4676,6 +4676,24 @@ int * truedmgptr;
 	}
 	if(check_oprop(otmp, OPROP_SFLMW) && sflm_target(mdef)){
 		*truedmgptr += d(2,7);
+	}
+	if(check_oprop(otmp, OPROP_ANTAW)){
+		if(!Shock_res(mdef) && magr)
+			*truedmgptr += atr_dbon(otmp, magr, A_INT);
+
+		if(check_reanimation(ANTENNA_ERRANT)){
+			if(youdef && !Tele_blind && (Blind_telepat || !rn2(5))){
+				*truedmgptr += rnd(15) + otmp->spe;
+			}
+			else if(!youdef && !mindless_mon(mdef) && (mon_resistance(mdef,TELEPAT) || !rn2(5))){
+				*truedmgptr += rnd(15) + otmp->spe;
+			}
+		}
+
+		if(check_reanimation(ANTENNA_BOLT)){
+			int modifier = (youdef ? (Blind_telepat && !Tele_blind) : mon_resistance(mdef, TELEPAT)) ? 2 : 1;
+			(*truedmgptr) += modifier*(rnd(10) + otmp->spe);
+		}
 	}
 	return ((*truedmgptr != original_truedmgptr) || (*plusdmgptr != original_plusdmgptr));
 }
@@ -14099,6 +14117,8 @@ do_passive_attacks()
 	}
 	if(is_snake_bite_mtyp(youracedata))
 		dosnake(&youmonst);
+	if(u.jellyfish && active_glyph(LUMEN))
+		dojellysting(&youmonst);
 	if(is_tailslap_mtyp(youracedata))
 		dotailslap(&youmonst);
 	if(uring_art(ART_STAR_EMPEROR_S_RING))

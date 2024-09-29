@@ -521,9 +521,9 @@ struct Role roles[] = {
 	{"Vindicator",  0},
 	{"Old Hunter",  0} },
 	GOD_THE_COLLEGE, GOD_THE_CHOIR, GOD_DEFILEMENT, /* Bloodborne-ish */
-	"Hnt", "the Cathedral", "the Queen's Forest",
+	"Hnt", "the Cathedral", "the Haunted Forest",
 	PM_UNDEAD_HUNTER, NON_PM, NON_PM,
-	PM_VICAR_AMALIA, PM_VERGER, PM_INDEX_WEREWOLF,
+	PM_VICAR_AMALIA, PM_VERGER, PM_INDEX_WOLF,
 	PM_HUMAN_WEREWOLF, PM_MIST_WOLF, S_DOG, S_VORTEX,
 	ART_STAKE_OF_WITHERING,
 	MA_HUMAN|MA_VAMPIRE|MA_ORC|MA_FEY, ROLE_MALE|ROLE_FEMALE |

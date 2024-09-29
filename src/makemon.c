@@ -496,11 +496,11 @@ boolean goodequip;
 	otmp->oerodeproof = TRUE;
 	otmp->spe = 2;
 	(void) mpickobj(mtmp, otmp);
-	if ((int) mtmp->m_lev > rn2(75))
+	if ((int) (mtmp->m_lev+2)/3 > rn2(active_glyph(ROTTEN_EYES) ? 60 : 75))
 		(void) mongets(mtmp, rnd_offensive_item(mtmp), mkobjflags);
-	if ((int) mtmp->m_lev > rn2(50))
+	if ((int) (mtmp->m_lev+2)/3 > rn2(active_glyph(ROTTEN_EYES) ? 40 : 50))
 		(void) mongets(mtmp, rnd_defensive_item(mtmp), mkobjflags);
-	if ((int) mtmp->m_lev > rn2(100))
+	if ((int) (mtmp->m_lev+2)/3 > rn2(active_glyph(ROTTEN_EYES) ? 80 : 100))
 		(void) mongets(mtmp, rnd_misc_item(mtmp), mkobjflags);
 }
 
@@ -4577,7 +4577,7 @@ boolean goodequip;
 	}
 }
 
-#define MAYBE_MERC(otmp)	if(!rn2(100) || greatequip) set_material_gm(otmp, MERCURIAL);
+#define MAYBE_MERC(otmp)	if(!rn2(100) || (!rn2(20) && greatequip)) set_material_gm(otmp, MERCURIAL);
 
 STATIC_OVL void
 m_initweap(mtmp, mkobjflags, faction, goodequip, greatequip, mmflags)
@@ -5713,7 +5713,7 @@ int mmflags;
 				}
 #undef CAILLEA_ARMOR
 				int pom = phase_of_the_moon();
-				if(pom == 4){
+				if(pom == 4 || pom == 8){
 					otmp = mongets(mtmp, MOON_AXE, mkobjflags);
 					if(otmp){
 						otmp->objsize = MZ_SMALL;
@@ -9709,6 +9709,18 @@ int mmflags;
 				curse(otmp);
 				(void) mpickobj(mtmp, otmp);
 			}
+		} else if(mm == PM_BEFOULED_WRAITH) {
+			if(rn2(3)){
+				otmp = mksobj(KNIFE, mkobjflags);
+				otmp = mksobj(KNIFE, mkobjflags);
+			}
+			else {
+				otmp = mksobj(SICKLE, mkobjflags);
+				if(otmp){
+					otmp->objsize = MZ_LARGE;
+					fix_object(otmp);
+				}
+			}
 		} else if(mm == PM_ZARIELITE_ZEALOT) {
 			otmp = mongets(mtmp, SPEAR, mkobjflags);
 			if(otmp){
@@ -10790,7 +10802,7 @@ int mmflags;
 	      }
 	      break;
 	}
-	if ((int) mtmp->m_lev > rn2(75))
+	if ((int) (mtmp->m_lev+2)/3 > rn2(active_glyph(ROTTEN_EYES) ? 60 : 75))
 		(void) mongets(mtmp, rnd_offensive_item(mtmp), mkobjflags);
 }
 
@@ -12808,9 +12820,9 @@ boolean greatequip;
 	/* ordinary soldiers rarely have access to magic (or gold :-) */
 	if (ptr->mtyp == PM_SOLDIER && rn2(13)) return;
 
-	if ((int) mtmp->m_lev > rn2(50))
+	if ((int) (mtmp->m_lev+2)/3 > rn2(active_glyph(ROTTEN_EYES) ? 40 : 50))
 		(void) mongets(mtmp, rnd_defensive_item(mtmp), mkobjflags);
-	if ((int) mtmp->m_lev > rn2(100))
+	if ((int) (mtmp->m_lev+2)/3 > rn2(active_glyph(ROTTEN_EYES) ? 80 : 100))
 		(void) mongets(mtmp, rnd_misc_item(mtmp), mkobjflags);
 #ifndef GOLDOBJ
 	if (likes_gold(ptr) && !mtmp->mgold && !rn2(5))
@@ -13073,6 +13085,10 @@ boolean randmonst;
 		else if(randmonst && is_cha_demon(ptr) && !is_dlord(ptr) && check_insight() && Inhell){
 			mkmon_template = MOLY_TEMPLATE;
 		}
+		/* undead hunter moon-entity astral */
+		else if(randmonst && (is_animal(ptr) || mortal_race_data(ptr)) && !(ptr->geno & G_UNIQ) && Role_if(PM_UNDEAD_HUNTER) && quest_status.moon_close && Is_astralevel(&u.uz)){
+			mkmon_template = TONGUE_PUPPET;
+		}
 		/* most general case at bottom -- creatures randomly being zombified */
 		else if(randmonst && can_undead(ptr)
 #ifdef REINCARNATION
@@ -13284,6 +13300,14 @@ struct monst * mon;
 		out_faction = ILSENSINE_FACTION;
 	else if(In_quest(&u.uz) && Role_if(PM_EXILE) && !peaceful)
 		out_faction = SEROPAENES_FACTION;
+	else if(In_quest(&u.uz) && Role_if(PM_UNDEAD_HUNTER)){
+		if(!peaceful)
+			out_faction = MOON_FACTION;
+		else if(In_quest(&u.uz) && mon->mtyp == urole.guardnum)
+			out_faction = QUEST_FACTION;
+		else if(mon->mtyp != urole.ldrnum && mon->mtyp != PM_LIVING_DOLL)
+			out_faction = CITY_FACTION;
+	}
 	else if((In_quest(&u.uz) && Role_if(PM_MADMAN) && !peaceful)
 		|| yellow_monster(mon)
 		|| (mon->mtyp == PM_STAR_ELF && Role_if(PM_MADMAN))
@@ -13406,12 +13430,16 @@ int faction;
 		do{
 			x = rn1(COLNO-3,2);
 			y = rn2(ROWNO);
-			ptr = rndmonst();
+			ptr = rndmonst(x, y);
 			if(!ptr) {
 	#ifdef DEBUG
 				pline("Warning: no monster.");
 	#endif
 				return((struct monst *) 0);	/* no more monsters! */
+			}
+			if(ptr->mtyp == PM_ANGEL && Role_if(PM_UNDEAD_HUNTER) && quest_status.moon_close && Is_astralevel(&u.uz)){
+				//Moon entity subouts
+				ptr = rn2(10) ? &mons[PM_AETHER_WOLF] : &mons[PM_FOETID_ANGEL];
 			}
 			out_template = makemon_set_template(&ptr, template, randmonst);
 			set_mon_data_core(&fakemon, ptr); /* set up for goodpos */
@@ -13528,7 +13556,7 @@ int faction;
 		int tryct = 0;	/* maybe there are no good choices */
 		struct monst fakemon = {0};
 		do {
-			if(!(ptr = rndmonst())) {
+			if(!(ptr = rndmonst(x, y))) {
 #ifdef DEBUG
 			    pline("Warning: no monster.");
 #endif
@@ -13683,6 +13711,8 @@ int faction;
 		mtmp->m_insight_level = 40;
 	else if(mtmp->mtyp == PM_HUNTING_HORROR)
 		mtmp->m_insight_level = 0;
+	else if(mtmp->mtyp == PM_BEFOULED_WRAITH)
+		mtmp->m_insight_level = 15;
 	else if(mtmp->mtyp == PM_ALKILITH)
 		mtmp->m_insight_level = 66;
 	else if(mtmp->mtyp == PM_SWIRLING_MIST
@@ -14630,12 +14660,22 @@ int faction;
 			makemon_full(&mons[PM_BINAH_SEPHIRAH], mtmp->mx, mtmp->my, MM_ADJACENTOK, template, faction);
 			makemon_full(&mons[PM_BINAH_SEPHIRAH], mtmp->mx, mtmp->my, MM_ADJACENTOK, template, faction);
 		}
+		// else if(Role_if(PM_UNDEAD_HUNTER)){
+			// makemon_full(&mons[PM_MOON_ENTITY_TONGUE], mtmp->mx, mtmp->my, MM_ADJACENTOK, template, faction);
+			// makemon_full(&mons[PM_MOON_ENTITY_MANIPALP], mtmp->mx, mtmp->my, MM_ADJACENTOK, template, faction);
+			// makemon_full(&mons[PM_MOON_ENTITY_MANIPALP], mtmp->mx, mtmp->my, MM_ADJACENTOK, template, faction);
+		// }
 	} else if (mndx == PM_FAMINE) {
 		if(Role_if(PM_EXILE)){
 			makemon_full(&mons[PM_BINAH_SEPHIRAH], mtmp->mx, mtmp->my, MM_ADJACENTOK, template, faction);
 			makemon_full(&mons[PM_BINAH_SEPHIRAH], mtmp->mx, mtmp->my, MM_ADJACENTOK, template, faction);
 			makemon_full(&mons[PM_BINAH_SEPHIRAH], mtmp->mx, mtmp->my, MM_ADJACENTOK, template, faction);
 		}
+		// else if(Role_if(PM_UNDEAD_HUNTER)){
+			// makemon_full(&mons[PM_MOON_ENTITY_TONGUE], mtmp->mx, mtmp->my, MM_ADJACENTOK, template, faction);
+			// makemon_full(&mons[PM_MOON_ENTITY_MANIPALP], mtmp->mx, mtmp->my, MM_ADJACENTOK, template, faction);
+			// makemon_full(&mons[PM_MOON_ENTITY_MANIPALP], mtmp->mx, mtmp->my, MM_ADJACENTOK, template, faction);
+		// }
 	} else if (mndx == PM_PESTILENCE) {
 		mitem = POT_SICKNESS;
 		if(Role_if(PM_EXILE)){
@@ -14643,6 +14683,11 @@ int faction;
 			makemon_full(&mons[PM_BINAH_SEPHIRAH], mtmp->mx, mtmp->my, MM_ADJACENTOK, template, faction);
 			makemon_full(&mons[PM_BINAH_SEPHIRAH], mtmp->mx, mtmp->my, MM_ADJACENTOK, template, faction);
 		}
+		// else if(Role_if(PM_UNDEAD_HUNTER)){
+			// makemon_full(&mons[PM_MOON_ENTITY_TONGUE], mtmp->mx, mtmp->my, MM_ADJACENTOK, template, faction);
+			// makemon_full(&mons[PM_MOON_ENTITY_MANIPALP], mtmp->mx, mtmp->my, MM_ADJACENTOK, template, faction);
+			// makemon_full(&mons[PM_MOON_ENTITY_MANIPALP], mtmp->mx, mtmp->my, MM_ADJACENTOK, template, faction);
+		// }
 	}
 	if (mitem) (void) mongets(mtmp, mitem, mkobjflags);
 	
@@ -14683,7 +14728,7 @@ int faction;
 	if (roll_madness(MAD_DELUSIONS) && mtmp->m_ap_type == M_AP_NOTHING && !(
 			mtmp->mtyp == PM_LIVING_DOLL || mtmp->data->msound == MS_GLYPHS)
 	){
-		struct permonst *delusion = rndmonst();
+		struct permonst *delusion = rndmonst(0,0);
 		if(delusion){
 			mtmp->m_ap_type = M_AP_MONSTER;
 			mtmp->mappearance = delusion->mtyp;
@@ -14916,7 +14961,7 @@ roguemonst()
 
 /* select a random monster type */
 struct permonst *
-rndmonst()
+rndmonst(int x, int y)
 {
 	register struct permonst *ptr;
 	register int mndx, ct;
@@ -14943,7 +14988,7 @@ rndmonst()
 	    return &mons[PM_CENTER_OF_ALL]; /*center of all may be created at any time */
 	}
 
-	if (u.uz.dnum == quest_dnum && (ptr = qt_montype()) != 0){
+	if (u.uz.dnum == quest_dnum && (ptr = qt_montype(x, y)) != 0){
 		if(ptr->mtyp == PM_LONG_WORM_TAIL) return (struct permonst *) 0;
 	    else if(Role_if(PM_ANACHRONONAUT) || rn2(7)) return ptr;
 		//else continue to random generation
@@ -15693,7 +15738,10 @@ register struct permonst *ptr;
 {
 	int	tmp, tmp2;
 	int scaling_mult = 1;
-	if(is_eladrin(ptr)){
+	if(is_eladrin(ptr)
+		|| ptr->mtyp == PM_MIST_CLOUD
+		|| ptr->mtyp == PM_MIST_WOLF
+	){
 		scaling_mult = 2;
 	}
 
@@ -16369,6 +16417,8 @@ struct monst *mtmp, *victim;
 				xp_threshold += lev_lomya();
 			if(artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_PATIENCE)
 				xp_threshold += 8;
+			if(is_vampire(mtmp->data) && check_vampire(VAMPIRE_MASTERY))
+				xp_threshold += 5;
 		}
 		if(has_sunflask(mtmp->mtyp) && mtmp->mvar_flask_charges < MAX_FLASK_CHARGES(mtmp) && !rn2(6+mtmp->mvar_flask_charges)){
 			if(canseemon(mtmp))
@@ -16827,6 +16877,8 @@ register struct permonst *ptr;
 	}
 	
 	if(goat_monster(ptr) && u.shubbie_atten && !godlist[GOD_THE_BLACK_MOTHER].anger) return TRUE;
+	
+	if(is_undead(ptr) && mindless(ptr) && check_preservation(PRESERVE_DEAD_TRUCE)) return TRUE;
 	
 	if(Race_if(PM_DROW) && 
 		((ual == A_CHAOTIC && (!Role_if(PM_NOBLEMAN) || flags.initgend)) || (ual == A_NEUTRAL && !flags.initgend)) && /*Males can be neutral or chaotic, but a chaotic male nobleman converted to a different god*/

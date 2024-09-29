@@ -1453,7 +1453,7 @@ int ochance, achance;	/* percent chance for ordinary objects, artifacts */
 	} else {
 		int chance = rn2(100);
 
-		return((boolean)(chance < ((obj->oartifact || is_lightsaber(obj) || is_slab(obj)) ? achance : ochance)));
+		return((boolean)(chance < ((obj->oartifact || is_lightsaber(obj) || is_slab(obj) || obj->blood_smithed || obj->spe >= 10) ? achance : ochance)));
 	}
 }
 

@@ -94,6 +94,7 @@ struct objclass {
 							   mask == W_SPIRIT ? 0 :\
 							   mask == W_GLYPH ? HEAD_DR :\
 							   mask == W_SKIN ? ALL_DR :\
+							   mask == W_UPGRADE ? ALL_DR :\
 							   UPPER_TORSO_DR)
 
 	/*Bitfield(oc_subtyp,3);*/	/* Now too big for a bitfield... see below */

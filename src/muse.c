@@ -2249,7 +2249,7 @@ struct monst *mon;
 	    else if (Is_dragon_mail(m_armr))
 		return Dragon_mail_to_pm(m_armr);
 	}
-	return rndmonst();
+	return rndmonst(0, 0);
 }
 
 int
@@ -2516,7 +2516,7 @@ museamnesia:
 		    if (!where_to) {
 				pline_The("whip slips free.");  /* not `The_whip' */
 				return 1;
-		    } else if (where_to == 3 && hates_silver(mtmp->data) && (obj->obj_material == SILVER || arti_silvered(obj))) {
+		    } else if (where_to == 3 && hates_silver(mtmp->data) && (obj_is_material(obj, SILVER))) {
 				/* this monster won't want to catch a silver
 				   weapon; drop it at hero's feet instead */
 				where_to = 2;
@@ -2524,7 +2524,7 @@ museamnesia:
 				/* this monster won't want to catch an iron
 				   weapon; drop it at hero's feet instead */
 				where_to = 2;
-		    } else if (where_to == 3 && hates_unholy_mon(mtmp) && obj->obj_material == GREEN_STEEL) {
+		    } else if (where_to == 3 && hates_unholy_mon(mtmp) && obj_is_material(obj, GREEN_STEEL)) {
 				/* this monster won't want to catch a green-steel
 				   weapon; drop it at hero's feet instead */
 				where_to = 2;
@@ -3398,14 +3398,14 @@ int mat;
 	if(mon == &youmonst){
 		for(obj = invent; obj; obj = obj->nobj){
 			if(obj->o_id == u.uentangled_oid){
-				if(obj->obj_material == mat)
+				if(obj_is_material(obj, mat))
 					return TRUE;
 			}
 		}
 	} else {
 		for(obj = mon->minvent; obj; obj = obj->nobj){
 			if(obj->o_id == mon->entangled_oid){
-				if(obj->obj_material == mat)
+				if(obj_is_material(obj, mat))
 					return TRUE;
 			}
 		}
@@ -3424,13 +3424,13 @@ int bet;
 		for(obj = invent; obj; obj = obj->nobj){
 			if(obj->o_id == u.uentangled_oid){
 				if(obj->cursed){
-					if(bet < 0 && strength < 2) strength = obj->obj_material == GOLD ? 2 : 1;
+					if(bet < 0 && strength < 2) strength = obj_is_material(obj, GOLD) ? 2 : 1;
 				}
 				else if(obj->blessed){
-					if(bet > 0 && strength < 2) strength = obj->obj_material == GOLD ? 2 : 1;
+					if(bet > 0 && strength < 2) strength = obj_is_material(obj, GOLD) ? 2 : 1;
 				}
 				else {
-					if(bet == 0 && strength < 2) strength = obj->obj_material == GOLD ? 2 : 1;
+					if(bet == 0 && strength < 2) strength = obj_is_material(obj, GOLD) ? 2 : 1;
 				}
 			}
 			if(strength == 2) return strength;
@@ -3439,13 +3439,13 @@ int bet;
 		for(obj = mon->minvent; obj; obj = obj->nobj){
 			if(obj->o_id == mon->entangled_oid){
 				if(obj->cursed){
-					if(bet < 0 && strength < 2) strength = obj->obj_material == GOLD ? 2 : 1;
+					if(bet < 0 && strength < 2) strength = obj_is_material(obj, GOLD) ? 2 : 1;
 				}
 				else if(obj->blessed){
-					if(bet > 0 && strength < 2) strength = obj->obj_material == GOLD ? 2 : 1;
+					if(bet > 0 && strength < 2) strength = obj_is_material(obj, GOLD) ? 2 : 1;
 				}
 				else {
-					if(bet == 0 && strength < 2) strength = obj->obj_material == GOLD ? 2 : 1;
+					if(bet == 0 && strength < 2) strength = obj_is_material(obj, GOLD) ? 2 : 1;
 				}
 			}
 			if(strength == 2) return strength;

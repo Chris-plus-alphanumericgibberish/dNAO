@@ -8020,247 +8020,223 @@ be spoken by the %gP with awe.  You are truly an inspiration to your
 %sp!"
 %E
 #
-#	Valkyrie
+#	Undead Hunter
 #
 %Cc Hnt 00001
-You materialize at the base of a snowy hill.  Atop the hill sits
-a place you know well, %H.  You immediately realize
-that something here is very wrong!
+You find yourself standing in sight of %H.  The smell
+of fresh funeral pyres tells you that something
+is obviously wrong here.
 
-In places, the snow and ice have been melted into steaming pools of
-water.  Fumaroles and pools of bubbling lava surround the hill.
-The stench of sulphur is carried through the air, and you %x creatures
-that should not be able to live in this environment moving towards you.
+You realize that %l needs your assistance!
 %E
 %Cp Hnt 00002
-Once again, you are near the abode of %l.
+Once again, you stand before %H.
 %E
 %Cp Hnt 00003
-Again you materialize near %ls abode.  You have a nagging feeling
-that this may be the last time you come here.
+Again you face %H.  Your intuition hints that this may be
+the final time you come here.
 %E
 %Cp Hnt 00005
-"Hail, and well met, brave %c."
+"Greetings, %r.  It is good to see you."
 %E
 %Cp Hnt 00006
-"May %d guide your steps, %p."
+"Ah, %p!  Surely you can help us in our hour of need."
 %E
 %Cp Hnt 00007
-"%lC weakens.  Without %o, her foresight is dim."
+"Greetings, %s.  %lC has great need of your help."
 %E
 %Cp Hnt 00008
-"You must hurry, %p, else Ragnarok may well come."
+"We are glad you have returned.  That last fight was a close one."
 %E
 %Cp Hnt 00009
-"I would deal with this foul %n myself, but %d forbids it."
+"Good Evening %p.  Have you Laid To Rest many recently?"
 %E
 %Cp Hnt 00010
 "Hail, and well met, brave %c."
 %E
 %Cp Hnt 00011
-"May %d guide your steps, %p."
+"Study %d, %s."
 %E
 %Cp Hnt 00012
 "%lC told us you had succeeded!"
 %E
 %Cp Hnt 00013
-"You recovered %o just in time, %p."
+"With %n destroyed, we are safe once more!"
 %E
 %Cp Hnt 00014
-"Hail %d, for delivering %o back to us."
+"I hear you are to be nominated as next vicar!"
 %E
 %Cc Hnt 00015
-"Ah, %p, my %S.  You have returned to %H
-at last.  We are in dire need of your aid, but I must determine if you
-are yet ready for such an undertaking.
-
-"Let me read your fate..."
+"Ah, %p, I'm glad you have made it back.  As you see we fight for our 
+survival each night. You must halt the spreading plague of beasts at
+the source, but first I must make sure you are ready."
 %E
 %Cp Hnt 00016
-"Let me read the future for you now, %p, perhaps you have managed to
-change it enough..."
+"Again, my %S, you stand before me.  Are you ready now to help us?"
 %E
 %Cp Hnt 00017
-"Again, I shall read your fate, my %S.  Let us both hope that you have
-made changes to become ready for this task..."
+"Once more, %p, you stand within the sanctum.  Are you ready now?"
 %E
 %Cc Hnt 00018
-"No, %p.  Your fate is sealed.  I must cast about for another
-champion.  Begone from my presence, and never return.  Know this, that
-you shall never succeed in this life, and Valhalla is denied to you."
+"You fool, %p!  Why did I waste all of those years teaching you
+the arcane secrets?  Get out of here!  I must find another hunter,
+as you have failed us utterly."
 %E
 %Cc Hnt 00019
-"I see you and %n fighting, %p.  But you are not prepared and
-shall die at %ns hand if you proceed.  No.  This will not do.
-Go back out into the world, and grow more experienced at the ways of
-war.  Only when you have returned %Ra will you be able to defeat
-%n."
+"No, you are not yet ready %p.  %nC is the most wicked of the 
+undead and you would surely fail.  Go back into the world and return when 
+you have Laid to Rest a few more.  We will survive until then."
 %E
 %Cc Hnt 00020
-"NO!  This is terrible.  I see you becoming an ally of %n, and
-leading his armies in the final great battles.  This must not come to
-pass!  You have strayed from the %a path.  You must purge yourself,
-and return here only when you have regained a state of purity."
+UNUSED?
 %E
 %Cc Hnt 00021
-"It is not clear, %p, for my sight is limited without
-%o.  But it is now likely that you can defeat %n,
-and recover %o.
+"Yes, %p.  You are truly ready now.  Attend to me and I shall
+tell you of what has transpired:
 
-"A short time ago, %n and his minions attacked this place.  They
-opened the huge volcanic vents you %x about the hill, and attacked.
-I knew that this was to come to pass, and had asked %d for a group
-of %gP to help defend this place.  The few you %x here are the
-mightiest of Valhalla's own, and are all that are left of one hundred
-%d sent.
+"Several months ago, the circuit rider assigned to %i
+returned to report a most unusual form of lycanthropy aflicting
+a widower living on the far side of the forest.
 
-"Despite the great and glorious battle we fought, %n managed at last
-to steal %o.  This has upset the balance of the universe, and
-unless %o is returned into my care, %n may start Ragnarok.
+"The rider took %o and departed,
+intending to make a study of the case.
 
-"You must find the entrance to %i.  Travel downward
-from there and you will find %ns lair.  Defeat him and
-return %o to me."
+"We haven't heard from the rider since, but ever since a virulent
+plague of lycanthropy has been spreading through %i,
+and the werewolves attack the city nightly.
+
+"You must travel through %i, reclaim
+%o, Lay to Rest %n,
+and halt this spreading scourge of beasts."
 %E
 %Cp Hnt 00025
-"Go with the blessings of %d."
+"You can prevail, if you devote yourself to the studies of %d."
 %E
 %Cp Hnt 00026
-"Call upon %d when you are in need."
+"Beware the werewolf's bite."
 %E
 %Cp Hnt 00027
-"Use %o if you can.  It will protect you."
+"Find %o as fast as possible.  It will make your attack much easier."
 %E
 %Cp Hnt 00028
-"Magical cold is very effective against %n."
+"Beasts fear fire."
 %E
 %Cp Hnt 00029
-"To face %n, you will need to be immune to fire."
+"Beware the insubstantial ghosts of %i."
 %E
 %Cp Hnt 00030
-"May %d strengthen your sword-arm."
+"Carry %o.  It will assist you against the beasts."
 %E
 %Cp Hnt 00031
-"Trust in %d.  He will not desert you."
+"May you Lay to Rest this scourge of beasts."
 %E
 %Cp Hnt 00032
-"It becomes more likely that Ragnarok will come with every passing moment.
-You must hurry, %p."
+"The undead legions are weakest during the daylight hours."
 %E
 %Cp Hnt 00033
-"If %n can master %o, he will be powerful enough to
-face %d far earlier than is fated.  This must not be!"
+"Be sure you are immune to cold.  The strange wolves have the touch of ice."
 %E
 %Cp Hnt 00034
-"Remember your training, %p.  You can succeed."
+"Beware the graveyard-city in %i. The ancient elves were destroyed long ago, but their spirits linger."
 %E
 %Cc Hnt 00035
-The ice and snow gives way to a valley floor.  You %x ahead of you
-a huge round hill surrounded by pools of lava.  This then is the entrance
-to %i.  It looks like you're not going to get in without
-a fight though.
+You have reached the outer ward, where the city encroaches on %i. 
+
+The cold howling wind surrounds you. The sky above is filled with clouds
+that seem to get thicker closer some center. Ahead, you sense the presence
+of undead in larger numbers than you have ever encountered before.
+
+You remember %lC's description. It is ahead that you will find %n's
+trail.
 %E
 %Cp Hnt 00036
 Once again, you stand before the entrance to %i.
 %E
 %Cc Hnt 00040
-Through clouds of sulphurous gasses, you %x a rock palisade
-surrounded with a moat of bubbling lava.  You remember the description
-from something that %l said.  This is the lair of %n.
+A strange smell is all about you. Through the cold mist, you %x
+a ruined hovel.
+
+This is the lair of %n.
 %E
 %Cp Hnt 00041
 Once again, you stand in sight of %ns lair.
 %E
 %Cc Hnt 00050
-"So!  %lC has finally sent %ca to challenge me!
-
-"I thought that mastering %o would enable me to challenge %d,
-but it has shown me that first I must kill you!
-So come, little %s.  Once I defeat you, I can at last begin
-the final battle with %d."
+%nC howls and attacks!
 %E
 %Cp Hnt 00051
-"Again you challenge me, %r.  Good.  I will kill you now."
+%nC barks.
 %E
 %Cp Hnt 00052
-"Have you not learned yet?  You cannot defeat %n!"
+%nC growls.
 %E
 %Cp Hnt 00053
-"I will kill you, %c, and wrest %o from your mangled hands."
+%nC screams.
 %E
 %Cp Hnt 00060
-"I am your death, %c."
+%nC growls.
 %E
 %Cp Hnt 00061
-"You cannot prevail, %r.  I have foreseen your every move."
+%nC growls.
 %E
 %Cp Hnt 00062
-"With you out of the way, Valhalla will be mine for the taking."
+%nC barks.
 %E
 %Cp Hnt 00063
-"I killed scores of %ds best when I took %o.
-Do you really think that one %c can stand against me?"
+%nC screams at you: "Where is she! This is the fault of your fraudulent church!"
 %E
 %Cp Hnt 00064
-"Who bears the souls of %cP to Valhalla, %r?"
+%nC growls.
 %E
 %Cp Hnt 00065
-"No, %d cannot help you here."
+%nC growls.
 %E
 %Cp Hnt 00066
-"Some instrument of %d you are, %p.  You are a weakling!"
+%nC growls.
 %E
 %Cp Hnt 00067
-"Never have I seen %ca so clumsy in battle."
+%nC barks.
 %E
 %Cp Hnt 00068
-"You die now, little %s."
+%nC growls.
 %E
 %Cp Hnt 00069
-"Your body I destroy now, your soul when my hordes overrun Valhalla!"
+%nC growls.
 %E
 %Cc Hnt 00070
-As you pick up %o, your mind is suddenly filled with images,
-and you perceive all of the possibilities of each potential choice you
-could make.  As you begin to control and channel your thoughts, you
-realize that you must return %o to %lC immediately.
+As you pick up %o, it flares with ghostly fire.
 %E
 %Cc Hnt 00080
-A look of surprise and horror appears on %ns face.
+Suddenly, %n grasps the stake driven into his
+head and screams in agony. A mad clarity fills his one
+remaining eye, and he rips the stake free in a single
+sudden motion and falls down dead!
 
-    No!!!  %o has lied to me!  I have been misled!
-
-Suddenly, %n grasps his head and screams in agony, then dies.
+...Above you, the moon glows bright through the clouds.
 %E
 %Cc Hnt 00081
-As you approach, %lC rises and touches %o.
+"You have returned %p, and with %o too!"
 
-"You may take %o with you, %p.  I have removed from
-it the power to foretell the future, for that power no mortal should
-have.  Its other abilities, however, you have at your disposal.
+"It is truly a day to celebrate. With %n 
+defeated the threat here is gone. For your aid against the
+scourge I appoint you the new caretaker of %o.
+I'm sure it will be of great use in your studies. I will show
+you how to channel its flames through your strikes.
 
-"You must now begin in %ds name to search for the Amulet of Yendor.
-May your steps be guided by %d, my %S."
+"May you Lay many to Rest %p."
 %E
-# assumes Orb of Fate (glass object)
 %Cc Hnt 00082
-"Careful, %p!  %oC might break, and that would be
-a tragic loss.  You are its keeper now, and the time has come to
-resume your search for the Amulet.  %Z await your
-return through the magic portal that brought you here."
+%l reiterates that %o is yours now.
+
+"The time has come to resume your search for the Amulet.
+%Z await your return through the magic portal which brought
+you here."
 %E
 %Cp Hnt 00090
-"Greetings, %p.  I have not been able to pay as much attention to
-your search for the Amulet as I have wished.  How do you fare?"
+"Welcome back, %p.  How is your quest for the Amulet going?"
 %E
 %Cc Hnt 00091
 "Excellent, %p.  I see you have recovered the Amulet!
-
-"You must take the Amulet to the Great Temple of %d, on the Astral
-Plane.  There you must offer the Amulet to %d.
-
-"Go now, my %S.  I cannot tell you your fate, as the power of the
-Amulet interferes with mine.  I hope for your success."
 %E
 #
 #	Valkyrie

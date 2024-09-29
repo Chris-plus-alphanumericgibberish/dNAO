@@ -260,7 +260,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 		/* random slips can cause projectiles to go down, though */
 
 		/* fired bullets should always disappear without a message */
-		if (fired && is_bullet(thrownobj))
+		if (fired && (is_bullet(thrownobj) && thrownobj->otyp != BLOOD_SPEAR))
 			return MM_MISS;
 
 		/* if we are outdoors... */
@@ -318,7 +318,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 		/* random slips can cause projectiles to go down, though */
 
 		/* fired bullets should specifically disappear without a message */
-		if (fired && is_bullet(thrownobj))
+		if (fired && (is_bullet(thrownobj) && thrownobj->otyp != BLOOD_SPEAR))
 			return MM_MISS;
 
 		/* returning weapons don't return when thrown downwards */
@@ -974,7 +974,7 @@ boolean forcedestroy;			/* If TRUE, make sure the projectile is destroyed */
 		thrownobj->otyp == BLASTER_BOLT ||
 		thrownobj->otyp == HEAVY_BLASTER_BOLT ||
 		thrownobj->otyp == CARCOSAN_BOLT ||
-		is_bullet(thrownobj)
+		(is_bullet(thrownobj) && thrownobj->otyp != BLOOD_SPEAR)
 		))
 	{
 		destroy_projectile(magr, thrownobj);

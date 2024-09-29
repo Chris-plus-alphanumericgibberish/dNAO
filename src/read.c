@@ -1504,6 +1504,20 @@ int curse_bless;
 		    p_glow1(obj);
 		}
 		break;
+		case PHLEBOTOMY_KIT:
+		if (is_cursed) stripspe(obj);
+		else if (is_blessed) {
+		    if (obj->spe <= 0)
+				obj->spe += rn1(3, 3);
+		    else obj->spe += 1;
+		    if (obj->spe > 20) obj->spe = 20;
+		    p_glow2(obj, NH_BLUE);
+		} else {
+		    obj->spe += 1;
+		    if (obj->spe > 20) obj->spe = 20;
+		    p_glow1(obj);
+		}
+		break;
 	    case MAGIC_FLUTE:
 	    case MAGIC_HARP:
 	    case FROST_HORN:
@@ -1805,6 +1819,8 @@ struct obj *sobj;
 			int skill = spell_skilltype(sobj->otyp);
 			int role_skill = P_SKILL(skill)-1; //P_basic would be 2
 			if(Spellboost) role_skill++;
+			if(u.cuckoo && active_glyph(LUMEN))
+				role_skill += u.cuckoo/3;
 			if(role_skill < 1)
 				role_skill = 1;
 			if(sobj->blessed)
@@ -2956,7 +2972,18 @@ struct obj	*sobj;
 			levl[u.ux][u.uy].typ == SOIL ||
 			levl[u.ux][u.uy].typ == SAND)
 		{
-			add_altar(u.ux, u.uy, whichgod, FALSE, GOD_NONE);
+			int godnum = GOD_NONE;
+			if(philosophy_index(align_to_god(whichgod))){
+				//Undead slayer used a second Egyptian pantheon for some reason.
+				// Just go ahead and use the Egyptian one as a reference.
+				if(whichgod == A_LAWFUL)
+					godnum = GOD_PTAH;
+				else if(whichgod == A_NEUTRAL)
+					godnum = GOD_THOTH;
+				else if(whichgod == A_CHAOTIC)
+					godnum = GOD_ANHUR;
+			}
+			add_altar(u.ux, u.uy, whichgod, FALSE, godnum);
 			pline("%s altar appears in front of you!", An(align_str(whichgod)));
 			newsym(u.ux, u.uy);
 		}
@@ -3413,7 +3440,7 @@ int how;
 		if (!strcmpi(buf, "none") || !strcmpi(buf, "nothing")) {
 		    /* ... but no free pass if cursed */
 		    if (!(how & REALLY)) {
-			ptr = rndmonst();
+			ptr = rndmonst(0, 0);
 			if (!ptr) return; /* no message, like normal case */
 			mndx = monsndx(ptr);
 			break;		/* remaining checks don't apply */

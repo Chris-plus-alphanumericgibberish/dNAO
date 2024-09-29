@@ -195,6 +195,14 @@ more_experienced(exp, rexp)
 		exp *= 1.3;
 		rexp *= 1.3;
 	}
+	if(Withering_stake && quest_status.moon_close){
+		exp *= 1.3;
+		rexp *= 1.3;
+	}
+	if(active_glyph(ROTTEN_EYES)){
+		exp *= 1.1;
+		rexp *= 1.1;
+	}
 	if(flags.descendant && flags.beginner){
 		if(Role_if(PM_CONVICT)
 		|| (Role_if(PM_HEALER) && Race_if(PM_DROW))
