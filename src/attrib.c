@@ -2015,7 +2015,7 @@ boolean
 activeMentalEdge(fform)
 int fform;
 {
-	return (artinstance[ART_SILVER_SKY].GithStyle == fform && !blockedMentalEdge(fform));
+	return ((artinstance[ART_SILVER_SKY].GithStyle & (1 << fform)) != 0 && !blockedMentalEdge(fform));
 }
 
 boolean
