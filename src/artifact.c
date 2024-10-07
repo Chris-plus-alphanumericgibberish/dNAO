@@ -2775,6 +2775,9 @@ touch_artifact(obj, mon, hypothetical)
 				badclass = TRUE;
 				badalign = FALSE;
 			}
+		} else if(obj->oartifact == ART_FINGERPRINT_SHIELD && u.yog_sothoth_atten){
+			badclass = FALSE;
+			badalign = FALSE;
 		} else {
 			if(!Role_if(PM_BARD)) badclass = self_willed && 
 			   (((oart->role != NON_PM && !Role_if(oart->role)) &&
@@ -4511,13 +4514,13 @@ int * truedmgptr;
 					*truedmgptr += basedmg;
 					heal(magr, min(*hp(mdef), basedmg));
 					if(youagr && !youdef)
-						yog_credit(max(mdef->m_lev, mdef->data->cnutrit/50));
+						yog_credit(max(mdef->m_lev, mdef->data->cnutrit/50), FALSE);
 				}
 				else {
 					*truedmgptr += basedmg/2;
 					heal(magr, min(*hp(mdef), basedmg/2));
 					if(youagr && !youdef)
-						yog_credit(mdef->data->cnutrit/500);
+						yog_credit(mdef->data->cnutrit/500, FALSE);
 				}
 			break;
 			case AD_DRST:
@@ -7210,7 +7213,65 @@ boolean printmessages; /* print generic elemental damage messages */
 		else
 			*plusdmgptr += basedmg/2;
 	}
-
+	if(otmp->oartifact == ART_FINGERPRINT_SHIELD){
+		// Blood
+		if(youdef){
+			u.umadness |= MAD_FRENZY;
+			u.ustdy = min(u.ustdy+basedmg, basedmg);
+		}
+		else if(youagr){
+			if(has_blood_mon(mdef) && roll_generic_madness(FALSE) && d(2,u.ulevel) >= mdef->m_lev){
+				pline("%s %s leaps through %s %s!", s_suffix(Monnam(mdef)), mbodypart(mdef, BLOOD), mhis(mdef), mbodypart(mdef, BODY_SKIN));
+				mdef->mhp = (3*mdef->mhp + 9)/10;
+			}
+			mdef->mstdy = min(mdef->mstdy+basedmg, basedmg);
+		}
+		else {
+			if(has_blood_mon(mdef) && d(2,mlev(magr)) >= mdef->m_lev){
+				pline("%s %s leaps through %s %s!", s_suffix(Monnam(mdef)), mbodypart(mdef, BLOOD), mhis(mdef), mbodypart(mdef, BODY_SKIN));
+				mdef->mhp = (3*mdef->mhp + 9)/10;
+			}
+			mdef->mstdy = min(mdef->mstdy+basedmg, basedmg);
+		}
+		// Madness
+		boolean affected = FALSE;
+		if(youdef){
+			if(!save_vs_sanloss()){
+				change_usanity(-1*basedmg, TRUE);
+				affected = TRUE;
+			}
+		}
+		else if(youagr){
+			if(!mindless_mon(mdef) && (mon_resistance(mdef,TELEPAT) || tp_sensemon(mdef) || !rn2(5)) && roll_generic_madness(FALSE)){
+				//reset seen madnesses
+				mdef->seenmadnesses = 0L;
+				you_inflict_madness(mdef);
+				affected = TRUE;
+			}
+		}
+		else {
+			if(!mindless_mon(mdef) && (mon_resistance(mdef,TELEPAT) || !rn2(5))){
+				if(!resist(mdef, WEAPON_CLASS, 0, FALSE))
+					mdef->mcrazed = TRUE;
+				affected = TRUE;
+			}
+		}
+		if(affected){
+			if(!Fire_res(mdef)){
+				*truedmgptr += d(2,6);
+				*truedmgptr += (basedmg)/2;
+			}
+			if (!UseInvFire_res(mdef)) {
+				if (!rn2(4)) (void) destroy_item(mdef, POTION_CLASS, AD_FIRE);
+				if (!rn2(4)) (void) destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
+				if (!rn2(7)) (void) destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
+			}
+			if(!Magic_res(mdef)){
+				*truedmgptr += max_ints(d(4,4) + otmp->spe, 1);
+				*truedmgptr += (basedmg+1)/2;
+			}
+		}
+	}
 	if(otmp->oartifact == ART_IBITE_ARM){
 		struct obj *cloak = which_armor(mdef, W_ARMC);
 
@@ -7470,12 +7531,12 @@ boolean printmessages; /* print generic elemental damage messages */
 				/* aggressor lifesteals by dmg dealt */
 				heal(magr, min(basedmg, *hp(mdef)));
 				if(youagr && !youdef){
-					yog_credit(mdef->data->cnutrit/500);
+					yog_credit(mdef->data->cnutrit/500, FALSE);
 					IMPURITY_UP(u.uimp_blood)
 				}
 				if(!Drain_res(mdef) && !rn2(3)){
 					if(youagr && !youdef){
-						yog_credit(max(mdef->m_lev, mdef->data->cnutrit/50));
+						yog_credit(max(mdef->m_lev, mdef->data->cnutrit/50), FALSE);
 					}
 					if(youdef){
 						losexp("blood drain", TRUE, FALSE, FALSE);
@@ -8566,10 +8627,138 @@ doparticularinvoke(obj)
 }
 
 STATIC_OVL int
-arti_invoke(obj)
-    register struct obj *obj;
+fingerprint_shield(obj)
+struct obj *obj;
 {
-    register const struct artifact *oart = get_artifact(obj);
+	if (nohands(youracedata)) {	/* should also check for no ears and/or deaf */
+		You("can't investigate the shield with no hands!");	/* not `body_part(HAND)' */
+		return MOVE_CANCELLED;
+	} else if (!freehand()) {
+		You("can't investigate the shield without free %s.", body_part(HAND));
+		return MOVE_CANCELLED;
+	}
+	You("run your %s over the sharp fingerprints.", makeplural(body_part(FINGER)));
+	if(!has_blood(youracedata) || mlev(&youmonst) == 1){
+		pline("Nothing happens.");
+		return MOVE_CANCELLED;
+	}
+	You("fear you may cut yourself.");
+	if(yn("Continue?") != 'y')
+		return MOVE_CANCELLED;
+	Your("blood flows down the ridges and pools in the valleys.");
+	losexp("blood loss",TRUE,FALSE,TRUE);
+	if(u.veil){
+		You("feel reality threatening to slip away!");
+		if (yn("Are you sure you want to studying the patterns?") == 'y'){
+			pline("So be it.");
+			u.veil = FALSE;
+			change_uinsight(1);
+		}
+		return MOVE_STANDARD;
+	}
+
+	int difficulty = artinstance[ART_FINGERPRINT_SHIELD].FingerprintProgress + 1;
+	difficulty *= 12;
+	difficulty -= u.uinsight;
+	difficulty -= ACURR(A_INT);
+	difficulty -= 14 - ACURR(A_WIS); //High wis may apply a penalty
+	difficulty -= 10 - ACURR(A_CHA); //High cha may apply a penalty
+	if(rnd(20) < difficulty){
+		You("study the patterns, but no revelation comes.");
+		return MOVE_STANDARD;
+	}
+
+	if(artinstance[ART_FINGERPRINT_SHIELD].FingerprintProgress == 0){
+		pline("As you study the patterns, you begin to sense some elusive deeper meaning.");
+		if(u.usanity > 90){
+			if(u.uinsight > 40)
+				You("feel an itch behind your eyes.");
+			change_usanity(-1*d(2,6), FALSE);
+		}
+		else {
+			if(u.uinsight > 60)
+				You("scratch at your eyes.");
+			else 
+				You("are blinded by a flash of magenta light.");
+			make_blinded(3L, FALSE);
+			
+			if(Blind)
+				pline("Trembling hands rest upon you, but for a moment.");
+			else
+				You("catch a brief glimpse of emaciated figures all around you; their trembling hands rest on your body.");
+			artinstance[ART_FINGERPRINT_SHIELD].FingerprintProgress++;
+		}
+	}
+	else if(artinstance[ART_FINGERPRINT_SHIELD].FingerprintProgress == 1){
+		pline("You study the patterns, chasing the elusive deeper meaning.");
+		if(u.usanity > 50){
+			if(u.uinsight > 45)
+				You("feel a scratching behind your eyes.");
+			change_usanity(-1*d(3,12), TRUE);
+		}
+		else {
+			if(u.uinsight > 60)
+				You("claw at your eyes.");
+			else 
+				You("are blinded by a flare of magenta flame.");
+			make_blinded(33L, FALSE);
+
+			if(Blind){
+				You_hear("howling voices all around.");
+			}
+			else {
+				You("are surrounded by a crowd of howling emaciated figures!");
+			}
+			verbalize("All fractures, all that is broken.");
+			verbalize("All torment and despair.");
+			verbalize("All that distinguishes and divides.");
+			verbalize("Melt it all away, until all is One again.");
+			artinstance[ART_FINGERPRINT_SHIELD].FingerprintProgress++;
+		}
+	}
+	else if(artinstance[ART_FINGERPRINT_SHIELD].FingerprintProgress == 2){
+		pline("You study the patterns. You are closing on the Truth at last.");
+		if(u.usanity > 10){
+			if(u.uinsight > 50)
+				You("feel a clawing behind your eyes.");
+			u.umadness |= MAD_FRENZY;
+			change_usanity(-1*d(4,20), TRUE);
+		}
+		else {
+			if(u.uinsight > 60)
+				You("tear out your eyes!");
+			else 
+				Your("eyes are blasted away by magenta fire.");
+			Blinded |= TIMEOUT_INF; //Note: Easily reversable by the time you're likely to have this item.
+
+			godvoice(GOD_YOG_SOTHOTH, "No more division. No more birth. All shall be one again.");
+			if(!(u.specialSealsKnown & SEAL_YOG_SOTHOTH)){
+				pline("You chant in tongues as a seal is engraved into your mind!");
+				u.specialSealsKnown |= SEAL_YOG_SOTHOTH;
+				u.yog_sothoth_atten = TRUE;
+			}
+			u.yog_sothoth_mutagen += 5;
+			//Free mutation.
+			if(!check_mutation(YOG_GAZE_1)){
+				add_mutation(YOG_GAZE_1);
+			}
+			else if(!check_mutation(YOG_GAZE_2)){
+				add_mutation(YOG_GAZE_2);
+			}
+			else {
+				u.yog_sothoth_mutations--;
+			}
+			artinstance[ART_FINGERPRINT_SHIELD].FingerprintProgress++;
+		}
+	}
+	return MOVE_STANDARD;
+}
+
+STATIC_OVL int
+arti_invoke(obj)
+    struct obj *obj;
+{
+    const struct artifact *oart = get_artifact(obj);
     char buf[BUFSZ];
  	struct obj *pseudo, *otmp, *pseudo2, *pseudo3;
 	int summons[10] = {0, PM_FOG_CLOUD, PM_DUST_VORTEX, PM_STALKER, 
@@ -8581,6 +8770,11 @@ arti_invoke(obj)
 	int n, damage, time = MOVE_STANDARD;
 	struct permonst *pm;
 	struct monst *mtmp = 0;
+
+	if(obj->oartifact == ART_FINGERPRINT_SHIELD && artinstance[ART_FINGERPRINT_SHIELD].FingerprintProgress < 3){
+		return fingerprint_shield(obj);
+	}
+
 	if (!oart || !oart->inv_prop) {
 		switch (obj->otyp)
 		{
@@ -12300,6 +12494,14 @@ struct obj *obj;
 			MENU_UNSELECTED);
 		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
 	}
+	if(obj->ovar1_necronomicon & R_YOG_SOTH){
+		Sprintf(buf, "Read the long chant of opening the gates");
+		any.a_int = SELECT_YOG_SOTHOTH;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
 	end_menu(tmpwin, prompt);
 
 	how = PICK_ONE;
@@ -13422,6 +13624,29 @@ read_necro(VOID_ARGS)
 				You("read the second half of the testament of whispers.");
 				for(i=15; i<31; i++) u.sealsKnown |= sealKey[u.sealorder[i]];
 			}break;
+			case SELECT_YOG_SOTHOTH:{
+				int i;
+				You("read aloud the long chant of opening the gates.");
+				if(!(u.specialSealsKnown & SEAL_YOG_SOTHOTH)){
+					pline("A seal is engraved into your mind!");
+					u.specialSealsKnown |= SEAL_YOG_SOTHOTH;
+					u.yog_sothoth_atten = TRUE;
+				}
+				else if(!(u.specialSealsActive&SEAL_YOG_SOTHOTH)){
+					You("percieve a great BEING beyond the gate, and it addresses you with waves of thunderous and burning power.");
+					You("are smote and changed by the unendurable violence of its voice!");
+					exercise(A_CON, FALSE);
+					bindspirit(YOG_SOTHOTH);
+					u.sealTimeout[YOG_SOTHOTH-FIRST_SEAL] = moves + 5000;
+				}
+				else {
+					You("are again smote by the unendurable violence the VOICE!");
+					if(rnd(5000) > u.spiritT[ALIGN_SPIRIT])
+						exercise(A_CON, FALSE);
+					u.spiritT[ALIGN_SPIRIT] = moves + 5000;
+					u.sealTimeout[YOG_SOTHOTH-FIRST_SEAL] = moves + 5000;
+				}
+			}break;
 		}
 	}
 	else if(necro_effect == SELECT_STUDY){
@@ -13431,10 +13656,13 @@ read_necro(VOID_ARGS)
 //		pline("learned %d abilities",artiptr->spestudied);
 		if(d(1,10) - artiptr->spestudied - 15 + ACURR(A_INT) > 0){
 			if(!(artiptr->ovar1_necronomicon & LAST_PAGE)){
-				chance = d(1,27);
+				chance = d(1,28);
 			}
-			else if(!(artiptr->ovar1_necronomicon & (S_OOZE|S_SHOGGOTH|S_NIGHTGAUNT|S_BYAKHEE|SUM_DEMON|S_DEVIL) )){
+			else if(!(artiptr->ovar1_necronomicon & (S_OOZE|S_SHOGGOTH|S_NIGHTGAUNT|S_BYAKHEE|SUM_DEMON|S_DEVIL) ) && rn2(3)){
 				chance = d(1,6);
+			}
+			else if(!(artiptr->ovar1_necronomicon & (R_YOG_SOTH) ) && !rn2(5)){
+				chance = 28;
 			}
 		}
 		if(chance > 0){
@@ -13605,6 +13833,11 @@ read_necro(VOID_ARGS)
 				(artiptr->ovar1_necronomicon & R_NAMES_1) ? "find the second half of the testament of whispers."
 					: "come across the latter half of something called 'the testament of whispers.'",
 				"discover another transcription of the latter half of the testament of whispers.");
+			break;
+			case 28:
+			STUDY_NECRONOMICON(R_YOG_SOTH,
+				"discover the long chant of opening the gates.",
+				"discover another copy of the long chant.");
 			break;
 		}
 #undef STUDY_NECRONOMICON

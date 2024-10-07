@@ -1461,7 +1461,7 @@ boolean check;
 		pline("Sanity change: %d + %d", u.usanity, delta);
 	u.usanity += delta;
 	if(!u.umadness && u.usanity < 50)
-		u.usanity = 50;
+		u.usanity = min(starting_sanity, 50);
 	else if(u.usanity < 0)
 		u.usanity = 0;
 	if(u.usanity > 100)
@@ -1863,7 +1863,7 @@ struct monst *mon;
 				mon->seenmadnesses |= madflag;
 				if(d(2,u.ulevel) >= mon->m_lev){
 					if(u.specialSealsActive&SEAL_YOG_SOTHOTH){
-						yog_credit(mon->m_lev);
+						yog_credit(mon->m_lev, FALSE);
 					}
 					if(madflag == MAD_DELUSIONS
 					 || madflag == MAD_REAL_DELUSIONS

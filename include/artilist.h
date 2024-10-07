@@ -1659,6 +1659,17 @@ A("The Spell-warded Wrappings of Nitocris",		MUMMY_WRAPPING,			(const char *)0,
 	),
 
 /*Needs encyc entry*/
+A("Fingerprint Shield",	TOWER_SHIELD,			"fingerprint-covered %s",
+	4000L, MINERAL, MZ_HUGE, WT_DEFAULT,
+	A_NEUTRAL, NON_PM, NON_PM, TIER_S, (ARTG_NOGEN|ARTG_INHER),
+	NO_MONS(),
+	NO_ATTK(), NOFLAG,
+	PROPS(HALF_PHDAM, HALF_SPDAM), NOFLAG,
+	PROPS(), NOFLAG,
+	NOINVOKE, (ARTI_PLUSTEN)
+	),
+
+/*Needs encyc entry*/
 /*from the works of HP Lovecraft*/
 A("The Hand-Mirror of Cthylla",		MIRROR,					(const char *)0,
 	5000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,

@@ -44,7 +44,7 @@ STATIC_DCL void FDECL(mk_knox_portal, (XCHAR_P,XCHAR_P));
 #define do_vault()	(vault_x != -1)
 static xchar		vault_x, vault_y;
 boolean goldseen;
-boolean wantanmivault, wantasepulcher;
+boolean wantanmivault, wantasepulcher, wantfingerprint;
 static boolean made_branch;	/* used only during level creation */
 
 /* Args must be (const genericptr) so that qsort will always be happy. */
@@ -226,6 +226,7 @@ makerooms()
 	/* rnd_rect() will returns 0 if no more rects are available... */
 	wantanmivault = !rn2(8);
 	wantasepulcher = (depth(&u.uz) > 12 && !rn2(8));
+	wantfingerprint = (depth(&u.uz) > 21 && !rn2(8) && !art_already_exists(ART_FINGERPRINT_SHIELD));
 	if(In_mithardir_terminus(&u.uz)){
 		create_room(-1, -1, 7, 7, -1, -1, OROOM, 0);
 		mkroom(SLABROOM);
@@ -239,7 +240,7 @@ makerooms()
 			if (!create_room(-1, -1, 2+rnd(4), 2+rnd(4), -1, -1, OROOM, -1))
 				continue;
 		}
-		else if(nroom >= (MAXNROFROOMS/6) && rn2(3) && !tried_vault && !wantanmivault && !wantasepulcher) {
+		else if(nroom >= (MAXNROFROOMS/6) && rn2(3) && !tried_vault && !wantanmivault && !wantasepulcher && !wantfingerprint) {
 			tried_vault = TRUE;
 			if (create_vault()) {
 				vault_x = rooms[nroom].lx;
@@ -1247,6 +1248,10 @@ makelevel()
 		!level.flags.has_vault) mkroom(RIVER);
 
 		/* Part four: very late modifications */
+	if (wantfingerprint &&
+		!level.flags.has_vault){
+		mkfingervault();
+	}
 	if (wantasepulcher &&
 		!level.flags.has_vault){
 		mksepulcher();

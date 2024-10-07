@@ -351,6 +351,50 @@ mkmivault()
 	}
 }
 
+void
+mkfingervault()
+{
+	int x,y,tries=0;
+	int i,j;
+	struct obj *otmp;
+	struct obj *otmp2;
+	struct monst *mon;
+	boolean good=FALSE,okspot;
+	struct permonst *ptr;
+	while(!good && tries < 50){
+		x = rn2(COLNO-3)+1;
+		y = rn2(ROWNO-3)+1;
+		tries++;
+		okspot = TRUE;
+		for(i=0;i<3;i++) for(j=0;j<3;j++) if(!isok(x+i,y+j) || levl[x+i][y+j].typ != STONE) okspot = FALSE;
+		if(okspot){
+			good = TRUE;
+			for(i=0;i<3;i++){
+				levl[x][y+i].edge = 1;
+				levl[x+i][y].edge = 1;
+				levl[x+2][y+i].edge = 1;
+				levl[x+i][y+2].edge = 1;
+			}
+			// levl[x+1][y+1].typ = STONE;
+			levl[x+2][y+2].typ = BRCORNER;
+			levl[x][y+2].typ = BLCORNER;
+			levl[x+1][y+2].typ = HWALL;
+			levl[x+1][y].typ = HWALL;
+			levl[x+2][y+1].typ = VWALL;
+			levl[x][y+1].typ = VWALL;
+			levl[x+2][y].typ = TRCORNER;
+			levl[x][y].typ = TLCORNER;
+			
+			otmp = mksartifact(ART_FINGERPRINT_SHIELD);
+			if(otmp){
+				place_object(otmp, x+1, y+1);
+				if(rn2(3))
+					bury_an_obj(otmp);
+			}
+		}
+	}
+}
+
 int misc_hell_vault[] = {
 				VITAL_SOULSTONE, SPIRITUAL_SOULSTONE,
 				VITAL_SOULSTONE, SPIRITUAL_SOULSTONE,

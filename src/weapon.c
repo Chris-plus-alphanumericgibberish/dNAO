@@ -596,6 +596,13 @@ struct monst *magr;
 		if (is_shield(obj) && magr == &youmonst && activeFightingForm(FFORM_SHIELD_BASH)){
 			ocn = 1;
 			ocd = max(2, 2 * FightingFormSkillLevel(FFORM_SHIELD_BASH)); // 2-8 for unskilled-expert
+			if(obj->oartifact == ART_FINGERPRINT_SHIELD){
+				ocn *= 2;
+				ocd *= 2.5;
+			}
+		} else if (obj->oartifact == ART_FINGERPRINT_SHIELD) {
+				ocn = 2;
+				ocd = 4;
 		} else if (magr == &youmonst && activeFightingForm(FFORM_GREAT_WEP) && (bimanual(obj, youracedata) || bimanual_mod(obj, &youmonst) > 1)) {
 			ignore_rolls = max(0, FightingFormSkillLevel(FFORM_GREAT_WEP) - 1); // 0-3 for unskilled-expert
 		}

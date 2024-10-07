@@ -1830,6 +1830,8 @@ spirits_enlightenment()
 				u.sealTimeout[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)] - moves); \
 		else Sprintf(buf, "  %-23s (duration:%ld, timeout:%ld)", sealNames[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)], \
 				u.spiritT[id]-moves, u.sealTimeout[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)] - moves); }\
+	else if(u.spiritT[id])\
+		Sprintf(buf, "  %-23s (duration:%ld)", sealNames[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)], u.spiritT[id]-moves);\
 	else\
 		Sprintf(buf, "  %-23s", sealNames[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)]); \
 	putstr(en_win, 0, buf); } while (0)

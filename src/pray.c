@@ -21,6 +21,7 @@ STATIC_DCL void FDECL(fry_by_god, (int));
 STATIC_DCL void FDECL(consume_offering,(struct obj *));
 STATIC_DCL void FDECL(eat_offering,(struct obj *, boolean, int));
 STATIC_DCL void FDECL(burn_offering,(struct obj *, boolean));
+STATIC_DCL void FDECL(drink_offering,(struct obj *));
 STATIC_DCL boolean FDECL(water_prayer,(BOOLEAN_P));
 STATIC_DCL boolean FDECL(blocked_boulder,(int,int));
 static void NDECL(lawful_god_gives_angel);
@@ -1424,6 +1425,33 @@ boolean silently;
 }
 
 STATIC_OVL void
+drink_offering(struct obj *otmp)
+{
+	xchar x, y;
+	get_obj_location(otmp, &x, &y, BURIED_TOO);
+	char *modifier = rn2(10) ? "" : "great ";
+	char *direction = !rn2(3) ? "over" : rn2(2) ? "down" : "up";
+	char *verb = "crushes";
+	pline("A %shand reaches %s and %s the blood from your offering!", modifier, direction, verb);
+	if(u.sealsActive&SEAL_BALAM){
+		struct permonst *ptr = &mons[otmp->corpsenm];
+		if(!(is_animal(ptr) || nohands(ptr))) unbind(SEAL_BALAM,TRUE);
+	}
+	if(u.sealsActive&SEAL_YMIR){
+		struct permonst *ptr = &mons[otmp->corpsenm];
+		if(is_giant(ptr)) unbind(SEAL_YMIR,TRUE);
+	}
+	otmp->odrained = TRUE;
+	fix_object(otmp);
+	if(otmp->where == OBJ_INVENT)
+		update_inventory();
+    exercise(A_CON, FALSE);
+    exercise(A_CHA, TRUE);
+    exercise(A_WIS, TRUE);
+    exercise(A_INT, TRUE);
+}
+
+STATIC_OVL void
 consume_offering(otmp)
 register struct obj *otmp;
 {
@@ -1655,7 +1683,7 @@ dosacrifice()
     if (In_endgame(&u.uz)) {
 		if (!(otmp = getobj(sacrifice_types, "sacrifice"))) return MOVE_CANCELLED;
 	} else {
-		if (!(otmp = floorfood("sacrifice", 1))) return MOVE_CANCELLED;
+		if (!(otmp = floorfood("sacrifice", yog_altar_at(u.ux, u.uy) ? 3 : 1))) return MOVE_CANCELLED;
     }
     /*
       Was based on nutritional value and aging behavior (< 50 moves).
@@ -1682,6 +1710,10 @@ dosacrifice()
 	}
 	if(bokrug_idol_at(u.ux, u.uy)){
 		bokrug_offer(otmp);
+		return MOVE_STANDARD;
+	}
+	if(yog_altar_at(u.ux, u.uy)){
+		yog_sothoth_drink(otmp);
 		return MOVE_STANDARD;
 	}
 	
@@ -4442,6 +4474,21 @@ int x, y;
 	return FALSE;
 }
 
+boolean
+yog_altar_at(x, y)
+int x, y;
+{
+	struct obj *otmp;
+	if(isok(x,y) && IS_ALTAR(levl[x][y].typ) && god_at_altar(x,y) == GOD_YOG_SOTHOTH)
+		return TRUE;
+
+	if(u.yog_sothoth_atten) for (otmp = level.objects[x][y]; otmp; otmp = otmp->nexthere) {
+		if (otmp->oartifact == ART_FINGERPRINT_SHIELD)
+			return TRUE;
+	}
+	return FALSE;
+}
+
 void
 bokrug_offer(otmp)
 struct obj *otmp;
@@ -4606,6 +4653,72 @@ int eatflag;
 }
 
 void
+yog_sothoth_drink(struct obj *otmp)
+{
+    int value = 0;
+	struct permonst *ptr = &mons[otmp->corpsenm];
+	struct monst *mtmp;
+	extern const int monstr[];
+	xchar x, y;
+	
+	get_obj_location(otmp, &x, &y, BURIED_TOO);
+	
+	//Note: Not interested in the amulet.
+	
+	if(otmp->otyp != CORPSE
+		|| otmp->odrained
+		|| !has_blood(ptr)
+		|| (peek_at_iced_corpse_age(otmp) + 10) < monstermoves
+	){
+		if(u.yog_sothoth_atten)
+			pline("Yog-Sothoth is uninterested.");
+		else
+			pline("Nothing happens.");
+		return;
+	}
+	
+	//Note: Nondestructive, so Rider corpses are fine.
+	
+	//Old corpses don't make it here.
+	value = monstr[otmp->corpsenm] + 1;
+	if (otmp->oeaten)
+		value = eaten_stat(value, otmp);
+
+	if (your_race(ptr) && !is_animal(ptr) && !mindless(ptr) && u.ualign.type != A_VOID && !Role_if(PM_ANACHRONONAUT) && !philosophy_index(u.ualign.god)) {
+	//No demon summoning.  Your god just smites you, and sac continues.
+		if (u.ualign.type != A_CHAOTIC && u.ualign.type != A_NONE) {
+			adjalign(-5);
+			godlist[u.ualign.god].anger += 3;
+			(void) adjattrib(A_WIS, -1, TRUE);
+			if (!Inhell) angrygods(u.ualign.god);
+			change_luck(-5);
+		} else adjalign(5);
+	//Pets are just eaten like anything else.  Your god doesn't know you did it, and the goat doesn't care.
+	//Yog doesn't give extra credit for undead.
+	} else if (is_unicorn(ptr)) {
+		int unicalign = sgn(ptr->maligntyp);
+
+		/* Yog has no unicorns, and doesn't give bonus. */
+		/* If sacrificing unicorn of your alignment to altar not of */
+		/* your alignment, your god gets angry */
+		if (unicalign == u.ualign.type) {
+			u.ualign.record = min(-1,u.ualign.record-20);
+			// value unchanged
+		}
+	}
+    /* corpse */
+	//Value can't be 0
+	//Value can't be -1
+	/* Sacrificing at an altar of a different alignment */
+	/* Never a conversion */
+	/* never an altar conversion*/
+	
+	/* Rider unimportant (corpse is not destroyed) */
+	drink_offering(otmp);
+	yog_credit(value, TRUE);
+}
+
+void
 flame_consume(mtmp, otmp, offering)
 struct monst *mtmp;
 struct obj *otmp;
@@ -4706,14 +4819,13 @@ boolean offering;
 }
 
 void
-yog_credit(value)
-int value;
+yog_credit(int value, boolean offered)
 {
 	//May be zero if draining a small monster etc.
 	if(!value)
 		return;
 
-	if(u.ualign.type != A_NEUTRAL && u.ualign.type != A_NONE && u.ualign.type != A_VOID && !Role_if(PM_ANACHRONONAUT)) {
+	if(u.ualign.type != A_NEUTRAL && u.ualign.type != A_NONE && u.ualign.type != A_VOID && !Role_if(PM_ANACHRONONAUT) && !philosophy_index(u.ualign.god)) {
 		adjalign(-value);
 		godlist[u.ualign.god].anger += 1;
 		(void) adjattrib(A_CHA, -1, TRUE);
@@ -4741,12 +4853,16 @@ int value;
 			u.yog_sothoth_credit + max(1, value * dim_return_factor / (dim_return_factor + u.yog_sothoth_credit)),
 			max(1, value * dim_return_factor / (dim_return_factor + u.yog_sothoth_credit)),
 			value,
-			u.yog_sothoth_devotion + max(1, value * dim_return_factor / (dim_return_factor + u.yog_sothoth_credit))
+			u.yog_sothoth_devotion + (offered ? value : max(1, value * dim_return_factor / (dim_return_factor + u.yog_sothoth_credit)))
 			);
 	}
+	//Increment devotion BEFORE diminishing returns 
+	if(offered)
+		u.yog_sothoth_devotion += value;
 	value = max(1, value * dim_return_factor / (dim_return_factor + u.yog_sothoth_credit));
 	u.yog_sothoth_credit += value;
-	u.yog_sothoth_devotion += value;
+	if(!offered)
+		u.yog_sothoth_devotion += value;
 	return;
 }
 

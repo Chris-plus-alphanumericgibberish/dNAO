@@ -1795,10 +1795,19 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 				&& !check_subout(subout, SUBOUT_XWEP)
 			) {
 				fromlist = FALSE;
-				attk->aatyp = AT_XWEP;
-				attk->adtyp = AD_PHYS;
-				attk->damn = 1;
-				attk->damd = 4;
+				if(activeFightingForm(FFORM_SHIELD_BASH) && uarms && uarms->oartifact == ART_DRAGONHEAD_SHIELD){
+					//Messages will be a bit janky :(
+					attk->aatyp = AT_HITS;
+					attk->adtyp = AD_PHYS;
+					attk->damn = 5;
+					attk->damd = 8;
+				}
+				else {
+					attk->aatyp = AT_XWEP;
+					attk->adtyp = AD_PHYS;
+					attk->damn = 1;
+					attk->damd = 4;
+				}
 				add_subout(subout, SUBOUT_XWEP);
 			}
 			/* fixup for black web, which replaces AT_WEAP with an AT_SRPR */
@@ -6033,7 +6042,7 @@ boolean ranged;
 			}
 
 			if(((youagr && u.specialSealsActive&SEAL_YOG_SOTHOTH) || pa->mtyp == PM_TWIN_SIBLING) && !youdef){
-				yog_credit(mdef->data->cnutrit/500);
+				yog_credit(mdef->data->cnutrit/500, FALSE);
 			}
 			/* Player vampires are smart enough not to feed while
 			   biting if they might have trouble getting it down */
@@ -6071,7 +6080,7 @@ boolean ranged;
 			}
 
 			if(attk->adtyp == AD_VAMP && (youagr || pa->mtyp == PM_TWIN_SIBLING) && !youdef && u.specialSealsActive&SEAL_YOG_SOTHOTH){
-				yog_credit(max(mdef->m_lev, mdef->data->cnutrit/50));
+				yog_credit(max(mdef->m_lev, mdef->data->cnutrit/50), FALSE);
 			}
 			/* metroids gain life (but not the player) */
 			if (!youagr && is_metroid(pa)) {
@@ -13704,6 +13713,8 @@ int vis;						/* True if action is at all visible to the player */
 				valid_weapon_attack = TRUE;
 			/* shield bashes are possibly if and only if using the style (youagr only) */
 			else if (melee && weapon && is_shield(weapon) && youagr && activeFightingForm(FFORM_SHIELD_BASH))
+				valid_weapon_attack = TRUE;
+			else if (melee && weapon && weapon->oartifact == ART_FINGERPRINT_SHIELD)
 				valid_weapon_attack = TRUE;
 			else
 				invalid_weapon_attack = TRUE;

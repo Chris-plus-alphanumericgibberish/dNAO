@@ -119,6 +119,7 @@
 #define	R_ELEMENTS		0x01000000L	//Cthuqha, Ithaqua, and Karakal
 #define	R_NAMES_1		0x02000000L	//Half of the spirits (based on random order)
 #define	R_NAMES_2		0x04000000L	//Other half of the spirits
+#define	R_YOG_SOTH		0x08000000L	//Yog Sothoth
 
 
 #define	LAST_PAGE		0x40000000L
@@ -161,9 +162,10 @@
 #define	SELECT_ELEMENTS		SELECT_WARDS + 1
 #define	SELECT_SPIRITS1		SELECT_ELEMENTS + 1
 #define	SELECT_SPIRITS2		SELECT_SPIRITS1 + 1
+#define	SELECT_YOG_SOTHOTH	SELECT_SPIRITS2 + 1
 
 
-#define SELECT_STUDY		SELECT_SPIRITS2 + 1
+#define SELECT_STUDY		SELECT_YOG_SOTHOTH + 1
 
 #define SELECT_WHISTLE		1
 #define SELECT_LEASH		SELECT_WHISTLE + 1
@@ -323,6 +325,7 @@ struct artinstance{
 #define	ZPROP_PATIENCE	0x00000040L
 #define	ZPROP_FOCUS		0x00000080L
 #define CarapaceXP avar1
+#define FingerprintProgress avar1
 
 	long avar2;
 #define SnSd2 avar2
