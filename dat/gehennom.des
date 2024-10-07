@@ -43,7 +43,7 @@ REGION:(37,09,43,14),unlit,"morgue",filled,true
 STAIR:(01,01),down
 # Branch location
 BRANCH:(66,17,66,17),(0,0,0,0)
-TELEPORT_REGION:(58,09,72,18),(0,0,0,0),down
+TELEPORT_REGION:(58,09,72,18),(00,00,11,05),down
 
 # Artifact Doors
 NON_PASSWALL:(00,00,11,05)
