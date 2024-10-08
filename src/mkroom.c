@@ -7018,6 +7018,54 @@ int sx,sy;
 			};
 			mtyp = ROLL_FROM(prisoners);
 		}break;
+		case PM_MASTER_MIND_FLAYER:{
+			int prisoners[] = {
+				PM_ELVENKING,
+				PM_ELVENQUEEN,
+				PM_UNEARTHLY_DROW,
+				PM_DROW_MATRON,
+				PM_ARCHEOLOGIST,
+				PM_ARCHEOLOGIST,
+				PM_BARBARIAN,
+				PM_HALF_DRAGON,
+				PM_BARD,
+				PM_BARD,
+				PM_CAVEMAN,
+				PM_CAVEWOMAN,
+				PM_CONVICT,
+				PM_CONVICT,
+				PM_HEALER,
+				PM_HEALER,
+				PM_KNIGHT,
+				PM_KNIGHT,
+				PM_MONK,
+				PM_MONK,
+				PM_MADMAN,
+				PM_MADWOMAN,
+				PM_NOBLEMAN,
+				PM_NOBLEWOMAN,
+				PM_PRIEST,
+				PM_PRIESTESS,
+				PM_PIRATE,
+				PM_PIRATE,
+				PM_RANGER,
+				PM_RANGER,
+				PM_ROGUE,
+				PM_ROGUE,
+				PM_SAMURAI,
+				PM_SAMURAI,
+				PM_UNDEAD_HUNTER,
+				PM_UNDEAD_HUNTER,
+				PM_VALKYRIE,
+				PM_INCANTIFIER,
+				PM_WIZARD,
+				PM_DEMINYMPH,
+				PM_DEMINYMPH,
+				PM_GITHYANKI_PIRATE,
+				PM_GITHYANKI_PIRATE,
+			};
+			mtyp = ROLL_FROM(prisoners);
+		}break;
 		case PM_PSYCHOPOMP:{
 			int prisoners[] = {
 				PM_ELVENKING,
@@ -7450,7 +7498,7 @@ struct mkroom *sroom;
 				}
 				if (type==COURT) {
 					//Note: court monsters are always part of rodney's forces, even if they are angels.
-					if(!mon->mfaction)
+					if(!mon->mfaction || Is_stronghold(&u.uz))
 						set_faction(mon, YENDORIAN_FACTION);
 					if(mon->mpeaceful){
 						mon->mpeaceful = 0;
