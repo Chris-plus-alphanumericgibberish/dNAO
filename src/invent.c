@@ -4319,7 +4319,7 @@ winid *datawin;
 	buf[0] = '\0';
 	ADDCLASSPROP(oartifact, "an artifact");
 	ADDCLASSPROP((oc.oc_magic && !oartifact), "inherently magical");		// overkill to say an artifact is inherently magical, and makes it weird when one isn't
-	ADDCLASSPROP((oc.oc_nowish || oartifact >= ART_ROD_OF_SEVEN_PARTS), "not wishable");
+	ADDCLASSPROP((oc.oc_nowish || (artilist[oartifact].gflags&ARTG_NOWISH)), "not wishable");
 	if (*buf) {
 		Sprintf(buf2, "Is %s.", buf);
 		OBJPUTSTR(buf2);
