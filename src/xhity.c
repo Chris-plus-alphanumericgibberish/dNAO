@@ -12380,7 +12380,7 @@ int vis;
 	case AD_PLYS:
 		/* Demogorgon's gaze is special, of course*/
 		if (youdef && pa->mtyp == PM_DEMOGORGON){
-			if ((!Free_action || rn2(2)) && (!Sleep_resistance || rn2(4))){
+			if (!cantmove(mdef) && (!Free_action || rn2(2)) && (!Sleep_resistance || rn2(4))){
 				You("meet the gaze of Aameul, left head of Demogorgon!");
 				You("are mesmerized!");
 				nomovemsg = 0;	/* default: "you can move again" */
@@ -12405,13 +12405,9 @@ int vis;
 				dmg = rnd(10);
 				maxdmg = 10;
 			}
-			/* simulate cooldown to avoid re-application */
-			if (!youagr && cooldown) {
-				if(youdef && multi < 0)
+
+			if(!cantmove(mdef))
 					return MM_MISS;
-				else if(!youdef && !mdef->mcanmove)
-					return MM_MISS;
-			}
 
 			/* split between player and monster */
 			if (youdef) {
