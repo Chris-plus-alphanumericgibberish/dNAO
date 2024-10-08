@@ -5546,6 +5546,7 @@ fracture_rock(obj)	/* fractured by pick-axe or wand of striking */
 register struct obj *obj;		   /* no texts here! */
 {
 	int mat = obj->obj_material;
+	int submat = obj->sub_material;
 	/* A little Sokoban guilt... */
 	if(In_sokoban(&u.uz) && !flags.mon_moving)
 	    change_luck(-1);
@@ -5558,6 +5559,15 @@ register struct obj *obj;		   /* no texts here! */
 	set_material_gm(obj, MINERAL);
 	obj->owt = weight(obj);
 	set_material(obj, mat);
+	if(mat == GEMSTONE){
+		if(submat)
+			obj->otyp = submat;
+		set_object_color(obj);
+		fix_object(obj);
+	}
+	else {
+		set_submat(obj, submat);
+	}
 	if (obj->where == OBJ_FLOOR) {
 		obj_extract_self(obj);		/* move rocks back on top */
 		place_object(obj, obj->ox, obj->oy);
