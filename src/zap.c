@@ -2622,6 +2622,11 @@ dozap()
 	obj = getobj(zap_syms, "zap");
 	if(!obj) return MOVE_CANCELLED;
 
+	if(on_level(&spire_level,&u.uz)){
+		pline1(nothing_happens);
+		return MOVE_ZAPPED;
+	}
+
 	check_unpaid(obj);
 
 	/* zappable addition done by GAN 11/03/86 */
