@@ -1018,13 +1018,15 @@ register struct monst *mtmp;
 			obj->corpsenm = PM_PARASITIC_MIND_FLAYER;
 			fix_object(obj);
 		break;
-	    case PM_BRAINBLOSSOM_PATCH:
+	    case PM_BRAINBLOSSOM_PATCH:{
+			struct trap *ttmp = t_at(x, y);
 			obj = mksobj_at(BRAINROOT, x, y, MKOBJ_NOINIT);
-			if(obj)
+			if(obj && !(ttmp && (ttmp->ttyp == PIT || ttmp->ttyp == SPIKED_PIT || ttmp->ttyp == HOLE))){
 				bury_an_obj(obj);
+			}
 			obj = (struct obj *)0;
 			goto default_1;
-		break;
+		}break;
 	    case PM_DANCING_BLADE:
 			obj = mksobj_at(TWO_HANDED_SWORD, x, y, MKOBJ_NOINIT);
 			obj->blessed = TRUE;
