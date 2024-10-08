@@ -3249,7 +3249,20 @@ dodip()
 
 	if (potion->otyp == POT_OIL) {
 	    boolean wisx = FALSE;
-	    if (potion->lamplit) {	/* burning */
+	    if((obj->lamplit || potion->lamplit) 
+			&& (obj->otyp == TORCH || obj->otyp == SHADOWLANDER_S_TORCH)
+		) {
+			// Note: magic torches don't burn items (magic. The torch itself is not burned, and it doesn't burn other things. It does burn creatures though!)
+			if(!obj->lamplit)
+				begin_burn(obj);
+			//Note: done in THIS ORDER SPECIFICALLY to avoid the explosion using up the potion!
+			// Requires duplicating the below useup and return here :(
+			makeknown(potion->otyp);
+			useup(potion);
+			explode(u.ux, u.uy, AD_FIRE, 0, d(6,6), EXPL_FIERY, 1);
+			exercise(A_WIS, FALSE);
+			return MOVE_STANDARD;
+	    } else if (potion->lamplit) {	/* burning */
 			int omat = obj->obj_material;
 			/* the code here should be merged with fire_damage */
 			if (catch_lit(obj)) {
@@ -3299,26 +3312,52 @@ dodip()
 			if(potion->dknown && !objects[potion->otyp].oc_name_known)
 				makeknown(potion->otyp);
 			goto poof;
-	    } else if (obj->oclass != WEAPON_CLASS && !is_weptool(obj)) {
-			/* the following cases apply only to weapons */
-			goto more_dips;
-			/* Oil removes rust and corrosion, but doesn't unburn.
-			 * Arrows, etc are classed as metallic due to arrowhead
-			 * material, but dipping in oil shouldn't repair them.
-			 */
-	    } else if ((!is_rustprone(obj) && !is_corrodeable(obj)) ||
-			is_ammo(obj) || (!obj->oeroded && !obj->oeroded2)) {
-			/* uses up potion, doesn't set obj->greased */
+		/* Allow filling of MAGIC_LAMPs to prevent identification by player */
+		/*  This is another one that can't use the general handling below and so has early returns */
+		} else if ((obj->otyp == OIL_LAMP || obj->otyp == MAGIC_LAMP)) {
+			/* Turn off engine before fueling, turn off fuel too :-)  */
+			if (obj->lamplit || potion->lamplit) {
+				useup(potion);
+				explode(u.ux, u.uy, AD_FIRE, 0, d(6,6), EXPL_FIERY, 1);
+				exercise(A_WIS, FALSE);
+				return MOVE_STANDARD;
+			}
+			/* Adding oil to an empty magic lamp renders it into an oil lamp */
+			if ((obj->otyp == MAGIC_LAMP) && obj->spe == 0) {
+				obj->otyp = OIL_LAMP;
+				obj->age = 0;
+			}
+			if (obj->age > 1000L) {
+				pline("%s %s full.", Yname2(obj), otense(obj, "are"));
+				potion->in_use = FALSE;	/* didn't go poof */
+			} else {
+				You("fill %s with oil.", yname(obj));
+				check_unpaid(potion);	/* Yendorian Fuel Tax */
+				obj->age += 2*potion->age;	/* burns more efficiently */
+				if (obj->age > 1500L) obj->age = 1500L;
+				useup(potion);
+				exercise(A_WIS, TRUE);
+			}
+			makeknown(POT_OIL);
+			obj->spe = 1;
+			update_inventory();
+			return MOVE_STANDARD;
+	    } else if (is_rustprone(obj) && obj->oeroded > 0){
+			pline("%s %s less rusty.", Yname2(obj), otense(obj, "are"));
+			obj->oeroded--;
+			wisx = TRUE;
+	    } else if (is_corrodeable(obj) && obj->oeroded2 > 0){
+			pline("%s %s less corroded.", Yname2(obj), otense(obj, "are"));
+			obj->oeroded2--;
+			wisx = TRUE;
+	    } else {
+			/* uses up potion */
 			pline("%s %s with an oily sheen.",
 				  Yname2(obj), otense(obj, "gleam"));
-	    } else {
-			pline("%s %s less %s.",
-				  Yname2(obj), otense(obj, "are"),
-				  (obj->oeroded && obj->oeroded2) ? "corroded and rusty" :
-				obj->oeroded ? "rusty" : "corroded");
-			if (obj->oeroded > 0) obj->oeroded--;
-			if (obj->oeroded2 > 0) obj->oeroded2--;
-			wisx = TRUE;
+			if(!obj->greased){
+				wisx = TRUE;
+				obj->greased = TRUE;
+			}
 	    }
 	    exercise(A_WIS, wisx);
 	    makeknown(potion->otyp);
@@ -3327,18 +3366,7 @@ dodip()
 	}
     more_dips:
 
-	// Note: magic torches don't burn items (magic. The torch itself is not burned, and it doesn't burn other things. It does burn creatures though!)
-	if((obj->lamplit || potion->lamplit) 
-		&& (obj->otyp == TORCH || obj->otyp == SHADOWLANDER_S_TORCH)
-		&& (potion->otyp == POT_OIL)
-	) {
-		if(!obj->lamplit)
-			begin_burn(obj);
-		useup(potion);
-		explode(u.ux, u.uy, AD_FIRE, 0, d(6,6), EXPL_FIERY, 1);
-		exercise(A_WIS, FALSE);
-		return MOVE_STANDARD;
-	} else if((obj->otyp == SUNROD)
+	if((obj->otyp == SUNROD)
 		&& (potion->otyp == POT_ACID)
 	) {
 		obj->age = max(obj->age-100, 1);
@@ -3366,36 +3394,6 @@ dodip()
 		}
 		exercise(A_WIS, FALSE);
 		return MOVE_STANDARD;
-	/* Allow filling of MAGIC_LAMPs to prevent identification by player */
-	} else if ((obj->otyp == OIL_LAMP || obj->otyp == MAGIC_LAMP) &&
-	   (potion->otyp == POT_OIL)) {
-	    /* Turn off engine before fueling, turn off fuel too :-)  */
-	    if (obj->lamplit || potion->lamplit) {
-		useup(potion);
-		explode(u.ux, u.uy, AD_FIRE, 0, d(6,6), EXPL_FIERY, 1);
-		exercise(A_WIS, FALSE);
-		return MOVE_STANDARD;
-	    }
-	    /* Adding oil to an empty magic lamp renders it into an oil lamp */
-	    if ((obj->otyp == MAGIC_LAMP) && obj->spe == 0) {
-		obj->otyp = OIL_LAMP;
-		obj->age = 0;
-	    }
-	    if (obj->age > 1000L) {
-		pline("%s %s full.", Yname2(obj), otense(obj, "are"));
-		potion->in_use = FALSE;	/* didn't go poof */
-	    } else {
-		You("fill %s with oil.", yname(obj));
-		check_unpaid(potion);	/* Yendorian Fuel Tax */
-		obj->age += 2*potion->age;	/* burns more efficiently */
-		if (obj->age > 1500L) obj->age = 1500L;
-		useup(potion);
-		exercise(A_WIS, TRUE);
-	    }
-	    makeknown(POT_OIL);
-	    obj->spe = 1;
-	    update_inventory();
-	    return MOVE_STANDARD;
 	}
 	
 	potion->in_use = FALSE;		/* didn't go poof */
