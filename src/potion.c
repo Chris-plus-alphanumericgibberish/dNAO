@@ -1184,7 +1184,7 @@ as_extra_healing:
 		exercise(A_STR, TRUE);
 		exercise(A_CON, TRUE);
 		//Makes you crazy
-		change_usanity(-1*rnd(10), FALSE);
+		change_usanity(-1*d(4,4), FALSE);
 		u.umadness |= MAD_GOAT_RIDDEN;
 		lift_veil();
 		break;
