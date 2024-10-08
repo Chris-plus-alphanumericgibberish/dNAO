@@ -4140,7 +4140,7 @@ register int num;
 	    /* Have lesshungry() report when you're nearly full so all eating
 	     * warns when you're about to choke.
 	     */
-	    if ((Race_if(PM_INCANTIFIER) && u.uen >= (get_uhungermax()*7)/8) ||
+	    if ((Race_if(PM_INCANTIFIER) && u.uen >= (u.uenmax*7)/8) ||
 			(uclockwork && u.uhunger >= (get_uhungermax()*7)/8) || 
 			(!Race_if(PM_INCANTIFIER) && !uclockwork && u.uhunger >= (get_uhungermax()*3)/4)) {
 			if (!victual.eating || (victual.eating && !victual.fullwarn)) {
