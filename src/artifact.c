@@ -7696,18 +7696,18 @@ boolean printmessages; /* print generic elemental damage messages */
 					affected = TRUE;
 				}
 			}
-			if(affected){
-				if(!Fire_res(mdef)){
-					*truedmgptr += d(2,6);
-				}
-				if (!UseInvFire_res(mdef)) {
-					if (!rn2(4)) (void) destroy_item(mdef, POTION_CLASS, AD_FIRE);
-					if (!rn2(4)) (void) destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
-					if (!rn2(7)) (void) destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
-				}
-				if(!Magic_res(mdef)){
-					*truedmgptr += max_ints(d(4,4) + otmp->spe, 1);
-				}
+			if(!Fire_res(mdef)){
+				*truedmgptr += d(2,6);
+				if(affected) *truedmgptr += (basedmg)/2;
+			}
+			if (!UseInvFire_res(mdef)) {
+				if (!rn2(4)) (void) destroy_item(mdef, POTION_CLASS, AD_FIRE);
+				if (!rn2(4)) (void) destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
+				if (!rn2(7)) (void) destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
+			}
+			if(!Magic_res(mdef)){
+				*truedmgptr += max_ints(d(4,4) + otmp->spe, 1);
+				if(affected) *truedmgptr += (basedmg+1)/2;
 			}
 		}break;
 	}
