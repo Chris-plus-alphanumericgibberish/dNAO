@@ -4986,7 +4986,7 @@ struct monst *magr;
 
 /*  */
 void
-otyp_hit(magr, mdef, otmp, basedmg, plusdmgptr, truedmgptr, dieroll, hittxt, printmessages)
+otyp_hit(magr, mdef, otmp, basedmg, plusdmgptr, truedmgptr, dieroll, hittxt, printmessages, direct_weapon)
 struct monst *magr, *mdef;
 struct obj *otmp;
 int basedmg;
@@ -4995,6 +4995,7 @@ int * truedmgptr;
 int dieroll; /* needed for Magicbane and vorpal blades */
 boolean * hittxt;
 boolean printmessages;
+boolean direct_weapon;
 {
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
@@ -5307,6 +5308,44 @@ boolean printmessages;
 			}
 		}
 	}
+
+	if(otmp->otyp == SHANTA_PATA && mdef){
+		if(otmp->ovar1_last_blooded > moves - 10){
+			if(youagr)
+				*plusdmgptr += u.uimpurity/2;
+			if(!u.veil && !Magic_res(mdef)){
+				int mod = min(u.uinsight, 100);
+				*truedmgptr += basedmg*mod/100;
+			}
+			if(has_blood_mon(mdef) && direct_weapon){
+				otmp->ovar1_last_blooded += 10;
+			}
+		}
+		else {
+			if(has_blood_mon(mdef) && direct_weapon){
+				otmp->ovar1_last_blooded = moves;
+			}
+		}
+	}
+	else if(otmp->otyp == TWINGUN_SHANTA && mdef){
+		if(otmp->ovar1_last_blooded > moves - 10){
+			if(youagr)
+				*plusdmgptr += u.uimpurity/4;
+			if(!u.veil && !Magic_res(mdef)){
+				int mod = min(u.uinsight/2, 100);
+				*truedmgptr += basedmg*mod/100;
+			}
+			if(has_blood_mon(mdef) && direct_weapon){
+				otmp->ovar1_last_blooded += 10;
+			}
+		}
+		else {
+			if(has_blood_mon(mdef) && direct_weapon){
+				otmp->ovar1_last_blooded = moves;
+			}
+		}
+	}
+
 }
 
 /* returns MM_style hitdata now, and is used for both artifacts and weapon properties */

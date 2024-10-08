@@ -1967,7 +1967,11 @@ int shotlimit;
 		else
 			magr_wepskill = m_martial_skill(magr->data);
 
-		switch (magr_wepskill) {
+		if(launcher && launcher->otyp == TWINGUN_SHANTA){
+			//No bonus shots from skill, base rof is 2
+			multishot = 1;
+		}
+		else switch (magr_wepskill) {
 		default:
 			multishot = 1; break;
 		case P_SKILLED:

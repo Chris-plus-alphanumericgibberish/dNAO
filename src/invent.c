@@ -1307,6 +1307,7 @@ register const char *let,*word;
 			  otmp->otyp != SAW_CLEAVER && otmp->otyp != RAZOR_CLEAVER &&
 			  otmp->otyp != SAW_SPEAR && otmp->otyp != LONG_SAW &&
 			  otmp->otyp != SOLDIER_S_RAPIER && otmp->otyp != SOLDIER_S_SABER &&
+			  otmp->otyp != SHANTA_PATA && otmp->otyp != TWINGUN_SHANTA &&
 			  otmp->otyp != BOW_BLADE && otmp->otyp != BLADED_BOW &&
 			  otmp->otyp != CANE && otmp->otyp != WHIP_SAW &&
 			  otmp->otyp != CHIKAGE &&
@@ -2399,6 +2400,9 @@ struct obj *obj;
 	else if (obj->otyp == BOW_BLADE || obj->otyp == BLADED_BOW)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Open or close your bow", MENU_UNSELECTED);
+	else if (obj->otyp == SHANTA_PATA || obj->otyp == TWINGUN_SHANTA)
+		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
+				"Open or close your pata", MENU_UNSELECTED);
 	else if (obj->otyp == SOLDIER_S_RAPIER || obj->otyp == SOLDIER_S_SABER)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
 				"Latch or unlatch your rapier", MENU_UNSELECTED);

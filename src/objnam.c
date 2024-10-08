@@ -1417,6 +1417,11 @@ char *buf;
 			Strcat(buf, "twinkling ");
 	}
 
+	if(obj->otyp == SHANTA_PATA || obj->otyp == TWINGUN_SHANTA){
+		if (obj->ovar1_last_blooded > moves - 10)
+			Strcat(buf, "bloodied ");
+	}
+
 	if (obj->otyp == HOLY_SYMBOL_OF_THE_BLACK_MOTHE){
 		if (u.shubbie_credit < 50)
 			return;

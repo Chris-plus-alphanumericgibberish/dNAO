@@ -346,6 +346,7 @@ struct obj {
 #define ovar1_iea_upgrades ovar1
 #define ovar1_puzzle_steps ovar1
 #define ovar1_alt_mat ovar1
+#define ovar1_last_blooded ovar1
 
 	/* Number of viperwhip heads */
 	/* Moon axe phase */
@@ -622,6 +623,9 @@ struct obj {
 			 ((objects[otmp->otyp].oc_skill >= P_SHORT_SWORD && \
 			 objects[otmp->otyp].oc_skill <= P_SABER) || \
 			 otmp->otyp == DOUBLE_SWORD))
+#define is_pata(otmp)	(\
+			 otmp->otyp == SHANTA_PATA || \
+			 otmp->otyp == TWINGUN_SHANTA)
 #define is_rapier(otmp)	(otmp->oclass == WEAPON_CLASS && (\
 			 otmp->otyp == RAPIER || \
 			 otmp->otyp == RAKUYO || \
@@ -795,6 +799,7 @@ struct obj {
 				otmp->oartifact == ART_ROGUE_GEAR_SPIRITS  || \
 				otmp->otyp == SOLDIER_S_SABER  || \
 				otmp->otyp == BLADED_BOW  || \
+				otmp->otyp == TWINGUN_SHANTA  || \
 				check_oprop(otmp, OPROP_BLADED) || \
 				check_oprop(otmp, OPROP_SPIKED))
 #define is_ammo(otmp)	((otmp->oclass == WEAPON_CLASS || \
@@ -923,6 +928,8 @@ struct obj {
 						  (otmp)->otyp == ISAMUSEI || \
 						  (otmp)->otyp == DISKOS || \
 						  (otmp)->otyp == PINCER_STAFF || \
+						  (otmp)->otyp == SHANTA_PATA || \
+						  (otmp)->otyp == TWINGUN_SHANTA || \
 						  (otmp)->otyp == KAMEREL_VAJRA)
 #define spec_prop_material(otmp)	(otmp->obj_material == MERCURIAL)
 #define is_multigen(otmp)	((otmp->oclass == WEAPON_CLASS && \

@@ -329,6 +329,9 @@ struct monst *magr;
 	if(otyp == SOLDIER_S_SABER || otyp == BLADED_BOW){
 		attackmask = SLASH;
 	}
+	if(otyp == TWINGUN_SHANTA){
+		attackmask = PIERCE;
+	}
 
 	/* catch special cases */
 	if (   oartifact == ART_YORSHKA_S_SPEAR
@@ -556,6 +559,11 @@ struct monst *magr;
 		{
 			ocn = 1;
 			ocd = 8;
+		}
+		else if (otyp == TWINGUN_SHANTA)
+		{
+			ocn = 1;
+			ocd = 4;
 		}
 		else if (otyp == WIND_AND_FIRE_WHEELS)
 		{
@@ -3666,6 +3674,9 @@ struct obj *obj;
 	else if(obj->otyp == DISKOS){
 		if(!uarms && !u.twoweap)
 			CHECK_ALTERNATE_SKILL(P_POLEARMS)
+	}
+	else if(obj->otyp == SHANTA_PATA){
+		CHECK_ALTERNATE_SKILL(P_LONG_SWORD)
 	}
 	else if(obj->otyp >= LUCKSTONE && obj->otyp <= ROCK && obj->ovar1_projectileSkill){
 		type = (int)obj->ovar1_projectileSkill;

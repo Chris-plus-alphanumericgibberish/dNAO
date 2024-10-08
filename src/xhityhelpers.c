@@ -2705,6 +2705,109 @@ struct attack * attk;
 
 
 ///////////////////////////////////////////////////////////////////////////////
+/* Gun katar shoot extra targets										    */
+/////////////////////////////////////////////////////////////////////////////
+boolean
+safe_shot(struct monst *magr, int dx, int dy, int range)
+{
+	boolean youagr = magr == &youmonst;
+	int ix = x(magr), iy = y(magr);
+	struct monst *mdef;
+	if(youagr && u.ustuck && u.uswallow){
+		return TRUE;
+	}
+	for(int i = 1; i < range; i++){
+		ix += dx;
+		iy += dy;
+		if(!isok(ix,iy))
+			return FALSE;
+		mdef = m_at(ix, iy);
+		if(!mdef || DEADMONSTER(mdef)){
+			if(!ZAP_POS(levl[ix][iy].typ) || closed_door(ix, iy))
+				return FALSE;
+		}
+		else {
+			//We'll call this your "sixth sense" talking <_<'
+			if(youagr)
+				return (!mdef->mpeaceful || Hallucination);
+			else {
+				if(magr->mtame && mdef->mtame)
+					return FALSE;
+				else if(magr->mpeaceful != mdef->mpeaceful)
+					return TRUE;
+				else
+					return mm_grudge(magr, mdef, TRUE);
+			}
+		}
+	}
+	return FALSE;
+}
+
+int
+shoot_with_gun_katar(magr, otmp, tarx, tary, tohitmod, attk)
+struct monst * magr;
+struct obj * otmp;
+int tarx;
+int tary;
+int tohitmod;
+struct attack * attk;
+{
+	int subresult = 0;
+	boolean youagr = magr == &youmonst;
+	/* try to find direction (u.dx and u.dy may be incorrect) */
+	int dx = sgn(tarx - x(magr));
+	int dy = sgn(tary - y(magr));
+	int nx, ny;
+	int result = 0;
+	int merc_mult = 1;
+	int range = 15;
+	struct obj *ammo = 0;
+	if(!(isok(tarx - dx, tary - dy) &&
+		x(magr) == tarx - dx &&
+		y(magr) == tary - dy)
+	)
+		return result;
+
+	if(result&(MM_AGR_DIED|MM_AGR_STOP))
+		return result;
+	//45 degree rotation
+	nx = sgn(dx+dy);
+	ny = sgn(dy-dx);
+	if(safe_shot(magr, nx, ny, range)){
+		if(youagr){
+			ammo = uquiver;
+		}
+		else {
+			ammo = select_rwep(magr);
+		}
+		if(!ammo || !ammo_and_launcher(ammo, otmp))
+			return result;
+		/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
+		result |= projectile(magr, ammo, otmp, HMON_PROJECTILE|HMON_FIRED, x(magr), y(magr), nx, ny, 0, range, FALSE, TRUE, FALSE)&(MM_AGR_DIED|MM_AGR_STOP);
+	}
+
+	if(result&(MM_AGR_DIED|MM_AGR_STOP))
+		return result;
+	//-45 degree rotation
+	nx = sgn(dx-dy);
+	ny = sgn(dx+dy);
+	if(safe_shot(magr, nx, ny, range)){
+		if(youagr){
+			ammo = uquiver;
+		}
+		else {
+			ammo = select_rwep(magr);
+		}
+		if(!ammo || !ammo_and_launcher(ammo, otmp))
+			return result;
+		/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
+		result |= projectile(magr, ammo, otmp, HMON_PROJECTILE|HMON_FIRED, x(magr), y(magr), nx, ny, 0, range, FALSE, TRUE, FALSE)&(MM_AGR_DIED|MM_AGR_STOP);
+	}
+	return result;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
 /* Isamusei hit additional targets, if your insight is high enough to percieve the distortions */
 ///////////////////////////////////////////////////////////////////////////////
 int

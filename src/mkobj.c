@@ -2235,6 +2235,8 @@ struct obj* obj;
 	case WHIP_SAW:
 	case HUNTER_S_SHORTSWORD:
 	case HUNTER_S_LONGSWORD:
+	case SHANTA_PATA:
+	case TWINGUN_SHANTA:
 		return special_materials;
 	default:
 		break;

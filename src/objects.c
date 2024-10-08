@@ -603,7 +603,7 @@ WEAPON(("aklys", "thonged club"),
 	0, 0, MZ_MEDIUM,  8, 15,  4,  0, B,   P_CLUB, IRON, FALSE, HI_METAL),
 WEAPON(("flail"),
 	DMG(D(6), F(1)), DMG(D(2, 4)),
-	1, 0, MZ_MEDIUM, 25, 15,  4,  0, B,   P_FLAIL, IRON, FALSE, HI_METAL),
+	1, 0, MZ_MEDIUM, 24, 15,  4,  0, B,   P_FLAIL, IRON, FALSE, HI_METAL),
 WEAPON(("nunchaku", "set of chain-sticks"),
 	DMG(D(4), F(1)), DMG(D(3)),
 	0, 0, MZ_MEDIUM,  5,  7,  4,  0, B,   P_FLAIL, WOOD, FALSE, HI_WOOD),
@@ -621,6 +621,9 @@ WEAPON(("bestial claw"), /*Needs encyc entry*/
 WEAPON(("katar"), /*Needs encyc entry*/
 	DMG(D(6)), DMG(D(4)),
 	1, 0, MZ_SMALL,  5,  5,   4,  0, S|P, P_BARE_HANDED_COMBAT, IRON, FALSE, HI_METAL),
+WEAPON(("shanta-pata", "ornate gauntlet-sword"), /*Needs encyc entry*/
+	DMG(D(8)), DMG(D(12)),
+	0, 0, MZ_MEDIUM,  1, 40, 125,  0, S|P, P_BARE_HANDED_COMBAT, METAL, FALSE, HI_METAL),
 
 
 
@@ -657,6 +660,7 @@ GUN(("cutting laser","hard tan lozenge", "hard lozenge"),         0,   MZ_SMALL,
 
 GUN(("raygun", "hard handle ending in glassy disks"), 0,  MZ_MEDIUM, 0,   8, 3000, 15,  1,  0,WP_BLASTER, PLASTIC, P_FIREARM, CLR_BRIGHT_CYAN, O_MAGIC(1)), /*Needs tile*/
 GUN(("soldier's saber", "gun saber"),               0,   MZ_MEDIUM, 0,   40,  100, 15,  1,  0, WP_BULLET, METAL, P_FIREARM, HI_METAL), /*Needs tile*/
+GUN(("twingun shanta", "gun-katar"),               0,   MZ_SMALL, 0,   40,  125, 15,  2,  0, WP_BULLET, METAL, P_FIREARM, HI_METAL), /*Needs tile*/
 BULLET(("bullet", "pellet"),
 	DMG(D(2, 8), F(4)), DMG(D(2, 6), F(4)),
 	0,    MZ_TINY, 0,  1,   5, 0,  WP_BULLET,   P,   LEAD, -P_FIREARM, HI_METAL),/*Needs tile*/

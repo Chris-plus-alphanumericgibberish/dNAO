@@ -2257,7 +2257,8 @@ boolean ac;
 	}
 }
 
-int arm_ac_bonus(otmp)
+int
+arm_ac_bonus(otmp)
 struct obj * otmp;
 {
 	/* no armor, no defense! */
@@ -2526,6 +2527,9 @@ base_uac()
 			else if(u.uinsight > 10)
 				uac -= u.uinsight - 10;
 		}
+		if(is_pata(uwep) && arti_phasing(uwep)){
+			uac -= 2 + material_def_bonus(uwep, 2, TRUE) + (uwep->spe)/2 - min((int)greatest_erosion(uwep), 2);
+		}
 		if(!flat_foot){
 			if((is_rapier(uwep) && arti_phasing(uwep)) || 
 				(uwep->otyp == LIGHTSABER && litsaber(uwep) && uwep->oartifact != ART_ANNULUS && uwep->ovar1_lightsaberHandle == 0)
@@ -2705,18 +2709,25 @@ find_ac()
 	if (uarmf)	uac -= arm_ac_bonus(uarmf);
 	if(uarms){
 		uac -= max(0, arm_ac_bonus(uarms) + (uarms->objsize - youracedata->msize)) + shield_skill(uarms);
-		if(uwep && (objects[uwep->otyp].oc_skill == P_SPEAR || objects[uwep->otyp].oc_skill == P_POLEARMS || objects[uwep->otyp].oc_skill == P_LANCE))
+		if(uwep && (objects[uwep->otyp].oc_skill == P_SPEAR || objects[uwep->otyp].oc_skill == P_POLEARMS
+			|| objects[uwep->otyp].oc_skill == P_TRIDENT || objects[uwep->otyp].oc_skill == P_LANCE)
+		)
 			uac -= 2;
 	}
 	else if(uarm && uarm->oartifact == ART_SCORPION_CARAPACE && check_carapace_mod(uarm, CPROP_SHIELDS)){
 		uac -= 1 + shield_skill(uarm);
-		if(uwep && (objects[uwep->otyp].oc_skill == P_SPEAR || objects[uwep->otyp].oc_skill == P_POLEARMS || objects[uwep->otyp].oc_skill == P_LANCE))
+		if(uwep && (objects[uwep->otyp].oc_skill == P_SPEAR || objects[uwep->otyp].oc_skill == P_POLEARMS
+			|| objects[uwep->otyp].oc_skill == P_TRIDENT || objects[uwep->otyp].oc_skill == P_LANCE)
+		)
 			uac -= 3;//+1 bonus to shield size
 	}
 	if (uarmg)	uac -= arm_ac_bonus(uarmg);
 	if (uarmu)	uac -= arm_ac_bonus(uarmu);
 	
 	if(uwep){
+		if(is_pata(uwep) && !arti_phasing(uwep)){
+			uac -= 2 + material_def_bonus(uwep, 2, TRUE) + (uwep->spe)/2 - min((int)greatest_erosion(uwep), 2);
+		}
 		if((is_rapier(uwep) && !arti_phasing(uwep)))
 			uac -= max(
 				min(
@@ -2943,6 +2954,9 @@ uchar aatyp;
 			if (!uarm && (slot & TORSO_DR)) {
 				arm_udr += max(1 + (uwep->spe + 1) / 2, 0);
 			}
+		}
+		if(is_pata(uwep) && slot&ARM_DR){
+			arm_udr += 4 + material_def_bonus(uwep, 4, FALSE) + (uwep->spe + 1) / 2 - min((int)greatest_erosion(uwep), 4);
 		}
 	}
 	/* Natural DR (overriden and ignored by base_nat_udr() for halfdragons) */

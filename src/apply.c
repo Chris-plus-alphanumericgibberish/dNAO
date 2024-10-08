@@ -2258,6 +2258,31 @@ struct obj *obj;
 }
 
 int
+use_gun_pata(obj)
+struct obj *obj;
+{
+	if(obj->unpaid){
+		You("need to buy it.");
+		return MOVE_CANCELLED;
+	}
+	
+	if(obj->otyp == TWINGUN_SHANTA){
+		You("extend and close %s.",the(xname(obj)));
+		obj->otyp = SHANTA_PATA;
+		if(obj == uwep)
+			unweapon = FALSE;
+	} else {
+		You("open and contract %s.",the(xname(obj)));
+		obj->otyp = TWINGUN_SHANTA;
+		if(obj == uwep)
+			unweapon = TRUE;
+	}
+	fix_object(obj);
+	update_inventory();
+	return MOVE_INSTANT;
+}
+
+int
 use_threaded_cane(obj)
 struct obj *obj;
 {
@@ -2800,6 +2825,16 @@ transfusion(struct obj *obj)
 	useup(obj);
 	if(phleb_kit->spe < 15)
 		phleb_kit->spe++;
+	if(uwep && (uwep->otyp == TWINGUN_SHANTA || uwep->otyp == SHANTA_PATA)){
+		if(uwep->ovar1_last_blooded > moves - 10)
+			uwep->ovar1_last_blooded += 10;
+		else uwep->ovar1_last_blooded = moves;
+	}
+	if(uswapwep && (uswapwep->otyp == TWINGUN_SHANTA || uswapwep->otyp == SHANTA_PATA)){
+		if(uswapwep->ovar1_last_blooded > moves - 10)
+			uswapwep->ovar1_last_blooded += 10;
+		else uswapwep->ovar1_last_blooded = moves;
+	}
 	return MOVE_STANDARD;
 }
 
@@ -3281,6 +3316,16 @@ blood_draw(struct obj *obj)
 	blood->bknown = obj->bknown;
 	blood->known = TRUE;
 	blood = hold_another_object(blood, "You drop %s!", doname(blood), (const char *)0);
+	if(uwep && (uwep->otyp == TWINGUN_SHANTA || uwep->otyp == SHANTA_PATA)){
+		if(uwep->ovar1_last_blooded > moves - 10)
+			uwep->ovar1_last_blooded += 10;
+		else uwep->ovar1_last_blooded = moves;
+	}
+	if(uswapwep && (uswapwep->otyp == TWINGUN_SHANTA || uswapwep->otyp == SHANTA_PATA)){
+		if(uswapwep->ovar1_last_blooded > moves - 10)
+			uswapwep->ovar1_last_blooded += 10;
+		else uswapwep->ovar1_last_blooded = moves;
+	}
 	return MOVE_STANDARD;
 }
 
@@ -9985,6 +10030,8 @@ doapply()
 		return use_soldier_rapier(obj);
 	} else if(obj->otyp == BOW_BLADE || obj->otyp == BLADED_BOW){
 		return use_bow_blade(obj);
+	} else if(obj->otyp == SHANTA_PATA || obj->otyp == TWINGUN_SHANTA){
+		return use_gun_pata(obj);
 	} else if(obj->otyp == CANE){
 		return use_threaded_cane(obj);
 	} else if(obj->otyp == CHIKAGE){
@@ -10205,6 +10252,16 @@ doapply()
 	case NIGHTMARE_S_BULLET_MOLD:{
 		You("jab the bullet mold into your %s!", u.uinsight < 18 ? body_part(LEG) : body_part(HEAD));
 		if(u.uexp > 7 && *hp(&youmonst) > 3*(*hpmax(&youmonst))/10){
+			if(uwep && (uwep->otyp == TWINGUN_SHANTA || uwep->otyp == SHANTA_PATA)){
+				if(uwep->ovar1_last_blooded > moves - 10)
+					uwep->ovar1_last_blooded += 10;
+				else uwep->ovar1_last_blooded = moves;
+			}
+			if(uswapwep && (uswapwep->otyp == TWINGUN_SHANTA || uswapwep->otyp == SHANTA_PATA)){
+				if(uswapwep->ovar1_last_blooded > moves - 10)
+					uswapwep->ovar1_last_blooded += 10;
+				else uswapwep->ovar1_last_blooded = moves;
+			}
 			struct obj *bullets = mksobj(check_vampire(VAMPIRE_BLOOD_SPIKES) ? BLOOD_SPEAR : BLOOD_BULLET, MKOBJ_NOINIT);
 			bullets->dknown = bullets->known = bullets->rknown = bullets->sknown = TRUE;
 			bullets->bknown = obj->bknown;

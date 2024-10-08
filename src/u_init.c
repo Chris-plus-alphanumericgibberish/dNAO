@@ -2504,7 +2504,7 @@ u_init()
 #endif
 	case PM_UNDEAD_HUNTER:
 		if(Race_if(PM_VAMPIRE)){
-			switch(rn2(4)){
+			switch(rn2(5)){
 			case 0:
 				//UndeadHunter[U_WEAPON].trotyp = CANE;
 			break;
@@ -2520,6 +2520,11 @@ u_init()
 				UndeadHunter[U_WEAPON].trotyp = RAKUYO;
 				knows_object(RAKUYO_SABER);
 				knows_object(RAKUYO_DAGGER);
+			break;
+			case 4:
+				UndeadHunter[U_WEAPON].trotyp = SHANTA_PATA;
+				knows_object(TWINGUN_SHANTA);
+				UndeadHunter[U_GUN].trotyp = BUCKLER;
 			break;
 			}
 			UndeadHunter[U_BULLETS].trspe = 1;

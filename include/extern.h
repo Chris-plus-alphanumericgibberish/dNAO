@@ -173,7 +173,7 @@ E void FDECL(undiscover_artifact, (int));
 E boolean FDECL(undiscovered_artifact, (int));
 E int FDECL(disp_artifact_discoveries, (winid));
 E void FDECL(otyp_hit, (struct monst *,struct monst *,
-				struct obj *,int, int *,int*, int, boolean *, boolean));
+				struct obj *,int, int *,int*, int, boolean *, boolean, boolean));
 E int FDECL(special_weapon_hit, (struct monst *,struct monst *,
 				struct obj *,struct obj*,int,int*,int*,int,boolean*,boolean));
 E int NDECL(doinvoke);
@@ -3553,6 +3553,7 @@ E boolean FDECL(wearing_dragon_armor, (struct monst *, int));
 E int FDECL(hit_with_cclaw, (struct monst *,struct obj *, int, int, int, struct attack *));
 E int FDECL(hit_with_iwarp, (struct monst *,struct obj *, int, int, int, struct attack *));
 E int FDECL(hit_with_rblood, (struct monst *,struct obj *, int, int, int, struct attack *));
+E int FDECL(shoot_with_gun_katar, (struct monst *,struct obj *, int, int, int, struct attack *));
 E int FDECL(hit_with_cblood, (struct monst *,struct obj *, int, int, int, struct attack *));
 E int FDECL(hit_with_rreject, (struct monst *,struct obj *, int, int, int, struct attack *));
 E int FDECL(hit_with_dance, (struct monst *,struct obj *, int, int, int, struct attack *));
