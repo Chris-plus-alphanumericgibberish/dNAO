@@ -1937,6 +1937,7 @@ int shotlimit;
 {
 	boolean youagr = (magr == &youmonst);
 	int multishot = 1;
+	int minmulti = 1;
 	int skill;
 	
 	if (launcher && !(launcher->oartifact == ART_PEN_OF_THE_VOID))
@@ -1980,6 +1981,15 @@ int shotlimit;
 			multishot = 3; break;
 		}
 
+		if(QuickDraw){
+			if(multishot > 2){
+				minmulti++;
+				multishot--;
+			}
+			else
+				multishot++;
+		}
+
 		/* The legendary Longbow increases skilled RoF */
 		if (launcher && (
 			launcher->oartifact == ART_LONGBOW_OF_DIANA ||
@@ -1997,10 +2007,20 @@ int shotlimit;
 			break;
 		case PM_RANGER:
 			multishot++;
-			if (launcher && launcher->oartifact == ART_LONGBOW_OF_DIANA) multishot++;//double bonus for Rangers
+			if(!Upolyd && u.ulevel >= 14)
+				minmulti++;
+			if(!Upolyd && u.ulevel >= 30)
+				multishot++;
+			if (launcher && launcher->oartifact == ART_LONGBOW_OF_DIANA) minmulti++;//Max and min for Rangers
+			if (Race_if(PM_ELF) && launcher && launcher->oartifact == ART_BELTHRONDING) minmulti++;//Max and min for Rangers
 			break;
 		case PM_ROGUE:
-			if (skill == P_DAGGER) multishot++;
+			if (skill == P_DAGGER){
+				if(QuickDraw)
+					minmulti++;
+				else
+					multishot++;
+			}
 			break;
 		case PM_NINJA:
 		case PM_SAMURAI:
@@ -2038,7 +2058,7 @@ int shotlimit;
 	}
 	else {
 		/* normal behaviour: randomize multishot */
-		multishot = rnd(multishot);
+		multishot = rn1(multishot, minmulti);
 	}
 
 	/* The Sansara Mirror doubles your multishooting ability,

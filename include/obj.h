@@ -806,6 +806,11 @@ struct obj {
 			 otmp->oclass == GEM_CLASS) && \
 			 ((objects[otmp->otyp].oc_skill >= -P_CROSSBOW && \
 			 objects[otmp->otyp].oc_skill <= -P_BOW)))
+#define is_aimable(otmp, attackmask)	(is_ammo(otmp) && attackmask == PIERCE &&\
+							(objects[otmp->otyp].oc_skill == -P_BOW ||\
+							 objects[otmp->otyp].oc_skill == -P_CROSSBOW ||\
+							 objects[otmp->otyp].oc_skill == -P_FIREARM \
+							))
 #define is_grenade(otmp)	(is_ammo(otmp) && \
 			 	 objects[(otmp)->otyp].w_ammotyp == WP_GRENADE)
 #define ammo_and_launcher(otmp,ltmp) \

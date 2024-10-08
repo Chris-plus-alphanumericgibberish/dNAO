@@ -15703,6 +15703,10 @@ int vis;						/* True if action is at all visible to the player */
 		//Give spears a slight advantage vs. armor.
 		if(valid_weapon_attack && weapon && is_spear(weapon) && dr)
 			dr = max(dr-2, 0);
+
+		//Give skilled rangers (and others) some help vs. armor
+		if(fired && launcher && valid_weapon_attack && weapon && is_aimable(weapon, attackmask) && dr)
+			dr = max(dr-skill_damage, 0);
 		
 		subtotl -= dr;
 		
