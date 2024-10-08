@@ -385,11 +385,11 @@ int tary;
 	boolean ranged = (distmin(x(magr), y(magr), tarx, tary) > 1);	/* is magr near its target? */
 	boolean dopassive = FALSE;	/* whether or not to provoke a passive counterattack */
 	/* if TRUE, don't make attacks that will be fatal to self (like touching a cockatrice) */
-	boolean be_safe = (mdef && !(youagr ? (Hallucination || flags.forcefight || !canspotmon(mdef)) :
+	boolean be_safe = (mdef && !(youagr ? (Hallucination || flags.forcefight || (!canspotmon(mdef) && mdef != u.ustuck)) :
 		(magr->mcrazed || mindless_mon(magr) || (youdef && !mon_can_see_you(magr)) || (!youdef && !mon_can_see_mon(magr, mdef)))));
 	/* if TRUE, don't make direct contact attacks against unknown monsters that may or may not be fatal to self */
 	boolean be_safe_unknown = (mdef && youagr && u.uavoid_unsafetouch && !flags.forcefight &&
-		(!canspotmon(mdef) || Hallucination));
+		((!canspotmon(mdef) && mdef != u.ustuck) || Hallucination));
 #define skip_unsafe_attack(weapon) ((be_safe_unknown && !safe_attack(magr, mdef, attk, weapon, pa, NULL)) || \
 				    (be_safe && !safe_attack(magr, mdef, attk, weapon, pa, pd)))
 
