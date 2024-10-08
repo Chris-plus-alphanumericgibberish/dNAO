@@ -9147,6 +9147,7 @@ boolean ranged;
 		/* big picture: can stunlock monsters, can't stunlock you because it uses the Screaming status effect */
 		if((!nonliving(pd) || is_android(pd)) 
 			&& pd->mflagsa != MA_ELEMENTAL /*not a PURE elemental like a vortex, sphere, or elemental*/
+			&& !has_template(mdef, TOMB_HERD) /*not a statue-piloting thingy */
 			&& !is_great_old_one(pd)
 		){
 			static long ulastscreamed = 0;
