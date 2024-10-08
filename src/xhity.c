@@ -6057,8 +6057,11 @@ boolean ranged;
 			}
 			/* Player vampires are smart enough not to feed while
 			   biting if they might have trouble getting it down */
+			int bite_threshold = 1420;
+			if(get_uhungersizemod() > 1)
+				bite_threshold *= get_uhungersizemod();
 			if (youagr && !Race_if(PM_INCANTIFIER) && is_vampire(youracedata)
-				&& u.uhunger <= 1420 && attk->aatyp == AT_BITE) {
+				&& u.uhunger <= bite_threshold && attk->aatyp == AT_BITE) {
 				/* For the life of a creature is in the blood (Lev 17:11) */
 				if (flags.verbose)
 				    You("feed on the lifeblood.");
