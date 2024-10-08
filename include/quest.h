@@ -42,6 +42,7 @@ struct q_score {			/* Quest "scorecard" */
 #define ANA_SPAWN_THREE (quest_status.time_on_home > MAX_HOME_TIMER/2)
 #define ANA_SPAWN_FOUR (quest_status.time_on_home > MAX_HOME_TIMER*3/4)
 	/*30*/
+	long time_doing_quest;
 	unsigned leader_m_id;
 };
 
