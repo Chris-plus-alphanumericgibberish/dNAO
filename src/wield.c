@@ -988,6 +988,7 @@ struct monst * mon;
 		|| otmp->otyp == ROD_OF_FORCE
 		|| otmp->otyp == HUNTER_S_LONGSWORD
 		|| otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD
+		|| (otmp->oartifact == ART_BLOODLETTER && artinstance[ART_BLOODLETTER].BLactive >= moves)
 		|| (youagr && weapon_type(otmp) == P_QUARTERSTAFF)
 	)
 		return 2;

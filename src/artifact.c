@@ -6136,7 +6136,7 @@ boolean printmessages; /* print generic elemental damage messages */
 			if(youagr)
 				*plusdmgptr += u.uimpurity/2;
 			if (otmp->oartifact == ART_BLOODLETTER)
-				artinstance[otmp->oartifact].BLactive -= max(0, mlev(mdef)/10 - rn2(5));
+				artinstance[otmp->oartifact].BLactive += max(0, mlev(mdef)/10 + rn2(5));
 		}
 	}
 	if (arti_attack_prop(otmp, ARTA_MAGIC) && dieroll <= MB_MAX_DIEROLL) {

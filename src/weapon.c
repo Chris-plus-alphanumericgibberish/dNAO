@@ -505,6 +505,10 @@ struct monst *magr;
 			dmod += 2;
 		else if (obj->oartifact == ART_HOLY_MOONLIGHT_SWORD && obj->lamplit)
 			dmod += 2;
+
+		if (obj->oartifact == ART_BLOODLETTER && artinstance[ART_BLOODLETTER].BLactive >= moves)
+			dmod += 4;
+
 		if (magr == &youmonst && activeFightingForm(FFORM_POMMEL)){
 			if(bimanual_mod(obj, magr) > 1){
 				*wdice = (large ? objects[WAR_HAMMER].oc_wldam : objects[WAR_HAMMER].oc_wsdam);
