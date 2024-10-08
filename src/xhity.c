@@ -4241,12 +4241,16 @@ int *shield_margin;
 			if(shield_margin) {
 				if(uarms){
 					*shield_margin = max(0, arm_ac_bonus(uarms) + (uarms->objsize - youracedata->msize)) + shield_skill(uarms);
-					if(uwep && (objects[uwep->otyp].oc_skill == P_SPEAR || objects[uwep->otyp].oc_skill == P_POLEARMS || objects[uwep->otyp].oc_skill == P_LANCE))
+					if(uwep && (objects[uwep->otyp].oc_skill == P_SPEAR || objects[uwep->otyp].oc_skill == P_POLEARMS
+						|| objects[uwep->otyp].oc_skill == P_TRIDENT || objects[uwep->otyp].oc_skill == P_LANCE)
+					)
 						*shield_margin += 2;
 				}
 				else if(uarm && uarm->oartifact == ART_SCORPION_CARAPACE && check_carapace_mod(uarm, CPROP_SHIELDS)){
 					*shield_margin = 1 + shield_skill(uarm);
-					if(uwep && (objects[uwep->otyp].oc_skill == P_SPEAR || objects[uwep->otyp].oc_skill == P_POLEARMS || objects[uwep->otyp].oc_skill == P_LANCE))
+					if(uwep && (objects[uwep->otyp].oc_skill == P_SPEAR || objects[uwep->otyp].oc_skill == P_POLEARMS
+						|| objects[uwep->otyp].oc_skill == P_TRIDENT || objects[uwep->otyp].oc_skill == P_LANCE)
+					)
 						*shield_margin += 3;//+1 bonus to shield size
 				}
 				else *shield_margin = -1;
