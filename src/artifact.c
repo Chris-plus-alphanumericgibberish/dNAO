@@ -5068,7 +5068,7 @@ boolean direct_weapon;
 	}
 	
 	if (otmp->otyp == TONITRUS && otmp->lamplit){
-		int modifier = (youdef ? Blind_telepat : mon_resistance(mdef, TELEPAT)) ? 2 : 1;
+		int modifier = (youdef ? (Blind_telepat && !Tele_blind) : mon_resistance(mdef, TELEPAT)) ? 2 : 1;
 		if (!Shock_res(mdef)) {
 			if(magr)
 				(*truedmgptr) += modifier*(rnd(10) + otmp->spe) + atr_dbon(otmp, magr, A_INT);
