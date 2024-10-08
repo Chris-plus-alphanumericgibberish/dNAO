@@ -780,7 +780,7 @@ struct obj *obj;
 {
 	int shield_ac = 0;
 	shield_ac += max(0, arm_ac_bonus(obj) + (obj->objsize - mon->data->msize));
-	if(mon_knight(mon)){
+	if(mon_knight(mon) || mon_dark_knight(mon)){
 		if(mon->m_lev >= 28)
 			shield_ac += 8;
 		else if(mon->m_lev >= 14)

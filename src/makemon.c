@@ -16057,7 +16057,7 @@ struct monst *mtmp;
 			give_mintrinsic(mtmp, POISON_RES);
 		}
 	}
-	if(mon_knight(mtmp)){
+	if(mon_knight(mtmp) || mon_dark_knight(mtmp)){
 		if(mtmp->m_lev >= 7){
 			give_mintrinsic(mtmp, FAST);
 		}

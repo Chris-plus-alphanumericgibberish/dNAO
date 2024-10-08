@@ -1552,6 +1552,16 @@ struct monst * magr;
 				use_skill(P_KNI_SACRED, 1);
 			}
 		}
+		else if(otmp->where == OBJ_MINVENT){
+			if(magr && (mon_dark_knight(magr) || magr->mtyp == PM_ALRUNES) && MON_WEP(magr) == otmp && mlev(magr) >= 14){
+				if(mlev(magr) >= 28)
+					dmg += vd(6, 8);
+				else if(mlev(magr) >= 21)
+					dmg += vd(3, 8);
+				else 
+					dmg += vd(1, 8);
+			}
+		}
 #undef sacred_bonus_dice
 		if (otmp->otyp == KHAKKHARA)
 			ndice *= khakharadice;
@@ -1675,6 +1685,17 @@ struct monst * magr;
 		/* calculate */
 		if (ndice)
 			dmg += vd(ndice, diesize);
+		//wields chaotic energies
+		if(otmp->where == OBJ_MINVENT){
+			if(magr && (magr->mtyp == PM_ALRUNES) && MON_WEP(magr) == otmp && mlev(magr) >= 14){
+				if(mlev(magr) >= 28)
+					dmg += vd(6, 8);
+				else if(mlev(magr) >= 21)
+					dmg += vd(3, 8);
+				else 
+					dmg += vd(1, 8);
+			}
+		}
 	}
 	if(otmp->oartifact == ART_LOLTH_S_FANG){
 		//Cross-aligned
