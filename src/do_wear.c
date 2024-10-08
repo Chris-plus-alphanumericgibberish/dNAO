@@ -2511,6 +2511,10 @@ base_uac()
 		uac -= 6;
 	}
 
+	if(Role_if(PM_ANACHRONONAUT) && !quest_status.leader_is_dead && Is_qhome(&u.uz)){
+		uac -= min(u.ulevel, 20);
+	}
+
 	if(!flat_foot && uring_art(ART_NENYA))
 		uac -= (ACURR(A_WIS)-11)/2;
 

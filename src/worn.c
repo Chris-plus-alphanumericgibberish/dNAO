@@ -819,6 +819,12 @@ struct monst *mon;
 	}
 	if(mon->mtyp == PM_VERMIURGE && mon->mvar_vermiurge > 0)
 		base -= min(mon->mvar_vermiurge/10, 20);
+
+	if(Role_if(PM_ANACHRONONAUT) && !quest_status.leader_is_dead && mon->mfaction == QUEST_FACTION && Is_qhome(&u.uz)){
+		if(mon->mtyp != PM_SARA__THE_LAST_ORACLE){
+			base -= rnd(min(mon->m_lev, 20));
+		}
+	}
 	
 	if(mon->mtyp == PM_ASMODEUS && base < -9) base = -9 + MONSTER_AC_VALUE(base+9);
 	else if(mon->mtyp == PM_PALE_NIGHT && base < -6) base = -6 + MONSTER_AC_VALUE(base+6);
@@ -1048,6 +1054,12 @@ struct monst *mon;
 	if(mon->mtyp == PM_VERMIURGE && mon->mvar_vermiurge > 0)
 		base -= min(mon->mvar_vermiurge/10, 20);
 	
+	if(Role_if(PM_ANACHRONONAUT) && !quest_status.leader_is_dead && mon->mfaction == QUEST_FACTION && Is_qhome(&u.uz)){
+		if(mon->mtyp != PM_SARA__THE_LAST_ORACLE){
+			base -= min(mon->m_lev, 20);
+		}
+	}
+
 	if(mon->mtyp == PM_CHOKHMAH_SEPHIRAH){
 		base -= u.chokhmah;
 	}

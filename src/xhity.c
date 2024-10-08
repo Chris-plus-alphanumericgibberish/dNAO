@@ -3752,6 +3752,10 @@ int *shield_margin;
 			if(active_glyph(SIGHT))
 				bons_acc += base_acc*.3;
 
+			if(Role_if(PM_ANACHRONONAUT) && !quest_status.leader_is_dead && Is_qhome(&u.uz)){
+				bons_acc += min(u.ulevel, 20);
+			}
+
 			/* Stat (INT) (from Dantalion vs telepathically sensed enemies) */
 			if (u.sealsActive&SEAL_DANTALION && tp_sensemon(mdef))
 				bons_acc += max(0, (ACURR(A_INT) - 10) / 2);
@@ -3845,6 +3849,13 @@ int *shield_margin;
 				bons_acc += 7;
 			if (pa->mtyp == PM_CHOKHMAH_SEPHIRAH)
 				bons_acc += u.chokhmah;
+
+			if(Role_if(PM_ANACHRONONAUT) && !quest_status.leader_is_dead && Is_qhome(&u.uz) && magr->mfaction == QUEST_FACTION){
+				if(magr->mtyp != PM_SARA__THE_LAST_ORACLE){
+					bons_acc += min(magr->m_lev, 20);
+				}
+			}
+
 			/* simulate accuracy from stat bonuses from gloves */
 			if ((otmp = which_armor(magr, W_ARMG))) {
 				if (otmp->oartifact == ART_GODHANDS)
