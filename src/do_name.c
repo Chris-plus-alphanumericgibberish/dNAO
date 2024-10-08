@@ -807,7 +807,7 @@ const char *name;
 	    if (obj == uswapwep) untwoweapon();
 	    /* activate warning if you've just named your weapon "Sting" */
 	    if (obj == uwep) set_artifact_intrinsic(obj, TRUE, W_WEP);
-	    if (obj == uwep && obj->oartifact == ART_KUSANAGI_NO_TSURUGI){
+	    if (obj == uwep && obj->oartifact == ART_KUSANAGI_NO_TSURUGI && !(u.ulevel >= 22 || u.uhave.amulet)){
 	    	setuwep((struct obj *) 0);
 	    	pline("You are not yet worthy of wielding this sword, but you may bear it until you are ready.");
 	    }
