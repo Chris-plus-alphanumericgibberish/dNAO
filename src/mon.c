@@ -3594,7 +3594,7 @@ boolean actual;			/* actual attack or faction check? */
 	if (magr->mstrategy & STRAT_WAITMASK) {
 		return 0L;
 	}
-	if(magr->mtyp == PM_ELVEN_WRAITH){
+	if(magr->mtyp == PM_ELVEN_WRAITH || magr->mtyp == PM_SILVERFIRE_SHADOW_S_WRAITH){
 		if(magr->mvar_elfwraith_target == (long) mdef->m_id)
 			return ALLOW_M | ALLOW_TM;
 		else

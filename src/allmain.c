@@ -5738,7 +5738,7 @@ struct monst *magr;
 		}
 		
 		if(symbiote.aatyp == AT_MAGC)
-			xcasty(magr, mdef, &symbiote, mdef->mx, mdef->my);
+			xcasty(magr, mdef, &symbiote, mdef->mx, mdef->my, 0);
 		else if(symbiote.aatyp == AT_GAZE)
 			xgazey(magr, mdef, &symbiote, -1);
 		else

@@ -354,16 +354,19 @@ struct monst {
 #define	mvar_vermiurge	mvar1
 #define	mvar_star_vampire_blood	mvar1
 #define	mvar_elfwraith_target	mvar1
+#define	mvar_spellweaver_count	mvar1
 	long mvar2;
 #define	mvar_dracaePregTimer	mvar2
 #define	mvar_spList_2	mvar2
 #define	mvar_dreadPrayer_progress	mvar2
 #define	mvar_attack_pm	mvar2
 #define	mvar_elfwraith_spell	mvar2
+#define	mvar_spellweaver_seed	mvar2
 	long mvar3;
 #define	mvar_conversationTracker	mvar3
 #define	mvar_lifesigns	mvar3
-#define has_lifesigns(mon)	(mon->mtyp != PM_CHAOS && mon->mvar_lifesigns)
+#define	mvar_spellweaver_last_cast	mvar3
+#define has_lifesigns(mon)	(mon->mtyp != PM_SPELLWEAVER && mon->mtyp != PM_SPELLWEAVER_GODDESS_MOCKER && mon->mtyp != PM_CHAOS && mon->mvar_lifesigns)
 
 	struct ls_t * light;
 

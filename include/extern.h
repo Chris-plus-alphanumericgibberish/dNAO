@@ -1438,7 +1438,7 @@ E void FDECL(mapglyph, (int, glyph_t *, int *, unsigned *, int, int));
 /* ### mcastu.c ### */
 
 E void FDECL(cursetxt, (struct monst *, struct monst *, boolean));
-E int FDECL(xcasty, (struct monst *, struct monst *, struct attack *, int, int));
+E int FDECL(xcasty, (struct monst *, struct monst *, struct attack *, int, int, int));
 E int FDECL(cast_spell, (struct monst *, struct monst *, struct attack *, int, int, int));
 E int FDECL(needs_familiar, (struct monst *));
 E int FDECL(pick_tannin, (struct monst *));

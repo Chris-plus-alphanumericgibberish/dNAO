@@ -351,9 +351,7 @@ boolean hostile;
 
 /* ...but first, check for monster-specific spells */
 STATIC_OVL int
-choose_magic_special(mtmp, type)
-struct monst *mtmp;
-unsigned int type;
+choose_magic_special(struct monst *mtmp, unsigned int type, int i)
 {
 	int clrc_spell_power;
 	int wzrd_spell_power;
@@ -371,6 +369,9 @@ unsigned int type;
 	}
 	boolean quake = FALSE;
 	if(mtmp->mtyp == PM_ELVEN_WRAITH){
+		return mtmp->mvar_elfwraith_spell;
+	}
+	if(mtmp->mtyp == PM_SILVERFIRE_SHADOW_S_WRAITH){
 		return mtmp->mvar_elfwraith_spell;
 	}
 	if(has_template(mtmp, PSURLON)){
@@ -1614,6 +1615,16 @@ unsigned int type;
 			}
        case PM_SHUUSHAR_THE_ENLIGHTENED:
           return (!quest_status.offered_artifact ? CURE_SELF : MASS_CURE_CLOSE);
+	   case PM_SPELLWEAVER:
+	    wzrd_spell_power = hash(mtmp->mvar_spellweaver_seed + mtmp->m_id - i)%12;
+		return choose_magic_spell(wzrd_spell_power,mtmp->m_id,!(mtmp->mpeaceful));
+	   break;
+	   case PM_SPELLWEAVER_GODDESS_MOCKER:
+	    wzrd_spell_power = hash(mtmp->mvar_spellweaver_seed + mtmp->m_id - i)%30;
+		if(hash(mtmp->mvar_spellweaver_seed + mtmp->m_id - i + 1000)%3)
+			return choose_clerical_spell(wzrd_spell_power,mtmp->m_id,!(mtmp->mpeaceful), TRUE);
+		return choose_magic_spell(wzrd_spell_power,mtmp->m_id,!(mtmp->mpeaceful));
+	   break;
        case PM_WITCH_S_FAMILIAR:
 			return OPEN_WOUNDS;
 	   break;
@@ -2175,12 +2186,7 @@ const char * spellname[] =
  * Does not consider whether or not magr should be able to cast at mdef (line of sight, range)
  */
 int
-xcasty(magr, mdef, attk, tarx, tary)
-struct monst * magr;
-struct monst * mdef;
-struct attack * attk;
-int tarx;
-int tary;
+xcasty(struct monst *magr, struct monst *mdef, struct attack *attk, int tarx, int tary, int i)
 {
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
@@ -2224,7 +2230,7 @@ int tary;
 
 		do {
 			/* get spell */
-			spellnum = choose_magic_special(magr, attk->adtyp);
+			spellnum = choose_magic_special(magr, attk->adtyp, i);
 			/* check that the spell selection code did not abort the cast */
 			if (!spellnum)
 				return 0;
@@ -2492,6 +2498,24 @@ int tary;
 			wraith->mhp = wraith->mhpmax;
 			wraith->mvar_elfwraith_target = youdef ? 0 : (long) mdef->m_id;
 			wraith->mvar_elfwraith_spell = spellnum;
+		}
+	}
+	if(result == MM_HIT && magr && !youagr && magr->mtyp == PM_SPELLWEAVER_GODDESS_MOCKER && spellnum && mdef){
+		struct monst *wraith = makemon(&mons[PM_SILVERFIRE_SHADOW_S_WRAITH], magr->mx, magr->my, MM_ESUM|MM_ADJACENTOK|NO_MINVENT);
+		if(wraith){
+			mark_mon_as_summoned(wraith, magr, u.uinsight/5, 0);
+			wraith->m_insight_level = magr->m_insight_level;
+			wraith->m_lev = max(1, magr->m_lev-6);
+			wraith->mpeaceful = magr->mpeaceful;
+			// set_faction(wraith, SPELLWEAVER_FACTION);
+			if(wraith->m_lev > 0)
+				wraith->mhpmax = d(magr->m_lev, hd_size(wraith->data));
+			else
+				wraith->mhpmax = rnd((hd_size(wraith->data)+1)/2);
+			wraith->mhp = wraith->mhpmax;
+			wraith->mvar_elfwraith_target = youdef ? 0 : (long) mdef->m_id;
+			wraith->mvar_elfwraith_spell = spellnum;
+			mofflin_close(wraith);
 		}
 	}
 	return result;
@@ -5088,7 +5112,7 @@ int tary;
 			else {
 				if (canseemon(magr))
 					pline("%s looks better.", Monnam(magr));
-				if(magr->mtyp == PM_ELVEN_WRAITH
+				if((magr->mtyp == PM_ELVEN_WRAITH || magr->mtyp == PM_SILVERFIRE_SHADOW_S_WRAITH)
 					&& get_mx(magr, MX_ESUM)
 					&& magr->mextra_p->esum_p->summoner
 				){
@@ -6903,7 +6927,7 @@ int tary;
 	/* don't cast healing when already healed */
 	if (spellnum == CURE_SELF){
 		if (*hp(magr) == *hpmax(magr)){
-			if(magr->mtyp == PM_ELVEN_WRAITH){
+			if((magr->mtyp == PM_ELVEN_WRAITH || magr->mtyp == PM_SILVERFIRE_SHADOW_S_WRAITH)){
 				if(get_mx(magr, MX_ESUM)
 					&& magr->mextra_p->esum_p->summoner
 					&& *hp(magr->mextra_p->esum_p->summoner) == *hpmax(magr->mextra_p->esum_p->summoner)
@@ -7171,8 +7195,7 @@ struct monst *mon;
  */
 
 int
-pick_tannin(mon)
-struct monst *mon;
+pick_tannin(struct monst *mon)
 {
 	switch(mon->mtyp){
 		case PM_PALE_NIGHT:

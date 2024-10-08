@@ -718,7 +718,7 @@ boolean you_abilities;
 	}
 	case MATTK_SPIT: return dospit();
 	case MATTK_MAGIC: 
-		return xcasty(&youmonst, (struct monst *)0, &youracedata->mattk[attackindex(youracedata, AT_MAGC, AD_ANY)], 0, 0) ? MOVE_CASTSPELL : MOVE_CANCELLED;
+		return xcasty(&youmonst, (struct monst *)0, &youracedata->mattk[attackindex(youracedata, AT_MAGC, AD_ANY)], 0, 0, 0) ? MOVE_CASTSPELL : MOVE_CANCELLED;
 		
 //		return castum((struct monst *)0,
 //	                   &youracedata->mattk[attackindex(youracedata, 

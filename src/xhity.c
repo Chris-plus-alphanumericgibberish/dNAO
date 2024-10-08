@@ -14,7 +14,7 @@ STATIC_DCL void FDECL(xyhitmsg, (struct monst *, struct monst *, struct attack *
 STATIC_DCL void FDECL(noises, (struct monst *, struct attack *));
 STATIC_DCL void FDECL(xymissmsg, (struct monst *, struct monst *, struct attack *, int, boolean));
 STATIC_DCL int FDECL(do_weapon_multistriking_effects, (struct monst *, struct monst *, struct attack *, struct obj *, int));
-STATIC_DCL int FDECL(xcastmagicy, (struct monst *, struct monst *, struct attack *, int));
+STATIC_DCL int FDECL(xcastmagicy, (struct monst *, struct monst *, struct attack *, int, int));
 STATIC_DCL int FDECL(xtinkery, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xexplodey, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(hmoncore, (struct monst *, struct monst *, struct attack *, struct attack *, struct obj **, void *, int, int, int, boolean, int, boolean, int));
@@ -1221,7 +1221,7 @@ int tary;
 			if (pa->mtyp == PM_DEMOGORGON && !ranged && rn2(6) && !(youagr || magr->mflee))
 				continue;
 
-			result = xcastmagicy(magr, mdef, attk, vis);
+			result = xcastmagicy(magr, mdef, attk, vis, indexnum);
 
 			if (result) {
 				/* if the spell was successful, the defender may wake up (MM_MISS -> no spell cast, no chance to wake) */
@@ -1301,6 +1301,17 @@ int tary;
 		magr->mvar_attack_pm = 0;
 	if (!youagr && pa->mtyp == PM_WALKING_DELIRIUM)
 		magr->mvar_attack_pm = 0;
+	if (!youagr && (magr->mtyp == PM_SPELLWEAVER || magr->mtyp == PM_SPELLWEAVER_GODDESS_MOCKER)){
+		magr->mvar_spellweaver_count += 1;
+		if(magr->mtyp == PM_SPELLWEAVER && magr->mvar_spellweaver_count > 3){
+			magr->mvar_spellweaver_count = 3;
+		}
+		else if(magr->mtyp == PM_SPELLWEAVER_GODDESS_MOCKER && magr->mvar_spellweaver_count > 6){
+			magr->mvar_spellweaver_count = 6;
+		}
+		magr->mvar_spellweaver_last_cast = moves;
+		magr->mvar_spellweaver_seed += 1;
+	}
 
 	/* do some things only if attacks were made */
 	if (attacksmade > 0) {
@@ -2121,6 +2132,20 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			if(!(aptr || has_mind_blast_mon(mdef)))
 				GETNEXT
 		}
+	}
+	/*Skip spell weaver extra magic attacks until they build up energy */
+	if((magr->mtyp == PM_SPELLWEAVER || magr->mtyp == PM_SPELLWEAVER_GODDESS_MOCKER) && attk->aatyp == AT_MAGC){
+		if(*indexnum == 0){
+			long delta = moves - magr->mvar_spellweaver_last_cast - 1;
+			if(delta > 0){
+				if(magr->mvar_spellweaver_count > delta)
+					magr->mvar_spellweaver_count -= delta;
+				else
+					magr->mvar_spellweaver_count = 0;
+			}
+		}
+		if(*indexnum > magr->mvar_spellweaver_count)
+			GETNEXT
 	}
 	/* Nitocris uses clerical spells while wearing their Wrappings */
 	if(!by_the_book && pa->mtyp == PM_NITOCRIS){
@@ -8097,8 +8122,10 @@ boolean ranged;
 		}
 		/* maybe print glowy message */
 		if (!Blind && (youdef || canseemon(mdef))){
-			const char * glow = ((pa->mtyp == PM_SWORD_ARCHON || pa->mtyp == PM_BAEL) ?
-				"faintly blue" : (pa->mtyp == PM_FLAXEN_STARSHADOW || pa->mtyp == PM_FLAXEN_STAR_PHANTOM) ? "bilious yellow" : "sickly green");
+			const char * glow = ((pa->mtyp == PM_SWORD_ARCHON || pa->mtyp == PM_BAEL) ? "faintly blue"
+				: (pa->mtyp == PM_FLAXEN_STARSHADOW || pa->mtyp == PM_FLAXEN_STAR_PHANTOM) ? "bilious yellow" 
+				: (pa->mtyp == PM_SILVERFIRE_SHADOW_S_WRAITH) ? "shadowy silver" 
+				: "sickly green");
 			if (youdef)
 				You("glow %s!", glow);
 			else
@@ -9685,11 +9712,7 @@ boolean ranged;
 }
 
 int
-xcastmagicy(magr, mdef, attk, vis)
-struct monst * magr;
-struct monst * mdef;
-struct attack * attk;
-int vis;
+xcastmagicy(struct monst *magr, struct monst *mdef, struct attack *attk, int vis, int i)
 {
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
@@ -9728,9 +9751,9 @@ int vis;
 		can_target = FALSE;
 
 	if (can_target)
-		result = xcasty(magr, mdef, attk, tarx, tary);
+		result = xcasty(magr, mdef, attk, tarx, tary, i);
 	else if (attk->adtyp == AD_SPEL || attk->adtyp == AD_CLRC || attk->adtyp == AD_PSON)
-		result = xcasty(magr, (struct monst *)0, attk, 0, 0);
+		result = xcasty(magr, (struct monst *)0, attk, 0, 0, i);
 	else
 		result = MM_MISS;	/* nothing to cast */
 

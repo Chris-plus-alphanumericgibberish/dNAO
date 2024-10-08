@@ -2140,14 +2140,14 @@ register struct monst *mtmp;
 					if (mtmp->mux==u.ux && mtmp->muy==u.uy && couldsee(mtmp->mx, mtmp->my) && !mtmp->mpeaceful && 
 						dist2(mtmp->mx, mtmp->my, mtmp->mux, mtmp->muy) <= BOLT_LIM*BOLT_LIM
 					){
-						if (xcasty(mtmp, &youmonst, a, mtmp->mux, mtmp->muy)){
+						if (xcasty(mtmp, &youmonst, a, mtmp->mux, mtmp->muy, 0)){
 							tmp = 3;
 							// if(mdat->mtyp != PM_DEMOGORGON) break;
 							if(DEADMONSTER(mtmp) || MIGRATINGMONSTER(mtmp))
 								return 1; //Oops!
 						}
 					} else {
-						if (xcasty(mtmp, (struct monst *)0, a, 0, 0)){
+						if (xcasty(mtmp, (struct monst *)0, a, 0, 0, 0)){
 							tmp = 3;
 							// if(mdat->mtyp != PM_DEMOGORGON) break;
 							if(DEADMONSTER(mtmp) || MIGRATINGMONSTER(mtmp))
