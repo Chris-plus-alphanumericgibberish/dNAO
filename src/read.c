@@ -4007,12 +4007,12 @@ int spellnum;
 	Sprintf(splname, objects[spellnum].oc_name_known ? "\"%s\"" : "the \"%s\" spell", OBJ_NAME(objects[spellnum]));
 	for (i = 0; i < MAXSPELL; i++)  {
 		if (spellid(i) == spellnum)  {
-			if (spellknow(i) <= KEEN) {
+			if (spellknow(i) < KEEN) {
 				Your("knowledge of %s is keener.", splname);
 				incrnknow(i);
 				exercise(A_WIS,TRUE);       /* extra study */
-			} else { /* 1000 < spellknow(i) <= KEEN */
-				You("know %s quite well already.", splname);
+			// } else { /* 1000 < spellknow(i) <= KEEN */
+				// You("know %s quite well already.", splname);
 			}
 			break;
 		} else if (spellid(i) == NO_SPELL)  {
