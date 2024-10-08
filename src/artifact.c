@@ -4017,7 +4017,7 @@ struct obj *pen;	/* Pen of the Void */
 		}
 	}
 	if (pen->ovara_seals&SEAL_OSE){
-		if(youdefend && Blind_telepat){
+		if(youdefend && !Tele_blind && Blind_telepat){
 			return TRUE;
 		}
 		else if(!mindless_mon(mdef) && mon_resistance(mdef,TELEPAT)){
