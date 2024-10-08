@@ -560,7 +560,7 @@ register int roomno;
 				set_mon_data(priest, PM_LUGRIBOSSK);
 				//Assumes High Priest is 25, Lugribossk is 27 (archon)
 				priest->m_lev = 27;
-				priest->mhp = 8*26 + rn2(8);
+				priest->mhp = hd_size(priest->data)*26 + rn2(hd_size(priest->data));
 				priest->mhpmax = priest->mhp;
 				do_clear_area(priest->mx,priest->my, 4, set_lit, (genericptr_t)0);
 				do_clear_area(u.ux,u.uy, 4, set_lit, (genericptr_t)0);
