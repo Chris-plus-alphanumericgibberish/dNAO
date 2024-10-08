@@ -1858,6 +1858,19 @@ default_case:
 						default_add_2(RAKUYO);
 					}
 				}
+				if(urace.malenum == PM_VAMPIRE){
+					if(flags.initgend){
+						default_add(CHIKAGE);
+						set_material_gm(stuff, COPPER);
+						default_add_2(FACELESS_HELM);
+						set_material_gm(stuff, METAL);
+						add_oprop(stuff, OPROP_BRIL);
+					}
+					else {
+						default_add_2(SOLDIER_S_RAPIER);
+						default_add(NIGHTMARE_S_BULLET_MOLD);
+					}
+				}
 			break;
 			case PM_HALF_DRAGON:
 				if(flags.initgend){

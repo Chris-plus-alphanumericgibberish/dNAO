@@ -2941,8 +2941,18 @@ boolean past;
 				skilled_weapon_skill(P_BEAST_MASTERY);
 			}
 		break;
-		case PM_HUMAN:
 		case PM_VAMPIRE:
+			if(flags.initgend){
+				skilled_weapon_skill(P_LONG_SWORD);
+				free_skill_up(P_LONG_SWORD);
+			}
+			else {
+				expert_weapon_skill(P_SABER);
+				skilled_weapon_skill(P_FIREARM);
+				free_skill_up(P_SABER);
+			}
+		break;
+		case PM_HUMAN:
 		case PM_INCANTIFIER:
 			if(flags.initgend){
 				expert_weapon_skill(P_DAGGER);
@@ -2952,6 +2962,7 @@ boolean past;
 				skilled_weapon_skill(P_TWO_WEAPON_COMBAT);
 			}
 			else {
+				//Note: dagger and two weapon default to skilled
 				expert_weapon_skill(P_SABER);
 				free_skill_up(P_SABER);
 			}
