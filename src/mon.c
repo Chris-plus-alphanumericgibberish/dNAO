@@ -436,11 +436,11 @@ register struct monst *mtmp;
 	    case PM_ORACLE:
 		if (mtmp->mrevived) {
 			if (canseemon(mtmp))
-			   pline("%s recently regrown eyes crumble to dust.",
+			   pline("%s recently returned eyes vanish once more.",
 				s_suffix(Monnam(mtmp)));
 		} else {
 			if (canseemon(mtmp))
-			   pline("%s eyes crumble to dust.",
+			   pline("%s eyes vanish.",
 				s_suffix(Monnam(mtmp)));
 		}
 		goto default_1;
