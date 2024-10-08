@@ -1098,6 +1098,7 @@ struct obj {
 								|| (obj)->otyp == JUMPING_BOOTS \
 								|| (obj)->otyp == AMULET_VERSUS_SICKNESS \
 								|| (obj)->otyp == HEALER_UNIFORM \
+								|| (obj)->otyp == BODYGLOVE \
 								|| (obj)->otyp == CLOAK_OF_PROTECTION \
 								|| (obj)->otyp == CLOAK_OF_MAGIC_RESISTANCE \
 								|| (obj)->otyp == ORIHALCYON_GAUNTLETS \

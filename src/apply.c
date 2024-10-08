@@ -9713,6 +9713,7 @@ upgradeImpArmor()
 				break;
 				case AMULET_VERSUS_SICKNESS:
 				case HEALER_UNIFORM:
+				case BODYGLOVE:
 					STANDARD_UPGRADE(IEA_SICK_RES, "sealed bodyglove")
 				break;
 				case CLOAK_OF_PROTECTION:
