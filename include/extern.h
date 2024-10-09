@@ -2321,6 +2321,7 @@ E int NDECL(dotip);
 E int NDECL(dopetequip);
 E int FDECL(use_container, (struct obj *,int));
 E int FDECL(use_massblaster, (struct obj *));
+E int FDECL(use_demon_claw, (struct obj *));
 E int FDECL(loot_mon, (struct monst *,int *,boolean *));
 E const char *FDECL(safe_qbuf, (const char *,unsigned,
 				const char *,const char *,const char *));

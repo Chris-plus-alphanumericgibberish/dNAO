@@ -972,6 +972,18 @@ struct monst *magr;
 									flat+=(ocd+3)/4;
 								}
 	break;
+	case DEVIL_FIST:
+		if(!on_level(&spire_level,&u.uz) && obj && obj->cobj && obj->cobj->otyp == WAGE_OF_LUST){
+			ocn+=2; //3d9+3/3d9
+		}
+	break;
+	case DEMON_CLAW:
+		if(!on_level(&spire_level,&u.uz) && obj && obj->cobj && obj->cobj->otyp == WAGE_OF_WRATH){
+			ocd*=2;
+			ocd+=1;
+			flat*=2;
+		}
+		break;
 	}
 #undef plus_base
 #undef plus
@@ -3681,6 +3693,12 @@ struct obj *obj;
 	}
 	else if(obj->otyp == SHANTA_PATA){
 		CHECK_ALTERNATE_SKILL(P_LONG_SWORD)
+	}
+	else if(obj->otyp == DEMON_CLAW){
+		CHECK_ALTERNATE_SKILL(P_AXE)
+	}
+	else if(obj->otyp == DEVIL_FIST){
+		CHECK_ALTERNATE_SKILL(P_AXE)
 	}
 	else if(obj->otyp >= LUCKSTONE && obj->otyp <= ROCK && obj->ovar1_projectileSkill){
 		type = (int)obj->ovar1_projectileSkill;

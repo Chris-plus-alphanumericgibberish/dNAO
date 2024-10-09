@@ -5251,7 +5251,7 @@ boolean direct_weapon;
 			mdef->mstdy += 3;
 		}
 	}
-	if(otmp->otyp == ISAMUSEI && u.uinsight >= 10 && !on_level(&spire_level,&u.uz)){
+	if(otmp->otyp == ISAMUSEI && u.uinsight >= 10 && !on_level(&spire_level,&u.uz) && mdef){
 		if(youdef || !resist(mdef, WEAPON_CLASS, 0, TRUE)){
 			int factor = 20;
 			if(u.uinsight >= 70){
@@ -5276,7 +5276,7 @@ boolean direct_weapon;
 		}
 	}
 
-	if(otmp->otyp == PINCER_STAFF && u.uinsight >= 10 && !on_level(&spire_level,&u.uz)){
+	if(otmp->otyp == PINCER_STAFF && u.uinsight >= 10 && !on_level(&spire_level,&u.uz) && mdef){
 		if(otmp->ovar1_pincerTarget == mdef->m_id){
 			*plusdmgptr += basedmg;
 			if (u.uinsight >= 20 && otmp->oartifact && otmp->oartifact == ART_FALLINGSTAR_MANDIBLES && !Magic_res(mdef)){
@@ -5346,6 +5346,134 @@ boolean direct_weapon;
 		}
 	}
 
+	if(otmp->otyp == DEVIL_FIST && !on_level(&spire_level,&u.uz) && otmp->cobj && mdef){
+
+		switch(otmp->cobj->otyp){
+			case WAGE_OF_WRATH:
+			case WAGE_OF_ENVY:
+				if(!Fire_res(mdef)){
+					*truedmgptr += d(2, 9);
+				}
+			break;
+			case WAGE_OF_GREED:
+			case WAGE_OF_GLUTTONY:
+				if(!Acid_res(mdef)){
+					*truedmgptr += d(2, 9);
+				}
+			break;
+			case WAGE_OF_SLOTH:
+				if(!Cold_res(mdef)){
+					*truedmgptr += d(2, 9);
+				}
+			break;
+			case WAGE_OF_PRIDE:
+				if(!Shock_res(mdef)){
+					*truedmgptr += d(2, 9);
+				}
+			break;
+		}
+	}
+
+	if(otmp->otyp == DEMON_CLAW && !on_level(&spire_level,&u.uz) && otmp->cobj){
+
+		switch(otmp->cobj->otyp){
+			case WAGE_OF_ENVY:
+				if(mdef){
+					int n = 0;
+					for(struct obj *inv = youdef ? invent : mdef->minvent; inv && n < mlev(magr); inv = inv->nobj)
+						n++;
+					n = (n+2)/3;
+					if(n){
+						*plusdmgptr += d(n,6);
+						if(hates_unholy_mon(mdef))
+							*truedmgptr += d(n,6);
+					}
+				}
+			break;
+			case WAGE_OF_GREED:
+				//Item theft?
+				//Money held by attacker
+				if(magr){
+					int gold;
+					int n = 0;
+					if(youagr){
+#ifndef GOLDOBJ
+						gold = u.ugold;
+#else
+						gold = money_cnt(invent);
+#endif
+					}
+					else {
+#ifndef GOLDOBJ
+						gold = magr->mgold;
+#else
+						gold = money_cnt(magr->minvent);
+#endif
+					}
+					gold /= 616;
+					if(gold)
+						n++;
+					while((gold = gold/6))
+						n++;
+					if(n){
+						*plusdmgptr += d(n,6);
+						if(hates_unholy_mon(mdef))
+							*truedmgptr += d(n,6);
+					}
+				}
+			break;
+			case WAGE_OF_GLUTTONY:{
+				//Starve target?
+				//Nutrition of attacker?
+				int n = 0;
+				if(youagr){
+					if(YouHunger > get_satiationlimit()){
+						n = 4;
+						morehungry(20);
+					}
+					else if(YouHunger > 150*get_uhungersizemod()){
+						n = 2;
+						morehungry(10);
+					}
+					else if(YouHunger > 50*get_uhungersizemod()){
+						n = 1;
+						morehungry(5);
+					}
+				}
+				else {
+					n = 2; //The PC is more detailed
+				}
+				if(n){
+					*plusdmgptr += d(n,6);
+					if(n/2 && hates_unholy_mon(mdef))
+						*truedmgptr += d(n/2,6);
+				}
+			}
+			break;
+			case WAGE_OF_SLOTH:
+				if(mdef){
+					if(!youdef && !resist(mdef, WEAPON_CLASS, 0, NOTELL)){
+						mdef->mspeed = MSLOW;
+						mdef->permspeed = MSLOW;
+					}
+					mdef->movement -= 2; //1/6th of a standard turn
+				}
+			break;
+			case WAGE_OF_PRIDE:
+				//Debuf target
+				if(magr && mdef && mlev(magr) > 0){
+					int level = min(mlev(magr), 36);
+					if (youdef){
+						u.ustdy += d((level+2)/3, 6);
+						u.uencouraged = min(u.uencouraged, max(u.uencouraged - level/6, -6));
+					} else {
+						mdef->mstdy += d((level+2)/3, 6);
+						mdef->encouraged = min(u.uencouraged, max(mdef->encouraged - level/6, -6));
+					}
+				}
+			break;
+		}
+	}
 }
 
 /* returns MM_style hitdata now, and is used for both artifacts and weapon properties */
@@ -5418,6 +5546,7 @@ boolean printmessages; /* print generic elemental damage messages */
 	/* knockback effect */
 	if (((arti_attack_prop(otmp, ARTA_KNOCKBACK) && !rn2(4))
 		|| arti_attack_prop(otmp, ARTA_KNOCKBACKX)
+		|| (otmp->otyp == DEMON_CLAW && !on_level(&spire_level,&u.uz) && otmp->cobj && otmp->cobj->otyp == WAGE_OF_LUST)
 		|| (otmp->otyp == IMPERIAL_ELVEN_BOOTS && check_imp_mod(otmp, IEA_KICKING) && check_imp_mod(otmp, IEA_JUMPING))
 	) && !(
 		/* exclusions below */

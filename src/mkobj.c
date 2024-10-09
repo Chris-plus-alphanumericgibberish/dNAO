@@ -303,6 +303,17 @@ static const struct icp special_materials[] = {
 	{  0, 0 }
 };
 
+static const struct icp fiend_materials[] = {
+	{350, 0 }, /* use base material */
+	{250, GOLD },
+	{150, GREEN_STEEL },
+	{ 75, LEAD },
+	{ 75, PLATINUM },
+	{ 50, MITHRIL },
+	{ 50, DRAGON_HIDE },
+	{  0, 0 }
+};
+
 struct obj *
 mkobj_at(let, x, y, mkflags)
 char let;
@@ -833,6 +844,10 @@ int mkflags;
 			}
 			else if (otmp->otyp == MASS_SHADOW_PISTOL){
 				otmp->ovar1_charges = 800L + rnd(200);
+			}
+			else if (otmp->otyp == DEVIL_FIST || otmp->otyp == DEMON_CLAW){
+				struct obj *coin = mksobj(WAGE_OF_SLOTH + rn2(WAGE_OF_PRIDE - (WAGE_OF_SLOTH-1)), NO_MKOBJ_FLAGS);
+				add_to_container(otmp, coin);
 			}
 			else if (is_blaster(otmp)){ //Rayguns and mass-shadow pistols are also blasters, so this has to go under that case
 				otmp->ovar1_charges = 80L + rnd(20);
@@ -2238,6 +2253,9 @@ struct obj* obj;
 	case SHANTA_PATA:
 	case TWINGUN_SHANTA:
 		return special_materials;
+	case DEVIL_FIST:
+	case DEMON_CLAW:
+		return fiend_materials;
 	default:
 		break;
 	}

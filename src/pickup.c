@@ -42,6 +42,7 @@ STATIC_DCL boolean FDECL(mon_beside, (int, int));
 STATIC_DCL int FDECL(use_lightsaber, (struct obj *));
 STATIC_DCL char NDECL(pick_gemstone);
 STATIC_DCL char NDECL(pick_bullet);
+STATIC_DCL char NDECL(pick_coin);
 STATIC_DCL struct obj * FDECL(pick_creatures_armor, (struct monst *, int *));
 STATIC_DCL struct obj * FDECL(pick_armor_for_creature, (struct monst *));
 
@@ -1549,8 +1550,9 @@ boolean countem;
 	for(cobj = level.objects[x][y]; cobj; cobj = nobj) {
 		nobj = cobj->nexthere;
 		if(Is_container(cobj) || 
-			is_gemable_lightsaber(cobj) ||
-			cobj->otyp == MASS_SHADOW_PISTOL
+			is_gemable_lightsaber(cobj)
+			|| cobj->otyp == MASS_SHADOW_PISTOL
+			|| cobj->otyp == DEMON_CLAW
 		) {
 			container_count++;
 			if (!countem) break;
@@ -1617,6 +1619,9 @@ boolean noit;
 	} else if(cobj->otyp == MASS_SHADOW_PISTOL){
 		You("carefully open %s...",the(xname(cobj)));
 		return use_massblaster(cobj);
+	} else if(cobj->otyp == DEMON_CLAW){
+		You("carefully reach into %s...",the(xname(cobj)));
+		return use_demon_claw(cobj);
 	}
     if (cobj->olocked) {
 	pline("Hmmm, %s seems to be locked.", noit ? the(xname(cobj)) : "it");
@@ -1677,7 +1682,11 @@ lootcont:
 		if (!able_to_loot(cc.x, cc.y, TRUE)) return MOVE_CANCELLED;
 
 		for (cobj = level.objects[cc.x][cc.y]; cobj; cobj = cobj->nexthere) {
-			if (Is_container(cobj) || cobj->otyp == MASS_SHADOW_PISTOL || is_gemable_lightsaber(cobj)) num_cont++;
+			if (Is_container(cobj)
+				|| cobj->otyp == MASS_SHADOW_PISTOL
+				|| is_gemable_lightsaber(cobj)
+				|| (cobj->otyp == DEMON_CLAW)
+			) num_cont++;
 		}
 
 		if (num_cont > 1) {
@@ -1696,8 +1705,9 @@ lootcont:
 
 			for (cobj = level.objects[cc.x][cc.y]; cobj; cobj = cobj->nexthere) {
 			if (Is_container(cobj) || 
-				cobj->otyp == MASS_SHADOW_PISTOL ||
-				is_gemable_lightsaber(cobj)
+				cobj->otyp == MASS_SHADOW_PISTOL
+				|| is_gemable_lightsaber(cobj)
+				|| (cobj->otyp == DEMON_CLAW)
 			) {
 				any.a_obj = cobj;
 				add_menu(win, NO_GLYPH, &any, 0, 0, ATR_NONE, doname(cobj),
@@ -1771,6 +1781,13 @@ lootcont:
 					if (c == 'q') return (timepassed==MOVE_CANCELLED ? MOVE_CANCELLED : (timepassed&~MOVE_CANCELLED));
 					if (c == 'n') continue;
 					timepassed |= use_massblaster(cobj);
+					if(timepassed & MOVE_STANDARD) underfoot = TRUE;
+				} else if(cobj->otyp == DEMON_CLAW){
+					Sprintf(qbuf, "There is %s here, exchange coin?",an(xname(cobj)));
+					c = ynq(qbuf);
+					if (c == 'q') return (timepassed==MOVE_CANCELLED ? MOVE_CANCELLED : (timepassed&~MOVE_CANCELLED));
+					if (c == 'n') continue;
+					timepassed |= use_demon_claw(cobj);
 					if(timepassed & MOVE_STANDARD) underfoot = TRUE;
 				}
 			}
@@ -3207,6 +3224,48 @@ pick_bullet()
 	return 0;
 }
 
+
+STATIC_OVL
+char
+pick_coin()
+{
+	winid tmpwin;
+	int n=0, how,count=0;
+	char buf[BUFSZ];
+	struct obj *otmp;
+	menu_item *selected;
+	anything any;
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;		/* zero out all bits */
+	
+	Sprintf(buf, "Coins");
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+	for(otmp = invent; otmp; otmp = otmp->nobj){
+		if(otmp->otyp >= WAGE_OF_SLOTH && otmp->otyp <= WAGE_OF_PRIDE){
+			Sprintf1(buf, doname(otmp));
+			any.a_char = otmp->invlet;	/* must be non-zero */
+			add_menu(tmpwin, NO_GLYPH, &any,
+				otmp->invlet, 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+			count++;
+		}
+	}
+	end_menu(tmpwin, "Choose new coin:");
+
+	how = PICK_ONE;
+	if(count) n = select_menu(tmpwin, how, &selected);
+	else You("don't have any suitable coins.");
+	destroy_nhwindow(tmpwin);
+	if(n > 0){
+		char picked = selected[0].item.a_char;
+		free(selected);
+		return picked;
+	}
+	return 0;
+}
+
 STATIC_OVL
 struct obj *
 pick_creatures_armor(mon, passed_info)
@@ -3368,13 +3427,39 @@ register struct obj *obj;
 	}
 	if(otmp){
 		current_container = obj;
-		if(otmp->quan > 1)
-			otmp = splitobj(otmp, 1);
 		if(obj->cobj) 
 			out_container(obj->cobj);
+		if(otmp->quan > 1)
+			otmp = splitobj(otmp, 1);
 		if(!obj->cobj)
 			in_container(otmp);
 		return MOVE_STANDARD;
+	} else return MOVE_CANCELLED;
+}
+
+int
+use_demon_claw(obj)
+register struct obj *obj;
+{
+	struct obj *otmp;
+	char coin;
+	coin = pick_coin();
+	
+	if(!coin)
+		return MOVE_CANCELLED;
+	
+	for (otmp = invent; otmp; otmp = otmp->nobj) {
+		if(otmp->invlet == coin) break;
+	}
+	if(otmp){
+		current_container = obj;
+		if(obj->cobj) 
+			out_container(obj->cobj);
+		if(otmp->quan > 1)
+			otmp = splitobj(otmp, 1);
+		if(!obj->cobj)
+			in_container(otmp);
+		return MOVE_PARTIAL;
 	} else return MOVE_CANCELLED;
 }
 

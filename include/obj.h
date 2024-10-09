@@ -851,10 +851,12 @@ struct obj {
 						|| (o)->otyp == SAW_SPEAR \
 						|| (o)->otyp == LONG_SAW \
 						|| (o)->otyp == DISKOS \
+						|| (o)->otyp == DEMON_CLAW \
 						)
 #define is_self_righteous(o)	((o)->otyp == CANE \
 						|| (o)->otyp == CHURCH_HAMMER \
 						|| (o)->otyp == CHURCH_BLADE \
+						|| (o)->otyp == DEVIL_FIST \
 						)
 
 #define is_lightsaber(otmp) ((otmp)->otyp == LIGHTSABER || \
@@ -935,6 +937,8 @@ struct obj {
 						  (otmp)->otyp == PINCER_STAFF || \
 						  (otmp)->otyp == SHANTA_PATA || \
 						  (otmp)->otyp == TWINGUN_SHANTA || \
+						  (otmp)->otyp == DEVIL_FIST || \
+						  (otmp)->otyp == DEMON_CLAW || \
 						  (otmp)->otyp == KAMEREL_VAJRA)
 #define spec_prop_material(otmp)	(otmp->obj_material == MERCURIAL)
 #define is_multigen(otmp)	((otmp->oclass == WEAPON_CLASS && \

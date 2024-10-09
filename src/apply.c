@@ -51,6 +51,7 @@ STATIC_DCL int FDECL(use_chikage, (struct obj *));
 STATIC_DCL int FDECL(use_church_weapon, (struct obj *));
 STATIC_DCL int FDECL(use_church_sword, (struct obj *));
 STATIC_DCL int FDECL(use_church_sheath, (struct obj *));
+STATIC_DCL int FDECL(use_devil_fist, (struct obj *));
 STATIC_DCL int FDECL(use_smithing_hammer, (struct obj *));
 STATIC_DCL void FDECL(light_cocktail, (struct obj *));
 STATIC_DCL void FDECL(light_torch, (struct obj *));
@@ -2475,6 +2476,38 @@ struct obj *obj;
 	}
 	obj_extract_and_unequip_self(sword);
 	add_to_container(obj, sword);
+	fix_object(obj);
+	update_inventory();
+	return MOVE_INSTANT;
+}
+
+int
+use_devil_fist(obj)
+struct obj *obj;
+{
+	if(u.veil){
+		You("don't know how to use that.");
+		return MOVE_CANCELLED;
+	}
+
+	if(obj->unpaid){
+		You("need to buy it.");
+		return MOVE_CANCELLED;
+	}
+	
+	if(obj->otyp == DEVIL_FIST){
+		You("open %s.",the(xname(obj)));
+		obj->otyp = DEMON_CLAW;
+	} else {
+		if(yn("Swap coin?") == 'y'){
+			You("carefully reach into %s...",the(xname(obj)));
+			return use_demon_claw(obj);
+		}
+		else {
+			You("close %s.",the(xname(obj)));
+			obj->otyp = DEVIL_FIST;
+		}
+	}
 	fix_object(obj);
 	update_inventory();
 	return MOVE_INSTANT;
@@ -10046,6 +10079,8 @@ doapply()
 		return use_church_sword(obj);
 	} else if(obj->otyp == CHURCH_SHEATH || obj->otyp == CHURCH_BRICK){
 		return use_church_sheath(obj);
+	} else if(obj->otyp == DEMON_CLAW || obj->otyp == DEVIL_FIST){
+		return use_devil_fist(obj);
 	} else switch(obj->otyp){
 	case BLINDFOLD:
 	case ANDROID_VISOR:
