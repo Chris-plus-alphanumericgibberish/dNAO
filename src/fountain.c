@@ -250,7 +250,7 @@ find_blood_smithing_crystal(struct obj * obj)
 {
 	struct obj *otmp;
 	for(otmp = invent; otmp; otmp = otmp->nobj){
-		if(otmp->otyp == CRYSTAL && otmp->obj_material == HEMARGYOS && otmp->spe == 1+(obj->spe/3))
+		if(otmp->otyp == CRYSTAL && otmp->obj_material == HEMARGYOS && otmp->spe == 1+(obj->spe/3) && obj->spe < 10)
 			break;
 	}
 	return otmp;
@@ -803,7 +803,6 @@ smithing_object(struct obj *obj)
 					new->quan = 2*n;
 					set_material_gm(new, HEMARGYOS);
 					fix_object(new);
-					useup(obj);
 					hold_another_object(new, u.uswallow ?
 							   "Oops!  %s out of your reach!" :
 							(Weightless ||
@@ -845,7 +844,6 @@ smithing_object(struct obj *obj)
 					new->quan = n + (4-c)*2;
 					set_material_gm(new, HEMARGYOS);
 					fix_object(new);
-					useup(obj);
 					hold_another_object(new, u.uswallow ?
 							   "Oops!  %s out of your reach!" :
 							(Weightless ||
@@ -863,7 +861,6 @@ smithing_object(struct obj *obj)
 					new->quan = 2*n;
 					set_material_gm(new, HEMARGYOS);
 					fix_object(new);
-					useup(obj);
 					hold_another_object(new, u.uswallow ?
 							   "Oops!  %s out of your reach!" :
 							(Weightless ||

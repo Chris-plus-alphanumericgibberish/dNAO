@@ -1229,7 +1229,7 @@ register int num;
 boolean special;
 {
 	int pm, x, y;
-	struct monst fakemon = {0};
+	struct monst fakemon = {0}, *mtmp;
 
 	while(num) {
 		int tryct = 0;
@@ -1247,7 +1247,9 @@ boolean special;
 		/* if pos not found in 50 tries, don't bother to continue */
 		if(tryct > 50) return;
 
-		(void) mk_mplayer(&mons[pm], (xchar)x, (xchar)y, special ? MM_GOODEQUIP : NO_MM_FLAGS);
+		mtmp = mk_mplayer(&mons[pm], (xchar)x, (xchar)y, special ? MM_GOODEQUIP : NO_MM_FLAGS);
+		if(mtmp)
+			set_template(mtmp, TONGUE_PUPPET);
 		num--;
 	}
 }
