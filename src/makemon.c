@@ -11278,8 +11278,15 @@ boolean greatequip;
 						begin_burn(otmp);
 				    }	
 				}
-				else//Outside the mines, only one in 6 gnomes have hats.
-			    	if(!rn2(6)) (void)mongets(mtmp, GNOMISH_POINTY_HAT, mkobjflags);
+				//Outside the mines, only one in 6 gnomes have hats.
+				else if (!rn2(6)) {
+				    otmp = mongets(mtmp, GNOMISH_POINTY_HAT, mkobjflags);
+				    /* Gnomish pointy hats are supposed to be medium.
+				       mongets (unlike mksobj) automatically resizes
+				       them to small. */
+				    if (otmp)
+					otmp->objsize = MZ_MEDIUM;
+				}
 			} else if(ptr->mtyp == PM_PARASITIZED_COMMANDER) {
 				otmp = mksobj(PISTOL, mkobjflags|MKOBJ_NOINIT);
 				set_material_gm(otmp, SILVER);

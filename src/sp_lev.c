@@ -1847,6 +1847,8 @@ default_case:
 				}
 				if(urace.malenum == PM_GNOME){
 					default_add_2(GNOMISH_POINTY_HAT);
+					/* Gnomish pointy hats are supposed to be medium */
+					stuff->objsize = MZ_MEDIUM;
 					default_add_2(AKLYS);
 				}
 				if(urace.malenum == PM_HUMAN){

@@ -3196,6 +3196,10 @@ register struct trobj *trop;
 			if(obj->otyp == FACELESS_HELM && Role_if(PM_MADMAN)){
 				set_material_gm(obj, IRON);
 			}
+			/* Gnomish pointy hats are supposed to be medium */
+			if(obj->otyp == GNOMISH_POINTY_HAT && Race_if(PM_GNOME)){
+				obj->objsize = MZ_MEDIUM;
+			}
 			
 			/* Don't start with +0 or negative rings */
 			if (objects[obj->otyp].oc_charged && obj->spe <= 0)
