@@ -1180,11 +1180,11 @@ doKnightForm()
 	int curskill;
 	char* block_reason;
 
-	for (i = FIRST_KNI_FFORM; i <= LAST_KNI_FFORM; i++) {
+	for (i = FIRST_BASIC_KNI_FFORM; i <= LAST_ADV_KNI_FFORM; i++) {
+		if (i > LAST_BASIC_KNI_FFORM && i < FIRST_ADV_KNI_FFORM) continue;
 		if (FightingFormSkillLevel(i) >= P_BASIC)
 			remotely_competent = TRUE;
 	}
-
 	tmpwin = create_nhwindow(NHW_MENU);
 	start_menu(tmpwin);
 	any.a_void = 0;		/* zero out all bits */
@@ -1193,7 +1193,9 @@ doKnightForm()
 	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
 
 
-	for (i = FIRST_KNI_FFORM; i <= LAST_KNI_FFORM; i++) {
+	for (i = FIRST_BASIC_KNI_FFORM; i <= LAST_ADV_KNI_FFORM; i++) {
+		if (i > LAST_BASIC_KNI_FFORM && i < FIRST_ADV_KNI_FFORM) continue;
+
 		curskill = FightingFormSkillLevel(i);
 		if (curskill == P_ISRESTRICTED)
 			continue;
@@ -1294,13 +1296,13 @@ doGithForm()
 
 
 	for (i = FIRST_GSTYLE; i <= LAST_GSTYLE; i++) {
-		if (i == GSTYLE_RESONANT && (u.ulevel < 30 || u.uinsight < 81))
+		if (i == GSTYLE_RESONANT && (u.ulevel < 30 || u.uinsight < 81) && (artinstance[ART_SILVER_SKY].GithStylesSeen & 2) == 0)
 			continue;
-		if (i == GSTYLE_COLD && u.uinsight < 9)
+		if (i == GSTYLE_COLD && u.uinsight < 9 && (artinstance[ART_SILVER_SKY].GithStylesSeen & 1) == 0)
 			continue;
 
 		/* knight forms are shown if unskilled but not restricted, since training involves starting from unskilled */
-		boolean active = artinstance[ART_SILVER_SKY].GithStyle == i;
+		boolean active = (artinstance[ART_SILVER_SKY].GithStyle & (1 << i)) != 0;
 		boolean blocked = blockedMentalEdge(i);
 
 		Strcpy(buf, nameOfMentalEdge(i));
@@ -1310,7 +1312,9 @@ doGithForm()
 		else if (i == GSTYLE_PENETRATE)
 			block_reason = "lack of hate";
 		else if (i == GSTYLE_COLD)
-			block_reason = "lack of wrath";
+			block_reason = (u.uinsight < 9) ? "lack of knowledge" : "lack of wrath";
+		else if (i == GSTYLE_RESONANT)
+			block_reason = (u.ulevel < 30) ? "lack of skill" : ((u.uinsight < 81) ? "lack of knowledge" : "lack of mental discipline");
 		else
 			block_reason = "lack of mental discipline";
 
@@ -1342,12 +1346,21 @@ doGithForm()
 
 	if(n <= 0){
 		return MOVE_CANCELLED;
-	} else if (artinstance[ART_SILVER_SKY].GithStyle == selected[0].item.a_int) {
-		artinstance[ART_SILVER_SKY].GithStyle = 0;
+	} else if ((artinstance[ART_SILVER_SKY].GithStyle&(1 << selected[0].item.a_int)) != 0) {
+		artinstance[ART_SILVER_SKY].GithStyle &= ~(1 << selected[0].item.a_int);
 		free(selected);
 		return MOVE_INSTANT;
 	} else {
-		artinstance[ART_SILVER_SKY].GithStyle = selected[0].item.a_int;
+		if (selected[0].item.a_int == GSTYLE_COLD || selected[0].item.a_int == GSTYLE_PENETRATE)
+			artinstance[ART_SILVER_SKY].GithStyle &= ~((1 << GSTYLE_PENETRATE) | (1 << GSTYLE_COLD));
+		else
+			artinstance[ART_SILVER_SKY].GithStyle &= ~((1 << GSTYLE_DEFENSE) | (1 << GSTYLE_ANTIMAGIC) | (1 << GSTYLE_RESONANT));
+
+		artinstance[ART_SILVER_SKY].GithStyle |= (1 << selected[0].item.a_int);
+
+		if (selected[0].item.a_int == GSTYLE_RESONANT) artinstance[ART_SILVER_SKY].GithStylesSeen |= 2;
+		if (selected[0].item.a_int == GSTYLE_COLD) artinstance[ART_SILVER_SKY].GithStylesSeen |= 1;
+
 		free(selected);
 		return MOVE_INSTANT;
 	}
@@ -1456,7 +1469,8 @@ hasfightingforms(){
 			formmask |= LIGHTSABER_FORMS;
 	}
 
-	for (i = FIRST_KNI_FFORM; i <= LAST_KNI_FFORM; i++) {
+	for (i = FIRST_BASIC_KNI_FFORM; i <= LAST_ADV_KNI_FFORM; i++) {
+		if (i > LAST_BASIC_KNI_FFORM && i < FIRST_ADV_KNI_FFORM) continue;
 		if (FightingFormSkillLevel(i) >= P_BASIC)
 			formmask |= KNIGHT_FORMS;
 	}

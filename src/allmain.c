@@ -484,6 +484,19 @@ mercurial_repair()
 
 STATIC_OVL
 void
+clear_stale_fforms()
+{
+	for(int fform = NO_FFORM+1; fform <= LAST_FFORM; fform++){
+		if (!!(u.fightingForm[(fform-1)/16] & (0x1L << ((fform-1)%16))) && FightingFormSkillLevel(fform) <= P_ISRESTRICTED){
+			unSetFightingForm(fform);
+			You("readjust your stance.");
+		}
+	}
+}
+
+
+STATIC_OVL
+void
 clothes_bite_you()
 {
 	struct obj * uequip[] = WORN_SLOTS;
@@ -2945,6 +2958,7 @@ karemade:
 			androidUpkeep();
 			clothes_bite_you();
 			mercurial_repair();
+			clear_stale_fforms();
 
 		    if(!(Invulnerable)) {
 			if(Teleportation && !rn2(85) && !(

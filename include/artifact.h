@@ -347,6 +347,7 @@ struct artinstance{
 #define SnSd3 avar3
 #define IbiteBoons avar3
 #define CarapacePoints avar3
+#define GithStylesSeen avar3
 	long avar4;
 #define SnSd3duration avar4
 #define CarapaceAura avar4

@@ -115,7 +115,7 @@
 #define martial_bonus()	(u.umartial || Earth_crystal)
 
 /* Fighting form IDs */
-/* each batch of 32 is mutually exclusive, but not with other batches */
+/* each batch of 16 is mutually exclusive, but not with other batches */
 #define NO_FFORM		0
 
 #define FFORM_SHII_CHO	1
@@ -129,15 +129,17 @@
 #define FIRST_LS_FFORM	FFORM_SHII_CHO
 #define LAST_LS_FFORM	FFORM_JUYO
 
-#define FFORM_SHIELD_BASH 	(1 + 32)
-#define FFORM_GREAT_WEP		(2 + 32)
-#define FFORM_HALF_SWORD 	(3 + 32)
-#define FFORM_POMMEL 		(4 + 32)
-#define FFORM_KNI_SACRED	(5 + 32)
-#define FFORM_KNI_ELDRITCH	(6 + 32)
-#define FFORM_KNI_RUNIC		(7 + 32)
-#define FIRST_KNI_FFORM		FFORM_SHIELD_BASH
-#define LAST_KNI_FFORM		FFORM_KNI_RUNIC
+#define FFORM_SHIELD_BASH 	(1 + 16)
+#define FFORM_GREAT_WEP		(2 + 16)
+#define FFORM_HALF_SWORD 	(3 + 16)
+#define FFORM_POMMEL 		(4 + 16)
+#define FFORM_KNI_SACRED	(1 + 32)
+#define FFORM_KNI_ELDRITCH	(2 + 32)
+#define FFORM_KNI_RUNIC		(3 + 32)
+#define FIRST_BASIC_KNI_FFORM		FFORM_SHIELD_BASH
+#define LAST_BASIC_KNI_FFORM		FFORM_POMMEL
+#define FIRST_ADV_KNI_FFORM			FFORM_KNI_SACRED
+#define LAST_ADV_KNI_FFORM			FFORM_KNI_RUNIC
 
 #define LAST_FFORM		FFORM_KNI_RUNIC
 
