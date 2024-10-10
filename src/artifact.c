@@ -2082,6 +2082,13 @@ boolean mod;
 				if(otmp->oartifact == ART_SCORPION_CARAPACE){
 					artinstance[ART_SCORPION_CARAPACE].CarapaceLevel = 10;//Starts off at "10th level" Max upgrade points is therefor 20, and it takes a while to earn the first
 				}
+				if(otmp->oartifact == ART_SILVER_SKY){
+					artinstance[ART_SILVER_SKY].GithStyle = 0;
+					artinstance[ART_SILVER_SKY].GithStylesSeen = 0;
+				}
+				if(otmp->oartifact == ART_SKY_REFLECTED){
+					artinstance[ART_SKY_REFLECTED].ZerthUpgrades = 0;
+				}
 			}
 			if(otmp->oartifact && (get_artifact(otmp)->inv_prop == NECRONOMICON || get_artifact(otmp)->inv_prop == SPIRITNAMES)){
 				otmp->ovar1_necronomicon = 0;//used to track special powers, via flags

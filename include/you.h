@@ -325,7 +325,7 @@ struct you {
 #define DEFAULT_HMAX	2000
 	unsigned uhs;		/* hunger state - see eat.c */
 
-#define FFORM_LISTSIZE	(LAST_FFORM/32 + 1)
+#define FFORM_LISTSIZE	(LAST_FFORM/16 + 1)
 	unsigned long int fightingForm[FFORM_LISTSIZE];/* special properties */
 	int ueldritch_style;
 	Bitfield(uavoid_passives,1);
