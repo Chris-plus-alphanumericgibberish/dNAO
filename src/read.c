@@ -1622,10 +1622,7 @@ forget_map(howmuch)
 	int howmuch;
 {
 	register int zx, zy;
-	
-	if(iflags.no_forget_map)
-		return;
-	
+
 	if (In_sokoban(&u.uz))
 	    return;
 
@@ -1668,9 +1665,6 @@ forget_levels(percent)
 	int indices[MAXLINFO];
 
 	if (percent == 0) return;
-
-	if(iflags.no_forget_map)
-		return;
 
 	if (percent <= 0 || percent > 100) {
 	    impossible("forget_levels: bad percent %d", percent);
@@ -1735,18 +1729,92 @@ losesaninsight(percent)
 	}
 }
 
+#define fist_skill(skill) (skill != P_BARE_HANDED_COMBAT && \
+		(skill != P_TWO_WEAPON_COMBAT || !Role_if(PM_MONK)) && skill != P_MARTIAL_ARTS && skill != P_NIMAN)
+int
+skill_slots_used(int skill_value, int skill){
+	boolean fists = fist_skill(skill);
+	switch (skill_value){
+		case P_UNSKILLED:
+		case P_ISRESTRICTED:
+			return 0;
+		case P_BASIC:
+			return 1;
+		case P_SKILLED:
+			return (fists) ? 2 : 3;
+		case P_EXPERT:
+			return (fists) ? 4 : 6;
+		case P_MASTER:
+			return (fists) ? 6 : 10;
+		case P_GRAND_MASTER:
+			return (fists) ? 9 : 15;
+		default:
+			return 0;
+	}
+	return 0;
+}
+
+void
+forget_skills(int percentage, boolean refunded){
+	boolean lost_skills = FALSE;
+
+	// calculate total skill slots earned by summing the points spent + adding what spare you have
+	// this means that this DOES include starting skills you got for free
+	// this is intentional because 1. it's appropriate & 2. it's hard to calc otherwise
+
+	int count_skills = 0;
+	int total_skill_slots = u.weapon_slots;
+	for (int i = P_NONE+1; i < P_NUM_SKILLS; i++){
+		if (OLD_P_SKILL(i) >= P_BASIC) {
+			count_skills++;
+			total_skill_slots += skill_slots_used(OLD_P_SKILL(i), i);
+		}
+	}
+	if (total_skill_slots < (u.ulevel/2)) return; // don't beat somebody while they're down
+
+	// bases this on the total skill slots earned, and subtracts until it's subtracted X% of that number
+	// this can be VERY mean late game. reference numbers - 1 expert skill is 6 points, you get 30 points
+	// losing 10% is equivalent to permanently losing one advancement from skilled->expert, or two from unskilled->skilled
+	// losing 25% is equivalent to permanently losing one advancement from unskilled->expert plus one from unskilled->basic
+	int damage = total_skill_slots * percentage / 100 + 1;
+
+	// refunding exists because i was thinking about it while writing, but it's unused because i don't like it for balance
+	// it means if you don't care about spell memory or hitting insight thresholds you can just use any refunding-amnesia
+	// sources to 0 your insight, which is a stupid way to not have to engage with the risks of having that insight
+	// this basically means you turn off thoughts alone unless you use certain setups, in exchange for riskless LC etc.
+	while (damage > 0){
+		if (count_skills == 0){
+			// if we run out of skills (or have none) to damage, apply the rest to unused slots and return
+			// this is basically meaningless if you downlevel to 1 - which is fine, I think. i'm not going to try to 'patch out'
+			// amnesia being useful for... losing memory & insight, at level 1, since you could already do that previously,
+			// and I think having to downlevel is enough of a negative to not be worth it for most characters. you'll still lose
+			// whatever skills you started the game with anyway
+			u.weapon_slots = max(u.weapon_slots - damage, 0);
+			lost_skills = TRUE;
+			break;
+		}
+		int which = rnd(count_skills); // pick the Nth advanced skill to damage to make it random
+		int count = 0;
+		for (int i = P_NONE+1; i < P_NUM_SKILLS; i++){
+			if (OLD_P_SKILL(i) >= P_BASIC){
+				count++;
+				if (count == which){
+					OLD_P_SKILL(i)--;
+					damage -= (fist_skill(i)) ? (OLD_P_SKILL(i)+1)/2 : OLD_P_SKILL(i);
+					if (refunded) u.weapon_slots += (fist_skill(i)) ? (OLD_P_SKILL(i)+1)/2 : OLD_P_SKILL(i);
+					P_ADVANCE(i) = practice_needed_to_advance(OLD_P_SKILL(i)-1);
+					if (OLD_P_SKILL(i) < P_BASIC) count_skills--;
+
+					lost_skills = TRUE;
+					break;
+				}
+			}
+		}
+	}
+	if (lost_skills) You("feel less capable!"); // weird wording but who cares
+}
 /*
- * Forget some things (e.g. after reading a scroll of amnesia).  When called,
- * the following are always forgotten:
- *
- *	- felt ball & chain
- *	- traps
- *	- part (6 out of 7) of the map
- *
- * Other things are subject to flags:
- *
- *	howmuch & ALL_MAP	= forget whole map
- *	howmuch & ALL_SPELLS	= forget all spells
+ * Forget some things (e.g. after reading a scroll of amnesia).
  */
 void
 forget(howmuch)
@@ -1760,7 +1828,7 @@ int howmuch;
 	}
 	if (Punished) u.bc_felt = 0;	/* forget felt ball&chain */
 
-	forget_map(howmuch);
+	// forget_map(howmuch);
 	// forget_traps();
 	
 	//Silently reduce the doubt timer (itimeout_incr handles negative timeouts)
@@ -1768,15 +1836,20 @@ int howmuch;
 		make_doubtful(itimeout_incr(HDoubt, -1*howmuch), FALSE);
 	}
 	
+	/* These are disabled in dnh, they're commented out for posterity rather than deleting the lines */
 	/* 1 in 3 chance of forgetting some levels */
-	if (howmuch && !rn2(3)) forget_levels(howmuch);
+	// if (howmuch && !rn2(3)) forget_levels(howmuch);
 
 	/* 1 in 3 chance of forgeting some objects */
-	if (howmuch && !rn2(3)) forget_objects(howmuch);
+	// if (howmuch && !rn2(3)) forget_objects(howmuch);
 
-	if (howmuch) losespells(howmuch);
+	if (howmuch) {
+		losespells(howmuch);
+		losesaninsight(howmuch);
+		forget_skills(howmuch, FALSE);
+	}
 	
-	if(howmuch) losesaninsight(howmuch);
+
 	/*
 	 * Make sure that what was seen is restored correctly.  To do this,
 	 * we need to go blind for an instant --- turn off the display,
