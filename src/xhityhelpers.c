@@ -3517,3 +3517,48 @@ obj_is_material(struct obj *obj, int mat)
 		return TRUE;
 	return FALSE;
 }
+
+int
+weapon_skill_type(struct obj *weapon, struct obj *launcher, boolean fired)
+{
+	int wtype = P_NONE;
+
+	if (fired && launcher)
+		wtype = weapon_type(launcher);
+	else if (!weapon)
+		wtype = weapon_type(weapon);
+	else if (weapon && martial_aid(weapon))
+		wtype = P_BARE_HANDED_COMBAT;
+	else if (weapon->oartifact == ART_LIECLEAVER)
+		wtype = P_SCIMITAR;
+	else if (weapon->oartifact == ART_ROGUE_GEAR_SPIRITS)
+		wtype = P_PICK_AXE;
+	else if (weapon->oartifact == ART_WAND_OF_ORCUS)
+		wtype = P_MACE;
+	else if (weapon->otyp == KAMEREL_VAJRA && !litsaber(weapon))
+		wtype = P_MACE;
+	else if (is_shield(weapon) && activeFightingForm(FFORM_SHIELD_BASH))
+		wtype = P_SHIELD_BASH;
+	else if (weapon->otyp == WIND_AND_FIRE_WHEELS)
+		wtype = P_BOOMERANG;
+	else if (weapon->otyp == CARCOSAN_STING)
+		wtype = P_DAGGER;
+	else if (weapon->otyp == SOLDIER_S_SABER)
+		wtype = P_SABER;
+	else if (weapon->otyp == TWINGUN_SHANTA)
+		wtype = P_BARE_HANDED_COMBAT;
+	else if (weapon->otyp == BLADED_BOW)
+		wtype = P_QUARTERSTAFF;
+	else if (!valid_weapon(weapon) || is_launcher(weapon)){
+		if(is_melee_launcher(weapon))
+			wtype = weapon_type(weapon);
+		else if (weapon && check_oprop(weapon, OPROP_BLADED))
+			wtype = P_AXE;
+		else if (weapon && check_oprop(weapon, OPROP_SPIKED))
+			wtype = P_SPEAR;
+		else wtype = P_CLUB;
+	}
+	else
+		wtype = weapon_type(weapon);
+	return wtype;
+}

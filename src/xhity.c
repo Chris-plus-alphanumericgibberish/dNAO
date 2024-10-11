@@ -4123,31 +4123,7 @@ int *shield_margin;
 		if (youagr) {
 			int wtype;
 			/* get simple weapon skill associated with the weapon, not including twoweapon */
-			if (fired && launcher)
-				wtype = weapon_type(launcher);
-			else if (!weapon)
-				wtype = weapon_type(weapon);
-			else if (weapon->oartifact == ART_LIECLEAVER)
-				wtype = P_SCIMITAR;
-			else if (weapon->oartifact == ART_ROGUE_GEAR_SPIRITS)
-				wtype = P_PICK_AXE;
-			else if (weapon->oartifact == ART_WAND_OF_ORCUS)
-				wtype = P_MACE;
-			else if (weapon->otyp == KAMEREL_VAJRA && !litsaber(weapon))
-				wtype = P_MACE;
-			else if (weapon->otyp == WIND_AND_FIRE_WHEELS)
-				wtype = P_BOOMERANG;
-			else if (weapon->otyp == CARCOSAN_STING)
-				wtype = P_DAGGER;
-			else if (weapon->otyp == SOLDIER_S_SABER)
-				wtype = P_SABER;
-			else if (weapon->otyp == TWINGUN_SHANTA){
-				wtype = P_BARE_HANDED_COMBAT;
-			}
-			else if (weapon->otyp == BLADED_BOW)
-				wtype = P_QUARTERSTAFF;
-			else
-				wtype = weapon_type(weapon);
+			wtype = weapon_skill_type(weapon, launcher, fired);
 
 			if (fired && launcher)
 				wepn_acc += weapon_hit_bonus(launcher, wtype);
@@ -15437,31 +15413,7 @@ int vis;						/* True if action is at all visible to the player */
 			int wtype;
 
 			/* get simple weapon skill associated with the weapon, not including twoweapon */
-			if (fired && launcher)
-				wtype = weapon_type(launcher);
-			else if (unarmed_punch || unarmed_kick || (weapon && martial_aid(weapon)))
-				wtype = P_BARE_HANDED_COMBAT;
-			else if (weapon && weapon->oartifact == ART_LIECLEAVER)
-				wtype = P_SCIMITAR;
-			else if (weapon && weapon->otyp == CARCOSAN_STING)
-				wtype = P_DAGGER;
-			else if (weapon && weapon->oartifact == ART_ROGUE_GEAR_SPIRITS)
-				wtype = P_PICK_AXE;
-			else if (weapon && weapon->otyp == KAMEREL_VAJRA && !litsaber(weapon))
-				wtype = P_MACE;
-			else if (weapon && is_shield(weapon) && activeFightingForm(FFORM_SHIELD_BASH))
-				wtype = P_SHIELD_BASH;
-			else if (weapon && (!valid_weapon(weapon) || is_launcher(weapon))){
-				if(is_melee_launcher(weapon))
-					wtype = weapon_type(weapon);
-				else if (weapon && check_oprop(weapon, OPROP_BLADED))
-					wtype = P_AXE;
-				else if (weapon && check_oprop(weapon, OPROP_SPIKED))
-					wtype = P_SPEAR;
-				else wtype = P_CLUB;
-			}
-			else
-				wtype = weapon_type(weapon);
+			wtype = weapon_skill_type(weapon, launcher, fired);
 			
 			/* ammo fired from a launcher */
 			if (fired && launcher) {

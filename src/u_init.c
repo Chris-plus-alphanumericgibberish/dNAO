@@ -1589,12 +1589,13 @@ static const struct def_skill Skill_U[] = {
     { P_SABER, P_SKILLED }, { P_BROAD_SWORD, P_SKILLED },
     { P_SHORT_SWORD, P_SKILLED }, { P_BARE_HANDED_COMBAT, P_EXPERT },
     { P_CLUB, P_SKILLED }, { P_MACE, P_SKILLED },
+    { P_SCIMITAR, P_SKILLED }, { P_QUARTERSTAFF, P_SKILLED },
 
     { P_DAGGER, P_EXPERT }, { P_CROSSBOW, P_EXPERT },
 	{ P_FIREARM, P_SKILLED },
     { P_BOW, P_BASIC }, { P_SLING, P_BASIC },
     { P_DART, P_BASIC }, { P_SHURIKEN, P_BASIC },
-    { P_BOOMERANG, P_BASIC },
+    { P_BOOMERANG, P_BASIC }, { P_BOW, P_SKILLED },
 
     { P_TWO_WEAPON_COMBAT, P_SKILLED },
 
@@ -2530,7 +2531,7 @@ u_init()
 			UndeadHunter[U_BULLETS].trspe = 1;
 			UndeadHunter[U_JACKET].trotyp = flags.female ? GENTLEWOMAN_S_DRESS : GENTLEMAN_S_SUIT;
 		}
-		else switch(rn2(5)){
+		else switch(rn2(6)){
 			case 0:
 				//UndeadHunter[U_WEAPON].trotyp = CANE;
 			break;
@@ -2551,6 +2552,14 @@ u_init()
 			case 4:
 				UndeadHunter[U_WEAPON].trotyp = SAW_CLEAVER;
 				knows_object(RAZOR_CLEAVER);
+			break;
+			case 5:
+				UndeadHunter[U_WEAPON].trotyp = BOW_BLADE;
+				knows_object(BLADED_BOW);
+				UndeadHunter[U_GUN].trotyp = ARROW;
+				UndeadHunter[U_GUN].trquan = rn1(20, 26);
+				UndeadHunter[U_GUN].trbless = 1;
+				UndeadHunter[U_GUN].trspe = 1;
 			break;
 		}
 		u.ublood_smithing = TRUE;

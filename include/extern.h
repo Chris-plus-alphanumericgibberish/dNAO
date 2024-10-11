@@ -3564,6 +3564,7 @@ E int FDECL(hit_with_dance, (struct monst *,struct obj *, int, int, int, struct 
 E int FDECL(hit_with_streaming, (struct monst *,struct obj *, int, int, int, struct attack *));
 E boolean FDECL(is_serration_vulnerable, (struct monst *));
 E boolean FDECL(obj_is_material, (struct obj *, int));
+E int FDECL(weapon_skill_type, (struct obj *, struct obj *, boolean));
 
 /* ### zap.c ### */
 
