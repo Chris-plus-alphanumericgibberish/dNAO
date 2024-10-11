@@ -6108,6 +6108,18 @@ int spell;
 			splcaster -= urole.spelarmr * cast_bon / 3;
 		}
 
+		if (uwep->otyp == PARASITE) {	// a diviner's friend
+			cast_bon = 0;
+			if(spell_skilltype(spellid(spell)) == P_DIVINATION_SPELL
+			  || Role_if(PM_UNDEAD_HUNTER)
+			  || active_glyph(LUMEN)
+			)
+			cast_bon += uwep->quan;
+			if (uwep->oartifact)
+				cast_bon *= urole.spelarmr; //Probably no such thing as an artifact parasite, but if so make it standard spellcasting based.
+			splcaster -= cast_bon;
+		}
+
 		if (uwep->otyp == QUARTERSTAFF || uwep->oartifact == ART_RITUAL_RINGED_SPEAR) {	// a sorcerous channeling tool
 			cast_bon = 0;
 			if (spell_skilltype(spellid(spell)) == P_ATTACK_SPELL)
