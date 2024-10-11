@@ -15023,6 +15023,11 @@ rndmonst(int x, int y)
 	else if (In_law(&u.uz)){
 	    return law_montype();
 	}
+	else if (Is_astralevel(&u.uz) && Role_if(PM_UNDEAD_HUNTER) && quest_status.moon_close){
+		ptr = moon_montype();
+		if(ptr) return ptr;
+		//else fall through to random generation
+	}
 	else if (In_mines(&u.uz)){
 		int roll = d(1,10);
 		if(Race_if(PM_GNOME) && Role_if(PM_RANGER) && rn2(2)){

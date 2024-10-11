@@ -2539,6 +2539,7 @@ E struct permonst *NDECL(chaos3_montype);
 E struct permonst *FDECL(ford_montype, (int));
 E struct permonst *NDECL(neutral_montype);
 E struct permonst *NDECL(law_montype);
+E struct permonst *NDECL(moon_montype);
 
 /* ### random.c ### */
 

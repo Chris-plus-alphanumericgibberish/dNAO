@@ -5275,6 +5275,13 @@ boolean direct_weapon;
 			mdef->mstdy += 3;
 		}
 	}
+	if(otmp->otyp == MOON_AXE && otmp->ovar1_moonPhase == HUNTING_MOON && u.uinsight >= 5){
+		if(youdef){
+			u.ustdy += rnd(u.uinsight/5);
+		} else if(mdef){
+			mdef->mstdy += rnd(u.uinsight/5);
+		}
+	}
 	if(otmp->otyp == ISAMUSEI && u.uinsight >= 10 && !on_level(&spire_level,&u.uz) && mdef){
 		if(youdef || !resist(mdef, WEAPON_CLASS, 0, TRUE)){
 			int factor = 20;

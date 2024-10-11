@@ -674,6 +674,7 @@ struct you {
 	//Power 2: Summon blood creatures
 	//Power 3: Upgrades?
 	long ureanimation_upgrades;
+	int antenae_upgrades;
 // #define ANTENNA_BOLT	0x0001L
 // #define ANTENNA_ERRANT 	0x0002L
 // #define ANTENNA_BOIL 	0x0004L

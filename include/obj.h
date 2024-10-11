@@ -853,6 +853,7 @@ struct obj {
 						|| (o)->otyp == LONG_SAW \
 						|| (o)->otyp == DISKOS \
 						|| (o)->otyp == DEMON_CLAW \
+						|| ((o)->otyp == MOON_AXE && (o)->ovar1_moonPhase == HUNTING_MOON) \
 						)
 #define is_self_righteous(o)	((o)->otyp == CANE \
 						|| (o)->otyp == CHURCH_HAMMER \
@@ -933,6 +934,7 @@ struct obj {
 						  (otmp)->otyp == SHADOWLANDER_S_TORCH || \
 						  (otmp)->otyp == CROW_QUILL || \
 						  (otmp)->otyp == SET_OF_CROW_TALONS || \
+						  (otmp)->otyp == MOON_AXE || \
 						  (otmp)->otyp == ISAMUSEI || \
 						  (otmp)->otyp == DISKOS || \
 						  (otmp)->otyp == PINCER_STAFF || \

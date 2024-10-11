@@ -2976,7 +2976,7 @@ reanimation_score()
 {
 	int count = reanimation_count()+1;
 	count *= 4; //TIER_B	4
-	return (count*(count+1))/2;
+	return (count*(count+1))/2 + (u.antenae_upgrades)*4;
 }
 
 boolean
@@ -3113,6 +3113,7 @@ reanimation_upgrade()
 	if(n == 5){
 		if(uwep){
 			add_oprop(uwep, OPROP_ANTAW);
+			u.antenae_upgrades++;
 		}
 	}
 	if(n == 6)

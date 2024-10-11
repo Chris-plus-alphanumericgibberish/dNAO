@@ -1090,22 +1090,22 @@ doup()
 	if(ledger_no(&u.uz) == 1) {
 		if (iflags.debug_fuzzer)
 			return MOVE_CANCELLED;
-		if (yn("Beware, there will be no return! Still climb?") != 'y')
+		if (yesno("Beware, there will be no return! Still climb?", iflags.paranoid_quit) != 'y')
 			return MOVE_CANCELLED;
 		if(Role_if(PM_UNDEAD_HUNTER) && u.uevent.udemigod){
 			if(u.veil){
 				if(philosophy_index(u.ualign.god)
-				 && yn("You feel that there is a deeper truth still to be uncovered here. Still climb?") != 'y'
+				 && yesno("You feel that there is a deeper truth still to be uncovered here. Still climb?", iflags.paranoid_quit) != 'y'
 				){
 					return MOVE_CANCELLED;
 				}
 			}
 			else {
-				if (!quest_status.moon_close && yn("You have the nagging feeling you have incomplete buisness here. Still climb?") != 'y')
+				if (!quest_status.moon_close && yesno("You have the nagging feeling you have incomplete buisness here. Still climb?", iflags.paranoid_quit) != 'y')
 					return MOVE_CANCELLED;
 				if (philosophy_index(u.ualign.god)
 				 && research_incomplete()
-				 && yn("You worry that you have not completed your research! Still climb?") != 'y'
+				 && yesno("You worry that you have not completed your research! Still climb?", iflags.paranoid_quit) != 'y'
 				)
 					return MOVE_CANCELLED;
 			}

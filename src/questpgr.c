@@ -1520,4 +1520,24 @@ law_montype()
 	return (struct permonst *)0;
 }
 
+struct permonst *
+moon_montype()
+{
+	int chance = rnd(100);
+	if(chance > 92)
+		return &mons[PM_MOON_ENTITY_MANIPALP];
+	if(chance > 88)
+		return &mons[PM_MOON_ENTITY_TONGUE];
+	if(chance > 84)
+		return &mons[PM_MOON_ENTITY_EYE_CLUSTER];
+	if(chance > 82)
+		return &mons[PM_FOETID_ANGEL];
+	if(chance > 72)
+		return &mons[PM_AETHER_WOLF];
+	if(chance > 62)
+		return &mons[PM_MIST_WOLF];
+	if(chance > 50)
+		return &mons[PM_MOON_FLEA];
+	return (struct permonst *)0;
+}
 /*questpgr.c*/
