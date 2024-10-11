@@ -2559,7 +2559,7 @@ u_init()
 				UndeadHunter[U_GUN].trotyp = ARROW;
 				UndeadHunter[U_GUN].trquan = rn1(20, 26);
 				UndeadHunter[U_GUN].trbless = 1;
-				UndeadHunter[U_GUN].trspe = 1;
+				UndeadHunter[U_GUN].trspe = 2;
 			break;
 		}
 		u.ublood_smithing = TRUE;
