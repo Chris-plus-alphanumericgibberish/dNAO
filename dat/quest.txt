@@ -4626,7 +4626,7 @@ Once again, you have returned to Tower Xaxox.
 "You dare turn against Lolth!?  Even in death you shall not know peace!"
 %E
 %Cp Hdr 00161
-""%l is using you.  You won't survive this fight!"
+"%l is using you.  You won't survive this fight!"
 %E
 %Cp Hdr 00162
 "Even a drider's fate is too good for you!"
