@@ -1064,7 +1064,7 @@ struct obj *otmp;	/* existing object */
 		}
 	}
 	/* armor props */
-	if(otmp->oclass == ARMOR_CLASS){
+	if(otmp->oclass == ARMOR_CLASS || (rn2(3) && otmp->oclass == RING_CLASS)){
 		if(!rn2(3)){
 			ADD_WEAPON_ARMOR_OPROPS(otmp, UNHY, HOLY);
 		}
@@ -1093,7 +1093,7 @@ struct obj *otmp;	/* existing object */
 		}
 	}
 	/* weapon props */
-	else if(otmp->oclass == WEAPON_CLASS){
+	else if(otmp->oclass == WEAPON_CLASS || otmp->oclass == RING_CLASS){
 		if(rn2(2)){
 			ADD_WEAK_OR_STRONG_OPROPS(otmp, UNHY, HOLY);
 		}
@@ -1127,20 +1127,22 @@ struct obj *otmp;	/* existing object */
 				break;
 			}
 		}
-		if(!rn2(20)){
-			add_oprop(otmp, OPROP_VORPW);
-		}
-		if(!rn2(20)){
-			add_oprop(otmp, OPROP_LIVEW);
-		}
-		else if(!rn2(20)){
-			add_oprop(otmp, OPROP_RETRW);
-		}
-		if(!rn2(20)){
-			add_oprop(otmp, OPROP_ASECW);
-		}
-		else if(!rn2(20)){
-			add_oprop(otmp, OPROP_PSECW);
+		if(otmp->oclass != RING_CLASS){
+			if(!rn2(20)){
+				add_oprop(otmp, OPROP_VORPW);
+			}
+			if(!rn2(20)){
+				add_oprop(otmp, OPROP_LIVEW);
+			}
+			else if(!rn2(20)){
+				add_oprop(otmp, OPROP_RETRW);
+			}
+			if(!rn2(20)){
+				add_oprop(otmp, OPROP_ASECW);
+			}
+			else if(!rn2(20)){
+				add_oprop(otmp, OPROP_PSECW);
+			}
 		}
 	}
 	/* ring props (stack with weapon) */
@@ -1818,7 +1820,7 @@ struct obj *otmp;	/* existing object */
 			add_oprop(otmp, OPROP_LIVEW);
 		}
 	}
-	else if(otmp->oclass == ARMOR_CLASS){
+	else if(otmp->oclass == ARMOR_CLASS || otmp->oclass == RING_CLASS){
 		prop = rnd(10);
 		switch(prop)
 		{
@@ -1914,7 +1916,7 @@ struct obj *otmp;	/* existing object */
 {
 	int prop = rnd(12);
 	
-	if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp)){
+	if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp) || otmp->oclass == RING_CLASS){
 		switch(prop)
 		{
 		case 1:
