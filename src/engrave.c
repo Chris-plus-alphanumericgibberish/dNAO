@@ -416,6 +416,7 @@ static const char *haluMesg[] = {
 		"And in doing so, you will restore the world to what it was.",
 		">^ N^T R3A> T||1S S1<N",
 		">^ R3A> T||1S ^N3",
+		"This wasn't your decision to make.","It was. I'd do it again, exactly the same.",
 	"Fall in a more hardboiled manner.", /* MS Paint Adventures */
 		"Since you are reading this, chances are you have already installed this game on your computer.  If this is true, you have just participated in bringing about the end of the world.  But don't beat yourself up about it.",
 		"YOU HATE TIME TRAVEL YOU HATE TIME TRAVEL YOU HATE....",
