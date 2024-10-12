@@ -1495,15 +1495,20 @@ int depth;
 	for (i = 0; i < SIZE(marmor); i++) {
 		if((curarm = which_armor(mon, marmor[i]))){
 			if(curarm->oclass == ARMOR_CLASS){
-				if (curarm && ((objects[curarm->otyp].oc_dtyp & slot) || (!objects[curarm->otyp].oc_dtyp && (slot&adfalt[i])))) {
-					if(depth && higher_depth(objects[curarm->otyp].oc_armcat, depth))
-						continue;
-					if(marmor[i] == W_ARM && slot == LOWER_TORSO_DR && mon->mtyp == PM_BLIBDOOLPOOLP_S_MINDGRAVEN_CHAMPION && !blip_humanoid_armor && magr && !depth){
-						if(!full_body_match(mon->data, curarm))
+				if (curarm){
+					if((objects[curarm->otyp].oc_dtyp & slot) || (!objects[curarm->otyp].oc_dtyp && (slot&adfalt[i]))) {
+						if(depth && higher_depth(objects[curarm->otyp].oc_armcat, depth))
 							continue;
+						if(marmor[i] == W_ARM && slot == LOWER_TORSO_DR && mon->mtyp == PM_BLIBDOOLPOOLP_S_MINDGRAVEN_CHAMPION && !blip_humanoid_armor && magr && !depth){
+							if(!full_body_match(mon->data, curarm))
+								continue;
+						}
+						arm_mdr += arm_dr_bonus(curarm);
+						if (magr) arm_mdr += properties_dr(curarm, agralign, agrmoral);
 					}
-					arm_mdr += arm_dr_bonus(curarm);
-					if (magr) arm_mdr += properties_dr(curarm, agralign, agrmoral);
+					else if(curarm->otyp == CLOAK_OF_PROTECTION){
+						arm_mdr += arm_dr_bonus(curarm)/2;
+					}
 				}
 			}
 			else if(!depth){
