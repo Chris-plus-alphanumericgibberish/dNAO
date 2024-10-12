@@ -3027,7 +3027,7 @@ weight_cap()
 			carrcap = maxcap;
 
 		/* these carrcap modifiers only make sense if you have feet on the ground */
-		if (boots && boots->otyp == find_hboots()) carrcap += 100;
+		if (boots && boots->otyp == find_hboots()) carrcap += maxcap/10;
 		
 		if (boots && check_oprop(boots, OPROP_RBRD)
 			&& u.ualign.record >= 20 && u.ualign.type != A_CHAOTIC && u.ualign.type != A_NEUTRAL
