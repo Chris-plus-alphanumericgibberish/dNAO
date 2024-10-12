@@ -2589,7 +2589,11 @@ int tary;
 	boolean foundem = (mdef && (tarx == x(mdef) && tary == y(mdef)));
 	boolean rangedspell;
 	int adtyp = attk->adtyp;
-	int dmn = mlev(magr) / 3 + 1;
+	int dmn;
+	if(attk->adtyp == AD_PSON) //Psion dice are usually d15s (like mind blasts), so there needs to be fewer of them.
+		dmn = max(mlev(magr) / 4, 1);
+	else
+		dmn = mlev(magr) / 3 + 1;
 	/* cap level contribution to ndice to MAX_BONUS_DICE */
 	if (dmn > MAX_BONUS_DICE)
 		dmn = MAX_BONUS_DICE;
