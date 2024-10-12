@@ -4558,8 +4558,9 @@ printAttacks(buf, ptr)
 		"unnerving",			/*153*/
 		"madness-fire",			/*154*/
 		"force to attack",		/*155*/
-		"drain bonus HP",		/*155*/
-		"monstrous tongue lick",/*156*/
+		"drain bonus HP",		/*156*/
+		"push",					/*157*/
+		"moon-entity lick",		/*158*/
 		// "[[ahazu abduction]]",	/**/
 		"[[stone choir]]",		/* */
 		"[[water vampire]]",	/* */
