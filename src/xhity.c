@@ -17270,6 +17270,29 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 	}
 	/* per round -- note cannot access attk or weapon */
 	else {
+		/* Mirrorbright has a limited nightmare effect */
+		struct obj *shield = youdef ? uarms : which_armor(mdef, W_ARMS);
+		//Technically a monster can attack itself, don't proc if so.
+		if(shield && shield->oartifact == ART_MIRRORBRIGHT && magr != mdef){
+			if(youagr){
+				if(canseemon(mdef)){
+					pline("The bright-copper shield shines in your %s!", makeplural(body_part(EYE)));
+					make_confused(HConfusion + d(3, 3), FALSE);
+					change_usanity(-1, TRUE);
+				}
+			}
+			else if(youdef){
+				if(mon_can_see_you(magr) && !mindless_mon(magr) && !magr->mtame && !is_render(magr->mtyp)){
+					you_inflict_madness(magr);
+					magr->mconf = TRUE;
+				}
+			}
+			else {
+				if(mon_can_see_mon(magr, mdef) && !mindless_mon(magr) && !magr->mtame && !is_render(magr->mtyp)){
+					magr->mconf = TRUE;
+				}
+			}
+		}
 		/* Gauntlets of the Divine Disciple's divine retribution -- player only */
 		if (youdef && uarmg && uarmg->oartifact == ART_GAUNTLETS_OF_THE_DIVINE_DI && !rn2(4)){
 			if (!Shock_res(magr)) {
