@@ -11084,15 +11084,23 @@ int vis;
 	case AD_DISE:	/* damage/effect ? */
 		if (youdef) {
 			diseasemu(pa);
-			result = MM_HIT;
 		}
 		else {
 			if (!Sick_res(mdef)) {
 				if (vis&VIS_MDEF)
 					pline("%s is afflicted by disease!", Monnam(mdef));
-				result = xdamagey(magr, mdef, attk, dmg);
 			}
 		}
+		if(pa->mtyp == PM_JUIBLEX){
+			if(!is_indigestible(youdef ? youracedata : mdef->data))
+				dmg += *hp(mdef)/2;
+			if(Sick_res(mdef))
+				dmg /= 2;
+			if(Acid_res(mdef))
+				dmg /= 2;
+		}
+		/* deal damage */
+		result = xdamagey(magr, mdef, attk, dmg);
 		break;
 		case AD_PYCL:{	/* Immediately recurse and return */
 			struct attack alt_attk = *attk;
