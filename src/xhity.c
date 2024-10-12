@@ -15775,9 +15775,14 @@ int vis;						/* True if action is at all visible to the player */
 					resisted_thick_skin = TRUE;
 				}
 			}
-			else if(otmp && otmp->oartifact){
+			else if(otmp && (otmp->oartifact || check_oprop(otmp, OPROP_FLAYW))){
 				/* damage partly mitigated */
 				subtotl /= 4;
+				partly_resisted_thick_skin = TRUE;
+			}
+			else if(otmp && check_oprop(otmp, OPROP_LESSER_FLAYW)){
+				/* damage partly mitigated */
+				subtotl /= 6;
 				partly_resisted_thick_skin = TRUE;
 			}
 			else {
