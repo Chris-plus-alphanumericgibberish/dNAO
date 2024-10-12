@@ -10655,7 +10655,30 @@ doapply()
 			u.uhpmod /= 2; // we only print a message if it's a lot, but fix regardless
 			calc_total_maxhp();		
 		}
-		
+
+		if (u.uhpbonus < 0){
+			u.uhpbonus /= 2;
+			calc_total_maxhp();		
+		}
+
+		if (u.uenbonus < 0){
+			u.uenbonus /= 2;
+			calc_total_maxen();		
+		}
+
+		if(u.uhitinc < 0){
+			u.uhitinc /= 2;
+		}
+		if(u.udaminc < 0){
+			u.udaminc /= 2;
+		}
+		if(u.ucarinc < 0){
+			u.ucarinc /= 2;
+		}
+		if(u.uacinc < 0){
+			u.uacinc /= 2;
+		}
+
 		if(obj->quan>1)
 			useup(obj);
 		else{
