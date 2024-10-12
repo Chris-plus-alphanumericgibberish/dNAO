@@ -2201,7 +2201,7 @@ struct obj *obj, *otmp;
 	case WAN_STRIKING:
 	case SPE_FORCE_BOLT:
 	case ROD_OF_FORCE:
-		if (is_boulder(obj) || obj->otyp == STATUE || (obj->otyp == CRYSTAL_SKULL && u.uinsight >= 20))
+		if (is_boulder(obj) || obj->otyp == STATUE)
 			break_boulder(obj);
 		else {
 			if (!flags.mon_moving)
