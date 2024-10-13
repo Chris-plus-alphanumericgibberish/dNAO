@@ -9632,6 +9632,20 @@ int mmflags;
 				}
 				(void) mongets(mtmp, CHUNK_OF_FOSSIL_DARK, mkobjflags);
 			} else {
+#define NazPastArmor(typ) \
+				otmp = mongets(mtmp, typ, mkobjflags);\
+				if(otmp){\
+					otmp->obj_color = CLR_BLACK;\
+					otmp->spe = rn2(3);\
+					add_oprop(otmp, OPROP_UNHY);\
+					curse(otmp);\
+				}
+				NazPastArmor(ARCHAIC_BOOTS);
+				NazPastArmor(ARCHAIC_PLATE_MAIL);
+				NazPastArmor(ARCHAIC_GAUNTLETS);
+				NazPastArmor(ARCHAIC_HELM);
+				NazPastArmor(CLOAK);
+#undef NazPastArmor
 				otmp = mksobj(STILETTO, mkobjflags);
 				add_oprop(otmp, OPROP_MORGW);
 				otmp->opoisoned = OPOISON_BASIC;
