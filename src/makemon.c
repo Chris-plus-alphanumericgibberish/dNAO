@@ -1305,12 +1305,20 @@ boolean greatequip;
 		(void)mongets(mtmp, HIGH_BOOTS, mkobjflags);
 	}
 	else if(ptr->mtyp == PM_PARASITIZED_KNIGHT){
-		(void)mongets(mtmp, ARMORED_BOOTS, mkobjflags);
-		(void)mongets(mtmp, PLATE_MAIL, mkobjflags);
-		(void)mongets(mtmp, GAUNTLETS, mkobjflags);
-		(void)mongets(mtmp, KITE_SHIELD, mkobjflags);
-		(void)mongets(mtmp, LONG_SWORD, mkobjflags);
+		otmp = mongets(mtmp, ARMORED_BOOTS, mkobjflags);
+		otmp->spe = max_ints(otmp->spe, 2+rn2(3));
 
+		otmp = mongets(mtmp, PLATE_MAIL, mkobjflags);
+		otmp->spe = max_ints(otmp->spe, 2+rn2(3));
+
+		otmp = mongets(mtmp, GAUNTLETS, mkobjflags);
+		otmp->spe = max_ints(otmp->spe, 2+rn2(3));
+
+		otmp = mongets(mtmp, KITE_SHIELD, mkobjflags);
+		otmp->spe = max_ints(otmp->spe, 2+rn2(3));
+
+		otmp = mongets(mtmp, LONG_SWORD, mkobjflags);
+		otmp->spe = max_ints(otmp->spe, 3+rn2(5));
 	}
 	else if (ptr->mtyp == PM_CROESUS) {
 		otmp = mksobj(TWO_HANDED_SWORD, mkobjflags);
