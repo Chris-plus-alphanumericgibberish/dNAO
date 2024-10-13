@@ -1848,6 +1848,44 @@ choose_magic_special(struct monst *mtmp, unsigned int type, int i)
 				return SUMMON_SPHERE;
 			break;
 		}
+   case PM_NEFERET_THE_GREEN:
+		if(quest_status.offered_artifact){
+			switch(rn2(9)){
+				case 8:
+					return TURN_TO_STONE;
+				case 7:
+					return DEATH_TOUCH;
+				case 6:
+					return DRAIN_ENERGY;
+				case 5:
+					return SUMMON_MONS;
+				case 4:
+					return DISAPPEAR;
+				case 3:
+					return STUN_YOU;
+				case 2:
+					return HASTE_SELF;
+				case 1:
+					return CURE_SELF;
+				case 0:
+					return PSI_BOLT;
+			}
+		}
+		else {
+			switch(rn2(5)){
+				case 4:
+					return DISAPPEAR;
+				case 3:
+					return STUN_YOU;
+				case 2:
+					return HASTE_SELF;
+				case 1:
+					return CURE_SELF;
+				case 0:
+					return PSI_BOLT;
+			}
+		}
+	   return ARROW_RAIN; //Fallback, should be unreached
 	case PM_NALFESHNEE:
 		switch(rn2(5)){
 			case 0:
@@ -3558,6 +3596,7 @@ int tary;
 			else if (!rn2(3)) weap = KNIFE;
 			else if (!rn2(3)) weap = JAVELIN;
 			else if (!rn2(3)) weap = AXE;
+			else if (magr && magr->mtyp == PM_NEFERET_THE_GREEN && rn2(3)) weap = KHOPESH;
 			else {
 				int weapons[] = {ARROW, ELVEN_ARROW, ORCISH_ARROW, SILVER_ARROW, GOLDEN_ARROW, ANCIENT_ARROW, YA, CROSSBOW_BOLT, DROVEN_BOLT, DART, 
 								SHURIKEN, BOOMERANG, CHAKRAM, SPEAR, ATGEIR, ELVEN_SPEAR, DROVEN_SPEAR, ORCISH_SPEAR, DWARVISH_SPEAR, JAVELIN,
