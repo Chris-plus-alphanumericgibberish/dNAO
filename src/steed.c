@@ -48,6 +48,7 @@ can_saddle(mtmp, otmp)
 				(Race_if(PM_ORC) && index(orc_steeds, ptr->mlet)) ||
 				(Role_if(PM_VALKYRIE) && index(valk_steeds, ptr->mlet)) ||
 				((Race_if(PM_DROW) || Race_if(PM_MYRKALFR)) && index(drow_steeds, ptr->mlet)) ||
+				(Race_if(PM_VAMPIRE) && is_vampire(ptr)) ||
 				(ptr->mtyp == PM_BYAKHEE)
 			) && 
 			(ptr->msize >= MZ_MEDIUM) &&
