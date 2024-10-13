@@ -7271,6 +7271,12 @@ d_weapon:
 					verbalize("That doesn't seem suitable to me.");
 				}
 			}
+			else if(resource->unpaid){
+				verbalize("You'd need to buy that first.");
+			}
+			else if(smith->isshk && resource->ostolen){
+				verbalize("Someone stole that!");
+			}
 			else if(resource->obj_material == mat
 				&& !resource->oartifact
 				&& !get_ox(resource, OX_ESUM)
