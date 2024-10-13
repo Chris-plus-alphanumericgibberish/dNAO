@@ -8685,7 +8685,7 @@ is a red right hand
 	 * (selected at random when attacking).
 	 */
     MON("Chromatic Dragon", S_DRAGON,//38
-	LVL(30, 12, 30, -14), (G_NOGEN|G_UNIQ),
+	LVL(30, 12, 30, 14), (G_NOGEN|G_UNIQ),
 	DEF(NAT_AC(20), NAT_DR(10)),
 	A(ATTK(AT_BREA, AD_RBRE, 0, 8), ATTK(AT_MAGC, AD_SPEL, 0, 0),
 	  ATTK(AT_CLAW, AD_PHYS, 2, 8), ATTK(AT_BITE, AD_PHYS, 4, 8),
