@@ -2888,6 +2888,8 @@ parasite_score()
 boolean
 parasite_ok()
 {
+	if(ABASE(A_INT) < 6)
+		return FALSE;
 	if(parasite_score() < u.uparasitology_research)
 		return TRUE;
 	return FALSE;
@@ -2944,6 +2946,8 @@ defile_score()
 boolean
 defile_ok()
 {
+	if(ABASE(A_INT) < 6)
+		return FALSE;
 	if(!impurity_ok())
 		return FALSE;
 	if(defile_score() < u.udefilement_research)
@@ -2990,6 +2994,8 @@ reanimation_insight_ok()
 boolean
 reanimation_ok()
 {
+	if(ABASE(A_INT) < 6)
+		return FALSE;
 	if(!reanimation_insight_ok())
 		return FALSE;
 	if(reanimation_score() < u.ureanimation_research)
@@ -3130,7 +3136,7 @@ reanimation_upgrade()
 	ABASE(A_INT) -= 1;
 	// check_brainlessness();
 	ABASE(A_INT) = max(ABASE(A_INT), ATTRMIN(A_INT));
-	AMAX(A_INT) = max(AMAX(A_INT)-1, ATTRMIN(A_INT));
+	AMAX(A_INT) = max(AMAX(A_INT)-1, ATTRMIN(A_INT)); //Can't be recovered via restore ability
 	ABASE(A_WIS) = max(ABASE(A_WIS)-1, ATTRMIN(A_WIS));
 	AMAX(A_WIS) = max(AMAX(A_WIS)-1, ATTRMIN(A_WIS));
 
@@ -3180,7 +3186,7 @@ defile_preserve(struct obj *obj)
 	ABASE(A_INT) -= 1;
 	// check_brainlessness();
 	ABASE(A_INT) = max(ABASE(A_INT), ATTRMIN(A_INT));
-	AMAX(A_INT) = max(AMAX(A_INT)-1, ATTRMIN(A_INT));
+	AMAX(A_INT) = max(AMAX(A_INT)-1, ATTRMIN(A_INT)); //Can't be recovered via restore ability
 	ABASE(A_WIS) = max(ABASE(A_WIS)-1, ATTRMIN(A_WIS));
 	AMAX(A_WIS) = max(AMAX(A_WIS)-1, ATTRMIN(A_WIS));
 
@@ -3270,7 +3276,7 @@ defile_vampire(struct obj *obj)
 	ABASE(A_INT) -= 1;
 	// check_brainlessness();
 	ABASE(A_INT) = max(ABASE(A_INT), ATTRMIN(A_INT));
-	AMAX(A_INT) = max(AMAX(A_INT)-1, ATTRMIN(A_INT));
+	AMAX(A_INT) = max(AMAX(A_INT)-1, ATTRMIN(A_INT)); //Can't be recovered via restore ability
 	ABASE(A_WIS) = max(ABASE(A_WIS)-1, ATTRMIN(A_WIS));
 	AMAX(A_WIS) = max(AMAX(A_WIS)-1, ATTRMIN(A_WIS));
 
@@ -4067,7 +4073,7 @@ register struct obj *obj;
 	ABASE(A_INT) -= 1;
 	// check_brainlessness();
 	ABASE(A_INT) = max(ABASE(A_INT), ATTRMIN(A_INT));
-	AMAX(A_INT) = max(AMAX(A_INT)-1, ATTRMIN(A_INT));
+	AMAX(A_INT) = max(AMAX(A_INT)-1, ATTRMIN(A_INT)); //Can't be recovered via restore ability
 	ABASE(A_WIS) = max(ABASE(A_WIS)-1, ATTRMIN(A_WIS));
 	AMAX(A_WIS) = max(AMAX(A_WIS)-1, ATTRMIN(A_WIS));
 	obj->spe--;

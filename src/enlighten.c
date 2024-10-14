@@ -3105,6 +3105,8 @@ research_enlightenment()
 					putstr(en_win, 0, "You are unable to devise further experiments into the nature of defilement.");
 					if(!impurity_ok())
 						putstr(en_win, 0, "You must immerse yourself in the ritually unclean to make progress.");
+					else if(ABASE(A_INT) < 6)
+						putstr(en_win, 0, "You must repair the damage to your intellect to survive further self-experimentation.");
 					else
 						putstr(en_win, 0, "You must conduct more dissections to make progress.");
 				}
@@ -3173,7 +3175,10 @@ research_enlightenment()
 			}
 			else {
 				putstr(en_win, 0, "You are unable to devise further surgical experiments.");
-				putstr(en_win, 0, "You must conduct more dissections to make progress.");
+				if(ABASE(A_INT) < 6)
+					putstr(en_win, 0, "You must repair the damage to your intellect to survive further self-experimentation.");
+				else
+					putstr(en_win, 0, "You must conduct more dissections to make progress.");
 			}
 		}
 		//Upgrade list
@@ -3218,6 +3223,8 @@ research_enlightenment()
 					putstr(en_win, 0, "You are unable to devise further Galvanic experiments.");
 					if(!reanimation_insight_ok())
 						putstr(en_win, 0, "You must hunt the strange creatures of the veil to make progress.");
+					else if(ABASE(A_INT) < 6)
+						putstr(en_win, 0, "You must repair the damage to your intellect to survive further self-experimentation.");
 					else
 						putstr(en_win, 0, "You must conduct more dissections and reanimations to make progress.");
 				}
