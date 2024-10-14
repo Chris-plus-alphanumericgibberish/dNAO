@@ -8335,6 +8335,14 @@ int mmflags;
 								otmp->oeroded3 = 1;
 						break;
 						case 12:
+							mtmp->mvar_deminymph_role = PM_UNDEAD_HUNTER;
+							otmp = mongets(mtmp, CLOAK, mkobjflags);
+							otmp = mongets(mtmp, GLOVES, mkobjflags);
+							if(otmp)
+								otmp->oeroded3 = 1;
+							otmp = mongets(mtmp, SICKLE, mkobjflags);
+						break;
+						case 13:
 							mtmp->mvar_deminymph_role = PM_WIZARD;
 							otmp = mongets(mtmp, CLOAK_OF_MAGIC_RESISTANCE, mkobjflags);
 							if(otmp)
@@ -8342,7 +8350,7 @@ int mmflags;
 							otmp = mongets(mtmp, SPE_BLANK_PAPER, mkobjflags);
 						break;
 					}
-				} else switch(rn2(16)){
+				} else switch(rn2(17)){
 					//Archeologist
 					case 0:
 						mtmp->mvar_deminymph_role = PM_ARCHEOLOGIST;
@@ -9236,8 +9244,57 @@ int mmflags;
 						mongets(mtmp, EXPENSIVE_CAMERA, mkobjflags);
 						mongets(mtmp, CREDIT_CARD, mkobjflags);
 					break;
+					//Undead Hunter
+					case 15:{
+						const int wep[] = {CANE, CHIKAGE, RAKUYO, SOLDIER_S_RAPIER, SHANTA_PATA, CHURCH_HAMMER, CHURCH_BLADE, HUNTER_S_AXE, SAW_CLEAVER, BOW_BLADE, SAW_SPEAR};
+						mtmp->mvar_deminymph_role = PM_UNDEAD_HUNTER;
+						otmp = mksobj(ROLL_FROM(wep), mkobjflags|MKOBJ_ARTIF);
+						otmp->spe = 2+rn2(3);
+						MAYBE_MERC(otmp)
+						(void) mpickobj(mtmp, otmp);
+
+						if(!rn2(3)){
+							otmp = mksobj(STAKE, mkobjflags|MKOBJ_ARTIF);
+							otmp->spe = 0+rn2(4);
+							(void) mpickobj(mtmp, otmp);
+						}
+						else if(rn2(2)){
+							otmp = mksobj(CROSSBOW, mkobjflags|MKOBJ_ARTIF);
+							otmp->spe = 0+rn2(4);
+							(void) mpickobj(mtmp, otmp);
+
+							otmp = mksobj(CROSSBOW_BOLT, mkobjflags|MKOBJ_ARTIF);
+							otmp->spe = 0+rn2(4);
+							otmp->quan = rn1(60, 30);
+							if(!rn2(3)){
+								set_material(otmp, SILVER);
+							}
+							(void) mpickobj(mtmp, otmp);
+						}
+						else {
+							otmp = mksobj(rn2(10) ? FLINTLOCK : rn2(20) ? PISTOL : EVELYN, mkobjflags|MKOBJ_ARTIF);
+							otmp->spe = 0+rn2(4);
+							(void) mpickobj(mtmp, otmp);
+
+							m_initthrow(mtmp, rn2(3) ? BULLET : SILVER_BULLET, 60, mkobjflags);
+							if(!rn2(3)){
+								m_initthrow(mtmp, BLOOD_BULLET, 20, mkobjflags);
+								if(!rn2(20))
+									mongets(mtmp, NIGHTMARE_S_BULLET_MOLD, mkobjflags);
+							}
+						}
+						otmp = mksobj(JACKET, mkobjflags|MKOBJ_ARTIF);
+						otmp->spe = 0+rn2(4);
+						(void) mpickobj(mtmp, otmp);
+						otmp = mksobj(FEDORA, mkobjflags|MKOBJ_ARTIF);
+						otmp->spe = 0+rn2(4);
+						(void) mpickobj(mtmp, otmp);
+						otmp = mksobj(HIGH_BOOTS, mkobjflags|MKOBJ_ARTIF);
+						otmp->spe = 0+rn2(4);
+						(void) mpickobj(mtmp, otmp);
+					}break;
 					//Wizard
-					case 15:
+					case 16:
 						mtmp->mvar_deminymph_role = PM_WIZARD;
 						otmp = mksobj(QUARTERSTAFF, mkobjflags|MKOBJ_ARTIF);
 						otmp->spe = 1+rn2(3);
