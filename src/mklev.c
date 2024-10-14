@@ -227,6 +227,12 @@ makerooms()
 	wantanmivault = !rn2(8);
 	wantasepulcher = (depth(&u.uz) > 12 && !rn2(8));
 	wantfingerprint = (depth(&u.uz) > 21 && !rn2(8) && !art_already_exists(ART_FINGERPRINT_SHIELD));
+	int u_depth = depth(&u.uz);
+	boolean knox_range = (u.uz.dnum != oracle_level.dnum		// not in main dungeon
+		|| (u_depth = depth(&u.uz)) < 10	// not beneath 10
+		|| u_depth > depth(&challenge_level)// not below medusa
+	) && !u.uevent.knoxmade;
+
 	if(In_mithardir_terminus(&u.uz)){
 		create_room(-1, -1, 7, 7, -1, -1, OROOM, 0);
 		mkroom(SLABROOM);
@@ -240,12 +246,15 @@ makerooms()
 			if (!create_room(-1, -1, 2+rnd(4), 2+rnd(4), -1, -1, OROOM, -1))
 				continue;
 		}
-		else if(nroom >= (MAXNROFROOMS/6) && rn2(3) && !tried_vault && !wantanmivault && !wantasepulcher && !wantfingerprint) {
+		else if(nroom >= (MAXNROFROOMS/6) && rn2(3) && !tried_vault && (knox_range || (!wantanmivault && !wantasepulcher && !wantfingerprint))) {
 			tried_vault = TRUE;
 			if (create_vault()) {
 				vault_x = rooms[nroom].lx;
 				vault_y = rooms[nroom].ly;
 				rooms[nroom].hx = -1;
+				wantanmivault = FALSE;
+				wantasepulcher = FALSE;
+				wantfingerprint = FALSE;
 			}
 		} else {
 		    if (!create_room(-1, -1, -1, -1, -1, -1, OROOM, -1))
@@ -1199,7 +1208,7 @@ makelevel()
 	}
 
     {
-	register int u_depth = depth(&u.uz);
+	int u_depth = depth(&u.uz);
 
 #ifdef WIZARD
 	if(wizard && nh_getenv("SHOPTYPE")) mkroom(SHOPBASE); else
