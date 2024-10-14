@@ -1903,6 +1903,8 @@ static const NEARDATA short hwep[] = {
 	  WHITE_VIBROZANBATO,/*2d16+8/2d8+4d6+10*/
 	  DOUBLE_FORCE_BLADE,/*6d6+12/6d4+8*/
 	  DOUBLE_LIGHTSABER/*6d8*/, 
+	  DEVIL_FIST,/*1d9+3/1d9 +2d9 energy*/
+	  DEMON_CLAW,/*1d12/1d22+special*/
 	  RED_EYED_VIBROSWORD,/*3d8+8/3d12+12*/
 	  FORCE_SWORD,/*3d8+8/3d6+6*/
 	  FORCE_WHIP,/*3d6+6+3/3d4+6+3d4+4*/
@@ -1953,7 +1955,11 @@ static const NEARDATA short hwep[] = {
 	  BLADE_OF_MERCY/*1d6+1/1d8+1*/, 
 	  RAKUYO_SABER/*1d8/1d8*/,
 	  PINCER_STAFF/*1d6+2/2d6+1*/, 
+	  SHANTA_PATA/*1d6+2/2d6+1*/, 
 	  TRIDENT/*1d8+1/3d6*/, 
+	  HUNTER_S_LONG_AXE/*1d8+1/1d6+2*/, 
+	  SAW_SPEAR/*1d8/1d10*/,
+	  BOW_BLADE/*1d8/1d8*/,
 	  SABER/*1d8/1d8*/,
 	  NAGINATA, /*1d8/1d10*/
 	  HUNTER_S_LONGSWORD/*1d8/1d12*/,
@@ -1965,8 +1971,11 @@ static const NEARDATA short hwep[] = {
 	  DWARVISH_SHORT_SWORD/*1d8/1d7*/, 
 	  WAKIZASHI/*1d8/1d6*/,
 	  KHOPESH,/*1d8/1d6*/
+	  LONG_SAW,/*1d8/1d6*/
+	  HUNTER_S_AXE,/*1d8/1d6*/
 	  DROVEN_DAGGER/*1d8/1d6*/, 
 	  CARCOSAN_STING/*1d3+1d5/1d3+1d5*/, 
+	  RAZOR_CLEAVER/*1d6+1/1d4*/, 
 	  MACE/*1d6+1/1d6*/, 
 	  MAGIC_TORCH/*1d8/1d4*/, 
 	  ELVEN_SHORT_SWORD/*1d7/1d7*/, 
@@ -1977,6 +1986,7 @@ static const NEARDATA short hwep[] = {
 	  BLADE_OF_GRACE/*1d6/1d8*/,
 	  HUNTER_S_SHORTSWORD/*1d6/1d8*/,
 	  SHORT_SWORD/*1d6/1d8*/,
+	  SAW_CLEAVER/*1d6/1d4*/, 
 	  RAPIER/*1d6/1d4*/, 
 	  AXE/*1d6/1d4*/, 
 	  ORCISH_SHORT_SWORD/*1d5/1d10*/, 
@@ -2016,6 +2026,8 @@ static const NEARDATA short hpwep[] = {
 	  WHITE_VIBROZANBATO,/*2d16+8/2d8+4d6+10*/
 	  DOUBLE_FORCE_BLADE,/*6d6+12/6d4+8*/
 	  DOUBLE_LIGHTSABER/*6d8*/, 
+	  DEVIL_FIST,/*1d9+3/1d9 +2d9 energy*/
+	  DEMON_CLAW,/*1d12/1d22+special*/
 	  RED_EYED_VIBROSWORD,/*3d8+8/3d12+12*/
 	  FORCE_SWORD,/*3d8+8/3d6+6*/
 	  FORCE_WHIP,/*3d6+6+3/3d4+6+3d4+4*/
@@ -2032,6 +2044,7 @@ static const NEARDATA short hpwep[] = {
 	  VIBROBLADE,/*2d6+3/2d8+4*/
 	  ROD_OF_FORCE/*2d8/2d12*/,
 	  CRYSTAL_SWORD/*2d8/2d12*/,
+	  CHURCH_HAMMER,/*2d8+2/2d8*/
 	  DOUBLE_SWORD,/*2d8/2d12*/
 	  DROVEN_GREATSWORD/*1d18/1d30*/, 
 	  SET_OF_CROW_TALONS/*2d4/2d3/+6 study*/,
@@ -2075,7 +2088,11 @@ static const NEARDATA short hpwep[] = {
 	  BLADE_OF_MERCY/*1d6+1/1d8+1*/, 
 	  RAKUYO_SABER/*1d8/1d8*/,
 	  PINCER_STAFF/*1d6+2/2d6+1*/, 
+	  SHANTA_PATA/*1d6+2/2d6+1*/, 
 	  TRIDENT/*1d8+2/3d6*/, 
+	  HUNTER_S_LONG_AXE/*1d8+1/1d6+2*/, 
+	  SAW_SPEAR/*1d8/1d10*/,
+	  BOW_BLADE/*1d8/1d8*/,
 	  SABER/*1d8/1d8*/,
 	  NAGINATA, /*1d8/1d10*/
 	  HUNTER_S_LONGSWORD/*1d8/1d12*/,
@@ -2089,8 +2106,11 @@ static const NEARDATA short hpwep[] = {
 	  WAKIZASHI/*1d8/1d6*/,
 	  KHOPESH,/*1d8/1d6*/
 	  BEC_DE_CORBIN, /*1d8/1d6*/
+	  LONG_SAW,/*1d8/1d6*/
+	  HUNTER_S_AXE,/*1d8/1d6*/
 	  DROVEN_DAGGER/*1d8/1d6*/, 
 	  CARCOSAN_STING/*1d3+1d5/1d3+1d5*/, 
+	  RAZOR_CLEAVER/*1d6+1/1d4*/, 
 	  MACE/*1d6+1/1d6*/, 
 	  MAGIC_TORCH/*1d8/1d4*/, 
 	  GLAIVE, /*1d6/1d10*/
@@ -2105,6 +2125,7 @@ static const NEARDATA short hpwep[] = {
 	  HUNTER_S_SHORTSWORD/*1d6/1d8*/,
 	  SHORT_SWORD/*1d6/1d8*/,
 	  PARTISAN, /*1d6/1d6*/
+	  SAW_CLEAVER/*1d6/1d4*/, 
 	  RAPIER/*1d6/1d4*/, 
 	  AXE/*1d6/1d4*/, 
 	  ORCISH_SHORT_SWORD/*1d5/1d10*/, 
