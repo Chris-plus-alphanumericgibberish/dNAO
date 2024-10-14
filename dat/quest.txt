@@ -8096,7 +8096,7 @@ tell you of what has transpired:
 
 "Several months ago, the circuit rider assigned to %i
 returned to report a most unusual form of lycanthropy aflicting
-a widower living on the far side of the forest.
+a widower living on the far side of the dark forest.
 
 "The rider took %o and departed,
 intending to make a study of the case.
@@ -8143,11 +8143,12 @@ and halt this spreading scourge of beasts."
 You have reached the outer ward, where the city encroaches on %i. 
 
 The cold howling wind surrounds you. The sky above is filled with clouds
-that seem to get thicker closer some center. Ahead, you sense the presence
-of undead in larger numbers than you have ever encountered before.
+that seem to get thicker closer some center. In the dark forest ahead you
+sense the presence of undead in larger numbers than you have ever
+encountered before.
 
-You remember %lC's description. It is ahead that you will find %n's
-trail.
+You remember %lC's description. It is ahead that you will find
+%n's trail.
 %E
 %Cp Hnt 00036
 Once again, you stand before the entrance to %i.
