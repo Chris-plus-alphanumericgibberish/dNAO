@@ -618,7 +618,7 @@ starting_twoweapon()
 		    mons[uswapwep->corpsenm].mname, body_part(HAND));
 		Sprintf(kbuf, "%s corpse", an(mons[uswapwep->corpsenm].mname));
 		instapetrify(kbuf);
-	} else if (uswapwep && (Glib || uswapwep->cursed)) {
+	} else if (uswapwep && (Glib || (!Weldproof && uswapwep->cursed))) {
 		if (!Glib)
 			uswapwep->bknown = TRUE;
 		drop_uswapwep();

@@ -2846,6 +2846,10 @@ karemade:
 
 		    if (flags.bypasses) clear_bypasses();
 		    if(Glib) glibr();
+			if (uswapwep && !Weldproof && uswapwep->cursed) {
+				uswapwep->bknown = TRUE;
+				drop_uswapwep();
+			}
 		    // if(StumbleBlind && rn2(100) >= NightmareAware_Sanity) bumbler();
 		    nh_timeout();
 		    run_regions();
