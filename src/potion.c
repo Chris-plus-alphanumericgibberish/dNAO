@@ -446,7 +446,12 @@ dodrink()
 
 	otmp = getobj(beverages, "drink");
 	if(!otmp) return MOVE_CANCELLED;
-	if(otmp->ostolen && u.sealsActive&SEAL_ANDROMALIUS) unbind(SEAL_ANDROMALIUS, TRUE);
+	if(otmp->ostolen){
+		if(u.sealsActive&SEAL_ANDROMALIUS)
+			unbind(SEAL_ANDROMALIUS, TRUE);
+		/*stealing is impure*/
+		IMPURITY_UP(u.uimp_theft)
+	}
 
 	/* quan > 1 used to be left to useup(), but we need to force
 	   the current potion to be unworn, and don't want to do
