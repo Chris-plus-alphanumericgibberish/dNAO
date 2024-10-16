@@ -2179,13 +2179,23 @@ moveloop()
 					if(mtmp->m_lev < mons[PM_FATHER_DAGON].mlevel)
 						mtmp->m_lev = mons[PM_FATHER_DAGON].mlevel;
 					set_mon_data(mtmp, PM_FATHER_DAGON);
+					mtmp->mhp = mtmp->mhpmax = (mtmp->m_lev*hd_size(mtmp->data))-1;
 					u.uevent.ukilled_dagon = 0;
+					if(canspotmon(mtmp)){
+						TRANSCENDENCE_IMPURITY_UP(FALSE)
+						IMPURITY_UP(u.uimp_deep_one)
+					}
 				}
 				if(mtmp->mtyp == PM_DEEPEST_ONE && mtmp->female && u.uevent.ukilled_hydra && !(In_quest(&u.uz) && Role_if(PM_ANACHRONONAUT))){
 					if(mtmp->m_lev < mons[PM_MOTHER_HYDRA].mlevel)
 						mtmp->m_lev = mons[PM_MOTHER_HYDRA].mlevel;
 					set_mon_data(mtmp, PM_MOTHER_HYDRA);
+					mtmp->mhp = mtmp->mhpmax = (mtmp->m_lev*hd_size(mtmp->data))-1;
 					u.uevent.ukilled_hydra = 0;
+					if(canspotmon(mtmp)){
+						TRANSCENDENCE_IMPURITY_UP(FALSE)
+						IMPURITY_UP(u.uimp_deep_one)
+					}
 				}
 				if(mtmp->mtyp == PM_GOLD_GOLEM){
 					int golds = u.goldkamcount_tame + level.flags.goldkamcount_peace + level.flags.goldkamcount_hostile;
