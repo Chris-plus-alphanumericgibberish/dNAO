@@ -630,6 +630,7 @@ struct obj {
 			 otmp->otyp == RAPIER || \
 			 otmp->otyp == RAKUYO || \
 			 otmp->otyp == RAKUYO_SABER || \
+			 otmp->otyp == SOLDIER_S_RAPIER || \
 			 otmp->otyp == CROW_QUILL))
 #define is_rakuyo(otmp)	(otmp->otyp == RAKUYO || \
 			 otmp->otyp == RAKUYO_SABER || \
