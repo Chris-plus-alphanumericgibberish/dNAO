@@ -436,6 +436,8 @@ ENDMAP
 STAIR: (00,05), down
 STAIR: (72,13), up
 
+REGION:(17,01,27,02),unlit,"morgue"
+
 # Doors
 DOOR:closed,(02,04)
 DOOR:closed,(06,04)
