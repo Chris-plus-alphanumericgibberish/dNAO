@@ -21,6 +21,7 @@ E char *FDECL(fmt_ptr, (const genericptr,char *));
 /* ### allmain.c ### */
 
 E int FDECL(you_action_cost, (int, boolean));
+E int NDECL(san_threshhold);
 E void NDECL(moveloop);
 E void NDECL(stop_occupation);
 E void NDECL(display_gamewindows);

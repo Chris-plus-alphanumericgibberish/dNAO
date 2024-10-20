@@ -15506,8 +15506,25 @@ int vis;						/* True if action is at all visible to the player */
 		int returnvalue = 0;
 		boolean artif_hit = FALSE;
 		/* use guidance glyph */
-		if (youagr && melee && active_glyph(GUIDANCE))
-			doguidance(mdef, basedmg);
+		if (youagr && melee){
+			if(active_glyph(GUIDANCE))
+				doguidance(mdef, basedmg);
+			if(weapon){
+				if(weapon->oartifact == ART_HOLY_MOONLIGHT_SWORD){
+					if(u.uinsight >= 40)
+						doguidance(mdef, active_glyph(GUIDANCE) ? basedmg : basedmg/2);
+					else if(active_glyph(GUIDANCE)){
+						doguidance(mdef, (u.uinsight*basedmg)/40);
+					}
+					else {
+						doguidance(mdef, (u.uinsight*basedmg)/80);
+					}
+				}
+				else if(weapon->otyp == CHURCH_BLADE && u.uinsight >= 40){
+					doguidance(mdef, active_glyph(GUIDANCE) ? basedmg/2 : basedmg/4);
+				}
+			}
+		}
 		/* hits with a valid weapon proc effects of the weapon */
 		if (valid_weapon_attack) {
 			otmp = weapon;

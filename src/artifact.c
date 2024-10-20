@@ -5284,6 +5284,29 @@ boolean direct_weapon;
 			mdef->mstdy += rnd(u.uinsight/5);
 		}
 	}
+	//Banishes summoned monsters
+	if(otmp->otyp == CHURCH_HAMMER && !youdef && mdef && get_mx(mdef, MX_ESUM)){
+		*truedmgptr += 10*u.uinsight;
+	}
+
+	//Flogging raises sanity (note: this is "backwards" on purpose)
+	if((otmp->otyp == CANE && !youdef && mdef && is_serration_vulnerable(mdef) && u.uinsight >= rnd(100))
+	|| (otmp->otyp == WHIP_SAW && !youdef && mdef && hates_holy_mon(mdef) && u.uinsight >= rnd(100))
+	){
+		int reglevel = san_threshhold() + otmp->spe;
+		if(u.usanity < reglevel){
+			if(rn2(10) < basedmg)
+				change_usanity(1, FALSE);
+		}
+		else if(u.usanity < reglevel*2){
+			if(rn2(32) < basedmg)
+				change_usanity(1, FALSE);
+		}
+		else if(u.usanity < reglevel*3){
+			if(rn2(100) < basedmg)
+				change_usanity(1, FALSE);
+		}
+	}
 	if(otmp->otyp == ISAMUSEI && u.uinsight >= 10 && !on_level(&spire_level,&u.uz) && mdef){
 		if(youdef || !resist(mdef, WEAPON_CLASS, 0, TRUE)){
 			int factor = 20;

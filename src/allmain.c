@@ -1397,18 +1397,12 @@ you_regen_pw()
 	}
 }
 
-/* perform 1 turn's worth of time-dependent sanity modification, silently */
-void
-you_regen_san()
+int
+san_threshhold()
 {
 	// Threshold levels based on wis.
 	int reglevel = ACURR(A_WIS);
 	int insight = u.uinsight;
-
-	if(u.veil && In_depths(&u.uz)){
-		u.veil = FALSE;
-		change_uinsight(1);
-	}
 
 	// role bonuses
 	if (Role_if(PM_BARBARIAN))   reglevel += 10;
@@ -1501,6 +1495,20 @@ you_regen_san()
 	
 	// penalty for being itchy
 	reglevel -= u_healing_penalty();
+	
+	return reglevel;
+}
+
+/* perform 1 turn's worth of time-dependent sanity modification, silently */
+void
+you_regen_san()
+{
+	if(u.veil && In_depths(&u.uz)){
+		u.veil = FALSE;
+		change_uinsight(1);
+	}
+
+	int reglevel = san_threshhold();
 
 	// minimum 0
 	if (reglevel <= 0)

@@ -177,7 +177,7 @@ doread()
 			}
 			return MOVE_READ;
 		} else if(scroll->oartifact == ART_HOLY_MOONLIGHT_SWORD && scroll->lamplit){
-			/* Note: you can see the blade even when blid */
+			/* Note: you can see the blade even when blind */
 			if(u.uinsight < 2) {
 				pline("The glowing cyan blade is decorated with faint curves.");
 			}

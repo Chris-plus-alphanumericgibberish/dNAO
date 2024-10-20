@@ -936,6 +936,9 @@ struct obj {
 						  (otmp)->otyp == CROW_QUILL || \
 						  (otmp)->otyp == SET_OF_CROW_TALONS || \
 						  (otmp)->otyp == MOON_AXE || \
+						  (otmp)->otyp == CANE || \
+						  (otmp)->otyp == WHIP_SAW || \
+						  (otmp)->otyp == CHURCH_HAMMER || \
 						  (otmp)->otyp == ISAMUSEI || \
 						  (otmp)->otyp == DISKOS || \
 						  (otmp)->otyp == PINCER_STAFF || \
