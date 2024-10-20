@@ -3085,16 +3085,22 @@ static int wc;	/* current weight_cap(); valid after call to inv_weight() */
 int
 inv_weight()
 {
-	register struct obj *otmp = invent;
-	register int wt = 0;
+	struct obj *otmp = invent;
+	int wt = 0;
+	int objwt;
+	boolean nymph = youracedata->mlet == S_NYMPH;
+	int wtmod = mlev(&youmonst)*5;
 
 #ifndef GOLDOBJ
 	/* when putting stuff into containers, gold is inserted at the head
 	   of invent for easier manipulation by askchain & co, but it's also
 	   retained in u.ugold in order to keep the status line accurate; we
 	   mustn't add its weight in twice under that circumstance */
-	wt = (otmp && otmp->oclass == COIN_CLASS) ? 0 :
+	objwt = (otmp && otmp->oclass == COIN_CLASS) ? 0 :
 		(int)((u.ugold + 50L) / 100L);
+	if(nymph)
+		objwt = max(0, objwt - wtmod);
+	wt += objwt;
 #endif
 	while (otmp) {
 		//Correct artifact weights before adding them.  Because that code isn't being run.
@@ -3102,11 +3108,20 @@ inv_weight()
 #ifndef GOLDOBJ
 		if (!is_boulder(otmp) || !(throws_rocks(youracedata) || u.sealsActive&SEAL_YMIR))
 #else
-		if (otmp->oclass == COIN_CLASS)
-			wt += (int)(((long)otmp->quan + 50L) / 100L);
+		if (otmp->oclass == COIN_CLASS){
+			objwt = (int)(((long)otmp->quan + 50L) / 100L);
+			if(nymph)
+				objwt = max(0, objwt - wtmod);
+			wt += objwt;
+		}
 		else if (!is_boulder(otmp) || !(throws_rocks(youracedata) || u.sealsActive&SEAL_YMIR))
 #endif
-			wt += otmp->owt;
+		{
+			objwt = otmp->owt;
+			if(nymph)
+				objwt = max(0, objwt - wtmod);
+			wt += objwt;
+		}
 
 		if(otmp->oartifact == ART_IRON_BALL_OF_LEVITATION)
 			wt -= 2*otmp->owt;
@@ -3117,10 +3132,15 @@ inv_weight()
 	}
 	
 	if(u.usteed){
+		nymph = u.usteed->data->mlet == S_NYMPH;
+		wtmod = mlev(u.usteed)*5;
 		otmp = u.usteed->minvent;
 		while (otmp){
 			if(otmp->oartifact) otmp->owt = weight(otmp);
-			wt += otmp->owt;
+			objwt = otmp->owt;
+			if(nymph)
+				objwt = max(0, objwt - wtmod);
+			wt += objwt;
 			otmp = otmp->nobj;
 		}
 	}
