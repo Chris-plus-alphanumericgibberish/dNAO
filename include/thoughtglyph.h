@@ -108,13 +108,13 @@ static struct thoughtglyph thoughtglyphs[] =
 	0, 99, "A bestial figure takes refuge inside you." },
 
 	{ DEFILEMENT_GLYPH, NON_PM, DEFILEMENT,
-	18, 100, "A twisted bloodless hand rises from the mire of your soul." },
+	27, 100, "A twisted bloodless hand rises from the mire of your soul." },
 
 	{ WEED_GLYPH, NON_PM, LUMEN,
-	18, 100, "Tightly packed florets burst from your skull." },
+	27, 100, "Tightly packed florets burst from your skull." },
 
 	{ VACUOUS_GLYPH, NON_PM, ROTTEN_EYES,
-	18, 100, "Great jolts of lightning rot your brain into milky mushy eyes." },
+	27, 100, "Great jolts of lightning rot your brain into milky mushy eyes." },
 
 	{ ORRERY_GLYPH, PM_GROTESQUE_PEEPER, SIGHT,
 	16, 100, "Your brain blinks open. There is an eye within an eye within an eye within an...." },
