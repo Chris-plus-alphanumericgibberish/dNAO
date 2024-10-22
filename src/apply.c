@@ -4454,12 +4454,14 @@ use_smithing_hammer(struct obj *obj)
 		if(sword){
 			sword->spe = smithing_bonus();
 			sword->known = TRUE;
+			use_skill(P_SMITHING, 4*smithing_bonus());
 		}
-		use_skill(P_SMITHING, 1+smithing_bonus());
+		use_skill(P_SMITHING, 4*smithing_bonus());
 		exercise(A_STR, TRUE);
 		exercise(A_STR, TRUE);
 		exercise(A_DEX, TRUE);
 	}
+	use_skill(P_SMITHING, 2);
 
 	product = hold_another_object(product, "You can't pick up %s.",
 				   doname(product), (const char *)0);

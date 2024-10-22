@@ -589,7 +589,7 @@ smithing_object(struct obj *obj)
 					obj->oeroded--;
 				else if (obj->oeroded2 > 0)
 					obj->oeroded2--;
-				use_skill(P_SMITHING, 1);
+				use_skill(P_SMITHING, obj->oeroded+obj->oeroded2+1);
 				exercise(A_DEX, TRUE);
 			break;
 			case 3:
@@ -599,7 +599,7 @@ smithing_object(struct obj *obj)
 						if(obj->cobj && obj->spe > obj->cobj->spe) /*Note: base obj already incremented*/
 							obj->cobj->spe++;
 					You("successfully improve your %s.", xname(obj));
-					use_skill(P_SMITHING, 1);
+					use_skill(P_SMITHING, 2);
 					exercise(A_DEX, TRUE);
 					exercise(A_STR, TRUE);
 				}
@@ -625,7 +625,7 @@ smithing_object(struct obj *obj)
 							}
 						}
 						useup(crystal);
-						use_skill(P_SMITHING, crystal->spe);
+						use_skill(P_SMITHING, (crystal->spe+1)*2);
 						exercise(A_STR, TRUE);
 						exercise(A_DEX, TRUE);
 						exercise(A_INT, TRUE);
@@ -649,7 +649,7 @@ smithing_object(struct obj *obj)
 					add_oprop(obj, OPROP_FIREW);
 				add_oprop(obj, OPROP_INSTW);
 				add_oprop(obj, OPROP_SMITHU);
-				use_skill(P_SMITHING, 4);
+				use_skill(P_SMITHING, 2*4);
 			}
 			break;
 			case 5:{
@@ -669,7 +669,7 @@ smithing_object(struct obj *obj)
 					add_oprop(obj, OPROP_COLDW);
 				add_oprop(obj, OPROP_INSTW);
 				add_oprop(obj, OPROP_SMITHU);
-				use_skill(P_SMITHING, 4);
+				use_skill(P_SMITHING, 2*4);
 			}
 			break;
 			case 6:{
@@ -689,7 +689,7 @@ smithing_object(struct obj *obj)
 					add_oprop(obj, OPROP_ELECW);
 				add_oprop(obj, OPROP_INSTW);
 				add_oprop(obj, OPROP_SMITHU);
-				use_skill(P_SMITHING, 5);
+				use_skill(P_SMITHING, 2*5);
 			}
 			break;
 			case 7:{
@@ -709,7 +709,7 @@ smithing_object(struct obj *obj)
 					add_oprop(obj, OPROP_ACIDW);
 				add_oprop(obj, OPROP_INSTW);
 				add_oprop(obj, OPROP_SMITHU);
-				use_skill(P_SMITHING, 4);
+				use_skill(P_SMITHING, 2*4);
 			}
 			break;
 			case 8:{
@@ -729,7 +729,7 @@ smithing_object(struct obj *obj)
 					add_oprop(obj, OPROP_MAGCW);
 				add_oprop(obj, OPROP_INSTW);
 				add_oprop(obj, OPROP_SMITHU);
-				use_skill(P_SMITHING, 2);
+				use_skill(P_SMITHING, 2*2);
 			}
 			break;
 			case 9:{
@@ -752,7 +752,7 @@ smithing_object(struct obj *obj)
 					add_oprop(obj, OPROP_UNHYW);
 				}
 				add_oprop(obj, OPROP_INSTW);
-				use_skill(P_SMITHING, 5);
+				use_skill(P_SMITHING, 2*5);
 			}
 			break;
 			case 10:{
@@ -776,7 +776,7 @@ smithing_object(struct obj *obj)
 								   The(aobjnam(new, "slip")),
 								   (const char *)0);
 					exercise(A_DEX, TRUE);
-					use_skill(P_SMITHING, 2);
+					use_skill(P_SMITHING, 2*2);
 				}
 				else if(obj->spe == 3){
 					You("break up the chunk of columnar crystals.");
@@ -815,7 +815,7 @@ smithing_object(struct obj *obj)
 								   (const char *)0);
 					exercise(A_DEX, TRUE);
 					exercise(A_STR, TRUE);
-					use_skill(P_SMITHING, 4);
+					use_skill(P_SMITHING, 2*4);
 				}
 				else if(obj->spe == 4){
 					You("break up the mass of columnar crystals.");
@@ -874,7 +874,7 @@ smithing_object(struct obj *obj)
 					exercise(A_DEX, TRUE);
 					exercise(A_STR, TRUE);
 					exercise(A_STR, TRUE);
-					use_skill(P_SMITHING, 8);
+					use_skill(P_SMITHING, 2*8);
 				}
 				return;
 			}
