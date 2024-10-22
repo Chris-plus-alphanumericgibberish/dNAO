@@ -1027,14 +1027,6 @@ register struct monst *mtmp;
 			obj = (struct obj *)0;
 			goto default_1;
 		}break;
-	    case PM_DANCING_BLADE:
-			obj = mksobj_at(TWO_HANDED_SWORD, x, y, MKOBJ_NOINIT);
-			obj->blessed = TRUE;
-			obj->cursed = FALSE;
-			obj->spe = 7;
-			obj->objsize = MZ_LARGE;
-			fix_object(obj);
-		break;
 	    case PM_IRON_GOLEM:
 			obj = mksobj_at(PLATE_MAIL, x, y, MKOBJ_NOINIT);
 			set_material_gm(obj, IRON);
@@ -2869,7 +2861,7 @@ mon_can_see_mon(looker, lookie)
 		//may still be able to feel target adjacent
 	}
 	
-	if(looker->mtyp == PM_DANCING_BLADE){
+	if(looker->mtyp == PM_DANCING_BLADE && looker->mvar_suryaID){
 		struct monst *surya;
 		for(surya = fmon; surya; surya = surya->nmon) if(surya->m_id == looker->mvar_suryaID) break;
 		if(surya){
@@ -3016,7 +3008,7 @@ struct monst *looker;
 		//may still be able to feel target adjacent
 	}
 	
-	if(looker->mtyp == PM_DANCING_BLADE){
+	if(looker->mtyp == PM_DANCING_BLADE && looker->mvar_suryaID){
 		struct monst *surya;
 		for(surya = fmon; surya; surya = surya->nmon) if(surya->m_id == looker->mvar_suryaID) break;
 		if(surya && mon_can_see_you(surya)) return TRUE;
@@ -3253,7 +3245,6 @@ mfndpos(mon, poss, info, flag)
 {
 	struct permonst *mdat = mon->data;
 	struct monst *witw = 0;
-	struct monst *madjacent = 0;
 	register xchar x,y,nx,ny;
 	register int cnt = 0;
 	register uchar ntyp;
@@ -3269,13 +3260,7 @@ mfndpos(mon, poss, info, flag)
 	if(mdat->mtyp == PM_WIDE_CLUBBED_TENTACLE){
 		for(witw = fmon; witw; witw = witw->nmon) if(witw->mtyp == PM_KETO) break;
 	}
-	
-	if(mdat->mtyp == PM_DANCING_BLADE){
-		for(madjacent = fmon; madjacent; madjacent = madjacent->nmon)
-			if(madjacent->mtyp == PM_SURYA_DEVA && madjacent->m_id == mon->mvar_suryaID)
-				break;
-	}
-	
+
 	x = mon->mx;
 	y = mon->my;
 	nowtyp = levl[x][y].typ;
@@ -3372,9 +3357,6 @@ nexttry:
 			onlineu(nx, ny) && (lined_up(mon) || !rn2(4))) continue;
 		if(witw && dist2(nx, ny, witw->mx, witw->my) > 32 && 
 			dist2(nx, ny, witw->mx, witw->my) >= dist2(mon->mx, mon->my, witw->mx, witw->my)) continue;
-		if(madjacent && distmin(nx, ny, madjacent->mx, madjacent->my) > 1 && 
-			dist2(nx, ny, madjacent->mx, madjacent->my) >= dist2(mon->mx, mon->my, madjacent->mx, madjacent->my) &&
-			!(m_at(nx, ny) && distmin(nx, ny, madjacent->mx, madjacent->my) <= 2)) continue;
 		if(mdat->mtyp == PM_HOOLOOVOO
 			&& (IS_ROCK(levl[mon->mx][mon->my].typ) && space_adjacent(mon->mx,mon->my))
 			&& !(IS_ROCK(levl[nx][ny].typ) && space_adjacent(nx,ny))
@@ -5104,18 +5086,6 @@ register struct monst *mtmp;
 					}
 				}
 				mmtmp = &(mon->nmon);
-			}
-		}
-	}
-	//Remove linked sword
-	if(mtmp->mtyp == PM_SURYA_DEVA){
-		struct monst *mon, *mtmp2;
-		for (mon = fmon; mon; mon = mtmp2){
-			mtmp2 = mon->nmon;
-			if(mon->mtyp == PM_DANCING_BLADE && mon->mvar_suryaID == mtmp->m_id){
-				if (DEADMONSTER(mon)) continue;
-				mon->mhp = -10;
-				monkilled(mon,"",AD_DRLI);
 			}
 		}
 	}
@@ -6991,7 +6961,7 @@ register struct monst *mtmp;
 	} else
 		adjalign(-1);		/* attacking peaceful monsters is bad */
 	
-	if(mtmp->mtyp == PM_DANCING_BLADE){
+	if(mtmp->mtyp == PM_DANCING_BLADE && mtmp->mvar_suryaID){
 		struct monst *surya;
 		for(surya = fmon; surya; surya = surya->nmon) if(surya->m_id == mtmp->mvar_suryaID) break;
 		if(surya) setmangry(surya);

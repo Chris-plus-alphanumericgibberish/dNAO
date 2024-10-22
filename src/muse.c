@@ -240,6 +240,7 @@ struct obj *otmp;
 #define MUSE_LIZARD_CORPSE 19
 #define MUSE_LIFE_FLASK 20
 #define MUSE_HEALING_SURGE 21
+#define MUSE_DANCING_SWORD 22
 /*
 #define MUSE_INNATE_TPT 9999
  * We cannot use this.  Since monsters get unlimited teleportation, if they
@@ -344,6 +345,16 @@ struct monst *mtmp;
 			if(mtarg->mhp*fraction >= mtarg->mhpmax) continue;
 		    m.has_defense = MUSE_HEALING_SURGE;
 		    return TRUE;
+		}
+	}
+	if(mtmp->mtyp == PM_SURYA_DEVA && mtmp->summonpwr == 0){
+		for(mtarg = fmon; mtarg; mtarg = mtarg->nmon){
+			if(DEADMONSTER(mtarg)) continue;
+			if(distmin(mtmp->mx,mtmp->my, mtarg->mx,mtarg->my) > 8) continue;
+			if(!clear_path(mtmp->mx,mtmp->my, mtarg->mx,mtarg->my)) continue;
+			if((mtmp->mtame && mtarg->mtame) || !mm_grudge(mtmp, mtarg, FALSE)) continue;
+			m.has_defense = MUSE_DANCING_SWORD;
+			return TRUE;
 		}
 	}
 	if(mtmp->mhp >= mtmp->mhpmax
@@ -1006,6 +1017,26 @@ mon_tele:
 		mon_doturn(mtmp);
 		mtmp->mspec_used = 3;
 		return DEADMONSTER(mtmp) ? 1 : 2;
+	case MUSE_DANCING_SWORD:
+	{
+		struct monst * blade;
+		blade = makemon(&mons[PM_DANCING_BLADE], x(mtmp), y(mtmp), MM_ADJACENTOK | MM_NOCOUNTBIRTH | MM_ESUM);
+		if (blade) {
+			if (canspotmon(blade))
+				pline("%s draws %s sword!", Monnam(mtmp), mhis(mtmp));
+			mark_mon_as_summoned(blade, mtmp, 88, 0);
+			blade->mvar_suryaID = mtmp->m_id;
+			if(mtmp->mtame){
+				blade = tamedog(blade, (struct obj *) 0);
+			}
+			else if(mtmp->mpeaceful){
+				blade->mpeaceful = TRUE;
+			}
+		}
+		if(!mtmp->mpeaceful)
+			stop_occupation();
+		return 0;
+	}
 	case 0: return 0; /* i.e. an exploded wand */
 	default: impossible("%s wanted to perform action %d?", Monnam(mtmp),
 			m.has_defense);

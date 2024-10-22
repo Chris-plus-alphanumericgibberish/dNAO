@@ -7152,13 +7152,6 @@ int sx,sy;
 			}
 		}
 		if(mon){
-			if(mon->mtyp == PM_SURYA_DEVA){
-				struct monst *blade;
-				for(blade = fmon; blade; blade = blade->nmon) if(blade->mtyp == PM_DANCING_BLADE && mon->m_id == blade->mvar_suryaID){
-					mongone(blade);
-					break;
-				}
-			}
 			if(mon->mtyp == PM_WITCH || mon->mtyp == PM_APPRENTICE_WITCH){
 				struct monst *rat;
 				for(rat = fmon; rat; rat = rat->nmon) if(rat->mtyp == PM_WITCH_S_FAMILIAR && mon->m_id == rat->mvar_witchID){

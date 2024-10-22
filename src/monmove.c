@@ -3046,19 +3046,6 @@ not_special:
 	    /* Place a segment at the old position. */
 	    if (mtmp->wormno) worm_move(mtmp);
 		
-		if(mtmp->mtyp == PM_SURYA_DEVA){
-			struct monst *blade;
-			for(blade = fmon; blade; blade = blade->nmon)
-				if(blade->mtyp == PM_DANCING_BLADE && mtmp->m_id == blade->mvar_suryaID && !DEADMONSTER(blade))
-					break;
-			if(blade){
-				int bx = blade->mx, by = blade->my;
-				remove_monster(bx, by);
-				place_monster(blade, omx, omy);
-				newsym(omx,omy);
-				newsym(bx,by);
-			}
-		}
 	} else {
 	    if(is_unicorn(ptr) && rn2(2) && !tele_restrict(mtmp) && !noactions(mtmp))
 		{

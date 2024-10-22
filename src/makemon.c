@@ -5408,18 +5408,6 @@ int mmflags;
 			    otmp = mongets(mtmp, ARCHAIC_GAUNTLETS, mkobjflags);
 			    if(otmp) otmp->oerodeproof = TRUE;
 			} else if(ptr->mtyp == PM_SURYA_DEVA){
-				struct monst *dancer;
-				int mmflags = MM_ADJACENTOK|MM_NOCOUNTBIRTH;
-				if (get_mx(mtmp, MX_ESUM))
-					mmflags |= MM_ESUM;
-				dancer = makemon(&mons[PM_DANCING_BLADE], mtmp->mx, mtmp->my, mmflags);
-				if(dancer){
-					dancer->mvar_suryaID = (long)mtmp->m_id;
-					dancer->mpeaceful = mtmp->mpeaceful;
-					if (mmflags&MM_ESUM)
-						mark_mon_as_summoned(dancer, mtmp, ESUMMON_PERMANENT, 0);
-				}
-
 			    otmp = mongets(mtmp, PLATE_MAIL, mkobjflags);
 				if(otmp){
 					set_material_gm(otmp, GOLD);

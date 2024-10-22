@@ -767,7 +767,6 @@ boolean portal;
 	    mtmp2 = mtmp->nmon;
 	    if (DEADMONSTER(mtmp)) continue;
 	    if (pets_only && !mtmp->mtame) continue;
-	    if (mtmp->mtyp == PM_DANCING_BLADE) continue;
 		follow_dist = pet_dist;
 		if(Race_if(PM_VAMPIRE)){
 			if(is_vampire(mtmp->data)){
@@ -876,26 +875,6 @@ boolean portal;
 			mtmp->nmon = mydogs;
 			mydogs = mtmp;
 			summoner_gone(mtmp, TRUE);	/* has to be after being added to mydogs */
-
-			if(mtmp->mtyp == PM_SURYA_DEVA){
-				struct monst *blade;
-				for(blade = fmon; blade; blade = blade->nmon) if(blade->mtyp == PM_DANCING_BLADE && mtmp->m_id == blade->mvar_suryaID) break;
-				if(blade) {
-					if(mtmp2 == blade) mtmp2 = mtmp2->nmon; /*mtmp2 is about to end up on the migrating mons chain*/
-					/* set minvent's obj->no_charge to 0 */
-					for(obj = blade->minvent; obj; obj = obj->nobj) {
-						if (Has_contents(obj))
-						picked_container(obj);	/* does the right thing */
-						obj->no_charge = 0;
-					}
-					relmon(blade);
-					newsym(blade->mx,blade->my);
-					blade->mx = blade->my = 0; /* avoid mnexto()/MON_AT() problem */
-					blade->mlstmv = monstermoves;
-					blade->nmon = mydogs;
-					mydogs = blade;
-				}
-			}
 	    } else if (quest_status.touched_artifact && Race_if(PM_DROW) && !flags.initgend && Role_if(PM_NOBLEMAN) && mtmp->m_id == quest_status.leader_m_id) {
 			mongone(mtmp);
 			u.uevent.qcompleted = TRUE;
@@ -921,10 +900,7 @@ boolean portal;
 			/* we want to be able to find him when his next resurrection
 			   chance comes up, but have him resume his present location
 			   if player returns to this level before that time */
-			if(mtmp->mtyp == PM_SURYA_DEVA && mtmp2 && mtmp2->mtyp == PM_DANCING_BLADE && mtmp2->mvar_suryaID == mtmp->m_id)
-				mtmp2 = mtmp2->nmon; /*mtmp2 is about to end up on the migrating mons chain*/
-			if(mtmp->mtyp != PM_DANCING_BLADE) migrate_to_level(mtmp, ledger_no(&u.uz),
-					 MIGR_EXACT_XY, (coord *)0);
+			migrate_to_level(mtmp, ledger_no(&u.uz), MIGR_EXACT_XY, (coord *)0);
 	    }
 	}
 	/* any of your summons that *weren't* kept now disappear */
@@ -1010,45 +986,6 @@ migrate_to_level(mtmp, tolev, xyloc, cc)
 	mtmp->mux = new_lev.dnum;
 	mtmp->muy = new_lev.dlevel;
 	mtmp->mx = mtmp->my = 0;	/* this implies migration */
-	
-	if(mtmp->mtyp == PM_SURYA_DEVA){
-		struct monst *blade;
-		for(blade = fmon; blade; blade = blade->nmon) if(blade->mtyp == PM_DANCING_BLADE && mtmp->m_id == blade->mvar_suryaID) break;
-		if(blade) {
-			/* set minvent's obj->no_charge to 0 */
-			for(obj = blade->minvent; obj; obj = obj->nobj) {
-				if (Has_contents(obj))
-				picked_container(obj);	/* does the right thing */
-				obj->no_charge = 0;
-			}
-
-			if (blade->mleashed) {
-				blade->mtame--;
-				if (!blade->mtame) untame(blade, 1);
-				m_unleash(blade, TRUE);
-			}
-			
-			relmon(blade);
-			newsym(blade->mx,blade->my);
-			blade->nmon = migrating_mons;
-			migrating_mons = blade;
-			
-			new_lev.dnum = ledger_to_dnum((xchar)tolev);
-			new_lev.dlevel = ledger_to_dlev((xchar)tolev);
-			/* overload mtmp->[mx,my], mtmp->[mux,muy], and mtmp->mtrack[] as */
-			/* destination codes (setup flag bits before altering mx or my) */
-			xyflags = (depth(&new_lev) < depth(&u.uz));	/* 1 => up */
-			if (In_W_tower(blade->mx, blade->my, &u.uz)) xyflags |= 2;
-			blade->mlstmv = monstermoves;
-			blade->mtrack[1].x = cc ? cc->x : blade->mx;
-			blade->mtrack[1].y = cc ? cc->y : blade->my;
-			blade->mtrack[0].x = xyloc;
-			blade->mtrack[0].y = xyflags;
-			blade->mux = new_lev.dnum;
-			blade->muy = new_lev.dlevel;
-			blade->mx = blade->my = 0;	/* this implies migration */
-		}
-	}
 }
 
 #endif /* OVLB */
