@@ -219,6 +219,7 @@
 	_50, _51, _52, _53, _54, _55, _56, _57, _58, _59, \
 	N, ...) N
 
+
 #define NARGS(...) _GET_NTH_ARG(dummy, ##__VA_ARGS__,\
 	59, 58, 57, 56, 55, 54, 53, 52, 51, 50, \
 	49, 48, 47, 46, 45, 44, 43, 42, 41, 40, \
@@ -328,6 +329,7 @@
 #define _OPEN_C27(...) __VA_ARGS__
 #define _OPEN_C28(...) __VA_ARGS__
 #define _OPEN_C29(...) __VA_ARGS__
+#define _OPEN_C30(...) __VA_ARGS__
 
 #define SET01(_arg01, ...) _EXPAND32(DSET01(_arg01, ## __VA_ARGS__, ))
 #define SET02(_arg01, _arg02, ...) _EXPAND32(DSET02(_arg01, _arg02, ## __VA_ARGS__, ))
@@ -358,6 +360,7 @@
 #define SET27(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, ...) _EXPAND32(DSET27(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, ## __VA_ARGS__, ))
 #define SET28(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, ...) _EXPAND32(DSET28(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, ## __VA_ARGS__, ))
 #define SET29(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, ...) _EXPAND32(DSET29(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, ## __VA_ARGS__, ))
+#define SET30(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, ...) _EXPAND32(DSET30(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, ## __VA_ARGS__, ))
 
 #define DSET01(...) _SET01(__VA_ARGS__)
 #define DSET02(...) _SET02(__VA_ARGS__)
@@ -388,6 +391,7 @@
 #define DSET27(...) _SET27(__VA_ARGS__)
 #define DSET28(...) _SET28(__VA_ARGS__)
 #define DSET29(...) _SET29(__VA_ARGS__)
+#define DSET30(...) _SET30(__VA_ARGS__)
 
 #define _SET01(_arg01, _nwarg, ...) SET01_DISC_ ## _nwarg (_arg01, _OPEN_ ## _nwarg, __VA_ARGS__)
 #define _SET02(_arg01, _arg02, _nwarg, ...) SET02_DISC_ ## _nwarg (_arg01, _arg02, _OPEN_ ## _nwarg, __VA_ARGS__)
@@ -418,6 +422,7 @@
 #define _SET27(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _nwarg, ...) SET27_DISC_ ## _nwarg (_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _OPEN_ ## _nwarg, __VA_ARGS__)
 #define _SET28(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _nwarg, ...) SET28_DISC_ ## _nwarg (_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _OPEN_ ## _nwarg, __VA_ARGS__)
 #define _SET29(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _nwarg, ...) SET29_DISC_ ## _nwarg (_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _OPEN_ ## _nwarg, __VA_ARGS__)
+#define _SET30(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, _nwarg, ...) SET30_DISC_ ## _nwarg (_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, _OPEN_ ## _nwarg, __VA_ARGS__)
 
 #define _SET01_ID() _SET01
 #define _SET02_ID() _SET02
@@ -448,6 +453,7 @@
 #define _SET27_ID() _SET27
 #define _SET28_ID() _SET28
 #define _SET29_ID() _SET29
+#define _SET30_ID() _SET30
 
 #define SET01_DISC_(_arg01, ...) CALL_MACRO_X_FOR_EACH(_DEPARENC) _DEPAREN(_arg01)
 #define SET02_DISC_(_arg01, _arg02, ...) CALL_MACRO_X_FOR_EACH(_DEPARENC ,_arg01) _DEPAREN(_arg02)
@@ -478,6 +484,7 @@
 #define SET27_DISC_(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, ...) CALL_MACRO_X_FOR_EACH(_DEPARENC ,_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26) _DEPAREN(_arg27)
 #define SET28_DISC_(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, ...) CALL_MACRO_X_FOR_EACH(_DEPARENC ,_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27) _DEPAREN(_arg28)
 #define SET29_DISC_(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, ...) CALL_MACRO_X_FOR_EACH(_DEPARENC ,_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28) _DEPAREN(_arg29)
+#define SET30_DISC_(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, ...) CALL_MACRO_X_FOR_EACH(_DEPARENC ,_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29) _DEPAREN(_arg30)
 
 
 
@@ -511,6 +518,7 @@
 #define SET01_DISC_C27(...) SET01_REPL_C27
 #define SET01_DISC_C28(...) SET01_REPL_C28
 #define SET01_DISC_C29(...) SET01_REPL_C29
+#define SET01_DISC_C30(...) SET01_REPL_C30
 #define SET02_DISC_C01(...) SET02_REPL_C01
 #define SET02_DISC_C02(...) SET02_REPL_C02
 #define SET02_DISC_C03(...) SET02_REPL_C03
@@ -540,6 +548,7 @@
 #define SET02_DISC_C27(...) SET02_REPL_C27
 #define SET02_DISC_C28(...) SET02_REPL_C28
 #define SET02_DISC_C29(...) SET02_REPL_C29
+#define SET02_DISC_C30(...) SET02_REPL_C30
 #define SET03_DISC_C01(...) SET03_REPL_C01
 #define SET03_DISC_C02(...) SET03_REPL_C02
 #define SET03_DISC_C03(...) SET03_REPL_C03
@@ -569,6 +578,7 @@
 #define SET03_DISC_C27(...) SET03_REPL_C27
 #define SET03_DISC_C28(...) SET03_REPL_C28
 #define SET03_DISC_C29(...) SET03_REPL_C29
+#define SET03_DISC_C30(...) SET03_REPL_C30
 #define SET04_DISC_C01(...) SET04_REPL_C01
 #define SET04_DISC_C02(...) SET04_REPL_C02
 #define SET04_DISC_C03(...) SET04_REPL_C03
@@ -598,6 +608,7 @@
 #define SET04_DISC_C27(...) SET04_REPL_C27
 #define SET04_DISC_C28(...) SET04_REPL_C28
 #define SET04_DISC_C29(...) SET04_REPL_C29
+#define SET04_DISC_C30(...) SET04_REPL_C30
 #define SET05_DISC_C01(...) SET05_REPL_C01
 #define SET05_DISC_C02(...) SET05_REPL_C02
 #define SET05_DISC_C03(...) SET05_REPL_C03
@@ -627,6 +638,7 @@
 #define SET05_DISC_C27(...) SET05_REPL_C27
 #define SET05_DISC_C28(...) SET05_REPL_C28
 #define SET05_DISC_C29(...) SET05_REPL_C29
+#define SET05_DISC_C30(...) SET05_REPL_C30
 #define SET06_DISC_C01(...) SET06_REPL_C01
 #define SET06_DISC_C02(...) SET06_REPL_C02
 #define SET06_DISC_C03(...) SET06_REPL_C03
@@ -656,6 +668,7 @@
 #define SET06_DISC_C27(...) SET06_REPL_C27
 #define SET06_DISC_C28(...) SET06_REPL_C28
 #define SET06_DISC_C29(...) SET06_REPL_C29
+#define SET06_DISC_C30(...) SET06_REPL_C30
 #define SET07_DISC_C01(...) SET07_REPL_C01
 #define SET07_DISC_C02(...) SET07_REPL_C02
 #define SET07_DISC_C03(...) SET07_REPL_C03
@@ -685,6 +698,7 @@
 #define SET07_DISC_C27(...) SET07_REPL_C27
 #define SET07_DISC_C28(...) SET07_REPL_C28
 #define SET07_DISC_C29(...) SET07_REPL_C29
+#define SET07_DISC_C30(...) SET07_REPL_C30
 #define SET08_DISC_C01(...) SET08_REPL_C01
 #define SET08_DISC_C02(...) SET08_REPL_C02
 #define SET08_DISC_C03(...) SET08_REPL_C03
@@ -714,6 +728,7 @@
 #define SET08_DISC_C27(...) SET08_REPL_C27
 #define SET08_DISC_C28(...) SET08_REPL_C28
 #define SET08_DISC_C29(...) SET08_REPL_C29
+#define SET08_DISC_C30(...) SET08_REPL_C30
 #define SET09_DISC_C01(...) SET09_REPL_C01
 #define SET09_DISC_C02(...) SET09_REPL_C02
 #define SET09_DISC_C03(...) SET09_REPL_C03
@@ -743,6 +758,7 @@
 #define SET09_DISC_C27(...) SET09_REPL_C27
 #define SET09_DISC_C28(...) SET09_REPL_C28
 #define SET09_DISC_C29(...) SET09_REPL_C29
+#define SET09_DISC_C30(...) SET09_REPL_C30
 #define SET10_DISC_C01(...) SET10_REPL_C01
 #define SET10_DISC_C02(...) SET10_REPL_C02
 #define SET10_DISC_C03(...) SET10_REPL_C03
@@ -772,6 +788,7 @@
 #define SET10_DISC_C27(...) SET10_REPL_C27
 #define SET10_DISC_C28(...) SET10_REPL_C28
 #define SET10_DISC_C29(...) SET10_REPL_C29
+#define SET10_DISC_C30(...) SET10_REPL_C30
 #define SET11_DISC_C01(...) SET11_REPL_C01
 #define SET11_DISC_C02(...) SET11_REPL_C02
 #define SET11_DISC_C03(...) SET11_REPL_C03
@@ -801,6 +818,7 @@
 #define SET11_DISC_C27(...) SET11_REPL_C27
 #define SET11_DISC_C28(...) SET11_REPL_C28
 #define SET11_DISC_C29(...) SET11_REPL_C29
+#define SET11_DISC_C30(...) SET11_REPL_C30
 #define SET12_DISC_C01(...) SET12_REPL_C01
 #define SET12_DISC_C02(...) SET12_REPL_C02
 #define SET12_DISC_C03(...) SET12_REPL_C03
@@ -830,6 +848,7 @@
 #define SET12_DISC_C27(...) SET12_REPL_C27
 #define SET12_DISC_C28(...) SET12_REPL_C28
 #define SET12_DISC_C29(...) SET12_REPL_C29
+#define SET12_DISC_C30(...) SET12_REPL_C30
 #define SET13_DISC_C01(...) SET13_REPL_C01
 #define SET13_DISC_C02(...) SET13_REPL_C02
 #define SET13_DISC_C03(...) SET13_REPL_C03
@@ -859,6 +878,7 @@
 #define SET13_DISC_C27(...) SET13_REPL_C27
 #define SET13_DISC_C28(...) SET13_REPL_C28
 #define SET13_DISC_C29(...) SET13_REPL_C29
+#define SET13_DISC_C30(...) SET13_REPL_C30
 #define SET14_DISC_C01(...) SET14_REPL_C01
 #define SET14_DISC_C02(...) SET14_REPL_C02
 #define SET14_DISC_C03(...) SET14_REPL_C03
@@ -888,6 +908,7 @@
 #define SET14_DISC_C27(...) SET14_REPL_C27
 #define SET14_DISC_C28(...) SET14_REPL_C28
 #define SET14_DISC_C29(...) SET14_REPL_C29
+#define SET14_DISC_C30(...) SET14_REPL_C30
 #define SET15_DISC_C01(...) SET15_REPL_C01
 #define SET15_DISC_C02(...) SET15_REPL_C02
 #define SET15_DISC_C03(...) SET15_REPL_C03
@@ -917,6 +938,7 @@
 #define SET15_DISC_C27(...) SET15_REPL_C27
 #define SET15_DISC_C28(...) SET15_REPL_C28
 #define SET15_DISC_C29(...) SET15_REPL_C29
+#define SET15_DISC_C30(...) SET15_REPL_C30
 #define SET16_DISC_C01(...) SET16_REPL_C01
 #define SET16_DISC_C02(...) SET16_REPL_C02
 #define SET16_DISC_C03(...) SET16_REPL_C03
@@ -946,6 +968,7 @@
 #define SET16_DISC_C27(...) SET16_REPL_C27
 #define SET16_DISC_C28(...) SET16_REPL_C28
 #define SET16_DISC_C29(...) SET16_REPL_C29
+#define SET16_DISC_C30(...) SET16_REPL_C30
 #define SET17_DISC_C01(...) SET17_REPL_C01
 #define SET17_DISC_C02(...) SET17_REPL_C02
 #define SET17_DISC_C03(...) SET17_REPL_C03
@@ -975,6 +998,7 @@
 #define SET17_DISC_C27(...) SET17_REPL_C27
 #define SET17_DISC_C28(...) SET17_REPL_C28
 #define SET17_DISC_C29(...) SET17_REPL_C29
+#define SET17_DISC_C30(...) SET17_REPL_C30
 #define SET18_DISC_C01(...) SET18_REPL_C01
 #define SET18_DISC_C02(...) SET18_REPL_C02
 #define SET18_DISC_C03(...) SET18_REPL_C03
@@ -1004,6 +1028,7 @@
 #define SET18_DISC_C27(...) SET18_REPL_C27
 #define SET18_DISC_C28(...) SET18_REPL_C28
 #define SET18_DISC_C29(...) SET18_REPL_C29
+#define SET18_DISC_C30(...) SET18_REPL_C30
 #define SET19_DISC_C01(...) SET19_REPL_C01
 #define SET19_DISC_C02(...) SET19_REPL_C02
 #define SET19_DISC_C03(...) SET19_REPL_C03
@@ -1033,6 +1058,7 @@
 #define SET19_DISC_C27(...) SET19_REPL_C27
 #define SET19_DISC_C28(...) SET19_REPL_C28
 #define SET19_DISC_C29(...) SET19_REPL_C29
+#define SET19_DISC_C30(...) SET19_REPL_C30
 #define SET20_DISC_C01(...) SET20_REPL_C01
 #define SET20_DISC_C02(...) SET20_REPL_C02
 #define SET20_DISC_C03(...) SET20_REPL_C03
@@ -1062,6 +1088,7 @@
 #define SET20_DISC_C27(...) SET20_REPL_C27
 #define SET20_DISC_C28(...) SET20_REPL_C28
 #define SET20_DISC_C29(...) SET20_REPL_C29
+#define SET20_DISC_C30(...) SET20_REPL_C30
 #define SET21_DISC_C01(...) SET21_REPL_C01
 #define SET21_DISC_C02(...) SET21_REPL_C02
 #define SET21_DISC_C03(...) SET21_REPL_C03
@@ -1091,6 +1118,7 @@
 #define SET21_DISC_C27(...) SET21_REPL_C27
 #define SET21_DISC_C28(...) SET21_REPL_C28
 #define SET21_DISC_C29(...) SET21_REPL_C29
+#define SET21_DISC_C30(...) SET21_REPL_C30
 #define SET22_DISC_C01(...) SET22_REPL_C01
 #define SET22_DISC_C02(...) SET22_REPL_C02
 #define SET22_DISC_C03(...) SET22_REPL_C03
@@ -1120,6 +1148,7 @@
 #define SET22_DISC_C27(...) SET22_REPL_C27
 #define SET22_DISC_C28(...) SET22_REPL_C28
 #define SET22_DISC_C29(...) SET22_REPL_C29
+#define SET22_DISC_C30(...) SET22_REPL_C30
 #define SET23_DISC_C01(...) SET23_REPL_C01
 #define SET23_DISC_C02(...) SET23_REPL_C02
 #define SET23_DISC_C03(...) SET23_REPL_C03
@@ -1149,6 +1178,7 @@
 #define SET23_DISC_C27(...) SET23_REPL_C27
 #define SET23_DISC_C28(...) SET23_REPL_C28
 #define SET23_DISC_C29(...) SET23_REPL_C29
+#define SET23_DISC_C30(...) SET23_REPL_C30
 #define SET24_DISC_C01(...) SET24_REPL_C01
 #define SET24_DISC_C02(...) SET24_REPL_C02
 #define SET24_DISC_C03(...) SET24_REPL_C03
@@ -1178,6 +1208,7 @@
 #define SET24_DISC_C27(...) SET24_REPL_C27
 #define SET24_DISC_C28(...) SET24_REPL_C28
 #define SET24_DISC_C29(...) SET24_REPL_C29
+#define SET24_DISC_C30(...) SET24_REPL_C30
 #define SET25_DISC_C01(...) SET25_REPL_C01
 #define SET25_DISC_C02(...) SET25_REPL_C02
 #define SET25_DISC_C03(...) SET25_REPL_C03
@@ -1207,6 +1238,7 @@
 #define SET25_DISC_C27(...) SET25_REPL_C27
 #define SET25_DISC_C28(...) SET25_REPL_C28
 #define SET25_DISC_C29(...) SET25_REPL_C29
+#define SET25_DISC_C30(...) SET25_REPL_C30
 #define SET26_DISC_C01(...) SET26_REPL_C01
 #define SET26_DISC_C02(...) SET26_REPL_C02
 #define SET26_DISC_C03(...) SET26_REPL_C03
@@ -1236,6 +1268,7 @@
 #define SET26_DISC_C27(...) SET26_REPL_C27
 #define SET26_DISC_C28(...) SET26_REPL_C28
 #define SET26_DISC_C29(...) SET26_REPL_C29
+#define SET26_DISC_C30(...) SET26_REPL_C30
 #define SET27_DISC_C01(...) SET27_REPL_C01
 #define SET27_DISC_C02(...) SET27_REPL_C02
 #define SET27_DISC_C03(...) SET27_REPL_C03
@@ -1265,6 +1298,7 @@
 #define SET27_DISC_C27(...) SET27_REPL_C27
 #define SET27_DISC_C28(...) SET27_REPL_C28
 #define SET27_DISC_C29(...) SET27_REPL_C29
+#define SET27_DISC_C30(...) SET27_REPL_C30
 #define SET28_DISC_C01(...) SET28_REPL_C01
 #define SET28_DISC_C02(...) SET28_REPL_C02
 #define SET28_DISC_C03(...) SET28_REPL_C03
@@ -1294,6 +1328,7 @@
 #define SET28_DISC_C27(...) SET28_REPL_C27
 #define SET28_DISC_C28(...) SET28_REPL_C28
 #define SET28_DISC_C29(...) SET28_REPL_C29
+#define SET28_DISC_C30(...) SET28_REPL_C30
 #define SET29_DISC_C01(...) SET29_REPL_C01
 #define SET29_DISC_C02(...) SET29_REPL_C02
 #define SET29_DISC_C03(...) SET29_REPL_C03
@@ -1323,6 +1358,37 @@
 #define SET29_DISC_C27(...) SET29_REPL_C27
 #define SET29_DISC_C28(...) SET29_REPL_C28
 #define SET29_DISC_C29(...) SET29_REPL_C29
+#define SET29_DISC_C30(...) SET29_REPL_C30
+#define SET30_DISC_C01(...) SET30_REPL_C01
+#define SET30_DISC_C02(...) SET30_REPL_C02
+#define SET30_DISC_C03(...) SET30_REPL_C03
+#define SET30_DISC_C04(...) SET30_REPL_C04
+#define SET30_DISC_C05(...) SET30_REPL_C05
+#define SET30_DISC_C06(...) SET30_REPL_C06
+#define SET30_DISC_C07(...) SET30_REPL_C07
+#define SET30_DISC_C08(...) SET30_REPL_C08
+#define SET30_DISC_C09(...) SET30_REPL_C09
+#define SET30_DISC_C10(...) SET30_REPL_C10
+#define SET30_DISC_C11(...) SET30_REPL_C11
+#define SET30_DISC_C12(...) SET30_REPL_C12
+#define SET30_DISC_C13(...) SET30_REPL_C13
+#define SET30_DISC_C14(...) SET30_REPL_C14
+#define SET30_DISC_C15(...) SET30_REPL_C15
+#define SET30_DISC_C16(...) SET30_REPL_C16
+#define SET30_DISC_C17(...) SET30_REPL_C17
+#define SET30_DISC_C18(...) SET30_REPL_C18
+#define SET30_DISC_C19(...) SET30_REPL_C19
+#define SET30_DISC_C20(...) SET30_REPL_C20
+#define SET30_DISC_C21(...) SET30_REPL_C21
+#define SET30_DISC_C22(...) SET30_REPL_C22
+#define SET30_DISC_C23(...) SET30_REPL_C23
+#define SET30_DISC_C24(...) SET30_REPL_C24
+#define SET30_DISC_C25(...) SET30_REPL_C25
+#define SET30_DISC_C26(...) SET30_REPL_C26
+#define SET30_DISC_C27(...) SET30_REPL_C27
+#define SET30_DISC_C28(...) SET30_REPL_C28
+#define SET30_DISC_C29(...) SET30_REPL_C29
+#define SET30_DISC_C30(...) SET30_REPL_C30
 
 #define SET01_REPL_C01(_arg01, _nwarg, ...) _DEFER(_SET01_ID)()(_nwarg, __VA_ARGS__)
 #define SET02_REPL_C01(_arg01, _arg02, _nwarg, ...) _DEFER(_SET02_ID)()(_nwarg, _arg02, __VA_ARGS__)
@@ -1759,5 +1825,35 @@
 #define SET29_REPL_C27(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _nwarg, ...) _DEFER(_SET29_ID)()(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _nwarg, _arg28, _arg29, __VA_ARGS__)
 #define SET29_REPL_C28(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _nwarg, ...) _DEFER(_SET29_ID)()(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _nwarg, _arg29, __VA_ARGS__)
 #define SET29_REPL_C29(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _nwarg, ...) _DEFER(_SET29_ID)()(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _nwarg, __VA_ARGS__)
+#define SET30_REPL_C01(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, _nwarg, ...) _DEFER(_SET30_ID)()(_nwarg, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, __VA_ARGS__)
+#define SET30_REPL_C02(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, _nwarg, ...) _DEFER(_SET30_ID)()(_arg01, _nwarg, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, __VA_ARGS__)
+#define SET30_REPL_C03(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, _nwarg, ...) _DEFER(_SET30_ID)()(_arg01, _arg02, _nwarg, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, __VA_ARGS__)
+#define SET30_REPL_C04(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, _nwarg, ...) _DEFER(_SET30_ID)()(_arg01, _arg02, _arg03, _nwarg, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, __VA_ARGS__)
+#define SET30_REPL_C05(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, _nwarg, ...) _DEFER(_SET30_ID)()(_arg01, _arg02, _arg03, _arg04, _nwarg, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, __VA_ARGS__)
+#define SET30_REPL_C06(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, _nwarg, ...) _DEFER(_SET30_ID)()(_arg01, _arg02, _arg03, _arg04, _arg05, _nwarg, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, __VA_ARGS__)
+#define SET30_REPL_C07(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, _nwarg, ...) _DEFER(_SET30_ID)()(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _nwarg, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, __VA_ARGS__)
+#define SET30_REPL_C08(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, _nwarg, ...) _DEFER(_SET30_ID)()(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _nwarg, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, __VA_ARGS__)
+#define SET30_REPL_C09(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, _nwarg, ...) _DEFER(_SET30_ID)()(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _nwarg, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, __VA_ARGS__)
+#define SET30_REPL_C10(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, _nwarg, ...) _DEFER(_SET30_ID)()(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _nwarg, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, __VA_ARGS__)
+#define SET30_REPL_C11(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, _nwarg, ...) _DEFER(_SET30_ID)()(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _nwarg, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, __VA_ARGS__)
+#define SET30_REPL_C12(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, _nwarg, ...) _DEFER(_SET30_ID)()(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _nwarg, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, __VA_ARGS__)
+#define SET30_REPL_C13(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, _nwarg, ...) _DEFER(_SET30_ID)()(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _nwarg, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, __VA_ARGS__)
+#define SET30_REPL_C14(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, _nwarg, ...) _DEFER(_SET30_ID)()(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _nwarg, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, __VA_ARGS__)
+#define SET30_REPL_C15(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, _nwarg, ...) _DEFER(_SET30_ID)()(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _nwarg, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, __VA_ARGS__)
+#define SET30_REPL_C16(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, _nwarg, ...) _DEFER(_SET30_ID)()(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _nwarg, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, __VA_ARGS__)
+#define SET30_REPL_C17(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, _nwarg, ...) _DEFER(_SET30_ID)()(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _nwarg, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, __VA_ARGS__)
+#define SET30_REPL_C18(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, _nwarg, ...) _DEFER(_SET30_ID)()(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _nwarg, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, __VA_ARGS__)
+#define SET30_REPL_C19(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, _nwarg, ...) _DEFER(_SET30_ID)()(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _nwarg, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, __VA_ARGS__)
+#define SET30_REPL_C20(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, _nwarg, ...) _DEFER(_SET30_ID)()(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _nwarg, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, __VA_ARGS__)
+#define SET30_REPL_C21(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, _nwarg, ...) _DEFER(_SET30_ID)()(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _nwarg, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, __VA_ARGS__)
+#define SET30_REPL_C22(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, _nwarg, ...) _DEFER(_SET30_ID)()(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _nwarg, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, __VA_ARGS__)
+#define SET30_REPL_C23(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, _nwarg, ...) _DEFER(_SET30_ID)()(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _nwarg, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, __VA_ARGS__)
+#define SET30_REPL_C24(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, _nwarg, ...) _DEFER(_SET30_ID)()(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _nwarg, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, __VA_ARGS__)
+#define SET30_REPL_C25(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, _nwarg, ...) _DEFER(_SET30_ID)()(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _nwarg, _arg26, _arg27, _arg28, _arg29, _arg30, __VA_ARGS__)
+#define SET30_REPL_C26(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, _nwarg, ...) _DEFER(_SET30_ID)()(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _nwarg, _arg27, _arg28, _arg29, _arg30, __VA_ARGS__)
+#define SET30_REPL_C27(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, _nwarg, ...) _DEFER(_SET30_ID)()(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _nwarg, _arg28, _arg29, _arg30, __VA_ARGS__)
+#define SET30_REPL_C28(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, _nwarg, ...) _DEFER(_SET30_ID)()(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _nwarg, _arg29, _arg30, __VA_ARGS__)
+#define SET30_REPL_C29(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, _nwarg, ...) _DEFER(_SET30_ID)()(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _nwarg, _arg30, __VA_ARGS__)
+#define SET30_REPL_C30(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _arg30, _nwarg, ...) _DEFER(_SET30_ID)()(_arg01, _arg02, _arg03, _arg04, _arg05, _arg06, _arg07, _arg08, _arg09, _arg10, _arg11, _arg12, _arg13, _arg14, _arg15, _arg16, _arg17, _arg18, _arg19, _arg20, _arg21, _arg22, _arg23, _arg24, _arg25, _arg26, _arg27, _arg28, _arg29, _nwarg, __VA_ARGS__)
 
 #endif /*MACROMAGIC_H*/
