@@ -25,6 +25,7 @@
 #define O_WT(x)			C22(x)
 #define O_COST(x)		C23(x)
 #define O_NUT(x)		C29(x)
+#define O_TRAITS(x)		C30(x)
 
 /* modifying the blindname of an object */
 #define DEF_BLINDNAME(names, blindname) (SETNAMES(names, C03(blindname)))
@@ -105,12 +106,12 @@ NEARDATA struct objdescr obj_descr[] = {
 	size, dexc, tuf, dir, \
 	dtyp, mtrl, shwmat, sub
 # define OBJECT(names,bits,prp,sym,prob,dly,wt,cost,sdam,ldam,oc1,oc2,oc3,nut,color,...) \
-	{0, 0, (char *)0, SET29( \
+	{0, 0, (char *)0, SET30( \
 	bits, \
 	prp, sym, dly, color, \
 	prob, wt, cost, \
 	sdam, ldam, \
-	oc1, oc2, oc3, nut, \
+	oc1, oc2, oc3, nut, 0L, \
 	__VA_ARGS__ \
 	)}
 

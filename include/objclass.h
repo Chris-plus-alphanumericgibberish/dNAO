@@ -207,7 +207,27 @@ struct objclass {
 #define a_acdr(o)	((o).a_ac + (o).a_dr) /* combined ac and dr bonus of object class o, used for disintegration effects */
 
 	unsigned short	oc_nutrition;	/* food value */
+	unsigned long int expert_traits;
 };
+
+#define ETRAIT_HEW				0x00000001L
+#define ETRAIT_FELL				0x00000002L
+#define ETRAIT_KNOCK_BACK		0x00000004L
+#define ETRAIT_FOCUS_FIRE		0x00000008L
+#define ETRAIT_STUNNING_STRIKE	0x00000010L
+
+#define ETRAIT_KNOCK_BACK_CHARGE	0x0020L
+#define ETRAIT_GRAZE			0x00000040L
+#define ETRAIT_STOP_THRUST		0x00000080L
+#define ETRAIT_PENETRATE_ARMOR	0x00000100L
+#define ETRAIT_LONG_SLASH		0x00000200L
+#define ETRAIT_BLEED			0x00000400L
+#define ETRAIT_CLEAVE			0x00000800L
+#define ETRAIT_LUNGE			0x00001000L
+#define ETRAIT_QUICK			0x00002000L
+#define ETRAIT_SECOND			0x00004000L
+#define ETRAIT_CREATE_OPENING	0x00008000L
+#define ETRAIT_BRACED			0x00010000L
 
 struct objdescr {
 	const char *oc_name;		/* actual name */
