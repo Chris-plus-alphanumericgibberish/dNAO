@@ -4747,7 +4747,7 @@ struct zapdata * zapdata;
 			int i;
 			/* reduce by DR */
 			for (i = zapdata->damn / 3; i > 0; i--) {
-				dmg -= (youdef ? roll_udr(magr, AT_ANY) : roll_mdr(mdef, magr, AT_ANY));
+				dmg -= (youdef ? roll_udr(magr, ROLL_SLOT) : roll_mdr(mdef, magr, ROLL_SLOT));
 			}
 			/* deals silver-hating damage */
 			if (hates_silver((youdef ? youracedata : mdef->data))) {

@@ -15732,10 +15732,11 @@ int vis;						/* True if action is at all visible to the player */
 			dr = (youdef ? (base_udr() + base_nat_udr()) : (base_mdr(mdef) + base_nat_mdr(mdef)));
 		}
 		else if(!attk){
-			dr = (youdef ? roll_udr(magr, AT_ANY) : roll_mdr(mdef, magr, AT_ANY));
+			dr = (youdef ? roll_udr(magr, ROLL_SLOT) : roll_mdr(mdef, magr, ROLL_SLOT));
 		}
-		else {
-			dr = (youdef ? roll_udr(magr, attk->aatyp) : roll_mdr(mdef, magr, attk->aatyp));
+		else if(attk->adtyp == AD_LEGS)
+		{
+			dr = (youdef ? roll_udr(magr, LEG_DR) : roll_mdr(mdef, magr, LEG_DR));
 		}
 		
 		//Give spears a slight advantage vs. armor.
@@ -17725,7 +17726,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 					}
 				}
 				/* damage (reduced by DR, half-phys damage, min 1) */
-				dmg -= (youagr ? roll_udr(mdef, passive->aatyp) : roll_mdr(magr, mdef, passive->aatyp));
+				dmg -= (youagr ? roll_udr(mdef, ROLL_SLOT) : roll_mdr(magr, mdef, ROLL_SLOT));
 				if (dmg < 1)
 					dmg = 1;
 				dmg = reduce_dmg(mdef,dmg,TRUE,FALSE);
@@ -18008,7 +18009,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 				case AD_PHYS:
 					/* no message */
 					/* damage (reduced by DR, half-phys damage, min 1) */
-					dmg -= (youagr ? roll_udr(mdef, passive->aatyp) : roll_mdr(magr, mdef, passive->aatyp));
+					dmg -= (youagr ? roll_udr(mdef, ROLL_SLOT) : roll_mdr(magr, mdef, ROLL_SLOT));
 					if (dmg < 1)
 						dmg = 1;
 					dmg = reduce_dmg(mdef,dmg,TRUE,FALSE);

@@ -317,6 +317,7 @@ struct obj {
 //define W_SADDLE     0x00100000L	/* KMH -- For riding monsters */
 //define W_BALL	    0x00200000L /* Punishment ball */
 //define W_CHAIN	    0x00400000L /* Punishment chain */
+	long o_e_trait;
 	long oward;
 			/*Records the warding sign of spellbooks. */
 			/*Records the warding sign of scrolls of ward. */

@@ -1358,21 +1358,13 @@ struct monst *mon;
 }
 
 int
-roll_mdr(mon, magr, aatyp)
-struct monst *mon;
-struct monst *magr;
-uchar aatyp;
+roll_mdr(struct monst *mon, struct monst *magr, int slot)
 {
-	return roll_mdr_detail(mon, magr, 0, 0, aatyp);
+	return roll_mdr_detail(mon, magr, slot, 0, 0);
 }
 
 int
-roll_mdr_detail(mon, magr, slot, depth, aatyp)
-struct monst *mon;
-struct monst *magr;
-int slot;
-int depth;
-uchar aatyp;
+roll_mdr_detail(struct monst *mon, struct monst *magr, int slot, int depth, uchar aatyp)
 {
 	int base, nat_dr, armac;
 	boolean youagr = (magr == &youmonst);

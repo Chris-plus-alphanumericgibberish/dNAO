@@ -63,6 +63,7 @@ struct objclass {
 #define SLASH		4	/* (latter includes iron ball & chain) */
 #define EXPLOSION	8	/* (rockets,  grenades) */
 
+#define	ROLL_SLOT 0 /* pick a random slot */
 #define	UPPER_TORSO_DR 0x01 /* body armor, shirt, cloak (2x weight) */
 #define	LOWER_TORSO_DR 0x02 /* body armor, cloak (2x weight) */
 #define	HEAD_DR        0x04 /* helmet */

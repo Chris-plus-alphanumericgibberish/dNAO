@@ -3046,19 +3046,13 @@ uchar aatyp;
 }
 
 int
-roll_udr(magr, aatyp)
-struct monst *magr;
-uchar aatyp;
+roll_udr(struct monst *magr, int slot)
 {
-	return roll_udr_detail(magr, 0, 0, aatyp);
+	return roll_udr_detail(magr, slot, 0, 0);
 }
 
 int
-roll_udr_detail(magr, slot, depth, aatyp)
-struct monst *magr;
-int slot;
-int depth;
-uchar aatyp;
+roll_udr_detail(struct monst *magr, int slot, int depth, uchar aatyp)
 {
 	int udr;
 	int cap = 10;
