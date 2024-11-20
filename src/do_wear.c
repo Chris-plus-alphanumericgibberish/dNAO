@@ -2518,6 +2518,20 @@ base_uac()
 	if(!flat_foot && uring_art(ART_NENYA))
 		uac -= (ACURR(A_WIS)-11)/2;
 
+
+	if(uwep && hand_protecting(uwep) && arti_phasing(uwep)){
+		if(!u.twoweap)
+			uac -= 2 + material_def_bonus(uwep, 2, TRUE) + (uwep->spe)/2 - min((int)greatest_erosion(uwep), 2);
+		else if(uswapwep && hand_protecting(uswapwep) && arti_phasing(uswapwep))
+			uac -= (2 + material_def_bonus(uwep, 2, TRUE) + (uwep->spe)/2 - min((int)greatest_erosion(uwep), 2)
+					+ 2 + material_def_bonus(uswapwep, 2, TRUE) + (uswapwep->spe)/2 - min((int)greatest_erosion(uswapwep), 2)
+					)/2;
+		else
+			uac -= (2 + material_def_bonus(uwep, 2, TRUE) + (uwep->spe)/2 - min((int)greatest_erosion(uwep), 2))/2;
+	}
+	else if(u.twoweap && uswapwep && hand_protecting(uswapwep) && arti_phasing(uswapwep))
+		uac -= (2 + material_def_bonus(uswapwep, 2, TRUE) + (uswapwep->spe)/2 - min((int)greatest_erosion(uswapwep), 2))/2;
+
 	if(uwep){
 		if(uwep->oartifact == ART_LANCE_OF_LONGINUS) uac -= max((uwep->spe+1)/2,0);
 		else if(uwep->oartifact == ART_TENSA_ZANGETSU){
@@ -2530,9 +2544,6 @@ base_uac()
 				uac -= 10;
 			else if(u.uinsight > 10)
 				uac -= u.uinsight - 10;
-		}
-		if(is_pata(uwep) && arti_phasing(uwep)){
-			uac -= 2 + material_def_bonus(uwep, 2, TRUE) + (uwep->spe)/2 - min((int)greatest_erosion(uwep), 2);
 		}
 		if(!flat_foot){
 			if((is_rapier(uwep) && arti_phasing(uwep)) || 
@@ -2728,10 +2739,21 @@ find_ac()
 	if (uarmg)	uac -= arm_ac_bonus(uarmg);
 	if (uarmu)	uac -= arm_ac_bonus(uarmu);
 	
-	if(uwep){
-		if(is_pata(uwep) && !arti_phasing(uwep)){
+	if(uwep && hand_protecting(uwep) && !arti_phasing(uwep)){
+		if(!u.twoweap)
 			uac -= 2 + material_def_bonus(uwep, 2, TRUE) + (uwep->spe)/2 - min((int)greatest_erosion(uwep), 2);
-		}
+		else if(uswapwep && hand_protecting(uswapwep) && !arti_phasing(uswapwep))
+			uac -= (2 + material_def_bonus(uwep, 2, TRUE) + (uwep->spe)/2 - min((int)greatest_erosion(uwep), 2)
+					+ 2 + material_def_bonus(uswapwep, 2, TRUE) + (uswapwep->spe)/2 - min((int)greatest_erosion(uswapwep), 2)
+					)/2;
+		else
+			uac -= (2 + material_def_bonus(uwep, 2, TRUE) + (uwep->spe)/2 - min((int)greatest_erosion(uwep), 2))/2;
+		uac -= 2 + material_def_bonus(uwep, 2, TRUE) + (uwep->spe)/2 - min((int)greatest_erosion(uwep), 2);
+	}
+	else if(u.twoweap && uswapwep && hand_protecting(uswapwep) && !arti_phasing(uswapwep))
+		uac -= (2 + material_def_bonus(uswapwep, 2, TRUE) + (uswapwep->spe)/2 - min((int)greatest_erosion(uswapwep), 2))/2;
+
+	if(uwep){
 		if((is_rapier(uwep) && !arti_phasing(uwep)))
 			uac -= max(
 				min(
@@ -2959,8 +2981,9 @@ uchar aatyp;
 				arm_udr += max(1 + (uwep->spe + 1) / 2, 0);
 			}
 		}
-		if(is_pata(uwep) && slot&ARM_DR){
-			arm_udr += 4 + material_def_bonus(uwep, 4, FALSE) + (uwep->spe + 1) / 2 - min((int)greatest_erosion(uwep), 4);
+		if(hand_protecting(uwep) && slot&ARM_DR){
+			if(!u.twoweap || (uswapwep && hand_protecting(uswapwep)))
+				arm_udr += 4 + material_def_bonus(uwep, 4, FALSE) + (uwep->spe + 1) / 2 - min((int)greatest_erosion(uwep), 4);
 		}
 	}
 	/* Natural DR (overriden and ignored by base_nat_udr() for halfdragons) */
@@ -3056,6 +3079,7 @@ roll_udr_detail(struct monst *magr, int slot, int depth, uchar aatyp)
 {
 	int udr;
 	int cap = 10;
+	
 	if(!slot) switch(rn2(9)){
 		case 0:
 		case 1:

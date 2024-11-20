@@ -627,6 +627,14 @@ struct obj {
 #define is_pata(otmp)	(\
 			 otmp->otyp == SHANTA_PATA || \
 			 otmp->otyp == TWINGUN_SHANTA)
+#define hand_protecting(otmp)	(\
+			 is_pata(otmp) || \
+			 otmp->otyp == BROADSWORD)
+#define is_runic_form_sword(otmp) (\
+			    otmp->otyp == LONG_SWORD \
+			 || otmp->otyp == RUNESWORD \
+			 || otmp->otyp == ELVEN_BROADSWORD \
+			)
 #define is_rapier(otmp)	(otmp->oclass == WEAPON_CLASS && (\
 			 otmp->otyp == RAPIER || \
 			 otmp->otyp == RAKUYO || \

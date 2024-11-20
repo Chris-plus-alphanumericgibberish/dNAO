@@ -2231,7 +2231,7 @@ int fform;
 			return !(uwep && uwep->otyp == LONG_SWORD);
 		/* require longsword*/
 		case FFORM_KNI_RUNIC:
-			return !(uwep && uwep->otyp == LONG_SWORD && FightingFormSkillLevel(fform) > P_ISRESTRICTED);
+			return !(uwep && is_runic_form_sword(uwep) && FightingFormSkillLevel(fform) > P_ISRESTRICTED);
 		/* requires shield */
 		case FFORM_SHIELD_BASH:
 			return (!uarms);

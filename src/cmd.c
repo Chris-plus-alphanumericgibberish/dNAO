@@ -1219,7 +1219,9 @@ doKnightForm()
 
 		if (i == FFORM_SHIELD_BASH)
 			block_reason = "lack of a shield";
-		else if (i == FFORM_KNI_RUNIC || i == FFORM_POMMEL)
+		else if (i == FFORM_KNI_RUNIC)
+			block_reason = "lack of a compatible sword";
+		else if (i == FFORM_POMMEL)
 			block_reason = "lack of a longsword";
 		else if (i == FFORM_HALF_SWORD){
 			if (!uwep || uwep->otyp != LONG_SWORD) block_reason = "lack of a longsword";

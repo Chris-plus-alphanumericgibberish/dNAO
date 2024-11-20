@@ -400,9 +400,9 @@ WEAPON(("rakuyo-dagger", "latch-pommeled dagger"),
 WEAPON(("isamusei", "oddly-luminous sword", "razor-thin sword"), /*Needs encyc entry*/
 	DMG(D(12)), DMG(D(8)),
 	0, 0, MZ_MEDIUM,  1, 100,500,  2, S|B, P_BROAD_SWORD, METAL, FALSE, CLR_ORANGE, O_MAGIC(1)),
-WEAPON(("broadsword"),
+WEAPON(("broadsword", "basket-hilted sword"),
 	DMG(D(2, 4)), DMG(D(6), F(1)),
-	1, 0,  MZ_LARGE,  8, 70, 10,  0, S,   P_BROAD_SWORD, IRON, FALSE, HI_METAL),
+	0, 0,  MZ_LARGE,  8, 70, 10,  0, S,   P_BROAD_SWORD, IRON, FALSE, HI_METAL),
 WEAPON(("elven broadsword", "runed broadsword"), /*Needs encyc entry*/
 	DMG(D(6), D(4)), DMG(D(6), F(2)),
 	0, 0,  MZ_LARGE,  4, 20, 10,  2, S,   P_BROAD_SWORD, WOOD, FALSE, HI_WOOD),
