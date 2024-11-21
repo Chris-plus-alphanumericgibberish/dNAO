@@ -15626,6 +15626,16 @@ int vis;						/* True if action is at all visible to the player */
 					artif_hit = TRUE;
 			}
 		}
+		else if(magr){
+			//Revenancer claws count as an artifact ring (Drains and procs cult oprops)
+			otmp = (youagr ? uarmg : which_armor(magr, W_ARMG));
+			if(otmp && otmp->oartifact == ART_CLAWS_OF_THE_REVENANCER){
+				returnvalue = apply_hit_effects(magr, mdef, otmp, (struct obj *)0, basedmg, &artidmg, &elemdmg, dieroll, &hittxt, FALSE, FALSE);
+				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED | MM_DEF_LSVD | MM_AGR_STOP)))
+					return returnvalue;
+				artif_hit = TRUE;
+			}
+		}
 		/* unarmed kicks proc effects of worn boots */
 		if (unarmed_kick) {
 			//Monsters have extra damage for their attacks, it makes sense to treat it as part of the unarmed damage.
