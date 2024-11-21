@@ -599,7 +599,13 @@ struct obj {
 										!is_vibroweapon((o)) && \
 										!is_rakuyo((o)) && \
 										!((o)->otyp == SET_OF_CROW_TALONS) && \
-										!((o)->otyp == CROW_QUILL) && \
+										!((o)->otyp == CARCOSAN_STING) && \
+										!((o)->otyp == CHIKAGE) && \
+										!((o)->otyp == PINCER_STAFF) && \
+										!((o)->otyp == ISAMUSEI) && \
+										!((o)->otyp == DISKOS) && \
+										!((o)->otyp == BESTIAL_CLAW) && \
+										!(is_mercy_blade(o)) && \
 										!((o)->otyp == CRYSTAL_SWORD) && \
 										!((o)->otyp == RUNESWORD) && \
 										!((o)->otyp == MIRRORBLADE)) \

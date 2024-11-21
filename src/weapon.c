@@ -341,6 +341,7 @@ struct monst *magr;
 	if (   oartifact == ART_YORSHKA_S_SPEAR
 		|| oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD
 		|| oartifact == ART_INFINITY_S_MIRRORED_ARC
+		|| oartifact == ART_FROST_BRAND
 		|| (obj && otyp == KAMEREL_VAJRA && !litsaber(obj))
 		){
 		attackmask |= WHACK;
@@ -385,7 +386,6 @@ struct monst *magr;
 	if ((obj && oartifact == ART_HOLY_MOONLIGHT_SWORD && obj->lamplit)
 		|| (oartifact == ART_BLOODLETTER && artinstance[oartifact].BLactive >= moves)
 		|| oartifact == ART_FIRE_BRAND
-		|| oartifact == ART_FROST_BRAND
 		|| oartifact == ART_ARYFAERN_KERYM
 		|| (obj && check_oprop(obj, OPROP_RLYHW) && u.uinsight >= 24)
 		){

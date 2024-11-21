@@ -3396,6 +3396,16 @@ int * truedmgptr;
 				*truedmgptr += (damd ? d(multiplier, damd) : max(dmgtomulti, 1)*multiplier);
 			else
 				*plusdmgptr += (damd ? d(multiplier, damd) : max(dmgtomulti, 1)*multiplier);
+
+			//Also do a fireball or a hail effect
+			if(otmp->oartifact == ART_FIRE_BRAND && spec_dbon_applies){
+				*truedmgptr += d(6*multiplier, 6);
+			}
+			else if(otmp->oartifact == ART_FROST_BRAND){
+				if(spec_dbon_applies)
+					*truedmgptr += d(3*multiplier, 8);
+				*plusdmgptr += d(3*multiplier, 8);
+			}
 		}
 		return TRUE;
 	}
