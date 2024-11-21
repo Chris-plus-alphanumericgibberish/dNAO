@@ -608,7 +608,9 @@ boolean affect_game_state;
 						artinstance[ART_SEVEN_LEAGUE_BOOTS].LeagueMod += NORMAL_SPEED/6;
 					}
 				}
-				if(uarmf && uarmf->oartifact == ART_FENG_HUO_LUN){
+				if((uarmf && uarmf->oartifact == ART_FENG_HUO_LUN)
+				 || (uwep && uwep->oartifact == ART_FENG_HUO_LUN)
+				){
 					MOVECOST(NORMAL_SPEED - artinstance[ART_FENG_HUO_LUN].LeagueMod);
 					if(affect_game_state && artinstance[ART_FENG_HUO_LUN].LeagueMod < NORMAL_SPEED/2){
 						artinstance[ART_FENG_HUO_LUN].LeagueMod += NORMAL_SPEED/4;
