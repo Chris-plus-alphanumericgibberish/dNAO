@@ -1368,6 +1368,118 @@ doGithForm()
 	}
 }
 
+int
+doEtechForm()
+{
+	winid tmpwin;
+	int n, how, i;
+	char buf[BUFSZ];
+	menu_item *selected;
+	anything any;
+	int curskill;
+	char* block_reason;
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;		/* zero out all bits */
+
+	Sprintf(buf, "Available Weapon Forms");
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+
+
+	if(CHECK_ETRAIT(uwep, &youmonst, ETRAIT_HEW)){
+		Sprintf(buf, "Hew");
+		if(uwep->o_e_trait&ETRAIT_HEW)
+			Strcat(buf, " (active)");
+		any.a_long = ETRAIT_HEW;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			'h', 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	if(CHECK_ETRAIT(uwep, &youmonst, ETRAIT_FELL)){
+		Sprintf(buf, "Fell");
+		if(uwep->o_e_trait&ETRAIT_FELL)
+			Strcat(buf, " (active)");
+		any.a_long = ETRAIT_FELL;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			'f', 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	if(CHECK_ETRAIT(uwep, &youmonst, ETRAIT_KNOCK_BACK)){
+		Sprintf(buf, "Knock back");
+		if(uwep->o_e_trait&ETRAIT_KNOCK_BACK)
+			Strcat(buf, " (active)");
+		any.a_long = ETRAIT_KNOCK_BACK;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			'k', 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	if(CHECK_ETRAIT(uwep, &youmonst, ETRAIT_STUNNING_STRIKE)){
+		Sprintf(buf, "Stunning strike");
+		if(uwep->o_e_trait&ETRAIT_STUNNING_STRIKE)
+			Strcat(buf, " (active)");
+		any.a_long = ETRAIT_STUNNING_STRIKE;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			's', 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	if(CHECK_ETRAIT(uwep, &youmonst, ETRAIT_FOCUS_FIRE)){
+		Sprintf(buf, "Target heads");
+		if(uwep->o_e_trait&EFOCUS_HEAD)
+			Strcat(buf, " (active)");
+		any.a_long = EFOCUS_HEAD;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			'a', 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		Sprintf(buf, "Target upper bodies");
+		if(uwep->o_e_trait&EFOCUS_UB)
+			Strcat(buf, " (active)");
+		any.a_long = EFOCUS_UB;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			'b', 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		Sprintf(buf, "Target hands");
+		if(uwep->o_e_trait&EFOCUS_GLOVE)
+			Strcat(buf, " (active)");
+		any.a_long = EFOCUS_GLOVE;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			'c', 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		Sprintf(buf, "Target lower bodies");
+		if(uwep->o_e_trait&EFOCUS_LB)
+			Strcat(buf, " (active)");
+		any.a_long = EFOCUS_LB;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			'd', 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		Sprintf(buf, "Target feet");
+		if(uwep->o_e_trait&EFOCUS_LEGS)
+			Strcat(buf, " (active)");
+		any.a_long = EFOCUS_LEGS;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			'e', 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+
+	end_menu(tmpwin, "Choose preferred weapon style:");
+
+	how = PICK_ONE;
+	n = select_menu(tmpwin, how, &selected);
+	destroy_nhwindow(tmpwin);
+
+	if(n <= 0){
+		return MOVE_CANCELLED;
+	} else if ((uwep->o_e_trait&(selected[0].item.a_long)) != 0) {
+		uwep->o_e_trait &= ~(selected[0].item.a_long);
+		free(selected);
+		return MOVE_INSTANT;
+	} else {
+		uwep->o_e_trait = selected[0].item.a_long;
+		free(selected);
+		return MOVE_INSTANT;
+	}
+}
+
 #define MONK_FORMS			0x001L
 #define LIGHTSABER_FORMS	0x002L
 #define KNIGHT_FORMS		0x004L
@@ -1377,6 +1489,7 @@ doGithForm()
 #define AVOID_ENGLATTK		0x040L
 #define AVOID_UNSAFETOUCH	0x080L
 #define GITH_FORMS			0x100L
+#define ETECH_FORMS			0x200L
 
 
 int
@@ -1464,6 +1577,10 @@ hasfightingforms(){
 				formmask |= GITH_FORMS;
 		}
 	}
+	
+	if(uwep && FFORM_ETRAIT(uwep, &youmonst)){
+		formmask |= ETECH_FORMS;
+	}
 
 	/* next, forms trained are shown, even if inapplicable at the moment*/
 	for (i = FIRST_LS_FFORM; i <= LAST_LS_FFORM; i++) {
@@ -1497,53 +1614,67 @@ dofightingform()
 	tmpwin = create_nhwindow(NHW_MENU);
 	start_menu(tmpwin);
 	any.a_void = 0;		/* zero out all bits */
+#define	MONK_FORM	1
+#define	LGHT_FORM	2
+#define	KNIT_FORM	3
+#define	AVOD_FORM	4
+#define	AVOD_MSPL	5
+#define	AVOD_GRAB	6
+#define	AVOD_ENGL	7
+#define	AVOD_TUCH	8
+#define	GITH_FORM	9
+#define	ETCH_FORM	10
 
 	if (formmask & MONK_FORMS) {
-		any.a_int = 1;
+		any.a_int = MONK_FORM;
 		add_menu(tmpwin, NO_GLYPH, &any, 'm', 0, ATR_NONE, "Select Mystic Forms", MENU_UNSELECTED);
 	}
 	if (formmask & LIGHTSABER_FORMS) {
-		any.a_int = 2;
+		any.a_int = LGHT_FORM;
 		add_menu(tmpwin, NO_GLYPH, &any, 'l', 0, ATR_NONE, "Select Lightsaber Forms", MENU_UNSELECTED);
 	}
 	if (formmask & KNIGHT_FORMS) {
-		any.a_int = 3;
+		any.a_int = KNIT_FORM;
 		add_menu(tmpwin, NO_GLYPH, &any, 'k', 0, ATR_NONE, "Select Knightly Forms", MENU_UNSELECTED);
 	}
 	if (formmask & GITH_FORMS) {
-		any.a_int = 9;
+		any.a_int = GITH_FORM;
 		add_menu(tmpwin, NO_GLYPH, &any, 'h', 0, ATR_NONE, "Select Mental Edge", MENU_UNSELECTED);
 	}
+	if (formmask & ETECH_FORMS) {
+		any.a_int = ETCH_FORM;
+		add_menu(tmpwin, NO_GLYPH, &any, 'w', 0, ATR_NONE, "Select Weapon Form", MENU_UNSELECTED);
+	}
 	if (formmask & AVOID_PASSIVES) {
-		any.a_int = 4;
+		any.a_int = AVOD_FORM;
 		if (!u.uavoid_passives) Strcpy(buf, "Only make passive-safe attacks");
 		else Strcpy(buf, "Allow passive-unsafe attacks");
 
 		add_menu(tmpwin, NO_GLYPH, &any, 'p', 0, ATR_NONE, buf, MENU_UNSELECTED);
 	}
 	if (formmask & AVOID_MSPLCAST) {
-		any.a_int = 5;
+		any.a_int = AVOD_MSPL;
 		if (!u.uavoid_msplcast) Strcpy(buf, "Avoid automatically casting spells when attacking");
 		else Strcpy(buf, "Allow the automatic casting of spells when attacking");
 
 		add_menu(tmpwin, NO_GLYPH, &any, 's', 0, ATR_NONE, buf, MENU_UNSELECTED);
 	}
 	if (formmask & AVOID_GRABATTK) {
-		any.a_int = 6;
+		any.a_int = AVOD_GRAB;
 		if (!u.uavoid_grabattk) Strcpy(buf, "Avoid grabbing monsters when attacking");
 		else Strcpy(buf, "Allow grabbing monsters when attacking");
 
 		add_menu(tmpwin, NO_GLYPH, &any, 'g', 0, ATR_NONE, buf, MENU_UNSELECTED);
 	}
 	if (formmask & AVOID_ENGLATTK) {
-		any.a_int = 7;
+		any.a_int = AVOD_ENGL;
 		if (!u.uavoid_englattk) Strcpy(buf, "Avoid engulfing monsters when attacking");
 		else Strcpy(buf, "Allow engulfing monsters when attacking");
 
 		add_menu(tmpwin, NO_GLYPH, &any, 'e', 0, ATR_NONE, buf, MENU_UNSELECTED);
 	}
 	if (formmask & AVOID_UNSAFETOUCH) {
-		any.a_int = 8;
+		any.a_int = AVOD_TUCH;
 		if (!u.uavoid_unsafetouch) Strcpy(buf, "Avoid directly touching potentially unsafe monsters");
 		else Strcpy(buf, "Allow directly touching potentally unsafe monsters");
 
@@ -1564,29 +1695,31 @@ dofightingform()
 	}
 
 	switch (n){
-		case 1:
+		case MONK_FORM:
 			return doMysticForm();
-		case 2:
+		case LGHT_FORM:
 			return doLightsaberForm();
-		case 3:
+		case KNIT_FORM:
 			return doKnightForm();
-		case 4:
+		case AVOD_FORM:
 			u.uavoid_passives = !u.uavoid_passives;
 			return MOVE_INSTANT;
-		case 5:
+		case AVOD_MSPL:
 			u.uavoid_msplcast = !u.uavoid_msplcast;
 			return MOVE_INSTANT;
-		case 6:
+		case AVOD_GRAB:
 			u.uavoid_grabattk = !u.uavoid_grabattk;
 			return MOVE_INSTANT;
-		case 7:
+		case AVOD_ENGL:
 			u.uavoid_englattk = !u.uavoid_englattk;
 			return MOVE_INSTANT;
-		case 8:
+		case AVOD_TUCH:
 			u.uavoid_unsafetouch = !u.uavoid_unsafetouch;
 			return MOVE_INSTANT;
-		case 9:
+		case GITH_FORM:
 			return doGithForm();
+		case ETCH_FORM:
+			return doEtechForm();
 		default:
 			impossible("unknown fighting form set %d", n);
 			return MOVE_CANCELLED;

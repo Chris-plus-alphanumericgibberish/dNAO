@@ -15547,6 +15547,36 @@ int vis;						/* True if action is at all visible to the player */
 			(activeFightingForm(FFORM_SHII_CHO) ||
 			(activeFightingForm(FFORM_SORESU))
 			)) use_skill(P_SORESU, 1);
+		//Weapon traits
+		if(weapon && magr){
+			if(weapon->o_e_trait == ETRAIT_HEW
+				&& CHECK_ETRAIT(weapon, magr, ETRAIT_HEW)
+				&& (!youagr || (weapon == uwep && !u.twoweap))
+				&& ROLL_ETRAIT(weapon, magr, TRUE, !rn2(10))
+			){
+				struct weapon_dice wdice;
+				/* grab the weapon dice from dmgval_core */
+				dmgval_core(&wdice, bigmonst(pd), weapon, weapon->otyp, magr);
+				/* add to the bonsdmg counter */
+				bonsdmg += weapon_dmg_roll(&wdice, youdef);
+				if(youagr)
+					bonsdmg += weapon_dam_bonus(weapon, weapon_type(weapon));
+			}
+			if(weapon->o_e_trait == ETRAIT_FELL
+				&& CHECK_ETRAIT(weapon, magr, ETRAIT_FELL)
+				&& (!youagr || (weapon == uwep && !u.twoweap))
+				&& ROLL_ETRAIT(weapon, magr, TRUE, !rn2(10))
+			){
+				if(youdef){
+					long side = rn2(2) ? RIGHT_SIDE : LEFT_SIDE;
+					const char *sidestr = (side == RIGHT_SIDE) ? "right" : "left";
+					Your("%s %s is injured in the fighting!", sidestr, body_part(LEG));
+					set_wounded_legs(side, rnd(60 - ACURR(A_DEX)));
+				}
+				else
+					mdef->movement = max(mdef->movement - 6, -12);
+			}
+		}
 	}
 	/* ARTIFACT HIT BLOCK */
 	/* this must come after skills are trained, as this can kill the defender and cause a return */
@@ -15747,6 +15777,35 @@ int vis;						/* True if action is at all visible to the player */
 		else if(attk->adtyp == AD_LEGS)
 		{
 			dr = (youdef ? roll_udr(magr, LEG_DR) : roll_mdr(mdef, magr, LEG_DR));
+		}
+		else if(weapon && magr){
+			int slot = ROLL_SLOT;
+			if(weapon->o_e_trait == ETRAIT_HEW && CHECK_ETRAIT(weapon, magr, ETRAIT_HEW)){
+				int hewslots[] = {HEAD_DR, UPPER_TORSO_DR, ARM_DR};
+				slot = ROLL_FROM(hewslots);
+			}
+			else if(weapon->o_e_trait == ETRAIT_FELL && CHECK_ETRAIT(weapon, magr, ETRAIT_FELL)){
+				int hewslots[] = {LEG_DR, LOWER_TORSO_DR};
+				slot = ROLL_FROM(hewslots);
+			}
+			else if(weapon->o_e_trait&ETRAIT_FOCUS_FIRE && CHECK_ETRAIT(weapon, magr, ETRAIT_FOCUS_FIRE)){
+				if(ROLL_ETRAIT(weapon, magr, TRUE, !rn2(5))){
+					if(weapon->o_e_trait&EFOCUS_HEAD)
+						slot = HEAD_DR;
+					else if(weapon->o_e_trait&EFOCUS_UB)
+						slot = UPPER_TORSO_DR;
+					else if(weapon->o_e_trait&EFOCUS_GLOVE)
+						slot = ARM_DR;
+					else if(weapon->o_e_trait&EFOCUS_LB)
+						slot = LOWER_TORSO_DR;
+					else if(weapon->o_e_trait&EFOCUS_LEGS)
+						slot = LEG_DR;
+				}
+			}
+			dr = (youdef ? roll_udr(magr, slot) : roll_mdr(mdef, magr, slot));
+		}
+		else {
+			dr = (youdef ? roll_udr(magr, ROLL_SLOT) : roll_mdr(mdef, magr, ROLL_SLOT));
 		}
 		
 		//Give spears a slight advantage vs. armor.

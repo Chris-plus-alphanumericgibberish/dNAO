@@ -217,7 +217,16 @@ struct objclass {
 #define ETRAIT_FOCUS_FIRE		0x00000008L
 #define ETRAIT_STUNNING_STRIKE	0x00000010L
 
-#define ETRAIT_KNOCK_BACK_CHARGE	0x0020L
+//For use in object class, overloads the top of the field
+#define EFOCUS_HEAD				0x80000000L
+#define EFOCUS_UB				0x40000000L
+#define EFOCUS_GLOVE			0x20000000L
+#define EFOCUS_LB				0x10000000L
+#define EFOCUS_LEGS				0x08000000L
+
+#define FFORM_ETRAITS			(ETRAIT_HEW|ETRAIT_FELL|ETRAIT_KNOCK_BACK|ETRAIT_FOCUS_FIRE|ETRAIT_STUNNING_STRIKE)
+
+#define ETRAIT_KNOCK_BACK_CHARGE 0x0000020L
 #define ETRAIT_GRAZE			0x00000040L
 #define ETRAIT_STOP_THRUST		0x00000080L
 #define ETRAIT_PENETRATE_ARMOR	0x00000100L
@@ -229,6 +238,10 @@ struct objclass {
 #define ETRAIT_SECOND			0x00004000L
 #define ETRAIT_CREATE_OPENING	0x00008000L
 #define ETRAIT_BRACED			0x00010000L
+
+#define CHECK_ETRAIT(obj, mon, trait) (objects[(obj)->otyp].expert_traits&trait && ((mon) == &youmonst ? (P_SKILL(objects[(obj)->otyp].oc_skill) > P_BASIC ) : (((mon)->data->mflagsf&MF_MARTIAL_E) || ((mon)->data->mflagsf&MF_MARTIAL_S))))
+#define ROLL_ETRAIT(obj, mon, echance, schance) (((mon) == &youmonst ? (P_SKILL(objects[(obj)->otyp].oc_skill) > P_SKILLED) : ((mon)->data->mflagsf&MF_MARTIAL_E)) ? echance : schance)
+#define FFORM_ETRAIT(obj, mon) (objects[(obj)->otyp].expert_traits&FFORM_ETRAITS && ((mon) == &youmonst ? (P_SKILL(objects[(obj)->otyp].oc_skill) > P_BASIC ) : (((mon)->data->mflagsf&MF_MARTIAL_E) || ((mon)->data->mflagsf&MF_MARTIAL_S))))
 
 struct objdescr {
 	const char *oc_name;		/* actual name */
