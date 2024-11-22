@@ -831,28 +831,75 @@ int tary;
 						int dx = sgn(tarx - x(magr));
 						int dy = sgn(tary - y(magr));
 						int nx, ny;
-						if((monstermoves+indexnum+devai)&1){//Odd
-							//-45 degree rotation
-							nx = sgn(dx+dy);
-							ny = sgn(dy-dx);
-						} else {
-							//45 degree rotation
-							nx = sgn(dx-dy);
-							ny = sgn(dx+dy);
+						int i = 0;
+						boolean target = FALSE;
+						while(i < 2 && !target){
+							if((monstermoves+indexnum+devai+i)&1){//Odd
+								//-45 degree rotation
+								nx = sgn(dx+dy);
+								ny = sgn(dy-dx);
+							} else {
+								//45 degree rotation
+								nx = sgn(dx-dy);
+								ny = sgn(dx+dy);
+							}
+							if (isok(x(magr) + nx, y(magr) + ny))
+							{
+								struct monst *mdef2 = u.uswallow ? u.ustuck : 
+														(nx || ny) ? m_at(x(magr) + nx, y(magr) + ny) : 
+														(struct monst *)0;
+								if (mdef2 && (mdef2 != mdef) && !DEADMONSTER(mdef2)
+									&& !((youagr && mdef2->mpeaceful) || (!youagr && magr->mpeaceful == mdef2->mpeaceful))
+								){
+									target = TRUE;
+									int vis2 = (VIS_MAGR | VIS_NONE) | (canseemon(mdef2) ? VIS_MDEF : 0);
+									bhitpos.x = x(magr) + nx; bhitpos.y = y(magr) + ny;
+									subresult = xmeleehity(magr, mdef2, attk, &otmp, vis2, tohitmod, TRUE);
+									/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
+									result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
+								}
+							}
 						}
-						if (isok(x(magr) + nx, y(magr) + ny))
-						{
-							struct monst *mdef2 = u.uswallow ? u.ustuck : 
-													(nx || ny) ? m_at(x(magr) + nx, y(magr) + ny) : 
-													(struct monst *)0;
-							if (mdef2 && (mdef2 != mdef) && !DEADMONSTER(mdef2)
-								&& !((youagr && mdef2->mpeaceful) || (!youagr && magr->mpeaceful == mdef2->mpeaceful))
-							){
-								int vis2 = (VIS_MAGR | VIS_NONE) | (canseemon(mdef2) ? VIS_MDEF : 0);
-								bhitpos.x = x(magr) + nx; bhitpos.y = y(magr) + ny;
-								subresult = xmeleehity(magr, mdef2, attk, &otmp, vis2, tohitmod, TRUE);
-								/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
-								result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
+					}
+					/* Cleaving weapon trait can cause melee attacks to hit an additional neighboring monster, if the blow kills the primary target */
+					if (!ranged && otmp && magr
+						&& (result&MM_DEF_DIED)
+						&& CHECK_ETRAIT(otmp, magr, ETRAIT_CLEAVE)
+						&& ROLL_ETRAIT(otmp, magr, TRUE, !rn2(4))
+					){
+						int subresult = 0;
+						/* try to find direction (u.dx and u.dy may be incorrect) */
+						int dx = sgn(tarx - x(magr));
+						int dy = sgn(tary - y(magr));
+						int nx, ny;
+						int i = 0;
+						boolean target = FALSE;
+						while(i < 2 && !target){
+							if((monstermoves+indexnum+devai+i)&1){//Odd
+								//-45 degree rotation
+								nx = sgn(dx+dy);
+								ny = sgn(dy-dx);
+							} else {
+								//45 degree rotation
+								nx = sgn(dx-dy);
+								ny = sgn(dx+dy);
+							}
+							i++;
+							if (isok(x(magr) + nx, y(magr) + ny))
+							{
+								struct monst *mdef2 = (youagr && u.uswallow) ? u.ustuck : 
+														(nx || ny) ? m_at(x(magr) + nx, y(magr) + ny) : 
+														(struct monst *)0;
+								if (mdef2 && (mdef2 != mdef) && !DEADMONSTER(mdef2)
+									&& !((youagr && mdef2->mpeaceful) || (!youagr && magr->mpeaceful == mdef2->mpeaceful))
+								){
+									target = TRUE;
+									int vis2 = (VIS_MAGR | VIS_NONE) | (canseemon(mdef2) ? VIS_MDEF : 0);
+									bhitpos.x = x(magr) + nx; bhitpos.y = y(magr) + ny;
+									subresult = xmeleehity(magr, mdef2, attk, &otmp, vis2, tohitmod, TRUE);
+									/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
+									result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
+								}
 							}
 						}
 					}
