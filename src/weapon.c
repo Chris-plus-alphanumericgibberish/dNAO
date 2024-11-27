@@ -369,7 +369,12 @@ struct monst *magr;
 		else if(activeFightingForm(FFORM_POMMEL))
 			attackmask = WHACK; // only bashing
 	}
-
+	if(obj && obj->o_e_trait == ETRAIT_HEW && magr
+		&& CHECK_ETRAIT(obj, magr, ETRAIT_HEW)
+		&& (attackmask&SLASH)
+	){
+		attackmask &= ~PIERCE;
+	}
 	if (   oartifact == ART_LIECLEAVER
 		|| oartifact == ART_INFINITY_S_MIRRORED_ARC
 		|| oartifact == ART_GREAT_CLAWS_OF_URDLEN
