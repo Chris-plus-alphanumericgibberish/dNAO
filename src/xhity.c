@@ -14064,6 +14064,14 @@ int vis;						/* True if action is at all visible to the player */
 		jostdmg += d(2, (weapon == uwep) ? 10 : 2);
 	}
 #endif
+	// Knockback expert weapon trait
+	if(!recursed && weapon && weapon->o_e_trait == ETRAIT_KNOCK_BACK &&
+		 magr && CHECK_ETRAIT(weapon, magr, ETRAIT_KNOCK_BACK) &&
+		 ROLL_ETRAIT(weapon, magr, !rn2(5), !rn2(20))
+	){
+		staggering_strike = TRUE;
+	}
+
 	/* staggering strike */
 	if (youagr && (melee || thrust) && !recursed) {
 		if (
