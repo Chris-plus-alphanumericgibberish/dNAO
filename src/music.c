@@ -1186,6 +1186,7 @@ int distance;
 					mtmp->mfrozen = 0;
 				}
 				if(mtmp->mstdy > 0) mtmp->mstdy = 0;
+				mtmp->mwounded_legs = 0;
 				mtmp->mstun = 0;
 				mtmp->mconf = 0;
 			case P_UNSKILLED:

@@ -2238,6 +2238,10 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	if(has_template(magr, DREAM_LEECH) && magr->mcan &&attk->aatyp == AT_TUCH && attk->adtyp == AT_TUCH){
 		GETNEXT
 	}
+	/* Skip kicks with wounded legs */
+	if(magr->mwounded_legs && magr->mcan &&attk->aatyp == AT_KICK){
+		GETNEXT
+	}
 		
 	if(!by_the_book && 
 		(pa->mtyp == PM_SMALL_GOAT_SPAWN || pa->mtyp == PM_GOAT_SPAWN || pa->mtyp == PM_GIANT_GOAT_SPAWN || pa->mtyp == PM_XUENU_MONK)
@@ -8312,6 +8316,9 @@ boolean ranged;
 			if (!notmcan) {
 				alt_attk.damn = 0;
 				alt_attk.damd = 0;
+			}
+			else {
+				mdef->mwounded_legs = TRUE;
 			}
 			alt_attk.adtyp = AD_PHYS;
 

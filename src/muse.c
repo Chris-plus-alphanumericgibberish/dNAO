@@ -2458,6 +2458,7 @@ museamnesia:
 			mtmp->mberserk = 0;
 			mtmp->mdisrobe = 0;
 			mtmp->mdoubt = 0;
+			mtmp->mwounded_legs = 0;
 			mtmp->msanctity = 0;
 			mtmp->mgluttony = 0;
 			mtmp->mfrigophobia = 0;
