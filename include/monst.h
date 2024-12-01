@@ -210,6 +210,7 @@ struct monst {
 	char mtaneggs;	/* tannin eggs */
 	long mwait;/* if tame, won't follow between levels (turn last ordered to wait on) */
 	int encouraged;	/* affected by Encourage song */
+	int mfell;	/* slowed by fell expert trait */
 #define BASE_DOG_ENCOURAGED_MAX		7
 	
 	int entangled_otyp;/* The monster is entangled, and in what? */

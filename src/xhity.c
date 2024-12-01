@@ -2239,7 +2239,9 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		GETNEXT
 	}
 	/* Skip kicks with wounded legs */
-	if(magr->mwounded_legs && magr->mcan &&attk->aatyp == AT_KICK){
+	if(magr->mwounded_legs && attk->aatyp == AT_KICK){
+		GETNEXT
+	}
 	/* Skip attacks if stunned */
 	if(magr->mstun && !by_the_book && !rn2(6)){
 		GETNEXT
@@ -15640,13 +15642,23 @@ int vis;						/* True if action is at all visible to the player */
 				&& ROLL_ETRAIT(weapon, magr, TRUE, !rn2(10))
 			){
 				if(youdef){
-					long side = rn2(2) ? RIGHT_SIDE : LEFT_SIDE;
-					const char *sidestr = (side == RIGHT_SIDE) ? "right" : "left";
-					Your("%s %s is injured in the fighting!", sidestr, body_part(LEG));
-					set_wounded_legs(side, rnd(60 - ACURR(A_DEX)));
+					if(!Wounded_legs){
+						long side = rn2(2) ? RIGHT_SIDE : LEFT_SIDE;
+						const char *sidestr = (side == RIGHT_SIDE) ? "right" : "left";
+						if(u.usteed)
+							Your("steed's %s is injured in the fighting!", mbodypart(u.usteed, LEG));
+						else
+							Your("%s %s is injured in the fighting!", sidestr, body_part(LEG));
+						set_wounded_legs(side, rnd(60 - ACURR(A_DEX)));
+					}
 				}
-				else
-					mdef->movement = max(mdef->movement - 6, -12);
+				else {
+					mdef->mfell += 1;
+					if(!mdef->mwounded_legs && !rn2(20)){
+						mdef->mwounded_legs = 1;
+						pline("%s %s is injured in the fighting!", s_suffix(Monnam(mdef)), mbodypart(mdef, LEG));
+					}
+				}
 			}
 		}
 	}
