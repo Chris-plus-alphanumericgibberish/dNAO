@@ -2240,6 +2240,8 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	}
 	/* Skip kicks with wounded legs */
 	if(magr->mwounded_legs && magr->mcan &&attk->aatyp == AT_KICK){
+	/* Skip attacks if stunned */
+	if(magr->mstun && !by_the_book && !rn2(6)){
 		GETNEXT
 	}
 		
@@ -13532,6 +13534,7 @@ int vis;						/* True if action is at all visible to the player */
 	boolean staggering_strike = FALSE;
 	boolean shattering_strike = FALSE;
 	boolean disarming_strike = FALSE;
+	boolean stunning_strike = FALSE;
 	int jousting = 0;		/* can be 1 (joust), 0 (ordinary hit), -1 (joust and lance breaks) */
 	int sneak_dice = 0;
 	int sneak_attack = 0;
@@ -14077,6 +14080,13 @@ int vis;						/* True if action is at all visible to the player */
 		 ROLL_ETRAIT(weapon, magr, !rn2(5), !rn2(20))
 	){
 		staggering_strike = TRUE;
+	}
+	// Stun expert weapon trait
+	if(!recursed && weapon && weapon->o_e_trait == ETRAIT_STUNNING_STRIKE &&
+		 magr && CHECK_ETRAIT(weapon, magr, ETRAIT_STUNNING_STRIKE) &&
+		 ROLL_ETRAIT(weapon, magr, !rn2(2), !rn2(10))
+	){
+		stunning_strike = TRUE;
 	}
 
 	/* staggering strike */
@@ -16140,6 +16150,7 @@ int vis;						/* True if action is at all visible to the player */
 			if (!hittxt &&
 				!jousting &&
 				!staggering_strike &&
+				!stunning_strike &&
 				!(youagr && lethaldamage) &&
 				!(youagr && snekdmg))
 			{
@@ -16260,7 +16271,30 @@ int vis;						/* True if action is at all visible to the player */
 			}
 		}
 		else {
-			impossible("Monsters using staggering strikes? Someone forgot to fully implement this...");
+			You("%s from %s powerful %s%s!",
+				makeplural(stagger(mdef, "stagger")),
+				s_suffix(mon_nam(magr)),
+				((weapon && weapon->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD) ? "blow" : "strike"),
+				(snekdmg && (sneak_attack & SNEAK_JUYO) ? "s" : "")
+				);
+		}
+	}
+	if (stunning_strike && !lethaldamage) {
+		if (youagr) {
+			if (canspotmon(mdef)) {
+				pline("%s is stunned by your powerful %s%s!",
+					Monnam(mdef),
+					((weapon && weapon->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD) ? "blow" : "strike"),
+					(snekdmg && (sneak_attack & SNEAK_JUYO) ? "s" : "")
+					);
+			}
+		}
+		else {
+			You("are stunned by %s powerful %s%s!",
+				s_suffix(mon_nam(magr)),
+				((weapon && weapon->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD) ? "blow" : "strike"),
+				(snekdmg && (sneak_attack & SNEAK_JUYO) ? "s" : "")
+				);
 		}
 	}
 	if(weapon && weapon->obj_material == HEMARGYOS){
@@ -17079,6 +17113,15 @@ int vis;						/* True if action is at all visible to the player */
 			if (staggering_strike)
 				mdef->mstun = TRUE;
 			pd = mdef->data; /* in case of a polymorph trap */
+		}
+	}
+	if(stunning_strike){
+		if(youdef){
+			make_stunned((HStun)+d(3, 3), FALSE);
+		}
+		else{
+			mdef->mstun = TRUE;
+			mdef->mconf = TRUE;
 		}
 	}
 
