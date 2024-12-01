@@ -15899,6 +15899,10 @@ int vis;						/* True if action is at all visible to the player */
 		//Give skilled rangers (and others) some help vs. armor
 		if(fired && launcher && valid_weapon_attack && weapon && is_aimable(weapon, attackmask) && dr)
 			dr = max(dr-skill_damage, 0);
+		//Armor-penetrating weapons do 0-1x or 1-2x bonus skill damage to dr (up to +10 vs dr)
+		if(valid_weapon_attack && weapon && CHECK_ETRAIT(weapon, magr, ETRAIT_PENETRATE_ARMOR) && ROLL_ETRAIT(weapon, magr, TRUE, rn2(2))){
+			dr = max_ints(dr - (ROLL_ETRAIT(weapon, magr, rnd(2), 1) * skill_damage), 0);
+		}
 		
 		subtotl -= dr;
 		
