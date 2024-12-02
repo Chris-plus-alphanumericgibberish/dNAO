@@ -2239,11 +2239,11 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		GETNEXT
 	}
 	/* Skip kicks with wounded legs */
-	if(magr->mwounded_legs && attk->aatyp == AT_KICK){
+	if(!youagr && magr->mwounded_legs && attk->aatyp == AT_KICK){
 		GETNEXT
 	}
 	/* Skip attacks if stunned */
-	if(magr->mstun && !by_the_book && !rn2(6)){
+	if(!youagr && magr->mstun && !by_the_book && !rn2(6)){
 		GETNEXT
 	}
 		
