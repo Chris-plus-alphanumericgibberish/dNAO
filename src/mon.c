@@ -1912,6 +1912,8 @@ movemon()
 	}
 	arc = maxtheta - mintheta;
 	
+	if(u.specialSealsActive&SEAL_LIVING_CRYSTAL)
+		average_dogs();
 	//Current Movement Loop///////////////////////////////////////////////////
     for(mtmp = fmon; mtmp; mtmp = nmtmp) {
 	if (flags.run_timers){
@@ -1941,8 +1943,6 @@ movemon()
 	/* Find a monster that we have not treated yet.	 */
 	if(DEADMONSTER(mtmp))
 	    continue;
-	if(u.specialSealsActive&SEAL_LIVING_CRYSTAL)
-		average_dogs();
 	if(mtmp->mlast_movement != monstermoves){
 		mtmp->mprev_dir.x = 0;
 		mtmp->mprev_dir.y = 0;
@@ -2132,6 +2132,9 @@ movemon()
 	}
 
 	if (minliquid(mtmp)) continue;
+
+	if(u.specialSealsActive&SEAL_LIVING_CRYSTAL)
+		average_dogs();
 
 	/* continue if the monster died fighting */
 	if (!mtmp->iswiz && !is_blind(mtmp)) {
