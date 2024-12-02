@@ -4541,6 +4541,45 @@ boolean ranged;
 	/* Hack this in by knowing that repeated AT_DEVA attacks have a flat_acc penalty */
 	if (attk->aatyp == AT_DEVA && flat_acc < 0)
 		domissmsg = FALSE;
+
+	boolean graze = FALSE;
+	int graze_dmg = 0;
+	if (miss && weapon && magr
+		&& CHECK_ETRAIT(weapon, magr, ETRAIT_GRAZE)
+		&& ROLL_ETRAIT(weapon, magr, (accuracy > (dieroll - 20)), (accuracy > (dieroll + 10 - rnd(20))))
+	){
+		struct weapon_dice wdice;
+		/* grab the weapon dice from dmgval_core */
+		dmgval_core(&wdice, bigmonst(pd), weapon, weapon->otyp, magr);
+		/* add to the bonsdmg counter */
+		graze_dmg = wdice.oc_damn + wdice.bon_damn + wdice.flat;
+		
+		if(youagr){
+			if (flags.verbose)
+				You("graze %s.", mon_nam(mdef));
+			else
+				You("graze it.");
+		}
+		else {
+			if (vis) {
+				if (!(vis&VIS_MAGR))
+					map_invisible(x(magr), y(magr));
+				if (!(vis&VIS_MDEF))
+					map_invisible(x(mdef), y(mdef));
+
+				pline("%s grazes %s.",
+					Monnam(magr),
+					mon_nam_too(mdef, magr)
+					);
+			}
+			else {
+				noises(magr, attk);
+			}
+		}
+		graze = TRUE;
+		miss = FALSE;
+		domissmsg = FALSE;
+	}
 	/* print a "miss" message */
 	if (miss && domissmsg) {
 		xymissmsg(magr, mdef, attk, vis, (accuracy == dieroll));
@@ -4616,6 +4655,9 @@ boolean ranged;
 		/* the player exercises dexterity when hitting */
 		if (youagr)
 			exercise(A_DEX, TRUE);
+	}
+	else if(graze){
+		result = hmon_general(magr, mdef, attk, attk, weapon_p, (struct obj *)0, (weapon && ranged) ? HMON_THRUST : HMON_WHACK, graze_dmg, 0, FALSE, dieroll, FALSE, vis);
 	}
 	else {
 		result = MM_MISS;
@@ -14683,7 +14725,10 @@ int vis;						/* True if action is at all visible to the player */
 	/* case 4: unarmed kick */
 	/* case 5: unarmed headbutt */
 	/* case 6: none of the above */
-	if (valid_weapon_attack) {
+	if(flatbasedmg){
+		basedmg = flatbasedmg;
+	}
+	else if (valid_weapon_attack) {
 		/* note: dmgval() includes enchantment and erosion of weapon */
 		if ((weapon->oartifact == ART_PEN_OF_THE_VOID && weapon->ovara_seals&SEAL_MARIONETTE) ||
 			(youagr && thrust && u.sealsActive&SEAL_MARIONETTE))
