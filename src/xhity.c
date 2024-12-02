@@ -499,6 +499,11 @@ int tary;
 		}
 	    }
 	}
+	
+	if(!youagr){
+		magr->mprev_attk.x = sgn(x(mdef) - x(magr));
+		magr->mprev_attk.y = sgn(y(mdef) - y(magr));
+	}
 #ifdef STEED
 	/* monsters may target your steed */
 	if (youdef && u.usteed && !missedyou) {
@@ -13579,6 +13584,7 @@ int vis;						/* True if action is at all visible to the player */
 	boolean shattering_strike = FALSE;
 	boolean disarming_strike = FALSE;
 	boolean stunning_strike = FALSE;
+	boolean braced_weapon = FALSE;
 	int jousting = 0;		/* can be 1 (joust), 0 (ordinary hit), -1 (joust and lance breaks) */
 	int sneak_dice = 0;
 	int sneak_attack = 0;
@@ -13812,6 +13818,15 @@ int vis;						/* True if action is at all visible to the player */
 	/* FIGURE OUT WHAT APPLIES */
 	/* what kind of attack is being made? */
 	if (weapon) {
+		if(CHECK_ETRAIT(weapon, magr, ETRAIT_BRACED)
+			&& ROLL_ETRAIT(weapon, magr, TRUE, !rn2(10))
+			&& magr != mdef
+			&& ((!youdef && mdef->mprev_attk.x == sgn(x(magr) - x(mdef)) && mdef->mprev_attk.y == sgn(y(magr) - y(mdef)))
+				|| (youdef && u.uattked && u.prev_dir.x == sgn(x(magr) - x(mdef)) && u.prev_dir.y == sgn(y(magr) - y(mdef)))
+				)
+		){
+			braced_weapon = TRUE;
+		}
 		if (/* valid weapon */
 			(valid_weapon(weapon)
 				|| check_oprop(weapon, OPROP_BLADED)
@@ -15704,6 +15719,34 @@ int vis;						/* True if action is at all visible to the player */
 						pline("%s %s is injured in the fighting!", s_suffix(Monnam(mdef)), mbodypart(mdef, LEG));
 					}
 				}
+			}
+			if(CHECK_ETRAIT(weapon, magr, ETRAIT_STOP_THRUST)
+				&& ROLL_ETRAIT(weapon, magr, TRUE, !rn2(10))
+				&& magr != mdef
+				&& ((!youdef && mdef->mprev_dir.x == sgn(x(magr) - x(mdef)) && mdef->mprev_dir.y == sgn(y(magr) - y(mdef)))
+					|| (youdef && u.umoved && u.prev_dir.x == sgn(x(magr) - x(mdef)) && u.prev_dir.y == sgn(y(magr) - y(mdef)))
+					)
+			){
+				struct weapon_dice wdice;
+				if (wizard && (iflags.wizcombatdebug & WIZCOMBATDEBUG_DMG) && WIZCOMBATDEBUG_APPLIES(magr, mdef))
+					pline("Stop thrust!");
+				/* grab the weapon dice from dmgval_core */
+				dmgval_core(&wdice, bigmonst(pd), weapon, weapon->otyp, magr);
+				/* add to the bonsdmg counter */
+				bonsdmg += weapon_dmg_roll(&wdice, youdef);
+				if(youagr)
+					bonsdmg += weapon_dam_bonus(weapon, weapon_type(weapon));
+			}
+			if(braced_weapon){
+				struct weapon_dice wdice;
+				if (wizard && (iflags.wizcombatdebug & WIZCOMBATDEBUG_DMG) && WIZCOMBATDEBUG_APPLIES(magr, mdef))
+					pline("Braced attack!");
+				/* grab the weapon dice from dmgval_core */
+				dmgval_core(&wdice, bigmonst(pd), weapon, weapon->otyp, magr);
+				/* add to the bonsdmg counter */
+				bonsdmg += weapon_dmg_roll(&wdice, youdef);
+				if(youagr)
+					bonsdmg += weapon_dam_bonus(weapon, weapon_type(weapon));
 			}
 		}
 	}

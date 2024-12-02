@@ -1442,6 +1442,9 @@ newdogpos:
 		/* insert a worm_move() if worms ever begin to eat things */
 		remove_monster(omx, omy);
 		place_monster(mtmp, nix, niy);
+		mtmp->mprev_dir.x = sgn(nix - omx);
+		mtmp->mprev_dir.y = sgn(niy - omy);
+		mtmp->mlast_movement = monstermoves;
 		if (cursemsg[chi] && (cansee(omx,omy) || cansee(nix,niy)))
 			pline("%s moves only reluctantly.", Monnam(mtmp));
 		for (j=MTSZ-1; j>0; j--) mtmp->mtrack[j] = mtmp->mtrack[j-1];
@@ -1480,6 +1483,9 @@ newdogpos:
 dognext:
 		if (!m_in_out_region(mtmp, nix, niy))
 		  return 1;
+		mtmp->mprev_dir.x = sgn(cc.x - mtmp->mx);
+		mtmp->mprev_dir.y = sgn(cc.y - mtmp->my);
+		mtmp->mlast_movement = monstermoves;
 		remove_monster(mtmp->mx, mtmp->my);
 		place_monster(mtmp, cc.x, cc.y);
 		newsym(cc.x,cc.y);

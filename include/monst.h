@@ -211,6 +211,9 @@ struct monst {
 	long mwait;/* if tame, won't follow between levels (turn last ordered to wait on) */
 	int encouraged;	/* affected by Encourage song */
 	int mfell;	/* slowed by fell expert trait */
+	coord mprev_dir;		/* previous movement direction (stop thrust etc) */
+	coord mprev_attk;	/* previous attack direction (braced etc) */
+	long mlast_movement;/* turn on which it most recently moved (clear stop thrust) */
 #define BASE_DOG_ENCOURAGED_MAX		7
 	
 	int entangled_otyp;/* The monster is entangled, and in what? */

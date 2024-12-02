@@ -3023,6 +3023,9 @@ not_special:
 	        return 3;
 	    remove_monster(omx, omy);
 	    place_monster(mtmp, nix, niy);
+		mtmp->mprev_dir.x = sgn(nix - omx);
+		mtmp->mprev_dir.y = sgn(niy - omy);
+		mtmp->mlast_movement = monstermoves;
 	    for(j = MTSZ-1; j > 0; j--)
 		mtmp->mtrack[j] = mtmp->mtrack[j-1];
 	    mtmp->mtrack[0].x = omx;

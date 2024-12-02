@@ -1943,6 +1943,14 @@ movemon()
 	    continue;
 	if(u.specialSealsActive&SEAL_LIVING_CRYSTAL)
 		average_dogs();
+	if(mtmp->mlast_movement != monstermoves){
+		mtmp->mprev_dir.x = 0;
+		mtmp->mprev_dir.y = 0;
+	}
+	if(mtmp->mlstmv != monstermoves){
+		mtmp->mprev_attk.x = 0;
+		mtmp->mprev_attk.y = 0;
+	}
 	if(mtmp->m_insight_level > u.uinsight
 	  || (mtmp->mtyp == PM_WALKING_DELIRIUM && BlockableClearThoughts)
 	  || (mtmp->mtyp == PM_STRANGER && !quest_status.touched_artifact)
