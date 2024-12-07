@@ -1424,40 +1424,12 @@ doEtechForm()
 			MENU_UNSELECTED);
 	}
 	if(CHECK_ETRAIT(uwep, &youmonst, ETRAIT_FOCUS_FIRE)){
-		Sprintf(buf, "Target heads");
-		if(uwep->o_e_trait&EFOCUS_HEAD)
+		Sprintf(buf, "Target weakpoints");
+		if(uwep->o_e_trait&ETRAIT_FOCUS_FIRE)
 			Strcat(buf, " (active)");
-		any.a_long = EFOCUS_HEAD;
+		any.a_long = ETRAIT_FOCUS_FIRE;
 		add_menu(tmpwin, NO_GLYPH, &any,
-			'a', 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		Sprintf(buf, "Target upper bodies");
-		if(uwep->o_e_trait&EFOCUS_UB)
-			Strcat(buf, " (active)");
-		any.a_long = EFOCUS_UB;
-		add_menu(tmpwin, NO_GLYPH, &any,
-			'b', 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		Sprintf(buf, "Target hands");
-		if(uwep->o_e_trait&EFOCUS_GLOVE)
-			Strcat(buf, " (active)");
-		any.a_long = EFOCUS_GLOVE;
-		add_menu(tmpwin, NO_GLYPH, &any,
-			'c', 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		Sprintf(buf, "Target lower bodies");
-		if(uwep->o_e_trait&EFOCUS_LB)
-			Strcat(buf, " (active)");
-		any.a_long = EFOCUS_LB;
-		add_menu(tmpwin, NO_GLYPH, &any,
-			'd', 0, ATR_NONE, buf,
-			MENU_UNSELECTED);
-		Sprintf(buf, "Target feet");
-		if(uwep->o_e_trait&EFOCUS_LEGS)
-			Strcat(buf, " (active)");
-		any.a_long = EFOCUS_LEGS;
-		add_menu(tmpwin, NO_GLYPH, &any,
-			'e', 0, ATR_NONE, buf,
+			'w', 0, ATR_NONE, buf,
 			MENU_UNSELECTED);
 	}
 

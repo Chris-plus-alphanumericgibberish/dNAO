@@ -15998,16 +15998,17 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 			}
 			else if(weapon->o_e_trait&ETRAIT_FOCUS_FIRE && CHECK_ETRAIT(weapon, magr, ETRAIT_FOCUS_FIRE)){
 				if(ROLL_ETRAIT(weapon, magr, TRUE, !rn2(5))){
-					if(weapon->o_e_trait&EFOCUS_HEAD)
-						slot = HEAD_DR;
-					else if(weapon->o_e_trait&EFOCUS_UB)
-						slot = UPPER_TORSO_DR;
-					else if(weapon->o_e_trait&EFOCUS_GLOVE)
-						slot = ARM_DR;
-					else if(weapon->o_e_trait&EFOCUS_LB)
-						slot = LOWER_TORSO_DR;
-					else if(weapon->o_e_trait&EFOCUS_LEGS)
-						slot = LEG_DR;
+					int min_slot = UPPER_TORSO_DR;
+					int min_dr = (youdef ? roll_udr(magr, UPPER_TORSO_DR) : roll_mdr(mdef, magr, UPPER_TORSO_DR));
+					for(slot = LOWER_TORSO_DR; slot <= ARM_DR; slot = slot<<1){
+						dr = (youdef ? roll_udr(magr, slot) : roll_mdr(mdef, magr, slot));
+						if(dr < min_dr){
+							min_dr = dr;
+							min_slot = slot;
+						}
+					}
+					//Targets lowest
+					slot = min_slot;
 				}
 			}
 			dr = (youdef ? roll_udr(magr, slot) : roll_mdr(mdef, magr, slot));
