@@ -17,7 +17,7 @@ STATIC_DCL int FDECL(do_weapon_multistriking_effects, (struct monst *, struct mo
 STATIC_DCL int FDECL(xcastmagicy, (struct monst *, struct monst *, struct attack *, int, int));
 STATIC_DCL int FDECL(xtinkery, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(xexplodey, (struct monst *, struct monst *, struct attack *, int));
-STATIC_DCL int FDECL(hmoncore, (struct monst *, struct monst *, struct attack *, struct attack *, struct obj **, void *, int, int, int, boolean, int, boolean, int));
+STATIC_DCL int FDECL(hmoncore, (struct monst *, struct monst *, struct attack *, struct attack *, struct obj **, void *, int, int, int, boolean, int, boolean, int, unsigned long));
 STATIC_DCL void FDECL(add_silvered_art_sear_adjectives, (char *, struct obj*));
 STATIC_DCL int FDECL(shadow_strike, (struct monst *));
 STATIC_DCL int FDECL(xpassivehity, (struct monst *, struct monst *, struct attack *, struct attack *, struct obj *, int, int, struct permonst *, boolean));
@@ -4544,8 +4544,16 @@ boolean ranged;
 
 	/* AT_DEVA attacks shouldn't print a miss message if it is a subsequent attack that misses */
 	/* Hack this in by knowing that repeated AT_DEVA attacks have a flat_acc penalty */
+	boolean longslash = FALSE;
 	if (attk->aatyp == AT_DEVA && flat_acc < 0)
 		domissmsg = FALSE;
+
+	if (hit && weapon && magr
+		&& CHECK_ETRAIT(weapon, magr, ETRAIT_LONG_SLASH)
+		&& ROLL_ETRAIT(weapon, magr, (accuracy > (dieroll + 20)), (accuracy > (dieroll + 30 - rnd(20))))
+	){
+		longslash = TRUE;
+	}
 
 	boolean graze = FALSE;
 	int graze_dmg = 0;
@@ -4655,7 +4663,7 @@ boolean ranged;
 	/* if we hit... */
 	if (hit) {
 		/* DEAL THE DAMAGE */
-		result = xmeleehurty(magr, mdef, attk, attk, weapon_p, TRUE, -1, dieroll, vis, ranged);
+		result = xmeleehurty_core(magr, mdef, attk, attk, weapon_p, TRUE, -1, dieroll, vis, ranged, longslash ? MELEEHURT_LONGSLASH : 0L);
 
 		/* the player exercises dexterity when hitting */
 		if (youagr)
@@ -4673,6 +4681,12 @@ boolean ranged;
 		wakeup2(mdef, youagr);
 
 	return result;
+}
+
+int
+xmeleehurty(struct monst *magr, struct monst *mdef, struct attack *attk, struct attack *originalattk, struct obj **weapon_p, boolean dohitmsg, int flatdmg, int dieroll, int vis, boolean ranged)
+{
+	return xmeleehurty_core(magr, mdef, attk, originalattk, weapon_p, dohitmsg, flatdmg, dieroll, vis, ranged, 0L);
 }
 
 /* xmeleehurty()
@@ -4694,17 +4708,7 @@ boolean ranged;
  * what damage was dealt and who survived.
  */
 int
-xmeleehurty(magr, mdef, attk, originalattk, weapon_p, dohitmsg, flatdmg, dieroll, vis, ranged)
-struct monst * magr;
-struct monst * mdef;
-struct attack * attk;
-struct attack * originalattk;
-struct obj ** weapon_p;
-boolean dohitmsg;
-int flatdmg;
-int dieroll;
-int vis;
-boolean ranged;
+xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, struct attack *originalattk, struct obj **weapon_p, boolean dohitmsg, int flatdmg, int dieroll, int vis, boolean ranged, unsigned long modifier_flags)
 {
 	int dmg = 0,					// damage that will be dealt
 		ptmp = 0,					// poison type
@@ -4995,14 +4999,14 @@ boolean ranged;
 			}
 		}
 		/* hit with [weapon] */
-		result = hmon_general(magr, mdef, attk, originalattk, weapon_p, (struct obj *)0, (weapon && ranged) ? HMON_THRUST : HMON_WHACK, 0, dmg, dohitmsg, dieroll, FALSE, vis);
+		result = hmon_general_modifiers(magr, mdef, attk, originalattk, weapon_p, (struct obj *)0, (weapon && ranged) ? HMON_THRUST : HMON_WHACK, 0, dmg, dohitmsg, dieroll, FALSE, vis, modifier_flags);
 		if (weapon_p) weapon = *weapon_p;
 		if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP))
 			return result;
 		if (weapon && is_multi_hit(weapon) && weapon->ostriking) {
 			int i;
 			for (i = 0; weapon && (i < weapon->ostriking); i++) {
-				result = hmon_general(magr, mdef, attk, originalattk, weapon_p, (struct obj *)0, (weapon && ranged) ? HMON_THRUST : HMON_WHACK, 0, 0, FALSE, dieroll, TRUE, vis);
+				result = hmon_general_modifiers(magr, mdef, attk, originalattk, weapon_p, (struct obj *)0, (weapon && ranged) ? HMON_THRUST : HMON_WHACK, 0, 0, FALSE, dieroll, TRUE, vis, modifier_flags);
 				if (weapon_p) weapon = *weapon_p;
 				if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP))
 					return result;
@@ -8116,6 +8120,7 @@ boolean ranged;
 					if (gold) {
 						obj_extract_self(gold);
 						add_to_minv(magr, gold);
+					}
 #endif
 					mdef->mstrategy &= ~STRAT_WAITFORU;
 					if (vis) {
@@ -13532,6 +13537,25 @@ int dieroll;					/* 1-20 accuracy dieroll, used for special effects */
 boolean recursed;				/* True for all but one attacks when 1 object is hitting >1 times in 1 attack. If so, avoid duplicating some messages and effects. */
 int vis;						/* True if action is at all visible to the player */
 {
+	return hmon_general_modifiers(magr, mdef, attk, originalattk, weapon_p, vpointer, hmoncode, flatbasedmg, monsdmg, dohitmsg, dieroll, recursed, vis, 0L);
+}
+
+// magr;			/* attacker */
+// mdef;			/* defender */
+// attk;			/* attack structure to use */
+// originalattk;	/* original attack structure, used for messages */
+// weapon_p;			/* pointer to weapon to hit with */
+// vpointer;				/* additional /whatever/, type based on hmoncode. */
+// hmoncode;					/* what kind of pointer is vpointer, and what is it doing? (hack.h) */
+// flatbasedmg;				/* if >0, REPLACE basedmg with this value -- currently unused. SCOPECREEP: use hmon for things like throwing an object upwards */
+// monsdmg;					/* flat damage amount to add onto other effects -- for monster attacks */
+// dohitmsg;				/* print hit message? */
+// dieroll;					/* 1-20 accuracy dieroll, used for special effects */
+// recursed;				/* True for all but one attacks when 1 object is hitting >1 times in 1 attack. If so, avoid duplicating some messages and effects. */
+// vis;						/* True if action is at all visible to the player */
+int
+hmon_general_modifiers(struct monst *magr, struct monst *mdef, struct attack *attk, struct attack *originalattk, struct obj **weapon_p, void *vpointer, int hmoncode, int flatbasedmg, int monsdmg, boolean dohitmsg, int dieroll, boolean recursed, int vis, unsigned long modifier_flags)
+{
 	int result;
 	boolean u_anger_guards;
 
@@ -13545,7 +13569,7 @@ int vis;						/* True if action is at all visible to the player */
 	else
 		u_anger_guards = FALSE;
 
-	result = hmoncore(magr, mdef, attk, originalattk, weapon_p, vpointer, hmoncode, flatbasedmg, monsdmg, dohitmsg, dieroll, recursed, vis);
+	result = hmoncore(magr, mdef, attk, originalattk, weapon_p, vpointer, hmoncode, flatbasedmg, monsdmg, dohitmsg, dieroll, recursed, vis, modifier_flags);
 
 	/* reset killer */
 	killer = 0;
@@ -13558,21 +13582,22 @@ int vis;						/* True if action is at all visible to the player */
 	return result;
 }
 
+// magr;			/* attacker */
+// mdef;			/* defender */
+// attk;			/* attack structure to use */
+// originalattk;	/* original attack structure, used for messages */
+// weapon_p;			/* pointer to weapon to hit with */
+// vpointer;				/* additional /whatever/, type based on hmoncode. */
+// hmoncode;					/* what kind of pointer is vpointer, and what is it doing? (hack.h) */
+// flatbasedmg;				/* if >0, REPLACE basedmg with this value -- currently unused. SCOPECREEP: use hmon for things like throwing an object upwards */
+// monsdmg;					/* flat damage amount to add onto other effects -- for monster attacks */
+// dohitmsg;				/* print hit message? */
+// dieroll;					/* 1-20 accuracy dieroll, used for special effects */
+// recursed;				/* True for all but one attacks when 1 object is hitting >1 times in 1 attack. If so, avoid duplicating some messages and effects. */
+// vis;						/* True if action is at all visible to the player */
+
 int
-hmoncore(magr, mdef, attk, originalattk, weapon_p, vpointer, hmoncode, flatbasedmg, monsdmg, dohitmsg, dieroll, recursed, vis)
-struct monst * magr;			/* attacker */
-struct monst * mdef;			/* defender */
-struct attack * attk;			/* attack structure to use */
-struct attack * originalattk;	/* original attack structure, used for messages */
-struct obj ** weapon_p;			/* pointer to weapon to hit with */
-void * vpointer;				/* additional /whatever/, type based on hmoncode. */
-int hmoncode;					/* what kind of pointer is vpointer, and what is it doing? (hack.h) */
-int flatbasedmg;				/* if >0, REPLACE basedmg with this value -- currently unused. SCOPECREEP: use hmon for things like throwing an object upwards */
-int monsdmg;					/* flat damage amount to add onto other effects -- for monster attacks */
-boolean dohitmsg;				/* print hit message? */
-int dieroll;					/* 1-20 accuracy dieroll, used for special effects */
-boolean recursed;				/* True for all but one attacks when 1 object is hitting >1 times in 1 attack. If so, avoid duplicating some messages and effects. */
-int vis;						/* True if action is at all visible to the player */
+hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct attack *originalattk, struct obj **weapon_p, void *vpointer, int hmoncode, int flatbasedmg, int monsdmg, boolean dohitmsg, int dieroll, boolean recursed, int vis, unsigned long modifier_flags)
 {
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
@@ -15741,6 +15766,17 @@ int vis;						/* True if action is at all visible to the player */
 				struct weapon_dice wdice;
 				if (wizard && (iflags.wizcombatdebug & WIZCOMBATDEBUG_DMG) && WIZCOMBATDEBUG_APPLIES(magr, mdef))
 					pline("Braced attack!");
+				/* grab the weapon dice from dmgval_core */
+				dmgval_core(&wdice, bigmonst(pd), weapon, weapon->otyp, magr);
+				/* add to the bonsdmg counter */
+				bonsdmg += weapon_dmg_roll(&wdice, youdef);
+				if(youagr)
+					bonsdmg += weapon_dam_bonus(weapon, weapon_type(weapon));
+			}
+			if(modifier_flags&MELEEHURT_LONGSLASH){
+				struct weapon_dice wdice;
+				if (wizard && (iflags.wizcombatdebug & WIZCOMBATDEBUG_DMG) && WIZCOMBATDEBUG_APPLIES(magr, mdef))
+					pline("Long slash!");
 				/* grab the weapon dice from dmgval_core */
 				dmgval_core(&wdice, bigmonst(pd), weapon, weapon->otyp, magr);
 				/* add to the bonsdmg counter */
