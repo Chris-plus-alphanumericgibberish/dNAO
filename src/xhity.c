@@ -13620,6 +13620,7 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 #define SNEAK_HELPLESS	0x10
 #define SNEAK_JUYO		0x20
 #define SNEAK_SUICIDAL	0x40
+#define SNEAK_OPEN	0x80
 	long silverobj = 0L,
 		jadeobj = 0L,
 		ironobj = 0L,
@@ -14019,6 +14020,8 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 				sneak_attack |= SNEAK_HELPLESS;
 			if (mdef->msuicide)
 				sneak_attack |= SNEAK_SUICIDAL;
+			if (mdef->mopen)
+				sneak_attack |= SNEAK_OPEN;
 			if (is_blind(mdef))
 				sneak_attack |= SNEAK_BLINDED;
 			if (mdef->mtrapped)
@@ -14048,6 +14051,8 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 				sneak_attack |= SNEAK_HELPLESS;
 			if (mad_turn(MAD_SUICIDAL))
 				sneak_attack |= SNEAK_SUICIDAL;
+			if (youmonst.mopen)
+				sneak_attack |= SNEAK_OPEN;
 		}
 		else {
 			if (mdef->mflee && pd->mtyp != PM_BANDERSNATCH)
@@ -14061,6 +14066,14 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 				sneak_attack |= SNEAK_HELPLESS;
 			if (mdef->msuicide)
 				sneak_attack |= SNEAK_SUICIDAL;
+			if (mdef->mopen)
+				sneak_attack |= SNEAK_OPEN;
+		}
+		if(!recursed && weapon &&
+			 magr && CHECK_ETRAIT(weapon, magr, ETRAIT_CREATE_OPENING) &&
+			 ROLL_ETRAIT(weapon, magr, TRUE, !rn2(10))
+		){
+			mdef->mopen = 2; //includes youmonst.mopen
 		}
 	}
 	/* if we have both a method (attack) and ability (dice) and this isn't a multihit, do the bonus */
@@ -16327,6 +16340,7 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 			else if (sneak_attack & SNEAK_TRAPPED)	You("rain blows on the trapped %s%s", l_monnam(mdef), exclam(subtotl));
 			else if (sneak_attack & SNEAK_HELPLESS) You("rain blows on the helpless %s%s", l_monnam(mdef), exclam(subtotl));
 			else if (sneak_attack & SNEAK_SUICIDAL) You("rain blows on the suicidal %s%s", l_monnam(mdef), exclam(subtotl));
+			else if (sneak_attack & SNEAK_OPEN) 	You("rain blows on the open %s%s", l_monnam(mdef), exclam(subtotl));
 			else									You("rain blows on %s%s", mon_nam(mdef), exclam(subtotl));
 			/* ...player gets bonus movement points! */
 			switch (min(P_SKILL(P_JUYO), P_SKILL(weapon_type(weapon)))){
@@ -16345,6 +16359,7 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 				else if (sneak_attack & SNEAK_TRAPPED)	You("strike the trapped %s%s", l_monnam(mdef), exclam(subtotl));
 				else if (sneak_attack & SNEAK_HELPLESS)	You("strike the helpless %s%s", l_monnam(mdef), exclam(subtotl));
 				else if (sneak_attack & SNEAK_SUICIDAL)	You("strike the suicidal %s%s", l_monnam(mdef), exclam(subtotl));
+				else if (sneak_attack & SNEAK_OPEN)		You("strike the open %s%s", l_monnam(mdef), exclam(subtotl));
 				else									You("strike %s%s", mon_nam(mdef), exclam(subtotl));
 			}
 		}

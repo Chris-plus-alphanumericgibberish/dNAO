@@ -1989,6 +1989,7 @@ movemon()
 	if(mtmp->mstdy > 0) mtmp->mstdy -= 1; //monster is moving, reduce studied level
 	else if(mtmp->mstdy < 0) mtmp->mstdy += 1; //monster is moving, reduce protection level
 
+	if(mtmp->mopen) mtmp->mopen--;
 	//Weeping angel step 3
 	if(is_weeping(mtmp->data)){
 		mtmp->mvar2 &= 0x1L; //clear higher order bits, first bit is whether it should generate a swarm when you return

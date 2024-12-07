@@ -203,6 +203,7 @@ struct monst {
 	Bitfield(mibitemarked,1); /* monster was damaged by the ibite arm and will be sacced if they die */ /*127*/
 	Bitfield(mpassive,1); /* if tame, won't attack monsters ever */ /*128*/
 	Bitfield(mwounded_legs,1);/* wounded legs */ /*129*/
+	Bitfield(mopen,2);/* open to sneak attacks */ /*131*/
 	
 	unsigned long long int 	seenmadnesses;	/* monster has seen these madnesses */
 	
