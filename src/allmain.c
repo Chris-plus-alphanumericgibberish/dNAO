@@ -631,6 +631,11 @@ boolean affect_game_state;
 			){
 				current_cost -= NORMAL_SPEED / 6;
 			}
+			if ((uwep && CHECK_ETRAIT(uwep, &youmonst, ETRAIT_QUICK))
+				&& (!u.twoweap || (uswapwep && CHECK_ETRAIT(uswapwep, &youmonst, ETRAIT_QUICK)))
+			){
+				current_cost -= NORMAL_SPEED / 3;
+			}
 
 			/* some weapons are slower */
 			if (uwep
