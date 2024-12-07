@@ -550,7 +550,7 @@ WEAPON(("bec de corbin", "beaked polearm"),
 
 WEAPON(("scythe"), 
 	DMG(D(2, 4)), DMG(D(2, 4)), /* Vs plants: +6 to hit and double damage */
-	1, 0,   MZ_HUGE,  5, 75,  6, -2, S,   P_HARVEST, IRON, FALSE, HI_METAL, O_TRAITS(ETRAIT_BLEED)),
+	1, 0,   MZ_HUGE,  5, 75,  6, -2, S,   P_HARVEST, IRON, FALSE, HI_METAL, O_TRAITS(ETRAIT_FELL|ETRAIT_BLEED)),
 
 /* bludgeons */
 WEAPON(("mace"),
