@@ -1038,6 +1038,13 @@ you_regen_hp()
 		blockRegen = TRUE;
 	}
 
+	// bleeding out
+	if (youmonst.mbleed > 0) {
+		youmonst.mbleed--;
+		perX -= youmonst.mbleed*HEALCYCLE;
+		blockRegen = TRUE;
+	}
+
 	// regeneration 'trinsic
 	if (Regeneration){
 		perX += HEALCYCLE;

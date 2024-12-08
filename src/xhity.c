@@ -15802,6 +15802,24 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 					}
 				}
 			}
+			if((youdef ? has_blood(youracedata) : has_blood_mon(mdef))
+				&& CHECK_ETRAIT(weapon, magr, ETRAIT_BLEED)
+				&& ROLL_ETRAIT(weapon, magr, rn2(2), !rn2(10))
+			){
+				struct weapon_dice wdice;
+				/* grab the weapon dice from dmgval_core */
+				dmgval_core(&wdice, bigmonst(pd), weapon, weapon->otyp, magr);
+				/* add to the bonsdmg counter */
+				bonsdmg += wdice.oc_damn + wdice.bon_damn + wdice.flat + ROLL_ETRAIT(weapon, magr, 5, 2) + weapon->spe;
+				if (wizard && (iflags.wizcombatdebug & WIZCOMBATDEBUG_DMG) && WIZCOMBATDEBUG_APPLIES(magr, mdef))
+					pline("Bleeding wound!");
+				if(youdef){
+					mdef->mbleed += bonsdmg;
+				}
+				else {
+					mdef->mbleed += bonsdmg;
+				}
+			}
 			if(CHECK_ETRAIT(weapon, magr, ETRAIT_STOP_THRUST)
 				&& ROLL_ETRAIT(weapon, magr, TRUE, !rn2(10))
 				&& magr != mdef

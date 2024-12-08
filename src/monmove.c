@@ -610,18 +610,19 @@ boolean digest_meal;
 		}
 	}
 	
-	//Degeneration cases block normal healing. Only one will take effect (bug?).
+	//Degeneration cases block normal healing..
+	boolean degenerating = FALSE;
 	/*Blib's image degrades from loss of artifact*/
-	if(mon->mtyp == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH && !mon_has_arti(mon, 0) && quest_status.touched_artifact && mon->mhp > 1){
-		mon->mhp -= 1;
-		return;
+	if(!DEADMONSTER(mon) && mon->mtyp == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH && !mon_has_arti(mon, 0) && quest_status.touched_artifact && mon->mhp > 1){
+		m_losehp(mon, 1, FALSE, "rot");
+		degenerating = TRUE;
 	}
-	if(mon->mtyp == PM_CYCLOPS && !mon_has_arti(mon, 0) && mon->mhp > 1){
-		mon->mhp -= 1;
-		return;
+	if(!DEADMONSTER(mon) && mon->mtyp == PM_CYCLOPS && !mon_has_arti(mon, 0) && mon->mhp > 1){
+		m_losehp(mon, 1, FALSE, "illness");
+		degenerating = TRUE;
 	}
 	/*Degen from drowning in blood*/
-	if(mon->mbdrown > 0){
+	if(!DEADMONSTER(mon) && mon->mbdrown > 0){
 		mon->mbdrown--;
 		water_damage(mon->minvent, FALSE, FALSE, WD_BLOOD, mon);
 		mon->mhp -= 99;
@@ -632,25 +633,30 @@ boolean digest_meal;
 		else if(!resist(mon, RING_CLASS, 0, NOTELL)){
 			mon->mberserk = 1;
 		}
-		return;
+		degenerating = TRUE;
 	}
 	/*The Changed degenerate due to damage*/
-	if(mon->mhp < mon->mhpmax/2 && is_changed_mtyp(mon->mtyp)){
-		mon->mhp -= 1;
+	if(!DEADMONSTER(mon) && mon->mhp < mon->mhpmax/2 && is_changed_mtyp(mon->mtyp)){
 		create_gas_cloud(mon->mx+rn2(3)-1, mon->my+rn2(3)-1, rnd(3), rnd(3)+1, FALSE);
-		if(mon->mhp <= 0){
-			mondied(mon);
-		}
-		return;
+		m_losehp(mon, 1, FALSE, "vapor leak");
+		degenerating = TRUE;
 	}
 	/*Invidiaks degenerate due to light*/
-	if(mon->mtyp == PM_INVIDIAK && !isdark(mon->mx, mon->my)){
-		mon->mhp -= 1;
-		if(mon->mhp <= 0){
-			mondied(mon);
-		}
-		return;
+	if(!DEADMONSTER(mon) && mon->mtyp == PM_INVIDIAK && !isdark(mon->mx, mon->my)){
+		m_losehp(mon, 1, FALSE, "light");
+		degenerating = TRUE;
 	}
+	/*Bleeding out*/
+	if(!DEADMONSTER(mon) && mon->mbleed > 0){
+		m_losehp(mon, mon->mbleed, FALSE, "bleeding wound");
+		mon->mbleed--;
+		degenerating = TRUE;
+	}
+
+	/*Early return to block regen*/
+	if(degenerating)
+		return;
+
 
 	//Normal healing cases
 	if(mon->mtyp == PM_ALIDER){

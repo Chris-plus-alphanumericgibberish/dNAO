@@ -212,6 +212,7 @@ struct monst {
 	long mwait;/* if tame, won't follow between levels (turn last ordered to wait on) */
 	int encouraged;	/* affected by Encourage song */
 	int mfell;	/* slowed by fell expert trait */
+	int mbleed; /* bleed damage per round */
 	coord mprev_dir;		/* previous movement direction (stop thrust etc) */
 	coord mprev_attk;	/* previous attack direction (braced etc) */
 	long mlast_movement;/* turn on which it most recently moved (clear stop thrust) */
