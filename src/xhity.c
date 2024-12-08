@@ -4609,7 +4609,7 @@ boolean ranged;
 		/* grab the weapon dice from dmgval_core */
 		dmgval_core(&wdice, bigmonst(pd), weapon, weapon->otyp, magr);
 		/* add to the bonsdmg counter */
-		graze_dmg = wdice.oc_damn + wdice.bon_damn + wdice.flat;
+		graze_dmg = wdice.oc_damn + wdice.bon_damn + wdice.flat + weapon->spe;
 		
 		if(youagr){
 			if (flags.verbose)

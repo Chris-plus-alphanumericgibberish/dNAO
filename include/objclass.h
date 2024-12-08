@@ -232,7 +232,11 @@ struct objclass {
 #define ETRAIT_CREATE_OPENING	0x00008000L
 #define ETRAIT_BRACED			0x00010000L
 
-#define CHECK_ETRAIT(obj, mon, trait) (objects[(obj)->otyp].expert_traits&trait && ((mon) == &youmonst ? (P_SKILL(objects[(obj)->otyp].oc_skill) > P_BASIC ) : (((mon)->data->mflagsf&MF_MARTIAL_E) || ((mon)->data->mflagsf&MF_MARTIAL_S))))
+#define CHECK_ETRAIT(obj, mon, trait) (( (objects[(obj)->otyp].expert_traits&trait && (trait == ETRAIT_PENETRATE_ARMOR || !is_lightsaber(obj) || litsaber(obj))) \
+										|| (trait == ETRAIT_QUICK && mon == &youmonst && obj->otyp == LONG_SWORD && activeFightingForm(FFORM_HALF_SWORD))\
+										|| (trait == ETRAIT_PENETRATE_ARMOR && mon == &youmonst && obj->otyp == LONG_SWORD && activeFightingForm(FFORM_POMMEL))\
+									   ) && \
+	((mon) == &youmonst ? (P_SKILL(objects[(obj)->otyp].oc_skill) > P_BASIC ) : (((mon)->data->mflagsf&MF_MARTIAL_E) || ((mon)->data->mflagsf&MF_MARTIAL_S))))
 #define ROLL_ETRAIT(obj, mon, echance, schance) (((mon) == &youmonst ? (P_SKILL(objects[(obj)->otyp].oc_skill) > P_SKILLED) : ((mon)->data->mflagsf&MF_MARTIAL_E)) ? echance : schance)
 #define FFORM_ETRAIT(obj, mon) (objects[(obj)->otyp].expert_traits&FFORM_ETRAITS && ((mon) == &youmonst ? (P_SKILL(objects[(obj)->otyp].oc_skill) > P_BASIC ) : (((mon)->data->mflagsf&MF_MARTIAL_E) || ((mon)->data->mflagsf&MF_MARTIAL_S))))
 

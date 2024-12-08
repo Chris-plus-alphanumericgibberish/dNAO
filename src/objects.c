@@ -594,7 +594,7 @@ WEAPON(("double sword"), /*Needs encyc entry*/
 	1, 0,   MZ_HUGE,  1, 80, 30,  0, S|P, P_QUARTERSTAFF, IRON, FALSE, HI_METAL, O_TRAITS(ETRAIT_CLEAVE)),
 WEAPON(("kamerel vajra", "short mace"), /*Needs encyc entry*/
 	DMG(D(6)), DMG(D(6)),	/* very different dice for different litness states */
-	0, 0, MZ_MEDIUM,  0, 10,800,  1, S|E, P_MACE, GOLD, UNIDED, HI_GOLD, O_NOWISH(1)),
+	0, 0, MZ_MEDIUM,  0, 10,800,  1, S|E, P_MACE, GOLD, UNIDED, HI_GOLD, O_NOWISH(1), O_TRAITS(ETRAIT_GRAZE|ETRAIT_PENETRATE_ARMOR)),
 WEAPON(("bar"),
 	DMG(D(8)), DMG(D(6)),
 	1, 0,   MZ_HUGE, 0, 400, 10,-10, B,   P_QUARTERSTAFF, IRON, IDED|UNIDED, HI_METAL, O_TRAITS(ETRAIT_HEW|ETRAIT_FELL|ETRAIT_STUNNING_STRIKE|ETRAIT_KNOCK_BACK|ETRAIT_KNOCK_BACK_CHARGE)),
@@ -1411,10 +1411,10 @@ TOOL(("drum of earthquake", "drum"), 0, MZ_MEDIUM, 0, 1, 1,  2, 25, 25, LEATHER,
 /* tools useful as weapons */
 WEPTOOL(("pick-axe"),
 	DMG(D(6)), DMG(D(3)),
-	1,  MZ_LARGE, 0, 0, 20, 80,  50,  0, P,   P_PICK_AXE, IRON, HI_METAL),
+	1,  MZ_LARGE, 0, 0, 20, 80,  50,  0, P,   P_PICK_AXE, IRON, HI_METAL, O_TRAITS(ETRAIT_HEW|ETRAIT_PENETRATE_ARMOR)),
 WEPTOOL(("seismic hammer", "dull metallic hammer"),/*Needs encyc entry*/
 	DMG(D(12)), DMG(D(10)),
-	0,   MZ_HUGE, 1, 1,  0,150, 250, -5, B,   P_HAMMER,  METAL, HI_METAL),
+	0,   MZ_HUGE, 1, 1,  0,150, 250, -5, B,   P_HAMMER,  METAL, HI_METAL, O_TRAITS(ETRAIT_HEW|ETRAIT_STUNNING_STRIKE|ETRAIT_PENETRATE_ARMOR)),
 /*
  * Torches work as clubs
  */
@@ -1435,29 +1435,29 @@ TORCH(("sunrod", "rod"),/*Needs encyc entry*/
  */
 WEPTOOL(("lightsaber", "sword hilt"), /*Needs (better) encyc entry*/
 	DMG(D(8)), DMG(D(8)),
-	0,  MZ_SMALL, 1, 1,  0, 10, 500, -3, S|E, P_SABER, SILVER, HI_SILVER, O_MATSPEC(IDED|UNIDED)),
+	0,  MZ_SMALL, 1, 1,  0, 10, 500, -3, S|E, P_SABER, SILVER, HI_SILVER, O_MATSPEC(IDED|UNIDED), O_TRAITS(ETRAIT_GRAZE)),
 WEPTOOL(("beamsword",  "broadsword hilt"), /*Needs encyc entry*/
 	DMG(D(10)), DMG(D(10)),
-	0,  MZ_SMALL, 1, 1,  0, 20, 500, -3, S|E, P_BROAD_SWORD, GOLD, HI_GOLD, O_MATSPEC(IDED|UNIDED)),
+	0,  MZ_SMALL, 1, 1,  0, 20, 500, -3, S|E, P_BROAD_SWORD, GOLD, HI_GOLD, O_MATSPEC(IDED|UNIDED), O_TRAITS(ETRAIT_GRAZE)),
 WEPTOOL(("double lightsaber",  "long grip"), /*Needs encyc entry*//*Needs tile*//*needs special case for 2handedness*/
 	DMG(D(10)), DMG(D(10)),
-	0,  MZ_SMALL, 1, 1,  0, 30,1000, -6, S|E, P_QUARTERSTAFF, PLATINUM, HI_SILVER, O_MATSPEC(IDED|UNIDED)),
+	0,  MZ_SMALL, 1, 1,  0, 30,1000, -6, S|E, P_QUARTERSTAFF, PLATINUM, HI_SILVER, O_MATSPEC(IDED|UNIDED), O_TRAITS(ETRAIT_GRAZE)),
 WEPTOOL(("rod of force", "rod"), /*Needs encyc entry*/
 	DMG(D(8)), DMG(D(12)),
-	0,  MZ_SMALL, 1, 1,  0, 10,1000, 1, S|P|E, P_LONG_SWORD, IRON, CLR_BLACK, O_DIR(IMMEDIATE), O_MATSPEC(UNIDED), O_NOWISH(1)),
+	0,  MZ_SMALL, 1, 1,  0, 10,1000, 1, S|P|E, P_LONG_SWORD, IRON, CLR_BLACK, O_DIR(IMMEDIATE), O_MATSPEC(UNIDED), O_NOWISH(1), O_TRAITS(ETRAIT_GRAZE)),
 WEPTOOL(("grappling hook", "hook"),
 	DMG(D(2)), DMG(D(6)),
 	0, MZ_MEDIUM, 0, 0,  4, 30,  50,  0, B,   P_FLAIL, IRON, HI_METAL, O_MATSPEC(UNIDED)),
 WEPTOOL(("shepherd's crook", "bent staff"),/*Needs encyc entry*/
 	DMG(D(6)), DMG(D(4)),
-	0,   MZ_LARGE, 0, 0, 1,  30,   5, 0, B,   P_QUARTERSTAFF, WOOD, HI_WOOD),
+	0,   MZ_LARGE, 0, 0, 1,  30,   5, 0, B,   P_QUARTERSTAFF, WOOD, HI_WOOD, O_TRAITS(ETRAIT_FELL)),
 /* 3.4.1: unicorn horn left classified as "magic" */
 WEPTOOL(("unicorn horn"),
 	DMG(D(12)), DMG(D(12)),
-	1, MZ_MEDIUM, 1, 0, 0,  20, 100,  0, P,   P_UNICORN_HORN, BONE, CLR_WHITE),
+	1, MZ_MEDIUM, 1, 0, 0,  20, 100,  0, P,   P_UNICORN_HORN, BONE, CLR_WHITE, O_TRAITS(ETRAIT_QUICK|ETRAIT_SECOND|ETRAIT_FOCUS_FIRE)),
 WEPTOOL(("spoon"), /*Needs encyc entry*//*Needs tile*/
 	DMG(D(1)), DMG(D(1)),
-	1,   MZ_TINY, 0, 0, 0,   1,   1,  0, P,   P_KNIFE, IRON, HI_METAL),
+	1,   MZ_TINY, 0, 0, 0,   1,   1,  0, P,   P_KNIFE, IRON, HI_METAL, O_TRAITS(ETRAIT_QUICK|ETRAIT_SECOND|ETRAIT_FOCUS_FIRE)),
 
 /* two special unique artifact tools */
 TOOL(("Candelabrum of Invocation", "candelabrum"), 0, MZ_SMALL, 0, 1, 0, 0, 10, 5000, GOLD, HI_GOLD,
