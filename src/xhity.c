@@ -908,6 +908,50 @@ int tary;
 							}
 						}
 					}
+					/* Second weapon trait can cause melee attacks to hit an additional neighboring monster, if the blow kills the primary target */
+					if (!ranged && magr && (result&MM_DEF_DIED)){
+						struct obj *second = youagr ? uswapwep : MON_SWEP(magr);
+						if(second && CHECK_ETRAIT(second, magr, ETRAIT_SECOND) && ROLL_ETRAIT(second, magr, TRUE, !rn2(4))){
+							struct attack secattk = {AT_XWEP, AD_PHYS, 0, 0}; 
+							int subresult = 0;
+							/* try to find direction (u.dx and u.dy may be incorrect) */
+							int dx = sgn(x(magr) - tarx);
+							int dy = sgn(y(magr) - tary);
+							int nx, ny;
+							int i = 0;
+							boolean target = FALSE;
+							while(i < 8 && !target){
+								if((monstermoves+indexnum+devai)&1){//Odd
+									//-45 degree rotation
+									nx = sgn(dx+dy);
+									ny = sgn(dy-dx);
+								} else {
+									//45 degree rotation
+									nx = sgn(dx-dy);
+									ny = sgn(dx+dy);
+								}
+								dx = nx;
+								dy = ny;
+								i++;
+								if (isok(x(magr) + nx, y(magr) + ny))
+								{
+									struct monst *mdef2 = (youagr && u.uswallow) ? u.ustuck : 
+															(nx || ny) ? m_at(x(magr) + nx, y(magr) + ny) : 
+															(struct monst *)0;
+									if (mdef2 && (mdef2 != mdef) && !DEADMONSTER(mdef2)
+										&& !((youagr && mdef2->mpeaceful) || (!youagr && magr->mpeaceful == mdef2->mpeaceful))
+									){
+										target = TRUE;
+										int vis2 = (VIS_MAGR | VIS_NONE) | (canseemon(mdef2) ? VIS_MDEF : 0);
+										bhitpos.x = x(magr) + nx; bhitpos.y = y(magr) + ny;
+										subresult = xmeleehity(magr, mdef2, &secattk, &second, vis2, tohitmod, TRUE);
+										/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
+										result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
+									}
+								}
+							}
+						}
+					}
 					/* Dancers hit additional targets */
 					if(!ranged && !(result&(MM_AGR_DIED|MM_AGR_STOP)) && is_dancer(magr->data)){
 						result |= hit_with_dance(magr, otmp, tarx, tary, tohitmod, attk)&(MM_AGR_DIED|MM_AGR_STOP);
