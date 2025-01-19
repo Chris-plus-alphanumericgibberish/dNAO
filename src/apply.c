@@ -8857,6 +8857,15 @@ doapply()
 			make_doubtful(0L, TRUE);
 		}
 		
+		int total_skill_slots = u.weapon_slots;
+		for (int i = P_NONE+1; i < P_NUM_SKILLS; i++){
+			if (OLD_P_SKILL(i) >= P_BASIC) {
+				total_skill_slots += skill_slots_used(OLD_P_SKILL(i), i);
+			}
+		}
+		int correct_skill_total = u.ulevel * ((Race_if(PM_HUMAN) || Race_if(PM_ANDROID)) ? 1.5 : 1) - 1;
+		add_weapon_skill((correct_skill_total - total_skill_slots + 1)/2);
+
 		u.wimage = 0; //Sub-critical images are removed anyway.
 		
 		u.umummyrot = 0;

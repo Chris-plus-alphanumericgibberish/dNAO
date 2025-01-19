@@ -2524,6 +2524,7 @@ E void FDECL(do_genocide, (int));
 E void FDECL(punish, (struct obj *));
 E void NDECL(unpunish);
 E boolean FDECL(cant_create, (int *, BOOLEAN_P));
+E int FDECL(skill_slots_used, (int, int));
 #ifdef WIZARD
 E int NDECL(wiz_kill_all);
 E struct monst * FDECL(create_particular, (int, int, unsigned long, int, int, unsigned long, unsigned long, int, char *));
