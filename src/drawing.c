@@ -999,7 +999,6 @@ int glth, maxlen, offset;
     for (i = 0; i < maxlen; i++)
 	showsyms[i+offset] = (((i < glth) && graph_chars[i]) ?
 		       graph_chars[i] : defsyms[i+offset].sym);
-    if (monsyms[S_GHOST] == DEF_GHOST) monsyms[S_GHOST] = showsyms[S_litroom];
 }
 
 #ifdef USER_DUNGEONCOLOR
