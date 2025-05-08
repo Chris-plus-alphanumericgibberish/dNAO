@@ -3780,6 +3780,17 @@ newgame()
 	hack_artifacts();	/* recall after u_init() to fix up role specific artifacts */
 	hack_objects();
 
+	if(flags.descendant){
+		int inher_arti = find_preset_inherited(inherited);
+
+		while (!inher_arti) inher_arti = do_inheritance_menu();
+
+		if(inher_arti == -1)
+			flags.descendant = 0;
+		else
+			u.inherited = inher_arti;
+	}
+
 #ifndef NO_SIGNAL
 	(void) signal(SIGINT, (SIG_RET_TYPE) done1);
 #endif
@@ -3855,11 +3866,7 @@ newgame()
 	if(Darksight) litroom(FALSE,NULL);
 	if(flags.descendant){
 		struct obj *otmp;
-		int inher_arti = find_preset_inherited(inherited);
-
-		while (!inher_arti) inher_arti = do_inheritance_menu();
-
-		u.inherited = inher_arti;
+		int inher_arti = u.inherited;
 
 		/* fix up artifact a little so we can use it fine */
 		/* the alignment check should be unnecessary, but otherwise this prevents intelligents from evading */
@@ -3970,6 +3977,12 @@ do_inheritance_menu()
 			incntlet = (incntlet == 'z') ? 'A' : (incntlet == 'Z') ? 'a' : (incntlet + 1);
 		}
 	}
+
+	Sprintf(buf, "None");
+	any.a_int = -1;
+	add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
 
 	end_menu(tmpwin, "Which artifact did you inherit?");
 
