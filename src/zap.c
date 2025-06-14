@@ -84,6 +84,7 @@ int adtyp, ztyp;
 		switch (adtyp)
 		{
 		case AD_MAGM: return "magic missile";
+		case AD_PHYS: return "sothothic missile";
 		case AD_FIRE: return "fireball";
 		case AD_COLD: return "cone of cold";
 		case AD_SLEE: return "sleep ray";
@@ -169,7 +170,7 @@ int adtyp;
 	case AD_DRST:
 		return CLR_GREEN;
 	case AD_PHYS:
-		return CLR_BROWN;
+		return CLR_BRIGHT_MAGENTA;
 	case AD_WET:
 		return CLR_BLUE;
 	case AD_DISE:
@@ -1316,7 +1317,7 @@ struct obj *obj;
 	artinstance[ART_SCORPION_CARAPACE].CarapaceLevel -= price;
 	artinstance[ART_SCORPION_CARAPACE].CarapaceXP = newuexp(artinstance[ART_SCORPION_CARAPACE].CarapaceLevel) - 1;
 	
-	obj->ovar1_carapace &= ~flag;
+	obj->ovara_carapace &= ~flag;
 	return TRUE;
 }
 
@@ -1453,7 +1454,7 @@ int ochance, achance;	/* percent chance for ordinary objects, artifacts */
 	} else {
 		int chance = rn2(100);
 
-		return((boolean)(chance < ((obj->oartifact || is_lightsaber(obj) || is_slab(obj)) ? achance : ochance)));
+		return((boolean)(chance < ((obj->oartifact || is_lightsaber(obj) || is_imperial_elven_armor(obj) || is_slab(obj) || obj->blood_smithed || obj->spe >= 10) ? achance : ochance)));
 	}
 }
 
@@ -1594,6 +1595,10 @@ create_polymon(obj, okind)
 	case PAPER:
 	    pm_index = PM_PAPER_GOLEM;
 	    material = "paper ";
+	    break;
+	case DRAGON_HIDE:
+	    pm_index = PM_PSEUDODRAGON;
+	    material = "draconic ";
 	    break;
 	default:
 	    /* if all else fails... */
@@ -2184,7 +2189,7 @@ struct obj *obj, *otmp;
 		res = !obj->dknown;
 		/* target object has now been "seen (up close)" */
 		obj->dknown = 1;
-		if (Is_container(obj) || obj->otyp == STATUE || (obj->otyp == CRYSTAL_SKULL && u.uinsight >= 20)) {
+		if (Is_container(obj) || obj->otyp == STATUE || (obj->otyp == CRYSTAL_SKULL && Insight >= 20)) {
 		    if (!obj->cobj)
 			pline("%s empty.", Tobjnam(obj, "are"));
 		    else {
@@ -2201,7 +2206,7 @@ struct obj *obj, *otmp;
 	case WAN_STRIKING:
 	case SPE_FORCE_BOLT:
 	case ROD_OF_FORCE:
-		if (is_boulder(obj) || obj->otyp == STATUE || (obj->otyp == CRYSTAL_SKULL && u.uinsight >= 20))
+		if (is_boulder(obj) || obj->otyp == STATUE)
 			break_boulder(obj);
 		else {
 			if (!flags.mon_moving)
@@ -2622,6 +2627,11 @@ dozap()
 	obj = getobj(zap_syms, "zap");
 	if(!obj) return MOVE_CANCELLED;
 
+	if(on_level(&spire_level,&u.uz)){
+		pline1(nothing_happens);
+		return MOVE_ZAPPED;
+	}
+
 	check_unpaid(obj);
 
 	/* zappable addition done by GAN 11/03/86 */
@@ -2719,6 +2729,17 @@ boolean ordinary;
 		case SPE_FIRE_STORM:
 		    You("explode a fireball on top of yourself!");
 		    explode(u.ux, u.uy, AD_FIRE, WAND_CLASS, d(6,6), EXPL_FIERY, 1);
+			if(u.explosion_up){
+				int ex, ey;
+				for(int i = 0; i < u.explosion_up; i++){
+					ex = u.ux + rn2(3) - 1;
+					ey = u.uy + rn2(3) - 1;
+					if(isok(ex, ey) && ZAP_POS(levl[ex][ey].typ))
+						explode(ex, ey, AD_FIRE, WAND_CLASS, d(6,6), EXPL_FIERY, 1);
+					else
+						explode(u.ux, u.uy, AD_FIRE, WAND_CLASS, d(6,6), EXPL_FIERY, 1);
+				}
+			}
 		    break;
 		case WAN_FIRE:
 		    makeknown(WAN_FIRE);
@@ -3399,6 +3420,11 @@ register struct	obj	*obj;
 	if (objects[otyp].oc_dir == IMMEDIATE) {
 	    obj_zapped = FALSE;
 
+		/* Death magic is impure */
+		if(otyp == SPE_DRAIN_LIFE || otyp == WAN_DRAINING ){
+			IMPURITY_UP(u.uimp_death_magic)
+		}
+
 	    if (u.uswallow) {
 		(void) bhitm(u.ustuck, obj);
 		/* [how about `bhitpile(u.ustuck->minvent)' effect?] */
@@ -3419,8 +3445,12 @@ register struct	obj	*obj;
 		int range = rn1(7, 7);
 	    /* neither immediate nor directionless */
 
-		if(u.sealsActive&SEAL_BUER && (otyp == SPE_FINGER_OF_DEATH || otyp == WAN_DEATH ))
-			unbind(SEAL_BUER,TRUE);
+		/* Wands of death are impure, unbind buer */
+		if(otyp == SPE_FINGER_OF_DEATH || otyp == WAN_DEATH ){
+			IMPURITY_UP(u.uimp_death_magic)
+			if(u.sealsActive&SEAL_BUER)
+				unbind(SEAL_BUER,TRUE);
+		}
 		
 	    if (otyp == WAN_DIGGING || otyp == SPE_DIG)
 			zap_dig(-1,-1,-1);//-1-1-1 = "use defaults"
@@ -3461,8 +3491,15 @@ register struct	obj	*obj;
 			switch (otyp) {
 			case SPE_MAGIC_MISSILE:
 				zapdat.single_target = TRUE;
-				if(otyp == SPE_MAGIC_MISSILE && (artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_WRATH))
-					zapdat.damd += 2;
+				if(otyp == SPE_MAGIC_MISSILE){ 
+					if(artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_WRATH)
+						zapdat.damd += 2;
+					if(YogSpell && !YOG_BAD){
+						zapdat.adtyp = AD_PHYS;
+						zapdat.unreflectable = ZAP_REFL_NEVER;
+						zapdat.always_hits = TRUE;
+					}
+				}
 				break;
 			case SPE_FIREBALL:
 				zapdat.explosive = TRUE;
@@ -4315,9 +4352,27 @@ struct zapdata * zapdata;	/* lots of flags and data about the zap */
 	/* TODO: record colours in zapdata? Color currently standardized on AD_type */
 	if (zapdata->explosive) {
 		explode(sx, sy, zapdata->adtyp, 0, zapdamage(magr, (struct monst *)0, zapdata), adtyp_expl_color(zapdata->adtyp), 1 + !!(youagr &&Double_spell_size));
+		if(youagr && u.explosion_up){
+			int ex, ey;
+			for(int i = 0; i < u.explosion_up; i++){
+				ex = sx + rn2(3) - 1;
+				ey = sy + rn2(3) - 1;
+				if(isok(ex, ey) && ZAP_POS(levl[ex][ey].typ))
+					explode(ex, ey, zapdata->adtyp, 0, zapdamage(magr, (struct monst *)0, zapdata), adtyp_expl_color(zapdata->adtyp), 1 + !!(Double_spell_size));
+				else
+					explode(sx, sy, zapdata->adtyp, 0, zapdamage(magr, (struct monst *)0, zapdata), adtyp_expl_color(zapdata->adtyp), 1 + !!(Double_spell_size));
+			}
+		}
 	}
 	if (zapdata->splashing) {
-		splash(sx, sy, dx, dy, zapdata->adtyp, 0, zapdamage(magr, (struct monst *)0, zapdata), adtyp_expl_color(zapdata->adtyp));
+		long special_flags = 0L;
+		if(youagr && GoatSpell && !GOAT_BAD && zapdata->adtyp == AD_ACID){
+			zapdata->adtyp = AD_EACD;
+			special_flags |= GOAT_SPELL;
+			zapdata->damn *= 2;
+			zapdata->damd += 2;
+		}
+		splash(sx, sy, dx, dy, zapdata->adtyp, 0, zapdamage(magr, (struct monst *)0, zapdata), adtyp_expl_color(zapdata->adtyp), special_flags);
 	}
 
 	/* calculate shop damage */
@@ -4365,6 +4420,7 @@ struct zapdata * zapdata;
 	case AD_PHYS:
 		if (Half_phys(mdef))
 			dmg = (dmg + 1) / 2;
+		domsg();
 		return xdamagey(magr, mdef, &attk, dmg);
 	case AD_MAGM:
 		/* check resist */
@@ -4610,6 +4666,11 @@ struct zapdata * zapdata;
 					domsg();
 					pline_The("poison was deadly...");
 					killer_format = NO_KILLER_PREFIX;
+					if (!u.uconduct.killer && !youagr){
+						//Pcifist PCs aren't combatants so if something kills them up "killed peaceful" type impurities
+						IMPURITY_UP(u.uimp_murder)
+						IMPURITY_UP(u.uimp_bloodlust)
+					}
 					done(POISONING);
 					return MM_DEF_LSVD;
 				}
@@ -4728,7 +4789,7 @@ struct zapdata * zapdata;
 			int i;
 			/* reduce by DR */
 			for (i = zapdata->damn / 3; i > 0; i--) {
-				dmg -= (youdef ? roll_udr(magr, AT_ANY) : roll_mdr(mdef, magr, AT_ANY));
+				dmg -= (youdef ? roll_udr(magr, ROLL_SLOT) : roll_mdr(mdef, magr, ROLL_SLOT));
 			}
 			/* deals silver-hating damage */
 			if (hates_silver((youdef ? youracedata : mdef->data))) {
@@ -4884,6 +4945,11 @@ struct zapdata * zapdata;
 					killer = flash_type(zapdata->adtyp, zapdata->ztyp);
 					/* when killed by disintegration breath, don't leave corpse */
 					u.ugrave_arise = NON_PM;
+					if (!u.uconduct.killer && !youagr){
+						//Pcifist PCs aren't combatants so if something kills them up "killed peaceful" type impurities
+						IMPURITY_UP(u.uimp_murder)
+						IMPURITY_UP(u.uimp_bloodlust)
+					}
 					done(DISINTEGRATED);
 					return MM_DEF_LSVD; /* or, lifesaved */
 				}
@@ -5537,6 +5603,7 @@ fracture_rock(obj)	/* fractured by pick-axe or wand of striking */
 register struct obj *obj;		   /* no texts here! */
 {
 	int mat = obj->obj_material;
+	int submat = obj->sub_material;
 	/* A little Sokoban guilt... */
 	if(In_sokoban(&u.uz) && !flags.mon_moving)
 	    change_luck(-1);
@@ -5549,6 +5616,15 @@ register struct obj *obj;		   /* no texts here! */
 	set_material_gm(obj, MINERAL);
 	obj->owt = weight(obj);
 	set_material(obj, mat);
+	if(mat == GEMSTONE){
+		if(submat)
+			obj->otyp = submat;
+		set_object_color(obj);
+		fix_object(obj);
+	}
+	else {
+		set_submat(obj, submat);
+	}
 	if (obj->where == OBJ_FLOOR) {
 		obj_extract_self(obj);		/* move rocks back on top */
 		place_object(obj, obj->ox, obj->oy);
@@ -5662,6 +5738,85 @@ boolean burial;
 
 #endif /*OVL3*/
 #ifdef OVL2
+
+int
+mm_resist(struct monst *mdef, struct monst *magr, int damage, int tell)
+{
+	int resisted;
+	int alev, dlev;
+	boolean youagr = &youmonst == magr;
+
+#define LUCK_MODIFIER	if(Luck > 0) alev += rnd(Luck)/2; else if(Luck < 0) alev -= rnd(-1*Luck)/2;
+
+	damage -= avg_spell_mdr(mdef);
+	if(damage < 0)
+		damage = 0;
+	alev = mlev(magr);
+	/* attack level */
+	if(!mdef->mpeaceful || magr->mtame){
+		LUCK_MODIFIER
+	}
+#undef LUCK_MODIFIER
+	/* defense level */
+	dlev = (int)mdef->m_lev;
+	if(mdef->mcan)
+		dlev /= 2;
+	if (dlev > 50) dlev = 50;
+	else if (dlev < 1) dlev = 1;
+	
+	if(mdef->mtame && artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_STEEL)
+		dlev += 1;
+
+	int mons_mr = mdef->data->mr;
+	if(mdef->mcan){
+		if(mdef->mtyp == PM_ALIDER)
+			mons_mr = 0;
+		else
+			mons_mr /= 2;
+	}
+	if(mdef->mtame && artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_WILL)
+		mons_mr += 10;
+
+	if(mdef->mtyp == PM_CHOKHMAH_SEPHIRAH) dlev+=u.chokhmah;
+	resisted = rn2(100 + alev - dlev) < mons_mr;
+	if (resisted) {
+	    if (tell) {
+			shieldeff(mdef->mx, mdef->my);
+			pline("%s resists!", Monnam(mdef));
+	    }
+	    damage = (damage + 1) / 2;
+	}
+
+	if(youagr && mdef->female && humanoid_torso(mdef->data) && roll_madness(MAD_SANCTITY)){
+		damage /= 4;
+	}
+	if(youagr && roll_madness(MAD_ARGENT_SHEEN)){
+		damage /= 6;
+	}
+	if(youagr && (is_spider(mdef->data) 
+		|| mdef->mtyp == PM_SPROW
+		|| mdef->mtyp == PM_DRIDER
+		|| mdef->mtyp == PM_PRIESTESS_OF_GHAUNADAUR
+		|| mdef->mtyp == PM_AVATAR_OF_LOLTH
+	) && roll_madness(MAD_ARACHNOPHOBIA)){
+		damage /= 4;
+	}
+	if(youagr && mdef->female && humanoid_upperbody(mdef->data) && roll_madness(MAD_ARACHNOPHOBIA)){
+		damage /= 2;
+	}
+	if(youagr && is_aquatic(mdef->data) && roll_madness(MAD_THALASSOPHOBIA)){
+		damage /= 10;
+	}
+	
+	if (damage) {
+	    mdef->mhp -= damage;
+	    if (mdef->mhp < 1) {
+			if(m_using) monkilled(mdef, "", AD_RBRE);
+			else killed(mdef);
+	    }
+	}
+	return(resisted);
+}
 
 int
 resist(mtmp, oclass, damage, tell)

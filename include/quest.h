@@ -34,6 +34,9 @@ struct q_score {			/* Quest "scorecard" */
 	Bitfield(fakeleader_greet_1,1);
 	Bitfield(fakeleader_greet_2,1);
 	/*24*/
+	Bitfield(moon_close,1);
+	Bitfield(uh_shop_created,1);
+	/*26*/
 	int time_on_home;
 #define	MAX_HOME_TIMER 255
 /* Note: should be > 1 (urrent 70->6 */
@@ -42,8 +45,19 @@ struct q_score {			/* Quest "scorecard" */
 #define ANA_SPAWN_THREE (quest_status.time_on_home > MAX_HOME_TIMER/2)
 #define ANA_SPAWN_FOUR (quest_status.time_on_home > MAX_HOME_TIMER*3/4)
 	/*30*/
+	long time_doing_quest;
 	unsigned leader_m_id;
 };
+//Random spawns invade city:
+#define UH_QUEST_TIME_0	16000
+//Citizens begin turning outside cathedral:
+#define UH_QUEST_TIME_1	28000
+//Citizens begin turning inside cathedral, stake fails:
+#define UH_QUEST_TIME_2	32000
+//Amalia first becomes vulnerable to turning:
+#define UH_QUEST_TIME_3	38000
+//Quest "failed", everyone turns instantly:
+#define UH_QUEST_TIME_4	48000
 
 #define MAX_QUEST_TRIES  7	/* exceed this and you "fail" */
 #ifdef CONVICT

@@ -390,8 +390,8 @@ OBJECT:random,random,contained
 #
 #	The "goal" level for the quest.
 #
-#	Here you meet Minion of Huhetotl your nemesis monster.  You have to
-#	defeat Minion of Huhetotl in combat to gain the artifact you have
+#	Here you meet Minion of Tezcatlipoca your nemesis monster.  You have to
+#	defeat Minion of Tezcatlipoca in combat to gain the artifact you have
 #	been assigned to retrieve.
 #
 
@@ -449,8 +449,8 @@ REGION:(52,13,52,15),unlit,"ordinary"
 STAIR:(38,10),up
 # Non diggable walls
 NON_DIGGABLE:(00,00,75,19)
-# The altar of Huhetotl.  Unattended.
-ALTAR:place[0],chaos,altar
+# The altar of Tezcatlipoca.  Unattended.
+ALTAR:place[0],noalign,altar,"Tezcatlipoca"
 # Magic chest in another alcove
 OBJECT:'(',"magic chest",place[1]
 # Objects
@@ -481,7 +481,7 @@ TRAP:"rolling boulder",(30,14)
 TRAP:"rolling boulder",(46,05)
 TRAP:"rolling boulder",(46,14)
 # Random monsters.
-MONSTER:'&',"Minion of Huhetotl",place[0]
+MONSTER:'&',"Minion of Tezcatlipoca",place[0]
 MONSTER:'S',random,random
 MONSTER:'S',random,random
 MONSTER:'S',random,random
@@ -563,14 +563,21 @@ MONSTER:'S',"snake",random
 MONSTER:'S',"pit viper",random
 MONSTER:'S',"pit viper",random
 
-MONSTER:'@',"aztec warrior",random
-MONSTER:'@',"aztec warrior",random
-MONSTER:'@',"aztec warrior",random
-MONSTER:'@',"aztec spearthrower",random
-MONSTER:'@',"aztec spearthrower",random
-MONSTER:'@',"aztec priest",random
+MONSTER:'Y',"second-sun warrior",random
+MONSTER:'Y',"second-sun warrior",random
+MONSTER:'Y',"second-sun warrior",random
+MONSTER:'Y',"second-sun spearthrower",random
+MONSTER:'Y',"second-sun spearthrower",random
+MONSTER:'Y',"second-sun priest",random
 
-MONSTER[50%]:'f',"jaguar",random
+MONSTER:'f',"jaguar",random
+MONSTER:'f',"jaguar",random
+MONSTER:'f',"jaguar",random
+MONSTER:'f',"jaguar",random
+MONSTER:'f',"jaguar",random
+MONSTER:'f',"jaguar",random
+MONSTER:'f',"jaguar",random
+MONSTER:'f',"jaguar",random
 MONSTER[50%]:'f',"tiger",random
 MONSTER[50%]:'f',"panther",random
 

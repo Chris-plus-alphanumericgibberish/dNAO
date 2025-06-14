@@ -144,7 +144,7 @@ test_readobjnam()
 	for (i=LOW_PM; i < NUMMONS; i++) {
 		/* known and acceptable failures */
 		if (i == PM_HUMAN_WEREWOLF || i == PM_HUMAN_WERERAT || i == PM_HUMAN_WEREJACKAL ||	//gives animal form (of same name)
-			i == PM_LONG_WORM_TAIL || i == PM_HUNTING_HORROR_TAIL)// gives main creature
+			i == PM_LONG_WORM_TAIL || i == PM_HUNTING_HORROR_TAIL || i == PM_CHORISTER_TRAIN)// gives main creature
 			continue;
 		Sprintf(buf2, "statue of %s",
 			type_is_pname(&mons[i]) ? mons[i].mname : an(mons[i].mname));

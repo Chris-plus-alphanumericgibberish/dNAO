@@ -48,11 +48,12 @@ can_saddle(mtmp, otmp)
 				(Race_if(PM_ORC) && index(orc_steeds, ptr->mlet)) ||
 				(Role_if(PM_VALKYRIE) && index(valk_steeds, ptr->mlet)) ||
 				((Race_if(PM_DROW) || Race_if(PM_MYRKALFR)) && index(drow_steeds, ptr->mlet)) ||
+				(Race_if(PM_VAMPIRE) && is_vampire(ptr)) ||
 				(ptr->mtyp == PM_BYAKHEE)
 			) && 
 			(ptr->msize >= MZ_MEDIUM) &&
 			!(humanoid(ptr) && ptr->mtyp != PM_SPROW) &&
-			!amorphous(ptr) && !is_whirly(ptr) && 
+			!amorphous(ptr) && !is_gaseous_noequip(ptr) && 
 			((otmp && check_oprop(otmp, OPROP_PHSEW)) || !(noncorporeal(ptr) || unsolid(ptr)))
 			);
 }
@@ -305,7 +306,11 @@ mount_steed(mtmp, force)
 	    return (FALSE);
 	}
 	
-	if (!force && !(Role_if(PM_KNIGHT) || Role_if(PM_NOBLEMAN)) && !(get_mx(mtmp, MX_EDOG) && (EDOG(mtmp)->loyal || EDOG(mtmp)->dominated)) && !(--mtmp->mtame)) {
+	if (!force && !(Role_if(PM_KNIGHT) || Role_if(PM_NOBLEMAN)) 
+		&& !(get_mx(mtmp, MX_EDOG) && (EDOG(mtmp)->loyal || EDOG(mtmp)->dominated))
+		&& !(mtmp->mtame && is_vampire(mtmp->data) && check_vampire(VAMPIRE_THRALLS))
+		&& !(--mtmp->mtame)
+	) {
 	    /* no longer tame */
 	    newsym(mtmp->mx, mtmp->my);
 	    pline("%s resists%s!", Monnam(mtmp),
@@ -434,7 +439,9 @@ kick_steed()
 	}
 
 	/* Make the steed less tame and check if it resists */
-	if(!(get_mx(u.usteed, MX_EDOG) && (EDOG(u.usteed)->loyal || EDOG(u.usteed)->dominated))){
+	if(!(get_mx(u.usteed, MX_EDOG) && (EDOG(u.usteed)->loyal || EDOG(u.usteed)->dominated))
+		&& !(u.usteed->mtame && is_vampire(u.usteed->data) && check_vampire(VAMPIRE_THRALLS))
+	){
 		if (u.usteed->mtame) u.usteed->mtame--;
 		if (!u.usteed->mtame && u.usteed->mleashed) m_unleash(u.usteed, TRUE);
 		if (!u.usteed->mtame || (u.ulevel+u.usteed->mtame+P_SKILL(P_RIDING) < rnd(MAXULEV/2+5))) {
@@ -683,8 +690,9 @@ int x, y;
     level.monsters[x][y] = mon;
 //	pline("%d",u.umonster); O_o that was a strange series of bugs....
 	// if (opaque(mon->data) && (!mon->minvis || HSee_invisible || ESee_invisible || ((!Race_if(PM_INCANTIFIER) || Upolyd) && mon_resistance(&youmonst,SEE_INVIS)) ))
-	// if (opaque(&mons[mon->mtyp]) && (!mon->minvis || (See_invisible(mon->mx,mon->my))))
-		// block_point(x,y);
+	// pline("%d\n",mon->mtyp);
+	if (!loading_mons && opaque(&mons[mon->mtyp]) && (!mon->minvis || ((u.ux || u.uy) && See_invisible(mon->mx,mon->my))))
+		block_point(x,y);
 }
 
 #endif /* STEED */

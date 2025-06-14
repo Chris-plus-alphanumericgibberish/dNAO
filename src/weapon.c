@@ -34,9 +34,7 @@ STATIC_DCL int FDECL(enhance_skill, (boolean));
 #define PN_HARVEST				(-15)
 #define PN_BEAST_MASTERY		(-16)
 #define PN_FIREARMS				(-17)
-#ifdef BARD
 #define PN_MUSICALIZE			(-18)
-#endif
 #define PN_SHII_CHO				(-19)
 #define PN_MAKASHI				(-20)
 #define PN_SORESU				(-21)
@@ -53,6 +51,7 @@ STATIC_DCL int FDECL(enhance_skill, (boolean));
 #define PN_KNI_RUNIC			(-32)
 #define PN_WAND_DAMAGE			(-33)
 #define PN_SHIELD				(-34)
+#define PN_SMITHING				(-35)
 
 #define holy_damage(mon)	((mon == &youmonst) ? \
 							hates_holy(youracedata) :\
@@ -85,9 +84,8 @@ STATIC_VAR NEARDATA const short skill_names_indices[P_NUM_SKILLS] = {
 	PN_CLERIC_SPELL,     PN_ESCAPE_SPELL,
 	PN_MATTER_SPELL,
 	PN_WAND_DAMAGE,
-#ifdef BARD
 	PN_MUSICALIZE,
-#endif
+	PN_SMITHING,
 	PN_BARE_HANDED,   PN_TWO_WEAPONS, PN_SHIELD,
 	PN_BEAST_MASTERY,
 	PN_SHII_CHO, PN_MAKASHI, PN_SORESU, PN_ATARU,
@@ -138,6 +136,7 @@ STATIC_VAR NEARDATA const char * const odd_skill_names[] = {
 	"runic weapon techniques",
     "wand damage",
     "shield",
+    "smithing",
 };
 /* indexed vis `is_martial() */
 STATIC_VAR NEARDATA const char * const barehands_or_martial[] = {
@@ -204,8 +203,29 @@ struct monst *magr;
 		}
 	}
 
-/*	Put weapon specific "to hit" bonuses in below:		*/
+	/*	Put weapon specific "to hit" bonuses in below:		*/
 	tmp += objects[otmp->otyp].oc_hitbon;
+	if(youagr && u.sealsActive&SEAL_OTIAX && (
+		otmp->otyp == LOCK_PICK ||
+		otmp->otyp == CREDIT_CARD ||
+		otmp->otyp == UNIVERSAL_KEY ||
+		otmp->otyp == SKELETON_KEY
+	)){
+		tmp += u.ulevel >= 21 ? 5 : u.ulevel >= 14 ? 2 : 1;
+	}
+	if(youagr && u.sealsActive&SEAL_PAIMON && otmp->oclass == SPBOOK_CLASS){
+		tmp += u.ulevel >= 21 ? 5 : u.ulevel >= 14 ? 2 : 1;
+	}
+	if(youagr && u.sealsActive&SEAL_JACK && (
+		otmp->otyp == OIL_LAMP ||
+		otmp->otyp == TORCH ||
+		otmp->otyp == SHADOWLANDER_S_TORCH ||
+		otmp->otyp == SUNROD
+	)
+		&& otmp->lamplit
+	){
+		tmp += u.ulevel >= 21 ? 5 : u.ulevel >= 14 ? 2 : 1;
+	}
 	
 	if (is_lightsaber(otmp) && otmp->altmode) tmp += objects[otmp->otyp].oc_hitbon;
 	//But DON'T double the to hit bonus from spe for double lightsabers in dual bladed mode. It gets harder to use, not easier.
@@ -256,9 +276,13 @@ struct monst *magr;
 	}
 
 	if (is_insight_weapon(otmp)){
-		if(youagr && (Role_if(PM_MADMAN) || u.sealsActive&SEAL_OSE)){
-			if(u.uinsight)
-				tmp += rnd(min(u.uinsight, mlev(magr)));
+		if(youagr && (Role_if(PM_MADMAN) 
+						|| u.sealsActive&SEAL_OSE
+						|| (Role_if(PM_UNDEAD_HUNTER) && mvitals[PM_MOON_S_CHOSEN].died)
+					)
+		){
+			if(Insight)
+				tmp += rnd(min(Insight, mlev(magr)));
 		}
 		else if(magr && insightful(magr->data)){
 			tmp += rnd(mlev(magr));
@@ -266,8 +290,8 @@ struct monst *magr;
 	}
 
 	if (otmp->oartifact == ART_LASH_OF_THE_COLD_WASTE){
-		if(youagr && u.uinsight){
-			tmp += rnd(min(u.uinsight, mlev(magr)));
+		if(youagr && Insight){
+			tmp += rnd(min(Insight, mlev(magr)));
 		} else if(magr && insightful(magr->data)) {
 			tmp += rnd(mlev(magr));
 		}
@@ -311,6 +335,10 @@ struct monst *magr;
 		else
 			attackmask = WHACK; //No claws! Just a flabby hand.
 	}
+	if (oartifact == ART_DIRGE){
+		if(check_mutation(SHUB_CLAWS))
+			attackmask |= SLASH|PIERCE; //Claws
+	}
 	if(oartifact == ART_JIN_GANG_ZUO){
 		attackmask = WHACK;
 	}
@@ -323,6 +351,12 @@ struct monst *magr;
 	if(otyp == CARCOSAN_STING){
 		attackmask = PIERCE;
 	}
+	if(otyp == SOLDIER_S_SABER || otyp == BLADED_BOW){
+		attackmask = SLASH;
+	}
+	if(otyp == TWINGUN_SHANTA){
+		attackmask = PIERCE;
+	}
 
 	/* catch special cases */
 	if (   oartifact == ART_YORSHKA_S_SPEAR
@@ -333,7 +367,7 @@ struct monst *magr;
 		attackmask |= WHACK;
 	}
 	if(obj && magr && !litsaber(obj) && is_chained_merc(obj) && (
-		(youagr && u.uinsight > 20 && YOU_MERC_SPECIAL)
+		(youagr && Insight > 20 && YOU_MERC_SPECIAL)
 		|| (!youagr && insightful(magr->data) && is_chaotic_mon(magr))
 	)){
 		attackmask |= WHACK;
@@ -355,13 +389,22 @@ struct monst *magr;
 		else if(activeFightingForm(FFORM_POMMEL))
 			attackmask = WHACK; // only bashing
 	}
-
+	if (obj && magr && obj->otyp == TOOTH && obj->o_e_trait&ETRAIT_FOCUS_FIRE && CHECK_ETRAIT(obj, magr, ETRAIT_FOCUS_FIRE)){
+		attackmask = PIERCE; // only thrusting
+	}
+	if(obj && obj->o_e_trait == ETRAIT_HEW && magr
+		&& CHECK_ETRAIT(obj, magr, ETRAIT_HEW)
+		&& (attackmask&SLASH)
+	){
+		attackmask &= ~PIERCE;
+	}
 	if (   oartifact == ART_LIECLEAVER
 		|| oartifact == ART_INFINITY_S_MIRRORED_ARC
 		|| oartifact == ART_GREAT_CLAWS_OF_URDLEN
 		|| oartifact == ART_CLAWS_OF_THE_REVENANCER
+		|| oartifact == ART_SHADOWLOCK
 		|| (obj && check_oprop(obj, OPROP_BLADED) && !litsaber(obj))
-		|| (obj && check_oprop(obj, OPROP_RLYHW) && u.uinsight >= 12)
+		|| (obj && check_oprop(obj, OPROP_RLYHW) && Insight >= 12)
 		|| (obj && !litsaber(obj) && is_streaming_merc(obj))
 		){
 		attackmask |= SLASH;
@@ -372,11 +415,17 @@ struct monst *magr;
 	if ((obj && oartifact == ART_HOLY_MOONLIGHT_SWORD && obj->lamplit)
 		|| (oartifact == ART_BLOODLETTER && artinstance[oartifact].BLactive >= moves)
 		|| oartifact == ART_FIRE_BRAND
-		|| oartifact == ART_FROST_BRAND
 		|| oartifact == ART_ARYFAERN_KERYM
-		|| (obj && check_oprop(obj, OPROP_RLYHW) && u.uinsight >= 24)
+		|| (obj && check_oprop(obj, OPROP_RLYHW) && Insight >= 24)
 		){
 		attackmask |= EXPLOSION;
+	}
+	if(oartifact == ART_FROST_BRAND){
+		if(!(attackmask&WHACK))
+			attackmask |= WHACK;
+		else if(!(attackmask&PIERCE))
+			attackmask |= PIERCE;
+		else attackmask |= SLASH;
 	}
 	/* if it's not any of the above, we're just smacking things with it */
 	if (!attackmask)
@@ -481,13 +530,27 @@ struct monst *magr;
 			ocd = objects[otyp].oc_wldam.oc_damd;
 		}
 
-		if (obj->oartifact == ART_HOLY_MOONLIGHT_SWORD)
-			dmod += 1;
+		if(obj->otyp == CHIKAGE && obj->obj_material == HEMARGYOS){
+			ocn *= 2;
+			bonn *= 2;
+			flat *= 2;
+			if(magr)
+				flat += min(mlev(magr)/3, 10);
+		}
 
-		if (obj->oartifact == ART_FRIEDE_S_SCYTHE)
-			dmod += 2;
-		else if (obj->oartifact == ART_HOLY_MOONLIGHT_SWORD && obj->lamplit)
-			dmod += 2;
+		if (obj->oartifact == ART_HOLY_MOONLIGHT_SWORD){
+			dmod += 1;
+			if (obj->lamplit)
+				dmod += 2;
+		}
+		else if (obj->oartifact == ART_SHADOWLOCK){
+			ocn = 4;
+			ocd = 6;
+		}
+
+		if (obj->oartifact == ART_BLOODLETTER && artinstance[ART_BLOODLETTER].BLactive >= moves)
+			dmod += 4;
+
 		if (magr == &youmonst && activeFightingForm(FFORM_POMMEL)){
 			if(bimanual_mod(obj, magr) > 1){
 				*wdice = (large ? objects[WAR_HAMMER].oc_wldam : objects[WAR_HAMMER].oc_wsdam);
@@ -507,6 +570,15 @@ struct monst *magr;
 				flat = 0;
 			}
 		}
+		if (magr && obj->otyp == TOOTH && obj->o_e_trait&ETRAIT_FOCUS_FIRE && CHECK_ETRAIT(obj, magr, ETRAIT_FOCUS_FIRE)){
+				ocn = 1;
+				ocd = 8;
+				bonn = 0;
+				bond = 0;
+				flat = 0;
+		}
+		if (obj->oartifact == ART_FRIEDE_S_SCYTHE)
+			dmod += 2;
 
 		if (obj->oartifact == ART_LIECLEAVER) {
 			ocn = 1;
@@ -527,11 +599,26 @@ struct monst *magr;
 		{
 			ocn = 1;
 			ocd = 3;
-			if(u.uinsight >= 25){
+			if(Insight >= 25){
 				bonn = 1;
 				bond = 5;
 				spe_mult += 1;
 			}
+		}
+		else if (otyp == SOLDIER_S_SABER)
+		{
+			ocn = 1;
+			ocd = 8;
+		}
+		else if (otyp == BLADED_BOW)
+		{
+			ocn = 1;
+			ocd = 8;
+		}
+		else if (otyp == TWINGUN_SHANTA)
+		{
+			ocn = 1;
+			ocd = 4;
 		}
 		else if (otyp == WIND_AND_FIRE_WHEELS)
 		{
@@ -546,23 +633,39 @@ struct monst *magr;
 		}
 		else if (otyp == MOON_AXE)
 		{
-			/*
-			ECLIPSE_MOON	0  -  2d4 v small, 2d12 v large
-			CRESCENT_MOON	1  -  2d6
-			HALF_MOON		2  -  2d8
-			GIBBOUS_MOON	3  - 2d10
-			FULL_MOON	 	4  - 2d12 
-			 */
-			ocn = 2;
-			ocd = max(4 + 2 * obj->ovar1_moonPhase + 2 * dmod, 2);	// die size is based on axe's phase of moon (0 <= ovar1_moonPhase <= 4)
-			if (!large && obj->ovar1_moonPhase == ECLIPSE_MOON)		// eclipse moon axe is surprisingly effective against small creatures (2d12)
-				ocd = max(12 + 2 * dmod, 2);
+			if(obj->ovar1_moonPhase == HUNTING_MOON){
+				ocn = 2;
+				if(large)
+					ocd = 9;
+				else
+					ocd = 12;
+			}
+			else {
+				/*
+				ECLIPSE_MOON	0  -  2d4 v large, 2d12 v small
+				CRESCENT_MOON	1  -  2d6
+				HALF_MOON		2  -  2d8
+				GIBBOUS_MOON	3  - 2d10
+				FULL_MOON	 	4  - 2d12 
+				 */
+				ocn = 2;
+				ocd = max(4 + 2 * obj->ovar1_moonPhase + 2 * dmod, 2);	// die size is based on axe's phase of moon (0 <= ovar1_moonPhase <= 4)
+				if (!large && obj->ovar1_moonPhase == ECLIPSE_MOON)		// eclipse moon axe is surprisingly effective against small creatures (2d12)
+					ocd = max(12 + 2 * dmod, 2);
+			}
 		}
 
 		/* shield bash skill buffs shield damage to d4/6/8 with skill, affected by dmod */
 		if (is_shield(obj) && magr == &youmonst && activeFightingForm(FFORM_SHIELD_BASH)){
 			ocn = 1;
 			ocd = max(2, 2 * FightingFormSkillLevel(FFORM_SHIELD_BASH)); // 2-8 for unskilled-expert
+			if(obj->oartifact == ART_FINGERPRINT_SHIELD){
+				ocn *= 2;
+				ocd *= 2.5;
+			}
+		} else if (obj->oartifact == ART_FINGERPRINT_SHIELD) {
+				ocn = 2;
+				ocd = 4;
 		} else if (magr == &youmonst && activeFightingForm(FFORM_GREAT_WEP) && (bimanual(obj, youracedata) || bimanual_mod(obj, &youmonst) > 1)) {
 			ignore_rolls = max(0, FightingFormSkillLevel(FFORM_GREAT_WEP) - 1); // 0-3 for unskilled-expert
 		}
@@ -573,8 +676,8 @@ struct monst *magr;
 				ignore_rolls += u.usanity > 50 ? 0 : u.usanity > 25 ? 1 : u.usanity > 10 ? 2 : 3;
 		}
 
-		if (otyp == HEAVY_IRON_BALL) {
-			int wt = (int)objects[HEAVY_IRON_BALL].oc_weight;
+		if (otyp == BALL) {
+			int wt = (int)objects[BALL].oc_weight;
 
 			if ((int)obj->owt > wt) {
 				wt = ((int)obj->owt - wt) / 160;
@@ -645,8 +748,8 @@ struct monst *magr;
 					modnum = &flat;
 				}
 				if(magr == &youmonst || (!magr && obj->where == OBJ_INVENT)){
-					*modnum += u.uinsight/10;
-					if (((moves)*(u.uinsight % 10)) / 10 > ((moves - 1)*(u.uinsight % 10)) / 10)
+					*modnum += Insight/10;
+					if (((moves)*(Insight % 10)) / 10 > ((moves - 1)*(Insight % 10)) / 10)
 						*modnum += 1;
 				}
 				else if(magr){
@@ -720,7 +823,24 @@ struct monst *magr;
 		}
 	}
 	/* apply dmod to ocd */
-	ocd = max(2, ocd + dmod * 2);
+	if(dmod){
+		ocd = max(2, ocd + dmod * 2);
+		if(bond){
+			bond = max(2, bond + dmod * 2);
+			if(flat){
+				flat = max(0, flat + dmod);
+			}
+		}
+		else if(flat){
+			if(flat > 1){
+				flat = max(0, flat + dmod);
+			}
+			else {
+				bond = max(0, dmod * 2);
+				flat = 0;
+			}
+		}
+	}
 
 	/* SPECIAL CASES (beyond what is defined in objects.c) START HERE */
 
@@ -803,7 +923,7 @@ struct monst *magr;
 		{
 			// couatl bite 
 			ocn = 1;
-			ocd = 2;
+			ocd = 3;
 			bonn = 2;
 			bond = 4;
 		}
@@ -896,30 +1016,42 @@ struct monst *magr;
 
 	case SEISMIC_HAMMER:		if (chrgd){ ocd *= 3; } break;
 	case ACID_VENOM:			if (obj&&obj->ovar1_acidSplashDamage){ ocn = 0; flat = obj->ovar1_acidSplashDamage; } else{ add(6); } break;
-	case LIGHTSABER:			spe_mult *= 3; ocn *= 3; if(obj&&obj->altmode){ plus(3,3); spe_mult *= 2;} break;	// external special case: lightsaber forms
-	case BEAMSWORD:				spe_mult *= 3; ocn *= 3; if(obj&&obj->altmode){ plus(3,3); spe_mult *= 2;} break;	// external special case: Atma Weapon, lightsaber forms
-	case DOUBLE_LIGHTSABER:		spe_mult *= 3; ocn *= 3; if(obj&&obj->altmode){ ocn*=2;    spe_mult *= 2;} break;	// external special case: lightsaber forms
-	case ROD_OF_FORCE:			spe_mult *= 2; ocn *= 2; if(obj&&obj->altmode){ ocn*=2;    spe_mult *= 2;} break;	// external special case: lightsaber forms
+	case LIGHTSABER:			spe_mult *= 3; ocn *= 3; if(obj&&obj->altmode&&!activeFightingForm(FFORM_MAKASHI)){ plus(3,3); spe_mult *= 2;} break;	// external special case: lightsaber forms
+	case BEAMSWORD:				spe_mult *= 3; ocn *= 3; if(obj&&obj->altmode&&!activeFightingForm(FFORM_MAKASHI)){ plus(3,3); spe_mult *= 2;} break;	// external special case: Atma Weapon, lightsaber forms
+	case DOUBLE_LIGHTSABER:		spe_mult *= 3; ocn *= 3; if(obj&&obj->altmode&&!activeFightingForm(FFORM_MAKASHI)){ ocn*=2;    spe_mult *= 2;} break;	// external special case: lightsaber forms
+	case ROD_OF_FORCE:			spe_mult *= 2; ocn *= 2; if(obj&&obj->altmode&&!activeFightingForm(FFORM_MAKASHI)){ ocn*=2;    spe_mult *= 2;} break;	// external special case: lightsaber forms
 	case DISKOS:
-								if(u.uinsight >= 40){
+								if(Insight >= 40){
 									ocn+=1;
 									flat+=(ocd+1)/2;
-								} else if(u.uinsight >= 35){
+								} else if(Insight >= 35){
 									ocn+=1;
 									flat+=(ocd+3)/4;
-								} else if(u.uinsight >= 30){
+								} else if(Insight >= 30){
 									plus(1,3*ocd/4);
 									flat+=(ocd+3)/4;
-								} else if(u.uinsight >= 25){
+								} else if(Insight >= 25){
 									plus(1,(ocd+1)/2);
 									flat+=(ocd+3)/4;
-								} else if(u.uinsight >= 10){
+								} else if(Insight >= 10){
 									plus(1,(ocd+3)/4);
 									flat+=(ocd+3)/4;
-								} else if(u.uinsight >= 5){
+								} else if(Insight >= 5){
 									flat+=(ocd+3)/4;
 								}
 	break;
+	case DEVIL_FIST:
+		if(!on_level(&spire_level,&u.uz) && obj && obj->cobj && obj->cobj->otyp == WAGE_OF_LUST){
+			ocn+=2; //3d9+3/3d9
+		}
+	break;
+	case DEMON_CLAW:
+		if(!on_level(&spire_level,&u.uz) && obj && obj->cobj && obj->cobj->otyp == WAGE_OF_WRATH){
+			ocd*=2;
+			ocd+=1;
+			flat*=2;
+		}
+		break;
 	}
 #undef plus_base
 #undef plus
@@ -1249,7 +1381,7 @@ struct monst *magr;
 			otmp->oartifact == ART_INFINITY_S_MIRRORED_ARC))
 		{
 			otmp->age -= 100;
-			if (otmp->altmode){
+			if (otmp->altmode&&!activeFightingForm(FFORM_MAKASHI)){
 				otmp->age -= 100;
 			}
 		}
@@ -1311,21 +1443,29 @@ struct monst *magr;
 		}
 		break;
 	case ART_ATMA_WEAPON:
-		/* damage is multiplied % of health remaining (currently only implemented for the player) */
+		/* damage is multiplied % of health remaining */
 		/* calculate damage normally */
 		tmp += weapon_dmg_roll(&wdice, youdefend);
 		/* apply the multiplier, if applicable */
-		if (otmp == uwep &&	!Drain_resistance)
+		if (magr == &youmonst && !Drain_resistance)
 		{
 			tmp *= Upolyd ?
 				((float)u.mh) / u.mhmax :
 				((float)u.uhp) / u.uhpmax;
+		}
+		else if(magr && !Drain_res(magr)){
+			tmp *= ((float)magr->mhp) / magr->mhpmax;
 		}
 		/* cannot be negative */
 		if (tmp < 0)
 			tmp = 0;
 		/* don't re-add the weapon dice */
 		add_dice = FALSE;
+		break;
+	case ART_STORMBRINGER:
+		if(mon && (mon != &youmonst || Upolyd) && hd_size(mon->data) > 8){
+			tmp *= ((float)hd_size(mon->data)) / 8;
+		}
 		break;
 	}
 
@@ -1358,20 +1498,20 @@ struct monst *magr;
 			switch (min(P_SKILL(P_ATARU), P_SKILL(weapon_type(otmp)))){
 			case P_BASIC:
 				tmp += d(2, wdice.oc_damd);
-				if (otmp->altmode){ //Probably just the Annulus
-					tmp += d(2, 3);
+				if (otmp->altmode){
+					tmp += d(2, otmp->oartifact == ART_ANNULUS ? 3 : wdice.oc_damd);
 				}
 				break;
 			case P_SKILLED:
 				tmp += d(4, wdice.oc_damd);
-				if (otmp->altmode){ //Probably just the Annulus
-					tmp += d(4, 3);
+				if (otmp->altmode){
+					tmp += d(4, otmp->oartifact == ART_ANNULUS ? 3 : wdice.oc_damd);
 				}
 				break;
 			case P_EXPERT:
 				tmp += d(6, wdice.oc_damd);
-				if (otmp->altmode){ //Probably just the Annulus
-					tmp += d(6, 3);
+				if (otmp->altmode){
+					tmp += d(6, otmp->oartifact == ART_ANNULUS ? 3 : wdice.oc_damd);
 				}
 				break;
 			}
@@ -1491,18 +1631,14 @@ struct monst *magr;
 #endif /* OVLB */
 #ifdef OVL0
 
-STATIC_DCL struct obj *FDECL(oselect, (struct monst *,int,int));
+STATIC_DCL struct obj *FDECL(oselect, (struct monst *,int,int, boolean));
 STATIC_DCL struct obj *FDECL(oselectBoulder, (struct monst *));
-#define Oselect(x, spot) if ((otmp = oselect(mtmp, x, spot)) != 0) return(otmp);
+#define Oselect(x, spot, mari) if ((otmp = oselect(mtmp, x, spot, mari)) != 0) return(otmp);
 
 STATIC_OVL struct obj *
-oselect(mtmp, x, spot)
-struct monst *mtmp;
-int x;
-int spot;
+oselect(struct monst *mtmp, int x, int spot, boolean marilith)
 {
 	struct obj *otmp, *obest = 0;
-	boolean marilith = mon_attacktype(mtmp, AT_MARI); //Marilith arms don't suffer weight limits, so also don't impose them on the offhand arm.
 
 	for (otmp = mtmp->minvent; otmp; otmp = otmp->nobj) {
 	    if (otmp->otyp == x &&
@@ -1522,7 +1658,7 @@ int spot;
 				|| (marilith && ok_mariwep(otmp, mtmp, mtmp->data, FALSE))
 				|| (otmp->otyp == CHAIN && mtmp->mtyp == PM_CATHEZAR) 
 				|| (otmp->otyp == CHAIN && mtmp->mtyp == PM_FIERNA)
-				|| (otmp->otyp == HEAVY_IRON_BALL && mtmp->mtyp == PM_WARDEN_ARIANNA)
+				|| (otmp->otyp == BALL && (mtmp->mtyp == PM_WARDEN_ARIANNA || mtmp->mtyp == PM_ARIANNA || mtmp->mtyp == PM_RAGE_WALKER))
 				|| (mtmp->mtyp == PM_BASTARD_OF_THE_BOREAL_VALLEY)
 				|| (mtmp->mtyp == PM_LUNGORTHIN)
 				|| (mtmp->mtyp == PM_CORVIAN_KNIGHT)
@@ -1573,7 +1709,7 @@ static NEARDATA const int rwep[] =
 	ROPE_OF_ENTANGLING/*lost turns*/, 
 	LOADSTONE/*1d30 plus weight*/, 
 // #ifdef FIREARMS
-	FRAG_GRENADE, GAS_GRENADE, ROCKET, SILVER_BULLET, BULLET, SHOTGUN_SHELL,
+	FRAG_GRENADE, GAS_GRENADE, ROCKET, BLOOD_SPEAR, BLOOD_BULLET, SILVER_BULLET, BULLET, SHOTGUN_SHELL,
 // #endif
 	DROVEN_BOLT/*1d9+1/1d6+1*/, 
 	DWARVISH_SPEAR/*1d9/1d9*/, 
@@ -1698,9 +1834,10 @@ register struct monst *mtmp;
 	struct obj *tmpprop = &zeroobj;
 
 	char mlet = mtmp->data->mlet;
+	boolean marilith = mon_attacktype(mtmp, AT_MARI) ? TRUE : FALSE; //Marilith arms don't suffer weight limits, so also don't impose them on the offhand arm.
 	
 	propellor = &zeroobj;
-	Oselect(EGG, W_QUIVER); /* cockatrice egg */
+	Oselect(EGG, W_QUIVER, marilith); /* cockatrice egg */
 	if(throws_rocks(mtmp->data))	/* ...boulders for giants */
 	if((otmp = oselectBoulder(mtmp)))
 		return otmp;
@@ -1716,7 +1853,7 @@ register struct monst *mtmp;
 	/* if (dist2(mtmp->mx, mtmp->my, mtmp->mux, mtmp->muy) <= 13 && couldsee(mtmp->mx, mtmp->my)) */
 	{
 	    for (i = 0; i < SIZE(pwep); i++) {
-		if ((otmp = oselect(mtmp, pwep[i], W_WEP)) != 0) {
+		if ((otmp = oselect(mtmp, pwep[i], W_WEP, marilith)) != 0) {
 			propellor = otmp; /* force the monster to wield it */
 			return otmp;
 			}
@@ -1763,42 +1900,42 @@ register struct monst *mtmp;
 	    if (prop < 0) {
 		switch (-prop) {
 		case P_BOW:
-		  propellor = (oselect(mtmp, YUMI, W_WEP));
-		  if (!propellor) propellor = (oselect(mtmp, ELVEN_BOW, W_WEP));
-		  if (!propellor) propellor = (oselect(mtmp, BOW, W_WEP));
-		  if (!propellor) propellor = (oselect(mtmp, ORCISH_BOW, W_WEP));
+		  propellor = (oselect(mtmp, YUMI, W_WEP, marilith));
+		  if (!propellor) propellor = (oselect(mtmp, ELVEN_BOW, W_WEP, marilith));
+		  if (!propellor) propellor = (oselect(mtmp, BOW, W_WEP, marilith));
+		  if (!propellor) propellor = (oselect(mtmp, ORCISH_BOW, W_WEP, marilith));
 		  break;
 		case P_SLING:
-		  propellor = (oselect(mtmp, SLING, W_WEP));
+		  propellor = (oselect(mtmp, SLING, W_WEP, marilith));
 		  break;
 //ifdef FIREARMS
 		case P_FIREARM:
 		  if ((objects[rwep[i]].w_ammotyp) == WP_BULLET) {
-			propellor = (oselect(mtmp, BFG, W_WEP));
-			if (!propellor) propellor = (oselect(mtmp, HEAVY_MACHINE_GUN, W_WEP));
-			if (!propellor) propellor = (oselect(mtmp, ASSAULT_RIFLE, W_WEP));
-			if (!propellor) propellor = (oselect(mtmp, SUBMACHINE_GUN, W_WEP));
-			if (!propellor) propellor = (oselect(mtmp, SNIPER_RIFLE, W_WEP));
-			if (!propellor) propellor = (oselect(mtmp, RIFLE, W_WEP));
-			if (!propellor) propellor = (oselect(mtmp, PISTOL, W_WEP));
-			if (!propellor) propellor = (oselect(mtmp, FLINTLOCK, W_WEP));
+			propellor = (oselect(mtmp, BFG, W_WEP, marilith));
+			if (!propellor) propellor = (oselect(mtmp, HEAVY_MACHINE_GUN, W_WEP, marilith));
+			if (!propellor) propellor = (oselect(mtmp, ASSAULT_RIFLE, W_WEP, marilith));
+			if (!propellor) propellor = (oselect(mtmp, SUBMACHINE_GUN, W_WEP, marilith));
+			if (!propellor) propellor = (oselect(mtmp, SNIPER_RIFLE, W_WEP, marilith));
+			if (!propellor) propellor = (oselect(mtmp, RIFLE, W_WEP, marilith));
+			if (!propellor) propellor = (oselect(mtmp, PISTOL, W_WEP, marilith));
+			if (!propellor) propellor = (oselect(mtmp, FLINTLOCK, W_WEP, marilith));
 		  } else if ((objects[rwep[i]].w_ammotyp) == WP_SHELL) {
-			propellor = (oselect(mtmp, BFG, W_WEP));
-			if (!propellor) propellor = (oselect(mtmp, AUTO_SHOTGUN, W_WEP));
-			if (!propellor) propellor = (oselect(mtmp, SHOTGUN, W_WEP));
+			propellor = (oselect(mtmp, BFG, W_WEP, marilith));
+			if (!propellor) propellor = (oselect(mtmp, AUTO_SHOTGUN, W_WEP, marilith));
+			if (!propellor) propellor = (oselect(mtmp, SHOTGUN, W_WEP, marilith));
 		  } else if ((objects[rwep[i]].w_ammotyp) == WP_ROCKET) {
-			propellor = (oselect(mtmp, BFG, W_WEP));
-			if (!propellor) propellor = (oselect(mtmp, ROCKET_LAUNCHER, W_WEP));
+			propellor = (oselect(mtmp, BFG, W_WEP, marilith));
+			if (!propellor) propellor = (oselect(mtmp, ROCKET_LAUNCHER, W_WEP, marilith));
 		  } else if ((objects[rwep[i]].w_ammotyp) == WP_GRENADE) {
-			propellor = (oselect(mtmp, BFG, W_WEP));
-			if (!propellor) propellor = (oselect(mtmp, GRENADE_LAUNCHER, W_WEP));
+			propellor = (oselect(mtmp, BFG, W_WEP, marilith));
+			if (!propellor) propellor = (oselect(mtmp, GRENADE_LAUNCHER, W_WEP, marilith));
 			if (!propellor) propellor = &zeroobj;  /* can toss grenades */
 		  }
 		break;
 //endif
 		case P_CROSSBOW:
-		  propellor = (oselect(mtmp, DROVEN_CROSSBOW, W_WEP));
-		  if (!propellor) propellor = (oselect(mtmp, CROSSBOW, W_WEP));
+		  propellor = (oselect(mtmp, DROVEN_CROSSBOW, W_WEP, marilith));
+		  if (!propellor) propellor = (oselect(mtmp, CROSSBOW, W_WEP, marilith));
 		}
 		if (!tmpprop) tmpprop = propellor;
 		if (((otmp = MON_WEP(mtmp)) && otmp->cursed && otmp != propellor
@@ -1817,7 +1954,7 @@ register struct monst *mtmp;
 			if (rwep[i] != LOADSTONE) {
 				/* Don't throw a cursed weapon-in-hand or an artifact */
 				/* nor throw the last one (for stacks) of a wielded weapon */
-				if ((otmp = oselect(mtmp, rwep[i], W_QUIVER))
+				if ((otmp = oselect(mtmp, rwep[i], W_QUIVER, marilith))
 					&& !otmp->oartifact
 					&& (!otmp->cursed || otmp != MON_WEP(mtmp))
 					&& !((otmp->quan == 1) && (otmp->owornmask & (W_WEP|W_SWAPWEP))))
@@ -1842,6 +1979,8 @@ static const NEARDATA short hwep[] = {
 	  WHITE_VIBROZANBATO,/*2d16+8/2d8+4d6+10*/
 	  DOUBLE_FORCE_BLADE,/*6d6+12/6d4+8*/
 	  DOUBLE_LIGHTSABER/*6d8*/, 
+	  DEVIL_FIST,/*1d9+3/1d9 +2d9 energy*/
+	  DEMON_CLAW,/*1d12/1d22+special*/
 	  RED_EYED_VIBROSWORD,/*3d8+8/3d12+12*/
 	  FORCE_SWORD,/*3d8+8/3d6+6*/
 	  FORCE_WHIP,/*3d6+6+3/3d4+6+3d4+4*/
@@ -1854,28 +1993,40 @@ static const NEARDATA short hwep[] = {
 	  WHITE_VIBROSPEAR,/*2d6+3/2d8+3*/
 	  LIGHTSABER/*3d8*/,
 	  MIRRORBLADE/*your weapon is probably pretty darn good*/,
-	  HEAVY_IRON_BALL,/*1d25/1d25*/
+	  TOOTH/*6d6/3d12+3*/,
+	  GREATCLUB/*3d6/1d12*/,
+	  BALL,/*1d25/1d25*/
 	  VIBROBLADE,/*2d6+3/2d8+4*/
 	  ROD_OF_FORCE/*2d8/2d12*/,
 	  CRYSTAL_SWORD/*2d8/2d12*/,
+	  CHURCH_HAMMER,/*2d8+2/2d8*/
 	  DOUBLE_SWORD,/*2d8/2d12*/
+	  BEAST_CUTTER,/*1d6+4/3d4+3*/
+	  BEAST_CRUSHER,/*2d6/1d12*/
 	  DROVEN_GREATSWORD/*1d18/1d30*/, 
 	  SET_OF_CROW_TALONS/*2d4/2d3/+6 study*/,
 	  TSURUGI/*1d16/1d8+2d6*/, 
 	  MOON_AXE/*variable, 2d6 to 2d12*/,
+	  GREAT_MACE/*1d6+2d4/1d8+4*/,
 	  HIGH_ELVEN_WARSWORD/*1d10+1d6/1d10+1d6*/,
+	  CHURCH_BLADE/*1d12+1/3d8*/, 
 	  RUNESWORD/*1d10+1d4/1d10+1*/, 
 	  BATTLE_AXE/*1d8+1d4/1d6+2d4*/,
 	  TWO_HANDED_SWORD/*1d12/3d6*/, 
 	  DROVEN_SPEAR/*1d12/1d12*/,
 	  UNICORN_HORN/*1d12/1d12*/,
 	  ISAMUSEI/*1d12/1d8*/, 
+	  CHURCH_PICK/*1d12/1d8*/, 
 	  DWARVISH_MATTOCK/*1d12/1d8*/, 
 	  RAKUYO/*1d8+1d4/1d8+1d3*/, 
 	  ELVEN_BROADSWORD/*1d6+1d4/1d6+2*/, 
+	  TONITRUS/*1d10+1/1d10*/, 
+	  CHIKAGE/*1d10/1d12*/,
 	  KATANA/*1d10/1d12*/,
 	  CRYSKNIFE/*1d10/1d10*/, 
+	  WHIP_SAW/*1d10/1d8*/, 
 	  BESTIAL_CLAW/*1d10/1d8*/, 
+	  SOLDIER_S_RAPIER/*1d10/1d6*/, 
 	  VIPERWHIP/*2d4/2d3/poison*/,
 	  DROVEN_SHORT_SWORD/*1d9/1d9*/, 
 	  DWARVISH_SPEAR/*1d9/1d9*/, 
@@ -1887,18 +2038,29 @@ static const NEARDATA short hwep[] = {
 	  BLADE_OF_MERCY/*1d6+1/1d8+1*/, 
 	  RAKUYO_SABER/*1d8/1d8*/,
 	  PINCER_STAFF/*1d6+2/2d6+1*/, 
+	  SHANTA_PATA/*1d6+2/2d6+1*/, 
 	  TRIDENT/*1d8+1/3d6*/, 
+	  ELVEN_SCIMITAR/*1d6+2/1d6+1*/,
+	  HUNTER_S_LONG_AXE/*1d8+1/1d6+2*/, 
+	  SAW_SPEAR/*1d8/1d10*/,
+	  BOW_BLADE/*1d8/1d8*/,
 	  SABER/*1d8/1d8*/,
 	  NAGINATA, /*1d8/1d10*/
+	  HUNTER_S_LONGSWORD/*1d8/1d12*/,
 	  LONG_SWORD/*1d8/1d12*/,
+	  CANE/*1d8/1d10*/,
 	  FLAIL/*1d6+1/2d4*/, 
 	  NAGINATA/*1d6+1/2d4*/, 
 	  SCIMITAR/*1d8/1d8*/,
+	  CHURCH_SHORTSWORD/*1d8/1d7*/, 
 	  DWARVISH_SHORT_SWORD/*1d8/1d7*/, 
 	  WAKIZASHI/*1d8/1d6*/,
 	  KHOPESH,/*1d8/1d6*/
+	  LONG_SAW,/*1d8/1d6*/
+	  HUNTER_S_AXE,/*1d8/1d6*/
 	  DROVEN_DAGGER/*1d8/1d6*/, 
 	  CARCOSAN_STING/*1d3+1d5/1d3+1d5*/, 
+	  RAZOR_CLEAVER/*1d6+1/1d4*/, 
 	  MACE/*1d6+1/1d6*/, 
 	  MAGIC_TORCH/*1d8/1d4*/, 
 	  ELVEN_SHORT_SWORD/*1d7/1d7*/, 
@@ -1907,7 +2069,9 @@ static const NEARDATA short hwep[] = {
 	  DISKOS/*1d6/1d8*/,
 	  SPEAR/*1d6/1d8*/,
 	  BLADE_OF_GRACE/*1d6/1d8*/,
+	  HUNTER_S_SHORTSWORD/*1d6/1d8*/,
 	  SHORT_SWORD/*1d6/1d8*/,
+	  SAW_CLEAVER/*1d6/1d4*/, 
 	  RAPIER/*1d6/1d4*/, 
 	  AXE/*1d6/1d4*/, 
 	  ORCISH_SHORT_SWORD/*1d5/1d10*/, 
@@ -1947,6 +2111,8 @@ static const NEARDATA short hpwep[] = {
 	  WHITE_VIBROZANBATO,/*2d16+8/2d8+4d6+10*/
 	  DOUBLE_FORCE_BLADE,/*6d6+12/6d4+8*/
 	  DOUBLE_LIGHTSABER/*6d8*/, 
+	  DEVIL_FIST,/*1d9+3/1d9 +2d9 energy*/
+	  DEMON_CLAW,/*1d12/1d22+special*/
 	  RED_EYED_VIBROSWORD,/*3d8+8/3d12+12*/
 	  FORCE_SWORD,/*3d8+8/3d6+6*/
 	  FORCE_WHIP,/*3d6+6+3/3d4+6+3d4+4*/
@@ -1959,31 +2125,43 @@ static const NEARDATA short hpwep[] = {
 	  WHITE_VIBROSPEAR,/*2d6+3/2d8+3*/
 	  LIGHTSABER/*3d8*/,
 	  MIRRORBLADE/*your weapon is probably pretty darn good*/,
-	  HEAVY_IRON_BALL,/*1d25/1d25*/
+	  TOOTH/*6d6/3d12+3*/,
+	  GREATCLUB/*3d6/1d12*/,
+	  BALL,/*1d25/1d25*/
 	  VIBROBLADE,/*2d6+3/2d8+4*/
 	  ROD_OF_FORCE/*2d8/2d12*/,
 	  CRYSTAL_SWORD/*2d8/2d12*/,
+	  CHURCH_HAMMER,/*2d8+2/2d8*/
 	  DOUBLE_SWORD,/*2d8/2d12*/
+	  BEAST_CUTTER,/*1d6+4/3d4+3*/
+	  BEAST_CRUSHER,/*2d6/1d12*/
 	  DROVEN_GREATSWORD/*1d18/1d30*/, 
 	  SET_OF_CROW_TALONS/*2d4/2d3/+6 study*/,
 	  TSURUGI/*1d16/1d8+2d6*/, 
 	  MOON_AXE/*variable, 2d6 to 2d12*/,
+	  GREAT_MACE/*1d6+2d4/1d8+4*/,
 	  HIGH_ELVEN_WARSWORD/*1d10+1d6/1d10+1d6*/,
+	  CHURCH_BLADE/*1d12+1/3d8*/, 
 	  RUNESWORD/*1d10+1d4/1d10+1*/, 
 	  BATTLE_AXE/*1d8+1d4/1d6+2d4*/,
 	  TWO_HANDED_SWORD/*1d12/3d6*/, 
 	  DROVEN_SPEAR/*1d12/1d12*/,
 	  UNICORN_HORN/*1d12/1d12*/,
 	  ISAMUSEI/*1d12/1d8*/, 
+	  CHURCH_PICK/*1d12/1d8*/, 
 	  DWARVISH_MATTOCK/*1d12/1d8*/, 
 	  RAKUYO/*1d8+1d4/1d8+1d3*/, 
 	  ELVEN_BROADSWORD/*1d6+1d4/1d6+2*/, 
 	  POLEAXE, /*1d10/2d6*/
+	  TONITRUS/*1d10+1/1d10*/, 
 	  HALBERD, /*1d10/2d6*/
+	  CHIKAGE/*1d10/1d12*/,
 	  KATANA/*1d10/1d12*/,
 	  DROVEN_LANCE, /*1d10/1d10*/
 	  CRYSKNIFE/*1d10/1d10*/, 
+	  WHIP_SAW/*1d10/1d8*/, 
 	  BESTIAL_CLAW/*1d10/1d8*/, 
+	  SOLDIER_S_RAPIER/*1d10/1d6*/, 
 	  VIPERWHIP/*2d4/2d3/poison*/,
 	  BARDICHE, /*2d4/3d4*/ 
 	  DROVEN_SHORT_SWORD/*1d9/1d9*/, 
@@ -2002,20 +2180,31 @@ static const NEARDATA short hpwep[] = {
 	  BLADE_OF_MERCY/*1d6+1/1d8+1*/, 
 	  RAKUYO_SABER/*1d8/1d8*/,
 	  PINCER_STAFF/*1d6+2/2d6+1*/, 
+	  SHANTA_PATA/*1d6+2/2d6+1*/, 
 	  TRIDENT/*1d8+2/3d6*/, 
+	  ELVEN_SCIMITAR/*1d6+2/1d6+1*/,
+	  HUNTER_S_LONG_AXE/*1d8+1/1d6+2*/, 
+	  SAW_SPEAR/*1d8/1d10*/,
+	  BOW_BLADE/*1d8/1d8*/,
 	  SABER/*1d8/1d8*/,
 	  NAGINATA, /*1d8/1d10*/
+	  HUNTER_S_LONGSWORD/*1d8/1d12*/,
 	  LONG_SWORD/*1d8/1d12*/,
+	  CANE/*1d8/1d10*/,
 	  FLAIL/*1d6+1/2d4*/, 
 	  NAGINATA/*1d6+1/2d4*/, 
 	  ELVEN_LANCE, /*1d8/1d8*/
 	  SCIMITAR/*1d8/1d8*/,
+	  CHURCH_SHORTSWORD/*1d8/1d7*/, 
 	  DWARVISH_SHORT_SWORD/*1d8/1d7*/, 
 	  WAKIZASHI/*1d8/1d6*/,
 	  KHOPESH,/*1d8/1d6*/
 	  BEC_DE_CORBIN, /*1d8/1d6*/
+	  LONG_SAW,/*1d8/1d6*/
+	  HUNTER_S_AXE,/*1d8/1d6*/
 	  DROVEN_DAGGER/*1d8/1d6*/, 
 	  CARCOSAN_STING/*1d3+1d5/1d3+1d5*/, 
+	  RAZOR_CLEAVER/*1d6+1/1d4*/, 
 	  MACE/*1d6+1/1d6*/, 
 	  MAGIC_TORCH/*1d8/1d4*/, 
 	  GLAIVE, /*1d6/1d10*/
@@ -2027,8 +2216,10 @@ static const NEARDATA short hpwep[] = {
 	  LANCE, /*1d6/1d8*/
 	  SPEAR/*1d6/1d8*/,
 	  BLADE_OF_GRACE/*1d6/1d8*/,
+	  HUNTER_S_SHORTSWORD/*1d6/1d8*/,
 	  SHORT_SWORD/*1d6/1d8*/,
 	  PARTISAN, /*1d6/1d6*/
+	  SAW_CLEAVER/*1d6/1d4*/, 
 	  RAPIER/*1d6/1d4*/, 
 	  AXE/*1d6/1d4*/, 
 	  ORCISH_SHORT_SWORD/*1d5/1d10*/, 
@@ -2077,7 +2268,7 @@ struct obj *otmp;
     
         if (wep->oartifact) return FALSE;
 		
-        if (!check_oprop(wep, OPROP_NONE) || (rakuyo_prop(wep) && u.uinsight >= 20)) return FALSE;
+        if (!check_oprop(wep, OPROP_NONE) || (rakuyo_prop(wep) && Insight >= 20)) return FALSE;
 
         if (is_giant(mtmp->data) &&  wep->otyp == CLUB) return FALSE;
         if (is_giant(mtmp->data) && otmp->otyp == CLUB) return TRUE;
@@ -2107,6 +2298,7 @@ register struct monst *mtmp;
 	register int i;
 	boolean strong = strongmonst(mtmp->data);
 	boolean wearing_shield = (mtmp->misc_worn_check & W_ARMS) != 0;
+	boolean marilith = mon_attacktype(mtmp, AT_MARI) ? TRUE : FALSE; //Marilith arms don't suffer weight limits, so also don't impose them on the offhand arm.
 
 	/* needs to be capable of wielding a weapon in the mainhand */
 	if (!mon_attacktype(mtmp, AT_WEAP) &&
@@ -2117,10 +2309,10 @@ register struct monst *mtmp;
 	otmp = MON_WEP(mtmp);
 	if(otmp && (otmp->oartifact
 			|| !check_oprop(otmp, OPROP_NONE)
-			|| (rakuyo_prop(otmp) && u.uinsight >= 20) //Note: Rakuyo-ness is accidently caught by OPROP_
-			|| (otmp->otyp == ISAMUSEI && u.uinsight >= 22)
-			|| (otmp->otyp == DISKOS && u.uinsight >= 10)
-			|| (otmp->otyp == PINCER_STAFF && u.uinsight >= 10)
+			|| (rakuyo_prop(otmp) && Insight >= 20) //Note: Rakuyo-ness is accidently caught by OPROP_
+			|| (otmp->otyp == ISAMUSEI && Insight >= 22)
+			|| (otmp->otyp == DISKOS && Insight >= 10)
+			|| (otmp->otyp == PINCER_STAFF && Insight >= 10)
 	))
 		return otmp;
 	
@@ -2128,15 +2320,15 @@ register struct monst *mtmp;
 	for(otmp=mtmp->minvent; otmp; otmp = otmp->nobj) {
 		if (/* valid weapon */
 			(otmp->oclass == WEAPON_CLASS || is_weptool(otmp)
-			|| otmp->otyp == CHAIN || otmp->otyp == HEAVY_IRON_BALL
+			|| otmp->otyp == CHAIN || otmp->otyp == BALL
 			) &&
 			/* an artifact or other special weapon*/
 			(otmp->oartifact
 				|| !check_oprop(otmp, OPROP_NONE)
-				|| (rakuyo_prop(otmp) && u.uinsight >= 20)
-				|| (otmp->otyp == ISAMUSEI && u.uinsight >= 22)
-				|| (otmp->otyp == DISKOS && u.uinsight >= 10)
-				|| (otmp->otyp == PINCER_STAFF && u.uinsight >= 10)
+				|| (rakuyo_prop(otmp) && Insight >= 20)
+				|| (otmp->otyp == ISAMUSEI && Insight >= 22)
+				|| (otmp->otyp == DISKOS && Insight >= 10)
+				|| (otmp->otyp == PINCER_STAFF && Insight >= 10)
 			) &&
 			/* never uncharged lightsabers */
             (!is_lightsaber(otmp) || otmp->age
@@ -2158,18 +2350,18 @@ register struct monst *mtmp;
 	}
 
 	if(is_giant(mtmp->data))	/* giants just love to use clubs */
-		Oselect(CLUB, W_WEP);
+		Oselect(CLUB, W_WEP, marilith);
 	
 	if(melee_polearms(mtmp->data)){
 		for (i = 0; i < SIZE(hpwep); i++) {
 			if (hpwep[i] == CORPSE && !((mtmp->misc_worn_check & W_ARMG) || resists_ston(mtmp)))
 				continue;
-			Oselect(hpwep[i], W_WEP);
+			Oselect(hpwep[i], W_WEP, marilith);
 		}
 	} else for (i = 0; i < SIZE(hwep); i++) {
 	    if (hwep[i] == CORPSE && !((mtmp->misc_worn_check & W_ARMG) || resists_ston(mtmp)))
 			continue;
-		Oselect(hwep[i], W_WEP);
+		Oselect(hwep[i], W_WEP, marilith);
 	}
 
 	/* failure */
@@ -2184,6 +2376,7 @@ register struct monst *mtmp;
 	register int i;
 	boolean strong = strongmonst(mtmp->data);
 	boolean wearing_shield = (mtmp->misc_worn_check & W_ARMS) != 0;
+	boolean marilith = mon_attacktype(mtmp, AT_MARI) ? TRUE : FALSE; //Marilith arms don't suffer weight limits, so also don't impose them on the offhand arm.
 
 	/* needs to be capable of wielding a weapon in the offhand */
 	if (!mon_attacktype(mtmp, AT_XWEP))
@@ -2193,10 +2386,10 @@ register struct monst *mtmp;
 	otmp = MON_SWEP(mtmp);
 	if(otmp && (otmp->oartifact
 		|| !check_oprop(otmp, OPROP_NONE)
-		|| (rakuyo_prop(otmp) && u.uinsight >= 20)
-		|| (otmp->otyp == ISAMUSEI && u.uinsight >= 22)
-		|| (otmp->otyp == DISKOS && u.uinsight >= 10)
-		|| (otmp->otyp == PINCER_STAFF && u.uinsight >= 10)
+		|| (rakuyo_prop(otmp) && Insight >= 20)
+		|| (otmp->otyp == ISAMUSEI && Insight >= 22)
+		|| (otmp->otyp == DISKOS && Insight >= 10)
+		|| (otmp->otyp == PINCER_STAFF && Insight >= 10)
 	))
 		return otmp;
 	
@@ -2204,17 +2397,17 @@ register struct monst *mtmp;
 	for(otmp=mtmp->minvent; otmp; otmp = otmp->nobj) {
 		if (/* valid weapon */
 			(otmp->oclass == WEAPON_CLASS || is_weptool(otmp)
-			|| otmp->otyp == CHAIN || otmp->otyp == HEAVY_IRON_BALL
+			|| otmp->otyp == CHAIN || otmp->otyp == BALL
 			) &&
 			/* not already weided in main hand */
 			(otmp != MON_WEP(mtmp)) &&
 			/* an artifact or other special weapon*/
 			(otmp->oartifact
 				|| !check_oprop(otmp, OPROP_NONE)
-				|| (rakuyo_prop(otmp) && u.uinsight >= 20)
-				|| (otmp->otyp == ISAMUSEI && u.uinsight >= 22)
-				|| (otmp->otyp == DISKOS && u.uinsight >= 10)
-				|| (otmp->otyp == PINCER_STAFF && u.uinsight >= 10)
+				|| (rakuyo_prop(otmp) && Insight >= 20)
+				|| (otmp->otyp == ISAMUSEI && Insight >= 22)
+				|| (otmp->otyp == DISKOS && Insight >= 10)
+				|| (otmp->otyp == PINCER_STAFF && Insight >= 10)
 			) &&
 			/* never uncharged lightsabers */
             (!is_lightsaber(otmp) || otmp->age
@@ -2236,12 +2429,12 @@ register struct monst *mtmp;
 	}
 
 	if(is_giant(mtmp->data))	/* giants just love to use clubs */
-		Oselect(CLUB, W_SWAPWEP);
+		Oselect(CLUB, W_SWAPWEP, marilith);
 
 	for (i = 0; i < SIZE(hwep); i++) {
 	    if (hwep[i] == CORPSE && !(mtmp->misc_worn_check & W_ARMG))
 		continue;
-		Oselect(hwep[i], W_SWAPWEP);
+		Oselect(hwep[i], W_SWAPWEP, marilith);
 	}
 
 	/* failure */
@@ -2253,15 +2446,16 @@ select_pick(mtmp)
 struct monst *mtmp;
 {
 	struct obj *otmp, *obj;
+	boolean marilith = mon_attacktype(mtmp, AT_MARI) ? TRUE : FALSE; //Marilith arms don't suffer weight limits, so also don't impose them on the offhand arm.
 
 	/* preference to any artifacts (and checks for arti_digs, loop control must use a different variable than otmp, in case Oselect fails for any reason) */
 	for (obj = mtmp->minvent; obj; obj = obj->nobj){
 		if (is_pick(obj) && obj->oartifact)
-			Oselect(obj->otyp, W_WEP);
+			Oselect(obj->otyp, W_WEP, marilith);
 	}
 
-	Oselect(DWARVISH_MATTOCK, W_WEP);
-	Oselect(PICK_AXE, W_WEP);
+	Oselect(DWARVISH_MATTOCK, W_WEP, marilith);
+	Oselect(PICK_AXE, W_WEP, marilith);
 	/* failure */
 	return (struct obj *)0;
 }
@@ -2271,16 +2465,17 @@ select_axe(mtmp)
 struct monst *mtmp;
 {
 	struct obj *otmp, *obj;
+	boolean marilith = mon_attacktype(mtmp, AT_MARI) ? TRUE : FALSE; //Marilith arms don't suffer weight limits, so also don't impose them on the offhand arm.
 
 	/* preference to any artifacts (loop control must use a different variable than otmp, in case Oselect fails for any reason) */
 	for (obj = mtmp->minvent; obj; obj = obj->nobj){
 		if (is_axe(obj) && obj->oartifact)
-			Oselect(obj->otyp, W_WEP);
+			Oselect(obj->otyp, W_WEP, marilith);
 	}
 
-	Oselect(MOON_AXE, W_WEP);
-	Oselect(BATTLE_AXE, W_WEP);
-	Oselect(AXE, W_WEP);
+	Oselect(MOON_AXE, W_WEP, marilith);
+	Oselect(BATTLE_AXE, W_WEP, marilith);
+	Oselect(AXE, W_WEP, marilith);
 	/* failure */
 	return (struct obj *)0;
 }
@@ -2393,6 +2588,7 @@ register struct monst *mon;
 	xchar old_weapon_check = mon->weapon_check;
 	boolean time_taken = FALSE;
 	boolean toreturn = FALSE;
+	boolean marilith = mon_attacktype(mon, AT_MARI) ? TRUE : FALSE; //Marilith arms don't suffer weight limits, so also don't impose them on the offhand arm.
 
 	/* This case actually should never happen */
 	if (mon->weapon_check == NO_WEAPON_WANTED) return 0;
@@ -2508,13 +2704,13 @@ register struct monst *mon;
 					((tobj = m_carrying_charged(mon, HAND_BLASTER)) && tobj != MON_WEP(mon)) ||
 					((tobj = m_carrying_charged(mon, CARCOSAN_STING)) && tobj != MON_WEP(mon)) ||
 					/* bullets */
-					((m_carrying(mon, BULLET) || m_carrying(mon, SILVER_BULLET)) &&
-						(((tobj = oselect(mon, ASSAULT_RIFLE, W_SWAPWEP))) ||
-						((tobj = oselect(mon, SUBMACHINE_GUN, W_SWAPWEP))) ||
-						((tobj = oselect(mon, PISTOL, W_SWAPWEP))))) ||
+					((m_carrying(mon, BULLET) || m_carrying(mon, SILVER_BULLET) || m_carrying(mon, BLOOD_BULLET) || m_carrying(mon, BLOOD_SPEAR)) &&
+						(((tobj = oselect(mon, ASSAULT_RIFLE, W_SWAPWEP, marilith))) ||
+						((tobj = oselect(mon, SUBMACHINE_GUN, W_SWAPWEP, marilith))) ||
+						((tobj = oselect(mon, PISTOL, W_SWAPWEP, marilith))))) ||
 					/* shotgun shells */
 					((m_carrying(mon, SHOTGUN_SHELL)) &&
-						((tobj = oselect(mon, SHOTGUN, W_SWAPWEP))))
+						((tobj = oselect(mon, SHOTGUN, W_SWAPWEP, marilith))))
 					) {
 					sobj = tobj;
 				}
@@ -2784,19 +2980,25 @@ int atr;
 
 			if (is_rapier(otmp) || is_mercy_blade(otmp) || otmp->otyp == SET_OF_CROW_TALONS ||
 				(otmp->otyp == LIGHTSABER && !otmp->oartifact && otmp->ovar1_lightsaberHandle == 0))
-				mod = 0.5;
+				mod *= 0.5;
 
 			if (otmp->oartifact == ART_LIFEHUNT_SCYTHE || otmp->oartifact == ART_VELKA_S_RAPIER ||
 				otmp->oartifact == ART_FRIEDE_S_SCYTHE || otmp->oartifact == ART_CRUCIFIX_OF_THE_MAD_KING)
-				mod = 0.5;
+				mod *= 0.5;
 
-			if (check_oprop(otmp, OPROP_OCLTW) || (u.uinsight > 0 && check_oprop(otmp, OPROP_GSSDW)))
-				mod = 0.5;
+			if (check_oprop(otmp, OPROP_OCLTW) || (Insight > 0 && check_oprop(otmp, OPROP_GSSDW)))
+				mod *= 0.5;
+
+			if (otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD && otmp->lamplit)
+				mod *= 0.5; //2x->1x, 1x->.5x, etc.
 
 			return mod;
 		case A_DEX:
 			if (is_rakuyo(otmp))
 				return 2; // otherwise gets caught by rapiers
+
+			if (otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD && otmp->lamplit)
+				mod = 0.5;
 
 			if (otmp->oartifact == ART_LIFEHUNT_SCYTHE || otmp->oartifact == ART_YORSHKA_S_SPEAR ||
 				otmp->oartifact == ART_FRIEDE_S_SCYTHE)
@@ -2810,7 +3012,10 @@ int atr;
 		case A_CON:
 			return mod;
 		case A_INT:
-			if (u.uinsight > 0 && check_oprop(otmp, OPROP_GSSDW))
+			if (otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD && otmp->lamplit)
+				mod = 0.5;
+
+			if (Insight > 0 && check_oprop(otmp, OPROP_GSSDW))
 				mod += 1;
 
 			if (otmp->oartifact == ART_VELKA_S_RAPIER || otmp->oartifact == ART_FRIEDE_S_SCYTHE)
@@ -2824,6 +3029,9 @@ int atr;
 
 			return mod;
 		case A_WIS:
+			if (otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD && otmp->lamplit)
+				mod = 0.5;
+
 			if (otmp->oartifact == ART_YORSHKA_S_SPEAR)
 				mod += 1;
 
@@ -2838,6 +3046,9 @@ int atr;
 
 			return mod;
 		case A_CHA:
+			if (otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD && otmp->lamplit)
+				mod = 0.5;
+
 			if (check_oprop(otmp, OPROP_ELFLW))
 				mod += 0.5;
 			return mod;
@@ -2896,13 +3107,39 @@ struct monst *mtmp;
 
 	if (otmp){
 		damage_bon = (int)(strbon * atr_dbon(otmp, mtmp, A_STR));
-		for (int i = A_DEX; i < A_MAX; i++){
+		for (int i = A_INT; i < A_MAX; i++){
 			stat = acurr(i, (youagr) ? ((struct monst *) 0) : mtmp);
 			statbon = (stat == 25) ? 8 : ((stat-10)/2);
 			damage_bon += (int)(statbon * atr_dbon(otmp, mtmp, i));
 		}
-		if (youagr && otmp->oartifact == ART_IBITE_ARM){
-			if(bare_bonus > 0) damage_bon += ACURR(A_CHA)/5 + bare_bonus*2;
+		if(youagr){
+			if (otmp->oartifact == ART_IBITE_ARM){
+				if(bare_bonus > 0) damage_bon += ACURR(A_CHA)/5 + bare_bonus*2;
+			}
+			if (otmp->otyp == CHIKAGE && otmp->obj_material == HEMARGYOS){
+				damage_bon += u.uimpurity/2;
+			}
+		}
+		if(youagr && u.sealsActive&SEAL_OTIAX && (
+			otmp->otyp == LOCK_PICK ||
+			otmp->otyp == CREDIT_CARD ||
+			otmp->otyp == UNIVERSAL_KEY ||
+			otmp->otyp == SKELETON_KEY
+		)){
+			damage_bon += u.ulevel >= 21 ? 5 : u.ulevel >= 14 ? 2 : 1;
+		}
+		if(youagr && u.sealsActive&SEAL_PAIMON && otmp->oclass == SPBOOK_CLASS){
+			damage_bon += u.ulevel >= 21 ? 5 : u.ulevel >= 14 ? 2 : 1;
+		}
+		if(youagr && u.sealsActive&SEAL_JACK && (
+			otmp->otyp == OIL_LAMP ||
+			otmp->otyp == TORCH ||
+			otmp->otyp == SHADOWLANDER_S_TORCH ||
+			otmp->otyp == SUNROD
+		)
+			&& otmp->lamplit
+		){
+			damage_bon += u.ulevel >= 21 ? 5 : u.ulevel >= 14 ? 2 : 1;
 		}
 	} else {
 		damage_bon = strbon;
@@ -3077,7 +3314,7 @@ int skill;
 	P_NAME(skill));
 }
 
-const static struct skill_range {
+static const struct skill_range {
 	short first, last;
 	const char *name;
 } skill_ranges[] = {
@@ -3351,7 +3588,8 @@ int new_cap;
     if (skill < P_NUM_SKILLS && OLD_P_MAX_SKILL(skill) < new_cap) {
 		if(OLD_P_SKILL(skill) == P_ISRESTRICTED) OLD_P_SKILL(skill) = P_UNSKILLED;
 		OLD_P_MAX_SKILL(skill) = new_cap;
-		P_ADVANCE(skill) = practice_needed_to_advance(OLD_P_SKILL(skill)-1);
+		P_ADVANCE(skill) = max(practice_needed_to_advance(OLD_P_SKILL(skill)-1), P_ADVANCE(skill));
+		P_ADVANCE(skill) = min(practice_needed_to_advance(OLD_P_SKILL(skill)), P_ADVANCE(skill));
     }
 }
 
@@ -3523,7 +3761,7 @@ struct obj *obj;
 		/* Not using a weapon */
 		return (P_BARE_HANDED_COMBAT);
 #ifdef CONVICT
-    if ((obj->otyp == HEAVY_IRON_BALL) && (Role_if(PM_CONVICT) || u.sealsActive&SEAL_AHAZU))
+    if ((obj->otyp == BALL) && (Role_if(PM_CONVICT) || u.sealsActive&SEAL_AHAZU))
         return objects[obj->otyp].oc_skill;
 #endif /* CONVICT */
     if ((obj->otyp == CHAIN) && (Role_if(PM_CONVICT) || u.sealsActive&SEAL_AHAZU))
@@ -3559,6 +3797,8 @@ struct obj *obj;
 		CHECK_ALTERNATE_SKILL(P_LONG_SWORD)
 		CHECK_ALTERNATE_SKILL(P_BROAD_SWORD)
 		CHECK_ALTERNATE_SKILL(P_SHORT_SWORD)
+		if(artinstance[ART_SKY_REFLECTED].ZerthOtyp)
+			CHECK_ALTERNATE_SKILL(artinstance[ART_SKY_REFLECTED].ZerthOtyp)
 	}
 	else if(obj->oartifact == ART_TORCH_OF_ORIGINS){
 		type = P_CLUB;
@@ -3604,6 +3844,15 @@ struct obj *obj;
 	else if(obj->otyp == DISKOS){
 		if(!uarms && !u.twoweap)
 			CHECK_ALTERNATE_SKILL(P_POLEARMS)
+	}
+	else if(obj->otyp == SHANTA_PATA){
+		CHECK_ALTERNATE_SKILL(P_LONG_SWORD)
+	}
+	else if(obj->otyp == DEMON_CLAW){
+		CHECK_ALTERNATE_SKILL(P_AXE)
+	}
+	else if(obj->otyp == DEVIL_FIST){
+		CHECK_ALTERNATE_SKILL(P_AXE)
 	}
 	else if(obj->otyp >= LUCKSTONE && obj->otyp <= ROCK && obj->ovar1_projectileSkill){
 		type = (int)obj->ovar1_projectileSkill;
@@ -3796,7 +4045,7 @@ int wep_type;
 	if(weapon && is_lightsaber(weapon) && litsaber(weapon) && uwep == weapon){
 		validateLightsaberForm();
 		if(activeFightingForm(FFORM_MAKASHI)){
-			if(wep_type != P_SABER){
+			if(!is_makashi_saber(weapon)){
 				if(makashiwarn) pline("Your %s seem%s very unwieldy.",xname(uwep),uwep->quan == 1 ? "s" : "");
 				makashiwarn = FALSE;
 				bonus += -20;
@@ -4118,7 +4367,7 @@ int wep_type;
 			// //no bonus
 		// }
 		if(activeFightingForm(FFORM_MAKASHI)){
-			if(!uarms && !u.twoweap && wep_type == P_SABER) switch(min(P_SKILL(P_MAKASHI), P_SKILL(wep_type))){
+			if(!uarms && !u.twoweap && is_makashi_saber(weapon)) switch(min(P_SKILL(P_MAKASHI), P_SKILL(wep_type))){
 				case P_BASIC:
 					bonus += 2 + ((ACURR(A_DEX)+3)/3 - 4);
 				break;
@@ -4326,6 +4575,15 @@ const struct def_skill *class_skill;
 	    skill = weapon_type(obj);
 	    if (skill != P_NONE)
 			OLD_P_SKILL(skill) = Role_if(PM_PIRATE) ? P_SKILLED : P_BASIC;
+
+		if (obj->otyp == CHURCH_HAMMER)
+			OLD_P_SKILL(P_SHORT_SWORD) = Role_if(PM_PIRATE) ? P_SKILLED : P_BASIC;
+		else if (obj->otyp == CHURCH_BLADE)
+			OLD_P_SKILL(P_LONG_SWORD) = Role_if(PM_PIRATE) ? P_SKILLED : P_BASIC;
+		else if (obj->otyp == CANE)
+			OLD_P_SKILL(P_WHIP) = Role_if(PM_PIRATE) ? P_SKILLED : P_BASIC;
+		else if (obj->otyp == SOLDIER_S_RAPIER)
+			OLD_P_SKILL(P_FIREARM) = Role_if(PM_PIRATE) ? P_SKILLED : P_BASIC;
 	}
 
 	/* set skills for magic */

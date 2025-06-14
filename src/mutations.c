@@ -9,6 +9,7 @@ const int shubbie_mutation_list[] = {ABHORRENT_SPORE,
 						 SHIFTING_MIND,
 						 SHUB_CLAWS,
 						 MIND_STEALER,
+						 SHUB_TENTACLES,
 						 0
 						};
 
@@ -25,7 +26,7 @@ const struct mutationtype mutationtypes[] =
 	{ ABHORRENT_SPORE, -1, "abhorrent spore", "An abhorrent spore has taken root on your body." },
 	{ CRAWLING_FLESH, -1, "crawling flesh", "Your flesh crawls, closing wounds with horrid swiftness." },
 	{ SHUB_RADIANCE, -1, "illumination of Shub-Nugganoth", "HER light shines in your eyes!" },
-	{ TENDRIL_HAIR, -1, "hairlike tendrils", "Your body is covered with hairlike tentrils." },
+	{ TENDRIL_HAIR, -1, "hairlike tendrils", "Your body is covered with hairlike tendrils." },
 	{ SHIFTING_MIND, -1, "shifting mind", "Your mind has shifted."},
 	{ SHUB_CLAWS, HAND, "pointed claws", "Your fingernails can fuse into your fingers and transform into long claws."},
 	{ MIND_STEALER, TONGUE, "mind-stealing tongue", "Your long thin tongue can slip into others' thoughts."},
@@ -35,6 +36,7 @@ const struct mutationtype mutationtypes[] =
 	{ TWIN_DREAMS, -1, "mind blasts", "You emit deadly dreams."},
 	// { BY_THE_SMELL, -1, "bladder of Yog-Sothoth", "A gas-filled bladder swells then vanishes. An unholy stench fills the air!"},
 	{ TWIN_SAVE, -1, "empathic link", "You feel a strong connection to your twin."},
+	{ SHUB_TENTACLES, -1, "tentacle valves", "You have valves in your skull, allowing HER to reach through your mind."},
 	{ 0 },
 };
 

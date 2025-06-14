@@ -640,12 +640,18 @@ MONSTER: random, random, random
 ROOM: "ordinary" , random, random, random, random
 OBJECT: random, random, random
 OBJECT: random,random,random
-MONSTER: random, random, random
-MONSTER: random, random, random
+OBJECT: random, random, random
+OBJECT: random,random,random
+OBJECT: random, random, random
+OBJECT: random,random,random
+MONSTER: 'x', "man-fly", random, asleep
+MONSTER: 'x', "man-fly", random, asleep
+MONSTER: 'x', "man-fly", random, asleep
+MONSTER: 'x', "man-fly", random, asleep
 
 ROOM: "ordinary" , random, random, random, random
 STAIR: random, down
-MONSTER: random, random, random
+MONSTER: 'x', "man-fly", random, asleep
 MONSTER: random, random, random
 MONSTER: random, random, random
 

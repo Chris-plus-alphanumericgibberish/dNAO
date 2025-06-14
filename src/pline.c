@@ -5,9 +5,7 @@
 #define NEED_VARARGS /* Uses ... */	/* comment line for pre-compiled headers */
 #include <math.h>
 #include "hack.h"
-
-#ifdef WIZARD
-#endif
+#include "hashmap.h"
 
 #ifdef OVLB
 
@@ -19,7 +17,6 @@ static char *FDECL(You_buf, (int));
 char msgs[DUMPMSGS][BUFSZ];
 int lastmsg = -1;
 #endif
-
 
 void
 msgpline_add(typ, pattern)
@@ -85,8 +82,6 @@ msgpline_type(msg)
     }
     return MSGTYP_NORMAL;
 }
-
-
 
 /*VARARGS1*/
 /* Note that these declarations rely on knowledge of the internals
@@ -660,6 +655,7 @@ ustatusline()
 	}
 	if (Stoned)		Strcat(info, ", solidifying");
 	if (Golded)		Strcat(info, ", aurelifying");
+	if (Golded)		Strcat(info, ", salifying");
 	if (Slimed)		Strcat(info, ", becoming slimy");
 	if (BloodDrown)		Strcat(info, ", drowning");
 	if (FrozenAir)		Strcat(info, ", can't breath");

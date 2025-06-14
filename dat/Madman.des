@@ -124,8 +124,8 @@ OBJECT[75%]: '_', "chain", random
 OBJECT[75%]: '_', "chain", random
 OBJECT[75%]: '_', "chain", random
 OBJECT[75%]: '_', "chain", random
-OBJECT[50%]: '0', "heavy iron ball", random
-OBJECT[50%]: '0', "heavy iron ball", random
+OBJECT[50%]: '0', "ball", random
+OBJECT[50%]: '0', "ball", random
 # Non diggable walls
 NON_DIGGABLE:(25,00,43,18)
 
@@ -234,8 +234,8 @@ OBJECT[75%]: '_', "chain", random
 OBJECT[75%]: '_', "chain", random
 OBJECT[75%]: '_', "chain", random
 OBJECT[75%]: '_', "chain", random
-OBJECT[50%]: '0', "heavy iron ball", random
-OBJECT[50%]: '0', "heavy iron ball", random
+OBJECT[50%]: '0', "ball", random
+OBJECT[50%]: '0', "ball", random
 
 DOOR:locked,(28,02)
 DOOR:locked,(31,02)
@@ -636,8 +636,8 @@ OBJECT[75%]: '_', "chain", random
 OBJECT[75%]: '_', "chain", random
 OBJECT[75%]: '_', "chain", random
 OBJECT[75%]: '_', "chain", random
-OBJECT[50%]: '0', "heavy iron ball", random
-OBJECT[50%]: '0', "heavy iron ball", random
+OBJECT[50%]: '0', "ball", random
+OBJECT[50%]: '0', "ball", random
 
 DOOR:locked,(27,02)
 DOOR:locked,(27,04)

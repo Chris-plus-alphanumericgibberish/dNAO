@@ -8,6 +8,7 @@
 #include "dgn_file.h"
 #include "dlb.h"
 #include "display.h"
+#include "mapseen.h"
 
 #ifdef OVL1
 
@@ -1529,7 +1530,7 @@ d_level *lev;
 		|| Role_if(PM_PIRATE) || Role_if(PM_PRIEST) || Role_if(PM_SAMURAI)
 		|| Role_if(PM_VALKYRIE) || Role_if(PM_WIZARD)){
 			return lev->dlevel <= qlocate_level.dlevel;
-		} else if(Role_if(PM_HEALER) || Role_if(PM_NOBLEMAN)){
+		} else if(Role_if(PM_HEALER) || Role_if(PM_NOBLEMAN) || Role_if(PM_UNDEAD_HUNTER)){
 			return TRUE;
 		} else if(Role_if(PM_RANGER)){
 			return lev->dlevel < qlocate_level.dlevel;
@@ -1926,6 +1927,12 @@ level_difficulty()
 	return max(1, dpth);
 }
 
+void
+name_by_lev(char *buf, d_level *lev){
+	Sprintf(buf, "level %d of %s", lev->dlevel, dungeons[lev->dnum].dname);
+}
+
+
 /* Take one word and try to match it to a level.
  * Recognized levels are as shown by print_dungeon().
  */
@@ -2313,6 +2320,34 @@ donamelevel()
 	return MOVE_CANCELLED;
 }
 
+boolean
+check_msgod(mapseen *mptr, int godnum)
+{
+	if(godnum >= MAX_GOD || godnum < 1){
+		impossible("Attempting to check god number %d in mapseen?", godnum);
+		return FALSE;
+	}
+	return !!(mptr->feat.msgods[(godnum-1)/16] & (0x1L << ((godnum-1)%16)));
+}
+
+void
+add_msgod(mapseen *mptr, int godnum)
+{
+	if(godnum >= MAX_GOD || godnum < 1){
+		impossible("Attempting to set god number %d in mapseen?", godnum);
+	}
+	mptr->feat.msgods[(godnum-1)/16] |= (0x1L << ((godnum-1)%16));
+}
+
+int
+count_msgods(mapseen *mptr)
+{
+	int count = 0;
+	for (int i = 0; i < MSGODS_ARRAY_SIZE; i++)
+		count += stdc_count_ones(mptr->feat.msgods[i]);
+	return count;
+}
+
 /* find the particular mapseen object in the chain */
 /* may return 0 */
 STATIC_OVL mapseen *
@@ -2638,11 +2673,7 @@ recalc_mapseen()
 				mptr->feat.nsink = min(mptr->feat.nsink + 1, 3);
 				break;
 			case ALTAR:
-				if (!mptr->feat.naltar)
-					mptr->feat.msalign = Align2msa(a_align(x,y));
-				else if (mptr->feat.msalign != Align2msa(a_align(x,y)))
-					mptr->feat.msalign = MSA_MULTI;
-						
+				add_msgod(mptr, god_at_altar(x,y));
 				mptr->feat.naltar = min(mptr->feat.naltar + 1, 3);
 				break;
 			}
@@ -2945,9 +2976,14 @@ boolean printdun;
 			ADDNTOBUF("altar", mptr->feat.naltar)
 		else
 			ADDNTOBUF("temple", mptr->feat.ntemple)
-		/* and print out altar's god if they are all to your god */
-		if ((mptr->feat.ntemple || mptr->feat.naltar) && (Msa2align(mptr->feat.msalign) == u.ualign.type))
-			Sprintf(eos(buf), " to %s", align_gname(u.ualign.type));
+		/* and print out altar's god if they are all to one god */
+		if ((mptr->feat.ntemple || mptr->feat.naltar) && count_msgods(mptr) == 1) {
+			int godnum;
+			for (godnum = 1; godnum < MAX_GOD; godnum++)
+				if (check_msgod(mptr, godnum))
+					break;
+			Sprintf(eos(buf), " to %s", godname(godnum));
+		}
 
 		ADDNTOBUF("fountain", mptr->feat.nfount)
 		ADDNTOBUF("forge", mptr->feat.nforge)

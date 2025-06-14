@@ -549,7 +549,8 @@ boolean allow_drag;
 		}
 	    }
 	}
-	u.utrap = 0;
+	if(u.utraptype != TT_SALIVA)
+		u.utrap = 0;
 	u.ustuck = 0;
 	u.ux0 = u.ux;
 	u.uy0 = u.uy;
@@ -765,7 +766,7 @@ dotele()
 	struct trap *trap;
 
 	trap = t_at(u.ux, u.uy);
-	if (trap && (!trap->tseen || trap->ttyp != TELEP_TRAP))
+	if (trap && (!trap->tseen || (trap->ttyp != TELEP_TRAP && trap->ttyp != LEVEL_TELEP)))
 		trap = 0;
 
 	if (trap) {
@@ -778,9 +779,14 @@ dotele()
 				newsym(u.ux, u.uy);
 			}
 		}
-		if (trap)
+		if (trap){
 			You("%s onto the teleportation trap.",
 			    locomotion(&youmonst, "jump"));
+			if(trap->ttyp == LEVEL_TELEP){
+				level_tele_trap(trap, TRUE);
+				return MOVE_STANDARD;
+			}
+		}
 	}
 	if (!trap) {
 	    boolean castit = FALSE;
@@ -948,7 +954,7 @@ level_tele()
 	    if (newlev == 0 && !force_dest) {
 			if (trycnt >= 10)
 				goto random_levtport;
-			if (ynq("Go to Nowhere.  Are you sure?") != 'y') return FALSE;
+			if (yesno("Go to Nowhere.  Are you sure?", iflags.paranoid_quit) != 'y') return FALSE;
 			You("%s in agony as your body begins to warp...",
 				is_silent(youracedata) ? "writhe" : "scream");
 			display_nhwindow(WIN_MESSAGE, FALSE);
@@ -1064,6 +1070,7 @@ level_tele()
        		goto random_levtport;
 	
 	if (newlev < 0 && dungeons[u.uz.dnum].depth_start-1 > newlev && !force_dest) {
+		if (yesno("There will be no return. Are you sure?", iflags.paranoid_quit) != 'y') return FALSE;
 		if (*u.ushops0) {
 		    /* take unpaid inventory items off of shop bills */
 		    in_mklev = TRUE;	/* suppress map update */
@@ -1259,7 +1266,6 @@ register struct trap *ttmp;
 	    You_feel("dizzy for a moment, but nothing happens...");
 	    return;
 	}
-	
 	//The exit portal tries to return fem half dragon nobles to where they entered the quest.
 	if(Role_if(PM_NOBLEMAN) && Race_if(PM_HALF_DRAGON) && flags.initgend && In_quest(&u.uz)){
 	    int i;
@@ -1285,6 +1291,52 @@ register struct trap *ttmp;
 				  (char *)0, 0, 0);
 	} else {
 		target_level = ttmp->dst;
+		if(Role_if(PM_UNDEAD_HUNTER)
+			&& In_endgame(&u.uz)
+			&& Is_astralevel(&target_level)
+			&& quest_status.moon_close
+		){
+			if(!philosophy_index(u.ualign.god)){
+				pline("A blinding wall of silver-green light fills your consciousness, but you feel something beyond the wall pull you through.");
+			}
+			else if(research_incomplete()){
+				char buf[BUFSZ];
+				You("feel dizzy for a moment, and a blinding wall of silver-green light fills your consciousness.");
+				You_feel("strangely peaceful, as though you were a rock skipping along the surface of a pond.");
+				pline("You materialize high above the clouds...");
+				//The game appears unwinnable (The Player could arrange to fail this check yet still have the ability to make the game winnable, but tough luck for them in that case)
+				if(Levitation){
+					pline("...and float gently down to earth.");
+				}
+				else if(Flying){
+					You("fly down to the ground.");
+				}
+				else {
+					pline("Unfortunately, you don't know how to fly.");
+					You("plummet a few thousand feet to your death.");
+					Sprintf(buf,
+					  "was blocked from entering the heavenly temple and fell to %s death",
+						uhis());
+					killer = buf;
+					killer_format = NO_KILLER_PREFIX;
+					done(DIED);
+					You("find yourself back on the surface.");
+				}
+				done(ESCAPED); //On surface :(
+			}
+			else {
+				pline("A blinding wall of silver-green light fills your consciousness.");
+				if(((u.ualign.type == A_LAWFUL && known_glyph(ROTTEN_EYES)) || active_glyph(ROTTEN_EYES)) && reanimation_count() >= 6){
+					pline("...Actually, it's more of a maze, and your many eyes can see the way through!");
+				}
+				else if(((u.ualign.type == A_CHAOTIC && known_glyph(DEFILEMENT)) || active_glyph(DEFILEMENT)) && defile_count() >= 6){
+					pline("The wall doesn't seem to notice you, or impede your progress in any way.");
+				}
+				else if(((u.ualign.type == A_NEUTRAL && known_glyph(LUMEN)) || active_glyph(LUMEN)) && parasite_count() >= 6){
+					pline("Your parasites lift their voices in song, and the wall opens to allow you through!");
+				}
+			}
+		}
 		schedule_goto(&target_level, FALSE, FALSE, TRUE,
 				  "You feel dizzy for a moment, but the sensation passes.",
 				  (char *)0, 0, 0);
@@ -1332,16 +1384,15 @@ struct trap *trap;
 }
 
 void
-level_tele_trap(trap)
-struct trap *trap;
+level_tele_trap(struct trap *trap, boolean force)
 {
 	You("%s onto a level teleport trap!",
 		      Levitation ? (const char *)"float" :
 				  locomotion(&youmonst, "step"));
-	if (Antimagic) {
+	if (Antimagic && !force) {
 	    shieldeff(u.ux, u.uy);
 	}
-	if (Antimagic || In_endgame(&u.uz)) {
+	if ((Antimagic && !force) || In_endgame(&u.uz)) {
 	    You_feel("a wrenching sensation.");
 	    return;
 	}

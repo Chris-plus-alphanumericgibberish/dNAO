@@ -58,7 +58,8 @@ struct mutationtype {
 #define	TWIN_DREAMS		11
 #define	BY_THE_SMELL		12
 #define	TWIN_SAVE		13
-#define	LAST_MUTATION		TWIN_SAVE
+#define	SHUB_TENTACLES		14
+#define	LAST_MUTATION		SHUB_TENTACLES
 
 #define MUTATION_LISTSIZE	((LAST_MUTATION-1)/32 + 1)
 

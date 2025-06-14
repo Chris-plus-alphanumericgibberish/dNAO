@@ -31,6 +31,8 @@ boolean recursed;
 
 	return (boolean)(((sptr = Is_special(lev)) != 0 && !sptr->boneid)
 		|| !dungeons[lev->dnum].boneid
+			/* no bones in the true madman home level */
+		|| (Role_if(PM_MADMAN) && qstart_level.dnum == lev->dnum && qlocate_level.dlevel == (lev->dlevel+1))
 			/* no bones in the branch level TO the Quest (because this portal can be voided) */
 		|| (!recursed && (bptr = Is_branchlev(lev)) && In_quest(branchlev_other_end(bptr, lev)))
 			/* no bones in a branch level if the other end is nobones */
@@ -278,6 +280,7 @@ int y;
 
 		otmp->owornmask = 0;
 		if(u.ugrave_arise == (NON_PM - 3)) set_material(otmp, GOLD);
+		if(u.ugrave_arise == (NON_PM - 4)) set_material(otmp, SALT);
 		/* lamps don't go out when dropped */
 		if ((cont || artifact_light(otmp)) && obj_is_burning(otmp))
 		    end_burn(otmp, TRUE);	/* smother in statue */
@@ -361,6 +364,13 @@ int y;
 		} else if(u.thoughts & SIGHT){
 			u.thoughts &= ~SIGHT;
 			otmp = mksobj(ORRERY_GLYPH, MKOBJ_NOINIT);
+		//Philosophy runes do not death-drop
+		} else if(u.thoughts & DEFILEMENT){
+			u.thoughts &= ~DEFILEMENT;
+		} else if(u.thoughts & LUMEN){
+			u.thoughts &= ~LUMEN;
+		} else if(u.thoughts & ROTTEN_EYES){
+			u.thoughts &= ~ROTTEN_EYES;
 		} else {
 			pline("Can't find glyph!");
 		}
@@ -521,6 +531,16 @@ struct obj *corpse;
 		if (!otmp) return;	/* couldn't make statue */
 		mtmp = (struct monst *)0;
 	} else if (u.ugrave_arise == (NON_PM - 4)) {
+		struct obj *otmp;
+
+		/* embed your possessions in your statue */
+		otmp = mk_named_object(STATUE, &mons[u.umonnum],
+				       x, y, plname);
+		set_material_gm(otmp, SALT);
+		drop_upon_death((struct monst *)0, otmp, x, y);
+		if (!otmp) return;	/* couldn't make statue */
+		mtmp = (struct monst *)0;
+	} else if (u.ugrave_arise == (NON_PM - 5)) {
 		struct obj *otmp;
 
 		/* embed your possessions in your statue */

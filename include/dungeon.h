@@ -12,7 +12,6 @@ typedef struct d_flags {	/* dungeon/level type flags */
 	Bitfield(rogue_like, 1); /* is this an old-fashioned presentation? */
 	Bitfield(align, 3);	/* dungeon alignment. */
 	Bitfield(raise, 3);	/* corpse resurection type (current max 8) */
-	Bitfield(mirror, 1);	/* has at least one mirror on the ground */
 } d_flags;
 
 typedef struct d_level {	/* basic dungeon level element */
@@ -291,86 +290,5 @@ struct linfo {
 	long	size;
 #endif /* MFLOPPY */
 };
-
-/* types and structures for dungeon map recording
- *
- * It is designed to eliminate the need for an external notes file for some of
- * the more mundane dungeon elements.  "Where was the last altar I passed?" etc...
- * Presumably the character can remember this sort of thing even if, months
- * later in real time picking up an old save game, I can't.
- *
- * To be consistent, one can assume that this map is in the player's mind and
- * has no physical correspondence (eliminating illiteracy/blind/hands/hands free
- * concerns.) Therefore, this map is not exaustive nor detailed ("some fountains").
- * This makes it also subject to player conditions (amnesia).
- */
-
-/* Because clearly Nethack needs more ways to specify alignment */
-#define Align2msa(x) ((x) == A_LAWFUL ? MSA_LAWFUL : \
-					  (x) == A_NEUTRAL ? MSA_NEUTRAL : \
-					  (x) == A_CHAOTIC ? MSA_CHAOTIC : \
-					  (x) == A_NONE ? MSA_UNALI : \
-					  (x) == A_VOID ? MSA_VOID : \
-					  MSA_MULTI)
-#define Msa2align(x) ((x) == MSA_LAWFUL ? A_LAWFUL : \
-					  (x) == MSA_NEUTRAL ? A_NEUTRAL : \
-					  (x) == MSA_CHAOTIC ? A_CHAOTIC : \
-					  (x) == MSA_UNALI ? A_NONE : \
-					  (x) == MSA_VOID ? A_VOID : \
-					  A_NONE) /* A_NONE is technically bad and overlaps with MSA_UNALI */
-
-#define MSA_MULTI	0  /* multiple alignments */
-#define MSA_LAWFUL  1
-#define MSA_NEUTRAL 2
-#define MSA_CHAOTIC 3
-#define MSA_UNALI 	4
-#define MSA_VOID 	5
-
-typedef struct mapseen_feat {
-	/* feature knowledge that must be calculated from levl array */
-	Bitfield(nfount, 2);
-	Bitfield(nforge, 2);
-	Bitfield(nsink, 2);
-	Bitfield(naltar, 2);
-	Bitfield(msalign, 3); /* corresponds to MSA_* above */
-	Bitfield(ngrave, 2);
-	Bitfield(nthrone, 2);
-	Bitfield(ntree, 2);
-	/* water, lava, ice are too verbose so commented out for now */
-	/*
-	Bitfield(water, 1);
-	Bitfield(lava, 1);
-	Bitfield(ice, 1);
-	*/
-
-	/* calculated from rooms array */
-	Bitfield(nshop, 2);
-	Bitfield(nmorgue, 2);
-	Bitfield(ntemple, 2);
-	Bitfield(shoptype, 5);
-
-	Bitfield(forgot, 1); /* player has forgotten about this level? */
-} mapseen_feat;
-
-/* for mapseen->rooms */
-#define MSR_SEEN		1
-
-/* what the player knows about a single dungeon level */
-/* initialized in mklev() */
-typedef struct mapseen  {
-	struct mapseen *next; /* next map in the chain */
-	branch *br; /* knows about branch via taking it in goto_level */
-	d_level lev; /* corresponding dungeon level */
-
-	mapseen_feat feat;
-
-	/* custom naming */
-	char *custom;
-	unsigned custom_lth;
-
-	/* maybe this should just be in struct mkroom? */
-	schar rooms[(MAXNROFROOMS+1)*2];
-} mapseen;
-
 
 #endif /* DUNGEON_H */

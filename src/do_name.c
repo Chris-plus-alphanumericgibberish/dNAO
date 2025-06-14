@@ -456,7 +456,7 @@ do_mname()
 
 static NEARDATA const char callable[] = {
 	SCROLL_CLASS, TILE_CLASS, POTION_CLASS, WAND_CLASS, RING_CLASS, AMULET_CLASS,
-	GEM_CLASS, SPBOOK_CLASS, ARMOR_CLASS, TOOL_CLASS, 0 };
+	GEM_CLASS, SPBOOK_CLASS, ARMOR_CLASS, BELT_CLASS, TOOL_CLASS, 0 };
 
 boolean
 objtyp_is_callable(i)
@@ -616,7 +616,7 @@ const char *name;
 	
     if(!strcmp((&artilist[ART_SCALPEL_OF_LIFE_AND_DEATH])->name,name) &&
        obj && obj->otyp == SCALPEL){
-      obj->ovar1_lifeDeath = COMMAND_DEATH;
+      obj->ovara_lifeDeath = COMMAND_DEATH;
     }
     if(((!strcmp((&artilist[ART_FIGURINE_OF_GALATEA])->name,name)) || (!strcmp((&artilist[ART_FIGURINE_OF_PYGMALION])->name,name))) &&
        obj && obj->otyp == FIGURINE){
@@ -807,7 +807,7 @@ const char *name;
 	    if (obj == uswapwep) untwoweapon();
 	    /* activate warning if you've just named your weapon "Sting" */
 	    if (obj == uwep) set_artifact_intrinsic(obj, TRUE, W_WEP);
-	    if (obj == uwep && obj->oartifact == ART_KUSANAGI_NO_TSURUGI){
+	    if (obj == uwep && obj->oartifact == ART_KUSANAGI_NO_TSURUGI && !(u.ulevel >= 22 || u.uhave.amulet)){
 	    	setuwep((struct obj *) 0);
 	    	pline("You are not yet worthy of wielding this sword, but you may bear it until you are ready.");
 	    }
@@ -824,6 +824,7 @@ const char *name;
 		}
 	}
 	if (carried(obj)) update_inventory();
+	fix_object(obj);
 	return obj;
 }
 
@@ -1010,6 +1011,8 @@ boolean full;
 		else if (full && template == CORDYCEPS)			Sprintf(buf2, "%s's sporulating corpse", buf);
 		else if (full && template == PSURLON)			Sprintf(buf2, "%s the finger", buf);
 		else if (full && template == CONSTELLATION)		Sprintf(buf2, "%s constellation", buf);
+		else if (full && template == SWOLLEN_TEMPLATE)	Sprintf(buf2, "%s the swollen", buf);
+		else if (full && template == BLOOD_MON)	Sprintf(buf2, "%s the bloody", buf);
 		else											Strcpy(buf2, buf);
 	}
 	else {
@@ -1041,6 +1044,8 @@ boolean full;
 		else if (full && template == CORDYCEPS)			Sprintf(buf2, "%s cordyceps", buf);
 		else if (full && template == PSURLON)			Sprintf(buf2, "%s finger", buf);
 		else if (full && template == CONSTELLATION)		Sprintf(buf2, "%s constellation", buf);
+		else if (full && template == SWOLLEN_TEMPLATE)	Sprintf(buf2, "swollen %s", buf);
+		else if (full && template == BLOOD_MON)	Sprintf(buf2, "blood %s", buf);
 		else											Strcpy(buf2, buf);
 	}
 
@@ -1241,8 +1246,13 @@ boolean called;
 	/* Put the adjectives in the buffer */
 	if (adjective)
 	    Strcat(strcat(buf, adjective), " ");
-	if (get_mx(mtmp, MX_ESUM))
-		Strcat(buf, "summoned ");
+	if (get_mx(mtmp, MX_ESUM)){
+		if(has_template(mtmp, SPARK_SKELETON)){
+			Strcat(buf, "reanimated ");
+		}
+		else
+			Strcat(buf, "summoned ");
+	}
 	if (do_invis)
 	    Strcat(buf, "invisible ");
 #ifdef STEED

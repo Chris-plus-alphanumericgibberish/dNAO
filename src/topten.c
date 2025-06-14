@@ -94,9 +94,10 @@ STATIC_DCL void FDECL(nsb_unmung_line,(char*));
 /* must fit with end.c; used in rip.c */
 NEARDATA const char * const killed_by_prefix[] = {
 	"killed by ", "betrayed by ", "choked on ", "poisoned by ", "died of ", "drowned in ",
-	"burned by ", "dissolved in ", "crushed to death by ", "petrified by ",
-	"turned to slime by ", "exploded by ", "died by ", "disintegrated by ", "killed by ", 
-	"", "", "", "", ""
+	"burned by ", "dissolved in ", "crushed to death by ", "petrified by ", "turned to gold by ",
+	"turned to salt by ", "vitrified by ", "turned to slime by ", "exploded by ", "died by ",
+	"disintegrated by ", "killed by ", 	"" /*APOCALYPSE*/, "" /*PANICKED*/, "" /*TRICKED*/,
+	"" /*QUIT*/, "" /*ESCAPED*/, ""  /*ASCENDED*/
 };
 
 static winid toptenwin = WIN_ERR;
@@ -841,9 +842,14 @@ boolean so;
 		*bp = (t1->deathdnum == astral_level.dnum) ? '\0' : ' ';
 	    second_line = FALSE;
 	} else if (!strncmp("ascended", t1->death, 8)) {
-	    Sprintf(eos(linebuf), "ascended to demigod%s-hood",
-		    (t1->plgend[0] == 'F') ? "dess" : "");
-	    second_line = FALSE;
+		if (!strcmp("ascended", t1->death)) {
+			Sprintf(eos(linebuf), "ascended to demigod%s-hood",
+				(t1->plgend[0] == 'F') ? "dess" : "");
+		}
+		else {
+			Sprintf(eos(linebuf), "%s", t1->death);
+		}
+		second_line = FALSE;
 	} else {
 	    if (!strncmp(t1->death, "quit", 4)) {
 		Strcat(linebuf, "quit");
@@ -1130,6 +1136,8 @@ char *achieveXbuff;
 	CHECK_ACHIEVE(NOB_QUEST,"base_noble_quest")
 	CHECK_ACHIEVE(MAD_QUEST,"madman_quest")
 	CHECK_ACHIEVE(MONK_QUEST,"monk_quest")
+	CHECK_ACHIEVE(UH_QUEST,"undead_hunter_quest")
+	CHECK_ACHIEVE(UH_ASC,"undead_hunter_ascension")
 	CHECK_ACHIEVE(HDR_NOB_QUEST,"hedrow_noble_quest")
 	CHECK_ACHIEVE(HDR_SHR_QUEST,"hedrow_shared_quest")
 	CHECK_ACHIEVE(DRO_NOB_QUEST,"drow_noble_quest")

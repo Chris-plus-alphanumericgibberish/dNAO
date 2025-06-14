@@ -36,7 +36,10 @@ struct thoughtglyph {
 #define	WRITHE							0x0000000000040000L
 #define	RADIANCE						0x0000000000080000L
 #define	BEASTS_EMBRACE					0x0000000000100000L
-#define	SIGHT							0x0000000000200000L
+#define	DEFILEMENT						0x0000000000200000L
+#define	LUMEN							0x0000000000400000L
+#define	ROTTEN_EYES						0x0000000000800000L
+#define	SIGHT							0x0000000001000000L
 
 #define FIRST_GLYPH	ANTI_CLOCKWISE_METAMORPHOSIS_G
 static struct thoughtglyph thoughtglyphs[] =
@@ -104,8 +107,17 @@ static struct thoughtglyph thoughtglyphs[] =
 	{ BEAST_S_EMBRACE_GLYPH, NON_PM, BEASTS_EMBRACE,
 	0, 99, "A bestial figure takes refuge inside you." },
 
+	{ DEFILEMENT_GLYPH, NON_PM, DEFILEMENT,
+	27, 100, "A twisted bloodless hand rises from the mire of your soul." },
+
+	{ WEED_GLYPH, NON_PM, LUMEN,
+	27, 100, "Tightly packed florets burst from your skull." },
+
+	{ VACUOUS_GLYPH, NON_PM, ROTTEN_EYES,
+	27, 100, "Great jolts of lightning rot your brain into milky mushy eyes." },
+
 	{ ORRERY_GLYPH, PM_GROTESQUE_PEEPER, SIGHT,
-	16, 100, "Your brain blinks open. There is an eye within an eye within an eye within an...." }
+	16, 100, "Your brain blinks open. There is an eye within an eye within an eye within an...." },
 };
 #define LAST_GLYPH	ORRERY_GLYPH
 

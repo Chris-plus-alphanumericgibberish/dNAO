@@ -97,6 +97,8 @@ enum {
 	OPROP_BYAK,
 	OPROP_MRCYW,
 	OPROP_RLYHW,
+	OPROP_SMITHU,
+	OPROP_ANTAW,
 	MAX_OPROP
 };
 
@@ -225,6 +227,8 @@ struct obj {
 	Bitfield(forceconf,1);	/* when set on a scroll, forces the confusion effect. Meant for use with pseudo objects, isn't checked while merging */
 	Bitfield(ohaluengr,1);	/* engraving on item isn't a "real" ward */
 	/* 15 free bits in this field, I think -CM */
+	Bitfield(researched,1);	/* already disected */
+	Bitfield(blood_smithed,1);	/* improved by blood smithing */
 	
 	int obj_material;		/*Object material (from lookup table)*/
 	int sub_material;		/*Sub-material*/
@@ -313,6 +317,9 @@ struct obj {
 //define W_SADDLE     0x00100000L	/* KMH -- For riding monsters */
 //define W_BALL	    0x00200000L /* Punishment ball */
 //define W_CHAIN	    0x00400000L /* Punishment chain */
+//define W_BELT		0x04000000L	/* Belt */
+	long o_e_trait;
+	long expert_traits;
 	long oward;
 			/*Records the warding sign of spellbooks. */
 			/*Records the warding sign of scrolls of ward. */
@@ -341,14 +348,14 @@ struct obj {
 #define ovar1_secretsSecret ovar1
 #define ovar1_iea_upgrades ovar1
 #define ovar1_puzzle_steps ovar1
-
-#define ovar1_gober ovar1
-#define ovar1_seals ovar1
-#define ovar1_timeout ovar1
-#define ovar1_lifeDeath ovar1
-#define ovar1_artiTheftType ovar1
-#define ovar1_heard ovar1
-#define ovar1_carapace ovar1
+#define ovar1_alt_mat ovar1
+#define ovar1_last_blooded ovar1
+#define ovar1_tooth_type ovar1
+#define SERPENT_TOOTH	1
+#define MAGMA_TOOTH		2
+#define VOID_TOOTH		3
+#define MAX_TOOTH		VOID_TOOTH
+#define ovar1_offhand_oid ovar1
 	/* Number of viperwhip heads */
 	/* Moon axe phase */
 	/* Acid venom non-1d6 damage */
@@ -375,7 +382,13 @@ struct obj {
 	|| (otmp)->oclass == RING_CLASS \
 	|| (otmp)->otyp == DOLL_S_TEAR \
 	|| (otmp)->otyp == PINCER_STAFF \
+	|| (otmp)->otyp == CANE \
+	|| (otmp)->otyp == WHIP_SAW \
+	|| (otmp)->otyp == CHIKAGE \
+	|| (otmp)->otyp == TOOTH \
 	|| is_imperial_elven_armor(otmp) \
+	|| (otmp)->otyp == RAKUYO_DAGGER \
+	|| (otmp)->otyp == BLADE_OF_PITY \
 	)
 #define ECLIPSE_MOON	0
 #define CRESCENT_MOON	1
@@ -383,7 +396,7 @@ struct obj {
 #define GIBBOUS_MOON	3
 #define FULL_MOON	 	4
 
-#define check_carapace_mod(obj, prop) ((obj)->ovar1_carapace&(prop))
+#define check_carapace_mod(obj, prop) ((obj)->ovara_carapace&(prop))
 
 #define check_imp_mod(obj, prop) ((obj)->ovar1_iea_upgrades&(prop))
 #define add_imp_mod(obj, prop) ((obj)->ovar1_iea_upgrades |= (prop))
@@ -426,13 +439,22 @@ struct obj {
 
 
 
+	long ovar_art;		/* extra variable. Specifies: */
+
+#define ovara_gober ovar_art
+#define ovara_seals ovar_art
+#define ovara_timeout ovar_art
+#define ovara_lifeDeath ovar_art
+#define ovara_artiTheftType ovar_art
+#define ovara_heard ovar_art
+#define ovara_carapace ovar_art
 	/* Songs that the Singing Sword has heard */
 	/* Spirits bound into the Pen of the Void */
 	/* The ema of damage taken for gloves of the berserker */
 	/* Life/Death for the scalpel of life and death */
 	/* Theft type for stealing artifacts (reaver (scimitar) and avarice (shortsword) */
 	/* Misc data for the artifact spellbooks */
-#define obj_art_uses_ovar1(otmp) (\
+#define obj_art_uses_ovar_art(otmp) (\
 	   (otmp)->oartifact == ART_SINGING_SWORD \
 	|| (otmp)->oartifact == ART_PEN_OF_THE_VOID \
 	|| (otmp)->oartifact == ART_GAUNTLETS_OF_THE_BERSERKER \
@@ -478,6 +500,20 @@ struct obj {
 #define	CPROP_WINGS			0x00002000L
 #define	CPROP_CLAWS			0x00004000L
 #define	CPROP_CROWN			0x00008000L
+
+	long ovar2;		/* extra variable. Specifies: */
+#define obj_type_uses_ovar2(otmp) (\
+	   (otmp)->otyp == CANE \
+	|| (otmp)->otyp == WHIP_SAW \
+	|| (otmp)->otyp == CHIKAGE \
+	)
+#define ovar2_alt_erosion ovar2
+#define store_oeroded(field, value) ((field) = ((field)&~(0x3L))|(value))
+#define store_oeroded2(field, value) ((field) = ((field)&~(0x3L<<2))|((value)<<2))
+#define store_oeroded3(field, value) ((field) = ((field)&~(0x3L<<4))|((value)<<4))
+#define access_oeroded(field) ((field)&(0x3L))
+#define access_oeroded2(field) (((field)&(0x3L<<2))>>2)
+#define access_oeroded3(field) (((field)&(0x3L<<4))>>4)
 
 	schar gifted; /*gifted is of type aligntyp.  For some reason aligntyp isn't being seen at compile*/
 	
@@ -564,22 +600,110 @@ struct obj {
 							( (a)->otyp ) == ROUNDSHIELD ? ((o)->otyp==DWARVISH_ROUNDSHIELD) : \
 							( (a) == &artilist[ART_LANCE_OF_LONGINUS] ) ? ((o)->otyp==SCALPEL||(o)->otyp==LIGHTSABER) : \
 							( (a) == &artilist[ART_GUNGNIR] ) ? (is_spear(o)) : \
-							( (a) == &artilist[ART_SINGING_SWORD] ) ? ((o)->otyp == LONG_SWORD || (o)->otyp == RAPIER || (o)->otyp == SABER) : \
+							( (a) == &artilist[ART_SINGING_SWORD] ) ? ((o)->otyp == LONG_SWORD || (o)->otyp == RAPIER || (o)->otyp == SABER || (Race_if(PM_ELF) && (o)->otyp == ELVEN_BROADSWORD)) : \
 							( (a) == &artilist[ART_DIRGE] ) ? (o->oclass == WEAPON_CLASS || is_weptool(o)) : \
 							( (a) == &artilist[ART_SKY_REFLECTED] ) ? (o->obj_material == MERCURIAL && (o->oclass == WEAPON_CLASS || is_weptool(o))) : \
 							((a) == &artilist[ART_FIRE_BRAND] || (a) == &artilist[ART_FROST_BRAND]) ? \
 								(u.brand_otyp == STRANGE_OBJECT ? \
-									((is_blade((o)) && objects[(o)->otyp].oc_size < MZ_HUGE && \
-										!is_vibroweapon((o)) && \
-										!is_rakuyo((o)) && \
-										!((o)->otyp == SET_OF_CROW_TALONS) && \
-										!((o)->otyp == CROW_QUILL) && \
-										!((o)->otyp == CRYSTAL_SWORD) && \
-										!((o)->otyp == RUNESWORD) && \
-										!((o)->otyp == MIRRORBLADE)) \
-									|| (o)->otyp == GAUNTLETS) : \
+									(brandtype((o)->otyp)) : \
 									(u.brand_otyp == (o)->otyp)) : \
 							(a)->otyp == (o)->otyp)
+
+#define brandtype(typ) ( \
+				typ == CHAKRAM \
+				|| typ == SPEAR \
+				|| typ == ATGEIR \
+				|| typ == JAVELIN \
+				|| typ == TRIDENT \
+				|| typ == DAGGER \
+				|| typ == STAKE \
+				|| typ == ATHAME \
+				|| (Role_if(PM_NOBLEMAN) && Race_if(PM_HALF_DRAGON) && typ == SET_OF_CROW_TALONS) \
+				|| typ == SCALPEL \
+				|| typ == KNIFE \
+				|| typ == STILETTO \
+				|| typ == SICKLE \
+				|| (Role_if(PM_UNDEAD_HUNTER) && typ == SAW_CLEAVER) \
+				|| (Role_if(PM_UNDEAD_HUNTER) && typ == RAZOR_CLEAVER) \
+				|| (Role_if(PM_UNDEAD_HUNTER) && typ == LONG_SAW) \
+				|| (Role_if(PM_UNDEAD_HUNTER) && typ == SAW_SPEAR) \
+				|| typ == AXE \
+				|| (Role_if(PM_ANACHRONONAUT) && typ == DISKOS) \
+				|| (Role_if(PM_UNDEAD_HUNTER) && typ == HUNTER_S_AXE) \
+				|| (Role_if(PM_UNDEAD_HUNTER) && typ == HUNTER_S_LONG_AXE) \
+				|| typ == BATTLE_AXE \
+				|| typ == SHORT_SWORD \
+				|| (Role_if(PM_WIZARD) && typ == KHOPESH) \
+				|| (Role_if(PM_SAMURAI) && typ == WAKIZASHI) \
+				|| (Role_if(PM_UNDEAD_HUNTER) && typ == CHURCH_BRICK) \
+				|| (Role_if(PM_UNDEAD_HUNTER) && typ == HUNTER_S_SHORTSWORD) \
+				|| typ == SCIMITAR \
+				|| (Role_if(PM_UNDEAD_HUNTER) && typ == BOW_BLADE) \
+				|| (Role_if(PM_UNDEAD_HUNTER) && typ == BLADED_BOW) \
+				|| typ == RAPIER \
+				|| typ == SABER \
+				|| (Role_if(PM_NOBLEMAN) && Race_if(PM_HALF_DRAGON) && typ == CROW_QUILL) \
+				|| (Role_if(PM_UNDEAD_HUNTER) && typ == SOLDIER_S_RAPIER) \
+				|| (Role_if(PM_UNDEAD_HUNTER) && typ == SOLDIER_S_SABER) \
+				|| typ == BROADSWORD \
+				|| typ == LONG_SWORD \
+				|| typ == CRYSTAL_SWORD \
+				|| typ == TWO_HANDED_SWORD \
+				|| typ == KATANA \
+				|| (Role_if(PM_UNDEAD_HUNTER) && typ == CANE) \
+				|| (Role_if(PM_UNDEAD_HUNTER) && typ == WHIP_SAW) \
+				|| (Role_if(PM_UNDEAD_HUNTER) && typ == BEAST_CUTTER) \
+				|| (Role_if(PM_UNDEAD_HUNTER) && typ == BEAST_CRUSHER) \
+				|| (Role_if(PM_UNDEAD_HUNTER) && typ == CHURCH_PICK) \
+				|| (Role_if(PM_UNDEAD_HUNTER) && typ == CHURCH_SHORTSWORD) \
+				|| (Role_if(PM_UNDEAD_HUNTER) && typ == CHURCH_SHEATH) \
+				|| (Role_if(PM_UNDEAD_HUNTER) && typ == HUNTER_S_LONGSWORD) \
+				|| (Role_if(PM_SAMURAI) && typ == TSURUGI) \
+				|| typ == PARTISAN \
+				|| typ == RANSEUR \
+				|| typ == SPETUM \
+				|| typ == GLAIVE \
+				|| (Role_if(PM_SAMURAI) && typ == NAGINATA) \
+				|| typ == LANCE \
+				|| typ == HALBERD \
+				|| typ == POLEAXE \
+				|| typ == BARDICHE \
+				|| typ == VOULGE \
+				|| typ == FAUCHARD \
+				|| typ == GUISARME \
+				|| typ == BILL_GUISARME \
+				|| typ == LUCERN_HAMMER \
+				|| typ == BEC_DE_CORBIN \
+				|| typ == SCYTHE \
+				|| typ == MACE \
+				|| typ == GREAT_MACE \
+				|| (Role_if(PM_UNDEAD_HUNTER) && typ == TONITRUS) \
+				|| typ == MORNING_STAR \
+				|| typ == WAR_HAMMER \
+				|| typ == SMITHING_HAMMER \
+				|| typ == CLUB \
+				|| typ == MACUAHUITL \
+				|| typ == QUARTERSTAFF \
+				|| typ == KHAKKHARA \
+				|| typ == DOUBLE_SWORD \
+				|| typ == AKLYS \
+				|| typ == FLAIL \
+				|| typ == NUNCHAKU \
+				|| (Race_if(PM_DROW) && typ == DROVEN_GREATSWORD) \
+				|| typ == KATAR \
+				|| (Role_if(PM_PIRATE) && typ == FLINTLOCK) \
+				|| (Role_if(PM_UNDEAD_HUNTER) && typ == PISTOL) \
+				|| (Role_if(PM_MADMAN) && Insight > 30 && typ == CARCOSAN_STING) \
+				|| typ == BOW \
+				|| (Role_if(PM_SAMURAI) && typ == YUMI) \
+				|| (Race_if(PM_GNOME) && typ == CROSSBOW) \
+				|| (Role_if(PM_ARCHEOLOGIST) && typ == ATLATL) \
+				|| (Role_if(PM_CAVEMAN) && typ == ATLATL) \
+				|| (Race_if(PM_ELF) && typ == RIN_NOTHING) \
+				|| typ == CRYSTAL_GAUNTLETS \
+			)
+
+
 #define is_blade(otmp)	((otmp->oclass == WEAPON_CLASS || is_weptool(otmp)) && \
 			 ((objects[otmp->otyp].oc_skill >= P_DAGGER && \
 			 objects[otmp->otyp].oc_skill <= P_SABER) || \
@@ -598,10 +722,24 @@ struct obj {
 			 ((objects[otmp->otyp].oc_skill >= P_SHORT_SWORD && \
 			 objects[otmp->otyp].oc_skill <= P_SABER) || \
 			 otmp->otyp == DOUBLE_SWORD))
+#define is_pata(otmp)	(\
+			 otmp->otyp == SHANTA_PATA || \
+			 otmp->otyp == TWINGUN_SHANTA)
+#define hand_protecting(otmp)	(\
+			 is_pata(otmp) || \
+			 (otmp)->otyp == BROADSWORD || \
+			 ((otmp)->oartifact == ART_AMALGAMATED_SKIES && (artinstance[ART_SKY_REFLECTED].ZerthOtyp == SHANTA_PATA || artinstance[ART_SKY_REFLECTED].ZerthOtyp == TWINGUN_SHANTA || artinstance[ART_SKY_REFLECTED].ZerthOtyp == BROADSWORD))\
+			 )
+#define is_runic_form_sword(otmp) (\
+			    otmp->otyp == LONG_SWORD \
+			 || otmp->otyp == RUNESWORD \
+			 || otmp->otyp == ELVEN_BROADSWORD \
+			)
 #define is_rapier(otmp)	(otmp->oclass == WEAPON_CLASS && (\
 			 otmp->otyp == RAPIER || \
 			 otmp->otyp == RAKUYO || \
 			 otmp->otyp == RAKUYO_SABER || \
+			 otmp->otyp == SOLDIER_S_RAPIER || \
 			 otmp->otyp == CROW_QUILL))
 #define is_rakuyo(otmp)	(otmp->otyp == RAKUYO || \
 			 otmp->otyp == RAKUYO_SABER || \
@@ -611,11 +749,13 @@ struct obj {
 			 otmp->otyp == BLADE_OF_PITY)
 #define rakuyo_prop(otmp)	(check_oprop(otmp, OPROP_RAKUW))
 #define mercy_blade_prop(otmp)	(check_oprop(otmp, OPROP_MRCYW))
-#define is_insight_weapon(otmp) (is_cclub_able(otmp) || \
+#define is_insight_weapon(otmp) (is_full_insight_weapon(otmp) || \
 			 is_rakuyo(otmp) ||\
-			 rakuyo_prop(otmp) || \
-			 otmp->otyp == PINCER_STAFF || \
 			 otmp->otyp == CARCOSAN_STING || \
+			 otmp->otyp == CHIKAGE || \
+			 otmp->otyp == TOOTH || \
+			 otmp->otyp == CHURCH_SHORTSWORD || \
+			 otmp->otyp == CHURCH_PICK || \
 			 check_oprop(otmp,OPROP_GSSDW) || \
 			 check_oprop(otmp,OPROP_INSTW) || \
 			 check_oprop(otmp,OPROP_ELFLW) || \
@@ -625,9 +765,13 @@ struct obj {
 			 otmp->oartifact == ART_LASH_OF_THE_COLD_WASTE || \
 			 otmp->oartifact == ART_GOLDEN_SWORD_OF_Y_HA_TALLA || \
 			 otmp->oartifact == ART_RUINOUS_DESCENT_OF_STARS || \
-			 (otmp->oartifact == ART_PEN_OF_THE_VOID && otmp->ovar1_seals&SEAL_OSE) ||\
+			 (otmp->oartifact == ART_PEN_OF_THE_VOID && otmp->ovara_seals&SEAL_OSE) ||\
+			 is_mercy_blade(otmp))
+
+#define is_full_insight_weapon(otmp) (is_cclub_able(otmp) || \
+			 rakuyo_prop(otmp) || \
+			 otmp->otyp == PINCER_STAFF || \
 			 otmp->obj_material == MERCURIAL || \
-			 is_mercy_blade(otmp) || \
 			 mercy_blade_prop(otmp) || \
 			 otmp->otyp == ISAMUSEI ||\
 			 otmp->otyp == DISKOS ||\
@@ -670,27 +814,30 @@ struct obj {
 		typ == PROTEIN_PILL\
 		)
 
-#define ensouled_item(otmp)	(((otmp)->otyp >= WAGE_OF_SLOTH && (otmp)->otyp <= WAGE_OF_PRIDE)\
-			 || (otmp)->otyp == VITAL_SOULSTONE\
-			 || (otmp)->otyp == SPIRITUAL_SOULSTONE\
-			 || ((otmp)->otyp >= EFFIGY && (otmp)->otyp <= DOLL_S_TEAR)\
-			 || (otmp)->otyp == HOLY_SYMBOL_OF_THE_BLACK_MOTHE\
+#define ensouled_item(otmp)	(ensouled_otyp((otmp)->otyp)\
 			 || (otmp)->oartifact == ART_ESSCOOAHLIPBOOURRR\
-			 || (otmp)->otyp == FIGURINE\
-			 || (otmp)->otyp == STATUE\
-			 || (otmp)->otyp == MAGIC_LAMP\
-			 || (otmp)->otyp == CANDLE_OF_INVOCATION\
-			 || (otmp)->otyp == RIN_WISHES\
-			 || (otmp)->otyp == AMULET_OF_LIFE_SAVING\
-			 || (otmp)->otyp == MISOTHEISTIC_PYRAMID\
-			 || (otmp)->otyp == MISOTHEISTIC_FRAGMENT\
-			 || (otmp)->otyp == DIMENSIONAL_LOCK\
-			 || (otmp)->otyp == PRESERVATIVE_ENGINE\
-			 || (otmp)->otyp == ARMOR_SALVE\
-			 || (otmp)->otyp == LIVING_MASK\
-			 || (otmp)->oclass == TILE_CLASS\
-			 || (otmp)->otyp == ANTIMAGIC_RIFT\
-			 || (otmp)->otyp == CATAPSI_VORTEX\
+			)
+
+#define ensouled_otyp(otyp)	(((otyp) >= WAGE_OF_SLOTH && (otyp) <= WAGE_OF_PRIDE)\
+			 || objects[(otyp)].oc_class == TILE_CLASS\
+			 || (otyp) == VITAL_SOULSTONE\
+			 || (otyp) == SPIRITUAL_SOULSTONE\
+			 || ((otyp) >= EFFIGY && (otyp) <= DOLL_S_TEAR)\
+			 || (otyp) == HOLY_SYMBOL_OF_THE_BLACK_MOTHE\
+			 || (otyp) == FIGURINE\
+			 || (otyp) == STATUE\
+			 || (otyp) == MAGIC_LAMP\
+			 || (otyp) == CANDLE_OF_INVOCATION\
+			 || (otyp) == RIN_WISHES\
+			 || (otyp) == AMULET_OF_LIFE_SAVING\
+			 || (otyp) == MISOTHEISTIC_PYRAMID\
+			 || (otyp) == MISOTHEISTIC_FRAGMENT\
+			 || (otyp) == DIMENSIONAL_LOCK\
+			 || (otyp) == PRESERVATIVE_ENGINE\
+			 || (otyp) == ARMOR_SALVE\
+			 || (otyp) == LIVING_MASK\
+			 || (otyp) == ANTIMAGIC_RIFT\
+			 || (otyp) == CATAPSI_VORTEX\
 			)
 #define goat_acidable(otmp)	(accepts_weapon_oprops(otmp)\
 				&& !check_oprop((otmp), OPROP_GOATW) && !check_oprop((otmp), OPROP_ACIDW) && !check_oprop((otmp), OPROP_LESSER_ACIDW))
@@ -698,10 +845,11 @@ struct obj {
 #define yog_magicable(otmp)	(accepts_weapon_oprops(otmp)\
 				&& !check_oprop((otmp), OPROP_SOTHW) && !check_oprop((otmp), OPROP_MAGCW) && !check_oprop((otmp), OPROP_LESSER_MAGCW))
 #define yog_windowable(otmp) (accepts_weapon_oprops(otmp) && !check_oprop((otmp), OPROP_SOTHW) && !check_oprop((otmp), OPROP_MAGCW))
-#define sflm_able(otmp)	(((otmp)->obj_material == SILVER || (otmp)->obj_material == PLATINUM || (otmp)->obj_material == MITHRIL)\
+#define sflm_able(otmp)	(((otmp)->obj_material == SILVER || (otmp)->obj_material == PLATINUM || (otmp)->obj_material == MITHRIL || (otmp)->obj_material == HEMARGYOS)\
 			 || ((otmp)->oartifact == ART_IBITE_ARM && artinstance[ART_IBITE_ARM].IbiteUpgrades&IPROP_REFLECT)\
 			 || ((otmp)->oartifact == ART_AMALGAMATED_SKIES)\
 			 )
+#define sflm_active(otmp)	(sflm_able(otmp))
 #define sflm_offerable(otmp)	(accepts_weapon_oprops(otmp) && sflm_able(otmp) && !check_oprop(otmp, OPROP_SFLMW))
 #define sflm_mirrorable(otmp)	(((otmp)->oclass == WEAPON_CLASS || is_weptool(otmp) || is_suit(otmp) || is_shield(otmp))\
 				 && sflm_able(otmp) && !check_oprop(otmp, OPROP_REFL))
@@ -723,16 +871,18 @@ struct obj {
 			  objects[(otmp)->otyp].oc_skill == P_LANCE || \
 			  (otmp)->otyp==AKLYS || \
 			  (otmp)->otyp==DISKOS || \
-			  (is_cclub_able(otmp) && u.uinsight >= 15) || \
+			  (otmp)->otyp==HUNTER_S_LONG_AXE || \
+			  (is_cclub_able(otmp) && Insight >= 15) || \
 			  (otmp)->oartifact==ART_SOL_VALTIVA || \
 			  (otmp)->oartifact==ART_SHADOWLOCK || \
 			  (otmp)->oartifact==ART_RUYI_JINGU_BANG || \
 			  ((otmp)->oartifact==ART_GOLDEN_SWORD_OF_Y_HA_TALLA && (otmp)->otyp == BULLWHIP) || \
 			  (otmp)->oartifact==ART_DEATH_SPEAR_OF_KEPTOLO || \
-			  ((otmp)->oartifact==ART_PEN_OF_THE_VOID && (otmp)->ovar1_seals&SEAL_MARIONETTE ) \
+			  ((otmp)->oartifact==ART_PEN_OF_THE_VOID && (otmp)->ovara_seals&SEAL_MARIONETTE ) \
 			 ))
 #define is_bad_melee_pole(otmp) (!((otmp)->otyp == POLEAXE ||\
 									(otmp)->otyp == DISKOS ||\
+									(otmp)->otyp == HUNTER_S_LONG_AXE ||\
 									is_vibropike(otmp) ||\
 									(otmp)->oartifact == ART_WEBWEAVER_S_CROOK ||\
 									(otmp)->oartifact == ART_SILENCE_GLAIVE ||\
@@ -760,21 +910,30 @@ struct obj {
 #define is_melee_launcher(otmp)	(otmp->otyp == CARCOSAN_STING || \
 				otmp->oartifact == ART_LIECLEAVER || \
 				otmp->oartifact == ART_ROGUE_GEAR_SPIRITS  || \
+				otmp->otyp == SOLDIER_S_SABER  || \
+				otmp->otyp == BLADED_BOW  || \
+				otmp->otyp == TWINGUN_SHANTA  || \
 				check_oprop(otmp, OPROP_BLADED) || \
 				check_oprop(otmp, OPROP_SPIKED))
 #define is_ammo(otmp)	((otmp->oclass == WEAPON_CLASS || \
 			 otmp->oclass == GEM_CLASS) && \
 			 ((objects[otmp->otyp].oc_skill >= -P_CROSSBOW && \
 			 objects[otmp->otyp].oc_skill <= -P_BOW)))
+#define is_aimable(otmp, attackmask)	(is_ammo(otmp) && attackmask == PIERCE &&\
+							(objects[otmp->otyp].oc_skill == -P_BOW ||\
+							 objects[otmp->otyp].oc_skill == -P_CROSSBOW ||\
+							 objects[otmp->otyp].oc_skill == -P_FIREARM \
+							))
 #define is_grenade(otmp)	(is_ammo(otmp) && \
 			 	 objects[(otmp)->otyp].w_ammotyp == WP_GRENADE)
 #define ammo_and_launcher(otmp,ltmp) \
 			 ((otmp) && (ltmp) && (\
 			  (\
 			   (ltmp->otyp == BFG) ||\
-			   (ltmp->oartifact == ART_PEN_OF_THE_VOID && ltmp->ovar1_seals&SEAL_EVE) ||\
+			   (ltmp->oartifact == ART_PEN_OF_THE_VOID && ltmp->ovara_seals&SEAL_EVE) ||\
 			   (ltmp->otyp == MASS_SHADOW_PISTOL && ltmp->cobj && (otmp->otyp == ltmp->cobj->otyp)) ||\
 			   (ltmp->otyp == ATLATL && is_spear(otmp)) ||\
+			   (ltmp->otyp == BLADED_BOW && (otmp->otyp == BLOOD_BULLET || otmp->otyp == BLOOD_SPEAR)) ||\
 			   (\
 			    (otmp->objsize == (ltmp)->objsize || objects[(ltmp)->otyp].oc_skill == P_SLING || (ltmp)->oartifact == ART_ROGUE_GEAR_SPIRITS) &&\
 			    (objects[(otmp)->otyp].w_ammotyp & objects[(ltmp)->otyp].w_ammotyp) && \
@@ -801,9 +960,28 @@ struct obj {
 			 (o)->otyp == PRAYER_WARDED_WRAPPING)
 #define is_slab(o)	((o)->otyp >= FIRST_WORD && \
 			 (o)->otyp <= WORD_OF_KNOWLEDGE)
-#define is_lightsaber(otmp) ((otmp)->otyp == LIGHTSABER || \
+#define is_serrated(o)	((o)->otyp == WHIP_SAW \
+						|| (o)->otyp == SAW_CLEAVER \
+						|| (o)->otyp == SAW_SPEAR \
+						|| (o)->otyp == LONG_SAW \
+						|| (o)->otyp == DISKOS \
+						|| (o)->otyp == DEMON_CLAW \
+						|| (o)->otyp == BEAST_CUTTER \
+						|| (o)->otyp == BEAST_CRUSHER \
+						|| ((o)->otyp == MOON_AXE && (o)->ovar1_moonPhase == HUNTING_MOON) \
+						)
+#define is_self_righteous(o)	((o)->otyp == CANE \
+						|| (o)->otyp == CHURCH_HAMMER \
+						|| (o)->otyp == CHURCH_BLADE \
+						|| (o)->otyp == CHURCH_PICK \
+						|| (o)->otyp == CHURCH_SHORTSWORD \
+						|| (o)->otyp == DEVIL_FIST \
+						)
+
+#define is_lightsaber(otmp) (is_lasersword(otmp) || \
 							 (otmp)->otyp == KAMEREL_VAJRA || \
-							 (otmp)->otyp == ROD_OF_FORCE || \
+							 (otmp)->otyp == ROD_OF_FORCE)
+#define is_lasersword(otmp) ((otmp)->otyp == LIGHTSABER || \
 							 (otmp)->otyp == BEAMSWORD || \
 							 (otmp)->otyp == DOUBLE_LIGHTSABER)
 #define is_gemable_lightsaber(otmp) (((otmp)->otyp == LIGHTSABER\
@@ -811,6 +989,9 @@ struct obj {
 							  || (otmp)->otyp == DOUBLE_LIGHTSABER)\
 							&& (otmp)->oartifact != ART_ANNULUS\
 							&& (otmp)->oartifact != ART_INFINITY_S_MIRRORED_ARC\
+							)
+#define is_makashi_saber(otmp) ( ( (otmp)->otyp == LIGHTSABER ) \
+							  || (otmp)->otyp == ROD_OF_FORCE \
 							)
 #define valid_focus_gem(otmp) ((otmp)->oclass == GEM_CLASS && ((otmp)->otyp < LUCKSTONE \
 								|| (otmp)->otyp == CHUNK_OF_FOSSIL_DARK \
@@ -874,9 +1055,18 @@ struct obj {
 						  (otmp)->otyp == SHADOWLANDER_S_TORCH || \
 						  (otmp)->otyp == CROW_QUILL || \
 						  (otmp)->otyp == SET_OF_CROW_TALONS || \
+						  (otmp)->otyp == MOON_AXE || \
+						  (otmp)->otyp == TOOTH || \
+						  (otmp)->otyp == CANE || \
+						  (otmp)->otyp == WHIP_SAW || \
+						  (otmp)->otyp == CHURCH_HAMMER || \
 						  (otmp)->otyp == ISAMUSEI || \
 						  (otmp)->otyp == DISKOS || \
 						  (otmp)->otyp == PINCER_STAFF || \
+						  (otmp)->otyp == SHANTA_PATA || \
+						  (otmp)->otyp == TWINGUN_SHANTA || \
+						  (otmp)->otyp == DEVIL_FIST || \
+						  (otmp)->otyp == DEMON_CLAW || \
 						  (otmp)->otyp == KAMEREL_VAJRA)
 #define spec_prop_material(otmp)	(otmp->obj_material == MERCURIAL)
 #define is_multigen(otmp)	((otmp->oclass == WEAPON_CLASS && \
@@ -887,7 +1077,7 @@ struct obj {
 			 // objects[otmp->otyp].oc_skill <= -P_BOW)
 //#ifdef FIREARMS
 #define is_unpoisonable_firearm_ammo(otmp)	\
-			 (is_bullet(otmp) || (otmp)->otyp == STICK_OF_DYNAMITE)
+			 ((is_bullet(otmp) && otmp->otyp != BLOOD_SPEAR) || (otmp)->otyp == STICK_OF_DYNAMITE)
 //#else
 //#define is_unpoisonable_firearm_ammo(otmp)	0
 //#endif
@@ -947,7 +1137,8 @@ struct obj {
 /* like multistriking, but all ends always roll attacks. multi_ended() is 0-based so that only actual multi_ended weapons return multi_ended!=0 */
 #define multi_ended(otmp)	(!(otmp) ? 0 : \
 	(otmp)->otyp == DOUBLE_SWORD ? 1 : \
-	((otmp) == uwep && martial_bonus() && (otmp)->otyp == QUARTERSTAFF && P_SKILL(P_QUARTERSTAFF) >= P_EXPERT && P_SKILL(P_BARE_HANDED_COMBAT) >= P_EXPERT && !uarms && !(u.twoweap && uswapwep)) ? 1 : \
+	(otmp)->otyp == BLADED_BOW ? 1 : \
+	((otmp) == uwep && martial_bonus() && (otmp)->otyp == QUARTERSTAFF && (otmp)->objsize >= youracedata->msize && P_SKILL(P_QUARTERSTAFF) >= P_EXPERT && P_SKILL(P_BARE_HANDED_COMBAT) >= P_EXPERT && !uarms && !(u.twoweap && uswapwep)) ? 1 : \
 	0)
 /*  */
 #define is_multi_hit(otmp)	(multistriking(otmp) || multi_ended(otmp) || otmp->otyp == STILETTOS || otmp->otyp == WIND_AND_FIRE_WHEELS)
@@ -959,7 +1150,7 @@ struct obj {
 	is_weptool((otmp)) || \
 	(otmp)->otyp == BOULDER || \
 	(otmp)->otyp == MASS_OF_STUFF || \
-	(otmp)->otyp == HEAVY_IRON_BALL || \
+	(otmp)->otyp == BALL || \
 	(otmp)->otyp == CHAIN || \
 	(otmp)->oclass == GEM_CLASS)
 #define throwing_weapon(otmp)	(is_missile((otmp)) || is_spear((otmp)) || \
@@ -984,9 +1175,14 @@ struct obj {
 			 objects[otmp->otyp].oc_armcat == ARM_SHIRT)
 #define is_suit(otmp)	(otmp->oclass == ARMOR_CLASS && \
 			 objects[otmp->otyp].oc_armcat == ARM_SUIT)
-#define is_harmonium_armor(otmp)	((otmp)->otyp == HARMONIUM_HELM || (otmp)->otyp == HARMONIUM_PLATE\
-								|| (otmp)->otyp == HARMONIUM_SCALE_MAIL || (otmp)->otyp == HARMONIUM_GAUNTLETS\
-								|| (otmp)->otyp == HARMONIUM_BOOTS)
+#define is_belt(otmp)	(otmp->oclass == BELT_CLASS && \
+			 objects[otmp->otyp].oc_armcat == ARM_BELT)
+			 
+#define is_harmonium_armor(otmp)	is_harmonium_otyp((otmp)->otyp)
+
+#define is_harmonium_otyp(otyp)	((otyp) == HARMONIUM_HELM || (otyp) == HARMONIUM_PLATE\
+								|| (otyp) == HARMONIUM_SCALE_MAIL || (otyp) == HARMONIUM_GAUNTLETS\
+								|| (otyp) == HARMONIUM_BOOTS)
 
 #define is_light_armor(otmp)	(((otmp)->otyp == IMPERIAL_ELVEN_ARMOR && check_imp_mod(otmp, IEA_MITHRIL)) || ((otmp)->oartifact == ART_SCORPION_CARAPACE && check_carapace_mod(otmp, CPROP_FLEXIBLE)) || objects[(otmp)->otyp].oc_dexclass == ARMSZ_LIGHT)
 #define is_medium_armor(otmp)	(objects[(otmp)->otyp].oc_dexclass == ARMSZ_MEDIUM)
@@ -1011,6 +1207,7 @@ struct obj {
 				|| carrying(IMPERIAL_ELVEN_BOOTS)\
 				)
 #define helm_upgrade_obj(obj)	(((obj)->otyp == AMULET_OF_MAGICAL_BREATHING \
+								|| (obj)->otyp == ENCOUNTER_EXOSKELETON \
 								|| (obj)->otyp == WAN_DRAINING \
 								|| (obj)->otyp == RIN_SEE_INVISIBLE \
 								|| (obj)->otyp == HELM_OF_TELEPATHY \
@@ -1025,6 +1222,7 @@ struct obj {
 								|| (obj)->otyp == GAUNTLETS_OF_DEXTERITY \
 								|| (obj)->otyp == RIN_INCREASE_DAMAGE \
 								|| (obj)->otyp == WAN_MAGIC_MISSILE \
+								|| (obj)->otyp == ENCOUNTER_EXOSKELETON \
 								|| (obj)->otyp == AMULET_OF_STRANGULATION \
 								) && objects[(obj)->otyp].oc_name_known)
 #define armor_upgrade_obj(obj)	(((obj)->otyp == FLYING_BOOTS \
@@ -1036,6 +1234,8 @@ struct obj {
 								|| (obj)->otyp == JUMPING_BOOTS \
 								|| (obj)->otyp == AMULET_VERSUS_SICKNESS \
 								|| (obj)->otyp == HEALER_UNIFORM \
+								|| (obj)->otyp == BODYGLOVE \
+								|| (obj)->otyp == ENCOUNTER_EXOSKELETON \
 								|| (obj)->otyp == CLOAK_OF_PROTECTION \
 								|| (obj)->otyp == CLOAK_OF_MAGIC_RESISTANCE \
 								|| (obj)->otyp == ORIHALCYON_GAUNTLETS \
@@ -1049,6 +1249,7 @@ struct obj {
 #define boots_upgrade_obj(obj)	(((obj)->otyp == JUMPING_BOOTS \
 								|| (obj)->otyp == SPEED_BOOTS \
 								|| (obj)->otyp == KICKING_BOOTS \
+								|| (obj)->otyp == ENCOUNTER_EXOSKELETON \
 								|| (obj)->otyp == WAN_SPEED_MONSTER \
 								|| (obj)->otyp == RIN_ALACRITY \
 								|| (obj)->otyp == WAN_TELEPORTATION \
@@ -1072,15 +1273,7 @@ struct obj {
 				|| (otmp)->otyp == WIDE_HAT \
 				|| (otmp)->otyp == WITCH_HAT )
 
-#define is_plusten(otmp)	(arti_plusten(otmp)\
-								|| is_rakuyo(otmp)\
-								|| rakuyo_prop(otmp)\
-								|| is_mercy_blade(otmp)\
-								|| mercy_blade_prop(otmp)\
-								|| otmp->otyp == ISAMUSEI\
-								|| otmp->otyp == BESTIAL_CLAW\
-								|| check_oprop(otmp, OPROP_CCLAW)\
-								)
+#define is_plusten(otmp)	(arti_plusten(otmp))
 #define is_plussev_armor(otmp)	(is_elven_armor((otmp))\
 								|| arti_plussev((otmp))\
 								|| ((otmp)->otyp == CORNUTHAUM && Role_if(PM_WIZARD))\
@@ -1109,6 +1302,7 @@ struct obj {
 				|| ((otmp)->oartifact == ART_CLEAVER && Role_if(PM_BARBARIAN))\
 				|| ((otmp)->oartifact == ART_ATLANTEAN_ROYAL_SWORD && Role_if(PM_BARBARIAN))\
 				|| ((otmp)->oartifact == ART_TECPATL_OF_HUHETOTL && Role_if(PM_ARCHEOLOGIST))\
+				|| ((otmp)->oartifact == ART_REAVER && Role_if(PM_PIRATE))\
 				|| ((otmp)->oartifact == ART_KIKU_ICHIMONJI && Role_if(PM_SAMURAI))\
 				|| ((otmp)->oartifact == ART_JINJA_NAGINATA && Role_if(PM_SAMURAI))\
 				|| ((otmp)->oartifact == ART_SNICKERSNEE && (Role_if(PM_SAMURAI) || Role_if(PM_TOURIST) ))\
@@ -1306,7 +1500,7 @@ struct obj {
 				)
 #define is_chupodible(otmp) ((otmp)->otyp == CORPSE && your_race(&mons[(otmp)->corpsenm]))
 
-#define is_unholy(otmp)		((otmp)->oartifact == ART_STORMBRINGER || (otmp)->cursed)
+#define is_unholy(otmp)		((otmp)->oartifact == ART_STORMBRINGER || (otmp)->oartifact == ART_DIRGE || (otmp)->cursed)
 
 /* material */
 #define is_flimsy(otmp)		((otmp)->obj_material <= LEATHER)
@@ -1397,9 +1591,11 @@ struct obj {
 
 #define higher_depth(armdepth, depth)	(armdepth == depth || (\
 		(depth&(W_ARMC|W_GLYPH)) ? FALSE :\
+		(depth&(W_BELT)) ? !!(armdepth&(W_ARMC|W_GLYPH)) :\
+		(depth&(W_DRESS_DEPTH)) ? !!(armdepth&(W_ARMC|W_GLYPH|W_BELT)) :\
 		(depth&(W_ARMS|W_WEP|W_QUIVER|W_SWAPWEP|W_AMUL|W_SADDLE|W_CHAIN)) ? (armdepth == W_ARMC) :\
 		(depth&(W_ARMH|W_ARMG|W_ARMF|W_ARM|W_RINGL|W_RINGR|W_TOOL)) ? (armdepth != W_ARMU) :\
-		(depth&(W_ARMU|W_SKIN)) ? TRUE :\
+		(depth&(W_ARMU|W_SKIN|W_UPGRADE)) ? TRUE :\
 		FALSE))
 
 #define PURIFIED_CHAOS	(mvitals[PM_CHAOS].died)

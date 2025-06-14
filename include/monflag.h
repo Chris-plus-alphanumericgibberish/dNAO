@@ -103,6 +103,7 @@
 #define MM_FLEETFLEE	0x00008000L	/* Flees if adjacent if it thinks it can outrun you */
 #define MM_WEBRIP		0x00010000L	/* Tears through webs instead of getting stuck */
 #define MM_DOORBUST		0x00020000L	/* Breaks down locked doors (UNIMPLEMENTED, part of ma_giant currently!) */
+#define MM_AQUATIC		0x00040000L	/* Can ONLY survive underwater */
 
 //Monster Thoughts and behavior
 #define MT_WANTSAMUL	0x00000001L	/* would like to steal the amulet */
@@ -183,6 +184,7 @@
 #define MB_INSUBSTANTIAL	0x04000000L	/* Weapons pass through the monster */
 #define MB_NOGLOVES		0x08000000L	/* can handle things but has no glove slot */
 #define MB_NOHAT		0x10000000L	/* has a head to be beheaded but has no helm slot */
+#define MB_SKELETAL		0x20000000L	/* only bones */
 
 #define MB_SNAKELEG	(MB_HUMANOID|MB_SLITHY)
 #define MB_CENTAUR	(MB_HUMANOID|MB_ANIMAL)
@@ -457,8 +459,12 @@
 #define CRUSH_BOLT             HYPNOTIC_COLORS+1
 #define MADF_BURST             CRUSH_BOLT+1
 #define HOLY_BOLT              MADF_BURST+1
+#define MIST_WOLVES            HOLY_BOLT+1
+//105
+#define FORCE_SPHERES          MIST_WOLVES+1
+#define PEST_THREADS           FORCE_SPHERES+1
 
-#define MON_LASTSPELL          HOLY_BOLT
+#define MON_LASTSPELL          PEST_THREADS
 //Not yet implemented
 // #define MON_FIRE               STRANGLE+1
 // #define MON_BLIZZARD           MON_FIRAGA+1

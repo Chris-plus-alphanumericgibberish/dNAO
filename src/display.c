@@ -482,12 +482,14 @@ display_monster(x, y, mon, sightflags, worm_tail)
 	if (mon->mtame && !Hallucination) {
 	    if (worm_tail) num = mon->mtyp == PM_HUNTING_HORROR ?
 			petnum_to_glyph(PM_HUNTING_HORROR_TAIL):
+			mon->mtyp == PM_CHORISTER_JELLY ? petnum_to_glyph(PM_CHORISTER_TRAIN):
 			petnum_to_glyph(PM_LONG_WORM_TAIL);
 	    else
 		num = petnum_to_glyph(appear);
 	} else if (mon->mpeaceful && !Hallucination) {
 	    if (worm_tail) num = mon->mtyp == PM_HUNTING_HORROR ?
 			peacenum_to_glyph(PM_HUNTING_HORROR_TAIL):
+			mon->mtyp == PM_CHORISTER_JELLY ? peacenum_to_glyph(PM_CHORISTER_TRAIN):
 			peacenum_to_glyph(PM_LONG_WORM_TAIL);
 	    else
 		num = peacenum_to_glyph(appear);
@@ -495,6 +497,7 @@ display_monster(x, y, mon, sightflags, worm_tail)
 	else if (!Hallucination && mon->mtemplate != 0) {
 	    if (worm_tail) num = mon->mtyp == PM_HUNTING_HORROR ?
 			mtemplatenum_to_glyph(PM_HUNTING_HORROR_TAIL, mon->mtemplate):
+			mon->mtyp == PM_CHORISTER_JELLY ? mtemplatenum_to_glyph(PM_CHORISTER_TRAIN, mon->mtemplate):
 			mtemplatenum_to_glyph(PM_LONG_WORM_TAIL, mon->mtemplate);
 	    else
 		num = mtemplatenum_to_glyph(appear, mon->mtemplate);
@@ -504,12 +507,14 @@ display_monster(x, y, mon, sightflags, worm_tail)
 	} else if (sightflags == DETECTED) {
 	    if (worm_tail) num = mon->mtyp == PM_HUNTING_HORROR ?
 			detected_monnum_to_glyph(what_mon(PM_HUNTING_HORROR_TAIL, (struct monst *)0)):
+			mon->mtyp == PM_CHORISTER_JELLY ? detected_monnum_to_glyph(PM_CHORISTER_TRAIN):
 			detected_monnum_to_glyph(what_mon(PM_LONG_WORM_TAIL, (struct monst *)0));
 	    else
 			num = detected_monnum_to_glyph(appear);
 	} else {
 	    if (worm_tail) num = mon->mtyp == PM_HUNTING_HORROR ?
 			monnum_to_glyph(what_mon(PM_HUNTING_HORROR_TAIL, (struct monst *)0)):
+			mon->mtyp == PM_CHORISTER_JELLY ? what_mon(PM_CHORISTER_TRAIN, (struct monst *)0):
 			monnum_to_glyph(what_mon(PM_LONG_WORM_TAIL, (struct monst *)0));
 	    else
 			num = monnum_to_glyph(appear);

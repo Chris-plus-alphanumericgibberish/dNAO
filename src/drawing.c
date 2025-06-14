@@ -50,7 +50,8 @@ const char def_oc_syms[MAXOCLASSES] = {
 	VENOM_SYM,
 	TILE_SYM,
 	BED_SYM,
-	SCOIN_SYM
+	SCOIN_SYM,
+	BELT_SYM,
 };
 
 const char invisexplain[] = "remembered, unseen, creature";
@@ -77,7 +78,8 @@ const char * const objexplain[] = {	/* these match def_oc_syms, above */
 	"splash of venom",
 	"broken tile or slab",
 	"bed or chair",
-	"strange coin"
+	"strange coin",
+	"belt"
 };
 
 /* Object class names.  Used in object_detect(). */
@@ -997,7 +999,8 @@ int glth, maxlen, offset;
     for (i = 0; i < maxlen; i++)
 	showsyms[i+offset] = (((i < glth) && graph_chars[i]) ?
 		       graph_chars[i] : defsyms[i+offset].sym);
-    if (monsyms[S_GHOST] == DEF_GHOST) monsyms[S_GHOST] = showsyms[S_litroom];
+    if (monsyms[S_GHOST] == DEF_GHOST || monsyms[S_GHOST] == 183)
+		monsyms[S_GHOST] = showsyms[S_litroom];
 }
 
 #ifdef USER_DUNGEONCOLOR
@@ -1184,7 +1187,8 @@ static const uchar IBM_r_oc_syms[MAXOCLASSES] = {	/* a la EPYX Rogue */
 	VENOM_SYM,
 	TILE_SYM,
 	BED_SYM,
-	SCOIN_SYM
+	SCOIN_SYM,
+	BELT_SYM,
 };
 # endif /* ASCIIGRAPH */
 

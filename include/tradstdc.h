@@ -276,4 +276,87 @@ typedef genericptr genericptr_t;	/* (void *) or (char *) */
 #define PRINTF_F(f,v)
 #endif
 
+/*
+ * If we don't have C23 <stdckdint.h>, fall back to GCC
+ * __builtin_*_overflow functions.  If we don't have those either,
+ * fall back to implementation using C11 _Generic.
+ */
+#if __has_include(<stdckdint.h>)
+# include <stdckdint.h>
+#else
+# ifdef __GNUC__
+#  define ckd_add(R, A, B) __builtin_add_overflow ((A), (B), (R))
+#  define ckd_sub(R, A, B) __builtin_sub_overflow ((A), (B), (R))
+#  define ckd_mul(R, A, B) __builtin_mul_overflow ((A), (B), (R))
+# else
+#  define max_int_value(I)						\
+	_Generic((I),							\
+		 signed char: SCHAR_MAX,				\
+		 short: SHRT_MAX,					\
+		 int: INT_MAX,						\
+		 long: LONG_MAX,					\
+		 long long: LLONG_MAX,					\
+		 unsigned char: UCHAR_MAX,				\
+		 unsigned short: USHRT_MAX,				\
+		 unsigned int: UINT_MAX,				\
+		 unsigned long: ULONG_MAX,				\
+		 unsigned long long: ULLONG_MAX,			\
+		 default: LARGEST_INT)
+#  define min_int_value(I)						\
+	_Generic((I),							\
+		 signed char: SCHAR_MIN,				\
+		 short: SHRT_MIN,					\
+		 int: INT_MIN,						\
+		 long: LONG_MIN,					\
+		 long long: LLONG_MIN,					\
+		 default: 0)
+#  define ckd_add(R, A, B)						\
+	((((A) > 0) && ((B) > max_int_value(*(R)) - (A)))		\
+	 ? (*(R) = ((A) + min_int_value(*(R))) + ((B) + min_int_value(*(R))), TRUE) \
+	 : ((((A) < 0) && ((B) < min_int_value(*(R)) - (A)))		\
+	    ? (*(R) = ((A) - min_int_value(*(R))) + ((B) - min_int_value(*(R))), TRUE) \
+	    : (*(R) = ((A) + (B)), FALSE)))
+#  define ckd_sub(R, A, B) ckd_add((R), (A), -(B))
+/* Lazy implementation: only works for 32-bit types */
+#  define ckd_mul(R, A, B) (*(R) = (long long)(A) * (B), ((long long)(A) * (B)) > max_int_value(*(R)))
+# endif /* __GNUC__ */
+#endif /* __has_include(<stdckdint.h>) */
+
+/*
+ * If we don't have C23 <stdbit.h>, fall back to GCC
+ * __builtin_popcount and C11 _Generic.  If we don't have that either,
+ * fall back to Brian Kernighan's algorithm and C11 _Generic.
+ */
+#if __has_include(<stdbit.h>)
+# include <stdbit.h>
+#else
+# ifdef __GNUC__
+#  define stdc_count_ones_uc(n) (unsigned char)__builtin_popcount((unsigned char)(n))
+#  define stdc_count_ones_us(n) (unsigned short)__builtin_popcount((unsigned short)(n))
+#  define stdc_count_ones_ui(n) __builtin_popcount((n))
+#  define stdc_count_ones_ul(n) __builtin_popcountl((n))
+#  define stdc_count_ones_ull(n) __builtin_popcountll((n))
+# else
+#  define DEFINE_STDC_COUNT_ONES(suffix, type)			       \
+	static inline type stdc_count_ones_##suffix(type n) {	       \
+		int count = 0;					       \
+		while (n) { n &= n-1; count++; }		       \
+		return count;					       \
+	}
+DEFINE_STDC_COUNT_ONES(uc, unsigned char)
+DEFINE_STDC_COUNT_ONES(us, unsigned short)
+DEFINE_STDC_COUNT_ONES(ui, unsigned int)
+DEFINE_STDC_COUNT_ONES(ul, unsigned long)
+DEFINE_STDC_COUNT_ONES(ull, unsigned long long)
+#  undef DEFINE_STDC_COUNT_ONES
+# endif /* __GNUC__ */
+#define stdc_count_ones(n)						\
+	_Generic((n),							\
+		 unsigned char: stdc_count_ones_uc((n)),		\
+		 unsigned short: stdc_count_ones_us((n)),		\
+		 unsigned int: stdc_count_ones_ui((n)),			\
+		 unsigned long: stdc_count_ones_ul((n)),		\
+		 unsigned long long: stdc_count_ones_ull((n)))
+#endif /* __has_include(<stdbit.h>) */
+
 #endif /* TRADSTDC_H */

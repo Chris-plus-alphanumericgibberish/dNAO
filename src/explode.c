@@ -124,7 +124,7 @@ ExplodeRegion *reg;
 
 /* This is the "do-it-all" explosion command */
 STATIC_DCL void FDECL(do_explode,
-	(int,int,ExplodeRegion *,int,int,int,int,int,BOOLEAN_P, struct permonst *));
+	(int,int,ExplodeRegion *,int,int,int,int,int, boolean, struct permonst *, long));
 
 /* Note: I had to choose one of three possible kinds of "type" when writing
  * this function: a wand type (like in zap.c), an adtyp, or an object type.
@@ -143,7 +143,13 @@ int dam;
 int color;
 int radius;
 {
-	explode_full(x, y, adtyp, olet, dam, color, radius, 0, !flags.mon_moving, (struct permonst *) 0);
+	explode_full(x, y, adtyp, olet, dam, color, radius, 0, !flags.mon_moving, (struct permonst *) 0, 0L);
+}
+
+void
+explode_spell(int x, int y, int adtyp, int olet, int dam, int color, int radius, long special_flags)
+{
+	explode_full(x, y, adtyp, olet, dam, color, radius, 0, !flags.mon_moving, (struct permonst *) 0, special_flags);
 }
 
 void
@@ -156,7 +162,7 @@ int color;
 int radius;
 int dest;
 {
-	explode_full(x, y, adtyp, olet, dam, color, radius, dest, !flags.mon_moving, (struct permonst *) 0);
+	explode_full(x, y, adtyp, olet, dam, color, radius, dest, !flags.mon_moving, (struct permonst *) 0, 0L);
 }
 
 void
@@ -169,7 +175,7 @@ int color;
 int radius;
 struct permonst *pa;
 {
-	explode_full(x, y, adtyp, olet, dam, color, radius, 0, !flags.mon_moving, pa);
+	explode_full(x, y, adtyp, olet, dam, color, radius, 0, !flags.mon_moving, pa, 0L);
 }
 
 
@@ -187,20 +193,11 @@ boolean yours; /* is it your fault (for killing monsters) */
 	 * this is used for not-player-caused explosions on the player's turn,
 	 * print your own sound effects
 	 */
-	explode_full(x, y, adtyp, olet, dam, color, radius, 0, yours, (struct permonst *)0);
+	explode_full(x, y, adtyp, olet, dam, color, radius, 0, yours, (struct permonst *)0, 0L);
 }
 
 void
-explode_full(x, y, adtyp, olet, dam, color, radius, dest, yours, pa)
-int x, y;
-int adtyp; /* the same as in zap.c */
-int olet;
-int dam;
-int color;
-int radius;
-int dest;
-boolean yours;
-struct permonst *pa;
+explode_full(int x, int y, int adtyp, int olet, int dam, int color, int radius, int dest, boolean yours, struct permonst *pa, long special_flags)
 {
 	ExplodeRegion *area;
 	area = create_explode_region();
@@ -222,17 +219,12 @@ struct permonst *pa;
 		do_clear_area(x, y, radius, add_location_to_explode_region, (genericptr_t)(area));
 	}
 
-	do_explode(x, y, area, adtyp, olet, dam, color, dest, yours, pa);
+	do_explode(x, y, area, adtyp, olet, dam, color, dest, yours, pa, special_flags);
 	free_explode_region(area);
 }
 
 void
-splash(x, y, dx, dy, adtyp, olet, dam, color)
-int x, y, dx, dy;
-int adtyp;
-int olet;
-int dam;
-int color;
+splash(int x, int y, int dx, int dy, int adtyp, int olet, int dam, int color, long special_flags)
 {
 	/*
 	Splash pattern:
@@ -257,21 +249,16 @@ int color;
 	if (isok(x + i, y + j) && ((!i && dx) || (!j && dy) || ((!dx || i == dx) & (!dy || j == dy))) && ((ZAP_POS(levl[x][y].typ) || distmin(x - dx, y - dy, x + i, y + j) == 1) || ZAP_POS(levl[x - dx + i][y - dy + j].typ))) // it looks strange, but it works
 		add_location_to_explode_region(x + i, y + j, area);
 
-	do_explode(x, y, area, adtyp, olet, dam, color, 0, !flags.mon_moving, (struct permonst *)0);
+	do_explode(x, y, area, adtyp, olet, dam, color, 0, !flags.mon_moving, (struct permonst *)0, special_flags);
 	free_explode_region(area);
 }
 
+/* AD_TYPE and O_CLASS describing the cause of the explosion */
+//int dest; /* 0 = normal, 1 = silent, 2 = remote, 4 = no sound */	
+// boolean yours; /* is it your fault (for killing monsters) */
+// struct permonst *pa; /* permonst of the attacker (used for disease) */
 STATIC_DCL void
-do_explode(x, y, area, adtyp, olet, dam, color, dest, yours, pa)
-int x, y;
-ExplodeRegion *area;
-int adtyp; /* AD_TYPE and O_CLASS describing the cause of the explosion */
-int olet;
-int dam;
-int color;
-int dest; /* 0 = normal, 1 = silent, 2 = remote, 4 = no sound */	
-boolean yours; /* is it your fault (for killing monsters) */
-struct permonst *pa; /* permonst of the attacker (used for disease) */
+do_explode(int x, int y, ExplodeRegion *area, int adtyp, int olet, int dam, int color, int dest, boolean yours, struct permonst *pa, long special_flags)
 {
 	int i, k, damu = dam;
 	boolean starting = 1, silver = FALSE;
@@ -318,22 +305,36 @@ struct permonst *pa; /* permonst of the attacker (used for disease) */
 				str = "burning oil";
 			else if(olet == SCROLL_CLASS)
 				str = "tower of flame";
+			else if(special_flags&GOAT_SPELL)
+				str = "fanged flames";
 			else
 				str = "fireball";
 			break;
-		case AD_COLD: str = "ball of cold";
+		case AD_COLD:
+			 if(special_flags&GOAT_SPELL)
+				str = "fanged blizzard";
+			else
+				str = "ball of cold";
 			break;
 		case AD_DEAD: str = "death field";
 			break;
 		case AD_DISN: str = "disintegration field";
 			break;
 		case AD_EELC:
-		case AD_ELEC: str = "ball of lightning";
+		case AD_ELEC:
+			 if(special_flags&GOAT_SPELL)
+				str = "cloven-hoofed lightning";
+			else
+				str = "pillar of lightning";
 			break;
 		case AD_DRST: str = "poison gas cloud";
 			break;
 		case AD_EACD:
-		case AD_ACID: str = "splash of acid";
+		case AD_ACID:
+			 if(special_flags&GOAT_SPELL)
+				str = "splash of drool";
+			else
+				str = "splash of acid";
 			break;
 		case AD_SLIM: str = "spout of acidic slime";
 			break;
@@ -425,63 +426,71 @@ struct permonst *pa; /* permonst of the attacker (used for disease) */
 #endif
 		if (mtmp) {
 		    if (mtmp->mhp < 1) explmask = 2;
-		    else switch(adtyp) {
-			case AD_PHYS:
-				if(mtmp->mtyp == PM_LICH__THE_FIEND_OF_EARTH || 
-				   mtmp->mtyp == PM_BURNING_FERN_SPROUT ||
-				   mtmp->mtyp == PM_BURNING_FERN ||
-				   mtmp->mtyp == PM_CHAOS
-				) explmask |= TRUE;
-				break;
-			case AD_MAGM:
-				explmask |= resists_magm(mtmp);
-				break;
-			case AD_EFIR:
-			case AD_FIRE:
-				explmask |= resists_fire(mtmp);
-				break;
-			case AD_MADF:
-				explmask |= (resists_fire(mtmp) && resists_magm(mtmp));
-				break;
-			case AD_ECLD:
-			case AD_COLD:
-				explmask |= resists_cold(mtmp);
-				break;
-			case AD_DISN:
-				explmask |= resists_disint(mtmp);
-				break;
-			case AD_DEAD:
-				explmask |= resists_death(mtmp);
-				break;
-			case AD_EELC:
-			case AD_ELEC:
-				explmask |= resists_elec(mtmp);
-				break;
-			case AD_DRST:
-				explmask |= resists_poison(mtmp);
-				break;
-			case AD_EACD:
-			case AD_ACID:
-				explmask |= resists_acid(mtmp);
-				break;
-			case AD_SLIM:
-				explmask |= resists_acid(mtmp) || Slime_res(mtmp);
-				break;
-			case AD_DISE:
-				explmask |= resists_sickness(mtmp);
-				break;
-			case AD_DARK:
-				explmask |= dark_immune(mtmp);
-				break;
-			case AD_BLUD:
-				// explmask |= has_blood_mon(mtmp);
-				break;
-			case AD_WET:
-				break;
-			default:
-				impossible("explosion type %d?", adtyp);
-				break;
-		    }
+		    else {
+				switch(adtyp) {
+				case AD_PHYS:
+					if(mtmp->mtyp == PM_LICH__THE_FIEND_OF_EARTH || 
+					   mtmp->mtyp == PM_BURNING_FERN_SPROUT ||
+					   mtmp->mtyp == PM_BURNING_FERN ||
+					   mtmp->mtyp == PM_CHAOS
+					) explmask |= TRUE;
+					break;
+				case AD_MAGM:
+					explmask |= resists_magm(mtmp);
+					break;
+				case AD_EFIR:
+				case AD_FIRE:
+					explmask |= resists_fire(mtmp);
+					break;
+				case AD_MADF:
+					explmask |= (resists_fire(mtmp) && resists_magm(mtmp));
+					break;
+				case AD_ECLD:
+				case AD_COLD:
+					explmask |= resists_cold(mtmp);
+					break;
+				case AD_DISN:
+					explmask |= resists_disint(mtmp);
+					break;
+				case AD_DEAD:
+					explmask |= resists_death(mtmp);
+					break;
+				case AD_EELC:
+				case AD_ELEC:
+					explmask |= resists_elec(mtmp);
+					break;
+				case AD_DRST:
+					explmask |= resists_poison(mtmp);
+					break;
+				case AD_EACD:
+				case AD_ACID:
+					explmask |= resists_acid(mtmp);
+					break;
+				case AD_SLIM:
+					explmask |= resists_acid(mtmp) || Slime_res(mtmp);
+					break;
+				case AD_DISE:
+					explmask |= resists_sickness(mtmp);
+					break;
+				case AD_DARK:
+					explmask |= dark_immune(mtmp);
+					break;
+				case AD_BLUD:
+					// explmask |= has_blood_mon(mtmp);
+					break;
+				case AD_WET:
+					break;
+				default:
+					impossible("explosion type %d?", adtyp);
+					break;
+				}
+				if(special_flags&GOAT_SPELL){
+					mtmp->mgoatmarked = TRUE;
+					if(yours){
+						mtmp->myoumarked = TRUE;
+					}
+				}
+			}
 		}
 		if (mtmp && cansee(xi,yi) && !canspotmon(mtmp))
 		    map_invisible(xi, yi);
@@ -558,7 +567,7 @@ struct permonst *pa; /* permonst of the attacker (used for disease) */
 
 		/* DS: Allow monster induced explosions also */
 		//if (type >= 0 || type <= -10) //what was this supposed to correspond to? It isn't listed by buzz() in zap.c
-		(void)zap_over_floor((xchar)xi, (xchar)yi, adtyp, WAND_CLASS, FALSE, &shopdamage);
+		(void)zap_over_floor((xchar)xi, (xchar)yi, adtyp, WAND_CLASS, yours, &shopdamage);
 
 		mtmp = m_at(xi, yi);
 #ifdef STEED
@@ -667,6 +676,10 @@ struct permonst *pa; /* permonst of the attacker (used for disease) */
 		 * call mondied, not killed, if it's not your blast
 		 */
 			int mdam = dam;
+			//Explosions deal extra damage to larger monsters
+			if(mtmp->data->msize > MZ_MEDIUM){
+				mdam = (mdam * (mtmp->data->msize))/MZ_MEDIUM;
+			}
 
 			if (resist(mtmp, olet, 0, FALSE)) {
 			    if (!silent && cansee(xi,yi))
@@ -715,7 +728,8 @@ struct permonst *pa; /* permonst of the attacker (used for disease) */
 				mdam *= 2;
 			else if (has_blood_mon(mtmp) && adtyp == AD_BLUD)
 				mdam += mlev(mtmp);
-			
+			if(yours && adtyp == AD_BLUD)
+				mdam += u.uimpurity/2;
 			if(adtyp == AD_WET){
 				water_damage(mtmp->minvent, FALSE, FALSE, FALSE, mtmp);
 			}
@@ -851,6 +865,11 @@ struct permonst *pa; /* permonst of the attacker (used for disease) */
 			killer = killer_buf;
 			/* Known BUG: BURNING suppresses corpse in bones data,
 			   but done does not handle killer reason correctly */
+			if (!u.uconduct.killer && !yours){
+				//Pcifist PCs aren't combatants so if something kills them up "killed peaceful" type impurities
+				IMPURITY_UP(u.uimp_murder)
+				IMPURITY_UP(u.uimp_bloodlust)
+			}
 			done((adtyp == AD_FIRE || adtyp == AD_EFIR || adtyp == AD_MADF) ? BURNING : DIED);
 		    }
 		}
@@ -1315,7 +1334,7 @@ int dest;
     grenade_effects(obj, x, y, fiery_area, gas_area, dig_area, isyou);
     if (fiery_area->nlocations) {
 	adtyp = AD_FIRE;
-	do_explode(x, y, fiery_area, adtyp, WEAPON_CLASS, d(3,6), EXPL_FIERY, dest, isyou, (struct permonst *)0);
+	do_explode(x, y, fiery_area, adtyp, WEAPON_CLASS, d(3,6), EXPL_FIERY, dest, isyou, (struct permonst *)0, 0L);
     }
     wake_nearto(x, y, 400);
     /* Like cartoons - the explosion first, then
@@ -1341,7 +1360,7 @@ int dest;
     if (gas_area->nlocations) {
 	adtyp = AD_DRST;
 	do_explode(x, y, gas_area, adtyp, WEAPON_CLASS, d(3,6),
-	  EXPL_NOXIOUS, dest, isyou, (struct permonst *)0);
+	  EXPL_NOXIOUS, dest, isyou, (struct permonst *)0, 0L);
     }
     free_explode_region(gas_area);
     if (shop_damage) pay_for_damage("damage", FALSE);

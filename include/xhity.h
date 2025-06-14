@@ -1,6 +1,8 @@
 #ifndef XHITY_H
 #define XHITY_H
 
+#define MELEEHURT_LONGSLASH_MASK	0x0000000FL
+
 /* macros to unify player and monster */
 #define x(mon)				((mon)==&youmonst ? u.ux : (mon)->mx)
 #define y(mon)				((mon)==&youmonst ? u.uy : (mon)->my)
@@ -36,6 +38,7 @@
 #define Breathless_res(mon)	((mon)==&youmonst ? Breathless : breathless_mon(mon))
 #define Water_res(mon)		((mon)==&youmonst ? Waterproof : mon_resistance((mon), WATERPROOF))
 #define Gaze_res(mon)		((mon)==&youmonst ? Gaze_immune : mon_resistance((mon), GAZE_RES))
+#define ProtectItems(mon)		((mon)==&youmonst ? ProtItems : mon_resistance((mon), PROT_ITEMS))
 #define creature_at(x,y)	(isok(x,y) ? MON_AT(x, y) ? level.monsters[x][y] : (x==u.ux && y==u.uy) ? &youmonst : (struct monst *)0 : (struct monst *)0)
 
 #define FATAL_DAMAGE_MODIFIER 9001
@@ -71,7 +74,11 @@
 #define SUBOUT_SHUBTONG	15	/* Mind-stealing tongue attack */
 #define SUBOUT_V_CLAWS1	16	/* Extra vermiurge claws 1 */
 #define SUBOUT_V_CLAWS2	17	/* Extra vermiurge claws 2 */
-#define MAX_SUBOUT		18
-#define SUBOUT_ARRAY_SIZE (MAX_SUBOUT/8+1)
+#define SUBOUT_BRAINSUCK	18	/* Brain suckers */
+#define SUBOUT_ROT_SPORES	19	/* Pasive spore attack */
+#define SUBOUT_ROT_VOMIT	20	/* Vomit rot */
+#define SUBOUT_ROT_STING	21	/* Rot stinger */
+#define MAX_SUBOUT		22
+#define SUBOUT_ARRAY_SIZE (MAX_SUBOUT/16+1)
 
 #endif

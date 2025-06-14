@@ -4626,7 +4626,7 @@ Once again, you have returned to Tower Xaxox.
 "You dare turn against Lolth!?  Even in death you shall not know peace!"
 %E
 %Cp Hdr 00161
-""%l is using you.  You won't survive this fight!"
+"%l is using you.  You won't survive this fight!"
 %E
 %Cp Hdr 00162
 "Even a drider's fate is too good for you!"
@@ -8018,6 +8018,226 @@ out your days in %H would seem pretty tame.
 our oral history foretells for you.  Forever more, though, your name shall
 be spoken by the %gP with awe.  You are truly an inspiration to your
 %sp!"
+%E
+#
+#	Undead Hunter
+#
+%Cc Hnt 00001
+You find yourself standing in sight of %H.  The smell
+of fresh funeral pyres tells you that something
+is obviously wrong here.
+
+You realize that %l needs your assistance!
+%E
+%Cp Hnt 00002
+Once again, you stand before %H.
+%E
+%Cp Hnt 00003
+Again you face %H.  Your intuition hints that this may be
+the final time you come here.
+%E
+%Cp Hnt 00005
+"Greetings, %r.  It is good to see you."
+%E
+%Cp Hnt 00006
+"Ah, %p!  Surely you can help us in our hour of need."
+%E
+%Cp Hnt 00007
+"Greetings, %s.  %lC has great need of your help."
+%E
+%Cp Hnt 00008
+"We are glad you have returned.  That last fight was a close one."
+%E
+%Cp Hnt 00009
+"Good Evening %p.  Have you Laid To Rest many recently?"
+%E
+%Cp Hnt 00010
+"Hail, and well met, brave %c."
+%E
+%Cp Hnt 00011
+"Study %d, %s."
+%E
+%Cp Hnt 00012
+"%lC told us you had succeeded!"
+%E
+%Cp Hnt 00013
+"With %n destroyed, we are safe once more!"
+%E
+%Cp Hnt 00014
+"I hear you are to be nominated as next vicar!"
+%E
+%Cc Hnt 00015
+"Ah, %p, I'm glad you have made it back.  As you see we fight for our 
+survival each night. You must halt the spreading plague of beasts at
+the source, but first I must make sure you are ready."
+%E
+%Cp Hnt 00016
+"Again, my %S, you stand before me.  Are you ready now to help us?"
+%E
+%Cp Hnt 00017
+"Once more, %p, you stand within the sanctum.  Are you ready now?"
+%E
+%Cc Hnt 00018
+"You fool, %p!  Why did I waste all of those years teaching you
+the arcane secrets?  Get out of here!  I must find another hunter,
+as you have failed us utterly."
+%E
+%Cc Hnt 00019
+"No, you are not yet ready %p.  %nC is the most wicked of the 
+undead and you would surely fail.  Go back into the world and return when 
+you have Laid to Rest a few more.  We will survive until then."
+%E
+%Cc Hnt 00020
+UNUSED?
+%E
+%Cc Hnt 00021
+"Yes, %p.  You are truly ready now.  Attend to me and I shall
+tell you of what has transpired:
+
+"Several months ago, the circuit rider assigned to %i
+returned to report a most unusual form of lycanthropy aflicting
+a widower living on the far side of the dark forest.
+
+"The rider took %o and departed,
+intending to make a study of the case.
+
+"We haven't heard from the rider since, but ever since a virulent
+plague of lycanthropy has been spreading through %i,
+and the werewolves attack the city nightly.
+
+"You must travel through %i, reclaim
+%o, Lay to Rest %n,
+and halt this spreading scourge of beasts."
+%E
+%Cp Hnt 00025
+"You can prevail, if you devote yourself to the studies of %d."
+%E
+%Cp Hnt 00026
+"Beware the werewolf's bite."
+%E
+%Cp Hnt 00027
+"Find %o as fast as possible.  It will make your attack much easier."
+%E
+%Cp Hnt 00028
+"Beasts fear fire."
+%E
+%Cp Hnt 00029
+"Beware the insubstantial ghosts of %i."
+%E
+%Cp Hnt 00030
+"Carry %o.  It will assist you against the beasts."
+%E
+%Cp Hnt 00031
+"May you Lay to Rest this scourge of beasts."
+%E
+%Cp Hnt 00032
+"The undead legions are weakest during the daylight hours."
+%E
+%Cp Hnt 00033
+"Be sure you are immune to cold.  The strange wolves have the touch of ice."
+%E
+%Cp Hnt 00034
+"Beware the graveyard-city in %i. The ancient elves were destroyed long ago, but their spirits linger."
+%E
+%Cc Hnt 00035
+You have reached the outer ward, where the city encroaches on %i. 
+
+The cold howling wind surrounds you. The sky above is filled with clouds
+that seem to get thicker closer some center. In the dark forest ahead you
+sense the presence of undead in larger numbers than you have ever
+encountered before.
+
+You remember %lC's description. It is ahead that you will find
+%n's trail.
+%E
+%Cp Hnt 00036
+Once again, you stand before the entrance to %i.
+%E
+%Cc Hnt 00040
+A strange smell is all about you. Through the cold mist, you %x
+a ruined hovel.
+
+This is the lair of %n.
+%E
+%Cp Hnt 00041
+Once again, you stand in sight of %ns lair.
+%E
+%Cc Hnt 00050
+%nC howls and attacks!
+%E
+%Cp Hnt 00051
+%nC barks.
+%E
+%Cp Hnt 00052
+%nC growls.
+%E
+%Cp Hnt 00053
+%nC screams.
+%E
+%Cp Hnt 00060
+%nC growls.
+%E
+%Cp Hnt 00061
+%nC growls.
+%E
+%Cp Hnt 00062
+%nC barks.
+%E
+%Cp Hnt 00063
+%nC screams at you: "Where is she! This is the fault of your fraudulent church!"
+%E
+%Cp Hnt 00064
+%nC growls.
+%E
+%Cp Hnt 00065
+%nC growls.
+%E
+%Cp Hnt 00066
+%nC growls.
+%E
+%Cp Hnt 00067
+%nC barks.
+%E
+%Cp Hnt 00068
+%nC growls.
+%E
+%Cp Hnt 00069
+%nC growls.
+%E
+%Cc Hnt 00070
+As you pick up %o, it flares with ghostly fire.
+%E
+%Cc Hnt 00080
+Suddenly, %n grasps the stake driven into his
+head and screams in agony. A mad clarity fills his one
+remaining eye, and he rips the stake free in a single
+sudden motion and falls down dead!
+
+...Above you, the moon glows bright through the clouds.
+%E
+%Cc Hnt 00081
+"You have returned %p, and with %o too!"
+
+"It is truly a day to celebrate. With %n 
+defeated the threat here is gone. For your aid against the
+scourge I appoint you the new caretaker of %o.
+I'm sure it will be of great use in your studies. I will show
+you how to channel its flames through your strikes.
+
+"May you Lay many to Rest %p."
+%E
+%Cc Hnt 00082
+%l reiterates that %o is yours now.
+
+"The time has come to resume your search for the Amulet.
+%Z await your return through the magic portal which brought
+you here."
+%E
+%Cp Hnt 00090
+"Welcome back, %p.  How is your quest for the Amulet going?"
+%E
+%Cc Hnt 00091
+"Excellent, %p.  I see you have recovered the Amulet!
 %E
 #
 #	Valkyrie

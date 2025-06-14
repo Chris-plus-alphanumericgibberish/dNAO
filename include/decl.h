@@ -384,6 +384,7 @@ E NEARDATA struct sinfo {
 } program_state;
 
 E boolean restoring;
+E boolean loading_mons;
 
 E const char quitchars[];
 E const char vowels[];
@@ -404,6 +405,7 @@ E NEARDATA char *save_cm;
 #define NO_KILLER_PREFIX 2
 E NEARDATA int killer_format;
 E const char *killer;
+E const char *title_override;
 E const char *delayed_killer;
 #ifdef GOLDOBJ
 E long done_money;
@@ -513,12 +515,12 @@ E NEARDATA struct obj *invent,
 #ifdef TOURIST
 	*uarmu,				/* under-wear, so to speak */
 #endif
-	*uskin, *uamul, *uleft, *uright, *ublindf,
+	*uskin, *uamul, *ubelt, *uleft, *uright, *ublindf,
 	*uwep, *uswapwep, *uquiver;
 
 /* Needs to update, so it's redefined each time whenever it's used */
-#define ARMOR_SLOTS { uarm, uarmc, uarmf, uarmh, uarmg, uarms, uarmu }
-#define WORN_SLOTS { uarm, uarmc, uarmf, uarmh, uarmg, uarms, uarmu, uamul, uleft, uright, ublindf, uwep, uswapwep, uquiver }
+#define ARMOR_SLOTS { uarm, uarmc, uarmf, uarmh, uarmg, uarms, uarmu, ubelt }
+#define WORN_SLOTS { uarm, uarmc, uarmf, uarmh, uarmg, uarms, uarmu, uamul, ubelt, uleft, uright, ublindf, uwep, uswapwep, uquiver }
 
 E NEARDATA struct obj *urope;		/* defined only when entangled */
 E NEARDATA struct obj *uchain;		/* defined only when punished */
@@ -552,6 +554,8 @@ E NEARDATA struct mvitals {
 	uchar	born; /*How many of this monster have been created in a way that respects extinction*/
 	uchar	died; /*How many of this monster have died of any cause*/
 	uchar	killed; /*How many of this monster have died at the PC's hands*/
+	uchar	dissected; /*How many of this monster has the PC dissected*/
+	uchar	reanimated; /*How many of this monster has the PC reanimated*/
 	long long mvflags;
 	int	san_lost;
 	int	insight_gained;
@@ -717,59 +721,61 @@ struct u_achieve {
 		Bitfield(killed_demogorgon,1);		/* Bragging rights */
 		unsigned long long	trophies;	/* Flags for Junethack trophies */
 		unsigned long iea_flags;	/* IEA flags for Junethack trophy */
-#define	ARC_QUEST		0x1L << 0
-#define	CAV_QUEST		0x1L << 1
-#define	CON_QUEST		0x1L << 2
-#define	KNI_QUEST		0x1L << 3
-#define	ANA_QUEST		0x1L << 4
-#define	AND_QUEST		0x1L << 5
-#define	ANA_ASC			0x1L << 6
-#define	BIN_QUEST		0x1L << 7
-#define	BIN_ASC			0x1L << 8
-#define	PIR_QUEST		0x1L << 9
-#define	BRD_QUEST		0x1L << 10
-#define	NOB_QUEST		0x1L << 11
-#define	HDR_NOB_QUEST	0x1L << 12
-#define	HDR_SHR_QUEST	0x1L << 13
-#define	DRO_NOB_QUEST	0x1L << 14
-#define	DRO_SHR_QUEST	0x1L << 15
-#define	DWA_NOB_QUEST	0x1L << 16
-#define	DWA_KNI_QUEST	0x1L << 17
-#define	GNO_RAN_QUEST	0x1L << 18
-#define	ELF_SHR_QUEST	0x1L << 19
-#define	CLOCK_ASC		0x1L << 20
-#define	CHIRO_ASC		0x1L << 21
-#define	YUKI_ASC		0x1L << 22
-#define	HALF_ASC		0x1L << 23
-#define	LAW_QUEST		0x1L << 24
-#define	NEU_QUEST		0x1L << 25
-#define	CHA_QUEST		0x1L << 26
-#define	MITH_QUEST		0x1L << 27
-#define	MORD_QUEST		0x1L << 28
-#define	SECOND_THOUGHTS	0x1L << 29
-#define	ILLUMIAN		0x1L << 30
-#define	RESCUE			0x1L << 31
-#define	FULL_LOADOUT	0x1L << 32
-#define	NIGHTMAREHUNTER	0x1L << 33
-#define	SPEED_PHASE		0x1L << 34
-#define	QUITE_MAD		0x1L << 35
-#define	TOTAL_DRUNK		0x1L << 36
-#define	MAD_QUEST		0x1L << 37
-#define	LAMASHTU_KILL	0x1L << 38
-#define	BAALPHEGOR_KILL	0x1L << 39
-#define	ANGEL_VAULT		0x1L << 40
-#define	ANCIENT_VAULT	0x1L << 41
-#define	TANNINIM_VAULT	0x1L << 42
-#define	CASTLE_WISH		0x1L << 43
-#define	UNKNOWN_WISH	0x1L << 44
-#define	FEM_DRA_NOB_QUEST	0x1L << 45
-#define	DEVIL_VAULT		0x1L << 46
-#define	DEMON_VAULT		0x1L << 47
-#define	BOKRUG_QUEST	0x1L << 48
-#define	HEA_QUEST		0x1L << 49
-#define	DRO_HEA_QUEST	0x1L << 50
-#define	MONK_QUEST		0x1L << 51
-#define	IEA_UPGRADES	0x1L << 52
+#define	ARC_QUEST		0x1LL << 0
+#define	CAV_QUEST		0x1LL << 1
+#define	CON_QUEST		0x1LL << 2
+#define	KNI_QUEST		0x1LL << 3
+#define	ANA_QUEST		0x1LL << 4
+#define	AND_QUEST		0x1LL << 5
+#define	ANA_ASC			0x1LL << 6
+#define	BIN_QUEST		0x1LL << 7
+#define	BIN_ASC			0x1LL << 8
+#define	PIR_QUEST		0x1LL << 9
+#define	BRD_QUEST		0x1LL << 10
+#define	NOB_QUEST		0x1LL << 11
+#define	HDR_NOB_QUEST	0x1LL << 12
+#define	HDR_SHR_QUEST	0x1LL << 13
+#define	DRO_NOB_QUEST	0x1LL << 14
+#define	DRO_SHR_QUEST	0x1LL << 15
+#define	DWA_NOB_QUEST	0x1LL << 16
+#define	DWA_KNI_QUEST	0x1LL << 17
+#define	GNO_RAN_QUEST	0x1LL << 18
+#define	ELF_SHR_QUEST	0x1LL << 19
+#define	CLOCK_ASC		0x1LL << 20
+#define	CHIRO_ASC		0x1LL << 21
+#define	YUKI_ASC		0x1LL << 22
+#define	HALF_ASC		0x1LL << 23
+#define	LAW_QUEST		0x1LL << 24
+#define	NEU_QUEST		0x1LL << 25
+#define	CHA_QUEST		0x1LL << 26
+#define	MITH_QUEST		0x1LL << 27
+#define	MORD_QUEST		0x1LL << 28
+#define	SECOND_THOUGHTS	0x1LL << 29
+#define	ILLUMIAN		0x1LL << 30
+#define	RESCUE			0x1LL << 31
+#define	FULL_LOADOUT	0x1LL << 32
+#define	NIGHTMAREHUNTER	0x1LL << 33
+#define	SPEED_PHASE		0x1LL << 34
+#define	QUITE_MAD		0x1LL << 35
+#define	TOTAL_DRUNK		0x1LL << 36
+#define	MAD_QUEST		0x1LL << 37
+#define	LAMASHTU_KILL	0x1LL << 38
+#define	BAALPHEGOR_KILL	0x1LL << 39
+#define	ANGEL_VAULT		0x1LL << 40
+#define	ANCIENT_VAULT	0x1LL << 41
+#define	TANNINIM_VAULT	0x1LL << 42
+#define	CASTLE_WISH		0x1LL << 43
+#define	UNKNOWN_WISH	0x1LL << 44
+#define	FEM_DRA_NOB_QUEST	0x1LL << 45
+#define	DEVIL_VAULT		0x1LL << 46
+#define	DEMON_VAULT		0x1LL << 47
+#define	BOKRUG_QUEST	0x1LL << 48
+#define	HEA_QUEST		0x1LL << 49
+#define	DRO_HEA_QUEST	0x1LL << 50
+#define	MONK_QUEST		0x1LL << 51
+#define	IEA_UPGRADES	0x1LL << 52
+#define	UH_QUEST		0x1LL << 53
+#define	UH_ASC			0x1LL << 54
 #define ACHIEVE_NUMBER	53
 };
 
@@ -785,11 +791,9 @@ E struct realtime_data {
 } realtime_data;
 #endif /* RECORD_REALTIME || REALTIME_ON_BOTL */
 
-
 #ifdef SIMPLE_MAIL
 E int mailckfreq;
 #endif
-
 
 struct _plinemsg {
     xchar msgtype;
@@ -805,6 +809,20 @@ E struct _plinemsg *pline_msg;
 #define MSGTYP_NOREP   1
 #define MSGTYP_NOSHOW  2
 #define MSGTYP_STOP    3
+
+struct querytype {
+    xchar querytype;
+    char *pattern;
+    regex_t match;
+    boolean is_regexp;
+    struct querytype *next;
+};
+
+extern struct querytype *query_types;
+
+#define QUERYTYP_NORMAL 0
+#define QUERYTYP_YN     1
+#define QUERYTYP_YESNO  2
 
 #define ROLL_FROM(array)	array[rn2(SIZE(array))]
 

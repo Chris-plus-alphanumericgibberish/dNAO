@@ -68,8 +68,9 @@ struct u_event {
 #define ARTWISH_SPENT	2
 	Bitfield(ascended,1);			/*34 has offered the Amulet */
 	Bitfield(knoxmade,1);			/*35 Portal to Ludios has been made in the main dungeon, teleport ok */
+	Bitfield(qrecalled,1);			/*36 Quest re-opened */
 	
-	Bitfield(padding,10);			/*45 reseve another bitfield in event. */
+	Bitfield(padding, 9);			/*45 reseve another bitfield in event. */
 };
 
 /* KMH, conduct --
@@ -102,6 +103,7 @@ struct Role {
 	struct RoleName name;	/* the role's name (from u_init.c) */
 	struct RoleName rank[9]; /* names for experience levels (from botl.c) */
 	int lgod, ngod, cgod;	/* god numbers (from gnames.h) */
+	int vgod;				/* god number (from gnames.h) to use for vampires */
 	const char *filecode;	/* abbreviation for use in file names */
 	const char *homebase;	/* quest leader's location (from questpgr.c) */
 	const char *intermed;	/* quest intermediate goal (from questpgr.c) */
@@ -310,6 +312,7 @@ struct you {
 #define TT_LAVA		3
 #define TT_INFLOOR	4
 #define TT_FLESH_HOOK	5
+#define TT_SALIVA	6
 	char	urooms[5];	/* rooms (roomno + 3) occupied now */
 	char	urooms0[5];	/* ditto, for previous position */
 	char	uentered[5];	/* rooms (roomno + 3) entered this turn */
@@ -325,7 +328,7 @@ struct you {
 #define DEFAULT_HMAX	2000
 	unsigned uhs;		/* hunger state - see eat.c */
 
-#define FFORM_LISTSIZE	(LAST_FFORM/32 + 1)
+#define FFORM_LISTSIZE	(LAST_FFORM/16 + 1)
 	unsigned long int fightingForm[FFORM_LISTSIZE];/* special properties */
 	int ueldritch_style;
 	Bitfield(uavoid_passives,1);
@@ -333,6 +336,8 @@ struct you {
 	Bitfield(uavoid_grabattk,1);
 	Bitfield(uavoid_englattk,1);
 	Bitfield(uavoid_unsafetouch,1);
+	Bitfield(uavoid_theft,1);
+	Bitfield(uno_auto_attacks,1);
 	int umystic;	/*Monk mystic attacks active*/
 #define monk_style_active(style) (u.umystic & (1 << (style-1)))
 #define toggle_monk_style(style) (u.umystic  = u.umystic ^ (1 << (style-1)))
@@ -345,6 +350,7 @@ struct you {
 	// long laststruck;
 	long lastmoved;
 	long lastcast;
+	long bladesong;
 	
 	boolean ukinghill; /* records if you are carying the pirate treasure (and are therefor king of the hill) */
 	int protean; /* counter for the auto-polypiling power of the pirate treasure*/
@@ -411,6 +417,7 @@ struct you {
 #define MATTK_U_ELMENTAL    29
 #define MATTK_WHISPER    	30
 #define MATTK_KI    		31
+#define MATTK_UPGRADE    	32
 
 	struct attribs	macurr,		/* for monster attribs */
 			mamax;		/* for monster attribs */
@@ -604,49 +611,171 @@ struct you {
 	int		uentangled_otyp; /* to record the otyp of an item entangling you */
 	long	uentangled_oid; /* to record the oid of the item entangling you */
 	long int spawnedGold; /* to record total amount of gold spawned in a game */
+	long int total_damage; /* to record total amount of damage in game */
 	int 	usanity;	/* to record level of sanity */
 	unsigned long long int 	umadness;	/* to afflictions */
-#define	MAD_DELUSIONS		0x0000000000000001L
-#define	MAD_REAL_DELUSIONS	0x0000000000000002L
-#define	MAD_SANCTITY		0x0000000000000004L
-#define	MAD_GLUTTONY		0x0000000000000008L
-#define	MAD_SPORES			0x0000000000000010L
-#define	MAD_FRIGOPHOBIA		0x0000000000000020L
-#define	MAD_CANNIBALISM		0x0000000000000040L
-#define	MAD_RAGE			0x0000000000000080L
-#define	MAD_ARGENT_SHEEN	0x0000000000000100L
-#define	MAD_SUICIDAL		0x0000000000000200L
-#define	MAD_NUDIST			0x0000000000000400L
-#define	MAD_OPHIDIOPHOBIA	0x0000000000000800L
-#define	MAD_ARACHNOPHOBIA	0x0000000000001000L
-#define	MAD_ENTOMOPHOBIA	0x0000000000002000L
-#define	MAD_THALASSOPHOBIA	0x0000000000004000L
-#define	MAD_PARANOIA		0x0000000000008000L
-#define	MAD_TALONS			0x0000000000010000L
-#define	MAD_COLD_NIGHT		0x0000000000020000L
-#define	MAD_OVERLORD		0x0000000000040000L
-#define	MAD_DREAMS			0x0000000000080000L
-#define	MAD_NON_EUCLID		0x0000000000100000L
-#define	MAD_SPIRAL			0x0000000000200000L
-#define	MAD_HELMINTHOPHOBIA	0x0000000000400000L
-#define	MAD_GOAT_RIDDEN		0x0000000000800000L
-#define	MAD_FRENZY			0x0000000001000000L
-#define	MAD_THOUSAND_MASKS	0x0000000002000000L
-#define	MAD_FORMICATION		0x0000000004000000L
-#define	MAD_HOST			0x0000000008000000L
-#define	MAD_SCIAPHILIA		0x0000000010000000L
-#define	MAD_FORGETFUL		0x0000000020000000L
-#define	MAD_TOO_BIG			0x0000000040000000L
-#define	MAD_APOSTASY		0x0000000080000000L
-#define	MAD_ROTTING			0x0000000100000000L
-#define	MAD_REACHER			0x0000000200000000L
-#define	MAD_SCORPIONS		0x0000000400000000L
-#define	MAD_VERMIN			0x0000000800000000L
+#define	MAD_DELUSIONS		0x0000000000000001LL
+#define	MAD_REAL_DELUSIONS	0x0000000000000002LL
+#define	MAD_SANCTITY		0x0000000000000004LL
+#define	MAD_GLUTTONY		0x0000000000000008LL
+#define	MAD_SPORES			0x0000000000000010LL
+#define	MAD_FRIGOPHOBIA		0x0000000000000020LL
+#define	MAD_CANNIBALISM		0x0000000000000040LL
+#define	MAD_RAGE			0x0000000000000080LL
+#define	MAD_ARGENT_SHEEN	0x0000000000000100LL
+#define	MAD_SUICIDAL		0x0000000000000200LL
+#define	MAD_NUDIST			0x0000000000000400LL
+#define	MAD_OPHIDIOPHOBIA	0x0000000000000800LL
+#define	MAD_ARACHNOPHOBIA	0x0000000000001000LL
+#define	MAD_ENTOMOPHOBIA	0x0000000000002000LL
+#define	MAD_THALASSOPHOBIA	0x0000000000004000LL
+#define	MAD_PARANOIA		0x0000000000008000LL
+#define	MAD_TALONS			0x0000000000010000LL
+#define	MAD_COLD_NIGHT		0x0000000000020000LL
+#define	MAD_OVERLORD		0x0000000000040000LL
+#define	MAD_DREAMS			0x0000000000080000LL
+#define	MAD_NON_EUCLID		0x0000000000100000LL
+#define	MAD_SPIRAL			0x0000000000200000LL
+#define	MAD_HELMINTHOPHOBIA	0x0000000000400000LL
+#define	MAD_GOAT_RIDDEN		0x0000000000800000LL
+#define	MAD_FRENZY			0x0000000001000000LL
+#define	MAD_THOUSAND_MASKS	0x0000000002000000LL
+#define	MAD_FORMICATION		0x0000000004000000LL
+#define	MAD_HOST			0x0000000008000000LL
+#define	MAD_SCIAPHILIA		0x0000000010000000LL
+#define	MAD_FORGETFUL		0x0000000020000000LL
+#define	MAD_TOO_BIG			0x0000000040000000LL
+#define	MAD_APOSTASY		0x0000000080000000LL
+#define	MAD_ROTTING			0x0000000100000000LL
+#define	MAD_REACHER			0x0000000200000000LL
+#define	MAD_SCORPIONS		0x0000000400000000LL
+#define	MAD_VERMIN			0x0000000800000000LL
 #define	LAST_MADNESS		MAD_SCORPIONS
 	int 	uinsight;	/* to record level of insight */
 	/*Insight rate calculation: 40: "high insight" 300: "Approximate per-turn WoYendor intervention rate" 5: "total number of harmful effects" */
 #define INSIGHT_RATE (40*300*5)
-#define COA_PROB	 (max(1, 10000*pow(.95,u.uinsight)))
+#define COA_PROB	 (max(1, 10000*pow(.95,Insight)))
+	int 	uimpurity;	/* to record level of impurity */
+	Bitfield(uimp_meat, 4);
+	Bitfield(uimp_blood, 4);
+	Bitfield(uimp_bodies, 4);
+	Bitfield(uimp_death_magic, 4);
+	Bitfield(uimp_goo_transcendence, 6);
+	Bitfield(uimp_theft, 4);
+	Bitfield(uimp_murder, 4);
+	Bitfield(uimp_bloodlust, 4);
+	Bitfield(uimp_graverobbery, 4);
+	Bitfield(uimp_god_anger, 4);
+	Bitfield(uimp_illness, 4);
+	Bitfield(uimp_dirtiness, 4);
+	Bitfield(uimp_disaster, 4);
+	Bitfield(uimp_seduction, 4);
+	Bitfield(uimp_deep_one, 4);
+	Bitfield(uimp_betrayal, 4);
+	Bitfield(uimp_kuo_toa, 4);
+	Bitfield(uimp_ibite, 4);
+	Bitfield(uimp_mind_flayers, 4);
+	Bitfield(uimp_rot, 4);
+	Bitfield(uimp_poison, 4);
+	Bitfield(uimp_curse, 4); //60/+30 eve/+12 bullets?
+	int 	ureanimation_research;	/* to record progress on reanimation */
+	//Power 1: raise crazed corpses
+	//Power 2: Summon blood creatures
+	//Power 3: Upgrades?
+	long ureanimation_upgrades;
+	int antenae_upgrades;
+// #define ANTENNA_BOLT	0x0001L
+// #define ANTENNA_ERRANT 	0x0002L
+// #define ANTENNA_BOIL 	0x0004L
+// #define ANTENNA_REJECT 	0x0008L
+#define	RE_BOLT_RES		0x00000001L
+#define	RE_WATER_RES	0x00000002L
+#define	RE_CLAIR		0x00000004L
+#define	RE_CLONE_SELF	0x00000008L
+#define	ANTENNA_ERRANT	0x00000010L
+#define	ANTENNA_BOLT	0x00000020L
+#define	ANTENNA_REJECT	0x00000040L
+#define	LAMP_PHASE		0x00000080L
+#define REANIMATION_MAX LAMP_PHASE
+#define REANIMATION_COUNT 8
+#define check_reanimation(upgrade)	(u.ureanimation_upgrades&(upgrade))
+#define add_reanimation(upgrade)	(u.ureanimation_upgrades|=(upgrade))
+	int 	uparasitology_research;	/* to record progress on parasitology */
+	char brainsuckers;
+	char mm_up;
+	char explosion_up;
+	char jellyfish;
+	char cuckoo;
+	// int 	usaprobiology_research; /* to record progress on rot */
+	int 	udefilement_research; /* to record progress on defilement */
+	int mental_scores_down;
+	//Path 1: Preservation
+	long upreservation_upgrades;
+#define PRESERVE_REDUCE_HUNGER 0x00000001L
+#define PRESERVE_PREVENT_ABUSE 0x00000002L
+#define PRESERVE_GAIN_DR 	   0x00000004L
+#define PRESERVE_COLD_RES 	   0x00000008L
+#define PRESERVE_SLEEP_RES 	   0x00000010L
+#define PRESERVE_GAIN_DR_2 	   0x00000020L
+//
+#define PRESERVE_DEAD_TRUCE	   0x00000040L
+#define PRESERVE_MAX		   PRESERVE_DEAD_TRUCE
+#define PRESERVE_ROT_TRIGGER   PRESERVE_GAIN_DR
+#define check_preservation(upgrade)	(u.upreservation_upgrades&(upgrade))
+#define add_preservation(upgrade)	(u.upreservation_upgrades|=(upgrade))
+	//Path 2: Steal will
+	long uvampire_upgrades;
+#define VAMPIRE_THRALLS		   0x00000001L
+#define VAMPIRE_MASTERY		   0x00000002L
+#define VAMPIRE_BLOOD_RIP	   0x00000004L
+#define VAMPIRE_BLOOD_SPIKES   0x00000008L
+#define VAMPIRE_GAZE		   0x00000010L
+#define VAMPIRE_MAX			   VAMPIRE_GAZE
+#define VAMPIRE_COUNT		   5
+#define check_vampire(upgrade)	(u.uvampire_upgrades&(upgrade))
+#define add_vampire(upgrade)	(u.uvampire_upgrades|=(upgrade))
+
+	long urot_upgrades;
+	//Path 3: New life
+#define ROT_VOMIT			   0x00000001L
+#define ROT_WINGS			   0x00000002L
+#define ROT_CLONE			   0x00000004L
+#define ROT_TRUCE			   0x00000008L
+#define ROT_KIN				   0x00000010L
+#define ROT_FEAST			   0x00000020L
+#define ROT_CENT			   0x00000040L
+#define ROT_STING			   0x00000080L
+#define ROT_SPORES			   0x00000100L
+#define ROT_MIN				   ROT_VOMIT
+#define ROT_MAX				   ROT_SPORES
+#define ROT_COUNT			   9
+#define check_rot(upgrade)	(u.urot_upgrades&(upgrade))
+#define add_rot(upgrade)	(u.urot_upgrades|=(upgrade))
+#define remove_rot(upgrade)	(u.urot_upgrades&=~(upgrade))
+	// Blood fly swarm
+	// Rot enemy
+	// Ants and fungi are peaceful
+	// Rotting corpses spawn silvermen
+
+	Bitfield(ublood_smithing, 1);
+	Bitfield(umagic_smithing, 1);
+	Bitfield(uring_lore, 1);
+#define IMPURITY_UP(counter) 	if((counter) < 15){\
+		if((counter) == 0 || !rn2((counter))){\
+			((counter))++;\
+			if((counter) == 1 || (counter) == 4 || (counter) == 15)\
+				u.uimpurity++;\
+		}\
+	}
+#define TRANSCENDENCE_IMPURITY_UP(force) 	if((u.uimp_goo_transcendence) < 63){\
+		if(force || (u.uimp_goo_transcendence) < 4 || !rn2((u.uimp_goo_transcendence/2))){\
+			((u.uimp_goo_transcendence))++;\
+			if((u.uimp_goo_transcendence) == 1 || (u.uimp_goo_transcendence) == 4 || (u.uimp_goo_transcendence) == 8 || (u.uimp_goo_transcendence) == 16 || (u.uimp_goo_transcendence) == 32 || (u.uimp_goo_transcendence) == 63)\
+				u.uimpurity++;\
+		}\
+	}
+	Bitfield(silvergrubs, 1);
+
 	uchar 	wimage;		/* to record if you have the image of a Weeping Angel in your mind */
 	int 	umorgul;	/* to record the number of morgul wounds */
 	int 	utaneggs;	/* tannin eggs */
@@ -777,8 +906,9 @@ struct you {
 #define	GPREM_SPIRIT	6
 #define	CROWN_SPIRIT	7
 #define	ALIGN_SPIRIT	8
-#define	OUTER_SPIRIT	9
-#define	NUM_BIND_SPRITS	10
+#define	OTHER_SPIRIT	9
+#define	OUTER_SPIRIT	10
+#define	NUM_BIND_SPRITS	11
 	//Spirits in order bound:
 	long spirit[NUM_BIND_SPRITS];
 	long spiritTineA,spiritTineB;
@@ -898,7 +1028,7 @@ struct you {
 	boolean ufirst_know;
 	long ufirst_know_timeout;
 	long thoughts;
-#define MAX_GLYPHS ((Role_if(PM_MADMAN) && u.uevent.qcompleted && (u.uinsight >= 20 || u.render_thought)) ? 4 : 3)
+#define MAX_GLYPHS (((Role_if(PM_MADMAN) && u.uevent.qcompleted && (Insight >= 20 || u.render_thought)) || Role_if(PM_UNDEAD_HUNTER)) ? 4 : 3)
 	long mutations[MUTATION_LISTSIZE];
 };	/* end of `struct you' */
 #define uclockwork ((Race_if(PM_CLOCKWORK_AUTOMATON) && !Upolyd) || (Upolyd && youmonst.data->mtyp == PM_CLOCKWORK_AUTOMATON))
@@ -906,8 +1036,8 @@ struct you {
 #define umechanoid (uclockwork || uandroid)
 //BAB
 #define BASE_ATTACK_BONUS(wep)	((Role_if(PM_BARBARIAN) || Role_if(PM_CONVICT) || Role_if(PM_KNIGHT) || Role_if(PM_ANACHRONONAUT) || \
-								Role_if(PM_PIRATE) || Role_if(PM_SAMURAI) || Role_if(PM_VALKYRIE) || (u.sealsActive&SEAL_BERITH) || \
-								(!wep && (martial_bonus() || (u.sealsActive&SEAL_EURYNOME))) || \
+								Role_if(PM_PIRATE) || Role_if(PM_SAMURAI) || Role_if(PM_UNDEAD_HUNTER) || Role_if(PM_VALKYRIE) || \
+								(u.sealsActive&SEAL_BERITH) || (!wep && (martial_bonus() || (u.sealsActive&SEAL_EURYNOME))) || \
 								(Role_if(PM_MONK) && wep && is_monk_weapon(wep)) || \
 								(wep && is_lightsaber(wep) && (Unblind_telepat || (Blind && Blind_telepat)))) ? 1.00 :\
 							 (Role_if(PM_ARCHEOLOGIST) || Role_if(PM_EXILE) || Role_if(PM_CAVEMAN) || Role_if(PM_MONK) || \

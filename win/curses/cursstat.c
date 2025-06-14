@@ -101,6 +101,7 @@ static const struct statcolor default_colors[] = {
     {"Stone", CLR_BRIGHT_MAGENTA},
     {"Slime", CLR_BRIGHT_MAGENTA},
     {"Sufct", CLR_BRIGHT_MAGENTA},
+    {"Bleed", CLR_ORANGE},
     {"Ill", CLR_BRIGHT_MAGENTA},
     {"FoodPois", CLR_BRIGHT_MAGENTA},
     /* Other status effects */
@@ -605,6 +606,11 @@ draw_horizontal(int x, int y, int hp, int hpmax)
         if (strlen(buf) > 0) Strcpy(eos(buf)-1, "");
         wprintw(win, " [%d:%s]", flags.movetoprintcost, buf);
     }
+    if (iflags.showrealtime) {
+        time_t currenttime = get_realtime();
+        wprintw(win, " %ld:%2.2ld", currenttime / 3600,
+                (currenttime % 3600) / 60);
+    }
     if (iflags.statuslines >= 3) {
         y++;
         wmove(win, y, x);
@@ -720,6 +726,11 @@ draw_horizontal_new(int x, int y, int hp, int hpmax)
             }
         if (strlen(buf) > 0) Strcpy(eos(buf)-1, "");
         wprintw(win, " [%d:%s]", flags.movetoprintcost, buf);
+    }
+    if (iflags.showrealtime) {
+        time_t currenttime = get_realtime();
+        wprintw(win, " %ld:%2.2ld", currenttime / 3600,
+                (currenttime % 3600) / 60);
     }
     if (iflags.statuslines >= 4) {
         y++;
@@ -891,6 +902,13 @@ draw_vertical(int x, int y, int hp, int hpmax)
 
     if (flags.time) {
         print_statdiff("Time:          ", &prevtime, moves, STAT_TIME);
+        wmove(win, y++, x);
+    }
+
+    if (iflags.showrealtime) {
+        time_t currenttime = get_realtime();
+        wprintw(win, "Realtime:      %ld:%2.2ld", currenttime / 3600,
+                (currenttime % 3600) / 60);
         wmove(win, y++, x);
     }
 

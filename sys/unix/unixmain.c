@@ -322,6 +322,9 @@ char *argv[];
 		argv++;
 		argc--;
 		switch(argv[0][1]){
+		case 'F':
+			iflags.debug_fuzzer = TRUE;
+			break;
 		case 'D':
 #ifdef WIZARD
 			wizard = TRUE;

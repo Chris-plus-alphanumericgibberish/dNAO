@@ -693,6 +693,7 @@ fixup_special()
 					if (!rn2(3))mkobj_at(TOOL_CLASS, x, y, NO_MKOBJ_FLAGS);
 					if (rn2(6)) mkobj_at(SCROLL_CLASS, x, y, NO_MKOBJ_FLAGS);
 					if (!rn2(4))mkobj_at(GEM_CLASS, x, y, NO_MKOBJ_FLAGS);
+					if (!rn2(4)) mkobj_at(BELT_CLASS, x, y, NO_MKOBJ_FLAGS);
 					if (!rn2(3))mkobj_at(GEM_CLASS, x, y, NO_MKOBJ_FLAGS);
 					if (!rn2(2))mkobj_at(GEM_CLASS, x, y, NO_MKOBJ_FLAGS);
 					if (!rn2(4))mksobj_at(SILVER_SLINGSTONE, x, y, NO_MKOBJ_FLAGS);
@@ -734,6 +735,10 @@ fixup_special()
 				add_to_container(chest, obj);
 			}
 		}
+	}
+	/* Undead Hunter quest: Haunted forest features */
+	if (Role_if(PM_UNDEAD_HUNTER) && In_quest(&u.uz) && qlocate_level.dlevel < u.uz.dlevel && !Is_nemesis(&u.uz)) {
+		place_haunted_forest_features();
 	}
 	/* DROW QUEST: transfer equip */
 	if (urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH && In_quest(&u.uz)) {
@@ -1444,8 +1449,10 @@ register const char *s;
 			*/
 			if (!strcmp(sp->proto, "chalev"))
 				levvar = chaos_dvariant + 1;
-			else if (Is_hell1(&u.uz))
-				levvar = dungeon_topology.hell1_variant;
+			else if (Is_hell1(&u.uz)){
+				if (dungeon_topology.hell1_variant == CHROMA_LEVEL) levvar = BAEL_LEVEL;
+				else levvar = dungeon_topology.hell1_variant;
+			}
 			else if (Is_hell2(&u.uz))
 				levvar = dungeon_topology.hell2_variant;
 			else if (Is_abyss1(&u.uz))
@@ -1454,9 +1461,7 @@ register const char *s;
 				levvar = dungeon_topology.abys2_variant;
 			else if (Is_abyss3(&u.uz))
 				levvar = dungeon_topology.brine_variant;
-			
-			if (dungeon_topology.hell1_variant == CHROMA_LEVEL) levvar = BAEL_LEVEL;
-			
+						
 			Sprintf(protofile, "%s-%d", s, levvar);
 		}
 	    else Strcpy(protofile, s);
@@ -1500,7 +1505,7 @@ register const char *s;
 	}
 	/* quick hack for Binders entering Astral -- change the gods out before loading the level, so that
 	 * the altars are all generated to the correct gods */
-	if (Role_if(PM_EXILE) && on_level(&u.uz, &astral_level)) {
+	if (Role_if(PM_EXILE) && Is_astralevel(&u.uz)) {
 		/* the Deities on Astral are those that stand at the Gate, not the creational ones governing the Dungeon */
 		urole.lgod = GOD_PISTIS_SOPHIA;
 		urole.ngod = GOD_THE_VOID;

@@ -119,6 +119,7 @@
 #define	R_ELEMENTS		0x01000000L	//Cthuqha, Ithaqua, and Karakal
 #define	R_NAMES_1		0x02000000L	//Half of the spirits (based on random order)
 #define	R_NAMES_2		0x04000000L	//Other half of the spirits
+#define	R_YOG_SOTH		0x08000000L	//Yog Sothoth
 
 
 #define	LAST_PAGE		0x40000000L
@@ -161,9 +162,10 @@
 #define	SELECT_ELEMENTS		SELECT_WARDS + 1
 #define	SELECT_SPIRITS1		SELECT_ELEMENTS + 1
 #define	SELECT_SPIRITS2		SELECT_SPIRITS1 + 1
+#define	SELECT_YOG_SOTHOTH	SELECT_SPIRITS2 + 1
 
 
-#define SELECT_STUDY		SELECT_SPIRITS2 + 1
+#define SELECT_STUDY		SELECT_YOG_SOTHOTH + 1
 
 #define SELECT_WHISTLE		1
 #define SELECT_LEASH		SELECT_WHISTLE + 1
@@ -322,7 +324,9 @@ struct artinstance{
 #define	ZPROP_BALANCE	0x00000020L
 #define	ZPROP_PATIENCE	0x00000040L
 #define	ZPROP_FOCUS		0x00000080L
+#define TwinSkiesEtraits	avar2
 #define CarapaceXP avar1
+#define FingerprintProgress avar1
 
 	long avar2;
 #define SnSd2 avar2
@@ -338,18 +342,29 @@ struct artinstance{
 #define	GSTYLE_RESONANT		5
 #define FIRST_GSTYLE		GSTYLE_PENETRATE
 #define LAST_GSTYLE			GSTYLE_RESONANT
+#define ZerthOtyp	avar2
 #define CarapaceLevel avar2
 
 	long avar3;
 #define SnSd3 avar3
 #define IbiteBoons avar3
 #define CarapacePoints avar3
+#define GithStylesSeen avar3
+#define ZerthMaterials avar3
+#define	ZMAT_IRON		0x00000001L
+#define	ZMAT_GREEN		0x00000002L
+#define	ZMAT_SILVER		0x00000004L
+#define	ZMAT_GOLD		0x00000008L
+#define	ZMAT_PLATINUM	0x00000010L
+#define	ZMAT_MITHRIL	0x00000020L
 	long avar4;
 #define SnSd3duration avar4
 #define CarapaceAura avar4
 #define C_CROWN_AURA_ADD 10
 #define C_CROWN_AURA_DIVISOR 100
 #define C_CROWN_AURA_MAX 333
+	int spawn_dnum;
+	int spawn_dlevel;
 };
 
 

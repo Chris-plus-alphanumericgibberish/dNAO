@@ -70,8 +70,8 @@ OBJECT[75%]: '_', "chain", random
 OBJECT[75%]: '_', "chain", random
 OBJECT[75%]: '_', "chain", random
 OBJECT[75%]: '_', "chain", random
-OBJECT[50%]: '0', "heavy iron ball", random
-OBJECT[50%]: '0', "heavy iron ball", random
+OBJECT[50%]: '0', "ball", random
+OBJECT[50%]: '0', "ball", random
 # Non diggable walls
 NON_DIGGABLE:(00,00,75,19)
 
@@ -186,7 +186,7 @@ OBJECT: '_', "chain", (2,15)
 OBJECT: '_', "chain", (3,15)
 OBJECT: '_', "chain", (3,15)
 OBJECT: '_', "chain", (4,15)
-OBJECT: '0', "heavy iron ball", (4,15)
+OBJECT: '0', "ball", (4,15)
 OBJECT: '_', "chain", (4,15)
 OBJECT: '_', "chain", (5,15)
 OBJECT: '_', "chain", (5,15)
@@ -194,7 +194,7 @@ OBJECT: '_', "chain", (6,15)
 OBJECT: '_', "chain", (6,15)
 OBJECT: '_', "chain", (6,15)
 OBJECT: '_', "chain", (7,15)
-OBJECT: '0', "heavy iron ball", (7,15)
+OBJECT: '0', "ball", (7,15)
 OBJECT: '_', "chain", (8,15)
 OBJECT: '_', "chain", (8,15)
 OBJECT: '_', "chain", (9,15)
@@ -205,9 +205,9 @@ OBJECT: '_', "chain", (10,15)
 OBJECT: '_', "chain", (10,15)
 OBJECT: '_', "chain", (11,15)
 OBJECT: '_', "chain", (11,15)
-OBJECT: '0', "heavy iron ball", (11,15)
+OBJECT: '0', "ball", (11,15)
 OBJECT: '_', "chain", (2,16)
-OBJECT: '0', "heavy iron ball", (2,16)
+OBJECT: '0', "ball", (2,16)
 OBJECT: '_', "chain", (3,16)
 OBJECT: '_', "chain", (3,16)
 OBJECT: '_', "chain", (3,16)
@@ -219,7 +219,7 @@ OBJECT: '_', "chain", (6,16)
 OBJECT: '_', "chain", (6,16)
 OBJECT: '_', "chain", (7,16)
 OBJECT: '_', "chain", (7,16)
-OBJECT: '0', "heavy iron ball", (7,16)
+OBJECT: '0', "ball", (7,16)
 OBJECT: '_', "chain", (7,16)
 OBJECT: '_', "chain", (8,16)
 OBJECT: '_', "chain", (8,16)
@@ -234,10 +234,10 @@ OBJECT: '_', "chain", (3,17)
 OBJECT: '_', "chain", (3,17)
 OBJECT: '_', "chain", (3,17)
 OBJECT: '_', "chain", (4,17)
-OBJECT: '0', "heavy iron ball", (4,17)
+OBJECT: '0', "ball", (4,17)
 OBJECT: '_', "chain", (4,17)
 OBJECT: '_', "chain", (4,17)
-OBJECT: '0', "heavy iron ball", (4,17)
+OBJECT: '0', "ball", (4,17)
 OBJECT: '_', "chain", (5,17)
 OBJECT: '_', "chain", (6,17)
 OBJECT: '#', "rusty iron trephination kit", (6,17)
@@ -245,15 +245,15 @@ OBJECT: '_', "chain", (7,17)
 OBJECT: '_', "chain", (7,17)
 OBJECT: '_', "chain", (7,17)
 OBJECT: '_', "chain", (8,17)
-OBJECT: '0', "heavy iron ball", (8,17)
+OBJECT: '0', "ball", (8,17)
 OBJECT: '_', "chain", (9,17)
 OBJECT: '_', "chain", (9,17)
-OBJECT: '0', "heavy iron ball", (9,17)
+OBJECT: '0', "ball", (9,17)
 OBJECT: '_', "chain", (9,17)
 OBJECT: '_', "chain", (10,17)
 OBJECT: '_', "chain", (10,17)
 OBJECT: '_', "chain", (10,17)
-OBJECT: '0', "heavy iron ball", (10,17)
+OBJECT: '0', "ball", (10,17)
 OBJECT: '_', "chain", (11,17)
 # pre-placed inherited artifact
 OBJECT: '_', "chain", place[0], uncursed, 0, "Inherited"
@@ -321,8 +321,8 @@ MONSTER: '&',"lava demon",(26,14),hostile,awake
 MONSTER: ''',"iron golem",(04,13),hostile
 # Objects
 OBJECT:'(',"spoon",(31,10),blessed,0,"The Iron Spoon of Liberation"
-# OBJECT:'0',"heavy iron ball",(31,10),blessed,0,"The Iron Ball of Levitation"
-# OBJECT:'0',"heavy iron ball",(31,10),blessed,0,"The Iron Ball of Liberation"
+# OBJECT:'0',"ball",(31,10),blessed,0,"The Iron Ball of Levitation"
+# OBJECT:'0',"ball",(31,10),blessed,0,"The Iron Ball of Liberation"
 #Box full of crazy
 CONTAINER:'(',"chest",(55,18),cursed,6
 OBJECT:'#',"blessed iron +2 magic-resistant visored helmet named Mask of Waterdeep",contained
@@ -458,8 +458,8 @@ OBJECT[75%]: '_', "chain", random
 OBJECT[75%]: '_', "chain", random
 OBJECT[75%]: '_', "chain", random
 OBJECT[75%]: '_', "chain", random
-OBJECT[50%]: '0', "heavy iron ball", random
-OBJECT[50%]: '0', "heavy iron ball", random
+OBJECT[50%]: '0', "ball", random
+OBJECT[50%]: '0', "ball", random
 
 
 MAZE:"Con-filb",' '

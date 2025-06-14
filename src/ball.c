@@ -687,6 +687,9 @@ xchar x, y;
 	    case TT_LAVA:
 		pline(pullmsg, "lava");
 		break;
+	    case TT_SALIVA:
+		pline(pullmsg, "saliva");
+		break;
 		case TT_FLESH_HOOK: {
 		    You("rip free of the flesh hook!  Ouch!");
 			losehp(d(13,3), "tearing free from a flesh hook", KILLED_BY);
@@ -705,7 +708,7 @@ xchar x, y;
 				losehp(2, "leg damage from being pulled out of a bear trap",
 						KILLED_BY);
 				set_wounded_legs(side, rn1(100,50));
-				if(!Preservation){
+				if(!Preservation && !uarmf->oartifact){
 					if(bootdamage > uarmf->spe){
 						claws_destroy_arm(uarmf);
 					}else{
@@ -848,7 +851,7 @@ bc_sanity_check()
                    uball ? "iron ball" : "");
     }
     /* ball is free when swallowed, changing levels, other times? */
-    if (uball && (uball->otyp != HEAVY_IRON_BALL
+    if (uball && (uball->otyp != BALL
                   || (uball->where != OBJ_FLOOR
                       && uball->where != OBJ_INVENT
                       && uball->where != OBJ_FREE)

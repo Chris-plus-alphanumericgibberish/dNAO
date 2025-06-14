@@ -47,7 +47,8 @@
 #define WOUNDED_LEGS				1 + SLEEPING
 #define STONED						1 + WOUNDED_LEGS
 #define GOLDED						1 + STONED
-#define STRANGLED					1 + GOLDED
+#define SALTED						1 + GOLDED
+#define STRANGLED					1 + SALTED
 #define FROZEN_AIR					1 + STRANGLED
 #define HALLUC						1 + FROZEN_AIR
 #define HALLUC_RES					1 + HALLUC
@@ -135,7 +136,11 @@
 #define EARTH_CRYSTAL				1 + WATER_CRYSTAL
 #define AIR_CRYSTAL					1 + EARTH_CRYSTAL
 #define BLACK_CRYSTAL				1 + AIR_CRYSTAL
-#define LAST_PROP					(BLACK_CRYSTAL)
+#define WITHERING_STAKE				1 + BLACK_CRYSTAL
+#define PROT_ITEMS					1 + WITHERING_STAKE
+#define GOAT_SPELLS					1 + PROT_ITEMS
+#define YOG_SPELLS					1 + GOAT_SPELLS
+#define LAST_PROP					(YOG_SPELLS)
 
 #define MPROP_SIZE					(LAST_PROP/32 + 1)
 
@@ -165,7 +170,6 @@ struct prop {
 #	define W_RINGR	    0x00040000L /* Right ring */
 #	define W_RING	    (W_RINGL | W_RINGR)
 #	define W_TOOL	    0x00080000L /* Eyewear */
-#	define W_ACCESSORY	    (W_AMUL | W_RING| W_TOOL)
 #ifdef STEED
 #	define W_SADDLE     0x00100000L	/* KMH -- For riding monsters */
 #endif
@@ -173,7 +177,11 @@ struct prop {
 #	define W_CHAIN	    0x00400000L /* Punishment chain */
 #	define W_SPIRIT		0x00800000L	/* Bound spirit */
 #	define W_GLYPH		0x01000000L	/* Active thought-glyph */
+#	define W_UPGRADE	0x02000000L	/* Permanent upgrade */
+#	define W_BELT		0x04000000L	/* Belt */
+#	define W_DRESS_DEPTH	0x08000000L	/* Dummy slot for depth considerations concerning the bottom bit of dresses */
 #	define W_SKIN		I_SPECIAL	/* merged into skin */
+#	define W_ACCESSORY	    (W_AMUL | W_RING | W_TOOL | W_BELT)
 #	define W_WORN	     (W_ARMOR | W_ACCESSORY)
 
 	/*** Property is blocked by an object ***/
@@ -207,6 +215,7 @@ struct prop {
 #define WORN_GLOVES	W_ARMG
 #define WORN_BOOTS	W_ARMF
 #define WORN_AMUL	W_AMUL
+#define WORN_BELT	W_BELT
 #define WORN_BLINDF	W_TOOL
 #ifdef TOURIST
 #define WORN_SHIRT	W_ARMU

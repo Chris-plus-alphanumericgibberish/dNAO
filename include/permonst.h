@@ -24,6 +24,7 @@ struct attack {
 	boolean		offhand;	/*This attack is blocked by a shield (offhand weapons and spiritual rapiers handled via at_ type).*/
 	boolean		polywep;	/*This attack is changed to a weapon attack if you're poly'd into this form and wielding a weapon.*/
 	uchar		ins_req;	/*The PC must have reached X insight for the attacker to get this attack.*/
+	char		san_req;	/*The PC must have fallen below or risen above X sanity for the attacker to get this attack.*/
 };
 #define is_null_attk(attk)	((attk) && ((attk)->aatyp == 0 && (attk)->adtyp == 0 && (attk)->damn == 0 && (attk)->damd == 0))
 
@@ -110,6 +111,7 @@ struct permonst {
 					mflagsa,		/* Monster rAce boolean bitflags */
 					mflagsv,		/* Monster Vision boolean bitflags */
 					mflagsw;		/* Monster Warded boolean bitflags */
+	unsigned char light_radius;
 # ifdef TEXTCOLOR
 	uchar		mcolor;			/* color to use */
 # endif

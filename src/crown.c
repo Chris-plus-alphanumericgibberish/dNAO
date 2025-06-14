@@ -189,6 +189,7 @@ choose_crowning()
 			case A_LAWFUL:  retval = 1; break;
 			case A_NEUTRAL: retval = 2; break;
 			case A_CHAOTIC: retval = 3; break;
+			case A_NONE: retval = 3; break;
 			default:
 				impossible("Player alignment is %d?", u.ualign.type);
 				retval = 1;
@@ -324,7 +325,8 @@ gcrownu()
 		u.wardsknown |= WARD_HEPTAGRAM;
 	}
 
-	/* special cases: those that don't get artifact gifts at all */
+	int arti = 0; /* May not be set after this, so init it to 0 for last switch */
+ 	/* special cases: those that don't get artifact gifts at all */
 	if (!crowndata->crowninggift) {
 		obj = (struct obj *)0;
 		switch(hand_of_elbereth[u.uevent.uhand_of_elbereth].godnum) {
@@ -342,7 +344,7 @@ gcrownu()
 	/* general case: there is an intended crowning gift */
 	else {
 		boolean already_exists = FALSE;
-		int arti = crowndata->crowninggift;	/* make a modifiable local-scope copy */
+		arti = crowndata->crowninggift;	/* make a modifiable local-scope copy */
 		
 		/* does it already exist? might need to change what artifact we try to give */
 		if (art_already_exists(arti)) {
@@ -525,16 +527,17 @@ gcrownu()
     }
 
 	/* finally, FOR SOME REASON you get weapon skill for these ones even if you didn't get the weapon */
-	switch (u.uevent.uhand_of_elbereth) {
-		case 1:	/* Excalibur */
-		case 2:	/* Vorpal Blade */
-			expert_weapon_skill(P_LONG_SWORD);
+	switch (arti) {
+		case ART_EXCALIBUR:
+		case ART_VORPAL_BLADE:
+ 			expert_weapon_skill(P_LONG_SWORD);
 			break;
-		case 3:	/* Stormbringer */
+		case ART_STORMBRINGER:
 			expert_weapon_skill(P_BROAD_SWORD);
 			break;
-		case 44:/* Reaver */
+		case ART_REAVER:
 			expert_weapon_skill(P_SCIMITAR);
+			expert_weapon_skill(P_FIREARM);
 			break;
 	}
 

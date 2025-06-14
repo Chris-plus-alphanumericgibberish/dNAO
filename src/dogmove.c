@@ -130,13 +130,13 @@ boolean check_if_better;
 	    /* collect artifacts and oprop items */
 		 (otmp->oartifact
 			|| !check_oprop(otmp, OPROP_NONE)
-			|| (rakuyo_prop(otmp) && u.uinsight >= 20)
+			|| (rakuyo_prop(otmp) && Insight >= 20)
 			|| (mercy_blade_prop(otmp) && !u.veil)
-			|| (otmp->otyp == ISAMUSEI && u.uinsight >= 22)
-			|| (otmp->otyp == DISKOS && u.uinsight >= 10)
+			|| (otmp->otyp == ISAMUSEI && Insight >= 22)
+			|| (otmp->otyp == DISKOS && Insight >= 10)
 		 ) ||
 	    /* slotless non-artifact items */
-		 ((otmp->otyp == ARMOR_SALVE && u.uinsight >= 66) || otmp->otyp == PRESERVATIVE_ENGINE) ||
+		 ((otmp->otyp == ARMOR_SALVE && Insight >= 66) || otmp->otyp == PRESERVATIVE_ENGINE) ||
 	    /* chains for some */
 		 ((mtmp->mtyp == PM_CATHEZAR) && otmp->otyp == CHAIN) ||
 	    /* better weapons */
@@ -206,15 +206,16 @@ DROPPABLES(mon)
 register struct monst *mon;
 {
 	register struct obj *obj;
+	boolean weapon_user = mon_attacktype(mon, AT_WEAP) ? TRUE : FALSE;
 	struct obj *wep  = MON_WEP(mon),
-                   *hwep = mon_attacktype(mon, AT_WEAP)
+           *hwep = weapon_user
 		           ? select_hwep(mon) : (struct obj *)0,
-		   *proj = mon_attacktype(mon, AT_WEAP)
+		   *proj = weapon_user
 		           ? select_rwep(mon) : (struct obj *)0,
 		   *rwep;
 	boolean item1 = FALSE, item2 = FALSE;
 	boolean intelligent = TRUE;
-	boolean marilith = mon_attacktype(mon, AT_MARI);
+	boolean marilith = mon_attacktype(mon, AT_MARI) ? TRUE : FALSE;
 
 	if(on_level(&valley_level, &u.uz))
 		return (struct obj *)0; //The Dead hold on to their possessions (prevents the "drop whole inventory" bug
@@ -222,7 +223,7 @@ register struct monst *mon;
 	if(is_eeladrin(mon->data) || (mon->mtyp != PM_UNEARTHLY_DROW && is_yochlol(mon->data)))
 		return (struct obj *)0; //Eladrin don't drop objects in their energy form.
 	
-	rwep = mon_attacktype(mon, AT_WEAP) ? propellor : &zeroobj;
+	rwep = weapon_user ? propellor : &zeroobj;
 
 	if (is_animal(mon->data) || mindless_mon(mon)) {
 		intelligent = FALSE;
@@ -740,7 +741,7 @@ int udist;
 
 	boolean droppables = FALSE;
 
-	if (mtmp->msleeping || !mtmp->mcanmove) return(0);
+	if (mtmp->msleeping || mtmp->mequipping || !mtmp->mcanmove) return(0);
 
 	omx = mtmp->mx;
 	omy = mtmp->my;
@@ -1441,17 +1442,9 @@ newdogpos:
 		/* insert a worm_move() if worms ever begin to eat things */
 		remove_monster(omx, omy);
 		place_monster(mtmp, nix, niy);
-		if(mtmp->mtyp == PM_SURYA_DEVA){
-			struct monst *blade;
-			for(blade = fmon; blade; blade = blade->nmon) if(blade->mtyp == PM_DANCING_BLADE && mtmp->m_id == blade->mvar_suryaID) break;
-			if(blade){
-				int bx = blade->mx, by = blade->my;
-				remove_monster(bx, by);
-				place_monster(blade, omx, omy);
-				newsym(omx,omy);
-				newsym(bx,by);
-			}
-		}
+		mtmp->mprev_dir.x = sgn(nix - omx);
+		mtmp->mprev_dir.y = sgn(niy - omy);
+		mtmp->mlast_movement = monstermoves;
 		if (cursemsg[chi] && (cansee(omx,omy) || cansee(nix,niy)))
 			pline("%s moves only reluctantly.", Monnam(mtmp));
 		for (j=MTSZ-1; j>0; j--) mtmp->mtrack[j] = mtmp->mtrack[j-1];
@@ -1490,6 +1483,9 @@ newdogpos:
 dognext:
 		if (!m_in_out_region(mtmp, nix, niy))
 		  return 1;
+		mtmp->mprev_dir.x = sgn(cc.x - mtmp->mx);
+		mtmp->mprev_dir.y = sgn(cc.y - mtmp->my);
+		mtmp->mlast_movement = monstermoves;
 		remove_monster(mtmp->mx, mtmp->my);
 		place_monster(mtmp, cc.x, cc.y);
 		newsym(cc.x,cc.y);

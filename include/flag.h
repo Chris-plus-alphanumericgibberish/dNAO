@@ -24,6 +24,7 @@ struct flag {
 #endif
 	boolean  autodig;       /* MRKR: Automatically dig */
 	boolean  autoquiver;	/* Automatically fill quiver */
+	boolean  autounlock;	/* automatically apply unlocking tools */
 	boolean  beginner;
 #ifdef MAIL
 	boolean  biff;		/* enable checking for mail */
@@ -90,6 +91,7 @@ struct flag {
 	boolean  toptenwin;	/* ending list in window instead of stdout */
 	boolean  verbose;	/* max battle info */
 	boolean  prayconfirm;	/* confirm before praying */
+	boolean  tm_hour;	/* hour of the day (updated once per global turn) */
 
 	int move;	/* type[s] of action taken by player's last input/action */
 	int movetoprint;
@@ -116,6 +118,7 @@ struct flag {
 	unsigned long suppress_alert;
 #define NEW_MOON	0
 #define FULL_MOON	4
+#define HUNTING_MOON	8
 	unsigned no_of_wizards; /* 0, 1 or 2 (wizard and his shadow) */
 	boolean  travel;	/* find way automatically to u.tx,u.ty */
 	unsigned run;		/* 0: h (etc), 1: H (etc), 2: fh (etc) */
@@ -152,26 +155,25 @@ struct flag {
 	boolean	 stag;	/* turned stag during the quest, re-used to track if the Anachrononaut has completed their extra task */
 	boolean leader_backstab;		/* your leader is attacking you */
 	boolean made_bell;		/* the bell of opening has been created */
+	int spriest_level;		/* the current level has a priest of the serpent on it */
 
-	boolean spore_level;		/* the current level has a spore-spreading monster */
-	boolean slime_level;		/* the current level has a slime-spreading monster */
-	boolean walky_level;		/* the current level has a undead-raising monster */
-	boolean shade_level;		/* the current level has a shade-casting monster */
-	boolean yello_level;		/* the current level has the attention of the King in Yellow */
+	
+	Bitfield(spore_level, 1);		/* the current level has a spore-spreading monster */
+	Bitfield(slime_level, 1);		/* the current level has a slime-spreading monster */
+	Bitfield(walky_level, 1);		/* the current level has a undead-raising monster */
+	Bitfield(shade_level, 1);		/* the current level has a shade-casting monster */
+	Bitfield(yello_level, 1);		/* the current level has the attention of the King in Yellow */
+	Bitfield(goldka_level, 1);		/* the current level has a gold kamerel golem on it */
+	Bitfield(silence_level, 1);		/* the current level has an avatar of The Silence on it */
+	
+	Bitfield(made_first, 1);		/* the first word slab has been created */
+	Bitfield(made_divide, 1);		/* the dividing word slab has been created */
+	Bitfield(made_life, 1);			/* the nurturing word slab has been created */
+	Bitfield(made_know, 1);			/* the word of knowledge slab has been created */
 
-	boolean goldka_level;		/* the current level has a gold kamerel golem on it */
+	Bitfield(made_twin, 1);			/* your yog sothoth twin has been created */
 
-	boolean silence_level;		/* the current level has an avatar of The Silence on it */
-
-	boolean spriest_level;		/* the current level has a priest of the serpent on it */
-	boolean made_first;			/* the first word slab has been created */
-	boolean made_divide;		/* the dividing word slab has been created */
-	boolean made_life;			/* the nurturing word slab has been created */
-	boolean made_know;			/* the word of knowledge slab has been created */
-
-	boolean made_twin;			/* your yog sothoth twin has been created */
-
-	boolean disp_inv;			/* currently displaying inventory, use separate obuf list */
+	Bitfield(disp_inv, 1);			/* currently displaying inventory, use separate obuf list */
 
 	/* KMH, role patch -- Variables used during startup.
 	 *
@@ -211,6 +213,7 @@ struct flag {
 	int	 panLgod;	/* deity selection for binder character */
 	int	 panNgod;	/* deity selection for binder character */
 	int	 panCgod;	/* deity selection for binder character */
+	int	 panVgod;	/* deity selection for binder character */
 	int  HDbreath;	/* half-dragon breath weapon type*/
 };
 
@@ -349,6 +352,7 @@ struct instance_flags {
 	boolean  paranoid_quit; /* Ask for 'yes' when quitting */
 	boolean  paranoid_remove; /* Always show menu for 'T' and 'R' */
 	boolean  paranoid_swim; /* Require 'm' prefix to move into water/lava/air unless it's safe */
+	boolean  paranoid_wand_break; /* Ask for 'yes' when breaking a wand */
 #endif
 #ifdef USE_TILES
 	boolean  vt_nethack;
@@ -358,6 +362,11 @@ struct instance_flags {
        boolean  pickup_thrown;
     boolean msgtype_regex;
     boolean ape_regex;
+    boolean menucolor_regex;
+    boolean querytype_regex;
+#ifdef USER_SOUNDS
+    boolean usersound_regex;
+#endif
     boolean show_shop_prices;
     boolean item_use_menu;
     boolean notice_walls;

@@ -88,7 +88,7 @@
 #define Antimagic		(EAntimagic || HAntimagic || \
 						(u.usteed && u.usteed->misc_worn_check & W_SADDLE \
 						&& which_armor(u.usteed, W_SADDLE)->oartifact == ART_HELLRIDER_S_SADDLE) || \
-						(activeFightingForm(FFORM_KNI_RUNIC) && uwep && uwep->otyp == LONG_SWORD) || \
+						(activeFightingForm(FFORM_KNI_RUNIC) && uwep && is_runic_form_sword(uwep)) || \
 						Nullmagic ||\
 				 (Upolyd && resists_magm(&youmonst)))
 
@@ -123,7 +123,7 @@
 
 #define HCleaving		u.uprops[CLEAVING].intrinsic
 #define ECleaving		u.uprops[CLEAVING].extrinsic
-#define Cleaving		(HCleaving || ECleaving)
+#define Cleaving		(HCleaving || ECleaving || (uwep && uwep->otyp == RAZOR_CLEAVER && !u.twoweap))
 
 #define HGoodHealth		u.uprops[GOOD_HEALTH].intrinsic
 #define EGoodHealth		u.uprops[GOOD_HEALTH].extrinsic
@@ -140,6 +140,18 @@
 #define HPreservation		u.uprops[PRESERVATION].intrinsic
 #define EPreservation		u.uprops[PRESERVATION].extrinsic
 #define Preservation		(HPreservation || EPreservation)
+
+#define HProtItems		u.uprops[PROT_ITEMS].intrinsic
+#define EProtItems		u.uprops[PROT_ITEMS].extrinsic
+#define ProtItems		(HProtItems || EProtItems)
+
+#define HGoatSpell		u.uprops[GOAT_SPELLS].intrinsic
+#define EGoatSpell		u.uprops[GOAT_SPELLS].extrinsic
+#define GoatSpell		(HGoatSpell || EGoatSpell)
+
+#define HYogSpell		u.uprops[YOG_SPELLS].intrinsic
+#define EYogSpell		u.uprops[YOG_SPELLS].extrinsic
+#define YogSpell		(HYogSpell || EYogSpell)
 
 #define HQuickDraw		u.uprops[QUICK_DRAW].intrinsic
 #define EQuickDraw		u.uprops[QUICK_DRAW].extrinsic
@@ -170,7 +182,9 @@
 #define NightmareAware_Sanity ((Nightmare && ClearThoughts) ? (u.usanity + 4*Insanity/5) : ClearThoughts ? (u.usanity + 9*Insanity/10) : u.usanity)
 #define NightmareAware_Insanity ((Nightmare && ClearThoughts) ? (Insanity/5) : ClearThoughts ? Insanity/10 : Insanity)
 
-#define	FacelessHelm(obj) ((obj)->otyp == PLASTEEL_HELM || (obj)->otyp == CRYSTAL_HELM || (obj)->otyp == PONTIFF_S_CROWN || (obj)->otyp == FACELESS_HELM || (obj)->otyp == IMPERIAL_ELVEN_HELM)
+#define Insight	(u.uinsight)
+
+#define	FacelessHelm(obj) ((obj)->otyp == PLASTEEL_HELM || (obj)->otyp == CRYSTAL_HELM || (obj)->otyp == PONTIFF_S_CROWN || (obj)->otyp == FACELESS_HELM || (obj)->otyp == FACELESS_HOOD || (obj)->otyp == IMPERIAL_ELVEN_HELM)
 #define	FacelessCloak(obj) ((obj)->otyp == WHITE_FACELESS_ROBE || (obj)->otyp == BLACK_FACELESS_ROBE || (obj)->otyp == SMOKY_VIOLET_FACELESS_ROBE)
 #define	Faceless(obj) (FacelessHelm(obj) || FacelessCloak(obj))
 
@@ -201,7 +215,7 @@
 #define Blind_res		(HBlind_res || EBlind_res)
 #define Blindfolded		((ublindf && is_opaque_worn_tool(ublindf)) ||\
 						(uarmh && uarmh->otyp == PLASTEEL_HELM && uarmh->obj_material != objects[uarmh->otyp].oc_material && is_opaque(uarmh)) ||\
-						(uarmh && uarmh->otyp == CRYSTAL_HELM && is_opaque(uarmh)))
+						(uarmh && (uarmh->otyp == CRYSTAL_HELM || uarmh->otyp == FACELESS_HOOD) && is_opaque(uarmh)))
 		/* ...means blind because of a cover */
 #define NoLightBlind	(((Blinded || Blindfolded || !haseyes(youracedata)) && \
 		 !(u.sealsActive&SEAL_DANTALION && !((uarm && arm_blocks_upper_body(uarm->otyp) && is_opaque(uarm)) || (uarmu && is_opaque(uarmu)))) && \
@@ -222,6 +236,7 @@
 #define Sick			u.uprops[SICK].intrinsic
 #define Stoned			u.uprops[STONED].intrinsic
 #define Golded			u.uprops[GOLDED].intrinsic
+#define Salted			u.uprops[SALTED].intrinsic
 #define Vomiting		u.uprops[VOMITING].intrinsic
 #define Glib			u.uprops[GLIB].intrinsic
 #define Slimed			u.uprops[SLIMED].intrinsic	/* [Tom] */
@@ -618,6 +633,10 @@
 #define EBlack_crystal	u.uprops[BLACK_CRYSTAL].extrinsic
 #define Black_crystal	(HBlack_crystal || EBlack_crystal)
 
+#define HWithering_stake	u.uprops[WITHERING_STAKE].intrinsic
+#define EWithering_stake	u.uprops[WITHERING_STAKE].extrinsic
+#define Withering_stake	(HWithering_stake || EWithering_stake)
+
 #define HSterile	u.uprops[STERILE].intrinsic
 #define ESterile	u.uprops[STERILE].extrinsic
 #define Sterile		((HSterile || ESterile) && !GoodHealth)
@@ -643,7 +662,7 @@
 
  /*Note: the rings only give life saving when charged, so it can't be a normal property*/
 #define ELifesaved		u.uprops[LIFESAVED].extrinsic
-#define Lifesaved		(ELifesaved || Check_crystal_lifesaving() || Check_iaso_lifesaving() || Check_twin_lifesaving() || (uleft && uleft->otyp == RIN_WISHES && uleft->spe > 0) || (uright && uright->otyp == RIN_WISHES && uright->spe > 0) || (check_mutation(ABHORRENT_SPORE) && !(mvitals[PM_DARK_YOUNG].mvflags & G_GENOD)))
+#define Lifesaved		(ELifesaved || Check_crystal_lifesaving() || Check_iaso_lifesaving() || Check_twin_lifesaving() || (uleft && uleft->otyp == RIN_WISHES && uleft->spe > 0) || (uright && uright->otyp == RIN_WISHES && uright->spe > 0) || (check_rot(ROT_CENT) && !(mvitals[PM_CENTIPEDE].mvflags & G_GENOD) && !HUnchanging) || (check_mutation(ABHORRENT_SPORE) && !(mvitals[PM_DARK_YOUNG].mvflags & G_GENOD)))
 
 #define Necrospellboost	(u.uprops[NECROSPELLS].extrinsic)
 

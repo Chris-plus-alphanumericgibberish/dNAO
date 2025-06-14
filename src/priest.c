@@ -151,7 +151,24 @@ int roomno;
 	struct rm *lev;
 
 	shrine_spot = shrine_pos(roomno);
+	if(!IS_ALTAR(levl[shrine_spot->x][shrine_spot->y].typ)){
+		shrine_spot = find_shrine_altar(roomno);
+	}
 	return (a_align(shrine_spot->x, shrine_spot->y));
+}
+
+int
+temple_god(int roomno)
+{
+	char *ptr;
+	coord *shrine_spot;
+	struct rm *lev;
+
+	shrine_spot = shrine_pos(roomno);
+	if(!IS_ALTAR(levl[shrine_spot->x][shrine_spot->y].typ)){
+		shrine_spot = find_shrine_altar(roomno);
+	}
+	return (god_at_altar(shrine_spot->x, shrine_spot->y));
 }
 #endif /* OVL0 */
 #ifdef OVLB
@@ -230,6 +247,17 @@ int sanctum;   /* is it the seat of the high priest? */
 		EPRI(priest)->shroom = (sroom - rooms) + ROOMOFFSET;
 		EPRI(priest)->shralign = a_align(sx, sy);
 		EPRI(priest)->godnum = a_gnum(sx, sy);
+		switch(EPRI(priest)->godnum){
+			case GOD_THE_COLLEGE:
+				EPRI(priest)->godnum = GOD_PTAH;
+			break;
+			case GOD_THE_CHOIR:
+				EPRI(priest)->godnum = GOD_THOTH;
+			break;
+			case GOD_DEFILEMENT:
+				EPRI(priest)->godnum = GOD_ANHUR;
+			break;
+		}
 		EPRI(priest)->shrpos.x = sx;
 		EPRI(priest)->shrpos.y = sy;
 		assign_level(&(EPRI(priest)->shrlevel), lvl);
@@ -532,11 +560,22 @@ register int roomno;
 				set_mon_data(priest, PM_LUGRIBOSSK);
 				//Assumes High Priest is 25, Lugribossk is 27 (archon)
 				priest->m_lev = 27;
-				priest->mhp = 8*26 + rn2(8);
+				priest->mhp = hd_size(priest->data)*26 + rn2(hd_size(priest->data));
 				priest->mhpmax = priest->mhp;
 				do_clear_area(priest->mx,priest->my, 4, set_lit, (genericptr_t)0);
 				do_clear_area(u.ux,u.uy, 4, set_lit, (genericptr_t)0);
 				doredraw();
+				newsym(priest->mx, priest->my);
+			} else if(Is_astralevel(&u.uz) && Role_if(PM_UNDEAD_HUNTER) && quest_status.moon_close) {
+				if(priest->mpeaceful) {
+					priest->mpeaceful = 0;
+					set_malign(priest);
+				}
+				msg1 = "Owooooo!";
+				set_mon_data(priest, PM_HIGH_PRIEST_WOLF);
+				priest->m_lev = 50;
+				priest->mhp = hd_size(priest->data)*49 + rn2(hd_size(priest->data));
+				priest->mhpmax = priest->mhp;
 				newsym(priest->mx, priest->my);
 			} else {
 				Sprintf(buf, "Pilgrim, you enter a %s place!",
@@ -568,6 +607,9 @@ register int roomno;
 				else You("experience a strange sense of peace.");
 			}
 		} else {
+			int godnum = temple_god(roomno);
+			if(philosophy_index(godnum))
+				return;
 			switch(rn2(3)) {
 			  case 0: You("have an eerie feeling..."); break;
 			  case 1: You_feel("like you are being watched."); break;
@@ -873,12 +915,26 @@ boolean peaceful;
 
 	add_mx(roamer, MX_EMIN);
 	EMIN(roamer)->min_align = alignment;
-	EMIN(roamer)->godnum = align_to_god(alignment);
+	int gnum = align_to_god(alignment);
+	if(gnum == GOD_THE_COLLEGE)
+		gnum = GOD_PTAH;
+	else if(gnum == GOD_THE_CHOIR)
+		gnum = GOD_THOTH;
+	else if(gnum == GOD_DEFILEMENT)
+		gnum = GOD_ANHUR;
+	EMIN(roamer)->godnum = gnum;
 
 	/* Binders, on astral, should be beset by a wide variety of gods' angels -- overwrite godnum */
-	if (Role_if(PM_EXILE) && on_level(&u.uz, &astral_level) && alignment != A_NONE) {
+	if (Role_if(PM_EXILE) && Is_astralevel(&u.uz) && alignment != A_NONE) {
 		do {
-			EMIN(roamer)->godnum = rnd(MAX_GOD);
+			int gnum = rnd(MAX_GOD);
+			if(gnum == GOD_THE_COLLEGE)
+				gnum = GOD_PTAH;
+			else if(gnum == GOD_THE_CHOIR)
+				gnum = GOD_THOTH;
+			else if(gnum == GOD_DEFILEMENT)
+				gnum = GOD_ANHUR;
+			EMIN(roamer)->godnum = gnum;
 		} while(galign(EMIN(roamer)->godnum) != alignment);
 	}
 

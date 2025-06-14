@@ -123,6 +123,8 @@ register int n, x;
 		impossible("d(%d,%d) attempted", n, x);
 		return(1);
 	}
+	else if(x == 1)
+		return n;
 	while(n--) tmp += RND(x);
 	return(tmp); /* Alea iacta est. -- J.C. */
 }

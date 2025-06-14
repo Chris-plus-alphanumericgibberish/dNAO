@@ -28,6 +28,7 @@ CPPFLAGS += -Wno-unused-label
 CPPFLAGS += -Wno-unknown-pragmas
 CPPFLAGS += -Wno-missing-braces
 CPPFLAGS += -Wno-format-overflow
+CPPFLAGS += -std=gnu17
 
 .DELETE_ON_ERROR:
 
@@ -62,7 +63,7 @@ SRCOBJ = allmain.o alloc.o apply.o artifact.o astar.o attrib.o ball.o bones.o	\
          mthrowu.o muse.o music.o mutations.o o_init.o objects.o objnam.o		\
          oextra.o options.o pager.o pickup.o pline.o polyself.o potion.o	\
          pray.o priest.o projectile.o quest.o questpgr.o read.o 	\
-         recover.o rect.o region.o restore.o rip.o rnd.o role.o 	\
+         recover.o rect.o region.o research.o restore.o rip.o rnd.o role.o 	\
          rumors.o save.o seduce.o shk.o shknam.o sit.o sounds.o 	\
          sp_lev.o spell.o steal.o steed.o teleport.o testing.o 		\
          thoughtglyph.o tile.o timeout.o topten.o track.o trap.o 	\
@@ -199,7 +200,7 @@ QUEST_DES = Arch.des Anachrononaut.des Android.des Barb.des Bard.des Binder.des 
             Convict.des Drow.des DrowNoble.des DrowHealer.des Elf.des Erebor.des GnomeRanger.des	\
             HalfDragonFemaleNoble.des Healer.des Hedrow.des HedrowNoble.des Knight.des \
 			Monk.des Moria.des Madman.des Noble.des Pirate.des Priest.des Ranger.des Rogue.des	\
-            Samurai.des Tourist.des Valkyrie.des Wizard.des
+            Samurai.des Tourist.des UndeadHunter.des Valkyrie.des Wizard.des
 
 SPEC_DES = bigroom.des blacktemple.des castle.des chaos.des chaos2.des chaos3.des	\
            endgame.des gehennom.des knox.des labr.des law.des		\

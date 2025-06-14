@@ -180,6 +180,7 @@ flag_to_word(flag, category)
 			case MM_FLEETFLEE: return "flee";
 			case MM_WEBRIP: return "tear webs";
 			case MM_DOORBUST: return "break down doors";
+			case MM_AQUATIC: return "lives underwater";
 		}
 	break;
 	case MT_FLAG:
@@ -1188,6 +1189,8 @@ static const char * const bogusobjects[] = {
        "maximally subsentient emacs mode",
        "bongard diagram",                  /* Intelligence test */
 	   "pair of Joo Janta 200 Super-Chromatic Peril Sensitive Sunglasses",	/* K2 */
+
+	   "smooth-gemmed head-ch102020202020202020202020202020202020202020202",	/* my cat says "hello" */
 	   
 	   /* Movies etc. */
 	   "overloading phaser", /* Star Trek */
@@ -1803,6 +1806,7 @@ do_look_letter(sym, from_screen, quick, force_defsyms, cc, out_str, firstmatch)
 
 	/* Finally, return our explanation. */
 	if (found) {
+		flags.verbose = save_verbose;
 		return out_str;
 	}
     } while (from_screen && !quick && ans != LOOK_ONCE);
@@ -1989,12 +1993,12 @@ get_mm_description_of_monster_type(struct monst * mtmp, char * description)
 	int many = 0;
 	many = append(description, notonline(ptr)			, "avoids you"			, many);
 	many = append(description, fleetflee(ptr)			, "flees"				, many);
-	many = append(description, species_flies(ptr)	, "flies"				, many);
-	many = append(description, species_floats(ptr)	, "floats"				, many);
+	many = append(description, species_flies(ptr)		, "flies"				, many);
+	many = append(description, species_floats(ptr)		, "floats"				, many);
 	many = append(description, is_clinger(ptr)			, "clings to ceilings"	, many);
-	many = append(description, species_swims(ptr)	, "swims"				, many);
+	many = append(description, species_swims(ptr)		, "swims"				, many);
 	many = append(description, breathless_mon(mtmp)		, "is breathless"		, many);
-	many = append(description, amphibious(ptr)			, "survives underwater"	, many);
+	many = append(description, amphibious(ptr)			, (ptr->mflagsm&MM_AQUATIC) ? "lives underwater" : "survives underwater"	, many);
 	many = append(description, species_passes_walls(ptr), "phases"				, many);
 	many = append(description, amorphous(ptr)			, "squeezes in gaps"	, many);
 	many = append(description, tunnels(ptr)				, "tunnels"				, many);
@@ -2003,7 +2007,7 @@ get_mm_description_of_monster_type(struct monst * mtmp, char * description)
 	many = append(description, species_teleports(ptr), "teleports"			, many);
 	many = append(description, species_controls_teleports(ptr)	, "controls teleports"	, many);
 	many = append(description, mteleport(ptr)			, "teleports often"		, many);
-	many = append(description, stationary_mon(mtmp)			, "stationary"			, many);
+	many = append(description, stationary_mon(mtmp)		, "stationary"			, many);
 	many = append(description, (many==0)				, "moves normally"		, many);
 	strcat(description, ". ");
 	return description;
@@ -2302,6 +2306,7 @@ get_description_of_attack_type(uchar id)
 	case AT_ARRW: return "launch ammo";
 	case AT_WHIP: return "whip";
 	case AT_VINE: return "vines";
+	case AT_VOMT: return "vomit";
 	case AT_LRCH: return "reaching attack";
 	case AT_HODS: return "mirror attack";
 	case AT_LNCK: return "reaching bite";
@@ -2506,6 +2511,11 @@ get_description_of_damage_type(uchar id)
 	case AD_TSMI: return "magic-item-stealing tentacles";
 	case AD_BYAK: return "byakhee eggs";
 	case AD_UNRV: return "unnerving";
+	case AD_DRHP: return "drains bonus HP";
+	case AD_PUSH: return "push away";
+	case AD_LICK: return "monstrous tongue lick";
+	case AD_PFBT: return "poison and disease damage";
+	case AD_OMUD: return "inchoate orc-spawn";
 	default:
 			impossible("bug in get_description_of_damage_type(%d)", id);
 			return "<MISSING DESCRIPTION, THIS IS A BUG>";

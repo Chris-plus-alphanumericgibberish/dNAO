@@ -212,6 +212,7 @@ newman()
 	if (Sick) make_sick(0L, (char *) 0, FALSE, SICK_ALL);
 	Stoned = 0;
 	Golded = 0;
+	Salted = 0;
 	delayed_killer = 0;
 	if (u.uhp <= 0 || u.uhpmax <= 0) {
 		if (Polymorph_control) {
@@ -496,10 +497,15 @@ int	mntmp;
 		delayed_killer = 0;
 		You("no longer seem to be petrifying.");
 	}
-	if (Stone_resistance && Golded) { /* parnes@eniac.seas.upenn.edu */
+	if (Stone_resistance && Golded) {
 		Golded = 0;
 		delayed_killer = 0;
 		You("no longer seem to be turning to gold.");
+	}
+	if (Stone_resistance && Salted) {
+		Salted = 0;
+		delayed_killer = 0;
+		You("no longer seem to be turning to salt.");
 	}
 	if (Sick_resistance && Sick) {
 		make_sick(0L, (char *) 0, FALSE, SICK_ALL);
@@ -667,11 +673,11 @@ int	mntmp;
 		unpunish();
 	    }
 	}
-	if (u.utrap && (u.utraptype == TT_WEB || u.utraptype == TT_BEARTRAP || u.utraptype == TT_FLESH_HOOK) &&
+	if (u.utrap && (u.utraptype == TT_WEB || u.utraptype == TT_SALIVA || u.utraptype == TT_BEARTRAP || u.utraptype == TT_FLESH_HOOK) &&
 		(amorphous(youmonst.data) || is_whirly(youmonst.data) || unsolid(youmonst.data) ||
 		  (youmonst.data->msize <= MZ_SMALL && u.utraptype == TT_BEARTRAP))) {
 	    You("are no longer stuck in the %s.",
-		    u.utraptype == TT_WEB ? "web" : u.utraptype == TT_FLESH_HOOK ? "flesh hook" : "bear trap");
+		    u.utraptype == TT_WEB ? "web" : u.utraptype == TT_SALIVA ? "gooey saliva" :u.utraptype == TT_FLESH_HOOK ? "flesh hook" : "bear trap");
 	    /* probably should burn webs too if PM_FIRE_ELEMENTAL */
 	    u.utrap = 0;
 	}
@@ -699,9 +705,9 @@ break_armor()
     register struct obj *otmp;
 #define special_armor(a) (a->oartifact || is_imperial_elven_armor(a))
 	if ((otmp = uarm) != 0) {
-		if(!arm_size_fits(youracedata,otmp) || !arm_match(youracedata,otmp) || is_whirly(youracedata) || noncorporeal(youracedata)){
+		if(!arm_size_fits(youracedata,otmp) || !arm_match(youracedata,otmp) || is_gaseous_noequip(youracedata) || noncorporeal(youracedata)){
 			if (donning(otmp)) cancel_don();
-			if(special_armor(otmp) || otmp->objsize > youracedata->msize || is_whirly(youracedata) || noncorporeal(youracedata)){
+			if(special_armor(otmp) || otmp->objsize > youracedata->msize || is_gaseous_noequip(youracedata) || noncorporeal(youracedata)){
 				Your("armor falls around you!");
 				(void) Armor_gone();
 				dropx(otmp);
@@ -715,10 +721,10 @@ break_armor()
 	}
 	if ((otmp = uarmc) != 0) {
 		if(abs(otmp->objsize - youracedata->msize) > 1
-				 || is_whirly(youracedata) || noncorporeal(youracedata)
+				 || is_gaseous_noequip(youracedata) || noncorporeal(youracedata)
 		){
 			if (donning(otmp)) cancel_don();
-			if(special_armor(otmp) || otmp->objsize > youracedata->msize || is_whirly(youracedata) || noncorporeal(youracedata)) {
+			if(special_armor(otmp) || otmp->objsize > youracedata->msize || is_gaseous_noequip(youracedata) || noncorporeal(youracedata)) {
 				Your("%s falls off!", cloak_simple_name(otmp));
 				(void) Cloak_off();
 				dropx(otmp);
@@ -731,10 +737,10 @@ break_armor()
 	}
 	if ((otmp = uarmu) != 0) {
 		if(otmp->objsize != youracedata->msize
-				|| !shirt_match(youracedata,otmp) || is_whirly(youracedata) || noncorporeal(youracedata)
+				|| !shirt_match(youracedata,otmp) || is_gaseous_noequip(youracedata) || noncorporeal(youracedata)
 		){
 			if (donning(otmp)) cancel_don();
-			if(special_armor(otmp) || otmp->objsize > youracedata->msize || is_whirly(youracedata) || noncorporeal(youracedata)) {
+			if(special_armor(otmp) || otmp->objsize > youracedata->msize || is_gaseous_noequip(youracedata) || noncorporeal(youracedata)) {
 				Your("shirt falls off!");
 				(void) Shirt_off();
 		// setworn((struct obj *)0, otmp->owornmask & W_ARMU);
@@ -752,7 +758,7 @@ break_armor()
 			|| (!has_head_mon(&youmonst) && !hat)
 			|| !helm_size_fits(youracedata, uarmh)
 			|| (has_horns(youracedata) && !(otmp->otyp == find_gcirclet() || is_flimsy(otmp)))
-			|| is_whirly(youracedata)
+			|| is_gaseous_noequip(youracedata)
 			|| noncorporeal(youracedata)
 		) {
 			if (donning(otmp)) cancel_don();
@@ -771,7 +777,7 @@ break_armor()
 		if(nogloves(youracedata) 
 			|| nolimbs(youracedata) 
 			|| youracedata->msize != otmp->objsize
-			|| is_whirly(youracedata)
+			|| is_gaseous_noequip(youracedata)
 			|| noncorporeal(youracedata)
 		){
 			if (donning(otmp)) cancel_don();
@@ -783,7 +789,7 @@ break_armor()
 		}
 	}
 	if ((otmp = uarms) != 0) {
-		if(nohands(youracedata) || nolimbs(youracedata) || bimanual(uwep,youracedata) || is_whirly(youracedata) || noncorporeal(youracedata)){
+		if(nohands(youracedata) || nolimbs(youracedata) || bimanual(uwep,youracedata) || is_gaseous_noequip(youracedata) || noncorporeal(youracedata)){
 			if (donning(otmp)) cancel_don();
 			You("can no longer hold your shield!");
 			(void) Shield_off();
@@ -794,11 +800,11 @@ break_armor()
 		if(noboots(youracedata)
 			|| (!humanoid(youracedata) && !can_wear_boots(youracedata))
 			|| !boots_size_fits(youracedata, otmp)
-			|| is_whirly(youracedata)
+			|| is_gaseous_noequip(youracedata)
 			|| noncorporeal(youracedata)
 		){
 			if (donning(otmp)) cancel_don();
-			if (is_whirly(youracedata))
+			if (is_gaseous_noequip(youracedata))
 				Your("boots fall away!");
 			else Your("boots %s off your feet!",
 				youracedata->msize < otmp->objsize ? "slide" : "are pushed");
@@ -939,18 +945,18 @@ domakewhisperer()
 	const char *petname;
 	struct monst *mtmp;
 	int duration;
-	if (u.uen < (10+min(u.uinsight, 45))) {
+	if (u.uen < (10+min(Insight, 45))) {
 	    You("concentrate but lack the energy to maintain doing so.");
 	    return MOVE_CANCELLED;
 	}
 	
 	duration = ACURR(A_CHA) + 1;
 	
-	if(u.uinsight >= 20)
+	if(Insight >= 20)
 		duration = 2*ACURR(A_CHA);
 	
 	u.whisperturn = moves+duration+14;
-	losepw(10+min(u.uinsight, 45));
+	losepw(10+min(Insight, 45));
 	flags.botl = 1;
 	
 	// makedog();
@@ -959,7 +965,7 @@ domakewhisperer()
 	if(!mtmp) return MOVE_CANCELLED; /* pets were genocided */
 
 	mark_mon_as_summoned(mtmp, &youmonst, duration, 0);
-	for(int i = min(45, (u.uinsight - mtmp->m_lev)); i > 0; i--){
+	for(int i = min(45, (Insight - mtmp->m_lev)); i > 0; i--){
 		grow_up(mtmp, (struct monst *) 0);
 		//Technically might grow into a genocided form.
 		if(DEADMONSTER(mtmp))
@@ -1367,6 +1373,10 @@ dogaze()
 				if (a->aatyp == AT_GAZE) 
 					result |= xgazey(&youmonst, mtmp, a, -1);
 			}
+			if(!Upolyd && check_vampire(VAMPIRE_GAZE)){
+				struct attack gaze = {AT_GAZE, AD_PLYS, 1, 4};
+				result |= xgazey(&youmonst, mtmp, &gaze, -1);
+			}
 
 			if (!result) {
 				pline("%s seemed not to notice.", Monnam(mtmp));
@@ -1711,12 +1721,16 @@ domindblast()
 		twinround = twin;
 		round_dice = dice;
 		u_sen = (mon_resistance(mtmp,TELEPAT) && (is_blind(mtmp) || species_blind_telepathic(mtmp->data))) || rlyehiansight(mtmp->data);
+		if(is_tettigon(mtmp->data))
+			u_sen = FALSE;
 		hit = u_sen || (mon_resistance(mtmp,TELEPAT) && rn2(2)) || !rn2(10);
 		if(!hit && twinround){
 			twinround = FALSE;
 			//reroll
 			hit = (mon_resistance(mtmp,TELEPAT) && rn2(2)) || !rn2(10);
 		}
+		if(is_tettigon(mtmp->data) && rn2(10))
+			hit = FALSE;
 		if (hit) {
 			You("lock in on %s %s.", s_suffix(mon_nam(mtmp)),
 				u_sen ? "telepathy" :
@@ -2095,9 +2109,14 @@ boolean silently;
 #ifdef OVL1
 
 const char *
-mbodypart(mon, part)
-struct monst *mon;
-int part;
+mbodypart(struct monst *mon, int part)
+{
+	struct permonst *mptr = mon->data;
+	return ptrbodypart(mptr, part, mon);
+}
+
+const char *
+ptrbodypart(struct permonst *mptr, int part, struct monst *mon)
 {
 	static NEARDATA const char
 	*humanoid_parts[] = { 
@@ -2360,7 +2379,16 @@ int part;
 		"lung", 			"nose", 			"stomach",		"heart",
 		"skin",				"flesh",			"beat",			"bones",
 		"ear",				"ears",				"tongue",		"brain",
-		"creak",		"crack" };
+		"creak",		"crack" },
+	*luminous_parts[] = {
+		"arm", 				"eye", 				"face", 		"finger",
+		"fingertip", 		"leg spike", 		"claw", 		"clawed",
+		"head", 			"front leg",		"light headed", "neck", 
+		"spine", 			"spike-tip", 		"setae",		"swarm", 
+		"swarm center", 	"swarm antenna", 	"interior",		"vital core",
+		"outer swarm",		"swarm currents",	"pulse",		"latice",
+		"swarm tympanum",	"swarm tympana",	"swarm haustellum",	"ego core",
+		"weaken",		"falter" };
 	/* claw attacks are overloaded in mons[]; most humanoids with
 	   such attacks should still reference hands rather than claws */
 	static const char not_claws[] = {
@@ -2369,7 +2397,6 @@ int part;
 		S_ORC, S_GIANT,		/* quest nemeses */
 		'\0'		/* string terminator; assert( S_xxx != 0 ); */
 	};
-	struct permonst *mptr = mon->data;
 
 	//Specific overrides
 	if ((mptr->mtyp == PM_MUMAK || mptr->mtyp == PM_MASTODON) &&
@@ -2455,6 +2482,8 @@ int part;
 	    return uvuudaum_parts[part];
 	if (mptr->mtyp == PM_DRACAE_ELADRIN)
 	    return dracae_parts[part];
+	if (mptr->mtyp == PM_LUMINESCENT_SWARM)
+	    return luminous_parts[part];
 
 	//S-based part lists
 	if (mptr->mlet == S_PLANT)
@@ -2487,9 +2516,7 @@ int part;
 	    if (mptr->mlet == S_DOG || mptr->mlet == S_FELINE ||
 		    mptr->mlet == S_YETI)
 		return part == HAND ? "paw" : "pawed";
-		if(mon == &youmonst && youracedata->mtyp == PM_HALF_DRAGON)
-			return part == HAND ? "claw" : "clawed";
-		if(mon->mtyp == PM_HALF_DRAGON)
+		if(mon ? (mon == &youmonst && youracedata->mtyp == PM_HALF_DRAGON) : mptr->mtyp == PM_HALF_DRAGON)
 			return part == HAND ? "claw" : "clawed";
 	    if (humanoid(mptr) && attacktype(mptr, AT_CLAW) &&
 		    !index(not_claws, mptr->mlet) &&
@@ -2504,7 +2531,7 @@ int part;
 	    return snakeleg_humanoid_parts[part];
 	if (centauroid(mptr))
 	    return centauroid_parts[part];
-	if ((mon != &youmonst && is_clockwork(mptr)) || (mon == &youmonst && uclockwork))
+	if (mon ? ((mon != &youmonst && is_clockwork(mptr)) || (mon == &youmonst && uclockwork)) : is_clockwork(mptr))
 	    return clockwork_parts[part];
 	if (humanoid(mptr))
 	    return humanoid_parts[part];

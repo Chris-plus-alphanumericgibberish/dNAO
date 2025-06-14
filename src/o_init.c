@@ -191,11 +191,13 @@ shuffle_all()
 				oclass != WEAPON_CLASS &&
 				oclass != ARMOR_CLASS &&
 				oclass != SCOIN_CLASS &&
-				oclass != GEM_CLASS) {
+				// oclass != BELT_CLASS &&
+				oclass != GEM_CLASS
+		) {
 			int j = last-1;
 
 			if (oclass == POTION_CLASS)
-			    j -= 7;  /* primordial waters, goat's milk, space mead, water, starlight, amnesia, and blood have fixed descriptions */
+			    j -= 8;  /* primordial waters, goat's milk, space mead, midas, water, starlight, amnesia, and blood have fixed descriptions */
 			if (oclass == RING_CLASS)
 				first += 2;	/* three wishes and nothing have fixed descriptions */
 			if (oclass == WAND_CLASS)
@@ -1381,17 +1383,17 @@ void
 set_isamusei_color(obj)
 struct obj *obj;
 {
-	if(u.uinsight >= 70){
+	if(Insight >= 70){
 		obj->obj_color = CLR_MAGENTA;
-	} else if(u.uinsight >= 57){
+	} else if(Insight >= 57){
 		obj->obj_color = CLR_BRIGHT_MAGENTA;
-	} else if(u.uinsight >= 45){
+	} else if(Insight >= 45){
 		obj->obj_color = CLR_BRIGHT_BLUE;
-	} else if(u.uinsight >= 33){
+	} else if(Insight >= 33){
 		obj->obj_color = CLR_BRIGHT_CYAN;
-	} else if(u.uinsight >= 22){
+	} else if(Insight >= 22){
 		obj->obj_color = CLR_BRIGHT_GREEN;
-	} else if(u.uinsight >= 10){
+	} else if(Insight >= 10){
 		obj->obj_color = CLR_YELLOW;
 	} else {
 		obj->obj_color = CLR_ORANGE;
@@ -1561,6 +1563,7 @@ struct obj *otmp;
 	case ART_WATER_CRYSTAL:		return PURIFIED_WATER ? CLR_BRIGHT_BLUE : CLR_BLUE;
 	case ART_AIR_CRYSTAL:		return PURIFIED_WIND ?  CLR_BRIGHT_GREEN : CLR_GREEN;
 	case ART_SPELL_WARDED_WRAPPINGS_OF_:		return CLR_BLACK;
+	case ART_XIUHCOATL:			return CLR_BRIGHT_CYAN;
 	}
 	
 	//Use the set color.
@@ -1579,14 +1582,117 @@ int submat;
 		return;
 	}
 	otmp->sub_material = submat;
-	object_color(otmp);
+	set_object_color(otmp);
 }
 
 void
-fix_object(otmp)
-	struct obj *otmp;
+fix_etraits(struct obj *otmp)
 {
+	otmp->expert_traits = objects[otmp->otyp].expert_traits;
+	//Extra artifact traits
+	if(otmp->oartifact == ART_BLADE_SINGER_S_SABER)
+		otmp->expert_traits |= ETRAIT_BLADESONG;
+	else if(otmp->oartifact == ART_BLADE_DANCER_S_DAGGER)
+		otmp->expert_traits |= ETRAIT_BLADEDANCE;
+	else if(otmp->oartifact == ART_ORCRIST)
+		otmp->expert_traits |= ETRAIT_CLEAVE;
+	else if(otmp->oartifact == ART_GLAMDRING)
+		otmp->expert_traits |= ETRAIT_HEW;
+	else if(otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD){
+		otmp->expert_traits &= ~ETRAIT_FOCUS_FIRE;
+		otmp->expert_traits |= ETRAIT_FELL;
+	}
+	else if(otmp->oartifact == ART_SHADOWLOCK){
+		otmp->expert_traits = ETRAIT_FELL|ETRAIT_GRAZE|ETRAIT_STOP_THRUST|ETRAIT_LUNGE|ETRAIT_BLEED;
+	}
+
+	if(otmp->oartifact == ART_RUYI_JINGU_BANG){
+		//Special abnormal size rules
+		if(otmp->objsize == MZ_TINY){
+			otmp->expert_traits = ETRAIT_QUICK|ETRAIT_FOCUS_FIRE|ETRAIT_STUNNING_STRIKE;
+		}
+		else if(otmp->objsize == MZ_SMALL){
+			otmp->expert_traits = ETRAIT_CREATE_OPENING|ETRAIT_FOCUS_FIRE|ETRAIT_KNOCK_BACK|ETRAIT_STUNNING_STRIKE;
+		}
+		else if(otmp->objsize == MZ_MEDIUM){
+			otmp->expert_traits = ETRAIT_HEW|ETRAIT_FELL|ETRAIT_STUNNING_STRIKE|ETRAIT_KNOCK_BACK|ETRAIT_KNOCK_BACK_CHARGE|ETRAIT_STOP_THRUST;
+		}
+		else if(otmp->objsize == MZ_LARGE){
+			otmp->expert_traits = ETRAIT_HEW|ETRAIT_FELL|ETRAIT_STUNNING_STRIKE|ETRAIT_KNOCK_BACK|ETRAIT_KNOCK_BACK_CHARGE|ETRAIT_BRACED;
+		}
+		else if(otmp->objsize == MZ_HUGE){
+			otmp->expert_traits = ETRAIT_HEW|ETRAIT_FELL|ETRAIT_STUNNING_STRIKE|ETRAIT_KNOCK_BACK|ETRAIT_KNOCK_BACK_CHARGE;
+		}
+		else if(otmp->objsize == MZ_GIGANTIC){
+			otmp->expert_traits = ETRAIT_HEW|ETRAIT_FELL|ETRAIT_STUNNING_STRIKE|ETRAIT_KNOCK_BACK|ETRAIT_KNOCK_BACK_CHARGE|ETRAIT_CLEAVE;
+		}
+	}
+	else if(otmp->objsize != MZ_MEDIUM){
+		if(otmp->objsize > MZ_MEDIUM){
+			//Larger than normal: block "light weapon" traits
+			if(otmp->expert_traits&ETRAIT_CREATE_OPENING){
+				otmp->expert_traits &= ~ETRAIT_CREATE_OPENING;
+				otmp->expert_traits |= ETRAIT_STOP_THRUST;
+				if(objects[otmp->otyp].oc_dtyp == PIERCE){
+					otmp->expert_traits |= ETRAIT_LUNGE;
+				}
+			}
+			if(otmp->expert_traits&ETRAIT_SECOND){
+				otmp->expert_traits &= ~ETRAIT_SECOND;
+			}
+			if(otmp->expert_traits&ETRAIT_QUICK){
+				otmp->expert_traits &= ~ETRAIT_QUICK;
+				if(otmp->objsize - MZ_MEDIUM == 1){
+					otmp->expert_traits |= ETRAIT_CREATE_OPENING;
+				}
+				else {
+					otmp->expert_traits |= ETRAIT_STOP_THRUST;
+					if(objects[otmp->otyp].oc_dtyp == PIERCE){
+						otmp->expert_traits |= ETRAIT_LUNGE;
+					}
+				}
+			}
+		}
+		else {
+			//Smaller than normal: block "heavy/long weapon" traits
+			if(otmp->expert_traits&ETRAIT_KNOCK_BACK_CHARGE){
+				otmp->expert_traits &= ~ETRAIT_KNOCK_BACK_CHARGE;
+			}
+			if(otmp->expert_traits&ETRAIT_CLEAVE){
+				otmp->expert_traits &= ~ETRAIT_CLEAVE;
+				otmp->expert_traits |= ETRAIT_GRAZE;
+			}
+			if(MZ_MEDIUM - otmp->objsize > 1){
+				if(otmp->expert_traits&ETRAIT_STOP_THRUST){
+					otmp->expert_traits &= ~ETRAIT_STOP_THRUST;
+					otmp->expert_traits |= ETRAIT_CREATE_OPENING;
+				}
+				if(otmp->expert_traits&ETRAIT_LUNGE){
+					otmp->expert_traits &= ~ETRAIT_LUNGE;
+					otmp->expert_traits |= ETRAIT_QUICK;
+				}
+				if(otmp->expert_traits&ETRAIT_HEW){
+					otmp->expert_traits &= ~ETRAIT_HEW;
+					otmp->expert_traits |= ETRAIT_FOCUS_FIRE;
+				}
+				if(otmp->expert_traits&ETRAIT_FELL){
+					otmp->expert_traits &= ~ETRAIT_FELL;
+					otmp->expert_traits |= ETRAIT_FOCUS_FIRE;
+				}
+				if(otmp->expert_traits&ETRAIT_KNOCK_BACK){
+					otmp->expert_traits &= ~ETRAIT_KNOCK_BACK;
+				}
+			}
+		}
+	}
+}
+
+void
+fix_object(struct obj *otmp)
+{
+	fix_etraits(otmp);
 	otmp->owt = weight(otmp);
+
 	if (obj_eternal_light(otmp) && !otmp->lamplit) {
 		begin_burn(otmp);
 	}

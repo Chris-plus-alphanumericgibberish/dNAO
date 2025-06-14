@@ -51,9 +51,9 @@ OBJECT:')',"poleaxe",random
 OBJECT:')',"poleaxe",random
 OBJECT:')',"poleaxe",random
 
-OBJECT:')',"short sword",random
-OBJECT:')',"short sword",random
-OBJECT:')',"short sword",random
+OBJECT:')',"rondel dagger",random
+OBJECT:')',"rondel dagger",random
+OBJECT:')',"rondel dagger",random
 
 OBJECT:'[',random,random
 OBJECT:'[',random,random
@@ -75,29 +75,29 @@ OBJECT:'[',"kite shield",random
 OBJECT:'[',"kite shield",random
 OBJECT:'[',"kite shield",random
 
-OBJECT:'[',"plate mail",random
-OBJECT:'[',"plate mail",random
-OBJECT:'[',"plate mail",random
+OBJECT:'[',"chain mail",random
+OBJECT:'[',"chain mail",random
+OBJECT:'[',"chain mail",random
 
-OBJECT:'[',"plate mail",random
-OBJECT:'[',"plate mail",random
-OBJECT:'[',"plate mail",random
-
-OBJECT:'[',"gauntlets",random
-OBJECT:'[',"gauntlets",random
-OBJECT:'[',"gauntlets",random
+OBJECT:'[',"chain mail",random
+OBJECT:'[',"chain mail",random
+OBJECT:'[',"chain mail",random
 
 OBJECT:'[',"gauntlets",random
 OBJECT:'[',"gauntlets",random
 OBJECT:'[',"gauntlets",random
 
-OBJECT:'[',"armored boots",random
-OBJECT:'[',"armored boots",random
-OBJECT:'[',"armored boots",random
+OBJECT:'[',"gloves",random
+OBJECT:'[',"gloves",random
+OBJECT:'[',"gloves",random
 
 OBJECT:'[',"armored boots",random
 OBJECT:'[',"armored boots",random
 OBJECT:'[',"armored boots",random
+
+OBJECT:'[',"high boots",random
+OBJECT:'[',"high boots",random
+OBJECT:'[',"high boots",random
 
 GEOMETRY:center,center
 #0         1         2         3         4         5         6         7     
@@ -131,6 +131,9 @@ OBJECT:'(',"magic chest",(9,8)
 BRANCH:(20,14,20,14),(0,0,0,0)
 # Stairs
 STAIR:(40,7),down
+# The castle shrine (creating altar makes the priest).
+ALTAR:(40,8),law,shrine
+REGION:(37,06,43,09),lit,"temple"
 # Doors
 # Outside Doors
 DOOR:locked,(24,03)
@@ -178,12 +181,8 @@ MONSTER:'@',"human smith",(32,08)
 # Non diggable walls
 NON_DIGGABLE:(00,00,49,15)
 # Random traps
-TRAP:"sleep gas",(24,04)
-TRAP:"sleep gas",(25,04)
-TRAP:random,random
-TRAP:random,random
-TRAP:random,random
-TRAP:random,random
+TRAP:"falling rock",(24,04)
+TRAP:"falling rock",(25,04)
 # Monsters on siege duty.
 MONSTER: 'i',"quasit",(14,00),hostile
 MONSTER: 'i',"quasit",(16,00),hostile

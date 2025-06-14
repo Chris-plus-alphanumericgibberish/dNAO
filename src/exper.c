@@ -71,6 +71,9 @@ experience(mtmp, nk)	/* return # of exp points for mtmp after nk killed */
 /*	zombies give no experience (resurecting and infecting)*/
 	if(has_template(mtmp, ZOMBIFIED) && mtmp->mclone) return 0;
 
+/*	Harmless*/
+	if(mtmp->mtyp == PM_PRIEST_OF_AN_UNKNOWN_GOD) return 0;
+
 	tmp = 1 + mtmp->m_lev * mtmp->m_lev;
 
 /*	For higher ac values, give extra experience */
@@ -195,6 +198,14 @@ more_experienced(exp, rexp)
 		exp *= 1.3;
 		rexp *= 1.3;
 	}
+	if(Withering_stake && quest_status.moon_close){
+		exp *= 1.3;
+		rexp *= 1.3;
+	}
+	if(active_glyph(ROTTEN_EYES)){
+		exp *= 1.1;
+		rexp *= 1.1;
+	}
 	if(flags.descendant && flags.beginner){
 		if(Role_if(PM_CONVICT)
 		|| (Role_if(PM_HEALER) && Race_if(PM_DROW))
@@ -250,7 +261,16 @@ lose_experience(exp)
 #endif
 	   ) flags.botl = 1;
 	if (u.ulevel > 1 && u.uexp < newuexp(u.ulevel-1))
-	    losexp("lost experience",FALSE,FALSE,FALSE);
+	    losexp("lost experience",FALSE,TRUE,FALSE);
+}
+
+void
+nightmare_mold_lose_experience()
+{
+	if(u.ulevel > 1)
+		lose_experience(3*(newuexp(u.ulevel) - newuexp(u.ulevel-1))/10);
+	else
+		lose_experience(3*(newuexp(u.ulevel))/10);
 }
 
 void

@@ -401,7 +401,7 @@ hurtle_step(arg, x, y)
     }
 
     if ((mon = m_at(x, y)) != 0) {
-		if(Role_if(PM_MONK) && !Upolyd && !mon->mpeaceful && canseemon(mon)){
+		if(((Role_if(PM_MONK) && !Upolyd) || activeFightingForm(FFORM_ATARU)) && !mon->mpeaceful && canseemon(mon)){
 			u.dx = x - u.ux;
 			u.dy = y - u.uy;
 			flags.forcefight = TRUE;
@@ -516,9 +516,16 @@ hurtle(dx, dy, range, verbose, do_nomul)
 	You_feel("a tug from the iron ball.");
 	if(do_nomul) nomul(0, NULL);
 	return;
+    } else if (u.utrap && u.utraptype == TT_SALIVA) {
+		if(IS_AIR(levl[u.ux][u.uy].typ) && Weightless){
+			pline("The gooey mass of saliva hurtles through the air!");
+		}
+		else {
+			pline("The gooey mass of saliva slides along the %s!", surface(u.ux,u.uy));
+		}
     } else if (u.utrap) {
 	You("are anchored by the %s.",
-	    u.utraptype == TT_WEB ? "web" : u.utraptype == TT_LAVA ? "lava" :
+	    u.utraptype == TT_WEB ? "web" : u.utraptype == TT_LAVA ? "lava" : 
 		u.utraptype == TT_INFLOOR ? surface(u.ux,u.uy) : "trap");
 	if(do_nomul) nomul(0, NULL);
 	return;

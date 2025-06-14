@@ -63,6 +63,7 @@ struct objclass {
 #define SLASH		4	/* (latter includes iron ball & chain) */
 #define EXPLOSION	8	/* (rockets,  grenades) */
 
+#define	ROLL_SLOT 0 /* pick a random slot */
 #define	UPPER_TORSO_DR 0x01 /* body armor, shirt, cloak (2x weight) */
 #define	LOWER_TORSO_DR 0x02 /* body armor, cloak (2x weight) */
 #define	HEAD_DR        0x04 /* helmet */
@@ -85,6 +86,7 @@ struct objclass {
 							   mask == W_ART ? 0 :\
 							   mask == W_ARTI ? 0 :\
 							   mask == W_AMUL ? UPPER_TORSO_DR :\
+							   mask == W_BELT ? LOWER_TORSO_DR :\
 							   mask == W_RINGL ? ARM_DR :\
 							   mask == W_RINGR ? ARM_DR :\
 							   mask == W_TOOL ? HEAD_DR :\
@@ -94,11 +96,12 @@ struct objclass {
 							   mask == W_SPIRIT ? 0 :\
 							   mask == W_GLYPH ? HEAD_DR :\
 							   mask == W_SKIN ? ALL_DR :\
+							   mask == W_UPGRADE ? ALL_DR :\
 							   UPPER_TORSO_DR)
 
 	/*Bitfield(oc_subtyp,3);*/	/* Now too big for a bitfield... see below */
 
-	Bitfield(oc_material,5); //31 max
+	Bitfield(oc_material,6); //63 max
 #define LIQUID		1	/* currently only for venom */
 #define WAX			2
 #define VEGGY		3	/* foodstuffs */
@@ -128,8 +131,9 @@ struct objclass {
 #define SALT		27
 #define SHADOWSTEEL	28
 #define MERCURIAL	29	/* Not actually Hg - mercurial chaos matter */
-#define FIRMAMENT	30
- //Note: 31 max, coordinate with obj.h
+#define HEMARGYOS 	30	/* Not actually Hg - liquid blood-silver */
+#define FIRMAMENT	31
+ //Note: 63 max, coordinate with obj.h
 	Bitfield(oc_showmat,4);
 #define UNIDED	1	/* always show material when base object type is unknown */
 #define IDED	2	/* always show material when base object type is known */
@@ -171,6 +175,7 @@ struct objclass {
 #define ARM_BOOTS	4
 #define ARM_CLOAK	5
 #define ARM_SHIRT	6
+#define ARM_BELT	7
 #define ARM_SUIT	0
 
 	uchar	oc_oprop[8];	/* property (invis, &c.) conveyed */
@@ -205,7 +210,52 @@ struct objclass {
 #define a_acdr(o)	((o).a_ac + (o).a_dr) /* combined ac and dr bonus of object class o, used for disintegration effects */
 
 	unsigned short	oc_nutrition;	/* food value */
+	unsigned long int expert_traits;
 };
+
+#define ETRAIT_HEW				0x00000001L
+#define ETRAIT_FELL				0x00000002L
+#define ETRAIT_KNOCK_BACK		0x00000004L
+#define ETRAIT_FOCUS_FIRE		0x00000008L
+#define ETRAIT_STUNNING_STRIKE	0x00000010L
+
+#define FFORM_ETRAITS			(ETRAIT_HEW|ETRAIT_FELL|ETRAIT_KNOCK_BACK|ETRAIT_FOCUS_FIRE|ETRAIT_STUNNING_STRIKE)
+
+#define ETRAIT_KNOCK_BACK_CHARGE 0x0000020L
+#define ETRAIT_GRAZE			0x00000040L
+#define ETRAIT_STOP_THRUST		0x00000080L
+#define ETRAIT_PENETRATE_ARMOR	0x00000100L
+#define ETRAIT_LONG_SLASH		0x00000200L
+#define ETRAIT_BLEED			0x00000400L
+#define ETRAIT_CLEAVE			0x00000800L
+#define ETRAIT_LUNGE			0x00001000L
+#define ETRAIT_QUICK			0x00002000L
+#define ETRAIT_SECOND			0x00004000L
+#define ETRAIT_CREATE_OPENING	0x00008000L
+#define ETRAIT_BRACED			0x00010000L
+#define ETRAIT_BLADESONG		0x00020000L
+#define ETRAIT_BLADEDANCE		0x00040000L
+
+#define wielder_size(mon) ((mon) == &youmonst ? youracedata->msize : (mon)->data->msize)
+#define CHECK_ETRAIT(obj, mon, trait) ( \
+										( ((obj)->expert_traits&trait  \
+											&& (trait == (trait&FFORM_ETRAITS) || (obj)->otyp != TOOTH || !((obj)->o_e_trait&ETRAIT_FOCUS_FIRE)) \
+											&& !((mon) == &youmonst && objects[(obj)->otyp].oc_skill == P_LANCE && !(u.usteed || centauroid(youracedata) || animaloid(youracedata))) \
+											&& !(trait == ETRAIT_GRAZE && (mon) == &youmonst && obj->otyp == LONG_SWORD && activeFightingForm(FFORM_POMMEL)) \
+										) \
+										|| (trait == ETRAIT_QUICK && (mon) == &youmonst && obj->otyp == LONG_SWORD && activeFightingForm(FFORM_HALF_SWORD))\
+										|| (trait == ETRAIT_PENETRATE_ARMOR && (mon) == &youmonst && obj->otyp == LONG_SWORD && activeFightingForm(FFORM_POMMEL))\
+										|| (trait == ETRAIT_LUNGE && mon == &youmonst && activeFightingForm(FFORM_MAKASHI) && is_makashi_saber(obj))\
+										|| (trait == ETRAIT_STOP_THRUST && mon == &youmonst && activeFightingForm(FFORM_MAKASHI) && is_makashi_saber(obj))\
+										|| ((obj)->oartifact == ART_HOLY_MOONLIGHT_SWORD && (\
+												((obj)->lamplit && trait == ETRAIT_CLEAVE ) \
+												|| (mon == &youmonst && u.uinsight >= 40 && trait == ETRAIT_FOCUS_FIRE ) \
+											))\
+										|| ((obj)->oartifact == ART_AMALGAMATED_SKIES && artinstance[ART_AMALGAMATED_SKIES].TwinSkiesEtraits&trait)\
+									   ) && \
+	((mon) == &youmonst ? (P_SKILL(weapon_type(obj)) > P_BASIC ) : (((mon)->data->mflagsf&MF_MARTIAL_E) || ((mon)->data->mflagsf&MF_MARTIAL_S))))
+#define ROLL_ETRAIT(obj, mon, echance, schance) (((mon) == &youmonst ? (P_SKILL(weapon_type(obj)) > P_SKILLED) : ((mon)->data->mflagsf&MF_MARTIAL_E)) ? echance : schance)
+#define FFORM_ETRAIT(obj, mon) (objects[(obj)->otyp].expert_traits&FFORM_ETRAITS && ((mon) == &youmonst ? (P_SKILL(weapon_type(obj)) > P_BASIC ) : (((mon)->data->mflagsf&MF_MARTIAL_E) || ((mon)->data->mflagsf&MF_MARTIAL_S))))
 
 struct objdescr {
 	const char *oc_name;		/* actual name */
@@ -257,7 +307,8 @@ extern NEARDATA struct colorTextClr LightsaberColor[];
 #define TILE_CLASS	18
 #define BED_CLASS	19
 #define SCOIN_CLASS	20
-#define MAXOCLASSES	21
+#define BELT_CLASS	21
+#define MAXOCLASSES	22
 
 #define ALLOW_COUNT	(MAXOCLASSES+1) /* Can be used in the object class */
 #define ALL_CLASSES	(MAXOCLASSES+2) /* input to getobj().		   */
@@ -277,6 +328,7 @@ extern uchar oc_syms[MAXOCLASSES];		/* current class symbols */
 #define ILLOBJ_SYM	']'	/* also used for mimics */
 #define WEAPON_SYM	')'
 #define ARMOR_SYM	'['
+#define BELT_SYM	'['
 #define RING_SYM	'='
 #define AMULET_SYM	'"'
 #define TOOL_SYM	'('

@@ -202,13 +202,26 @@ struct monst {
 	Bitfield(brainblooms,1);/* should rise as brainblossom */ /*126*/
 	Bitfield(mibitemarked,1); /* monster was damaged by the ibite arm and will be sacced if they die */ /*127*/
 	Bitfield(mpassive,1); /* if tame, won't attack monsters ever */ /*128*/
+	Bitfield(mwounded_legs,1);/* wounded legs */ /*129*/
+	Bitfield(mopen,2);/* open to sneak attacks */ /*131*/
 	
+	Bitfield(mequipping,7); /*146*/
+
+	Bitfield(mironmarked,1);/* recently hit by an iron weapon (elves/fey/rage-walker) */ /*147*/
+	Bitfield(mcaterpillars,1); /* monster is covered in rot scorpions */ /*148*/
+	Bitfield(momud,1); /* monster is covered in orc-mud */ /*148*/
+
 	unsigned long long int 	seenmadnesses;	/* monster has seen these madnesses */
 	
 	char mbdrown;	/* drowning in blood */
 	char mtaneggs;	/* tannin eggs */
 	long mwait;/* if tame, won't follow between levels (turn last ordered to wait on) */
 	int encouraged;	/* affected by Encourage song */
+	int mfell;	/* slowed by fell expert trait */
+	int mbleed; /* bleed damage per round */
+	coord mprev_dir;		/* previous movement direction (stop thrust etc) */
+	coord mprev_attk;	/* previous attack direction (braced etc) */
+	long mlast_movement;/* turn on which it most recently moved (clear stop thrust) */
 #define BASE_DOG_ENCOURAGED_MAX		7
 	
 	int entangled_otyp;/* The monster is entangled, and in what? */
@@ -267,6 +280,9 @@ struct monst {
 #define	YELLOW_FACTION	    FACTION_PADDING+10	/* Hastur faction, not the same as the Yendorian faction, despite filling the same role in the Madman quest */
 #define	YOG_FACTION	    	FACTION_PADDING+11	/* Yog-Sothoth faction */
 #define	NECROMANCY_FACTION	FACTION_PADDING+12	/* Elf Necromacer's faction */
+#define	CITY_FACTION		FACTION_PADDING+13	/* Undead Hunter city faction */
+#define	MOON_FACTION		FACTION_PADDING+14	/* Undead Hunter lycanthrope faction */
+#define	ROT_FACTION			FACTION_PADDING+15	/* Rot monster faction */
 
 /* template applied to monster to create a new-ish monster */
 	int mtemplate;
@@ -298,7 +314,11 @@ struct monst {
 #define CORDYCEPS		26	/* spore shedder */
 #define PSURLON			27	/* psychic worm */
 #define CONSTELLATION	28	/* star creature */
-#define MAXTEMPLATE	CONSTELLATION
+#define SPARK_SKELETON	29	/* spark skeleton */
+#define TONGUE_PUPPET	30	/* moon-tongue puppet */
+#define SWOLLEN_TEMPLATE	33	/* giant */
+#define BLOOD_MON		34	/* blood clone */
+#define MAXTEMPLATE	BLOOD_MON
 
 //define	HALF_DEMON	FACTION_PADDING+1	/* half-demon  ??? */
 //define	HALF_DEVIL	FACTION_PADDING+2	/* half-devil  ??? */
@@ -354,16 +374,20 @@ struct monst {
 #define	mvar_vermiurge	mvar1
 #define	mvar_star_vampire_blood	mvar1
 #define	mvar_elfwraith_target	mvar1
+#define	mvar_spellweaver_count	mvar1
+#define	mvar1_tettigon_uncancel	mvar1
 	long mvar2;
 #define	mvar_dracaePregTimer	mvar2
 #define	mvar_spList_2	mvar2
 #define	mvar_dreadPrayer_progress	mvar2
 #define	mvar_attack_pm	mvar2
 #define	mvar_elfwraith_spell	mvar2
+#define	mvar_spellweaver_seed	mvar2
 	long mvar3;
 #define	mvar_conversationTracker	mvar3
 #define	mvar_lifesigns	mvar3
-#define has_lifesigns(mon)	(mon->mtyp != PM_CHAOS && mon->mvar_lifesigns)
+#define	mvar_spellweaver_last_cast	mvar3
+#define has_lifesigns(mon)	(mon->mtyp != PM_SPELLWEAVER && mon->mtyp != PM_SPELLWEAVER_GODDESS_MOCKER && mon->mtyp != PM_CHAOS && mon->mvar_lifesigns)
 
 	struct ls_t * light;
 

@@ -177,6 +177,14 @@ MONSTER:'@', "Alabaster elf", random
 MONSTER:'@', "Alabaster elf", random
 MONSTER:'@', "Alabaster elf", random
 
+MONSTER:'{', "alabaster cactoid", random
+MONSTER:'{', "alabaster cactoid", random
+MONSTER[90%]:'{', "alabaster cactoid", random
+
+MONSTER[75%]:'{', "alabaster cactoid", random
+MONSTER[50%]:'{', "alabaster cactoid", random
+MONSTER[25%]:'{', "alabaster cactoid", random
+
 OBJECT:'-',random,random
 OBJECT:'-',random,random
 OBJECT:'-',random,random
@@ -211,6 +219,14 @@ MONSTER:'@', "Alabaster elf", random
 MONSTER:'@', "Alabaster elf", random
 MONSTER:'@', "Alabaster elf", random
 
+MONSTER:'{', "alabaster cactoid", random
+MONSTER:'{', "alabaster cactoid", random
+MONSTER[90%]:'{', "alabaster cactoid", random
+
+MONSTER[75%]:'{', "alabaster cactoid", random
+MONSTER[50%]:'{', "alabaster cactoid", random
+MONSTER[25%]:'{', "alabaster cactoid", random
+
 OBJECT:'-',random,random
 OBJECT:'-',random,random
 OBJECT:'-',random,random
@@ -240,6 +256,24 @@ OBJECT[50%]:'-',random,random
 OBJECT[50%]:'-',random,random
 OBJECT[25%]:'-',random,random
 OBJECT[25%]:'-',random,random
+
+MONSTER:'{', "alabaster cactoid", random
+MONSTER:'{', "alabaster cactoid", random
+MONSTER:'{', "alabaster cactoid", random
+MONSTER:'{', "alabaster cactoid", random
+MONSTER:'{', "alabaster cactoid", random
+MONSTER[90%]:'{', "alabaster cactoid", random
+
+MONSTER[75%]:'{', "alabaster cactoid", random
+MONSTER[75%]:'{', "alabaster cactoid", random
+MONSTER[50%]:'{', "alabaster cactoid", random
+MONSTER[50%]:'{', "alabaster cactoid", random
+MONSTER[25%]:'{', "alabaster cactoid", random
+MONSTER[25%]:'{', "alabaster cactoid", random
+MONSTER[25%]:'{', "alabaster cactoid", random
+MONSTER[25%]:'{', "alabaster cactoid", random
+MONSTER[10%]:'{', "alabaster cactoid", random
+MONSTER[10%]:'{', "alabaster cactoid", random
 
 MONSTER:'@', "Alabaster elf", random
 MONSTER:'@', "Alabaster elf", random

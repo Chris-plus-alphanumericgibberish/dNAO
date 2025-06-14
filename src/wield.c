@@ -57,7 +57,7 @@ STATIC_DCL int FDECL(ready_weapon, (struct obj *, boolean));
 /* probably should be renamed */
 #define erodeable_wep(optr)	((optr)->oclass == WEAPON_CLASS \
 				|| is_weptool(optr) \
-				|| (optr)->otyp == HEAVY_IRON_BALL \
+				|| (optr)->otyp == BALL \
 				|| (optr)->otyp == CHAIN)
 
 /* used by welded(), and also while wielding */
@@ -301,7 +301,7 @@ dowield()
 	} else if (wep == uquiver){
 		if(wep->ostolen && u.sealsActive&SEAL_ANDROMALIUS) unbind(SEAL_ANDROMALIUS, TRUE);
 		setuqwep((struct obj *) 0);
-	} else if (wep->owornmask & (W_ARMOR | W_RING | W_AMUL | W_TOOL
+	} else if (wep->owornmask & (W_ARMOR | W_RING | W_AMUL | W_BELT | W_TOOL
 #ifdef STEED
 			| W_SADDLE
 #endif
@@ -411,7 +411,7 @@ dowieldquiver()
 		pline("%s already being used as a weapon!",
 		      !is_plural(uwep) ? "That is" : "They are");
 		return MOVE_CANCELLED;
-	} else if (newquiver->owornmask & (W_ARMOR | W_RING | W_AMUL | W_TOOL
+	} else if (newquiver->owornmask & (W_ARMOR | W_RING | W_AMUL | W_BELT | W_TOOL
 #ifdef STEED
 			| W_SADDLE
 #endif
@@ -479,7 +479,7 @@ const char *verb;	/* "rub",&c */
 		   strstri(what, "pair of ") != 0 ||
 		   strstri(what, "s of ") != 0);
 
-    if (obj->owornmask & (W_ARMOR|W_RING|W_AMUL|W_TOOL)) {
+    if (obj->owornmask & (W_ARMOR|W_RING|W_AMUL|W_BELT|W_TOOL)) {
 	char yourbuf[BUFSZ];
 
 	You_cant("%s %s %s while wearing %s.",
@@ -618,7 +618,7 @@ starting_twoweapon()
 		    mons[uswapwep->corpsenm].mname, body_part(HAND));
 		Sprintf(kbuf, "%s corpse", an(mons[uswapwep->corpsenm].mname));
 		instapetrify(kbuf);
-	} else if (uswapwep && (Glib || uswapwep->cursed)) {
+	} else if (uswapwep && (Glib || (!Weldproof && uswapwep->cursed))) {
 		if (!Glib)
 			uswapwep->bknown = TRUE;
 		drop_uswapwep();
@@ -980,16 +980,23 @@ struct monst * mon;
 	if (bimanual(otmp, (youagr ? youracedata : mon->data)))
 		return 2;
 
-	if (otmp->oartifact==ART_PEN_OF_THE_VOID && otmp->ovar1_seals&SEAL_MARIONETTE && mvitals[PM_ACERERAK].died > 0)
+	if (otmp->oartifact==ART_PEN_OF_THE_VOID && otmp->ovara_seals&SEAL_MARIONETTE && mvitals[PM_ACERERAK].died > 0)
 		return 2;
 
-	if (otmp->otyp == FORCE_SWORD || otmp->otyp == DISKOS || otmp->otyp == ROD_OF_FORCE || (youagr && weapon_type(otmp) == P_QUARTERSTAFF))
+	if (otmp->otyp == FORCE_SWORD
+		|| otmp->otyp == DISKOS
+		|| otmp->otyp == ROD_OF_FORCE
+		|| otmp->otyp == HUNTER_S_LONGSWORD
+		|| otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD
+		|| (otmp->oartifact == ART_BLOODLETTER && artinstance[ART_BLOODLETTER].BLactive >= moves)
+		|| (youagr && weapon_type(otmp) == P_QUARTERSTAFF)
+	)
 		return 2;
 
 	if (is_spear(otmp))
 		return 1.5;
 
-	if (otmp->otyp == ISAMUSEI || otmp->otyp == KATANA || otmp->otyp == LONG_SWORD || is_vibrosword(otmp))
+	if (otmp->otyp == ISAMUSEI || otmp->otyp == CHIKAGE || otmp->otyp == KATANA || otmp->otyp == LONG_SWORD || is_vibrosword(otmp))
 		return 1.5;
 	
 	return 1;

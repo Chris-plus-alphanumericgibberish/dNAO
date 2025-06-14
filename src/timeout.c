@@ -5,11 +5,13 @@
 #pragma clang diagnostic ignored "-Wint-to-void-pointer-cast"
 
 #include "hack.h"
+#include "artifact.h"
 
 #include "lev.h"	/* for checking save modes */
 
 STATIC_DCL void NDECL(stoned_dialogue);
 STATIC_DCL void NDECL(golded_dialogue);
+STATIC_DCL void NDECL(salted_dialogue);
 #ifdef CONVICT
 STATIC_DCL void NDECL(phasing_dialogue);
 #endif /* CONVICT */
@@ -157,6 +159,30 @@ golded_dialogue()
 		HFast = 0L;
 	if (i == 3L && !Free_action)
 		nomul(-3, "turning to gold");
+	exercise(A_DEX, FALSE);
+}
+
+static NEARDATA const char * const salted_texts[] = {
+	"You are slowing down.",		/* 5 */
+	"Your limbs are stiffening.",		/* 4 */
+	"Your limbs have turned to salt.",	/* 3 */
+	"You have turned to salt.",		/* 2 */
+	"You have become a pillar of salt."			/* 1 */
+};
+
+STATIC_OVL void
+salted_dialogue()
+{
+	register long i = (Salted & TIMEOUT);
+
+	if (i > 0L && i <= SIZE(salted_texts)) {
+		pline1(salted_texts[SIZE(salted_texts) - i]);
+		nomul(0, NULL); /* fix for C343-74 */
+	}
+	if (i == 5L)
+		HFast = 0L;
+	if (i == 3L && !Free_action)
+		nomul(-3, "turning to salt");
 	exercise(A_DEX, FALSE);
 }
 
@@ -319,6 +345,14 @@ burn_away_slime()
 	    flags.botl = 1;
 		delayed_killer = 0;
 	}
+	if (youmonst.mcaterpillars) {
+	    pline_The("parasitic caterpillars are burned off!");
+	    youmonst.mcaterpillars = FALSE;
+	}
+	if (youmonst.momud) {
+	    pline_The("writhing mud that covers you is burned away!");
+	    youmonst.momud = FALSE;
+	}
 	return;
 }
 
@@ -427,10 +461,10 @@ boolean lifesave_forced;
 				u.uprops[spiritprops[i]].extrinsic &= ~W_SPIRIT;
 
 		} else if(uwep && uwep->oartifact == ART_PEN_OF_THE_VOID){
-			uwep->ovar1_seals &= ~spir;
+			uwep->ovara_seals &= ~spir;
 			if(uwep->lamplit && !artifact_light(uwep)) end_burn(uwep, TRUE);
 		} else if(uswapwep  && uswapwep->oartifact == ART_PEN_OF_THE_VOID){
-			uswapwep->ovar1_seals &= ~spir;
+			uswapwep->ovara_seals &= ~spir;
 			if(uswapwep->lamplit && !artifact_light(uswapwep)) end_burn(uswapwep, TRUE);
 		}
 		if(u.spiritTineA == spir){
@@ -453,6 +487,9 @@ boolean lifesave_forced;
 		} else if(u.spirit[ALIGN_SPIRIT] == spir){
 			u.spirit[ALIGN_SPIRIT]=0;
 			u.spiritT[ALIGN_SPIRIT]=0;
+		} else if(u.spirit[OTHER_SPIRIT] == spir){
+			u.spirit[OTHER_SPIRIT]=0;
+			u.spiritT[OTHER_SPIRIT]=0;
 		} else if(u.spirit[OUTER_SPIRIT] == spir){
 			u.spirit[OUTER_SPIRIT]=0;
 			u.spiritT[OUTER_SPIRIT]=0;
@@ -483,7 +520,7 @@ void
 nh_timeout()
 {
 	register struct prop *upp;
-	int sleeptime, i, m_idx, baseluck = (flags.moonphase == FULL_MOON) ? 1 : 0;
+	int sleeptime, i, m_idx, baseluck = (flags.moonphase == HUNTING_MOON) ? 2 : (flags.moonphase == FULL_MOON) ? 1 : 0;
 	
 	if (flags.friday13) baseluck -= 1;
 	
@@ -561,6 +598,7 @@ nh_timeout()
 	if(Invulnerable) return; /* things past this point could kill you */
 	if(Stoned) stoned_dialogue();
 	if(Golded) golded_dialogue();
+	if(Salted) salted_dialogue();
 	if(Slimed) slime_dialogue();
 	if(Vomiting) vomiting_dialogue();
 	if((Strangled || FrozenAir || BloodDrown) && !Breathless) choke_dialogue();
@@ -607,16 +645,16 @@ nh_timeout()
 					u.uprops[spiritprops[i]].extrinsic &= ~W_SPIRIT;
 			}
 			if(uwep && uwep->oartifact==ART_PEN_OF_THE_VOID){
-				uwep->ovar1_seals = 0;
-				uwep->ovar1_seals |= u.spiritTineA;
-				uwep->ovar1_seals |= u.spiritTineB;
+				uwep->ovara_seals = 0;
+				uwep->ovara_seals |= u.spiritTineA;
+				uwep->ovara_seals |= u.spiritTineB;
 				if(artifact_light(uwep) && !uwep->lamplit) begin_burn(uwep);
 				else if(!artifact_light(uwep) && uwep->lamplit) end_burn(uwep, TRUE);
 			}
 			else if(uswapwep && uswapwep->oartifact==ART_PEN_OF_THE_VOID){
-				uswapwep->ovar1_seals = 0;
-				uswapwep->ovar1_seals |= u.spiritTineA;
-				uswapwep->ovar1_seals |= u.spiritTineB;
+				uswapwep->ovara_seals = 0;
+				uswapwep->ovara_seals |= u.spiritTineA;
+				uswapwep->ovara_seals |= u.spiritTineB;
 				// if(artifact_light(uswapwep) && !uswapwep->lamplit) begin_burn(uswapwep);
 				// else if(!artifact_light(uswapwep) && uswapwep->lamplit) end_burn(uswapwep, TRUE);
 			}
@@ -633,6 +671,8 @@ nh_timeout()
 			unbind(u.spirit[QUEST_SPIRIT],0);
 		if(u.spirit[ALIGN_SPIRIT] && u.spiritT[ALIGN_SPIRIT] < moves) 
 			unbind(u.spirit[ALIGN_SPIRIT],0);
+		if(u.spirit[OTHER_SPIRIT] && u.spiritT[OTHER_SPIRIT] < moves) 
+			unbind(u.spirit[OTHER_SPIRIT],0);
 		if(u.spirit[CROWN_SPIRIT] && u.spiritT[CROWN_SPIRIT] < moves) 
 			unbind(u.spirit[CROWN_SPIRIT],0);
 		if(u.spirit[GPREM_SPIRIT] && u.spiritT[GPREM_SPIRIT] < moves) 
@@ -689,7 +729,7 @@ nh_timeout()
 		if(u.divetimer<=3) You("are running short on air.");
 		if(u.divetimer==1) You("are running out of air!");
 	} else if (!u.usubwater){ /* limited duration dive, 2 turns to 6 turns naturally, 8 turns with magic */ 
-		if(u.divetimer < (ACURR(A_CON))/3 && !u.ustuck && !Babble && !Screaming) u.divetimer++;
+		if(u.divetimer < (ACURR(A_CON))/3 && !u.ustuck && (u.divetimer == 0 || (!Babble && !Screaming))) u.divetimer++;
 		else if(u.divetimer > (ACURR(A_CON))/3) u.divetimer--;
 	}
 
@@ -800,6 +840,11 @@ nh_timeout()
 				killer_format = NO_KILLER_PREFIX;
 				killer = "killed by petrification";
 			}
+			if (!u.uconduct.killer){
+				//Pcifist PCs aren't combatants so if something kills them up "killed peaceful" type impurities
+				IMPURITY_UP(u.uimp_murder)
+				IMPURITY_UP(u.uimp_bloodlust)
+			}
 			done(STONING);
 			break;
 		case GOLDED:
@@ -813,7 +858,30 @@ nh_timeout()
 				killer_format = NO_KILLER_PREFIX;
 				killer = "killed by turning to gold";
 			}
+			if (!u.uconduct.killer){
+				//Pcifist PCs aren't combatants so if something kills them up "killed peaceful" type impurities
+				IMPURITY_UP(u.uimp_murder)
+				IMPURITY_UP(u.uimp_bloodlust)
+			}
 			done(GOLDING);
+			break;
+		case SALTED:
+			if (delayed_killer && !killer) {
+				killer = delayed_killer;
+				delayed_killer = 0;
+			}
+			if (!killer) {
+				/* leaving killer_format would make it
+				   "petrified by petrification" */
+				killer_format = NO_KILLER_PREFIX;
+				killer = "killed by turning to salt";
+			}
+			if (!u.uconduct.killer){
+				//Pcifist PCs aren't combatants so if something kills them up "killed peaceful" type impurities
+				IMPURITY_UP(u.uimp_murder)
+				IMPURITY_UP(u.uimp_bloodlust)
+			}
+			done(SALTING);
 			break;
 		case FROZEN_AIR:
 			pline("The frozen air surrounding you becomes vapor.");
@@ -826,6 +894,11 @@ nh_timeout()
 			if (!killer) {
 				killer_format = NO_KILLER_PREFIX;
 				killer = "turned into green slime";
+			}
+			if (!u.uconduct.killer){
+				//Pcifist PCs aren't combatants so if something kills them up "killed peaceful" type impurities
+				IMPURITY_UP(u.uimp_murder)
+				IMPURITY_UP(u.uimp_bloodlust)
 			}
 			done(TURNED_SLIME);
 			break;
@@ -1219,6 +1292,13 @@ long timeout;
 
 	mon = mon2 = (struct monst *)0;
 	mtyp = big_to_little(egg->corpsenm);
+	if(u.silvergrubs && !rn2(20)){
+		set_silvergrubs(FALSE);
+	}
+	if(check_rot(ROT_KIN) && (u.silvergrubs || !rn2(100)) && !(mvitals[PM_MAN_FLY].mvflags&G_GONE && !In_quest(&u.uz))){
+		mtyp = PM_MAN_FLY;
+		set_silvergrubs(TRUE);
+	}
 	/* The identity of one's father is learned, not innate */
 	yours = (egg->spe || (!flags.female && carried(egg) && !rn2(2)));
 	silent = (timeout != monstermoves);	/* hatched while away */
@@ -1641,6 +1721,23 @@ long timeout;
 		    obj = (struct obj *) 0;
 		    break;
 
+	    case TONITRUS:
+			/* even if blind you'll know if holding it */
+			if (canseeit || obj->where == OBJ_INVENT) {
+			    switch (obj->where) {
+				case OBJ_INVENT:
+				case OBJ_MINVENT:
+					pline("%s %s has gone out.",
+					    whose, xname(obj));
+				    break;
+				case OBJ_FLOOR:
+					You("see %s go out.",
+					    an(xname(obj)));
+				    break;
+			    }
+			}
+			end_burn(obj, FALSE);
+			break;
    	    case DWARVISH_HELM:
 	    case LANTERN:
 	    case LANTERN_PLATE_MAIL:
@@ -2184,6 +2281,7 @@ struct obj * obj;
 	case GNOMISH_POINTY_HAT:
 	case POT_STARLIGHT:
 	case SUNLIGHT_MAGGOT:
+	case TONITRUS:
 		radius = 2;
 		break;
 	case CHUNK_OF_FOSSIL_DARK:
@@ -2260,6 +2358,10 @@ struct obj * obj;
 		turns = obj->age;
 		break;
 
+	case TONITRUS:
+		turns = 7;
+		break;
+
 	case GNOMISH_POINTY_HAT:
 		turns = obj->age;
 		if (obj->age > 75L)
@@ -2325,6 +2427,7 @@ struct obj * obj;
 {
 	return (obj && (
 		(obj->oartifact == ART_HOLY_MOONLIGHT_SWORD) ||	/* ??? Chris: The timer's used to extinquish it when it's dropped. */
+		(obj->otyp == TONITRUS) ||
 		(obj->otyp == DOUBLE_LIGHTSABER) ||
 		(obj->otyp == LIGHTSABER) ||
 		(obj->otyp == BEAMSWORD) ||
@@ -2393,6 +2496,7 @@ begin_burn(obj)
 		obj->otyp != POT_STARLIGHT && 
 		obj->otyp != SUNLIGHT_MAGGOT && 
 		obj->otyp != CHUNK_OF_FOSSIL_DARK && 
+		obj->otyp != TONITRUS && 
 		!artifact_light(obj) && 
 		!arti_light(obj) && 
 		obj->oartifact != ART_HOLY_MOONLIGHT_SWORD &&
@@ -2612,6 +2716,7 @@ struct obj *obj;
 	EMON(obj)->mnotlaugh = mon->mnotlaugh;
 	EMON(obj)->mlaughing = mon->mlaughing;
 	EMON(obj)->mdoubt = mon->mdoubt;
+	EMON(obj)->mwounded_legs = mon->mwounded_legs;
 	
 	EMON(obj)->menvy = mon->menvy;
 	EMON(obj)->msanctity = mon->msanctity;
@@ -2635,6 +2740,7 @@ struct obj *obj;
 	EMON(obj)->mspores = mon->mspores;
 	EMON(obj)->mformication = mon->mformication;
 	EMON(obj)->mscorpions = mon->mscorpions;
+	EMON(obj)->mcaterpillars = mon->mcaterpillars;
 	
 	
 	EMON(obj)->encouraged = mon->encouraged;
@@ -2754,6 +2860,74 @@ long timeout;
 	}
 }
 
+void
+revert_object(arg, timeout)
+genericptr_t arg;
+long timeout;
+{
+	struct obj *obj = (struct obj *) arg;
+	if(obj->owornmask&(W_WEP)){
+		start_timer(1, TIMER_OBJECT,
+					REVERT_OBJECT, (genericptr_t)obj);
+	}
+	else if((obj->owornmask&(W_SWAPWEP)) && (obj->where == OBJ_MINVENT || u.twoweap)){
+		start_timer(1, TIMER_OBJECT,
+					REVERT_OBJECT, (genericptr_t)obj);
+	}
+	else {
+		if(obj->obj_material == HEMARGYOS){
+			set_material_gm(obj, obj->ovar1_alt_mat);
+			obj->oeroded = access_oeroded(obj->ovar2_alt_erosion);
+			obj->oeroded2 = access_oeroded2(obj->ovar2_alt_erosion);
+			obj->oeroded3 = access_oeroded3(obj->ovar2_alt_erosion);
+			fix_object(obj);
+			update_inventory();
+		}
+	}
+}
+
+
+void
+revert_mercurial(arg, timeout)
+genericptr_t arg;
+long timeout;
+{
+	struct obj *obj = (struct obj *) arg;
+	if(obj->obj_material != MERCURIAL){
+		if(obj->oartifact == ART_SKY_REFLECTED || obj->oartifact == ART_AMALGAMATED_SKIES){
+			switch(obj->obj_material){
+				case IRON:
+					artinstance[ART_SKY_REFLECTED].ZerthMaterials |= ZMAT_IRON;
+				break;
+				case GREEN_STEEL:
+					artinstance[ART_SKY_REFLECTED].ZerthMaterials |= ZMAT_GREEN;
+				break;
+				case SILVER:
+					artinstance[ART_SKY_REFLECTED].ZerthMaterials |= ZMAT_SILVER;
+				break;
+				case GOLD:
+					artinstance[ART_SKY_REFLECTED].ZerthMaterials |= ZMAT_GOLD;
+				break;
+				case PLATINUM:
+					artinstance[ART_SKY_REFLECTED].ZerthMaterials |= ZMAT_PLATINUM;
+				break;
+				case MITHRIL:
+					artinstance[ART_SKY_REFLECTED].ZerthMaterials |= ZMAT_MITHRIL;
+				break;
+			}
+		}
+		if(obj->where == OBJ_INVENT){
+			Your("%s is tired of its rigid composition and melts back to silvery chaos.", xname(obj));
+		}
+		else if(obj->where == OBJ_FLOOR && cansee(obj->ox, obj->oy)){
+			pline("%s is tired of its rigid composition and melts back to silvery chaos.", The(xname(obj)));
+		}
+		set_material_gm(obj, MERCURIAL);
+		fix_object(obj);
+		update_inventory();
+	}
+}
+
 
 #ifdef OVL0
 /* ------------------------------------------------------------------------- */
@@ -2848,7 +3022,9 @@ static const ttable timeout_funcs[NUM_TIME_FUNCS] = {
 	TTAB(desummon_mon,		cleanup_msummon,	"desummon_mon"),
 	TTAB(desummon_obj,		(timeout_proc)0,	"desummon_obj"),
 	TTAB(larvae_die,		(timeout_proc)0,	"larvae_die"),
-	TTAB(revive_mon_pickup,	(timeout_proc)0,	"revive_mon_pickup")
+	TTAB(revive_mon_pickup,	(timeout_proc)0,	"revive_mon_pickup"),
+	TTAB(revert_object,		(timeout_proc)0,	"revert_object"),
+	TTAB(revert_mercurial,	(timeout_proc)0,	"revert_mercurial"),
 };
 #undef TTAB
 

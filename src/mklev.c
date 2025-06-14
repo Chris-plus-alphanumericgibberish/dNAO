@@ -44,7 +44,7 @@ STATIC_DCL void FDECL(mk_knox_portal, (XCHAR_P,XCHAR_P));
 #define do_vault()	(vault_x != -1)
 static xchar		vault_x, vault_y;
 boolean goldseen;
-boolean wantanmivault, wantasepulcher;
+boolean wantanmivault, wantasepulcher, wantfingerprint;
 static boolean made_branch;	/* used only during level creation */
 
 /* Args must be (const genericptr) so that qsort will always be happy. */
@@ -226,6 +226,13 @@ makerooms()
 	/* rnd_rect() will returns 0 if no more rects are available... */
 	wantanmivault = !rn2(8);
 	wantasepulcher = (depth(&u.uz) > 12 && !rn2(8));
+	wantfingerprint = (depth(&u.uz) > 21 && !rn2(8) && !art_already_exists(ART_FINGERPRINT_SHIELD));
+	int u_depth = depth(&u.uz);
+	boolean knox_range = (u.uz.dnum != oracle_level.dnum		// not in main dungeon
+		|| (u_depth = depth(&u.uz)) < 10	// not beneath 10
+		|| u_depth > depth(&challenge_level)// not below medusa
+	) && !u.uevent.knoxmade;
+
 	if(In_mithardir_terminus(&u.uz)){
 		create_room(-1, -1, 7, 7, -1, -1, OROOM, 0);
 		mkroom(SLABROOM);
@@ -239,12 +246,15 @@ makerooms()
 			if (!create_room(-1, -1, 2+rnd(4), 2+rnd(4), -1, -1, OROOM, -1))
 				continue;
 		}
-		else if(nroom >= (MAXNROFROOMS/6) && rn2(3) && !tried_vault && !wantanmivault && !wantasepulcher) {
+		else if(nroom >= (MAXNROFROOMS/6) && rn2(3) && !tried_vault && (knox_range || (!wantanmivault && !wantasepulcher && !wantfingerprint))) {
 			tried_vault = TRUE;
 			if (create_vault()) {
 				vault_x = rooms[nroom].lx;
 				vault_y = rooms[nroom].ly;
 				rooms[nroom].hx = -1;
+				wantanmivault = FALSE;
+				wantasepulcher = FALSE;
+				wantfingerprint = FALSE;
 			}
 		} else {
 		    if (!create_room(-1, -1, -1, -1, -1, -1, OROOM, -1))
@@ -680,6 +690,18 @@ int godnum;
 	altars[altarindex].shrine = shrine;
 	altars[altarindex].god = godnum;
 
+	if(!In_endgame(&u.uz) && !In_quest(&u.uz)){
+		if(godnum == GOD_THE_COLLEGE || (godnum == GOD_NONE && align_to_god(alignment) == GOD_THE_COLLEGE)){
+			mksobj_at(rn2(2) ? PORTABLE_ELECTRODE : BELL, x, y, NO_MKOBJ_FLAGS);
+		}
+		else if(godnum == GOD_THE_CHOIR || (godnum == GOD_NONE && align_to_god(alignment) == GOD_THE_CHOIR)){
+			mksobj_at(TREPHINATION_KIT, x, y, NO_MKOBJ_FLAGS);
+		}
+		else if(godnum == GOD_DEFILEMENT || (godnum == GOD_NONE && align_to_god(alignment) == GOD_DEFILEMENT)){
+			mksobj_at(PHLEBOTOMY_KIT, x, y, NO_MKOBJ_FLAGS);
+		}
+	}
+	
 	altarindex++;
 }
 
@@ -959,6 +981,7 @@ clear_level_structures()
 	level.flags.goldkamcount_peace = 0;
 	
 	level.flags.sp_lev_nroom = 0;
+	level.flags.rage = 0;
 	
 	level.flags.has_shop = 0;
 	level.flags.has_vault = 0;
@@ -994,6 +1017,12 @@ clear_level_structures()
 	level.flags.outside = 0;
 	level.flags.has_minor_spire = 0;
 	level.flags.has_kamerel_towers = 0;
+	
+	level.flags.mirror = 0;
+	level.flags.day = 0;
+	level.flags.walkers = 0;
+	
+	level.lastmove = monstermoves;
 
 	nroom = 0;
 	rooms[0].hx = -1;
@@ -1024,7 +1053,8 @@ makelevel()
 	oinit();	/* assign level dependent obj probabilities */
 	clear_level_structures();
 	flags.makelev_closerooms = FALSE;
-	
+	if(Infuture)
+		level.lastmove = quest_status.time_doing_quest;
 	if(Is_minetown_level(&u.uz)) livelog_write_string("entered Minetown for the first time");
 
 	{
@@ -1186,7 +1216,7 @@ makelevel()
 	}
 
     {
-	register int u_depth = depth(&u.uz);
+	int u_depth = depth(&u.uz);
 
 #ifdef WIZARD
 	if(wizard && nh_getenv("SHOPTYPE")) mkroom(SHOPBASE); else
@@ -1235,6 +1265,10 @@ makelevel()
 		!level.flags.has_vault) mkroom(RIVER);
 
 		/* Part four: very late modifications */
+	if (wantfingerprint &&
+		!level.flags.has_vault){
+		mkfingervault();
+	}
 	if (wantasepulcher &&
 		!level.flags.has_vault){
 		mksepulcher();
@@ -1501,7 +1535,13 @@ mineralize()
 				}
 			}
 			if (depth(&u.uz) > 14 && rn2(1000) < fossilprob) {
-				if ((otmp = mksobj(FOSSIL, 0)) != 0) {
+				if(!rn2(20)){
+					otmp = mksobj(TOOTH, NO_MKOBJ_FLAGS);
+					otmp->ox = x,  otmp->oy = y;
+					if (!rn2(3) && Can_dig_down(&u.uz)) add_to_buried(otmp);
+					else place_object(otmp, x, y);
+				}
+				else if ((otmp = mksobj(FOSSIL, 0)) != 0) {
 					otmp->quan = 1L;
 					otmp->owt = weight(otmp);
 					otmp->ox = x,  otmp->oy = y;
@@ -2078,7 +2118,6 @@ struct mkroom *croom;
 				ESMT(smith)->frglevel = u.uz;
 			}
 		}
-		level.flags.nforges++;
 		break;
 	case SINK:
 		/* Put a sink at m.x, m.y */

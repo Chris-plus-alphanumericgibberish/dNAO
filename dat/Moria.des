@@ -294,11 +294,11 @@ OBJECT:'[',"dwarvish roundshield",contained
 OBJECT:'[',"plate mail",contained
 OBJECT:'[',"shoes",contained
 CONTAINER:'(',"chest",(69,12)
-OBJECT:'+',random,random
+OBJECT:'+',random,contained
 OBJECT:'?',"resistance",contained
-OBJECT:'*',random,random
-OBJECT:'*',random,random
-OBJECT:'*',random,random
+OBJECT:'*',random,contained
+OBJECT:'*',random,contained
+OBJECT:'*',random,contained
 OBJECT:random,random,random
 OBJECT:random,random,random
 OBJECT:random,random,random
@@ -311,20 +311,20 @@ OBJECT:'[',"plate mail",contained
 OBJECT:'[',"shoes",contained
 
 CONTAINER:'(',"chest",(74,14)
-OBJECT:'+',random,random
+OBJECT:'+',random,contained
 OBJECT:'?',"resistance",contained
-OBJECT:'*',random,random
-OBJECT:'*',random,random
-OBJECT:'*',random,random
+OBJECT:'*',random,contained
+OBJECT:'*',random,contained
+OBJECT:'*',random,contained
 OBJECT:random,random,random
 OBJECT:random,random,random
 OBJECT:random,random,random
 CONTAINER:'(',"chest",(74,16)
-OBJECT:'+',random,random
+OBJECT:'+',random,contained
 OBJECT:'?',"resistance",contained
-OBJECT:'*',random,random
-OBJECT:'*',random,random
-OBJECT:'*',random,random
+OBJECT:'*',random,contained
+OBJECT:'*',random,contained
+OBJECT:'*',random,contained
 OBJECT:random,random,random
 OBJECT:random,random,random
 OBJECT:random,random,random
@@ -406,11 +406,11 @@ OBJECT:'[',"dwarvish roundshield",contained
 OBJECT:'[',"plate mail",contained
 OBJECT:'[',"shoes",contained
 CONTAINER:'(',"chest",(38,16)
-OBJECT:'+',random,random
+OBJECT:'+',random,contained
 OBJECT:'?',"resistance",contained
-OBJECT:'*',random,random
-OBJECT:'*',random,random
-OBJECT:'*',random,random
+OBJECT:'*',random,contained
+OBJECT:'*',random,contained
+OBJECT:'*',random,contained
 OBJECT:random,random,random
 OBJECT:random,random,random
 OBJECT:random,random,random

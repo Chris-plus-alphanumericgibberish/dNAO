@@ -28,11 +28,13 @@ README = sys.argv[2] if 2 < len(sys.argv) else "doc/macromagic.txt"
 
 # constants
 MAXARG = 59
-MAXOUT = 29
+MAXOUT = 30
 from math import log2
 from math import ceil
 EXPANDO = ceil(log2(MAXARG-MAXOUT))
 EXPANDMAX = 2**EXPANDO
+
+import os
 
 # helper funcs
 def strn(n):
@@ -78,6 +80,7 @@ for row in range(0, MAXARG//10+1):
 		f.write('_'+str(row)+str(n)+', ')
 	f.write('\\\n')
 f.write("\tN, ...) N\n\n")
+f.write("\n")
 
 f.write("#define NARGS(...) _GET_NTH_ARG(dummy, ##__VA_ARGS__,\\\n")
 for row in range(MAXARG//10, -1, -1):

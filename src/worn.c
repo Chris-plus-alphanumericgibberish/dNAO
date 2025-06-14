@@ -35,6 +35,7 @@ const struct worn {
 	{ W_SWAPWEP, &uswapwep },
 	{ W_QUIVER, &uquiver },
 	{ W_AMUL, &uamul },
+	{ W_BELT, &ubelt },
 	{ W_TOOL, &ublindf },
 	{ W_BALL, &uball },
 	{ W_CHAIN, &uchain },
@@ -99,7 +100,7 @@ int otyp;
 		otyp = obj->otyp;
 
 	i = 0;
-	for (cur_prop = 1; cur_prop < LAST_PROP; cur_prop++)
+	for (cur_prop = 1; cur_prop <= LAST_PROP; cur_prop++)
 	{
 		got_prop = FALSE;
 		// from objclass
@@ -232,6 +233,10 @@ int otyp;
 					if(check_imp_mod(obj, IEA_PROT_SHAPE))
 						got_prop = TRUE;
 				break;
+				case QUICK_DRAW:
+					if(check_imp_mod(obj, IEA_GODEXTERITY))
+						got_prop = TRUE;
+				break;
 			}
 		}
 		//From scorpion carapace
@@ -295,16 +300,16 @@ long mask;
 
 	/*Handle the pen of the void here*/
 	if(obj && obj->oartifact == ART_PEN_OF_THE_VOID){
-		if(obj->ovar1_seals && !Role_if(PM_EXILE)){
+		if(obj->ovara_seals && !Role_if(PM_EXILE)){
 			long oldseals = u.sealsKnown;
-			u.sealsKnown |= obj->ovar1_seals;
+			u.sealsKnown |= obj->ovara_seals;
 			if(oldseals != u.sealsKnown) You("learned new seals.");
 		}
-		obj->ovar1_seals = u.spiritTineA|u.spiritTineB;
+		obj->ovara_seals = u.spiritTineA|u.spiritTineB;
 		if(u.voidChime){
 			int i;
 			for(i=0; i<u.sealCounts; i++){
-				obj->ovar1_seals |= u.spirit[i];
+				obj->ovara_seals |= u.spirit[i];
 			}
 		}
 	} else if(obj && obj->oartifact == ART_HELM_OF_THE_ARCANE_ARCHER){
@@ -402,8 +407,8 @@ register struct obj *obj;
 		}
 		
 		if(obj->oartifact == ART_GAUNTLETS_OF_THE_BERSERKER){
-//        adj_abon(uarmg, -uarmg->ovar1_gober);
-          uarmg->ovar1_gober = 0;
+//        adj_abon(uarmg, -uarmg->ovara_gober);
+          uarmg->ovara_gober = 0;
         }
 		obj->owornmask &= ~wp->w_mask;
 		if (obj->oartifact)
@@ -618,13 +623,13 @@ boolean on, silently;
 		{
 		case INVIS:
 			if (mon->mtyp != PM_HELLCAT){
-				mon->mextrinsics[(which-1)/32] |= (1 << (which-1)%32);
+				mon->mextrinsics[(which-1)/32] |= (1L << (which-1)%32);
 				mon->minvis = !mon->invis_blkd;
 			}
 			break;
 		case FAST:
 			{
-			mon->mextrinsics[(which-1)/32] |= (1 << (which-1)%32);
+			mon->mextrinsics[(which-1)/32] |= (1L << (which-1)%32);
 			boolean save_in_mklev = in_mklev;
 			if (silently) in_mklev = TRUE;
 			mon_adjust_speed(mon, 0, obj, TRUE);
@@ -634,7 +639,7 @@ boolean on, silently;
 			}
 		case LEVITATION:
 		case FLYING:
-			mon->mextrinsics[(which-1)/32] |= (1 << (which-1)%32);
+			mon->mextrinsics[(which-1)/32] |= (1L << (which-1)%32);
 			if (!oldprop && (mon_resistance(mon,LEVITATION) || mon_resistance(mon,FLYING))) {
 				m_float_up(mon, silently);
 				if (obj && !silently && canseemon(mon)) {
@@ -643,7 +648,7 @@ boolean on, silently;
 			}
 			break;
 		case DISPLACED:
-			mon->mextrinsics[(which-1)/32] |= (1 << (which-1)%32);
+			mon->mextrinsics[(which-1)/32] |= (1L << (which-1)%32);
 			if (!oldprop && mon_resistance(mon,DISPLACED) && !silently && canseemon(mon)) {
 				pline("%s outline begins shimmering!", s_suffix(Monnam(mon)));
 				if (obj) {
@@ -652,13 +657,13 @@ boolean on, silently;
 			}
 			break;
 		case SWIMMING:
-			mon->mextrinsics[(which-1)/32] |= (1 << (which-1)%32);
+			mon->mextrinsics[(which-1)/32] |= (1L << (which-1)%32);
 			if (!oldprop && mon_resistance(mon,SWIMMING)) {
 				minliquid(mon);
 			}
 			break;
 		default:
-			mon->mextrinsics[(which-1)/32] |= (1 << (which-1)%32);
+			mon->mextrinsics[(which-1)/32] |= (1L << (which-1)%32);
 			break;
 		}
     }
@@ -780,7 +785,7 @@ struct obj *obj;
 {
 	int shield_ac = 0;
 	shield_ac += max(0, arm_ac_bonus(obj) + (obj->objsize - mon->data->msize));
-	if(mon_knight(mon)){
+	if(mon_knight(mon) || mon_dark_knight(mon)){
 		if(mon->m_lev >= 28)
 			shield_ac += 8;
 		else if(mon->m_lev >= 14)
@@ -805,8 +810,8 @@ struct monst *mon;
 		base -= mon->data->nac;
 	}
 	if(mon->mtyp == PM_CARCOSAN_COURTIER){
-		if(u.uinsight < 25){
-			base -= u.uinsight/5;
+		if(Insight < 25){
+			base -= Insight/5;
 		}
 		else {
 			base -= 5;
@@ -814,11 +819,17 @@ struct monst *mon;
 	}
 	if(!mon->mcan){
 		base -= mon->data->pac;
-		if(mon->mtyp == PM_CENTER_OF_ALL && u.uinsight < 32)
-			base -= (32-u.uinsight)/2;
+		if(mon->mtyp == PM_CENTER_OF_ALL && Insight < 32)
+			base -= (32-Insight)/2;
 	}
 	if(mon->mtyp == PM_VERMIURGE && mon->mvar_vermiurge > 0)
 		base -= min(mon->mvar_vermiurge/10, 20);
+
+	if(Role_if(PM_ANACHRONONAUT) && !quest_status.leader_is_dead && mon->mfaction == QUEST_FACTION && Is_qhome(&u.uz)){
+		if(mon->mtyp != PM_SARA__THE_LAST_ORACLE){
+			base -= rnd(min(mon->m_lev, 20));
+		}
+	}
 	
 	if(mon->mtyp == PM_ASMODEUS && base < -9) base = -9 + MONSTER_AC_VALUE(base+9);
 	else if(mon->mtyp == PM_PALE_NIGHT && base < -6) base = -6 + MONSTER_AC_VALUE(base+6);
@@ -848,6 +859,8 @@ struct monst *mon;
 			base -= rnd(def_beastmastery()); // the duster doubles for tame animals
 		
 		if(u.usteed && mon==u.usteed) base -= rnd(def_mountedCombat());
+		
+		if(is_vampire(mon->data) && check_vampire(VAMPIRE_MASTERY)) base -= rnd(5);
 		
 		if(uring_art(ART_VILYA) && def_vilya())
 			base -=  sgn(def_vilya())*rnd(abs(def_vilya()));
@@ -880,10 +893,10 @@ struct monst *mon;
 			if(!uarmc && !uarm) base -= max( (monwep->spe+1)/2,0);
 		}
 		else if(monwep->oartifact == ART_LASH_OF_THE_COLD_WASTE){
-			if(u.uinsight >= 20)
+			if(Insight >= 20)
 				base -= 10;
-			else if(u.uinsight > 10)
-				base -= u.uinsight - 10;
+			else if(Insight > 10)
+				base -= Insight - 10;
 		}
 		if(monwep->obj_material == MERCURIAL){
 			int level = monwep->ocarry->m_lev;
@@ -1031,8 +1044,8 @@ struct monst *mon;
 		base -= mon->data->nac;
 	}
 	if(mon->mtyp == PM_CARCOSAN_COURTIER){
-		if(u.uinsight < 25){
-			base -= u.uinsight/5;
+		if(Insight < 25){
+			base -= Insight/5;
 		}
 		else {
 			base -= 5;
@@ -1040,12 +1053,18 @@ struct monst *mon;
 	}
 	if(!mon->mcan && !(mon->mtyp == PM_SHADOWSMITH && dimness(mon->mx,mon->my) <= 0)){
 		base -= mon->data->pac;
-		if(mon->mtyp == PM_CENTER_OF_ALL && u.uinsight < 32)
-			base -= (32-u.uinsight)/2;
+		if(mon->mtyp == PM_CENTER_OF_ALL && Insight < 32)
+			base -= (32-Insight)/2;
 	}
 	if(mon->mtyp == PM_VERMIURGE && mon->mvar_vermiurge > 0)
 		base -= min(mon->mvar_vermiurge/10, 20);
 	
+	if(Role_if(PM_ANACHRONONAUT) && !quest_status.leader_is_dead && mon->mfaction == QUEST_FACTION && Is_qhome(&u.uz)){
+		if(mon->mtyp != PM_SARA__THE_LAST_ORACLE){
+			base -= min(mon->m_lev, 20);
+		}
+	}
+
 	if(mon->mtyp == PM_CHOKHMAH_SEPHIRAH){
 		base -= u.chokhmah;
 	}
@@ -1084,6 +1103,8 @@ struct monst *mon;
 		if(u.specialSealsActive&SEAL_COSMOS) base -= spiritDsize();
 		if(u.usteed && mon==u.usteed) base -= def_mountedCombat();
 		
+		if(is_vampire(mon->data) && check_vampire(VAMPIRE_MASTERY)) base -= 5;
+
 		if (uarm && uarm->oartifact == ART_BEASTMASTER_S_DUSTER && is_animal(mon->data))
 			base -= def_beastmastery(); // the duster doubles for tame animals
 
@@ -1233,8 +1254,15 @@ struct monst *mon;
 
 	if(mon->mtame){
 		if(active_glyph(IMPURITY)) base += 3;
-		if(uarm && uarm->oartifact == ART_SCORPION_CARAPACE && check_carapace_mod(uarm, CPROP_IMPURITY) && u.uinsight >= 5){
+		if(active_glyph(DEFILEMENT)) base += 3;
+		if(uarm && uarm->oartifact == ART_SCORPION_CARAPACE && check_carapace_mod(uarm, CPROP_IMPURITY) && Insight >= 5){
 			base += 3;
+		}
+		if(active_glyph(DEFILEMENT)){
+			if(active_glyph(IMPURITY))
+				base += max(0, u.uimpurity/3-3);
+			if(uarm && uarm->oartifact == ART_SCORPION_CARAPACE && check_carapace_mod(uarm, CPROP_IMPURITY) && Insight >= 5)
+				base += max(0, (u.uimpurity+4)/3-3);
 		}
 		if(Role_if(PM_HEALER))
 			base += heal_mlevel_bonus();
@@ -1276,8 +1304,15 @@ struct monst *mon;
 	
 	if(mon->mtame){
 		if(active_glyph(IMPURITY)) base += 3;
-		if(uarm && uarm->oartifact == ART_SCORPION_CARAPACE && check_carapace_mod(uarm, CPROP_IMPURITY) && u.uinsight >= 5){
+		if(active_glyph(DEFILEMENT)) base += 3;
+		if(uarm && uarm->oartifact == ART_SCORPION_CARAPACE && check_carapace_mod(uarm, CPROP_IMPURITY) && Insight >= 5){
 			base += 3;
+		}
+		if(active_glyph(DEFILEMENT)){
+			if(active_glyph(IMPURITY))
+				base += max(0, u.uimpurity/3-3);
+			if(uarm && uarm->oartifact == ART_SCORPION_CARAPACE && check_carapace_mod(uarm, CPROP_IMPURITY) && Insight >= 5)
+				base += max(0, (u.uimpurity+4)/3-3);
 		}
 		if(Role_if(PM_HEALER))
 			base += heal_mlevel_bonus();
@@ -1314,8 +1349,8 @@ struct monst *mon;
 #undef m_fdr
 #undef m_gdr
 		base += (dr / 7);
-		if(mon->mtyp == PM_CENTER_OF_ALL && u.uinsight < 32)
-			base += (33-u.uinsight)/2;
+		if(mon->mtyp == PM_CENTER_OF_ALL && Insight < 32)
+			base += (33-Insight)/2;
 
 		if(mon->mtyp == PM_OONA && mon->mhp < mon->mhpmax/2){
 			base += 7;
@@ -1328,21 +1363,13 @@ struct monst *mon;
 }
 
 int
-roll_mdr(mon, magr, aatyp)
-struct monst *mon;
-struct monst *magr;
-uchar aatyp;
+roll_mdr(struct monst *mon, struct monst *magr, int slot)
 {
-	return roll_mdr_detail(mon, magr, 0, 0, aatyp);
+	return roll_mdr_detail(mon, magr, slot, 0, 0);
 }
 
 int
-roll_mdr_detail(mon, magr, slot, depth, aatyp)
-struct monst *mon;
-struct monst *magr;
-int slot;
-int depth;
-uchar aatyp;
+roll_mdr_detail(struct monst *mon, struct monst *magr, int slot, int depth, uchar aatyp)
 {
 	int base, nat_dr, armac;
 	boolean youagr = (magr == &youmonst);
@@ -1465,15 +1492,20 @@ int depth;
 	for (i = 0; i < SIZE(marmor); i++) {
 		if((curarm = which_armor(mon, marmor[i]))){
 			if(curarm->oclass == ARMOR_CLASS){
-				if (curarm && ((objects[curarm->otyp].oc_dtyp & slot) || (!objects[curarm->otyp].oc_dtyp && (slot&adfalt[i])))) {
-					if(depth && higher_depth(objects[curarm->otyp].oc_armcat, depth))
-						continue;
-					if(marmor[i] == W_ARM && slot == LOWER_TORSO_DR && mon->mtyp == PM_BLIBDOOLPOOLP_S_MINDGRAVEN_CHAMPION && !blip_humanoid_armor && magr && !depth){
-						if(!full_body_match(mon->data, curarm))
+				if (curarm){
+					if((objects[curarm->otyp].oc_dtyp & slot) || (!objects[curarm->otyp].oc_dtyp && (slot&adfalt[i]))) {
+						if(depth && higher_depth(objects[curarm->otyp].oc_armcat, depth))
 							continue;
+						if(marmor[i] == W_ARM && slot == LOWER_TORSO_DR && mon->mtyp == PM_BLIBDOOLPOOLP_S_MINDGRAVEN_CHAMPION && !blip_humanoid_armor && magr && !depth){
+							if(!full_body_match(mon->data, curarm))
+								continue;
+						}
+						arm_mdr += arm_dr_bonus(curarm);
+						if (magr) arm_mdr += properties_dr(curarm, agralign, agrmoral);
 					}
-					arm_mdr += arm_dr_bonus(curarm);
-					if (magr) arm_mdr += properties_dr(curarm, agralign, agrmoral);
+					else if(curarm->otyp == CLOAK_OF_PROTECTION){
+						arm_mdr += arm_dr_bonus(curarm)/2;
+					}
 				}
 			}
 			else if(!depth){
@@ -1495,10 +1527,10 @@ int depth;
 			}
 		}
 		else if(MON_WEP(mon)->oartifact == ART_LASH_OF_THE_COLD_WASTE){
-			if(u.uinsight >= 40)
+			if(Insight >= 40)
 				bas_mdr += 5;
-			else if(u.uinsight > 20)
-				bas_mdr += (u.uinsight - 20)/4;
+			else if(Insight > 20)
+				bas_mdr += (Insight - 20)/4;
 		}
 	}
 	/* Hod Sephirah OVERRIDE other arm_mdr sources with the player's total DR (regardless of who's attacking them) */
@@ -1520,8 +1552,8 @@ int depth;
 	}
 	nat_mdr += slotnatdr;
 	if(mon->mtyp == PM_CARCOSAN_COURTIER){
-		if(u.uinsight < 25){
-			nat_mdr += u.uinsight/5;
+		if(Insight < 25){
+			nat_mdr += Insight/5;
 		}
 		else {
 			nat_mdr += 5;
@@ -1536,8 +1568,8 @@ int depth;
 		case LEG_DR:         bas_mdr += mon->data->spe_fdr; break;
 		case ARM_DR:         bas_mdr += mon->data->spe_gdr; break;
 		}
-		if(mon->mtyp == PM_CENTER_OF_ALL && u.uinsight < 32)
-			bas_mdr += (33-u.uinsight)/2;
+		if(mon->mtyp == PM_CENTER_OF_ALL && Insight < 32)
+			bas_mdr += (33-Insight)/2;
 
 		if(mon->mtyp == PM_OONA && mon->mhp < mon->mhpmax/2){
 			bas_mdr += 7;
@@ -1687,6 +1719,7 @@ boolean creation;
 	m_dowear_type(mon, W_ARMF, creation, FALSE);
 	m_dowear_type(mon, W_ARM, creation, FALSE);
 	m_dowear_type(mon, W_TOOL, creation, FALSE);
+	m_dowear_type(mon, W_BELT, creation, FALSE);
 }
 
 STATIC_OVL void
@@ -1703,7 +1736,7 @@ boolean racialexception;
 
 	if (mon->mfrozen) return; /* probably putting previous item on */
 	
-	if(is_whirly(mon->data) || noncorporeal(mon->data)) return;
+	if(is_gaseous_noequip(mon->data) || noncorporeal(mon->data)) return;
 
 	/* Get a copy of monster's name before altering its visibility */
 	Strcpy(nambuf, See_invisible(mon->mx,mon->my) ? Monnam(mon) : mon_nam(mon));
@@ -1713,6 +1746,7 @@ boolean racialexception;
 	if (old && old->otyp == STATUE && (old->corpsenm == PM_PARASITIC_MIND_FLAYER || old->corpsenm == PM_PARASITIC_MASTER_MIND_FLAYER))
 		return;
 	if (old && flag == W_AMUL) return; /* no such thing as better amulets */
+	if (old && flag == W_BELT) return; /* no such thing as better belts */
 	best = old;
 
 	for(obj = mon->minvent; obj; obj = obj->nobj) {
@@ -1731,6 +1765,9 @@ boolean racialexception;
 			continue;
 		    best = obj;
 		    goto outer_break; /* no such thing as better amulets */
+		case W_BELT:
+		    if (!is_belt(obj) || !can_wear_belt(mon->data)) continue;
+		    break;
 		case W_ARMU:
 		    if (!is_shirt(obj) || obj->objsize != mon->data->msize || !shirt_match(mon->data,obj)) continue;
 		    break;
@@ -1807,8 +1844,7 @@ outer_break:
 		      buf, distant_name(best,doname));
 	    } /* can see it */
 	    m_delay += objects[best->otyp].oc_delay;
-	    mon->mfrozen = m_delay;
-	    if (mon->mfrozen) mon->mcanmove = 0;
+	    mon->mequipping = m_delay;
 	}
 	if (old)
 	    update_mon_intrinsics(mon, old, FALSE, creation);
@@ -1847,9 +1883,7 @@ long flag;
 	    m_delay += 2;
 	m_delay += objects[old->otyp].oc_delay;
 	old->owornmask = 0L;
-	mon->mfrozen = max(mon->mfrozen, m_delay);
-	if(mon->mfrozen)
-		mon->mcanmove = 0;
+	mon->mequipping = max(mon->mequipping, m_delay);
 	update_mon_intrinsics(mon, old, FALSE, FALSE);
 	mon->misc_worn_check &= ~flag;
 	return old;
@@ -1867,7 +1901,7 @@ struct monst *mon;
 	
 	if (mon->mfrozen) return FALSE;
 	
-	do switch(rnd(7)){
+	do switch(rnd(8)){
 		case 1:
 			flag = W_ARM;
 		break;
@@ -1888,6 +1922,9 @@ struct monst *mon;
 		break;
 		case 7:
 			flag = W_AMUL;
+		break;
+		case 8:
+			flag = W_BELT;
 		break;
 	} while(tries-- && !(old = which_armor(mon, flag)));
 
@@ -1919,7 +1956,7 @@ struct monst *mon;
 	if (mon->mfrozen) return FALSE;
 	
 	for(i = 1; i<=7;i++){
-		switch(rnd(7)){
+		switch(rnd(8)){
 			case 1:
 				flag = W_ARM;
 			break;
@@ -1940,6 +1977,9 @@ struct monst *mon;
 			break;
 			case 7:
 				flag = W_AMUL;
+			break;
+			case 8:
+				flag = W_BELT;
 			break;
 		}
 
@@ -2058,8 +2098,8 @@ boolean polyspot;
 			m_useup(mon, otmp);	/* no message here;
 			   "the dragon merges with his scaly armor" is odd
 			   and the monster's previous form is already gone */
-		else if(!arm_size_fits(mon->data, otmp) || !arm_match(mon->data,otmp) || is_whirly(mon->data) || noncorporeal(mon->data)){
-			if (special_armor(otmp) || otmp->objsize > mon->data->msize || is_whirly(mon->data) || noncorporeal(mon->data)) {
+		else if(!arm_size_fits(mon->data, otmp) || !arm_match(mon->data,otmp) || is_gaseous_noequip(mon->data) || noncorporeal(mon->data)){
+			if (special_armor(otmp) || otmp->objsize > mon->data->msize || is_gaseous_noequip(mon->data) || noncorporeal(mon->data)) {
 				if (vis)
 					pline("%s armor falls around %s!",
 						s_suffix(Monnam(mon)), pronoun);
@@ -2077,8 +2117,8 @@ boolean polyspot;
 		}
 	}
 	if ((otmp = which_armor(mon, W_ARMC)) != 0) {
-		if(abs(otmp->objsize - mon->data->msize) > 1 || is_whirly(mon->data) || noncorporeal(mon->data)){
-			if (special_armor(otmp) || otmp->objsize > mon->data->msize || is_whirly(mon->data) || noncorporeal(mon->data)) {
+		if(abs(otmp->objsize - mon->data->msize) > 1 || is_gaseous_noequip(mon->data) || noncorporeal(mon->data)){
+			if (special_armor(otmp) || otmp->objsize > mon->data->msize || is_gaseous_noequip(mon->data) || noncorporeal(mon->data)) {
 				if (vis)
 				pline("%s %s falls off!", s_suffix(Monnam(mon)),
 					cloak_simple_name(otmp));
@@ -2108,8 +2148,8 @@ boolean polyspot;
 		}
 	}
 	if ((otmp = which_armor(mon, W_ARMU)) != 0) {
-		if(otmp->objsize != mon->data->msize || !shirt_match(mon->data,otmp) || is_whirly(mon->data) || noncorporeal(mon->data)){
-			if (special_armor(otmp) || otmp->objsize > mon->data->msize || is_whirly(mon->data) || noncorporeal(mon->data)) {
+		if(otmp->objsize != mon->data->msize || !shirt_match(mon->data,otmp) || is_gaseous_noequip(mon->data) || noncorporeal(mon->data)){
+			if (special_armor(otmp) || otmp->objsize > mon->data->msize || is_gaseous_noequip(mon->data) || noncorporeal(mon->data)) {
 				if (vis)
 				pline("%s %s falls off!", s_suffix(Monnam(mon)),
 					cloak_simple_name(otmp));
@@ -2125,7 +2165,7 @@ boolean polyspot;
 		}
 	}
 	if ((otmp = which_armor(mon, W_ARMG)) != 0) {
-		if(nogloves(mon->data) || nolimbs(mon->data) || otmp->objsize != mon->data->msize || is_whirly(mon->data) || noncorporeal(mon->data)){
+		if(nogloves(mon->data) || nolimbs(mon->data) || otmp->objsize != mon->data->msize || is_gaseous_noequip(mon->data) || noncorporeal(mon->data)){
 			if (vis)
 				pline("%s drops %s gloves!", Monnam(mon), ppronoun);
 			if (polyspot) bypass_obj(otmp);
@@ -2133,7 +2173,7 @@ boolean polyspot;
 		}
 	}
 	if ((otmp = which_armor(mon, W_ARMS)) != 0) {
-		if(nohands(mon->data) || nolimbs(mon->data) || bimanual(MON_WEP(mon),mon->data) || is_whirly(mon->data) || noncorporeal(mon->data)){
+		if(nohands(mon->data) || nolimbs(mon->data) || bimanual(MON_WEP(mon),mon->data) || is_gaseous_noequip(mon->data) || noncorporeal(mon->data)){
 			if (vis)
 				pline("%s can no longer hold %s shield!", Monnam(mon), ppronoun);
 			else
@@ -2144,7 +2184,7 @@ boolean polyspot;
 	}
 	if ((otmp = which_armor(mon, W_ARMH)) != 0 &&
 		/* flimsy test for horns matches polyself handling */
-		(!helm_match(mon->data, otmp) || !helm_size_fits(mon->data, otmp) || is_whirly(mon->data) || noncorporeal(mon->data) )
+		(!helm_match(mon->data, otmp) || !helm_size_fits(mon->data, otmp) || is_gaseous_noequip(mon->data) || noncorporeal(mon->data) )
 	) {
 		if (vis)
 			pline("%s helmet falls to the %s!",
@@ -2155,9 +2195,9 @@ boolean polyspot;
 		m_lose_armor(mon, otmp);
 	}
 	if ((otmp = which_armor(mon, W_ARMF)) != 0) {
-		if(((noboots(mon->data) || !humanoid(mon->data)) && !can_wear_boots(mon->data)) || !boots_size_fits(mon->data, otmp) || is_whirly(mon->data) || noncorporeal(mon->data)){
+		if(((noboots(mon->data) || !humanoid(mon->data)) && !can_wear_boots(mon->data)) || !boots_size_fits(mon->data, otmp) || is_gaseous_noequip(mon->data) || noncorporeal(mon->data)){
 			if (vis) {
-				if (is_whirly(mon->data) || noncorporeal(mon->data))
+				if (is_gaseous_noequip(mon->data) || noncorporeal(mon->data))
 					pline("%s %s falls, unsupported!",
 							 s_suffix(Monnam(mon)), cloak_simple_name(otmp));
 				else pline("%s boots %s off %s feet!",
@@ -2292,7 +2332,7 @@ struct obj *obj;
 				score += 3;
 		case SHOCK_RES:
 			if (!species_resists_elec(mon))
-				score += 3;
+				score += shock_vulnerable_species(mon) ? 18 : 3;
 		case ACID_RES:
 			if (!species_resists_acid(mon))
 				score += 3;
@@ -2775,4 +2815,113 @@ def_mountedCombat()
 	return bm;
 }
 
+long
+armor_depth(struct obj *otmp, int slot)
+{
+	return (slot == LOWER_TORSO_DR && is_dress(otmp->otyp)) ? W_DRESS_DEPTH : otmp->owornmask;
+}
+
+boolean
+default_coverage(int slot, long wornmask)
+{
+	switch(slot){
+		case HEAD_DR:
+			return !!(wornmask&W_ARMH);
+		break;
+		case UPPER_TORSO_DR:
+			return !!(wornmask&(W_ARM|W_ARMC|W_ARMU));
+		break;
+		case LOWER_TORSO_DR:
+			return !!(wornmask&(W_ARM|W_ARMC|W_BELT));
+		break;
+		case ARM_DR:
+			return !!(wornmask&W_ARMG);
+		break;
+		case LEG_DR:
+			return !!(wornmask&(W_ARMF|W_ARMC));
+		break;
+	}
+	return FALSE;
+}
+
+long
+next_armor_depth(long depth)
+{
+	if(depth&W_ARMS)
+		return W_ARMC;
+	if(depth&W_ARMC)
+		return W_BELT;
+	if(depth&W_BELT)
+		return W_DRESS_DEPTH;
+	if(depth&W_DRESS_DEPTH)
+		return W_ARM;
+	if(depth&W_ARM)
+		return W_ARMH;
+	if(depth&W_ARMH)
+		return W_ARMG;
+	if(depth&W_ARMG)
+		return W_ARMF;
+	if(depth&W_ARMF)
+		return W_ARMU;
+	return 0L;
+}
+
+void
+saber_damage_slot(struct monst *mdef, struct obj *saber, int slot, boolean lethal, boolean vis, boolean * messaged)
+{
+	long depth = W_ARMS;
+	struct obj *otmp, *nobj;
+	int i;
+	int limit = lethal ? 3 : rnd(3);
+	boolean youdef = mdef == &youmonst;
+	boolean immune = FALSE;
+
+	if((youdef && Preservation) || (!youdef && mon_resistance(mdef, PRESERVATION)) || check_res_engine(mdef, AD_SHRD))
+		return; //No inventory damage
+	while(depth){
+		for(otmp = youdef ? invent : mdef->minvent; otmp; otmp = nobj){
+			nobj = otmp->nobj;
+			if(otmp->owornmask&(W_ARMOR|W_BELT) && armor_depth(otmp, slot) == depth){
+				if(otmp->owornmask != W_ARMS){
+					if(otmp->oclass == ARMOR_CLASS && !(objects[otmp->otyp].oc_dtyp & slot) && !(!objects[otmp->otyp].oc_dtyp && default_coverage(slot,otmp->owornmask)))
+						continue;
+					if(otmp->oclass != ARMOR_CLASS && !default_coverage(slot,otmp->owornmask))
+						continue;
+				}
+				if (vis) {
+					pline("%s slices %s armor!",
+						The(xname(saber)),
+						(youdef ? "your" : s_suffix(mon_nam(mdef)))
+						);
+					*messaged = TRUE;
+					vis = FALSE;
+				}
+				if((is_lasersword(saber) && item_has_property(otmp, REFLECTING))
+				 ||(saber->otyp == ROD_OF_FORCE && (item_has_property(otmp, ANTIMAGIC) || item_has_property(otmp, NULLMAGIC)))
+				 ||(saber->otyp == KAMEREL_VAJRA && item_has_property(otmp, SHOCK_RES))
+				)
+					immune = TRUE;
+				if(!immune) for(i = 0; i < limit; i++){
+					if ((otmp->oclass == ARMOR_CLASS || otmp->oclass == ARMOR_CLASS) && otmp->spe > -1 * a_acdr(objects[(otmp)->otyp])){
+						damage_item(otmp);
+					}
+					else if (!otmp->oartifact){
+						saber_destroys_marm(mdef, otmp);
+						break;
+					}
+				}
+				if(!lethal){
+					if(immune || rn2(3)){
+						depth = 0;
+						break;
+					}
+					if(limit > 1)
+						limit--;
+				}
+			}
+		}
+		depth = next_armor_depth(depth);
+	}
+	
+}
 /*worn.c*/

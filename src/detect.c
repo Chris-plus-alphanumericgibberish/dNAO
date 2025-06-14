@@ -55,11 +55,11 @@ unsigned material;
 	register struct obj* otmp;
 	struct obj *temp;
 
-	if (obj->obj_material == material) return obj;
+	if (obj_is_material(obj, material)) return obj;
 
 	if (Has_contents(obj)) {
 	for (otmp = obj->cobj; otmp; otmp = otmp->nobj)
-		if (otmp->obj_material == material) return otmp;
+		if (obj_is_material(otmp, material)) return otmp;
 		else if (Has_contents(otmp) && (temp = o_material(otmp, material)))
 		return temp;
 	}
@@ -1595,6 +1595,13 @@ register int aflag;
 			arti_worn_prop(uwep, ARTP_SEEK)) ?
 			uwep->spe : 0;
 		if(u.sealsActive&SEAL_OTIAX) fund += spiritDsize();
+		if(Role_if(PM_ROGUE)){
+			fund += 2;
+			if(u.ulevel > 13)
+				fund += 3;
+			if(u.ulevel > 29)
+				fund += 5;
+		}
 		if (ublindf && ublindf->otyp == LENSES && !Blind)
 			fund += 2; /* JDS: lenses help searching */
 		if (ublindf && ublindf->otyp == SUNGLASSES && !Blind)

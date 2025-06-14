@@ -96,7 +96,8 @@ boolean use_find_offensive;	/* if TRUE, we have some offensive item ready that w
 	int tary;
 	boolean coveted = FALSE;	/* mdef was found via covetousness (used to prioritize this mdef in targeting loop) */
 	boolean tried_you = FALSE;	/* you have been attempted as mdef (used to prioritize you in targeting loop)*/
-
+	boolean on_scarry;
+	
 	boolean conflicted = (Conflict && couldsee(magr->mx, magr->my) &&
 			(distu(magr->mx, magr->my) <= BOLT_LIM*BOLT_LIM) &&
 			!resist(magr, RING_CLASS, 0, 0)) 
@@ -111,31 +112,61 @@ boolean use_find_offensive;	/* if TRUE, we have some offensive item ready that w
 		))){
 		mrwep = select_rwep(magr);
 	}
+	boolean weap_attack = 0;
+	if(mrwep){
+		weap_attack = mon_attacktype(magr, AT_WEAP);
+		if(!weap_attack)
+			weap_attack = mon_attacktype(magr, AT_DEVA);
+	}
+	boolean breath_attack = 0;
+	boolean splash_attack = 0;
+	struct attack *magic_attack = 0;
+	struct attack magic_buff = {0};
+	boolean gaze_attack = 0;
+	boolean spit_attack = 0;
+	boolean beam_attack = 0;
+	if(!magr->mcan){
+		breath_attack = mon_attacktype(magr, AT_BREA);
+		splash_attack = mon_attacktype(magr, AT_BRSH);
+		magic_attack = mon_get_attacktype(magr, AT_MAGC, &magic_buff);
+		if(!magic_attack)
+			magic_attack = mon_get_attacktype(magr, AT_MMGC, &magic_buff);
+		gaze_attack = mon_attacktype(magr, AT_GAZE);
+		spit_attack = mon_attacktype(magr, AT_SPIT);
+		beam_attack = mon_attacktype(magr, AT_BEAM);
+	}
+	boolean arrow_attack = mon_attacktype(magr, AT_ARRW);
+	boolean tinker_attack = mon_attacktype(magr, AT_TNKR);
+	boolean longreach_attack = mon_attacktype(magr, AT_LRCH);
+	if(!longreach_attack)
+		longreach_attack = mon_attacktype(magr, AT_LNCK);
+	boolean reach5_attack = mon_attacktype(magr, AT_5SQR);
+	if(!reach5_attack)
+		reach5_attack = mon_attacktype(magr, AT_5SBT);
 
+	boolean offense_item = (use_find_offensive && find_offensive(magr));
 	/* Check that magr can make any ranged attacks at all */
 	if (!force_linedup &&
 		!(
-		(mon_attacktype(magr, AT_WEAP) && mrwep) ||
-		(mon_attacktype(magr, AT_DEVA) && mrwep) ||
-		(mon_attacktype(magr, AT_BREA) && !magr->mcan) ||
-		(mon_attacktype(magr, AT_BRSH) && !magr->mcan) ||
-		(mon_attacktype(magr, AT_MAGC) && !magr->mcan) ||
-		(mon_attacktype(magr, AT_MMGC) && !magr->mcan) ||
-		(mon_attacktype(magr, AT_GAZE) && !magr->mcan) ||
+		weap_attack ||
+		breath_attack ||
+		splash_attack ||
+		magic_attack ||
+		gaze_attack ||
+		spit_attack ||
+		beam_attack ||
+		arrow_attack ||
+		tinker_attack ||
+		longreach_attack ||
+		reach5_attack ||
 		(mon_turn_undead(magr) && !magr->mspec_used && !magr->mcan && (!Inhell || mon_healing_turn(magr))) ||
-		(mon_attacktype(magr, AT_SPIT)) ||
-		(mon_attacktype(magr, AT_ARRW)) ||
-		(mon_attacktype(magr, AT_TNKR)) ||
-		(mon_attacktype(magr, AT_BEAM)) ||
-		(mon_attacktype(magr, AT_LRCH)) ||
-		(mon_attacktype(magr, AT_LNCK)) ||
-		(mon_attacktype(magr, AT_5SQR)) ||
-		(mon_attacktype(magr, AT_5SBT)) ||
 		(is_commander(magr->data)) ||
-		(use_find_offensive && find_offensive(magr))
+		offense_item
 		))
 		return (struct monst *)0;
-
+	boolean online = FALSE;
+	boolean pole_range = 0;
+	int dist_min = 0;
 	/* priority of targets:
 	 * covetous item holder
 	 * player
@@ -149,6 +180,9 @@ boolean use_find_offensive;	/* if TRUE, we have some offensive item ready that w
 			coveted = TRUE;
 	}
 	
+	pole_range = m_pole_range(magr);
+	dist_min = distmin(magr->mx, magr->my, tarx, tary);
+
 	/* target-finding loop */
 	do {
 		/* get next target */
@@ -192,77 +226,73 @@ boolean use_find_offensive;	/* if TRUE, we have some offensive item ready that w
 		if (!clear_path(magr->mx, magr->my, tarx, tary))
 			continue;
 
+		dist_min = distmin(magr->mx, magr->my, tarx, tary);
+
 		/* don't make ranged attacks at melee distance */
-		if (distmin(magr->mx, magr->my, tarx, tary) < 2)
+		if (dist_min < 2)
 			continue;
 
 		/* don't make ranged attacks beyond max-range */
-		if (distmin(magr->mx, magr->my, tarx, tary) > BOLT_LIM)
+		if (dist_min > BOLT_LIM)
 			continue;
 
 		/* horrible kludge: Oona doesn't target those resistant to her at range */
 		if (magr->mtyp == PM_OONA && (mdef == &youmonst ? Oona_resistance : resists_oona(mdef)))
 			continue;
+		
+		on_scarry = onscary(tarx, tary, magr);
+		online = m_online(magr, mdef, tarx, tary, dogbesafe, TRUE);
 
 		/* are any of our attacks good? */
 		if (/* force_linedup means we only check m_online -- we have a specific attack in mind to use that needs to be on a line */
-			(force_linedup) ? m_online(magr, mdef, tarx, tary, dogbesafe, TRUE) : (
+			(force_linedup) ? online : (
 
 			/* OTHERWISE... (!force_linedup) */
 
 			/* attacks that are on a line that do NOT stop on hit */
-			(m_online(magr, mdef, tarx, tary, dogbesafe, FALSE) && (
-				(mon_attacktype(magr, AT_BREA) && !magr->mcan) ||
-				(mon_get_attacktype(magr, AT_MAGC, &attkbuff) && !magr->mcan && !real_spell_adtyp(attkbuff.adtyp)) ||
-				(mon_get_attacktype(magr, AT_MMGC, &attkbuff) && !magr->mcan && !real_spell_adtyp(attkbuff.adtyp))
+			(online && (
+				(breath_attack) ||
+				(magic_attack && !real_spell_adtyp(magic_buff.adtyp))
 			))
 			||
 			/* attacks that splash */
-			(m_insplash(magr, mdef, tarx, tary, dogbesafe) && (
-				(mon_attacktype(magr, AT_BRSH) && !magr->mcan)
-			))
+			(splash_attack && m_insplash(magr, mdef, tarx, tary, dogbesafe))
 			||
 			/* attacks that are on a line that DO stop on hit */
-			(m_online(magr, mdef, tarx, tary, dogbesafe, TRUE) && (
-				(mon_attacktype(magr, AT_SPIT)) ||
-				(mon_attacktype(magr, AT_ARRW)) ||
-				(mon_attacktype(magr, AT_WEAP) && mrwep && !is_pole(mrwep)) ||
-				(mon_attacktype(magr, AT_DEVA) && mrwep && !is_pole(mrwep)) ||
-				(use_find_offensive && find_offensive(magr))
+			(online && (
+				spit_attack ||
+				arrow_attack ||
+				(weap_attack && !is_pole(mrwep)) ||
+				offense_item
 			))
 			||
 			/* attacks that are on a line that are ALWAYS SAFE */
-			(m_online(magr, mdef, tarx, tary, FALSE, FALSE) && (
-				(mon_attacktype(magr, AT_TNKR)) ||
-				(mon_attacktype(magr, AT_BEAM))
-			))
+			((
+				tinker_attack ||
+				beam_attack
+			) && m_online(magr, mdef, tarx, tary, FALSE, FALSE)) //Note: Non-standard online check
 			||
 			/* attacks in polearm range */
-			(dist2(magr->mx, magr->my, tarx, tary) <= m_pole_range(magr) && (
-				(mon_attacktype(magr, AT_WEAP) && mrwep && is_pole(mrwep)) ||
-				(mon_attacktype(magr, AT_DEVA) && mrwep && is_pole(mrwep))
-			))
+			((
+				(weap_attack && is_pole(mrwep) && !on_scarry)
+			) && dist2(magr->mx, magr->my, tarx, tary) <= pole_range)
 			||
 			/* attacks in a square range of 2 */
-			(distmin(magr->mx, magr->my, tarx, tary) <= 2 && (
-				(mon_attacktype(magr, AT_LRCH)) ||
-				(mon_attacktype(magr, AT_LNCK))
+			(dist_min <= 2 && !on_scarry && (
+				longreach_attack
 			))
 			||
 			/* attacks in a square range of 5 */
-			(distmin(magr->mx, magr->my, tarx, tary) <= 5 && (
-				(mon_attacktype(magr, AT_5SQR)) ||
-				(mon_attacktype(magr, AT_5SBT))
+			(dist_min <= 5 && !on_scarry && (
+				reach5_attack
 			))
 			||
 			/* attacks in a square range of 8 */
-			(distmin(magr->mx, magr->my, tarx, tary) <= 8 && (
+			(dist_min <= 8 && (
 				(is_commander(magr->data) && !rn2(4)) ||	/* !rn2(4) -> reduce command frequency */
-				(mon_attacktype(magr, AT_GAZE) && !magr->mcan) ||
-				(mon_turn_undead(magr) && !magr->mspec_used && !magr->mcan) ||
-				(mon_get_attacktype(magr, AT_MAGC, &attkbuff) && !magr->mcan && real_spell_adtyp(attkbuff.adtyp)) ||
-				(mon_get_attacktype(magr, AT_MMGC, &attkbuff) && !magr->mcan && real_spell_adtyp(attkbuff.adtyp)) ||
-				(mon_turn_undead(magr) && !magr->mspec_used && !magr->mcan && (!Inhell || mon_healing_turn(magr)))
+				gaze_attack ||
+				(magic_attack && real_spell_adtyp(magic_buff.adtyp)) ||
+				(mon_turn_undead(magr) && !magr->mspec_used && !magr->mcan && !on_scarry && (!Inhell || mon_healing_turn(magr)))
 			))
 		)){
 			/* mdef can be targeted by one of our attacks */
@@ -357,7 +387,7 @@ struct monst * magr;
 		return 8;
 	}
 	
-	if(magr->mformication || magr->mscorpions)
+	if(magr->mformication || magr->mscorpions || magr->mcaterpillars)
 		return 4;
 
 	switch (m_martial_skill(magr->data)) {
@@ -459,6 +489,7 @@ int whodidit;	/* 1==hero, 0=other, -1==just check whether it'll pass thru */
 		    hits = (obj_type == MEAT_STICK ||
 			    obj_type == MASSIVE_CHUNK_OF_MEAT);
 		break;
+	case BELT_CLASS:
 	case SPBOOK_CLASS:
 	case WAND_CLASS:
 	case BALL_CLASS:
@@ -474,7 +505,7 @@ int whodidit;	/* 1==hero, 0=other, -1==just check whether it'll pass thru */
 	if (whodidit ? hero_breaks(otmp, x, y, FALSE) : breaks(otmp, x, y))
 	    *obj_p = otmp = 0;		/* object is now gone */
 	    /* breakage makes its own noises */
-	else if (obj_type == BOULDER || obj_type == STATUE || obj_type == HEAVY_IRON_BALL)
+	else if (obj_type == BOULDER || obj_type == STATUE || obj_type == BALL)
 	    pline("Whang!");
 	else if (otmp->oclass == COIN_CLASS ||
 		otmp->obj_material == GOLD ||

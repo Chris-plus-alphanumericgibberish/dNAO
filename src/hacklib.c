@@ -530,7 +530,6 @@ fuzzymatch(s1, s2, ignore_chars, caseblind)
 #if defined(AMIGA) && !defined(AZTEC_C) && !defined(__SASC_60) && !defined(_DCC) && !defined(__GNUC__)
 extern struct tm *FDECL(localtime,(time_t *));
 #endif
-static struct tm *NDECL(getlt);
 
 void
 setrandom()
@@ -554,7 +553,7 @@ setrandom()
 	srand((unsigned int) time((time_t *)0)); /*The basic rand function is always used in a few places, so seed it*/
 }
 
-static struct tm *
+struct tm *
 getlt()
 {
 	time_t date;
@@ -644,8 +643,12 @@ time_t date;
  * + 11/22 for rounding
  */
 int
-phase_of_the_moon()		/* 0-7, with 0: new, 4: full */
+phase_of_the_moon()		/* 0-7, with 0: new, 4: full, 8: hunting moon */
 {
+	if(mvitals[PM_MOON_S_CHOSEN].died)
+		return 8;
+	else if(mvitals[PM_INDEX_WOLF].died)
+		return 4;
 	register struct tm *lt = getlt();
 	register int epact, diy, goldn;
 
@@ -677,15 +680,13 @@ friday_13th()
 int
 night()
 {
-	register int hour = getlt()->tm_hour;
-
-	return(hour < 6 || hour > 21);
+	return(flags.tm_hour < 6 || flags.tm_hour > 21);
 }
 
 int
 midnight()
 {
-	return(getlt()->tm_hour == 0);
+	return flags.tm_hour == 0;
 }
 
 //Integer hash function courtesy of Thomas Mueller via Stackoverflow

@@ -1006,6 +1006,8 @@ genericptr_t p2;
     /* If not a specially handled type, do generic handling */
     mdef = p2 ? (struct monst *) p2: &youmonst;
     boolean youdef = (mdef == &youmonst);
+	if (youdef && Invulnerable)
+		return FALSE;
     attk.aatyp = AT_ENGL;
     attk.adtyp = cloud_data->adtyp;
     attk.damn = cloud_data->damage;

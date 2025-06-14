@@ -190,6 +190,8 @@ static const char *haluMesg[] = {
 	
 	"I don't care if it compiles / Or makes your head explode / I want a messy makefile / I want a billion lines of code", /* Scope Creep by Radiohead by qt */
 
+	"my eternal angel form dnh soul has a gun with a spoon in it", /* Demo */
+
 	"I see you...",
 		"...do you see me?",
 		"That was a mistake.",
@@ -416,6 +418,7 @@ static const char *haluMesg[] = {
 		"And in doing so, you will restore the world to what it was.",
 		">^ N^T R3A> T||1S S1<N",
 		">^ R3A> T||1S ^N3",
+		"This wasn't your decision to make.","It was. I'd do it again, exactly the same.",
 	"Fall in a more hardboiled manner.", /* MS Paint Adventures */
 		"Since you are reading this, chances are you have already installed this game on your computer.  If this is true, you have just participated in bringing about the end of the world.  But don't beat yourself up about it.",
 		"YOU HATE TIME TRAVEL YOU HATE TIME TRAVEL YOU HATE....",
@@ -2025,9 +2028,12 @@ int mode;
 		return MOVE_CANCELLED;
 	}
 	if (IS_ALTAR(levl[u.ux][u.uy].typ)) {
-		You("make a motion towards the altar with your %s.", writer);
-		altar_wrath(u.ux, u.uy);
-		return MOVE_INSTANT;
+		int godnum = god_at_altar(u.ux,u.uy);
+		if(!no_altar_index(godnum)){
+			You("make a motion towards the altar with your %s.", writer);
+			altar_wrath(u.ux, u.uy);
+			return MOVE_INSTANT;
+		}
 	}
 	if(mode == ENGRAVE_MODE){
 		if (IS_GRAVE(levl[u.ux][u.uy].typ)) {
@@ -2063,6 +2069,10 @@ int mode;
 			break;
 		}
 		break;
+
+	    case BELT_CLASS:
+			type = DUST;
+			break;
 
 	    case ARMOR_CLASS:
 		if (is_boots(otmp)) {
@@ -2321,7 +2331,7 @@ int mode;
 
 	    case WEAPON_CLASS:
 		if (otmp->oartifact == ART_PEN_OF_THE_VOID &&
-				mvitals[PM_ACERERAK].died > 0 && (otmp->ovar1_seals & SEAL_ANDREALPHUS)
+				mvitals[PM_ACERERAK].died > 0 && (otmp->ovara_seals & SEAL_ANDREALPHUS)
 		) {
 			type = BURN;
 		} else if (is_lightsaber(otmp)) {
@@ -3009,6 +3019,7 @@ int mode;
 		break;
 	    case ENGR_BLOOD:
 			multi = -(len/10);
+			IMPURITY_UP(u.uimp_blood)
 			if (multi) nomovemsg =	"You finish scrawling.";
 		break;
 	}
@@ -3391,7 +3402,7 @@ int describe;
 				MENU_UNSELECTED);
 			incntlet = (incntlet != 'z') ? (incntlet + 1) : 'A';
 		}
-		if (uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && uwep->ovar1_seals&SEAL_ANDREALPHUS){
+		if (uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && uwep->ovara_seals&SEAL_ANDREALPHUS){
 			Sprintf(buf, "Hypergeometric transit solution");
 			any.a_int = ANDREALPHUS_TRANSIT;	/* must be non-zero */
 			add_menu(tmpwin, NO_GLYPH, &any,
@@ -3399,7 +3410,7 @@ int describe;
 				MENU_UNSELECTED);
 			incntlet = (incntlet != 'z') ? (incntlet + 1) : 'A';
 		}
-		if (uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && uwep->ovar1_seals&SEAL_ANDREALPHUS){
+		if (uwep && uwep->oartifact == ART_PEN_OF_THE_VOID && uwep->ovara_seals&SEAL_ANDREALPHUS){
 			Sprintf(buf, "Hypergeometric stabilization solution");
 			any.a_int = ANDREALPHUS_STABILIZE;	/* must be non-zero */
 			add_menu(tmpwin, NO_GLYPH, &any,
@@ -4531,7 +4542,11 @@ int x, y;
 const char *str;
 {
 	/* Can we put a grave here? */
-	if ((levl[x][y].typ != ROOM && levl[x][y].typ != GRAVE) || t_at(x,y)) return;
+	if ((levl[x][y].typ != ROOM
+		&& levl[x][y].typ != GRAVE
+		&& levl[x][y].typ != SOIL
+		&& levl[x][y].typ != GRASS
+	) || t_at(x,y)) return;
 
 	/* Make the grave */
 	levl[x][y].typ = GRAVE;

@@ -185,6 +185,8 @@ dosave0()
 	/* undo date-dependent luck adjustments made at startup time */
 	if(flags.moonphase == FULL_MOON)	/* ut-sally!fletcher */
 		change_luck(-1);		/* and unido!ab */
+	if(flags.moonphase == HUNTING_MOON)
+		change_luck(-2);
 	if(flags.friday13)
 		change_luck(1);
 	if(iflags.window_inited)
@@ -588,6 +590,7 @@ int mode;
 	bwrite(fd,(genericptr_t) &updest,sizeof(dest_area));
 	bwrite(fd,(genericptr_t) &dndest,sizeof(dest_area));
 	bwrite(fd,(genericptr_t) &level.flags,sizeof(level.flags));
+	bwrite(fd,(genericptr_t) &level.lastmove,sizeof(level.lastmove));
 	bwrite(fd, (genericptr_t) doors, sizeof(doors));
 	bwrite(fd,(genericptr_t) &altarindex, sizeof(int));
 	bwrite(fd, (genericptr_t) altars, sizeof(altars));
@@ -1095,6 +1098,7 @@ freedynamicdata()
 	free_youbuf();	/* You_buf,&c (pline.c) */
 	msgpline_free();
 #ifdef MENU_COLOR
+	querytype_free();
 	free_menu_coloring();
 #endif
 	tmp_at(DISP_FREEMEM, 0);	/* temporary display effects */

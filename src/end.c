@@ -80,9 +80,9 @@ extern void FDECL(nethack_exit,(int));
 static NEARDATA const char *deaths[] = {		/* the array of death */
 	"died", "betrayed", "choked", "poisoned", "starvation", "drowning", /*5*/
 	"burning", "dissolving under the heat and pressure",
-	"crushed", "turned to stone", "turned to gold", "turned to glass", "turned into slime",
+	"crushed", "turned to stone", "turned to gold", "turned to salt", "turned to glass", "turned into slime",
 	"exploded after being overwound", "turned into a weeping angel", "disintegrated",
-	"genocided",
+	"genocided", "world ended",
 	"panic", "trickery",
 	"quit", "escaped", "ascended"
 };
@@ -90,9 +90,9 @@ static NEARDATA const char *deaths[] = {		/* the array of death */
 static NEARDATA const char *ends[] = {		/* "when you..." */
 	"died", "were betrayed", "choked", "were poisoned", "starved", "drowned",
 	"burned", "dissolved in the lava",
-	"were crushed", "turned to stone", "turned to gold", "turned to glass", "turned into slime",
+	"were crushed", "turned to stone", "turned to gold", "turned to salt", "turned to glass", "turned into slime",
 	"were overwound and exploded", "turned into a weeping angel", "were disintegrated",
-	"were genocided",
+	"were genocided", "world ended",
 	"panicked", "were tricked",
 	"quit", "escaped", "ascended"
 };
@@ -299,21 +299,7 @@ done2()
 {
 	if (iflags.debug_fuzzer)
 		return MOVE_CANCELLED;
-#ifdef PARANOID
-	char buf[BUFSZ];
-	int really_quit = FALSE;
-
-	if (iflags.paranoid_quit) {
-	  getlin ("Really quit [yes/no]?",buf);
-	  (void) lcase (buf);
-	  if (!(strcmp (buf, "yes"))) really_quit = TRUE;
-	} else {
-	  if(yn("Really quit?") == 'y') really_quit = TRUE;
-	}
-	if (!really_quit) {
-#else /* PARANOID */
-	if(yn("Really quit?") == 'n') {
-#endif /* PARANOID */
+	if (yesno("Really quit?", iflags.paranoid_quit) != 'y') {
 #ifndef NO_SIGNAL
 		(void) signal(SIGINT, (SIG_RET_TYPE) done1);
 #endif
@@ -501,6 +487,11 @@ register struct monst *mtmp;
 	if (u.ugrave_arise >= LOW_PM &&
 				(mvitals[u.ugrave_arise].mvflags & G_GENOD && !In_quest(&u.uz)))
 		u.ugrave_arise = NON_PM;
+	if (!u.uconduct.killer){
+		//Pcifist PCs aren't combatants so if something kills them up "killed peaceful" type impurities
+		IMPURITY_UP(u.uimp_murder)
+		IMPURITY_UP(u.uimp_bloodlust)
+	}
 	if (touch_petrifies(mtmp->data))
 		done(STONING);
 	else if (mtmp->mtraitor)
@@ -687,6 +678,7 @@ int how;
 		HStrangled &= ~TIMEOUT;
 		delayed_killer = 0;
 	}
+	make_invulnerable(HSanctuary + 1, TRUE);
 	nomovemsg = "You survived that attempt on your life.";
 	flags.move |= MOVE_INSTANT;
 	if(multi > 0) multi = 0; else multi = -1;
@@ -987,10 +979,6 @@ void
 done(how)
 int how;
 {
-#if defined(WIZARD) && defined(PARANOID)
-	char paranoid_buf[BUFSZ];
-	int really_bon = TRUE;
-#endif
 	boolean taken;
 	char kilbuf[BUFSZ], pbuf[BUFSZ];
 	winid endwin = WIN_ERR;
@@ -1034,7 +1022,7 @@ int how;
 	            killer_format = 0;
 	            return;
 	        }
-	    } else
+	} else
 
 
 	/* kilbuf: used to copy killer in case it comes from something like
@@ -1042,12 +1030,12 @@ int how;
 	 *	xname() when listing possessions
 	 * pbuf: holds Sprintf'd output for raw_print and putstr
 	 */
-	if (how == ASCENDED || (!killer && how == GENOCIDED))
+	if (!killer && (how == ASCENDED || how == GENOCIDED))
 		killer_format = NO_KILLER_PREFIX;
 	/* Avoid killed by "a" burning or "a" starvation */
 	if (!killer && (how == STARVING || how == BURNING))
 		killer_format = KILLED_BY;
-	Strcpy(kilbuf, (!killer || how >= PANICKED ? deaths[how] : killer));
+	Strcpy(kilbuf, (!killer || (how >= PANICKED && how != ASCENDED) ? deaths[how] : killer));
 	killer = kilbuf;
 
 #define LSVD_NONE 0
@@ -1165,6 +1153,18 @@ int how;
 			You("wish that hadn't happened.");
 			pline("A star flares on your right ring-finger!");
 			uright->spe--;
+		} else if(check_rot(ROT_CENT) && !(mvitals[PM_CENTIPEDE].mvflags & G_GENOD) && !HUnchanging){
+			lsvd = LSVD_MISC;
+			if (how == DISINTEGRATED) pline("A monstrous centipede crawls out of your dust!");
+			else pline("A monstrous centipede crawls out of your rotting body!");
+			struct obj *otmp, *nobj;
+			for(otmp = invent; otmp; otmp = nobj){
+				nobj = otmp->nobj;
+				obj_extract_and_unequip_self(otmp);
+				dropy(otmp);
+			}
+			polymon(PM_CENTIPEDE);
+			remove_rot(ROT_CENT);
 		} else if(check_mutation(ABHORRENT_SPORE) && !(mvitals[PM_DARK_YOUNG].mvflags & G_GENOD)){
 			lsvd = LSVD_SPOR;
 			if (how == DISINTEGRATED) pline("Your dust is consumed by the abhorrent spore!");
@@ -1196,8 +1196,6 @@ int how;
 				calc_total_maxhp();
 			}
 		}
-		if(youmonst.movement < 12)
-			youmonst.movement = 12;
 		savelife(how);
 		if (how == GENOCIDED)
 			pline("Unfortunately you are still genocided...");
@@ -1342,8 +1340,10 @@ die:
 		u.ugrave_arise = (NON_PM - 1);	/* statue instead of corpse */
 	    else if (how == GOLDING)
 		u.ugrave_arise = (NON_PM - 3);	/* statue instead of corpse */
-	    else if (how == GLASSED)
+		else if (how == SALTING)
 		u.ugrave_arise = (NON_PM - 4);	/* statue instead of corpse */
+	    else if (how == GLASSED)
+		u.ugrave_arise = (NON_PM - 5);	/* statue instead of corpse */
 	    else if (u.ugrave_arise == NON_PM &&
 		     !(mvitals[u.umonnum].mvflags & G_NOCORPSE && !uandroid)) {
 		int mtyp = u.umonnum;
@@ -1437,17 +1437,7 @@ die:
 
 	if (bones_ok) {
 #ifdef WIZARD
-# ifdef PARANOID
-	    if(wizard) {
-		getlin("Save WIZARD MODE bones? [no/yes]", paranoid_buf);
-		(void) lcase (paranoid_buf);
-		if (strcmp (paranoid_buf, "yes"))
-		  really_bon = FALSE;
-            }
-            if(really_bon)
-# else
-	    if (!wizard || yn("Save bones?") == 'y')
-#endif /* PARANOID */
+	    if(!wizard || yesno("Save WIZARD MODE bones?", TRUE) == 'y')
 #endif /* WIZARD */
 		savebones(corpse);
 	    /* corpse may be invalid pointer now so
@@ -1512,7 +1502,7 @@ die:
 		   how != ASCENDED ?
 		      (const char *) ((flags.female && urole.name.f) ?
 		         urole.name.f : urole.name.m) :
-		      (const char *) (flags.female ? "Demigoddess" : "Demigod"));
+		      (const char *) title_override ? title_override : (flags.female ? "Demigoddess" : "Demigod"));
 	if (!done_stopprint) {
 	    putstr(endwin, 0, pbuf);
 	    putstr(endwin, 0, "");

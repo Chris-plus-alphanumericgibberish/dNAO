@@ -198,7 +198,9 @@ worm_move(worm)
 {
     register struct wseg *seg, *new_seg;	/* new segment */
     register int	 wnum = worm->wormno;	/* worm number */
-	boolean twoLong, hh = worm->mtyp == PM_HUNTING_HORROR;
+	boolean hh = worm->mtyp == PM_HUNTING_HORROR;
+	int w_length = count_wsegs(worm);
+	
 
 
 /*  if (!wnum) return;  bullet proofing */
@@ -207,8 +209,6 @@ worm_move(worm)
      *  Figure if worm is shorter than two
      */
     seg = wtails[wnum];
-	twoLong = !(seg->nseg && seg->nseg->nseg);
-	
     /*
      *  Place a segment at the old worm head.  The head has already moved.
      */
@@ -228,18 +228,24 @@ worm_move(worm)
     wheads[wnum]  = new_seg;		/* move the end pointer */
 
 
-    if ((!hh && wgrowtime[wnum] <= moves) || 
-		( hh && twoLong)) {
-	if (!wgrowtime[wnum])
-	    wgrowtime[wnum] = moves + rnd(5);
-	else
-	    wgrowtime[wnum] += rn1(15, 3);
-	worm->mhp += 3;
-	if (worm->mhp > MHPMAX) worm->mhp = MHPMAX;
-	if (worm->mhp > worm->mhpmax) worm->mhpmax = worm->mhp;
+    if ((!hh && wgrowtime[wnum] <= moves)
+		|| ( hh && w_length < 2)
+	) {
+		if (!wgrowtime[wnum])
+			wgrowtime[wnum] = moves + rnd(5);
+		else
+			wgrowtime[wnum] += rn1(15, 3);
+
+		if( worm->mtyp == PM_CHORISTER_JELLY){
+			wgrowtime[wnum] += rn2(w_length) *  rn2(w_length);
+		}
+
+		worm->mhp += 3;
+		if (worm->mhp > MHPMAX) worm->mhp = MHPMAX;
+		if (worm->mhp > worm->mhpmax) worm->mhpmax = worm->mhp;
     } else
 	/* The worm doesn't grow, so the last segment goes away. */
-	shrink_worm(wnum);
+		shrink_worm(wnum);
 }
 
 /*
@@ -300,8 +306,20 @@ wormhitu(worm)
     register int wnum = worm->wormno;
     register struct wseg *seg;
 	struct attack mattk = {AT_CLAW, AD_PHYS, 2, 4};
+	boolean dangerous_tail = (worm->mtyp == PM_CHORISTER_JELLY || worm->mtyp == PM_HUNTING_HORROR);
 
     if (!wnum) return; /* bullet proofing */
+	
+	if(worm->mtyp == PM_HUNTING_HORROR){
+		mattk.damn = 5;
+		mattk.damd = 6;
+	}
+	else if(worm->mtyp == PM_CHORISTER_JELLY){
+		mattk.aatyp = AT_STNG;
+		mattk.adtyp = AD_PAIN;
+		mattk.damn = 3;
+		mattk.damd = 6;
+	}
 
 /*  This does not work right now because mattacku() thinks that the head is
  *  out of range of the player.  We might try to kludge, and bring the head
@@ -309,7 +327,7 @@ wormhitu(worm)
  *  before we decide to do this.
  */
 	seg = wtails[wnum];
-    for (seg = seg->nseg; seg && seg->nseg; seg = seg->nseg)
+    for (seg = seg->nseg; seg && (dangerous_tail || seg->nseg); seg = seg->nseg)
 		if (distu(seg->wx, seg->wy) < 3 && magr_can_attack_mdef(worm, &youmonst, u.ux, u.uy, FALSE)){
 			if (xmeleehity(worm, &youmonst, &mattk, (struct obj **)0, -1, 0, FALSE) > 1)	// some result other than hit or miss
 				break;
@@ -420,7 +438,7 @@ cutworm(worm, x, y, weap)
      */
 
     /* Sometimes the tail end dies. */
-    if (worm->mtyp == PM_HUNTING_HORROR ||
+    if (worm->mtyp != PM_LONG_WORM ||
 		rn2(3) || !(new_wnum = get_wormno())
 	) {
 		cutoff(worm, new_tail);
@@ -501,6 +519,9 @@ detect_wsegs(worm, use_detection_glyph)
 	if(worm->mtyp == PM_HUNTING_HORROR) num = use_detection_glyph ?
 		detected_monnum_to_glyph(what_mon(PM_HUNTING_HORROR_TAIL, worm)) :
 		monnum_to_glyph(what_mon(PM_HUNTING_HORROR_TAIL, worm));
+	else if(worm->mtyp == PM_CHORISTER_JELLY) num = use_detection_glyph ?
+		detected_monnum_to_glyph(what_mon(PM_CHORISTER_TRAIN, worm)) :
+		monnum_to_glyph(what_mon(PM_CHORISTER_TRAIN, worm));
 	else num = use_detection_glyph ?
 		detected_monnum_to_glyph(what_mon(PM_LONG_WORM_TAIL, worm)) :
 		monnum_to_glyph(what_mon(PM_LONG_WORM_TAIL, worm));

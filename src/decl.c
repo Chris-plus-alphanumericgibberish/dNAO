@@ -3,6 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
+#include "hashmap.h"
 
 int NDECL((*afternmv));
 int NDECL((*occupation));
@@ -54,6 +55,7 @@ NEARDATA int altarindex = 0;
 NEARDATA char *save_cm = 0;
 NEARDATA int killer_format = 0;
 const char *killer = 0;
+const char *title_override = 0;
 const char *delayed_killer = 0;
 #ifdef GOLDOBJ
 NEARDATA long done_money = 0;
@@ -170,6 +172,8 @@ NEARDATA struct flag flags = DUMMY;
 NEARDATA struct instance_flags iflags = DUMMY;
 NEARDATA struct you u = DUMMY;
 
+struct hashmap_s *itemmap = 0;
+
 /* objects that have been stored in a magic chest */
 NEARDATA struct obj *magic_chest_objs[10] = {0};
 
@@ -180,6 +184,7 @@ NEARDATA struct obj *invent = (struct obj *)0,
 #ifdef TOURIST
 	*uarmu = (struct obj *)0, /* under-wear, so to speak */
 #endif
+	*ubelt = (struct obj *)0,
 	*uskin = (struct obj *)0, /* dragon armor, if a dragon */
 	*uarmc = (struct obj *)0, *uarmh = (struct obj *)0,
 	*uarms = (struct obj *)0, *uarmg = (struct obj *)0,
@@ -352,6 +357,7 @@ const struct material materials[] = {
 	{SALT,			CLR_WHITE,		 60,/*old:  21*/		 15,		4,				2,			3	},
 	{SHADOWSTEEL,	CLR_BLACK,		 30,/*old:  27*/		 50,		6,				4,			5	},
 	{MERCURIAL,		HI_SILVER,		100,/*old: 135*/		150,		5,				4,			4	},
+	{HEMARGYOS,		HI_SILVER,		100,/*old: 135*/		 30,		5,				3,			3	},
 	{FIRMAMENT,		CLR_BLACK,		 50,/*old:  27*/		300,	   10,			   10,		   10	}
 };
 
@@ -383,8 +389,9 @@ struct u_achieve achieve = DUMMY;
 struct realtime_data realtime_data = { 0, 0, 0 };
 #endif
 
-
 struct _plinemsg *pline_msg = NULL;
+
+struct querytype *query_types = NULL;
 
 /* FIXME: These should be integrated into objclass and permonst structs,
    but that invalidates saves */

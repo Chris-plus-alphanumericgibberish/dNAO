@@ -555,6 +555,7 @@ struct levelflags {
 	int		goldkamcount_hostile;	/* number of hostile gold kamerel 'above' level */
 	int		goldkamcount_peace;	/* number of peaceful gold kamerel 'above' level */
 	int		sp_lev_nroom;	/* number of rooms on the level as defined by the special level generator */
+	int		rage;		/* rage-walker rage*/
 	/* Several flags that give hints about what's on the level */
 	Bitfield(has_shop, 1);
 	Bitfield(has_vault, 1);
@@ -596,6 +597,11 @@ struct levelflags {
 	Bitfield(has_minor_spire, 1);	/* has minor spire (spawns only normal kamerel) */
 	Bitfield(has_kamerel_towers, 1);		/* has kamerel tows (spawns normal kamerel) */
 	/*32*/
+	Bitfield(mirror, 1);	/* has at least one mirror on the ground */
+	Bitfield(day, 1);	/* Is the map currently in day mode? */
+	Bitfield(walkers, 2);	/* How many rage-walkers for this level? (0-3) */
+	/*36*/
+
 };
 
 typedef struct
@@ -615,6 +621,7 @@ typedef struct
     struct monst	*monlist;
     struct damage	*damagelist;
     struct levelflags	flags;
+    long	lastmove;
 }
 dlevel_t;
 

@@ -39,7 +39,7 @@ static NEARDATA const char c_armor[]  = "armor",
 
 static NEARDATA const long takeoff_order[] = { WORN_BLINDF, W_WEP,
 	WORN_SHIELD, WORN_GLOVES, LEFT_RING, RIGHT_RING, WORN_CLOAK,
-	WORN_HELMET, WORN_AMUL, WORN_ARMOR,
+	WORN_HELMET, WORN_AMUL, WORN_BELT, WORN_ARMOR,
 #ifdef TOURIST
 	WORN_SHIRT,
 #endif
@@ -271,6 +271,8 @@ Cloak_on()
 	case CLOAK_OF_MAGIC_RESISTANCE:
 	case ROBE:
 	case CLOAK:
+	case CAPELET:
+	case HOODED_CAPELET:
 	case LEO_NEMAEUS_HIDE:
 	case WHITE_FACELESS_ROBE:
 	case BLACK_FACELESS_ROBE:
@@ -353,6 +355,8 @@ Cloak_off()
 	case OILSKIN_CLOAK:
 	case ROBE:
 	case CLOAK:
+	case CAPELET:
+	case HOODED_CAPELET:
 	case LEO_NEMAEUS_HIDE:
 	case WHITE_FACELESS_ROBE:
 	case BLACK_FACELESS_ROBE:
@@ -402,6 +406,7 @@ Helmet_on()
 	adj_abon(uarmh, uarmh->spe);
     switch(uarmh->otyp) {
 	case FEDORA:
+	case TRICORN:
 	case SHEMAGH:
 	case HELMET:
 	case DROVEN_HELM:
@@ -410,6 +415,7 @@ Helmet_on()
 	case CRYSTAL_HELM:
 	case PONTIFF_S_CROWN:
 	case FACELESS_HELM:
+	case FACELESS_HOOD:
 	case SEDGE_HAT:
 	case WAR_HAT:
 	case WIDE_HAT:
@@ -427,6 +433,12 @@ Helmet_on()
 	case HARMONIUM_HELM:
 	case HELM_OF_BRILLIANCE:
 	case SUNLIGHT_MAGGOT:
+		break;
+	case TOP_HAT:
+	case ESCOFFION:
+	case HENNIN:
+		ABON(A_CHA) += 1;
+		flags.botl = 1;
 		break;
 	case CORNUTHAUM:
 		/* people think marked wizards know what they're talking
@@ -519,6 +531,7 @@ Helmet_off()
 
     switch(uarmh->otyp) {
 	case FEDORA:
+	case TRICORN:
 	case SHEMAGH:
 	case HELMET:
 	case DROVEN_HELM:
@@ -527,6 +540,7 @@ Helmet_off()
 	case CRYSTAL_HELM:
 	case PONTIFF_S_CROWN:
 	case FACELESS_HELM:
+	case FACELESS_HOOD:
 	case SEDGE_HAT:
 	case WAR_HAT:
 	case WIDE_HAT:
@@ -542,6 +556,12 @@ Helmet_off()
 	case HARMONIUM_HELM:
 	case SUNLIGHT_MAGGOT:
 	    break;
+	case TOP_HAT:
+	case ESCOFFION:
+	case HENNIN:
+		ABON(A_CHA) -= 1;
+		flags.botl = 1;
+		break;
 	case DUNCE_CAP:
 	    flags.botl = 1;
 	    break;
@@ -575,7 +595,7 @@ Helmet_off()
 	if (Blind) {
 		if (was_blind) {
 			/* "still cannot see" needs the helmet to possibly have been the cause of your blindness */
-			if ((otmp->otyp == CRYSTAL_HELM && is_opaque(otmp)) ||
+			if (((otmp->otyp == CRYSTAL_HELM || otmp->otyp == FACELESS_HOOD) && is_opaque(otmp)) ||
 				(otmp->otyp == PLASTEEL_HELM && is_opaque(otmp) && otmp->obj_material != objects[otmp->otyp].oc_material))
 				You("still cannot see.");
 		}
@@ -1424,6 +1444,32 @@ register struct obj *otmp;
 	}
 }
 
+void
+Belt_on()
+{
+    if (!ubelt) return;
+	if(check_oprop(ubelt, OPROP_CURS)){
+		if (Blind)
+		pline("%s for a moment.", Tobjnam(ubelt, "vibrate"));
+		else
+		pline("%s %s for a moment.",
+			  Tobjnam(ubelt, "glow"), hcolor(NH_BLACK));
+		curse(ubelt);
+	}
+}
+
+void
+Belt_off()
+{
+	takeoff_mask &= ~W_BELT;
+	
+	if(!ubelt){
+		impossible("Belt_off() was called, but no belt is worn.");
+		return;
+	}
+	setworn((struct obj *)0, W_BELT);
+}
+
 /* called in main to set intrinsics of worn start-up items */
 void
 set_wear()
@@ -1492,7 +1538,7 @@ cancel_don()
 }
 
 static NEARDATA const char clothes[] = {ARMOR_CLASS, 0};
-static NEARDATA const char accessories[] = {RING_CLASS, AMULET_CLASS, TOOL_CLASS, FOOD_CLASS, 0};
+static NEARDATA const char accessories[] = {BELT_CLASS, RING_CLASS, AMULET_CLASS, TOOL_CLASS, FOOD_CLASS, 0};
 
 /* the 'T' command */
 int
@@ -1589,6 +1635,7 @@ doremring()
 	MOREACC(uright);
 	MOREACC(uamul);
 	MOREACC(ublindf);
+	MOREACC(ubelt);
 
 	if(!Accessories) {
 		pline("Not wearing any accessories.%s", (iflags.cmdassist &&
@@ -1603,7 +1650,7 @@ doremring()
 #endif
 	    ) otmp = getobj(accessories, "remove");
 	if(!otmp) return MOVE_CANCELLED;
-	if(!(otmp->owornmask & (W_RING | W_AMUL | W_TOOL))) {
+	if(!(otmp->owornmask & (W_RING | W_AMUL | W_TOOL | W_BELT))) {
 		You("are not wearing that.");
 		return MOVE_CANCELLED;
 	}
@@ -1624,6 +1671,9 @@ doremring()
 		Ring_off(otmp);
 	} else if (otmp == uamul) {
 		Amulet_off();
+		off_msg(otmp);
+	} else if (otmp == ubelt) {
+		Belt_off();
 		off_msg(otmp);
 	} else if (otmp == ublindf) {
 		Blindf_off(otmp);	/* does its own off_msg */
@@ -1758,7 +1808,7 @@ boolean noisy;
 {
     int err = 0;
 
-	if (otmp->owornmask & W_ARMOR) {
+	if (otmp->owornmask & (W_ARMOR|W_BELT)) {
 		if (noisy) already_wearing(c_that_);
 		return 0;
     }
@@ -1890,6 +1940,9 @@ boolean noisy;
 						   (uarm && !uarmc) ? c_armor : cloak_simple_name(uarmc));
 			}
 			err++;
+		} else if (ubelt && ubelt->cursed && !Weldproof) {
+			if (noisy) already_wearing("a belt");
+			err++;
 		} else if(youracedata->msize != otmp->objsize){
 			if (noisy)
 			pline_The("%s is the wrong size for you.", c_shirt);
@@ -1917,6 +1970,9 @@ boolean noisy;
 		} else if (uarm) {
 			if (noisy) already_wearing("some armor");
 			err++;
+		} else if (ubelt && ubelt->cursed && !Weldproof) {
+			if (noisy) already_wearing("a belt");
+			err++;
 		} else if(!arm_size_fits(youracedata,otmp)){
 			if (noisy)
 			pline_The("%s is the wrong size for you.", c_armor);
@@ -1927,6 +1983,11 @@ boolean noisy;
 			err++;
 		} else
 			*mask = W_ARM;
+    } else if (is_belt(otmp)) {
+		if (ubelt) {
+			if (noisy) already_wearing("a belt");
+			err++;
+		}
     } else {
 		/* getobj can't do this after setting its allow_all flag; that
 		   happens if you have armor for slots that are covered up or
@@ -1968,6 +2029,11 @@ dowear()
 
 	if (!canwearobj(otmp,&mask,TRUE)) return MOVE_CANCELLED;
 
+	if (is_belt(otmp)){
+		silly_thing("wear", otmp);
+		return MOVE_CANCELLED;
+	}
+
 	if (otmp->oartifact && !touch_artifact(otmp, &youmonst, FALSE))
 	    return MOVE_STANDARD;	/* costs a turn even though it didn't get worn */
 
@@ -2001,6 +2067,7 @@ dowear()
 		else if(is_gloves(otmp)) afternmv = Gloves_on;
 		else if(is_cloak(otmp)) afternmv = Cloak_on;
 		else if(is_shirt(otmp)) afternmv = Shirt_on;
+		// else if(is_belt(otmp)) afternmv = Belt_on;
 		else if(otmp == uarm) afternmv = Armor_on;
 		nomovemsg = "You finish your dressing maneuver.";
 	} else {
@@ -2010,6 +2077,7 @@ dowear()
 		else if(is_gloves(otmp)) (void) Gloves_on();
 		else if(is_cloak(otmp)) (void) Cloak_on();
 		else if(is_shirt(otmp)) (void) Shirt_on();
+		// else if(is_belt(otmp)) (void) Belt_on();
 		else if(otmp == uarm) (void) Armor_on();
 		on_msg(otmp);
 	}
@@ -2028,8 +2096,8 @@ doputon()
 		return MOVE_CANCELLED;
 	}
 
-	if(uleft && (uright || (uarmg && uarmg->oartifact == ART_CLAWS_OF_THE_REVENANCER)) && uamul && ublindf) {
-		Your("%s%s are full, and you're already wearing an amulet and %s.",
+	if(uleft && (uright || (uarmg && uarmg->oartifact == ART_CLAWS_OF_THE_REVENANCER)) && uamul && ubelt && ublindf) {
+		Your("%s%s are full, and you're already wearing a belt, an amulet, and %s.",
 			humanoid(youracedata) ? "ring-" : "",
 			makeplural(body_part(FINGER)),
 			(ublindf->otyp==LENSES || ublindf->otyp==SUNGLASSES) ? "some lenses"
@@ -2039,7 +2107,7 @@ doputon()
 	}
 	otmp = getobj(accessories, "put on");
 	if(!otmp) return MOVE_CANCELLED;
-	if(otmp->owornmask & (W_RING | W_AMUL | W_TOOL)) {
+	if(otmp->owornmask & (W_RING | W_AMUL | W_TOOL| W_BELT)) {
 		already_wearing(c_that_);
 		return MOVE_CANCELLED;
 	}
@@ -2119,6 +2187,19 @@ doputon()
 			return MOVE_STANDARD;
 		}
 		Amulet_on();
+	} else if (is_belt(otmp)) {
+		if(ubelt) {
+			already_wearing("a belt");
+			return MOVE_CANCELLED;
+		}
+		if(!can_wear_belt(youracedata)){
+			pline("It doesn't fit!");
+			return MOVE_CANCELLED;
+		}
+		if (otmp->oartifact && !touch_artifact(otmp, &youmonst, FALSE))
+		    return MOVE_STANDARD;
+		setworn(otmp, W_BELT);
+		Belt_on();
 	} else {	/* it's a blindfold, towel, or lenses */
 		if (ublindf) {
 			if (ublindf->otyp == TOWEL)
@@ -2177,7 +2258,7 @@ doputon()
 		Blindf_on(otmp);
 		return MOVE_STANDARD;
 	}
-	if (is_worn(otmp))
+	if (is_worn(otmp, 0))
 	    prinv((char *)0, otmp, 0L);
 	return MOVE_STANDARD;
 }
@@ -2257,7 +2338,8 @@ boolean ac;
 	}
 }
 
-int arm_ac_bonus(otmp)
+int
+arm_ac_bonus(otmp)
 struct obj * otmp;
 {
 	/* no armor, no defense! */
@@ -2292,7 +2374,7 @@ struct obj * otmp;
 	if (otmp->otyp == find_gcirclet()) def /= 2;
 
 	// add enchantment
-	if (otmp->spe)
+	if (otmp->spe && (!is_belt(otmp) || otmp->otyp == KIDNEY_BELT))
 	{
 		int spemult = 1; // out of 2
 		// shields get full enchantment to AC
@@ -2401,7 +2483,7 @@ struct obj * otmp;
 
 
 	// add enchantment
-	if (otmp->spe)
+	if (otmp->spe && (!is_belt(otmp) || otmp->otyp == KIDNEY_BELT))
 	{
 		int spemult = 1; // out of 2
 		// shields get no enchantment to DR
@@ -2500,18 +2582,39 @@ int
 base_uac()
 {
 	int dexbonus = 0;
-	int uac = 10-mons[u.umonnum].nac;
+	int uac = 10;
 	boolean flat_foot = multi < 0 || mad_turn(MAD_SUICIDAL) || u.ustuck;
 	
-	if(multi >= 0)
-		dexbonus += mons[u.umonnum].dac;
+	if(Upolyd){
+		uac -= youracedata->nac;
+		if(multi >= 0)
+			dexbonus += youracedata->dac;
+	}
 	
 	if(uring_art(ART_SHARD_FROM_MORGOTH_S_CROWN)){
 		uac -= 6;
 	}
 
+	if(Role_if(PM_ANACHRONONAUT) && !quest_status.leader_is_dead && Is_qhome(&u.uz)){
+		uac -= min(u.ulevel, 20);
+	}
+
 	if(!flat_foot && uring_art(ART_NENYA))
 		uac -= (ACURR(A_WIS)-11)/2;
+
+
+	if(uwep && hand_protecting(uwep) && arti_phasing(uwep)){
+		if(!u.twoweap)
+			uac -= 2 + material_def_bonus(uwep, 2, TRUE) + (uwep->spe)/2 - min((int)greatest_erosion(uwep), 2);
+		else if(uswapwep && hand_protecting(uswapwep) && arti_phasing(uswapwep))
+			uac -= (2 + material_def_bonus(uwep, 2, TRUE) + (uwep->spe)/2 - min((int)greatest_erosion(uwep), 2)
+					+ 2 + material_def_bonus(uswapwep, 2, TRUE) + (uswapwep->spe)/2 - min((int)greatest_erosion(uswapwep), 2)
+					)/2;
+		else
+			uac -= (2 + material_def_bonus(uwep, 2, TRUE) + (uwep->spe)/2 - min((int)greatest_erosion(uwep), 2))/2;
+	}
+	else if(u.twoweap && uswapwep && hand_protecting(uswapwep) && arti_phasing(uswapwep))
+		uac -= (2 + material_def_bonus(uswapwep, 2, TRUE) + (uswapwep->spe)/2 - min((int)greatest_erosion(uswapwep), 2))/2;
 
 	if(uwep){
 		if(uwep->oartifact == ART_LANCE_OF_LONGINUS) uac -= max((uwep->spe+1)/2,0);
@@ -2521,10 +2624,10 @@ base_uac()
 			if(!uarmc && !uarm) uac -= max( (uwep->spe+1)/2,0);
 		}
 		else if(uwep->oartifact == ART_LASH_OF_THE_COLD_WASTE){
-			if(u.uinsight >= 20)
+			if(Insight >= 20)
 				uac -= 10;
-			else if(u.uinsight > 10)
-				uac -= u.uinsight - 10;
+			else if(Insight > 10)
+				uac -= Insight - 10;
 		}
 		if(!flat_foot){
 			if((is_rapier(uwep) && arti_phasing(uwep)) || 
@@ -2618,6 +2721,9 @@ base_uac()
 	if(u.uuur_duration)
 		uac -= 10;
 	uac -= u.uuur/2;
+	if(mvitals[PM_MOON_S_CHOSEN].died){
+		uac += 12;
+	}
 	if(u.edenshield > moves) uac -= 7;
 	if(u.specialSealsActive&SEAL_BLACK_WEB && (
 		(u.utrap && u.utraptype == TT_WEB) ||
@@ -2702,17 +2808,39 @@ find_ac()
 	if (uarmf)	uac -= arm_ac_bonus(uarmf);
 	if(uarms){
 		uac -= max(0, arm_ac_bonus(uarms) + (uarms->objsize - youracedata->msize)) + shield_skill(uarms);
-		if(uwep && (objects[uwep->otyp].oc_skill == P_SPEAR || objects[uwep->otyp].oc_skill == P_POLEARMS || objects[uwep->otyp].oc_skill == P_LANCE))
+		if(uwep && (objects[uwep->otyp].oc_skill == P_SPEAR || objects[uwep->otyp].oc_skill == P_POLEARMS
+			|| objects[uwep->otyp].oc_skill == P_TRIDENT || objects[uwep->otyp].oc_skill == P_LANCE)
+		)
 			uac -= 2;
 	}
 	else if(uarm && uarm->oartifact == ART_SCORPION_CARAPACE && check_carapace_mod(uarm, CPROP_SHIELDS)){
 		uac -= 1 + shield_skill(uarm);
-		if(uwep && (objects[uwep->otyp].oc_skill == P_SPEAR || objects[uwep->otyp].oc_skill == P_POLEARMS || objects[uwep->otyp].oc_skill == P_LANCE))
+		if(uwep && (objects[uwep->otyp].oc_skill == P_SPEAR || objects[uwep->otyp].oc_skill == P_POLEARMS
+			|| objects[uwep->otyp].oc_skill == P_TRIDENT || objects[uwep->otyp].oc_skill == P_LANCE)
+		)
 			uac -= 3;//+1 bonus to shield size
+	}
+	if(!uarms && uwep && CHECK_ETRAIT(uwep, &youmonst, ETRAIT_BLADEDANCE) && Race_if(PM_ELF)){
+		uac -= ROLL_ETRAIT(uwep, &youmonst, 3, 1);
 	}
 	if (uarmg)	uac -= arm_ac_bonus(uarmg);
 	if (uarmu)	uac -= arm_ac_bonus(uarmu);
+	if (ubelt)	uac -= arm_ac_bonus(ubelt);
 	
+	if(uwep && hand_protecting(uwep) && !arti_phasing(uwep)){
+		if(!u.twoweap)
+			uac -= 2 + material_def_bonus(uwep, 2, TRUE) + (uwep->spe)/2 - min((int)greatest_erosion(uwep), 2);
+		else if(uswapwep && hand_protecting(uswapwep) && !arti_phasing(uswapwep))
+			uac -= (2 + material_def_bonus(uwep, 2, TRUE) + (uwep->spe)/2 - min((int)greatest_erosion(uwep), 2)
+					+ 2 + material_def_bonus(uswapwep, 2, TRUE) + (uswapwep->spe)/2 - min((int)greatest_erosion(uswapwep), 2)
+					)/2;
+		else
+			uac -= (2 + material_def_bonus(uwep, 2, TRUE) + (uwep->spe)/2 - min((int)greatest_erosion(uwep), 2))/2;
+		uac -= 2 + material_def_bonus(uwep, 2, TRUE) + (uwep->spe)/2 - min((int)greatest_erosion(uwep), 2);
+	}
+	else if(u.twoweap && uswapwep && hand_protecting(uswapwep) && !arti_phasing(uswapwep))
+		uac -= (2 + material_def_bonus(uswapwep, 2, TRUE) + (uswapwep->spe)/2 - min((int)greatest_erosion(uswapwep), 2))/2;
+
 	if(uwep){
 		if((is_rapier(uwep) && !arti_phasing(uwep)))
 			uac -= max(
@@ -2786,7 +2914,13 @@ int base_nat_udr()
 			else udr += (u.ulevel)/6;
 		}
 	}
-	if(uarm && uarm->oartifact == ART_SCORPION_CARAPACE && check_carapace_mod(uarm, CPROP_IMPURITY) && u.uinsight >= 5){
+	if(uarm && uarm->oartifact == ART_SCORPION_CARAPACE && check_carapace_mod(uarm, CPROP_IMPURITY) && Insight >= 5){
+		udr += 3;
+	}
+	if(check_preservation(PRESERVE_GAIN_DR)){
+		udr += 3;
+	}
+	if(check_preservation(PRESERVE_GAIN_DR_2)){
 		udr += 3;
 	}
 	
@@ -2812,10 +2946,10 @@ int base_udr()
 	if(uwep){
 		if(uwep->oartifact == ART_LANCE_OF_LONGINUS) udr += max((uwep->spe)/2,0);
 		else if(uwep->oartifact == ART_LASH_OF_THE_COLD_WASTE){
-			if(u.uinsight >= 40)
+			if(Insight >= 40)
 				udr += 5;
-			else if(u.uinsight > 20)
-				udr += (u.uinsight - 20)/4;
+			else if(Insight > 20)
+				udr += (Insight - 20)/4;
 		}
 	}
 	if (HProtection & INTRINSIC) udr += (u.ublessed)/2;
@@ -2935,6 +3069,10 @@ uchar aatyp;
 				arm_udr += max(1 + (uwep->spe + 1) / 2, 0);
 			}
 		}
+		if(hand_protecting(uwep) && slot&ARM_DR){
+			if(!u.twoweap || (uswapwep && hand_protecting(uswapwep)))
+				arm_udr += 4 + material_def_bonus(uwep, 4, FALSE) + (uwep->spe + 1) / 2 - min((int)greatest_erosion(uwep), 4);
+		}
 	}
 	/* Natural DR (overriden and ignored by base_nat_udr() for halfdragons) */
 	if (!Race_if(PM_HALF_DRAGON)) {
@@ -2981,6 +3119,17 @@ uchar aatyp;
 	/* Having the Deep Sea glyph increase magical DR by 3 */
 	if (active_glyph(DEEP_SEA))
 		bas_udr += 3;
+
+	if(mvitals[PM_MOON_S_CHOSEN].died){
+		if (slot == HEAD_DR)
+			bas_udr -= 8;
+		else if (slot == UPPER_TORSO_DR)
+			bas_udr -= 2;
+		else if (slot == LOWER_TORSO_DR)
+			bas_udr -= 1;
+		else if (slot == ARM_DR)
+			bas_udr -= 1;
+	}
 	
 	//Star spawn reach extra-dimensionally past all armor, even bypassing natural armor.
 	if(magr && (is_extradimensional(magr) || (aatyp == AT_BUTT && magr_helm && magr_helm->oartifact == ART_APOTHEOSIS_VEIL))){
@@ -3008,22 +3157,17 @@ uchar aatyp;
 }
 
 int
-roll_udr(magr, aatyp)
-struct monst *magr;
-uchar aatyp;
+roll_udr(struct monst *magr, int slot)
 {
-	return roll_udr_detail(magr, 0, 0, aatyp);
+	return roll_udr_detail(magr, slot, 0, 0);
 }
 
 int
-roll_udr_detail(magr, slot, depth, aatyp)
-struct monst *magr;
-int slot;
-int depth;
-uchar aatyp;
+roll_udr_detail(struct monst *magr, int slot, int depth, uchar aatyp)
 {
 	int udr;
 	int cap = 10;
+	
 	if(!slot) switch(rn2(9)){
 		case 0:
 		case 1:
@@ -3191,6 +3335,8 @@ struct monst *victim;
 	if(otmp && (!otmph || !rn2(4))) otmph = otmp;
 	otmp = (victim == &youmonst) ? uarmf : which_armor(victim, W_ARMF);
 	if(otmp && (!otmph || !rn2(4))) otmph = otmp;
+	otmp = (victim == &youmonst) ? ubelt : which_armor(victim, W_BELT);
+	if(otmp && otmp->otyp == KIDNEY_BELT && (!otmph || !rn2(4))) otmph = otmp;
 	otmp = (victim == &youmonst) ? uarms : which_armor(victim, W_ARMS);
 	if(otmp && (!otmph || !rn2(4))) otmph = otmp;
 	return(otmph);
@@ -3355,6 +3501,7 @@ register struct obj *otmp;
 	else if(otmp == uleft) takeoff_mask |= LEFT_RING;
 	else if(otmp == uright) takeoff_mask |= RIGHT_RING;
 	else if(otmp == uamul) takeoff_mask |= WORN_AMUL;
+	else if(otmp == ubelt) takeoff_mask |= WORN_BELT;
 	else if(otmp == ublindf) takeoff_mask |= WORN_BLINDF;
 	else if(otmp == uwep) takeoff_mask |= W_WEP;
 	else if(otmp == uswapwep) takeoff_mask |= W_SWAPWEP;
@@ -3411,6 +3558,9 @@ do_takeoff()
 	} else if (taking_off == WORN_AMUL) {
 	  otmp = uamul;
 	  if(!cursed(otmp)) Amulet_off();
+	} else if (taking_off == WORN_BELT) {
+	  otmp = ubelt;
+	  if(!cursed(otmp)) Belt_off();
 	} else if (taking_off == LEFT_RING) {
 	  otmp = uleft;
 	  if(!cursed(otmp)) Ring_off(uleft);
@@ -3488,6 +3638,8 @@ take_off()
 #endif
 	} else if (taking_off == WORN_AMUL) {
 	  todelay = 1;
+	} else if (taking_off == WORN_BELT) {
+	  todelay = 1;
 	} else if (taking_off == LEFT_RING) {
 	  todelay = 1;
 	} else if (taking_off == RIGHT_RING) {
@@ -3529,7 +3681,7 @@ doddoremarm()
 	You("continue %s.", disrobing);
 	set_occupation(take_off, disrobing, 0);
 	return MOVE_INSTANT;
-    } else if (!uwep && !uswapwep && !uquiver && !uamul && !ublindf &&
+    } else if (!uwep && !uswapwep && !uquiver && !uamul && !ubelt && !ublindf &&
 		!uleft && !uright && !wearing_armor()) {
 	You("are not wearing anything.");
 	return MOVE_CANCELLED;
@@ -3915,6 +4067,152 @@ register struct obj *otmp;
 	return 1;
 }
 
+/* hit by destroy armor scroll/black dragon breath/monster spell */
+int
+saber_destroys_arm(atmp)
+register struct obj *atmp;
+{
+	register struct obj *otmp;
+#define DESTROY_ARM(o) ((otmp = (o)) != 0 && \
+			(!atmp || atmp == otmp) && \
+			(!obj_resists(otmp, 0, 90)))
+
+	if(Preservation)
+		return 0;
+	
+	if (DESTROY_ARM(uarmc)) {
+		if (donning(otmp)) cancel_don();
+		Your("%s is sliced to shreds!",
+		     cloak_simple_name(uarmc));
+		(void) Cloak_off();
+		useup(otmp);
+		if(roll_madness(MAD_TALONS)){
+			You("panic after having your cloak shredded!");
+			HPanicking += 1+rnd(6);
+		}
+	} else if (DESTROY_ARM(uarm)) {
+		if (donning(otmp)) cancel_don();
+		Your("armor is sliced apart and falls to the %s!",
+			surface(u.ux,u.uy));
+		(void) Armor_gone();
+		useup(otmp);
+		if(roll_madness(MAD_TALONS)){
+			You("panic after having your armor sliced apart!");
+			HPanicking += 1+rnd(6);
+		}
+#ifdef TOURIST
+	} else if (DESTROY_ARM(uarmu)) {
+		if (donning(otmp)) cancel_don();
+		Your("underclothes are sliced open!");
+		(void) Shirt_off();
+		useup(otmp);
+		if(roll_madness(MAD_TALONS)){
+			You("panic after having your underclothes sliced off!");
+			HPanicking += 1+rnd(6);
+		}
+#endif
+	} else if (DESTROY_ARM(uarmh)) {
+		if (donning(otmp)) cancel_don();
+		Your("helmet is sliced to pieces!");
+		(void) Helmet_off();
+		useup(otmp);
+		if(roll_madness(MAD_TALONS)){
+			You("panic after having your helmet destroyed!");
+			HPanicking += 1+rnd(6);
+		}
+	} else if (DESTROY_ARM(uarmg)) {
+		if (donning(otmp)) cancel_don();
+		Your("gloves are sliced open!");
+		(void) Gloves_off();
+		useup(otmp);
+		selftouch("You");
+		if(roll_madness(MAD_TALONS)){
+			You("panic after having your gloves sliced off!");
+			HPanicking += 1+rnd(6);
+		}
+	} else if (DESTROY_ARM(uarmf)) {
+		if (donning(otmp)) cancel_don();
+		Your("boots are sliced open!");
+		(void) Boots_off();
+		useup(otmp);
+		if(roll_madness(MAD_TALONS)){
+			You("panic after having your boots sliced open!");
+			HPanicking += 1+rnd(6);
+		}
+	} else if (DESTROY_ARM(uarms)) {
+		if (donning(otmp)) cancel_don();
+		Your("shield is cut in two!");
+		(void) Shield_off();
+		useup(otmp);
+		if(roll_madness(MAD_TALONS)){
+			You("panic after having your shield destroyed!");
+			HPanicking += 1+rnd(6);
+		}
+	} else {
+		return 0;		/* could not destroy anything */
+	}
+
+#undef DESTROY_ARM
+	stop_occupation();
+	return(1);
+}
+
+int
+saber_destroys_marm(mtmp, otmp)
+register struct monst *mtmp;
+register struct obj *otmp;
+{
+	/* call the player's version if need be */
+	if (mtmp == &youmonst)
+		return saber_destroys_arm(otmp);
+
+	long unwornmask;
+	if(!otmp || !mtmp)
+		return 0;
+	if(obj_resists(otmp, 0, 100))
+		return 0;
+	if(!otmp->owornmask)
+		return 0;
+	obj_extract_self(otmp);
+	if ((unwornmask = otmp->owornmask) != 0L) {
+		mtmp->misc_worn_check &= ~unwornmask;
+		if (otmp->owornmask & W_WEP){
+			setmnotwielded(mtmp,otmp);
+			MON_NOWEP(mtmp);
+		}
+		if (otmp->owornmask & W_SWAPWEP){
+			setmnotwielded(mtmp,otmp);
+			MON_NOSWEP(mtmp);
+		}
+		otmp->owornmask = 0L;
+		update_mon_intrinsics(mtmp, otmp, FALSE, FALSE);
+		if(unwornmask&W_ARM){
+			if(canseemon(mtmp))
+				pline("%s armor is sliced open!", s_suffix(Monnam(mtmp)));
+		} else if(unwornmask&W_ARMC){
+			if(canseemon(mtmp))
+				pline("%s %s is sliced to shreds!", s_suffix(Monnam(mtmp)), cloak_simple_name(otmp));
+		} else if(unwornmask&W_ARMH){
+			if(canseemon(mtmp))
+				pline("%s helm is sliced open!", s_suffix(Monnam(mtmp)));
+		} else if(unwornmask&W_ARMS){
+			if(canseemon(mtmp))
+				pline("%s shield is cut in two!", s_suffix(Monnam(mtmp)));
+		} else if(unwornmask&W_ARMG){
+			if(canseemon(mtmp))
+				pline("%s gloves are sliced open!", s_suffix(Monnam(mtmp)));
+		} else if(unwornmask&W_ARMF){
+			if(canseemon(mtmp))
+				pline("%s boots are sliced open!", s_suffix(Monnam(mtmp)));
+		} else if(unwornmask&W_ARMU){
+			if(canseemon(mtmp))
+				pline("%s underclothes are sliced open!", s_suffix(Monnam(mtmp)));
+		}
+		m_useup(mtmp, otmp);
+	}
+	return 1;
+}
+
 int
 teleport_arm(atmp, mdef)
 struct obj *atmp;
@@ -4237,7 +4535,9 @@ register schar delta;
 				flags.botl = 1;
 			}
 		}
-		if (otmp->otyp == find_gcirclet() || otmp->oartifact == ART_CROWN_OF_THE_PERCIPIENT){
+		if (otmp->otyp == find_gcirclet() || otmp->oartifact == ART_CROWN_OF_THE_PERCIPIENT
+		 || otmp->otyp == TOP_HAT || otmp->otyp == ESCOFFION || otmp->otyp == HENNIN
+		){
 			if (delta) {
 				ABON(A_CHA) += (delta);
 				flags.botl = 1;
@@ -5426,16 +5726,16 @@ struct monst *magr;
 struct obj *wep;
 boolean invoked;
 {
-	if(u.uinsight >= 60 && invoked){
+	if(Insight >= 60 && invoked){
 		//summon ghosts
 		doibite_ghosts(magr, wep);
 	}
 
-	if(u.uinsight >= 50 && !rn2(20)){
+	if(Insight >= 50 && !rn2(20)){
 		//cast spell
 		doibite_cast(magr, wep);
 	}
-	else if(u.uinsight >= 40 || invoked){
+	else if(Insight >= 40 || invoked){
 		//hit targets
 		doibite_thrash(magr, wep);
 	}
@@ -5714,7 +6014,7 @@ boolean invoked;
 	boolean youdef;
 	
 	/*Must have some insight or all targets will be skipped.*/
-	if(u.uinsight < 1)
+	if(Insight < 1)
 		return;
 	
 	for(j=8;j>=1;j--){
@@ -5741,7 +6041,7 @@ boolean invoked;
 		if(!youdef && nonthreat(mdef))
 			continue;
 		
-		if(rn2(101) >= u.uinsight)
+		if(rn2(101) >= Insight)
 			continue;
 		
 		if(youdef && u.uen > 0){
@@ -5776,7 +6076,7 @@ boolean invoked;
 		if(wep == MON_WEP(magr)) delta = 3;
 	}
 	
-	if (!invoked && u.uinsight < rnd(100)) return;
+	if (!invoked && Insight < rnd(100)) return;
 	
 	for(i = x-delta; i <= x+delta; i++)
 		for(j = y-delta; j <= y+delta; j++){
@@ -5816,7 +6116,7 @@ boolean invoked;
 					return; //oops!
 			}
 			
-			if(u.uinsight >= 50 && invoked && !rn2(4) && m_online(magr, mdef, x(mdef), y(mdef), TRUE, TRUE)){
+			if(Insight >= 50 && invoked && !rn2(4) && m_online(magr, mdef, x(mdef), y(mdef), TRUE, TRUE)){
 				pline("A torrent of energy erupts from the jaws!");
 				struct zapdata beam;
 				basiczap(&beam, AD_MAGM, ZAP_BREATH, 6);
@@ -5882,10 +6182,10 @@ struct obj *salve;
 	if(rn2(180))
 		return;
 
-	if(u.uinsight >= 18 && salve->spe < 6){
+	if(Insight >= 18 && salve->spe < 6){
 		salve->spe++;
 	}
-	else if(u.uinsight >= 66 && salve->spe >= 6){
+	else if(Insight >= 66 && salve->spe >= 6){
 		for(struct obj *otmp = yours ? invent : mon->minvent; otmp; otmp = otmp->nobj){
 			if(salve_target(otmp) && rn2(2)){
 				if(yours) pline("%s crawls across %s.", Yname2(salve), yname(otmp));

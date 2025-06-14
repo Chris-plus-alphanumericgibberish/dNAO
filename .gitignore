@@ -1,4 +1,5 @@
 local.mk
+Merge notes
 
 src/dnethack
 util/recover
@@ -24,6 +25,8 @@ util/dgn_yacc.c
 util/lev_yacc.c
 util/dgn_lex.c
 util/lev_lex.c
+util/gmon.out
+
 src/tile.c
 
 dat/*.tag
@@ -42,6 +45,7 @@ dat/dngnch2.pdf
 dat/dngnch3
 dat/dngnch3.pdf
 dat/*.lev
+dat/gmon.out
 
 desktop.ini
 

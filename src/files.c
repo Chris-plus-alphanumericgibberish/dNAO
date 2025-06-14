@@ -2015,7 +2015,7 @@ char		*tmp_levels;
 	    char pattern[256];
 	    char msgtype[11];
 	    if (sscanf(bufp, "%10s \"%255[^\"]\"", msgtype, pattern) == 2) {
-		int typ = MSGTYP_NORMAL;
+		xchar typ = MSGTYP_NORMAL;
 		if (!strcasecmp("norep", msgtype)) typ = MSGTYP_NOREP;
 		else if (!strcasecmp("hide", msgtype)) typ = MSGTYP_NOSHOW;
 		else if (!strcasecmp("noshow", msgtype)) typ = MSGTYP_NOSHOW;
@@ -2023,6 +2023,17 @@ char		*tmp_levels;
 		else if (!strcasecmp("stop", msgtype)) typ = MSGTYP_STOP;
 		if ((typ != MSGTYP_NORMAL) || !strcasecmp("show", msgtype)) {
 		    msgpline_add(typ, pattern);
+		}
+	    }
+	} else if (match_varname(buf, "QUERYTYPE", 9)) {
+	    char pattern[256];
+	    char querytype[11];
+	    if (sscanf(bufp, "%10s \"%255[^\"]\"", querytype, pattern) == 2) {
+	        xchar typ = QUERYTYP_NORMAL;
+		if (!strcasecmp("yn", querytype)) typ = QUERYTYP_YN;
+		else if (!strcasecmp("yesno", querytype)) typ = QUERYTYP_YESNO;
+		if ((typ != QUERYTYP_NORMAL) || !strcasecmp("default", querytype)) {
+		    querytype_add(typ, pattern);
 		}
 	    }
 	} else if (match_varname(buf, "ROLE", 4) ||

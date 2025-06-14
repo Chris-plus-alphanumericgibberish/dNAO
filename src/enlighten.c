@@ -15,6 +15,7 @@ STATIC_DCL void NDECL(signs_enlightenment);
 STATIC_DCL void NDECL(spirits_enlightenment);
 STATIC_DCL void NDECL(mutations_enlightenment);
 STATIC_DCL void NDECL(genocide_enlightenment);
+STATIC_DCL void NDECL(research_enlightenment);
 
 #define DOATTRIB_RESISTS	1
 #define DOATTRIB_ARMOR		2
@@ -23,6 +24,7 @@ STATIC_DCL void NDECL(genocide_enlightenment);
 #define DOATTRIB_SPIRITS	5
 #define DOATTRIB_MUTATIONS	6
 #define DOATTRIB_GENOCIDE	7
+#define DOATTRIB_UH_RESEARCH	8
 
 /* -enlightenment and conduct- */
 static winid en_win;
@@ -152,6 +154,8 @@ doattributes()
 			break;
 		case DOATTRIB_GENOCIDE:
 			genocide_enlightenment();
+		case DOATTRIB_UH_RESEARCH:
+			research_enlightenment();
 		default:
 			return MOVE_INSTANT;
 		}
@@ -380,6 +384,15 @@ minimal_enlightenment()
 			 MENU_UNSELECTED);
 	}
 
+	//Role-specific info goes here (currently just undead-hunter research.
+	if (Role_if(PM_UNDEAD_HUNTER)) {
+		Sprintf(buf, "Research progress.");
+		any.a_int = DOATTRIB_UH_RESEARCH;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			 'h', 0, ATR_NONE, buf,
+			 MENU_UNSELECTED);
+	}
+
 	end_menu(tmpwin, "Base Attributes");
 	n = select_menu(tmpwin, PICK_ONE, &selected);
 	destroy_nhwindow(tmpwin);
@@ -446,6 +459,10 @@ boolean dumping;
 	if (wizard || final) {
 		Sprintf(buf, "%ld gold ", u.spawnedGold);
 		enl_msg(buf, "has been", "was", " created");
+
+		Sprintf(buf, " %ld damage from combat and mishaps", u.total_damage);
+		enl_msg("You ", "have taken", "took", buf);
+		
 		Sprintf(buf, " %d", u.ualign.record);
 		enl_msg("Your alignment ", "is", "was", buf);
 		Sprintf(buf, " %d sins", u.ualign.sins);
@@ -522,6 +539,7 @@ boolean dumping;
 		if(u.spirit[CROWN_SPIRIT]) numBound++;
 		if(u.spirit[GPREM_SPIRIT]) numBound++;
 		if(u.spirit[ALIGN_SPIRIT]) numBound++;
+		if(u.spirit[OTHER_SPIRIT]) numBound++;
 		if(u.spirit[OUTER_SPIRIT]) numBound++;
 		Sprintf(prebuf, "Your soul ");
 		Sprintf(buf, " bound to ");
@@ -552,8 +570,11 @@ boolean dumping;
 		if(!u.spirit[QUEST_SPIRIT] && u.specialSealsKnown&(SEAL_DAHLVER_NAR|SEAL_ACERERAK|SEAL_BLACK_WEB)){
 			you_are("able to bind with a quest spirit");
 		}
-		if(!u.spirit[ALIGN_SPIRIT] && u.specialSealsKnown&(SEAL_COSMOS|SEAL_LIVING_CRYSTAL|SEAL_TWO_TREES|SEAL_MISKA|SEAL_NUDZIRATH|SEAL_ALIGNMENT_THING|SEAL_UNKNOWN_GOD|SEAL_YOG_SOTHOTH)){
+		if(!u.spirit[ALIGN_SPIRIT] && u.specialSealsKnown&(SEAL_COSMOS|SEAL_LIVING_CRYSTAL|SEAL_TWO_TREES|SEAL_MISKA|SEAL_NUDZIRATH|SEAL_ALIGNMENT_THING|SEAL_UNKNOWN_GOD)){
 			you_are("able to bind with an aligned spirit");
+		}
+		if(!u.spirit[OTHER_SPIRIT] && u.specialSealsKnown&(SEAL_YOG_SOTHOTH)){
+			you_are("able to bind with an other god");
 		}
 		if(!u.spirit[OUTER_SPIRIT] && u.ulevel == 30 && Role_if(PM_EXILE)){
 			you_are("able to bind with the Numina");
@@ -636,7 +657,7 @@ boolean dumping;
 		enl_msg("The pitch-black waters ", "reduce", "reduced", " physical damage by 3");
 	}
 	if (active_glyph(TRANSPARENT_SEA)){
-		enl_msg("The perfectly clear sea ", "speed", "sped", " sanity recovery");
+		enl_msg("The perfectly clear sea ", "speeds", "sped", " sanity recovery");
 	}
 	if (active_glyph(COMMUNION)){
 		enl_msg("The strange minister's prayer ", "increases", "increased", " your carry capacity by 25%");
@@ -667,6 +688,15 @@ boolean dumping;
 	}
 	if (active_glyph(BEASTS_EMBRACE)){
 		enl_msg("The hidden figure inside of you ", "lets", "let", " you succumb to the inner beast");
+	}
+	if (active_glyph(DEFILEMENT)){
+		enl_msg("The bloodless hand ", "heals you and protects", "healed you and protected", " your companions");
+	}
+	if (active_glyph(LUMEN)){
+		enl_msg("The nurturing florets ", "increases", "increased", " your carrying capacity and item discovery");
+	}
+	if (active_glyph(ROTTEN_EYES)){
+		enl_msg("The milky eyes ", "increase", "increased", " your energy recovery, hit points, experience gain, and item discovery");
 	}
 	if (active_glyph(SIGHT)){
 		enl_msg("The recursive eye ", "lets", "let", " you strike more accurately at monsters.");
@@ -835,6 +865,7 @@ boolean dumping;
 	}
 	if (Stoned) you_are("turning to stone");
 	if (Golded) you_are("turning to gold");
+	if (Salted) you_are("turning to salt");
 	if (Slimed) you_are("turning into slime");
 	if (FrozenAir) you_are("suffocating in the cold night");
 	if (BloodDrown) you_are("drowning in blood");
@@ -1313,6 +1344,9 @@ resistances_enlightenment()
 	if (active_glyph(WRITHE)) putstr(en_win, 0, "A subtle mucus covers your brain.");
 	if (active_glyph(RADIANCE)) putstr(en_win, 0, "Your mind is impaled on a golden pyramid.");
 	if (active_glyph(BEASTS_EMBRACE)) putstr(en_win, 0, "A bestial figure hides inside of you.");
+	if (active_glyph(DEFILEMENT)) putstr(en_win, 0, "A reaching bloodless hand shoves through your every thought.");
+	if (active_glyph(LUMEN)) putstr(en_win, 0, "Waving florets nurture glassy invertebrates in the ruins of your skull.");
+	if (active_glyph(ROTTEN_EYES)) putstr(en_win, 0, "The milky eyes writhe in your brain.");
 	if (active_glyph(SIGHT)) putstr(en_win, 0, "Your brain is but the lid of an eye within an eye within an eye....");
 	
 	/*** Troubles ***/
@@ -1331,11 +1365,11 @@ resistances_enlightenment()
 	else if(u.usanity < 100)
 		putstr(en_win, 0, "You are a little touched in the head.");
 	
-	if(u.uinsight > 40)
+	if(Insight > 40)
 		putstr(en_win, 0, "You frequently see things you wish you hadn't.");
-	else if(u.uinsight > 20)
+	else if(Insight > 20)
 		putstr(en_win, 0, "You periodically see things you wish you hadn't.");
-	else if(u.uinsight > 1)
+	else if(Insight > 1)
 		putstr(en_win, 0, "You occasionally see things you wish you hadn't.");
 	
 	if(Doubt)
@@ -1572,6 +1606,7 @@ resistances_enlightenment()
 		if(u.spirit[CROWN_SPIRIT]) numBound++;
 		if(u.spirit[GPREM_SPIRIT]) numBound++;
 		if(u.spirit[ALIGN_SPIRIT]) numBound++;
+		if(u.spirit[OTHER_SPIRIT]) numBound++;
 		if(u.spirit[OUTER_SPIRIT]) numBound++;
 		Sprintf(buf, "Your soul is bound to ");
 		for(i=0;i<QUEST_SPIRIT;i++){
@@ -1805,6 +1840,8 @@ spirits_enlightenment()
 				u.sealTimeout[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)] - moves); \
 		else Sprintf(buf, "  %-23s (duration:%ld, timeout:%ld)", sealNames[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)], \
 				u.spiritT[id]-moves, u.sealTimeout[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)] - moves); }\
+	else if(u.spiritT[id])\
+		Sprintf(buf, "  %-23s (duration:%ld)", sealNames[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)], u.spiritT[id]-moves);\
 	else\
 		Sprintf(buf, "  %-23s", sealNames[decode_sealID(u.spirit[(id)]) - (FIRST_SEAL)]); \
 	putstr(en_win, 0, buf); } while (0)
@@ -1871,6 +1908,18 @@ spirits_enlightenment()
 		putstr(en_win, 0, "Embassy of Elements");
 		if (u.spirit[CROWN_SPIRIT] != 0L) {
 			addseal(CROWN_SPIRIT);
+		}
+		else {
+			addempty();
+		}
+		putstr(en_win, 0, "");
+	}
+	/* Yog Sothoth's spirit */
+	if (u.specialSealsActive & SEAL_YOG_SOTHOTH)
+	{
+		putstr(en_win, 0, "Other God");
+		if (u.spirit[OTHER_SPIRIT] != 0L) {
+			addseal(OTHER_SPIRIT);
 		}
 		else {
 			addempty();
@@ -2505,7 +2554,7 @@ signs_mirror()
 		if(dimness(u.ux, u.uy) <= 0)
 			putstr(en_win, 0, "Your rigid features can't be seen in the dark.");
 		else if((ublindf && (ublindf->otyp==MASK || ublindf->otyp==R_LYEHIAN_FACEPLATE)) //face-covering mask
-			 || (uarmh && (uarmh->otyp==PLASTEEL_HELM || uarmh->otyp==PONTIFF_S_CROWN || uarmh->otyp==FACELESS_HELM || uarmh->otyp==IMPERIAL_ELVEN_HELM)) //opaque face-covering helm
+			 || (uarmh && (uarmh->otyp==PLASTEEL_HELM || uarmh->otyp==PONTIFF_S_CROWN || uarmh->otyp==FACELESS_HELM || uarmh->otyp==FACELESS_HOOD || uarmh->otyp==IMPERIAL_ELVEN_HELM)) //opaque face-covering helm
 			 || (uarmc && (uarmc->otyp==WHITE_FACELESS_ROBE || uarmc->otyp==BLACK_FACELESS_ROBE || uarmc->otyp==SMOKY_VIOLET_FACELESS_ROBE))//face-covering robe
 		) putstr(en_win, 0, "Your rigid features can't be seen through your disguise.");
 		else putstr(en_win, 0, "Your features have taken on the rigidity of a cheap disguise.");
@@ -2982,6 +3031,7 @@ boolean dumping;
 	CHECK_ACHIEVE(NOB_QUEST,"Rebellion crushed: completed base noble quest")
 	CHECK_ACHIEVE(MAD_QUEST,"Oh good. I'm not crazy: completed madman quest")
 	CHECK_ACHIEVE(MONK_QUEST,"You must defeat Sheng Long to stand a chance: completed monk quest")
+	CHECK_ACHIEVE(UH_QUEST,"Don't think too hard about all of this: completed hunter quest")
 	CHECK_ACHIEVE(HDR_NOB_QUEST,"Family drama: completed hedrow noble quest")
 	CHECK_ACHIEVE(HDR_SHR_QUEST,"On agency: completed hedrow shared quest")
 	CHECK_ACHIEVE(DRO_NOB_QUEST,"Foreshadowing: completed drow noble quest")
@@ -3050,6 +3100,238 @@ STATIC_OVL void
 genocide_enlightenment()
 {
         list_genocided('y', FALSE, FALSE, TRUE);
+}
+
+STATIC_OVL void
+research_enlightenment()
+{
+	char buf[BUFSZ];
+	int i;
+	en_win = create_nhwindow(NHW_MENU);
+	if(active_glyph(DEFILEMENT) || u.ualign.god == GOD_DEFILEMENT || u.udefilement_research){
+		if(defile_count() >= 6){
+			putstr(en_win, 0, "You have made a great breakthrough in the philosophy of defilement!");
+		}
+		else {
+			putstr(en_win, 0, "You still have much to learn of defilement.");
+		}
+		if(!(active_glyph(DEFILEMENT) || (u.ualign.god == GOD_DEFILEMENT && known_glyph(DEFILEMENT)))){
+			putstr(en_win, 0, " Though, you are not currently a serious student of that philosophy.");
+		}
+		else if(u.veil){
+			putstr(en_win, 0, " You have yet to feel beyond.");
+		}
+		else {
+			if(!(u.upreservation_upgrades&PRESERVE_MAX) || (Race_if(PM_VAMPIRE) && vampire_count() < VAMPIRE_COUNT)){
+				if(defile_ok()){
+					putstr(en_win, 0, " You are ready to conduct another experiment into the nature of defilement.");
+					putstr(en_win, 0, " Use your phlebotomy kit while standing at a workbench-altar to defilement.");
+				}
+				else {
+					putstr(en_win, 0, " You are unable to devise further experiments into the nature of defilement.");
+					if(!impurity_ok())
+						putstr(en_win, 0, " You must immerse yourself in the ritually unclean to make progress.");
+					else if(ABASE(A_INT) < 6)
+						putstr(en_win, 0, " You must repair the damage to your intellect to survive further self-experimentation.");
+					else
+						putstr(en_win, 0, " You must conduct more dissections to make progress.");
+				}
+			}
+			else {
+				putstr(en_win, 0, " You have progressed your study of defilement as far as can be done in the Dungeons of Doom.");
+			}
+		}
+		//Upgrade list
+		if(check_preservation(PRESERVE_REDUCE_HUNGER)){
+			putstr(en_win, 0, "    You have slowed your metabolism.");
+		}
+		if(check_preservation(PRESERVE_PREVENT_ABUSE)){
+			putstr(en_win, 0, "    You have made your body resistant to decay.");
+		}
+		if(check_preservation(PRESERVE_GAIN_DR)){
+			if(check_preservation(PRESERVE_GAIN_DR_2)){
+				putstr(en_win, 0, "    You have greatly toughened your skin.");
+			}
+			else putstr(en_win, 0, "    You have toughened your skin.");
+		}
+		if(check_preservation(PRESERVE_COLD_RES)){
+			putstr(en_win, 0, "    You no longer feel cold.");
+		}
+		if(check_preservation(PRESERVE_SLEEP_RES)){
+			putstr(en_win, 0, "    You no longer feel sleepy.");
+		}
+		if(check_preservation(PRESERVE_DEAD_TRUCE)){
+			putstr(en_win, 0, "    You no longer interest the undead.");
+		}
+		if(check_vampire(VAMPIRE_THRALLS)){
+			putstr(en_win, 0, "    You have improved your control over your spawn.");
+		}
+		if(check_vampire(VAMPIRE_MASTERY)){
+			putstr(en_win, 0, "    You have improved your spawns' attacks.");
+		}
+		if(check_vampire(VAMPIRE_BLOOD_RIP)){
+			putstr(en_win, 0, "    You have learned to manipulate the blood of your victims.");
+		}
+		if(check_vampire(VAMPIRE_BLOOD_SPIKES)){
+			putstr(en_win, 0, "    You have improved your blood-bullets to spears.");
+		}
+		if(check_vampire(VAMPIRE_GAZE)){
+			putstr(en_win, 0, "    You have learned to hypnotize your prey.");
+		}
+		if(rot_count() > 0){
+			if(rot_count() < ROT_COUNT)
+				putstr(en_win, 0, " You have discovered a strange form of all-consuming rot.");
+			else
+				putstr(en_win, 0, " You have progressed your study of the cycle of rot and renewal as far as can be done in the Dungeons of Doom.");
+			if(check_rot(ROT_VOMIT)){
+				putstr(en_win, 0, "    Your guts have blossomed into parasitic caterpillars.");
+			}
+			if(check_rot(ROT_WINGS)){
+				putstr(en_win, 0, "    You fly on wings of rot.");
+			}
+			if(check_rot(ROT_CLONE)){
+				putstr(en_win, 0, "      Strange butterflies hatch from your wings.");
+			}
+			if(check_rot(ROT_TRUCE)){
+				putstr(en_win, 0, "    You no longer interest the beings of rot.");
+			}
+			if(check_rot(ROT_KIN)){
+				putstr(en_win, 0, "    You are followed by the kindred of rot.");
+			}
+			if(check_rot(ROT_FEAST)){
+				putstr(en_win, 0, "    You feast on injury and destruction.");
+			}
+			if(check_rot(ROT_CENT)){
+				putstr(en_win, 0, "    Monstrous centipedes bore through your body.");
+			}
+			if(check_rot(ROT_STING)){
+				putstr(en_win, 0, "    A monstrous scorpion stinger has torn loose from your flesh.");
+			}
+			if(check_rot(ROT_SPORES)){
+				putstr(en_win, 0, "    Puffball mushrooms errupt from your skin.");
+			}
+		}
+	}
+	if(active_glyph(LUMEN) || u.ualign.god == GOD_THE_CHOIR || u.uparasitology_research){
+		if(parasite_count() >= 6){
+			putstr(en_win, 0, "You have made a breakthrough in the philosophy of the choir!");
+		}
+		else {
+			putstr(en_win, 0, "You still have much to learn of parasitology.");
+		}
+		if(!(active_glyph(LUMEN) || (u.ualign.god == GOD_THE_CHOIR && known_glyph(LUMEN)))){
+			putstr(en_win, 0, " Though, you are not currently a serious student of that philosophy.");
+		}
+		else if(u.veil){
+			putstr(en_win, 0, " You have yet to hear the song.");
+		}
+		else {
+			if(parasite_ok()){
+				putstr(en_win, 0, " You are ready to conduct another experiment into the song of the parasite choir.");
+				if(carrying(PARASITE))
+					putstr(en_win, 0, " Use your trephination kit while standing at a workbench-altar to the choir.");
+				else {
+					sprintf(buf, " You will need to find %s parasite first, though.", parasite_count() > 0 ? "another" : "a");
+					putstr(en_win, 0, buf);
+				}
+			}
+			else if(Insight < 10){
+				putstr(en_win, 0, " You must listen beyond the veil.");
+			}
+			else {
+				putstr(en_win, 0, " You are unable to devise further surgical experiments.");
+				if(ABASE(A_INT) < 6)
+					putstr(en_win, 0, " You must repair the damage to your intellect to survive further self-experimentation.");
+				else
+					putstr(en_win, 0, " You must conduct more dissections to make progress.");
+			}
+		}
+		//Upgrade list
+		if(u.brainsuckers){
+			sprintf(buf, "    You have positioned %d parasite%s to suck out your enemies' brains.", u.brainsuckers, u.brainsuckers > 1 ? "s" : "");
+			putstr(en_win, 0, buf);
+		}
+		if(u.cuckoo){
+			sprintf(buf, "    You have positioned %d parasite%s to empower your charm spells.", u.cuckoo, u.cuckoo > 1 ? "s" : "");
+			putstr(en_win, 0, buf);
+		}
+		if(u.explosion_up){
+			sprintf(buf, "    You have positioned %d parasite%s to empower your explosive spells.", u.explosion_up, u.explosion_up > 1 ? "s" : "");
+			putstr(en_win, 0, buf);
+		}
+		if(u.mm_up){
+			sprintf(buf, "    You have positioned %d parasite%s to empower your ray and beam spells.", u.mm_up, u.mm_up > 1 ? "s" : "");
+			putstr(en_win, 0, buf);
+		}
+		if(u.jellyfish){
+			sprintf(buf, "    You have positioned %d parasite%s to sting adjacent enemies.", u.jellyfish, u.jellyfish > 1 ? "s" : "");
+			putstr(en_win, 0, buf);
+		}
+	}
+	if(active_glyph(ROTTEN_EYES) || u.ualign.god == GOD_THE_COLLEGE || u.ureanimation_research){
+		if(reanimation_count() >= 6){
+			putstr(en_win, 0, "You have made a breakthrough in the philosophy of the college!");
+		}
+		else {
+			putstr(en_win, 0, "You still have much to learn of reanimation.");
+		}
+		if(!(active_glyph(ROTTEN_EYES) || (u.ualign.god == GOD_THE_COLLEGE && known_glyph(ROTTEN_EYES)))){
+			putstr(en_win, 0, " Though, you are not currently a serious student of that philosophy.");
+		}
+		else if(u.veil){
+			putstr(en_win, 0, " Your eyes have yet to open.");
+		}
+		else {
+			if(reanimation_count() < REANIMATION_COUNT){
+				if(reanimation_ok()){
+					putstr(en_win, 0, " You are ready to conduct another experiment into the great animating thoughts pursued by the college.");
+					putstr(en_win, 0, " Use your portable electrode while standing at a workbench-altar to the college.");
+				}
+				else {
+					putstr(en_win, 0, " You are unable to devise further Galvanic experiments.");
+					if(!reanimation_insight_ok())
+						putstr(en_win, 0, " You must hunt the strange creatures of the veil to make progress.");
+					else if(ABASE(A_INT) < 6)
+						putstr(en_win, 0, " You must repair the damage to your intellect to survive further self-experimentation.");
+					else
+						putstr(en_win, 0, " You must conduct more dissections and reanimations to make progress.");
+				}
+			}
+			else {
+				putstr(en_win, 0, " You have progressed your study of the animating thoughts as far as can be done in the Dungeons of Doom.");
+			}
+		}
+		//Upgrade list
+		if(check_reanimation(RE_BOLT_RES)){
+			putstr(en_win, 0, "    You have made yourself lightning resistant.");
+		}
+		if(check_reanimation(RE_WATER_RES)){
+			putstr(en_win, 0, "    You have made yourself waterproof.");
+		}
+		if(check_reanimation(RE_CLAIR)){
+			putstr(en_win, 0, "    You have given yourself clairvoyance.");
+		}
+		if(check_reanimation(RE_CLONE_SELF)){
+			putstr(en_win, 0, "    You can create blood clones.");
+		}
+		if(check_reanimation(ANTENNA_ERRANT)){
+			putstr(en_win, 0, "    You have attuned your antennae weapons to conduct the errant thoughts of the cosmos.");
+		}
+		if(check_reanimation(ANTENNA_BOLT)){
+			putstr(en_win, 0, "    You have attuned your antennae weapons to conduct the cosmic static.");
+		}
+		if(check_reanimation(ANTENNA_REJECT)){
+			putstr(en_win, 0, "    You have attuned your antennae weapons to rebroadcast rejecting forces.");
+		}
+		if(check_reanimation(LAMP_PHASE)){
+			putstr(en_win, 0, "    You have learned to use light to reveal the insubstantial world.");
+		}
+	}
+	
+	
+	display_nhwindow(en_win, TRUE);
+	destroy_nhwindow(en_win);
+	return;
 }
 
 /*enlighten.c*/
