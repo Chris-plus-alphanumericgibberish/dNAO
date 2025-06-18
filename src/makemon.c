@@ -13265,6 +13265,13 @@ boolean greatequip;
 				fix_object(otmp);
 				(void) mpickobj(mtmp, otmp);
 				// (void) mongets(mtmp, POT_FULL_HEALING, mkobjflags);
+				otmp = mksobj(STILETTO, mkobjflags|MKOBJ_NOINIT);
+				otmp->spe = 4;
+				curse(otmp);
+				otmp->objsize = mtmp->data->msize;
+				set_material_gm(otmp, GREEN_STEEL);
+				fix_object(otmp);
+				(void) mpickobj(mtmp, otmp);
 			break;
 			case PM_BELIAL:
 				otmp = mksobj(TRIDENT, mkobjflags);
