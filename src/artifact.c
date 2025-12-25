@@ -7059,13 +7059,13 @@ boolean printmessages; /* print generic elemental damage messages */
 	
 	if (youagr && oartifact == ART_MORTAL_BLADE)
 	{
-		/* Overall - 2x to primordial/nonliving, 3x to everything else
+		/* Overall - 2x to primordial/nonliving/GOO, 3x to everything else
 		 * To compensate for AD_DARK already being 3x to Dark_vuln,
 		 * add the +1x to "things that didn't get 3x"
 		 * (dark_immune goes from 1x to 2x, non-mortal_race goes from 2x to 3x)
 		 */
 		if (!Dark_vuln(mdef)) *truedmgptr += basedmg;
-		if (!is_unalive(mdef->data) && is_primordial(mdef->data)) *truedmgptr += basedmg;
+		if (Dark_res(mdef)) *truedmgptr += basedmg;
 	}
 	
 	if (arti_attack_prop(otmp, ARTA_BLIND) && !resists_blnd(mdef) && !rn2(3)) {
