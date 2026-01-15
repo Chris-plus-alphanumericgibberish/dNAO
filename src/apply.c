@@ -4879,7 +4879,7 @@ use_dissection_kit(struct obj *obj)
 		// pline("That's too insubstantial to dissect.");
 		// return;
 	// }
-	splitobj(otmp, otmp->quan - 1L);
+	if (otmp->quan > 1) splitobj(otmp, otmp->quan - 1L);
 	consume_obj_charge(obj, TRUE);
 
 	//San check
