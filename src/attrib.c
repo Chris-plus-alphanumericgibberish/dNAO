@@ -1008,7 +1008,7 @@ int oldlevel, newlevel;
 						pline("%s", abil->gainstr);
 					else You_feel("%s!", abil->gainstr);
 					if(abil->ability == &(HStone_resistance)){ //Are we pointing to the stone res field?
-						fix_petrification();
+						if (Stoned || Golded || Salted) fix_petrification();
 					}
 				}
 			}
