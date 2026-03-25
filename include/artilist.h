@@ -2383,7 +2383,7 @@ A("Liecleaver",						DROVEN_CROSSBOW,	(const char *)0,
 /* Hedrow noble crowning gift, Chaotic */
 A("The Ruinous Descent of Stars",	MORNING_STAR,		"silver-spiked %s",
 	8000L, METAL, MZ_DEFAULT, WT_DEFAULT,
-	A_CHAOTIC, NON_PM, NON_PM, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR|ARTG_FXALGN),
+	A_CHAOTIC, NON_PM, PM_DROW, TIER_A, (ARTG_NOGEN|ARTG_NOWISH|ARTG_MAJOR|ARTG_FXALGN),
 	NO_MONS(),
 	ATTK(AD_PHYS, 1, 0), (ARTA_SILVER),
 	PROPS(), NOFLAG,
