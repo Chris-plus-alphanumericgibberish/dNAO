@@ -4422,7 +4422,7 @@ int wishflags;
 		} else if(!strncmpi(bp, "silvered ",l=9)) {
 			ispoisoned=OPOISON_SILVER;
 		} else if(!strncmpi(bp, "ergot-coated ",l=13)) {
-			ispoisoned=OPOISON_SILVER;
+			ispoisoned=OPOISON_HALLU;
 		} else if(!strncmpi(bp, "greased ",l=8)) {
 			isgreased=1;
 		} else if(!strncmpi(bp, "world-serpent ",l=14)
