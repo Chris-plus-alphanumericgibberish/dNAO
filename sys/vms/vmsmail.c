@@ -134,7 +134,7 @@ char *buf;			/* input: filtered broadcast text */
 	!strncmpi(q = buf, "mail ", 5)) {	/* unexpected alternative */
 	typ = MSG_MAIL;
 	p = strstri(q, " from");
-	txt = p ? strcat(strcpy(txt_buf, "Mail for you"), p) : (char *) 0;
+	if (p) { snprintf(txt_buf, sizeof txt_buf, "Mail for you%s", p); txt = txt_buf; } else txt = (char *) 0;
 
 	if (!strncmpi(buf, "new mail", 8)) {
 /*
@@ -160,8 +160,10 @@ Software Tools mail has arrived on FOO from \'BAR\' [in SPAM]
 */
 	    nam = "STmail";
 	    cmd = "MSG";
-	    if (txt && (p = strstri(p, " in ")) != 0)	/* specific folder */
-		cmd = strcat(strcpy(cmd_buf, "MSG +"), p + 4);
+	    if (txt && (p = strstri(p, " in ")) != 0) {	/* specific folder */
+		snprintf(cmd_buf, sizeof cmd_buf, "MSG +%s", p + 4);
+		cmd = cmd_buf;
+	    }
 	} else if (q - 2 >= buf && !strncmpi(q - 2, "mm", 2)) {
 /*
 {MultiNet\ |PMDF\/}MM mail has arrived on FOO from BAR\n
@@ -188,7 +190,7 @@ WPmail: New mail from BAR.  subject_text
 	    txt = (char *) 0;		/* don't rely on "from" info here */
 	}
 
-	if (!txt) txt = strcat(strcpy(txt_buf, "Mail for you: "), buf);
+	if (!txt) { snprintf(txt_buf, sizeof txt_buf, "Mail for you: %s", buf); txt = txt_buf; }
     /*
      :	end of mail recognition; now check for call-type interruptions...
      */
@@ -200,7 +202,8 @@ BAR is phoning you [on FOO] \(HH:MM:SS\)
 	nam = "Phone call";
 	cmd = "PHONE ANSWER";
 	if (!strncmpi(q + 8, " you", 4)) q += (8 + 4), *q = '\0';
-	txt = strcat(strcpy(txt_buf, "Do you hear ringing?  "), buf);
+	snprintf(txt_buf, sizeof txt_buf, "Do you hear ringing?  %s", buf);
+	txt = txt_buf;
     } else if ((q = strstri(buf, " talk-daemon")) != 0 ||
 	       (q = strstri(buf, " talk_daemon")) != 0) {
 /*
@@ -212,7 +215,8 @@ Connection request by BAR@SPAM\n
 	nam = "Talk request";		/* MultiNet's TALK and/or TALK/OLD */
 	cmd = "TALK";
 	if ((p = strstri(q, " by ")) != 0) {
-	    txt = strcat(strcpy(txt_buf, "Talk request from"), p + 3);
+	    snprintf(txt_buf, sizeof txt_buf, "Talk request from%s", p + 3);
+	    txt = txt_buf;
 	    if ((p = strstri(p, "respond with")) != 0) {
 		if (*(p-1) == '[') *(p-1) = '\0'; else *p = '\0'; /* terminate */
 		p += (sizeof "respond with" - sizeof "");
