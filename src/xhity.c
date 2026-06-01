@@ -22098,7 +22098,7 @@ warp_monk_target(int range)
 		if(!isok(ix,iy))
 			return FALSE;
 		mon = m_at(ix, iy);
-		if(mon && !mon->mpeaceful)
+		if(mon && !nonthreat_ful(mon))
 			return TRUE;
 		if(!ZAP_POS(levl[ix][iy].typ) || closed_door(ix, iy))
 			return FALSE;
