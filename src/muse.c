@@ -3099,7 +3099,7 @@ valid_rosp_e_target(struct monst *mtmp, struct monst *mtarg)
 	boolean subtarg_resists;
 	boolean target_found;
 	int numtargets = 0;
-	if(mtmp != mtarg && mtmp->mpeaceful != mtarg->mpeaceful && distmin(mtmp->mx, mtmp->my, mtarg->mx, mtarg->my) <= BOLT_LIM
+	if(mtmp != mtarg && mtmp->mpeaceful != mtarg->mpeaceful && !nonthreat_ful(mtarg) && distmin(mtmp->mx, mtmp->my, mtarg->mx, mtarg->my) <= BOLT_LIM
 		&& !(Fire_res(mtarg) && Shock_res(mtarg) && Cold_res(mtarg))
 		&& mon_can_see_mon(mtmp, mtarg)
 	){
@@ -3117,7 +3117,7 @@ valid_rosp_e_target(struct monst *mtmp, struct monst *mtarg)
 							target_found = FALSE;
 							i = j = 3; //break out of both loops
 						}
-						else if(mtmp->mpeaceful == subtarg->mpeaceful && !subtarg_resists){
+						else if((mtmp->mpeaceful == subtarg->mpeaceful || nonthreat_ful(subtarg)) && !subtarg_resists){
 							target_found = FALSE;
 							i = j = 3; //break out of both loops
 						}
@@ -3147,7 +3147,7 @@ has_rosp_e_target(struct monst *mtmp)
 	for(mtarg = fmon; mtarg; mtarg = mtarg->nmon){
 		if(DEADMONSTER(mtarg)) continue;
 		targets = valid_rosp_e_target(mtmp, mtarg);
-		if(targets && (targets > 3 || mlev(mtarg)+targets > tlevel))
+		if(targets && (targets > 3 || mlev(mtarg)+targets > tlevel || mtarg->data->msound == MS_NEMESIS))
 			return TRUE;
 	}
 	return FALSE;
@@ -3166,6 +3166,11 @@ explode_rod_of_seven_parts(struct monst *mtmp, struct obj *otmp)
 	else for(mtarg = fmon; mtarg; mtarg = mtarg->nmon){
 		if(DEADMONSTER(mtarg)) continue;
 		numtargets = valid_rosp_e_target(mtmp, mtarg);
+		if(numtargets && mtarg->data->msound == MS_NEMESIS){
+			best_numtargets = numtargets;
+			best_target = mtarg;
+			break;
+		}
 		if(numtargets && (!best_target || numtargets > best_numtargets || (numtargets == best_numtargets && mlev(mtarg) > mlev(best_target)))){
 			best_numtargets = numtargets;
 			best_target = mtarg;
