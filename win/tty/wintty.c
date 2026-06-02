@@ -200,6 +200,7 @@ static const char default_menu_cmds[] = {
 	MENU_SELECT_PAGE,
 	MENU_UNSELECT_PAGE,
 	MENU_INVERT_PAGE,
+	MENU_SEARCH,
 	0	/* null terminator */
 };
 
@@ -1293,6 +1294,41 @@ int *color, *attr;
 }
 #endif /* MENU_COLOR */
 
+boolean
+toggle_menu_curr(window, curr, lineno, in_view, counting, count)
+winid window;
+tty_menu_item *curr;
+int lineno;
+boolean in_view, counting;
+long count;
+{
+    if (curr->selected) {
+	if (counting && count > 0) {
+	    curr->count = count;
+	    if (in_view) set_item_state(window, lineno, curr);
+	    return TRUE;
+	} else { /* change state */
+	    curr->selected = FALSE;
+	    curr->count = -1L;
+	    if (in_view) set_item_state(window, lineno, curr);
+	    return TRUE;
+	}
+    } else {	/* !selected */
+	if (counting && count > 0) {
+	    curr->count = count;
+	    curr->selected = TRUE;
+	    if (in_view) set_item_state(window, lineno, curr);
+	    return TRUE;
+	} else if (!counting) {
+	    curr->selected = TRUE;
+	    if (in_view) set_item_state(window, lineno, curr);
+	    return TRUE;
+	}
+	/* do nothing counting&&count==0 */
+    }
+    return FALSE;
+}
+
 STATIC_OVL void
 process_menu_window(window, cw)
 winid window;
@@ -1592,6 +1628,32 @@ struct WinDesc *cw;
 		if (cw->how == PICK_ANY)
 		    invert_all(window, page_start, page_end, 0);
 		break;
+		case MENU_SEARCH:
+		if (cw->how == PICK_NONE) {
+		    tty_nhbell();
+		    break;
+		} else {
+		    char searchbuf[BUFSZ], tmpbuf[BUFSZ];
+		    boolean on_curr_page = FALSE;
+		    int lineno = 0;
+		    tty_getlin("Search for:", tmpbuf);
+		    if (!tmpbuf || tmpbuf[0] == '\033') break;
+		    Sprintf(searchbuf, "*%s*", tmpbuf);
+		    for (curr = cw->mlist; curr; curr = curr->next) {
+			if (on_curr_page) lineno++;
+			if (curr == page_start)
+			    on_curr_page = TRUE;
+			else if (curr == page_end)
+			    on_curr_page = FALSE;
+			if (curr->identifier.a_void && pmatch(searchbuf, curr->str)) {
+			    toggle_menu_curr(window, curr, lineno, on_curr_page, counting, count);
+			    if (cw->how == PICK_ONE) {
+				finished = TRUE;
+				break;
+			    }
+			}
+		    }
+		}
 	    default:
 		if (cw->how == PICK_NONE || !index(resp, morc)) {
 		    /* unacceptable input received */
