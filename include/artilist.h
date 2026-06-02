@@ -1727,6 +1727,18 @@ A("The Shard from Morgoth's Crown",	RIN_ADORNMENT,			"twisted band of jagged iro
 	MORGOTH, NOFLAG
 	),
 
+/*TODO*/
+/*Needs encyc entry*/
+A("The Omnitrix",	PLASTEEL_GAUNTLETS,			"glowing green watch",
+	3500L, MT_DEFAULT, MZ_DEFAULT, 15,
+	A_NONE, NON_PM, NON_PM, TIER_B, ARTG_INHER,
+	NO_MONS(),
+	NO_ATTK(), NOFLAG,
+	PROPS(UNCHANGING), NOFLAG,
+	PROPS(), NOFLAG,
+	NOINVOKE, NOFLAG
+	),
+
 /* The Alignment Keys.  Must be grouped together.  Some code in lock.c, artifact.h, and invent.c depends on the order. */
 #define ALIGNMENT_KEY(name, alignment)											\
 A((name),							SKELETON_KEY,			(const char *)0,	\

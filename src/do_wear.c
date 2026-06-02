@@ -2128,7 +2128,16 @@ dowear()
 		if(is_shield(otmp)) afternmv = Shield_on;
 		else if(is_helmet(otmp)) afternmv = Helmet_on;
 		else if(is_boots(otmp)) afternmv = Boots_on;
-		else if(is_gloves(otmp)) afternmv = Gloves_on;
+		else if(is_gloves(otmp)) {
+                if(otmp->oartifact == ART_OMNITRIX){
+                    You("reach for the watch, but before you even touch it, it jumps onto your hand.");
+                    pline("There is a bright flash of alien green light.");
+                    You("feel you and %s are now one.", the(xname(otmp)));
+
+                    otmp->spe = 0;//omnitrix ready to use when worn
+                }
+                afternmv = Gloves_on;
+                }
 		else if(is_cloak(otmp)) afternmv = Cloak_on;
 		else if(is_shirt(otmp)) afternmv = Shirt_on;
 		// else if(is_belt(otmp)) afternmv = Belt_on;

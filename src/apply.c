@@ -5,6 +5,7 @@
 #include <math.h>
 #include "hack.h"
 #include "artifact.h"
+#include "pm.h"
 #include "xhity.h"
 #ifdef OVLB
 
@@ -1694,6 +1695,31 @@ struct obj *obj;
 		pline("Aegis in unexpected state?");
 		return MOVE_CANCELLED;
 	}
+}
+
+STATIC_OVL int
+use_omnitrix(obj)
+struct obj *obj;
+{
+#define STATE_READY 0
+#define STATE_ACTIVE 1
+#define STATE_CHARGING 2
+	if(!obj->owornmask){
+        pline("It's just a strange alien watch.");
+		return MOVE_CANCELLED;
+	} 
+    You("press the dial on %s.", the(xname(obj)));
+    if(obj->spe){
+        pline("Nothing happens.");
+        return MOVE_STANDARD;
+    }
+    int tgtmon = rn2(2) ? PM_TETRAMAND : PM_KINECELERAN;
+//    obj->objsize = TETRAMAND_SIZE;
+    polymon(tgtmon);
+    obj->spe = STATE_ACTIVE;
+    int active_time = 25 + rnd(150);
+    start_timer(active_time, TIMER_OBJECT, OMNI_TIME_OUT, (genericptr_t)obj);
+    return MOVE_STANDARD;
 }
 
 STATIC_OVL int
@@ -12057,8 +12083,10 @@ doapply()
 	if (carrying(DWARVISH_HELM) || carrying(LANTERN_PLATE_MAIL) ||
 		carrying(GNOMISH_POINTY_HAT) || carrying(DROVEN_CLOAK) ||
 		carrying_art(ART_AEGIS) || carrying_art(ART_RED_CORDS_OF_ILMATER) ||
-		carrying(EILISTRAN_ARMOR) || carrying_art(ART_GREAT_CLAWS_OF_URDLEN))
-		add_class(class_list, ARMOR_CLASS);
+		carrying(EILISTRAN_ARMOR) || carrying_art(ART_GREAT_CLAWS_OF_URDLEN) ||
+        carrying_art(ART_OMNITRIX)){
+		    add_class(class_list, ARMOR_CLASS);
+        }
 	if(carrying_applyable_ring()){
 		add_class(class_list, RING_CLASS);
 	}
@@ -12107,6 +12135,7 @@ doapply()
 	}
 	else if(obj->oartifact == ART_BLOODLETTER && artinstance[obj->oartifact].BLactive >= monstermoves) res = do_bloodletter(obj);
 	else if(obj->oartifact == ART_AEGIS) res = swap_aegis(obj);
+	else if(obj->oartifact == ART_OMNITRIX) res = use_omnitrix(obj);
 	else if(obj->oartifact == ART_STAFF_OF_AESCULAPIUS) res = aesculapius_poke(obj);
 	else if(obj->oartifact == ART_ESSCOOAHLIPBOOURRR) res = aesculapius_poke(obj);
 	else if(obj->oartifact == ART_RED_CORDS_OF_ILMATER) res = ilmater_touch(obj);

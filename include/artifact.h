@@ -504,6 +504,7 @@ extern struct artifact * artilist;
 #define SCORPION_UPGRADES (LAST_PROP+96)
 #define MORTAL_DRAW     (LAST_PROP+97)
 #define BOREAL_INVOKE   (LAST_PROP+98)
+#define CHSELF_OMNI     (LAST_PROP+99)
 
 #define MASTERY_ARTIFACT_LEVEL 20
 

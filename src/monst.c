@@ -8264,7 +8264,6 @@ is a red right hand
 	 * random monster selection code assumes everything beyond here
 	 * has the G_NOGEN and MG_NOPOLY attributes.
 	 */
-
 /* 
  * character classes
  */
@@ -11121,6 +11120,30 @@ is a red right hand
 	0 /*MM*/, MT_OMNIVORE|MT_PEACEFUL|MT_COLLECT|MT_MAGIC /*MT*/, MF_BAB_HALF|MF_LEVEL_30 /*MF*/,
 	MB_HUMANOID|MB_STRONG /*MB*/, 0  /*MC*/, MG_NOWISH|MG_NOPOLY|MG_INFRAVISIBLE /*MG*/,
 	MA_HUMAN /*MA*/,  MV_NORMAL /*MV*/, 0 /*MW*/, 0 /*light radius*/, HI_DOMESTIC),
+/*
+ * omnitrix aliens
+ */
+
+//#define MON(nam,sym,lvl,gen,def,atk,siz,mr1,mr2,flgm,flgt,flgf,flgb,flgc,flgg,flga,flgv,flgw,light, col) \
+//	   {nam,sym,lvl,gen,def,atk,siz,mr1,mr2,flgm,flgt,flgf,flgb,flgc,flgg,flga,flgv,flgw, light, C(col),-1}
+    MON("tetramand", S_GIANT,//FOUR ARMS!
+	LVL(20, 12, 10, 0), G_NOGEN,
+	DEF(NAT_AC(10), NAT_DR(8)),
+	A(ATTK(AT_WEAP, AD_PHYS, 2, 15), ATTK(AT_XWEP, AD_PHYS, 2, 15),
+    ATTK(AT_HITS, AD_PHYS, 3, 10), ATTK(AT_HITS, AD_PHYS, 3, 10)),
+	SIZ(WT_LARGE, CN_LARGE, MS_ROAR, MZ_LARGE), 0, 0,
+	MM_WEBRIP|MM_DOORBUST /*MM*/, MT_OMNIVORE|MT_ROCKTHROW /*MT*/, MF_MARTIAL_S|MF_BAB_FULL /*MF*/,
+	MB_HUMANOID|MB_STRONG /*MB*/, MC_THICK_HIDE  /*MC*/, MG_NASTY|MG_NOWISH|MG_NOPOLY|MG_INFRAVISIBLE /*MG*/,
+	MA_ET /*MA*/,  MV_NORMAL /*MV*/, 0 /*MW*/, 0 /*light radius*/, CLR_RED),
+
+    MON("kineceleran", S_HUMANOID,//XLR8
+	LVL(20, 50, 10, 0), G_NOGEN,
+	DEF(DEX_AC(10)),
+	A(ATTK(AT_WEAP, AD_PHYS, 1, 10), ATTK(AT_WEAP, AD_PHYS, 1, 10)),
+	SIZ(WT_HUMAN, CN_HUMAN, MS_HISS, MZ_HUMAN), 0, 0,
+	MM_SWIM /*MM*/, MT_OMNIVORE /*MT*/, MF_MARTIAL_B|MF_BAB_FULL /*MF*/,
+	MB_HUMANOID /*MB*/, 0  /*MC*/, MG_NASTY|MG_NOWISH|MG_NOPOLY|MG_INFRAVISIBLE /*MG*/,
+	MA_ET /*MA*/,  MV_NORMAL|MV_LOWLIGHT2 /*MV*/, 0 /*MW*/, 0 /*light radius*/, CLR_BRIGHT_BLUE),
 /*
  * last but not least, the mighty array terminator!
  */
