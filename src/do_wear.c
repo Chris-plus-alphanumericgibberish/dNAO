@@ -3730,7 +3730,7 @@ do_takeoff()
 	  if(!cursed(otmp)) (void) Boots_off();
 	} else if (taking_off == WORN_GLOVES) {
 	  otmp = uarmg;
-	  if(!cursed(otmp)) (void) Gloves_off();
+	  if(!cursed(otmp) && !(otmp->oartifact == ART_OMNITRIX)) (void) Gloves_off();
 	} else if (taking_off == WORN_HELMET) {
 	  otmp = uarmh;
 	  if(!cursed(otmp)) (void) Helmet_off();

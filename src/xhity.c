@@ -1328,7 +1328,7 @@ xattacky(struct monst *magr, struct monst *mdef, int tarx, int tary, long modifi
 						magr->mspec_used = 10 + rn2(20);
 					}
 				}
-					
+
 				if ((adtyp != AD_SHDW || ranged)) {	// can be used in melee range, except for shadow
 					/* fire d(n,d) projectiles */
 					result |= xfirey(magr, attk, tarx, tary, d(attk->damn, attk->damd));

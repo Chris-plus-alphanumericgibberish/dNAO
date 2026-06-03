@@ -1715,7 +1715,7 @@ struct obj *obj;
     }
     int tgtmon = rn2(2) ? PM_TETRAMAND : PM_KINECELERAN;
 //    obj->objsize = TETRAMAND_SIZE;
-    polymon(tgtmon);
+    polymon(PM_VULPIMANCER);
     obj->spe = STATE_ACTIVE;
     int active_time = 25 + rnd(150);
     start_timer(active_time, TIMER_OBJECT, OMNI_TIME_OUT, (genericptr_t)obj);

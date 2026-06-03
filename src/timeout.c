@@ -3031,7 +3031,7 @@ long timeout;
 {
 	struct obj *obj = (struct obj *) arg;
     if(obj->spe == STATE_CHARGING){
-        pline("%s beeps.", Your(xname(obj)));
+        pline("%s beeps.", The(xname(obj)));
         obj->spe = STATE_READY;
     }
 }
