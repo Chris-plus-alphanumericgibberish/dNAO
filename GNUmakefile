@@ -1,4 +1,4 @@
-GAMEDIR = dnethackdir
+GAMEDIR = /media/pranav/data/Personal/Temp/dnethackdir
 
 # only used for generating include/macromagic.h
 PYTHON = python3
