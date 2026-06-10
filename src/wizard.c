@@ -519,7 +519,7 @@ tactics(mtmp)
 				attacktype_fordmg(mtmp->data, AT_SPIT, AD_ANY) ||
 				attacktype_fordmg(mtmp->data, AT_ARRW, AD_ANY) ||
 				attacktype_fordmg(mtmp->data, AT_BEAM, AD_ANY) )
-				&& !mtmp->mcan && !mtmp->mspec_used
+				&& !mtmp->mcan && (!mtmp->mspec_used || standoff(mtmp->data))
 			){
 				if(attacktype_fordmg(mtmp->data, AT_ARRW, AD_SLVR)
 					&& !has_object_type(mtmp->minvent, ARROW)
@@ -540,7 +540,7 @@ tactics(mtmp)
 				if(!mon_can_see_you(mtmp) || !couldsee(mtmp->mx, mtmp->my)) mnexto(mtmp);
 			} else if((attacktype_fordmg(mtmp->data, AT_MMGC, AD_ANY) ||
 				attacktype_fordmg(mtmp->data, AT_MAGC, AD_ANY) )
-				&& !mtmp->mcan && !mtmp->mspec_used
+				&& !mtmp->mcan && (!mtmp->mspec_used || standoff(mtmp->data))
 			){
 				mofflin(mtmp);
 				if(!mon_can_see_you(mtmp) || !couldsee(mtmp->mx, mtmp->my)) mnexto(mtmp);
@@ -612,7 +612,7 @@ tactics(mtmp)
 				attacktype_fordmg(mtmp->data, AT_SPIT, AD_ANY) ||
 				attacktype_fordmg(mtmp->data, AT_ARRW, AD_ANY) ||
 				attacktype_fordmg(mtmp->data, AT_BEAM, AD_ANY) )
-				&& !mtmp->mcan && !mtmp->mspec_used
+				&& !mtmp->mcan && (!mtmp->mspec_used || standoff(mtmp->data))
 			){
 				if(attacktype_fordmg(mtmp->data, AT_ARRW, AD_SLVR)
 					&& !has_object_type(mtmp->minvent, ARROW)
@@ -633,7 +633,7 @@ tactics(mtmp)
 				if(!mon_can_see_you(mtmp) || !couldsee(mtmp->mx, mtmp->my)) mnexto(mtmp);
 			} else if((attacktype_fordmg(mtmp->data, AT_MMGC, AD_ANY) ||
 				attacktype_fordmg(mtmp->data, AT_MAGC, AD_ANY) )
-				&& !mtmp->mcan && !mtmp->mspec_used
+				&& !mtmp->mcan && (!mtmp->mspec_used || standoff(mtmp->data))
 			){
 				mofflin(mtmp);
 				if(!mon_can_see_you(mtmp) || !couldsee(mtmp->mx, mtmp->my)) mnexto(mtmp);

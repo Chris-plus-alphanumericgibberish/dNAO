@@ -12225,8 +12225,16 @@ boolean greatequip;
 				}
 			}
 			else {
-				(void)mongets(mtmp, RUNESWORD, mkobjflags);
-				(void)mongets(mtmp, PLATE_MAIL, mkobjflags);
+				otmp = mongets(mtmp, RUNESWORD, mkobjflags);
+				if(otmp) otmp->spe = max(otmp->spe, 3);
+				otmp = mongets(mtmp, PLATE_MAIL, mkobjflags);
+				if(otmp) otmp->spe = max(otmp->spe, 2);
+				otmp = mongets(mtmp, GAUNTLETS, mkobjflags);
+				if(otmp) otmp->spe = max(otmp->spe, 2);
+				otmp = mongets(mtmp, ARMORED_BOOTS, mkobjflags);
+				if(otmp) otmp->spe = max(otmp->spe, 2);
+				otmp = mongets(mtmp, HELMET, mkobjflags);
+				if(otmp) otmp->spe = max(otmp->spe, 2);
 			}
 		} else if (ptr->mtyp == PM_BAELNORN){
 			if(Infuture){

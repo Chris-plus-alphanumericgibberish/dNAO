@@ -18,6 +18,7 @@ STATIC_DCL boolean FDECL(is_buff_spell			 ,(int));
 STATIC_DCL boolean FDECL(is_summon_spell		 ,(int));
 STATIC_DCL boolean FDECL(is_debuff_spell		 ,(int));
 STATIC_DCL boolean FDECL(spell_would_be_useless, (struct monst *, struct monst *, int, int, int));
+STATIC_DCL int FDECL(lich_spell, (struct monst *, struct monst *, struct attack *, int, int));
 
 #ifdef OVL0
 
@@ -2847,8 +2848,12 @@ xcasty(struct monst *magr, struct monst *mdef, struct attack *attk, int tarx, in
 			angrygods(GOD_LOLTH);
 			result = MM_HIT;
 		}
-		else /* generally: cast the spell */
+		else {/* generally: cast the spell */
 			result = cast_spell(magr, mdef, attk, spellnum, tarx, tary);
+			if(is_lich(magr->data) && !(result&(MM_AGR_DIED|MM_DEF_DIED|MM_AGR_STOP))){
+				result |= lich_spell(magr, mdef, attk, tarx, tary);
+			}
+		}
 	}
 	else if (!notarget || youagr) {
 		/* no spell selected; this probably means we have an elemental spell to cast */
@@ -7988,6 +7993,44 @@ dream_wolves(int tx, int ty)
 	aggravate();
 }
 
+STATIC_OVL int
+lich_spell(struct monst *magr, struct monst *mdef, struct attack *attk, int tarx, int tary)
+{
+	if(!mdef)
+		return 0;
+	switch(magr->mtyp){
+		case PM_LICH:
+			return cast_spell(magr, mdef, attk, OPEN_WOUNDS, tarx, tary);
+		break;
+		case PM_ACERERAK:
+		case PM_DEMILICH:
+			return cast_spell(magr, mdef, attk, SAN_BOLT, tarx, tary);
+		break;
+		case PM_MASTER_LICH:
+			if(mdef == &youmonst){
+				if(u.uencouraged > -mlev(magr)){
+					u.uencouraged -= rnd(6);
+					if(u.uencouraged < -mlev(magr))
+						u.uencouraged = -mlev(magr);
+				}
+			}
+			return cast_spell(magr, mdef, attk, OPEN_WOUNDS, tarx, tary);
+		break;
+		case PM_BAELNORN:
+			return cast_spell(magr, mdef, attk, ACID_RAIN, tarx, tary);
+		break;
+		case PM_ARCH_LICH:
+			return cast_spell(magr, mdef, attk, !Drain_res(mdef) ? DRAIN_LIFE : OPEN_WOUNDS, tarx, tary);
+		break;
+		case PM_ALHOON:
+			return cast_spell(magr, mdef, attk, MON_WARP, tarx, tary);
+		break;
+		case PM_VECNA:
+			return cast_spell(magr, mdef, attk, !Disint_res(mdef) ? DISINTEGRATION : !Drain_res(mdef) ? DRAIN_LIFE : OPEN_WOUNDS, tarx, tary);
+		break;
+	}
+	return 0;
+}
 #endif /* OVL0 */
 
 /*mcastu.c*/

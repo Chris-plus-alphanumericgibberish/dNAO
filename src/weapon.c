@@ -5108,6 +5108,9 @@ process_etraits(unsigned long traits, int otyp, struct obj *obj, struct monst *m
 		if(Insight >= 24)
 			traits |= ETRAIT_CLEAVE;
 	}
+	if(pa->mtyp == PM_DEATH_KNIGHT){
+		traits |= ETRAIT_CLEAVE|ETRAIT_BLEED|ETRAIT_LONG_SLASH|ETRAIT_PENETRATE_ARMOR;
+	}
 	if(obj->o_e_trait&ETRAIT_FOCUS_FIRE){
 		if(otyp == SILVERKNIGHT_SWORD){
 			traits |= ETRAIT_PENETRATE_ARMOR|ETRAIT_CREATE_OPENING;
