@@ -182,6 +182,7 @@ flag_to_word(flag, category)
 			case MM_WEBRIP: return "tear webs";
 			case MM_DOORBUST: return "break down doors";
 			case MM_AQUATIC: return "lives underwater";
+			case MM_STANDOFF: return "keep their distance";
 		}
 	break;
 	case MT_FLAG:
@@ -2025,6 +2026,7 @@ get_mm_description_of_monster_type(struct monst * mtmp, char * description)
 	int many = 0;
 	many = append(description, notonline(ptr)			, "avoids you"			, many);
 	many = append(description, fleetflee(ptr)			, "flees"				, many);
+	many = append(description, standoff(ptr)			, "keeps distance"	    , many);
 	many = append(description, species_flies(ptr)		, "flies"				, many);
 	many = append(description, species_floats(ptr)		, "floats"				, many);
 	many = append(description, is_clinger(ptr)			, "clings to ceilings"	, many);

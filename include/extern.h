@@ -761,11 +761,12 @@ E void NDECL(average_dogs);
 
 /* ### dogmove.c ### */
 
-E boolean FDECL(could_use_item, (struct monst *, struct obj *,BOOLEAN_P));
+E boolean FDECL(could_use_item, (struct monst *, struct obj *,boolean));
 E boolean FDECL(acceptable_pet_target, (struct monst *,struct monst *,BOOLEAN_P));
 E boolean FDECL(betrayed, (struct monst *));
 E int FDECL(dog_nutrition, (struct monst *,struct obj *));
 E int FDECL(dog_eat, (struct monst *,struct obj *,int,int,BOOLEAN_P));
+E boolean FDECL(mon_benificial_corpse, (struct monst *,int));
 E void FDECL(give_mon_corpse_intrinsic, (struct monst *,int));
 E int FDECL(monster_eat, (struct monst *,struct obj *,int,int,BOOLEAN_P));
 E int FDECL(dog_move, (struct monst *,int));

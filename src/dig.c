@@ -2872,7 +2872,7 @@ long timeout;	/* unused */
 				}
 			}
 		}
-		if((active_glyph(LUMEN) || (!u.veil && u.ualign.god == GOD_THE_CHOIR)) && !obj->researched && !mindless(&mons[obj->corpsenm]) && !is_animal(&mons[obj->corpsenm])){
+		if((active_glyph(LUMEN) || (!u.veil && u.ualign.god == GOD_THE_CHOIR)) && !obj->researched && intelligent(&mons[obj->corpsenm])){
 			int out_of = 100;
 			if(active_glyph(EYE_THOUGHT) && active_glyph(LUMEN))
 				out_of = 33;
@@ -2918,7 +2918,7 @@ long timeout;	/* unused */
 		if(u.silvergrubs && !u.silverknight_mire && !rn2(20)){
 			set_silvergrubs(FALSE);
 		}
-		if(check_rot(ROT_KIN) && !mindless(&mons[obj->corpsenm]) && !is_animal(&mons[obj->corpsenm]) && (u.silvergrubs || !rn2(100)) && !(mvitals[PM_SILVERGRUB].mvflags&G_GONE && !In_quest(&u.uz))){
+		if(check_rot(ROT_KIN) && intelligent(&mons[obj->corpsenm]) && (u.silvergrubs || !rn2(100)) && !(mvitals[PM_SILVERGRUB].mvflags&G_GONE && !In_quest(&u.uz))){
 			set_silvergrubs(TRUE);
 			makemon(&mons[PM_SILVERGRUB], x, y, NO_MM_FLAGS);
 		}

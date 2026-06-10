@@ -2776,7 +2776,7 @@ not_special:
 				/* look for gold or jewels nearby */
 				likegold = (likes_gold(ptr) && pctload < 95);
 				likegems = (likes_gems(ptr) && pctload < 85);
-				uses_items = (!mindless_mon(mtmp) && !is_animal(ptr)
+				uses_items = (intelligent_mon(mtmp)
 					&& pctload < 75);
 				likeobjs = (!mad_no_armor(mtmp) && likes_objs(ptr) && pctload < 75);
 				likemagic = (likes_magic(ptr) && pctload < 85);
@@ -2973,9 +2973,13 @@ not_special:
 					leader_target = FALSE;
 					gx = m2->mx;
 					gy = m2->my;
-					mtmp->mux = m2->mx;
-					mtmp->muy = m2->my;
-					appr = 1;
+					if(standoff(mtmp->data) && distminbest <= 4 && distminbest > 1)
+						; /* already at standoff range; wander rather than close in */
+					else {
+						mtmp->mux = m2->mx;
+						mtmp->muy = m2->my;
+						appr = 1;
+					}
 				}
 			}//End target closest hostile
 			
@@ -3353,7 +3357,7 @@ postmov:
 		    /* look for gold or jewels nearby */
 		    likegold = (likes_gold(ptr) && pctload < 95);
 		    likegems = (likes_gems(ptr) && pctload < 85);
-		    uses_items = (!mindless_mon(mtmp) && !is_animal(ptr)
+		    uses_items = (intelligent_mon(mtmp)
 				  && pctload < 75);
 		    likeobjs = (!mad_no_armor(mtmp) && likes_objs(ptr) && pctload < 75);
 		    likemagic = (likes_magic(ptr) && pctload < 85);

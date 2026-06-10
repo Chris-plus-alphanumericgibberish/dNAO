@@ -724,7 +724,7 @@ maybe_cannibal(pm, allowmsg)
 int pm;
 boolean allowmsg;
 {
-	if((your_race(&mons[pm]) || Race_if(PM_SILVERMAN)) && !is_animal(&mons[pm]) && !mindless(&mons[pm])){
+	if((your_race(&mons[pm]) || Race_if(PM_SILVERMAN)) && intelligent(&mons[pm])){
 		if (!CANNIBAL_ALLOWED()) {
 			if (allowmsg) {
 				if (Upolyd)
@@ -1628,7 +1628,7 @@ opentin()		/* called during each move whilst opening a tin */
 		}
 
 		char buf[BUFSZ];
-		if(tin.tin->corpsenm > NON_PM && tin.tin->spe != 1 && your_race(&mons[tin.tin->corpsenm]) && !is_animal(&mons[tin.tin->corpsenm]) && !mindless(&mons[tin.tin->corpsenm])
+		if(tin.tin->corpsenm > NON_PM && tin.tin->spe != 1 && your_race(&mons[tin.tin->corpsenm]) && intelligent(&mons[tin.tin->corpsenm])
 			&& !CANNIBAL_ALLOWED() && (u.ualign.record >= 20 || ACURR(A_WIS) >= 20 || u.ualign.record >= rnd(20-ACURR(A_WIS))))
 			Sprintf(buf, "You feel a deep sense of kinship to the tin!  Eat it anyway?");
 		else
@@ -2886,7 +2886,7 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 	    You_cant("eat %s you're wearing.", something);
 	    return MOVE_CANCELLED;
 	}
-	if(otmp->otyp == CORPSE && your_race(&mons[otmp->corpsenm]) && !is_animal(&mons[otmp->corpsenm]) && !mindless(&mons[otmp->corpsenm])
+	if(otmp->otyp == CORPSE && your_race(&mons[otmp->corpsenm]) && intelligent(&mons[otmp->corpsenm])
 		&& !CANNIBAL_ALLOWED() && (u.ualign.record >= 20 || ACURR(A_WIS) >= 20 || u.ualign.record >= rnd(20-ACURR(A_WIS)))
 	){
 		char buf[BUFSZ];

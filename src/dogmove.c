@@ -17,12 +17,23 @@ extern boolean FDECL(would_prefer_hwep,(struct monst *,struct obj *));
 extern boolean FDECL(would_prefer_rwep,(struct monst *,struct obj *));
 
 #define DOG_SATIATED 3000
+#define DOG_SUPER_SATIATED 4*DOG_SATIATED
+#define DOG_CHOKE 5*DOG_SATIATED
+#define SQSRCHRADIUS 5
 
 #ifdef OVL0
 
 STATIC_DCL boolean FDECL(dog_hunger,(struct monst *,struct edog *));
 STATIC_DCL int FDECL(dog_invent,(struct monst *,struct edog *,int));
+STATIC_DCL void FDECL(dog_find_item_goal,(struct monst *,struct edog *,boolean,boolean,int));
+STATIC_DCL boolean FDECL(dog_find_combat_target,(struct monst *,int *,int));
+STATIC_DCL void FDECL(dog_find_track_goal,(struct monst *,struct edog *,boolean));
+STATIC_DCL int FDECL(leashed_goal,(struct monst *,struct edog *));
 STATIC_DCL int FDECL(dog_goal,(struct monst *,struct edog *,int,int,int));
+STATIC_DCL int FDECL(intelligent_goal,(struct monst *,struct edog *,int,int,int));
+STATIC_DCL int FDECL(pet_goal,(struct monst *,struct edog *,int,int,int));
+STATIC_DCL boolean FDECL(mon_has_ranged_complement,(struct monst *,struct obj *));
+STATIC_DCL boolean FDECL(could_use_ranged_item,(struct monst *,struct obj *));
 
 STATIC_DCL boolean FDECL(can_reach_location,(struct monst *,XCHAR_P,XCHAR_P,
     XCHAR_P,XCHAR_P));
@@ -109,21 +120,57 @@ register struct obj *otmp;
 	     arm_total_bonus(best) + extra_pref(mtmp,best)));
 }
 
+/* True if otmp is ammo for a launcher the monster carries, or a launcher
+ * for ammo the monster carries.  Covers the case where select_rwep fails
+ * because the monster has one half of the pair but not the other.
+ */
+STATIC_OVL boolean
+mon_has_ranged_complement(struct monst *mtmp, struct obj *otmp)
+{
+    struct obj *inv;
+    for (inv = mtmp->minvent; inv; inv = inv->nobj) {
+        if (is_launcher(inv) && ammo_and_launcher(otmp, inv)) return TRUE;
+        if (is_ammo(inv)     && ammo_and_launcher(inv, otmp)) return TRUE;
+    }
+    return FALSE;
+}
+
+STATIC_OVL boolean
+could_use_ranged_item(struct monst *mtmp, struct obj *otmp)
+{
+    struct obj *rwep;
+
+    if (!is_armed_mon(mtmp))
+        return FALSE;
+
+    rwep = select_rwep(mtmp);  /* also sets propellor as a side effect */
+
+    /* more of the same self-propelled thrown weapon (spears, darts, etc.);
+     * exclude polearms — a monster doesn't need duplicate polearms */
+    if (rwep && rwep->otyp == otmp->otyp && !is_pole(otmp))
+        return TRUE;
+
+    /* ammo matching the current launcher */
+    if (is_ammo(otmp) && propellor && propellor != &zeroobj &&
+            ammo_and_launcher(otmp, propellor))
+        return TRUE;
+
+    /* launcher or ammo completing an incomplete set */
+    return mon_has_ranged_complement(mtmp, otmp);
+}
+
 /*
  * See if a monst could use this item in an offensive or defensive capacity.
  */
 boolean
-could_use_item(mtmp, otmp, check_if_better)
-register struct monst *mtmp;
-register struct obj *otmp;
-boolean check_if_better;
+could_use_item(struct monst *mtmp, struct obj *otmp, boolean check_if_better)
 {
     boolean can_use;
     if(mindless_mon(mtmp) && otmp && otmp->where == OBJ_MINVENT)
 		can_use = TRUE;
 	else can_use =
             /* make sure this is an intelligent monster */
-            (mtmp && !is_animal(mtmp->data) && !mindless_mon(mtmp) && 
+            (mtmp && intelligent_mon(mtmp) && 
 	      !nohands(mtmp->data) &&
 	     otmp &&
 	    /* food */
@@ -142,11 +189,13 @@ boolean check_if_better;
 		 ((mtmp->mtyp == PM_CATHEZAR || mtmp->mtyp == PM_CHAIN_DEVIL) && otmp->otyp == CHAIN) ||
 	    /* better weapons */
 	     (is_armed_mon(mtmp) &&
-	      (otmp->oclass == WEAPON_CLASS || is_weptool(otmp)) && 
+	      (otmp->oclass == WEAPON_CLASS || is_weptool(otmp)) &&
 		   (!check_if_better ||
 		    mtmp->mtyp == PM_MARILITH ||
 		    would_prefer_hwep(mtmp, otmp) ||
 		    would_prefer_rwep(mtmp, otmp))) ||
+	    /* ranged weapon or ammo */
+	     could_use_ranged_item(mtmp, otmp) ||
 	    /* useful masks */
 	     (otmp->otyp == MASK && otmp->corpsenm != NON_PM && mtmp->mtyp == PM_LILLEND) ||
 	     (is_worn_tool(otmp) && can_wear_blindf(mtmp->data)) ||
@@ -188,10 +237,7 @@ boolean check_if_better;
 		if(mindless_mon(mtmp))
 			return TRUE;
 
-        if (otmp->oclass == ARMOR_CLASS){
-			return !check_if_better || !is_better_armor(&youmonst, otmp);
-		}
-		else if (otmp->oclass == WAND_CLASS && otmp->spe <= 0)
+        if (otmp->oclass == WAND_CLASS && otmp->spe <= 0)
             return FALSE;  /* used charges or was cancelled? */
 		else {
 			/*Hold all useful items.  The player can take with #loot if needed*/
@@ -226,7 +272,7 @@ register struct monst *mon;
 	
 	rwep = weapon_user ? propellor : &zeroobj;
 
-	if (is_animal(mon->data) || mindless_mon(mon)) {
+	if (!intelligent_mon(mon)) {
 		intelligent = FALSE;
 		item1 = item2 = TRUE;
 	}
@@ -511,7 +557,7 @@ boolean devour;
 			delobj(obj);
 	}
 
-	if (can_choke && edog->hungrytime >= (monstermoves + 5*DOG_SATIATED))
+	if (can_choke && edog->hungrytime >= (monstermoves + DOG_CHOKE))
 	{
 	    if (canseemon(mtmp))
 	    {
@@ -665,6 +711,26 @@ dog_died:
 	return(FALSE);
 }
 
+boolean
+mon_benificial_corpse(mon, mtyp)
+struct monst *mon;
+int mtyp;
+{
+	struct permonst *ptr = &mons[mtyp];
+	int i;
+	if (ptr->mlevel < 1)
+		return FALSE;
+	boolean result = FALSE;
+	for (i = 1; i <= LAST_PROP; i++) {
+		if (intrinsic_possible(i, ptr) && !mon_acquired_trinsic(mon, i)) {
+			if (i == TELEPORT)
+				return FALSE;
+			result = TRUE;
+		}
+	}
+	return result;
+}
+
 void
 give_mon_corpse_intrinsic(mon, mtyp)
 struct monst *mon;
@@ -786,14 +852,19 @@ int udist;
 				ESMT(mtmp)->smith_biomass_stockpile += edog->hungrytime - (monstermoves + DOG_SATIATED - 1);
 				edog->hungrytime = (monstermoves + DOG_SATIATED - 1);
 			}
-		    if (edog->hungrytime < monstermoves + DOG_SATIATED || 
-				(!mindless_mon(mtmp) && 
+		    if (edog->hungrytime < monstermoves + DOG_SATIATED ||
+				(!mindless_mon(mtmp) &&
 					(
 						(YouHunger > 150*get_uhungersizemod() && edog->hungrytime < monstermoves + DOG_SATIATED/3) ||
 						(YouHunger > 50*get_uhungersizemod() && edog->hungrytime < monstermoves)
 					)
-				)
-			) 
+				) ||
+				/* intelligent pets eat intrinsic-granting corpses until super-satiated */
+				(intelligent_mon(mtmp) &&
+				 obj->otyp == CORPSE && obj->corpsenm != NON_PM &&
+				 mon_benificial_corpse(mtmp, obj->corpsenm) &&
+				 edog->hungrytime < monstermoves + DOG_SUPER_SATIATED)
+			)
 #endif /* PET_SATIATION */
 		    return dog_eat(mtmp, obj, omx, omy, FALSE);
 		}
@@ -874,152 +945,118 @@ pet_sphere_goal(struct monst *mtmp, struct edog *edog, int after, int udist, int
 	return appr;
 }
 
-/* set dog's goal -- gtyp, gx, gy
- * returns -1/0/1 (dog's desire to approach player) or -2 (abort move)
- * or -3 (can't move but can act)
+/* scan nearby objects for the best food or item goal
+ * sets gtyp, gx, gy as side effects
  */
-STATIC_OVL int
-dog_goal(struct monst *mtmp, struct edog *edog, int after, int udist, int whappr)
+STATIC_OVL void
+dog_find_item_goal(struct monst *mtmp, struct edog *edog, boolean in_masters_sight, boolean dog_has_minvent, int search_radius)
 {
-	register int omx, omy;
-	boolean in_masters_sight, dog_has_minvent, explosive = mon_attacktype(mtmp, AT_EXPL) ? TRUE : FALSE;
-	register struct obj *obj;
+#define DDIST(x,y) (dist2(x,y,mtmp->mx,mtmp->my))
+	int min_x, max_x, min_y, max_y;
+	register int nx, ny;
+	boolean can_use = FALSE;
+	struct obj *obj;
 	xchar otyp;
-	int appr;
 
-#ifdef STEED
-	/* Steeds don't move on their own will */
-	if (mtmp == u.usteed)
-		return (-2);
-#endif
+	gtyp = UNDEF;	/* no goal as yet */
+	gx = gy = 0;	/* suppress 'used before set' message */
 
-	omx = mtmp->mx;
-	omy = mtmp->my;
+	if ((min_x = mtmp->mx - search_radius) < 1) min_x = 1;
+	if ((max_x = mtmp->mx + search_radius) >= COLNO) max_x = COLNO - 1;
+	if ((min_y = mtmp->my - search_radius) < 0) min_y = 0;
+	if ((max_y = mtmp->my + search_radius) >= ROWNO) max_y = ROWNO - 1;
 
-	in_masters_sight = couldsee(omx, omy);
-	dog_has_minvent = (DROPPABLES(mtmp) != 0);
-
-	if (!edog || mtmp->mleashed) {	/* he's not going anywhere... */
-	    gtyp = APPORT;
-	    gx = u.ux;
-	    gy = u.uy;
-	} else if(explosive){
-		return pet_sphere_goal(mtmp, edog, after, udist, whappr);
-	} else if(distu(mtmp->mx,mtmp->my) > 5 || (!in_masters_sight && distu(mtmp->mx,mtmp->my) > 2) ){
-	    gtyp = UNDEF;
-	} else {
-#define DDIST(x,y) (dist2(x,y,omx,omy))
-#define SQSRCHRADIUS 5
-	    int min_x, max_x, min_y, max_y;
-	    register int nx, ny;
-	    boolean can_use = FALSE;
-
-	    gtyp = UNDEF;	/* no goal as yet */
-	    gx = gy = 0;	/* suppress 'used before set' message */
-
-	    if ((min_x = omx - SQSRCHRADIUS) < 1) min_x = 1;
-	    if ((max_x = omx + SQSRCHRADIUS) >= COLNO) max_x = COLNO - 1;
-	    if ((min_y = omy - SQSRCHRADIUS) < 0) min_y = 0;
-	    if ((max_y = omy + SQSRCHRADIUS) >= ROWNO) max_y = ROWNO - 1;
-
-	    /* nearby food is the first choice, then other objects */
-	    for (obj = fobj; obj; obj = obj->nobj) {
+	/* nearby food is the first choice, then other objects */
+	for (obj = fobj; obj; obj = obj->nobj) {
 		nx = obj->ox;
 		ny = obj->oy;
 		if (nx >= min_x && nx <= max_x && ny >= min_y && ny <= max_y) {
-		    otyp = dogfood(mtmp, obj);
-		    /* skip inferior goals */
-		    if (otyp > gtyp || otyp == UNDEF)
-			continue;
-		    /* avoid cursed items unless starving */
-		    if ((!is_weldproof_mon(mtmp) && cursed_object_at(nx, ny))
-			    && !(edog->mhpmax_penalty && otyp < MANFOOD)
-			)
+			otyp = dogfood(mtmp, obj);
+			/* skip inferior goals */
+			if (otyp > gtyp || otyp == UNDEF)
 				continue;
-		    /* skip completely unreacheable goals */
-		    if (!could_reach_item(mtmp, nx, ny) ||
-		        !can_reach_location(mtmp, mtmp->mx, mtmp->my, nx, ny))
-			continue;
-		    if (otyp < MANFOOD) {
-			if (otyp < gtyp || DDIST(nx,ny) < DDIST(gx,gy)) {
-			    gx = nx;
-			    gy = ny;
-			    gtyp = otyp;
+			/* avoid cursed items unless starving */
+			if ((!is_weldproof_mon(mtmp) && cursed_object_at(nx, ny))
+				    && !(edog && edog->mhpmax_penalty && otyp < MANFOOD)
+				)
+				continue;
+			/* skip completely unreacheable goals */
+			if (!could_reach_item(mtmp, nx, ny) ||
+			    !can_reach_location(mtmp, mtmp->mx, mtmp->my, nx, ny))
+				continue;
+			if (otyp < MANFOOD) {
+				if (otyp < gtyp || DDIST(nx,ny) < DDIST(gx,gy)) {
+					gx = nx;
+					gy = ny;
+					gtyp = otyp;
+				}
+			} else if(!mtmp->mnopickup && gtyp == UNDEF && can_carry(mtmp,obj)) {
+				can_use = could_use_item(mtmp, obj, TRUE);
+				if (can_use && m_cansee(mtmp, nx, ny)) {
+					/* pick up to equip/use for self; no master-watching required */
+					gx = nx;
+					gy = ny;
+					gtyp = APPORT;
+				} else if(!can_use && !intelligent_mon(mtmp) && !dog_has_minvent && in_masters_sight &&
+				          (otyp == MANFOOD || m_cansee(mtmp, nx, ny)) &&
+				          cansee(nx, ny) &&
+				          (edog && edog->apport > rn2(8))) {
+					/* fetch non-usable item for master */
+					gx = nx;
+					gy = ny;
+					gtyp = APPORT;
+				}
 			}
-		    } else if(gtyp == UNDEF && in_masters_sight &&
-			      ((can_use = could_use_item(mtmp, obj, TRUE))
-			       || !dog_has_minvent) &&
-			      (!levl[omx][omy].lit || levl[u.ux][u.uy].lit) &&
-			      (otyp == MANFOOD || m_cansee(mtmp, nx, ny)) &&
-			      (can_use ||
-			       edog->apport > rn2(8)) &&
-			      can_carry(mtmp,obj)) {
-			gx = nx;
-			gy = ny;
-			gtyp = APPORT;
-		    }
 		}
-	    }
 	}
+#undef DDIST
+}
 
-	/* follow player if appropriate, or move to attack nearby enemies */
-	if (gtyp == UNDEF ||
-	    (gtyp != DOGFOOD && gtyp != APPORT && monstermoves < edog->hungrytime)) {
-		gx = u.ux;
-		gy = u.uy;
-		if (after && udist <= 4 && gx == u.ux && gy == u.uy)
-			return(-2);
-		appr = (udist >= 9) ? 1 : (mtmp->mflee) ? -1 : 0;
-		if (udist > 1) {
-			if (!IS_ROOM(levl[u.ux][u.uy].typ) || !rn2(4) ||
-			   whappr ||
-			   (dog_has_minvent && rn2(edog->apport)))
-				appr = 1;
-		}
-		if(appr == 0 && u.sealsActive&SEAL_ECHIDNA && !mindless_mon(mtmp) && (is_animal(mtmp->data) || slithy(mtmp->data) || nohands(mtmp->data))){
-			appr = 1;
-		}
-		if(appr == 0 && Race_if(PM_DROW) && is_spider(mtmp->data)){
-			appr = 1;
-		}
-		
-		if(appr >= 0){
-			struct monst *m2 = (struct monst *)0;
-			int distminbest = SQSRCHRADIUS;
-			for(m2=fmon; m2; m2 = m2->nmon){
-				if(!m2->mtame && !m2->mpeaceful && distu(m2->mx,m2->my) <= SQSRCHRADIUS && distmin(mtmp->mx,mtmp->my,m2->mx,m2->my) < distminbest){
-					distminbest = distmin(mtmp->mx,mtmp->my,m2->mx,m2->my);
-					gx = m2->mx;
-					gy = m2->my;
-					if(MON_WEP(mtmp) && 
-						(is_launcher(MON_WEP(mtmp)) || is_firearm(MON_WEP(mtmp)) )
-					){
-						if(distmin(mtmp->mx,mtmp->my,m2->mx,m2->my) >= BOLT_LIM) appr = 1;
-						else if(distmin(mtmp->mx,mtmp->my,m2->mx,m2->my) < 4) appr = -1;
-						else appr = 0;
-					} else {
-						appr = 1;
-					}
+/* find and target the nearest hostile monster for combat
+ * returns updated appr; sets gx/gy as a side effect if a target is found
+ */
+STATIC_OVL boolean
+dog_find_combat_target(struct monst *mtmp, int *appr, int search_radius)
+{
+	if(*appr >= 0){
+		struct monst *m2 = (struct monst *)0;
+		int distminbest = 2 * search_radius+2; // One side of the search area to the other
+		boolean found = FALSE;
+		for(m2=fmon; m2; m2 = m2->nmon){
+			if(!m2->mtame && !m2->mpeaceful && distu(m2->mx,m2->my) <= search_radius && distmin(mtmp->mx,mtmp->my,m2->mx,m2->my) < distminbest){
+				distminbest = distmin(mtmp->mx,mtmp->my,m2->mx,m2->my);
+				gx = m2->mx;
+				gy = m2->my;
+				if(MON_WEP(mtmp) &&
+					(is_launcher(MON_WEP(mtmp)) || is_firearm(MON_WEP(mtmp)) )
+				){
+					if(distmin(mtmp->mx,mtmp->my,m2->mx,m2->my) >= BOLT_LIM) *appr = 1;
+					else if(distmin(mtmp->mx,mtmp->my,m2->mx,m2->my) < 4) *appr = -1;
+					else *appr = 0;
+				} else {
+					if(standoff(mtmp->data) && distminbest <= 4)
+						*appr = -1;
+					else
+						*appr = 1;
 				}
+				found = TRUE;
 			}
 		}
-		/* if you have dog food it'll follow you more closely */
-		if (appr == 0) {
-			obj = invent;
-			while (obj) {
-				if(dogfood(mtmp, obj) == DOGFOOD) {
-					appr = 1;
-					break;
-				}
-				obj = obj->nobj;
-			}
-		}
-	} else
-	    appr = 1;	/* gtyp != UNDEF */
-	if(mtmp->mconf)
-	    appr = 0;
+		return found;
+	}
+	return FALSE;
+}
 
+/* when master is out of sight and the goal is the master's position,
+ * find a better intermediate goal via footprints, previous goal, or nearest door
+ * sets gx/gy as side effects
+ */
+STATIC_OVL void
+dog_find_track_goal(struct monst *mtmp, struct edog *edog, boolean in_masters_sight)
+{
 #define FARAWAY (COLNO + 2)		/* position outside screen */
+	int omx = mtmp->mx, omy = mtmp->my;
+
 	if (gx == u.ux && gy == u.uy && !in_masters_sight) {
 	    register coord *cp;
 
@@ -1054,6 +1091,98 @@ dog_goal(struct monst *mtmp, struct edog *edog, int after, int udist, int whappr
 	} else if(edog) {
 	    edog->ogoal.x = 0;
 	}
+#undef FARAWAY
+}
+
+/* goal function for leashed pets and pets without an edog structure:
+ * always target the player's position
+ */
+STATIC_OVL int
+leashed_goal(struct monst *mtmp, struct edog *edog)
+{
+	boolean in_masters_sight;
+	int appr = 1;
+
+	gtyp = APPORT;
+	gx = u.ux;
+	gy = u.uy;
+
+	if(mtmp->mconf)
+		appr = 0;
+
+	in_masters_sight = couldsee(mtmp->mx, mtmp->my);
+	dog_find_track_goal(mtmp, edog, in_masters_sight);
+
+	if (mtmp == u.urider)
+		return (-3);
+	return appr;
+}
+
+/* set dog's goal -- gtyp, gx, gy
+ * returns -1/0/1 (dog's desire to approach player) or -2 (abort move)
+ * or -3 (can't move but can act)
+ */
+STATIC_OVL int
+dog_goal(struct monst *mtmp, struct edog *edog, int after, int udist, int whappr)
+{
+	register int omx, omy;
+	boolean in_masters_sight, dog_has_minvent;
+	register struct obj *obj;
+	int appr;
+
+	omx = mtmp->mx;
+	omy = mtmp->my;
+
+	in_masters_sight = couldsee(omx, omy);
+	dog_has_minvent = (DROPPABLES(mtmp) != 0);
+
+	if(distu(mtmp->mx,mtmp->my) > 5 || (!in_masters_sight && distu(mtmp->mx,mtmp->my) > 2) ){
+	    gtyp = UNDEF;
+	} else if(edog) {
+		dog_find_item_goal(mtmp, edog, in_masters_sight, dog_has_minvent, SQSRCHRADIUS);
+		// May have set gtyp and gx/gy as a side effect
+	}
+
+	/* follow player if appropriate, or move to attack nearby enemies */
+	if (gtyp == UNDEF ||
+	    (gtyp != DOGFOOD && gtyp != APPORT && (!edog || monstermoves < edog->hungrytime))) {
+		gx = u.ux;
+		gy = u.uy;
+		if (after && udist <= 4 && gx == u.ux && gy == u.uy)
+			return(-2);
+		appr = (udist >= 9) ? 1 : (mtmp->mflee) ? -1 : 0;
+		if (udist > 1) {
+			if (!IS_ROOM(levl[u.ux][u.uy].typ) || !rn2(4) ||
+			   whappr ||
+			   (edog && dog_has_minvent && rn2(edog->apport)))
+				appr = 1;
+		}
+		if(appr == 0 && u.sealsActive&SEAL_ECHIDNA && !mindless_mon(mtmp) && (is_animal(mtmp->data) || slithy(mtmp->data) || nohands(mtmp->data))){
+			appr = 1;
+		}
+		if(appr == 0 && Race_if(PM_DROW) && is_spider(mtmp->data)){
+			appr = 1;
+		}
+		
+		if (!mtmp->mpassive)
+			(void) dog_find_combat_target(mtmp, &appr, SQSRCHRADIUS);
+		/* if you have dog food it'll follow you more closely */
+		if (appr == 0) {
+			obj = invent;
+			while (obj) {
+				if(dogfood(mtmp, obj) == DOGFOOD) {
+					appr = 1;
+					break;
+				}
+				obj = obj->nobj;
+			}
+		}
+	} else
+	    appr = 1;	/* gtyp != UNDEF */
+	if(mtmp->mconf)
+	    appr = 0;
+
+	dog_find_track_goal(mtmp, edog, in_masters_sight);
 	if (mtmp == u.urider)
 		return (-3);
 	return appr;
@@ -1169,6 +1298,93 @@ register struct monst *mtmp;
 }
 
 
+/* goal function for intelligent (non-animal, non-mindless) pets:
+ * prioritizes combat within BOLT_LIM of the player; sets mcombat if a
+ * target is found and skips all other goal-setting in that case
+ */
+STATIC_OVL int
+intelligent_goal(struct monst *mtmp, struct edog *edog, int after, int udist, int whappr)
+{
+	register int omx, omy;
+	boolean in_masters_sight, dog_has_minvent;
+	register struct obj *obj;
+	int appr = 0;
+
+	gtyp = UNDEF;
+	gx = gy = 0;
+
+	if (!mtmp->mpassive && dog_find_combat_target(mtmp, &appr, BOLT_LIM)) {
+		mtmp->mcombat = TRUE;
+		return appr;
+	}
+	if(mtmp->mpassive || !rn2(3))
+		mtmp->mcombat = FALSE;
+
+	omx = mtmp->mx;
+	omy = mtmp->my;
+
+	in_masters_sight = couldsee(omx, omy);
+	dog_has_minvent = (DROPPABLES(mtmp) != 0);
+
+	if(distu(mtmp->mx,mtmp->my) > 5 || (!in_masters_sight && distu(mtmp->mx,mtmp->my) > 2) ){
+	    gtyp = UNDEF;
+	} else if(!mtmp->mcombat && edog) {
+		dog_find_item_goal(mtmp, edog, in_masters_sight, dog_has_minvent, SQSRCHRADIUS);
+	}
+
+	if (gtyp == UNDEF ||
+	    (gtyp != DOGFOOD && gtyp != APPORT && (!edog || monstermoves < edog->hungrytime))) {
+		gx = u.ux;
+		gy = u.uy;
+		if (after && udist <= 4 && gx == u.ux && gy == u.uy)
+			return(-2);
+		appr = (udist >= 9) ? 1 : (mtmp->mflee) ? -1 : 0;
+		if (udist > 1) {
+			if (!IS_ROOM(levl[u.ux][u.uy].typ) || !rn2(4) ||
+			   whappr ||
+			   (edog && dog_has_minvent && rn2(edog->apport)))
+				appr = 1;
+		}
+		if (appr == 0) {
+			if(!mtmp->mcombat && distu(mtmp->mx, mtmp->my) > P_SKILL(P_BEAST_MASTERY)){
+				struct trap *ttmp = t_at(u.ux,u.uy);
+				if(On_stairs(u.ux,u.uy) || levl[u.ux][u.uy].typ == STAIRS || (ttmp && ttmp->ttyp == MAGIC_PORTAL)){
+					appr = 1;
+				}
+				else if(P_SKILL(P_BEAST_MASTERY) > 0){
+					appr = 1;
+				}
+			}
+		}
+	} else
+	    appr = 1;	/* gtyp != UNDEF */
+	if(mtmp->mconf)
+	    appr = 0;
+
+	dog_find_track_goal(mtmp, edog, in_masters_sight);
+	if (mtmp == u.urider)
+		return (-3);
+	return appr;
+}
+
+/* dispatch to the appropriate goal function for this pet */
+STATIC_OVL int
+pet_goal(struct monst *mtmp, struct edog *edog, int after, int udist, int whappr)
+{
+#ifdef STEED
+	/* Steeds don't move on their own will */
+	if (mtmp == u.usteed)
+		return (-2);
+#endif
+	if (mtmp->mleashed)
+		return leashed_goal(mtmp, edog);
+	if (mon_attacktype(mtmp, AT_EXPL))
+		return pet_sphere_goal(mtmp, edog, after, udist, whappr);
+	if (intelligent_mon(mtmp))
+		return intelligent_goal(mtmp, edog, after, udist, whappr);
+	return dog_goal(mtmp, edog, after, udist, whappr);
+}
+
 /* return 0 (no move), 1 (move) or 2 (dead) */
 int
 dog_move(mtmp, after)
@@ -1232,7 +1448,7 @@ register int after;	/* this is extra fast monster movement */
 	} else
 	    whappr = 0;
 
-	appr = dog_goal(mtmp, has_edog ? EDOG(mtmp) : (struct edog *)0,
+	appr = pet_goal(mtmp, has_edog ? EDOG(mtmp) : (struct edog *)0,
 							after, udist, whappr);
 	if (appr == -2) return(0);
 
@@ -1433,7 +1649,7 @@ register int after;	/* this is extra fast monster movement */
 
 		/* dog eschews cursed objects, but likes dog food */
 		/* (minion isn't interested; `cursemsg' stays FALSE) */
-		if (has_edog && appr != -3)
+		if (has_edog && appr != -3 && !mtmp->mcombat)
 		for (obj = level.objects[nx][ny]; obj; obj = obj->nexthere) {
 		    if (!is_weldproof_mon(mtmp) && obj->cursed) cursemsg[i] = TRUE;
 		    else if ((otyp = dogfood(mtmp, obj)) < MANFOOD &&

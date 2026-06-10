@@ -3448,6 +3448,7 @@ mfndpos(mon, poss, info, flag)
 	uchar nowtyp;
 	boolean wantpool, puddleispool, wantdry, poolok, cubewaterok, lavaok, nodiag, quantumlock;
 	boolean rockok = FALSE, treeok = FALSE, thrudoor;
+	boolean stand_off = standoff(mdat) && !mon->mpeaceful;
 	int maxx, maxy;
 	
 	if(mdat->mtyp == PM_SWARM_OF_SNAKING_TENTACLES || mdat->mtyp == PM_LONG_SINUOUS_TENTACLE){
@@ -3546,11 +3547,12 @@ nexttry:
 			continue;
 		if((mdat->mtyp == PM_GRUE) && isdark(mon->mx, mon->my) && !isdark(nx, ny))
 				continue;
-		if((mdat->mtyp == PM_WATCHER_IN_THE_WATER || mdat->mtyp == PM_KETO || mdat->mtyp == PM_TETTIGON_LEGATUS) && 
+		if(stand_off && 
 			!no_upos(mon) && 
 			distmin(nx, ny, mon->mux, mon->muy) <= 3 && 
-			dist2(nx, ny, mon->mux, mon->muy) <= dist2(mon->mx, mon->my, mon->mux, mon->muy)) continue;
-		if((mdat->mtyp == PM_WATCHER_IN_THE_WATER || mdat->mtyp == PM_TETTIGON_LEGATUS) && 
+			dist2(nx, ny, mon->mux, mon->muy) <= dist2(mon->mx, mon->my, mon->mux, mon->muy)
+		) continue;
+		if(stand_off && mdat->mtyp != PM_KETO && 
 			onlineu(nx, ny) && (lined_up(mon) || !rn2(4))) continue;
 		if(witw && dist2(nx, ny, witw->mx, witw->my) > 32 && 
 			dist2(nx, ny, witw->mx, witw->my) >= dist2(mon->mx, mon->my, witw->mx, witw->my)) continue;

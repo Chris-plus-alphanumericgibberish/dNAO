@@ -4070,7 +4070,7 @@ doresearch()
 		}
 
 		//San check
-		if (your_race(&mons[otmp->corpsenm]) && !is_animal(&mons[otmp->corpsenm]) && !mindless(&mons[otmp->corpsenm])) {
+		if (your_race(&mons[otmp->corpsenm]) && intelligent(&mons[otmp->corpsenm])) {
 			if (is_demon(youracedata)) {
 				You("find this very satisfying.");
 				exercise(A_WIS, TRUE);
@@ -4273,7 +4273,7 @@ doresearch()
 		else if(researchtype == A_NEUTRAL){
 			boolean pre_research = parasite_research_ok();
 			u.uparasitology_research += 1;
-			if(!mindless(&mons[otmp->corpsenm]) && !is_animal(&mons[otmp->corpsenm])){
+			if(intelligent(&mons[otmp->corpsenm])){
 				u.uparasitology_research += rn2(value);
 				if(!rn2(10)){
 					struct obj *parasites = mksobj_at(PARASITE,u.ux,u.uy,NO_MKOBJ_FLAGS);
@@ -4948,7 +4948,7 @@ use_dissection_kit(struct obj *obj)
 	consume_obj_charge(obj, TRUE);
 
 	//San check
-	if (your_race(&mons[otmp->corpsenm]) && !is_animal(&mons[otmp->corpsenm]) && !mindless(&mons[otmp->corpsenm])) {
+	if (your_race(&mons[otmp->corpsenm]) && intelligent(&mons[otmp->corpsenm])) {
 		if (is_demon(youracedata)) {
 			You("find this very satisfying.");
 			exercise(A_WIS, TRUE);
@@ -5022,7 +5022,7 @@ use_dissection_kit(struct obj *obj)
 	){
 		boolean pre_research = parasite_research_ok();
 		u.uparasitology_research += 1;
-		if(!mindless(&mons[otmp->corpsenm]) && !is_animal(&mons[otmp->corpsenm])){
+		if(intelligent(&mons[otmp->corpsenm])){
 			u.uparasitology_research += rn2(value);
 			if(!rn2(10)){
 				struct obj *parasites = mksobj_at(PARASITE,u.ux,u.uy,NO_MKOBJ_FLAGS);

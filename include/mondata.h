@@ -113,6 +113,7 @@
 #define is_cminion(mon)		(is_minion((mon)->data) && is_chaotic_mon(mon))
 
 #define notonline(ptr)			(((ptr)->mflagsm & MM_NOTONL) != 0L)
+#define standoff(ptr)			(((ptr)->mflagsm & MM_STANDOFF) != 0L)
 #define fleetflee(ptr)			(((ptr)->mflagsm & MM_FLEETFLEE) != 0L)
 #define bold(ptr)				(((ptr)->mflagst & MT_BOLD) != 0L)
 #define is_clinger(ptr)			(((ptr)->mflagsm & MM_CLING) != 0L)

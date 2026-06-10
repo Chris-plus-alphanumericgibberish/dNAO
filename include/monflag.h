@@ -104,6 +104,7 @@
 #define MM_WEBRIP		0x00010000L	/* Tears through webs instead of getting stuck */
 #define MM_DOORBUST		0x00020000L	/* Breaks down locked doors (UNIMPLEMENTED, part of ma_giant currently!) */
 #define MM_AQUATIC		0x00040000L	/* Can ONLY survive underwater */
+#define MM_STANDOFF		0x00080000L	/* Will not approach player beyond a certain range, may back up if player approaches */
 
 //Monster Thoughts and behavior
 #define MT_WANTSAMUL	0x00000001L	/* would like to steal the amulet */

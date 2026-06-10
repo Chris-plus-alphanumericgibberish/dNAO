@@ -218,6 +218,7 @@ struct monst {
 	Bitfield(mprobed,1); /* monster has been probed by Magicbane et al, will display at end of attack if it lives */ /*155*/
 	Bitfield(mmired,1); /* monster was created in the mire */ /*156*/
 	Bitfield(mnopickup,1); /* pet will leave items on the ground */ /*157*/
+	Bitfield(mcombat,1); /* pet is currently engaged in combat */ /*158*/
 
 	unsigned long long int 	seenmadnesses;	/* monster has seen these madnesses */
 	

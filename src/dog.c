@@ -214,7 +214,7 @@ boolean quietly;
 			/* 0,1,2:  b=80%,10,10; nc=10%,80,10; c=10%,10,80 */
 			if (chance > 0 && 
 				!(Role_if(PM_BARD) && rnd(20) < ACURR(A_CHA) && 
-					!(is_animal(mtmp->data) || mindless_mon(mtmp)))
+					intelligent_mon(mtmp))
 			){
 				untame(mtmp, 1);	/* not tame after all */
 				if (chance == 2) { /* hostile (cursed figurine) */
@@ -1037,148 +1037,146 @@ migrate_to_level(mtmp, tolev, xyloc, cc)
 /* return quality of food; the lower the better */
 /* fungi will eat even tainted food */
 int
-dogfood(mon,obj)
-struct monst *mon;
-register struct obj *obj;
+dogfood(struct monst *mon, struct obj *obj)
 {
 	boolean carni = carnivorous(mon->data);
 	boolean herbi = herbivorous(mon->data);
+	boolean intel = intelligent_mon(mon);
 	boolean starving;
 
 	if (is_quest_artifact(obj) || obj_resists(obj, 0, 100))
-	    return (obj->cursed ? TABU : APPORT);
+		return (obj->cursed ? TABU : APPORT);
 
 	switch(obj->oclass) {
 	case FOOD_CLASS:
-	    if (obj->otyp == CORPSE &&
+		if (obj->otyp == CORPSE &&
 		((touch_petrifies(&mons[obj->corpsenm]) && !resists_ston(mon))
 		 || is_rider(&mons[obj->corpsenm])))
-		    return TABU;
+			return TABU;
 
-	    /* Ghouls only eat old corpses... yum! */
-	    if (mon->mtyp == PM_GHOUL){
+		/* Ghouls only eat old corpses... yum! */
+		if (mon->mtyp == PM_GHOUL){
 		return (obj->otyp == CORPSE && obj->corpsenm != PM_ACID_BLOB &&
 		  peek_at_iced_corpse_age(obj) + 5*rn1(20,10) <= monstermoves) ?
 			DOGFOOD : TABU;
-	    }
-	    /* vampires only "eat" very fresh corpses ... 
-	     * Assume meat -> blood
-	     */
-	    if (is_vampire(mon->data)) {
+		}
+		/* vampires only "eat" very fresh corpses ... 
+		 * Assume meat -> blood
+		 */
+		if (is_vampire(mon->data)) {
 		return (obj->otyp == CORPSE &&
 		  has_blood(&mons[obj->corpsenm]) && !obj->oeaten &&
-	    	  peek_at_iced_corpse_age(obj) + 5 >= monstermoves) ?
+			  peek_at_iced_corpse_age(obj) + 5 >= monstermoves) ?
 				DOGFOOD : TABU;
-	    }
+		}
 
-	    if (!carni && !herbi)
-		    return (obj->cursed ? UNDEF : APPORT);
+		if (!carni && !herbi)
+			return (obj->cursed ? UNDEF : APPORT);
 
-	    /* a starving pet will eat almost anything */
-	    starving = (get_mx(mon, MX_EDOG) && EDOG(mon)->mhpmax_penalty);
+		/* a starving pet will eat almost anything */
+		starving = (get_mx(mon, MX_EDOG) && EDOG(mon)->mhpmax_penalty);
 
-	    switch (obj->otyp) {
+		switch (obj->otyp) {
 		case TRIPE_RATION:
 		case MEATBALL:
 		case MEAT_RING:
 		case MEAT_STICK:
 		case MASSIVE_CHUNK_OF_MEAT:
-		    return (carni ? DOGFOOD : MANFOOD);
+			return (carni ? (intel ? CADAVER : DOGFOOD) : MANFOOD);
 		case EGG:
-		    if (obj->corpsenm != NON_PM && touch_petrifies(&mons[obj->corpsenm]) && !resists_ston(mon))
-			return POISON;
-		    return (carni ? CADAVER : MANFOOD);
+			if (obj->corpsenm != NON_PM && touch_petrifies(&mons[obj->corpsenm]) && !resists_ston(mon))
+				return POISON;
+			return (carni ? CADAVER : MANFOOD);
 		case CORPSE:
 rock:
 		   if ((peek_at_iced_corpse_age(obj) + 50L <= monstermoves
-					    && obj->corpsenm != PM_LIZARD
-					    && obj->corpsenm != PM_BABY_CAVE_LIZARD
-					    && obj->corpsenm != PM_SMALL_CAVE_LIZARD
-					    && obj->corpsenm != PM_CAVE_LIZARD
-					    && obj->corpsenm != PM_LARGE_CAVE_LIZARD
-					    && obj->corpsenm != PM_LICHEN
-					    && obj->corpsenm != PM_BEHOLDER
-					    && mon->data->mlet != S_FUNGUS) ||
-			(mons[obj->corpsenm].mflagsa == mon->data->mflagsa && !(mindless_mon(mon) || is_animal(mon->data))) ||
-			(polyfodder(obj) && !resists_poly(mon->data) && (!(mindless_mon(mon) || is_animal(mon->data)) || goodsmeller(mon->data))) ||
+						&& obj->corpsenm != PM_LIZARD
+						&& obj->corpsenm != PM_BABY_CAVE_LIZARD
+						&& obj->corpsenm != PM_SMALL_CAVE_LIZARD
+						&& obj->corpsenm != PM_CAVE_LIZARD
+						&& obj->corpsenm != PM_LARGE_CAVE_LIZARD
+						&& obj->corpsenm != PM_LICHEN
+						&& obj->corpsenm != PM_BEHOLDER
+						&& mon->data->mlet != S_FUNGUS) ||
+			(mons[obj->corpsenm].mflagsa == mon->data->mflagsa && intel) ||
+			(polyfodder(obj) && !resists_poly(mon->data) && (intel || goodsmeller(mon->data))) ||
 			(acidic(&mons[obj->corpsenm]) && !resists_acid(mon)) ||
 			(freezing(&mons[obj->corpsenm]) && !resists_cold(mon)) ||
 			(burning(&mons[obj->corpsenm]) && !resists_fire(mon)) ||
 			(poisonous(&mons[obj->corpsenm]) &&
 						!resists_poison(mon))||
 			 (touch_petrifies(&mons[obj->corpsenm]) &&
-			  !resists_ston(mon)))
-			return POISON;
-		    else if (vegan(&mons[obj->corpsenm]))
-			return (herbi ? CADAVER : MANFOOD);
-		    else return (carni ? CADAVER : MANFOOD);
+			  !resists_ston(mon))
+			)
+				return POISON;
+			else if (vegan(&mons[obj->corpsenm]))
+				return (herbi ? ((intel && mon_benificial_corpse(mon, obj->corpsenm)) ? DOGFOOD : CADAVER) : MANFOOD);
+			else return (carni ? ((intel && mon_benificial_corpse(mon, obj->corpsenm)) ? DOGFOOD : CADAVER) : MANFOOD);
 		case CLOVE_OF_GARLIC:
-		    return (is_undead(mon->data) ? TABU :
-			    ((herbi || starving) ? ACCFOOD : MANFOOD));
+			return (is_undead(mon->data) ? TABU :
+				((herbi || starving) ? ACCFOOD : MANFOOD));
 		case TIN:
-		    return (metallivorous(mon->data) ? ACCFOOD : TABU);
+			return (metallivorous(mon->data) ? ACCFOOD : TABU);
 		case APPLE:
 		case CARROT:
-		    return (herbi ? DOGFOOD : starving ? ACCFOOD : MANFOOD);
+			return (herbi ? (intel ? CADAVER : DOGFOOD) : starving ? ACCFOOD : MANFOOD);
 		case BANANA:
-		    return ((mon->data->mlet == S_YETI) ? DOGFOOD :
-			    ((herbi || starving) ? ACCFOOD : MANFOOD));
+			return ((mon->data->mlet == S_YETI) ? DOGFOOD :
+				((herbi || starving) ? ACCFOOD : MANFOOD));
 
-                case K_RATION:
+		case K_RATION:
 		case C_RATION:
-                case CRAM_RATION:
+		case CRAM_RATION:
 		case LEMBAS_WAFER:
 		case FOOD_RATION:
-		    if (is_human(mon->data) ||
-		        is_elf(mon->data) ||
-			is_dwarf(mon->data) ||
-			is_gnome(mon->data) ||
-			is_orc(mon->data))
-		        return ACCFOOD; 
+			if (intel)
+				return ACCFOOD; 
 
 		default:
-		    if (starving) return ACCFOOD;
-		    return (obj->otyp > SLIME_MOLD ?
-			    (carni ? ACCFOOD : MANFOOD) :
-			    (herbi ? ACCFOOD : MANFOOD));
-	    }
+			if (starving) return ACCFOOD;
+			if(obj->obj_material == FLESH)
+				return carni ? ACCFOOD : MANFOOD;
+			if(obj->obj_material == VEGGY)
+				return herbi ? ACCFOOD : MANFOOD;
+			return TABU;
+		}
 	default:
-	    if (obj->otyp == AMULET_OF_STRANGULATION ||
+		if (obj->otyp == AMULET_OF_STRANGULATION ||
 			obj->otyp == RIN_SLOW_DIGESTION)
 			return TABU;
-	    if (hates_silver(mon->data) &&
+		if (hates_silver(mon->data) &&
 		obj_is_material(obj, SILVER))
 			return(TABU);
-	    if (hates_iron(mon->data) &&
+		if (hates_iron(mon->data) &&
 		is_iron_obj(obj))
 			return(TABU);
-	    if (hates_unholy_mon(mon) &&
+		if (hates_unholy_mon(mon) &&
 		is_unholy(obj))
 			return(TABU);
-	    if (hates_unholy_mon(mon) &&
+		if (hates_unholy_mon(mon) &&
 		obj_is_material(obj, GREEN_STEEL))
 			return(TABU);
-	    if (hates_unblessed_mon(mon) &&
+		if (hates_unblessed_mon(mon) &&
 		(is_unblessed(obj)))
 			return(TABU);
 		if (is_vampire(mon->data) &&
 		obj->otyp == POT_BLOOD && !((touch_petrifies(&mons[obj->corpsenm]) && !resists_ston(mon)) || is_rider(&mons[obj->corpsenm])))
 			return DOGFOOD;
-	    if (herbi && !carni && (obj->otyp == SHEAF_OF_HAY || obj->otyp == SEDGE_HAT))
+		if (herbi && !carni && (obj->otyp == SHEAF_OF_HAY || obj->otyp == SEDGE_HAT))
 			return CADAVER;
-	    if ((mon->mtyp == PM_GELATINOUS_CUBE || mon->mtyp == PM_ANCIENT_OF_CORRUPTION) && is_organic(obj))
+		if ((mon->mtyp == PM_GELATINOUS_CUBE || mon->mtyp == PM_ANCIENT_OF_CORRUPTION) && is_organic(obj))
 			return(ACCFOOD);
-	    if (metallivorous(mon->data) && is_metallic(obj) && (is_rustprone(obj) || mon->mtyp != PM_RUST_MONSTER)) {
+		if (metallivorous(mon->data) && is_metallic(obj) && (is_rustprone(obj) || mon->mtyp != PM_RUST_MONSTER)) {
 		/* Non-rustproofed ferrous based metals are preferred. */
 		return((is_rustprone(obj) && !obj->oerodeproof) ? DOGFOOD :
 			ACCFOOD);
-	    }
-	    if(!obj->cursed && obj->oclass != BALL_CLASS &&
+		}
+		if(!obj->cursed && obj->oclass != BALL_CLASS &&
 						obj->oclass != CHAIN_CLASS)
 		return(APPORT);
-	    /* fall into next case */
+		/* fall into next case */
 	case ROCK_CLASS:
-	    return(UNDEF);
+		return(UNDEF);
 	}
 }
 
