@@ -5488,7 +5488,8 @@ struct monst *mon;
 				}
 			}
 			//May have already gained madness but re-giving it is harmless
-			give_madness(mon);
+			if(!nonthreat(mon))
+				give_madness(mon);
 		}
 	}
 }
@@ -5514,7 +5515,8 @@ sense_nearby_monsters()
 					change_usanity(mvitals[monsndx(mtmp->data)].san_lost, !mtmp->mpeaceful);
 				}
 				//May have already gained madness but re-giving it is harmless
-				give_madness(mtmp);
+				if(!nonthreat(mtmp))
+					give_madness(mtmp);
 			}
 
 			//Monster is visible.
