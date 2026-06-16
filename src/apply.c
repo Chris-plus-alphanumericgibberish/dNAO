@@ -5,6 +5,7 @@
 #include <math.h>
 #include "hack.h"
 #include "artifact.h"
+#include "pm.h"
 #include "xhity.h"
 #ifdef OVLB
 
@@ -1694,6 +1695,104 @@ struct obj *obj;
 		pline("Aegis in unexpected state?");
 		return MOVE_CANCELLED;
 	}
+}
+
+
+#define STATE_READY 0
+#define STATE_ACTIVE 1
+#define STATE_CHARGING 2
+STATIC_OVL int
+omnitrix_menu(obj)
+register struct obj *obj;
+{
+	winid tmpwin;
+    char buf[BUFSZ];
+	char incntlet = 'a';
+	menu_item *selected;
+	anything any;
+	any.a_void = 0;         /* zero out all bits */
+	int n = 0;
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+
+	Sprintf(buf, "Become which alien?");
+	any.a_int = PM_VULPIMANCER;
+	add_menu(tmpwin, NO_GLYPH, &any , 'w', 0, ATR_NONE,
+		 "Wild Mutt", MENU_UNSELECTED);
+
+	any.a_int = PM_TETRAMAND;
+	add_menu(tmpwin, NO_GLYPH, &any , 'f', 0, ATR_NONE,
+		 "Four Arms", MENU_UNSELECTED);
+
+	any.a_int = PM_GALVAN;
+	add_menu(tmpwin, NO_GLYPH, &any , 'g', 0, ATR_NONE,
+		 "Grey Matter", MENU_UNSELECTED);
+
+	any.a_int = PM_KINECELERAN;
+	add_menu(tmpwin, NO_GLYPH, &any , 'x', 0, ATR_NONE,
+		 "XLR8", MENU_UNSELECTED);
+
+	any.a_int = PM_GALVANIC_MECHAMORPH;
+	add_menu(tmpwin, NO_GLYPH, &any , 'u', 0, ATR_NONE,
+		 "Upgrade", MENU_UNSELECTED);
+
+	any.a_int = PM_PETROSAPIEN;
+	add_menu(tmpwin, NO_GLYPH, &any , 'd', 0, ATR_NONE,
+		 "Diamond Head", MENU_UNSELECTED);
+
+	any.a_int = PM_PISCISS_VOLANN;
+	add_menu(tmpwin, NO_GLYPH, &any , 'r', 0, ATR_NONE,
+		 "Rip Jaws", MENU_UNSELECTED);
+
+	any.a_int = PM_LEPIDOPTERRAN;
+	add_menu(tmpwin, NO_GLYPH, &any , 's', 0, ATR_NONE,
+		 "Stink Fly", MENU_UNSELECTED);
+
+	any.a_int = PM_ECTONURITE;
+	add_menu(tmpwin, NO_GLYPH, &any , 'k', 0, ATR_NONE,
+		 "Ghost Freak", MENU_UNSELECTED);
+
+	any.a_int = PM_PYRONITE;
+	add_menu(tmpwin, NO_GLYPH, &any , 'h', 0, ATR_NONE,
+		 "Heat Blast", MENU_UNSELECTED);
+
+	end_menu(tmpwin, "Become which alien?");
+	n = select_menu(tmpwin, PICK_ONE, &selected);
+	destroy_nhwindow(tmpwin);
+    if (n > 0) {
+        int pm = selected[0].item.a_int;
+        free((genericptr_t) selected);
+        return pm;
+    }
+
+    return NON_PM;
+}
+
+STATIC_OVL int
+use_omnitrix(obj)
+struct obj *obj;
+{
+	if(!obj->owornmask){
+        pline("It's just a strange alien watch. Perhaps you should wear it?");
+		return MOVE_CANCELLED;
+	} 
+    if(obj->spe){
+        You("operate the watch.");
+        pline("Nothing happens.");
+        return MOVE_STANDARD;
+    }
+    You("rotate the dial on %s.", the(xname(obj)));
+    int tgtmon = omnitrix_menu(obj);
+    if(tgtmon == NON_PM){
+        pline("Never mind.");
+        return MOVE_CANCELLED;
+    }
+    polymon(tgtmon);
+    obj->spe = STATE_ACTIVE;
+    int active_time = 25 + rnd(150);
+    start_timer(active_time, TIMER_OBJECT, OMNI_TIME_OUT, (genericptr_t)obj);
+    return MOVE_STANDARD;
 }
 
 STATIC_OVL int
@@ -12057,8 +12156,10 @@ doapply()
 	if (carrying(DWARVISH_HELM) || carrying(LANTERN_PLATE_MAIL) ||
 		carrying(GNOMISH_POINTY_HAT) || carrying(DROVEN_CLOAK) ||
 		carrying_art(ART_AEGIS) || carrying_art(ART_RED_CORDS_OF_ILMATER) ||
-		carrying(EILISTRAN_ARMOR) || carrying_art(ART_GREAT_CLAWS_OF_URDLEN))
-		add_class(class_list, ARMOR_CLASS);
+		carrying(EILISTRAN_ARMOR) || carrying_art(ART_GREAT_CLAWS_OF_URDLEN) ||
+        carrying_art(ART_OMNITRIX)){
+		    add_class(class_list, ARMOR_CLASS);
+        }
 	if(carrying_applyable_ring()){
 		add_class(class_list, RING_CLASS);
 	}
@@ -12107,6 +12208,7 @@ doapply()
 	}
 	else if(obj->oartifact == ART_BLOODLETTER && artinstance[obj->oartifact].BLactive >= monstermoves) res = do_bloodletter(obj);
 	else if(obj->oartifact == ART_AEGIS) res = swap_aegis(obj);
+	else if(obj->oartifact == ART_OMNITRIX) res = use_omnitrix(obj);
 	else if(obj->oartifact == ART_STAFF_OF_AESCULAPIUS) res = aesculapius_poke(obj);
 	else if(obj->oartifact == ART_ESSCOOAHLIPBOOURRR) res = aesculapius_poke(obj);
 	else if(obj->oartifact == ART_RED_CORDS_OF_ILMATER) res = ilmater_touch(obj);

@@ -381,6 +381,11 @@ gotobj:
 		    remove_worn_item(otmp, TRUE);
 		    break;
 		case ARMOR_CLASS:
+            if(otmp->oartifact == ART_OMNITRIX){
+                pline("%s tries to steal %s.", Monnam(mtmp), the(xname(otmp)));
+                pline("%s remains firmly bonded to you at a genetic level.", The(xname(otmp)));
+                return 0;
+            }
 		    armordelay = objects[otmp->otyp].oc_delay;
 		    /* Stop putting on armor which has been stolen. */
 		    if (donning(otmp)) {
