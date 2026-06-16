@@ -3020,6 +3020,7 @@ long timeout;
     if(obj->spe == STATE_ACTIVE){
         rehumanize();
         obj->spe = STATE_CHARGING;
+        obj->objsize = youracedata->msize;
         start_timer(100 + rnd(500), TIMER_OBJECT, OMNI_RECHARGE, (genericptr_t)obj);
     }
 }

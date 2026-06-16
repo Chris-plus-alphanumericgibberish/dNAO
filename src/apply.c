@@ -1716,7 +1716,7 @@ register struct obj *obj;
 	tmpwin = create_nhwindow(NHW_MENU);
 	start_menu(tmpwin);
 
-	Sprintf(buf, "Choose an alien:");
+	Sprintf(buf, "Become which alien?");
 	any.a_int = PM_VULPIMANCER;
 	add_menu(tmpwin, NO_GLYPH, &any , 'w', 0, ATR_NONE,
 		 "Wild Mutt", MENU_UNSELECTED);
@@ -1741,11 +1741,23 @@ register struct obj *obj;
 	add_menu(tmpwin, NO_GLYPH, &any , 'd', 0, ATR_NONE,
 		 "Diamond Head", MENU_UNSELECTED);
 
+	any.a_int = PM_PISCISS_VOLANN;
+	add_menu(tmpwin, NO_GLYPH, &any , 'r', 0, ATR_NONE,
+		 "Rip Jaws", MENU_UNSELECTED);
+
+	any.a_int = PM_LEPIDOPTERRAN;
+	add_menu(tmpwin, NO_GLYPH, &any , 's', 0, ATR_NONE,
+		 "Stink Fly", MENU_UNSELECTED);
+
 	any.a_int = PM_ECTONURITE;
 	add_menu(tmpwin, NO_GLYPH, &any , 'k', 0, ATR_NONE,
 		 "Ghost Freak", MENU_UNSELECTED);
 
-	end_menu(tmpwin, "Choose an alien:");
+	any.a_int = PM_PYRONITE;
+	add_menu(tmpwin, NO_GLYPH, &any , 'h', 0, ATR_NONE,
+		 "Heat Blast", MENU_UNSELECTED);
+
+	end_menu(tmpwin, "Become which alien?");
 	n = select_menu(tmpwin, PICK_ONE, &selected);
 	destroy_nhwindow(tmpwin);
     if (n > 0) {
@@ -1762,7 +1774,7 @@ use_omnitrix(obj)
 struct obj *obj;
 {
 	if(!obj->owornmask){
-        pline("It's just a strange alien watch.");
+        pline("It's just a strange alien watch. Perhaps you should wear it?");
 		return MOVE_CANCELLED;
 	} 
     if(obj->spe){
@@ -1770,8 +1782,12 @@ struct obj *obj;
         pline("Nothing happens.");
         return MOVE_STANDARD;
     }
-    You("press the dial on %s.", the(xname(obj)));
+    You("rotate the dial on %s.", the(xname(obj)));
     int tgtmon = omnitrix_menu(obj);
+    if(tgtmon == NON_PM){
+        pline("Never mind.");
+        return MOVE_CANCELLED;
+    }
     polymon(tgtmon);
     obj->spe = STATE_ACTIVE;
     int active_time = 25 + rnd(150);

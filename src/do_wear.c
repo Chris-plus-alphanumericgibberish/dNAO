@@ -1760,6 +1760,11 @@ register struct obj *otmp;
 {
 	register int delay = -objects[otmp->otyp].oc_delay;
 
+    if(otmp->oartifact == ART_OMNITRIX){
+        You("can't. %s is bonded to your body on a genetic level.", The(xname(otmp)));
+        return MOVE_CANCELLED;
+    }
+
 	if(cursed(otmp)) return MOVE_CANCELLED;
 	if(delay) {
 		nomul(delay, "disrobing");
@@ -1970,9 +1975,15 @@ boolean noisy;
 			You("don't have proper hands.");
 			err++;
 		} else if(youracedata->msize != otmp->objsize){
-			if (noisy)
-			pline_The("%s are the wrong size for you.", c_gloves);
-			err++;
+            if (noisy)
+            pline_The("%s are the wrong size for you.", c_gloves);
+            if(otmp->oartifact != ART_OMNITRIX){
+                err++;
+            }
+            else {
+                pline("Wait! The watch readjusts its size!");
+                otmp->objsize = youracedata->msize;
+            }
 		} else if (welded(uwep)) {
 			if (noisy) You("cannot wear gloves over your %s.",
 				   is_sword(uwep) ? c_sword : c_weapon);
@@ -4008,17 +4019,22 @@ register struct obj *atmp;
 		}
 	} else if (DESTROY_ARM(uarmg)) {
 		if((!obj_resists(otmp, 0, 100))){
-			if (donning(otmp)) cancel_don();
-			Your("gloves vanish!");
-			(void) Gloves_off();
-			useup(otmp);
-			selftouch("You");
-			if(roll_madness(MAD_TALONS)){
-				You("panic after having your gloves destroyed!");
-				HPanicking += 1+rnd(6);
-			}
+            if(otmp->oartifact == ART_OMNITRIX){
+                pline("%s resists destruction.", The(xname(otmp)));
+            }
+            else {
+                if (donning(otmp)) cancel_don();
+                Your("gloves vanish!");
+                (void) Gloves_off();
+                useup(otmp);
+                selftouch("You");
+                if(roll_madness(MAD_TALONS)){
+                    You("panic after having your gloves destroyed!");
+                    HPanicking += 1+rnd(6);
+                }
+            }
 		} else {
-			Your("gloves resists destruction!");
+			Your("gloves resist destruction!");
 		}
 	} else if (DESTROY_ARM(uarmf)) {
 		if((!obj_resists(otmp, 0, 100))){
@@ -4165,15 +4181,20 @@ register struct obj *atmp;
 			HPanicking += 1+rnd(6);
 		}
 	} else if (DESTROY_ARM(uarmg)) {
-		if (donning(otmp)) cancel_don();
-		Your("gloves are torn off!");
-		(void) Gloves_off();
-		useup(otmp);
-		selftouch("You");
-		if(roll_madness(MAD_TALONS)){
-			You("panic after having your gloves ripped off!");
-			HPanicking += 1+rnd(6);
-		}
+        if(otmp->oartifact == ART_OMNITRIX){
+            pline("%s makes an unexpected noise, but seems unharmed.", The(xname(otmp)));
+        }
+        else{
+            if (donning(otmp)) cancel_don();
+            Your("gloves are torn off!");
+            (void) Gloves_off();
+            useup(otmp);
+            selftouch("You");
+            if(roll_madness(MAD_TALONS)){
+                You("panic after having your gloves ripped off!");
+                HPanicking += 1+rnd(6);
+            }
+        }
 	} else if (DESTROY_ARM(uarmf)) {
 		if (donning(otmp)) cancel_don();
 		Your("boots are ripped open!");
@@ -4311,15 +4332,20 @@ register struct obj *atmp;
 			HPanicking += 1+rnd(6);
 		}
 	} else if (DESTROY_ARM(uarmg)) {
-		if (donning(otmp)) cancel_don();
-		Your("gloves are sliced open!");
-		(void) Gloves_off();
-		useup(otmp);
-		selftouch("You");
-		if(roll_madness(MAD_TALONS)){
-			You("panic after having your gloves sliced off!");
-			HPanicking += 1+rnd(6);
-		}
+        if(otmp->oartifact == ART_OMNITRIX){
+            pline("%s sustains damage, but initiates auto-repair", The(xname(otmp)));
+        }
+        else{
+            if (donning(otmp)) cancel_don();
+            Your("gloves are sliced open!");
+            (void) Gloves_off();
+            useup(otmp);
+            selftouch("You");
+            if(roll_madness(MAD_TALONS)){
+                You("panic after having your gloves sliced off!");
+                HPanicking += 1+rnd(6);
+            }
+        }
 	} else if (DESTROY_ARM(uarmf)) {
 		if (donning(otmp)) cancel_don();
 		Your("boots are sliced open!");
@@ -4463,18 +4489,23 @@ struct monst *mdef;
 				HPanicking += 1+rnd(6);
 			}
 		} else if (TELEPORT_ARM(uarmg)) {
-			if (donning(otmp)) cancel_don();
-			Your("gloves vanish!");
-			(void) Gloves_off();
-			obj_extract_self(otmp);
-			otmp->ox = u.ux;
-			otmp->oy = u.uy;
-			randomly_place_obj(otmp);
-			selftouch("You");
-			if(roll_madness(MAD_TALONS)){
-				You("panic after losing your gloves!");
-				HPanicking += 1+rnd(6);
-			}
+            if(otmp->oartifact == ART_OMNITRIX){
+                pline("%s vanishes, but only for a fraction of a second.", The(xname(otmp)));
+            }
+            else{
+                if (donning(otmp)) cancel_don();
+                Your("gloves vanish!");
+                (void) Gloves_off();
+                obj_extract_self(otmp);
+                otmp->ox = u.ux;
+                otmp->oy = u.uy;
+                randomly_place_obj(otmp);
+                selftouch("You");
+                if(roll_madness(MAD_TALONS)){
+                    You("panic after losing your gloves!");
+                    HPanicking += 1+rnd(6);
+                }
+            }
 		} else if (TELEPORT_ARM(uarmf)) {
 			if (donning(otmp)) cancel_don();
 			Your("boots vanish!");
@@ -4585,16 +4616,21 @@ struct obj *atmp;
 			HPanicking += 1+rnd(6);
 		}
 	} else if (TELEPORT_ARM(uarmg)) {
-		if (donning(otmp)) cancel_don();
-		Your("gloves vanish!");
-		(void) Gloves_off();
-		obj_extract_self(otmp);
-		mpickobj(magr, otmp);
-		selftouch("You");
-		if(roll_madness(MAD_TALONS)){
-			You("panic after losing your gloves!");
-			HPanicking += 1+rnd(6);
-		}
+        if(otmp->oartifact == ART_OMNITRIX){
+            pline("%svanishes for a fraction of a second!", The(xname(otmp)));
+        }
+        else{
+            if (donning(otmp)) cancel_don();
+            Your("gloves vanish!");
+            (void) Gloves_off();
+            obj_extract_self(otmp);
+            mpickobj(magr, otmp);
+            selftouch("You");
+            if(roll_madness(MAD_TALONS)){
+                You("panic after losing your gloves!");
+                HPanicking += 1+rnd(6);
+            }
+        }
 	} else if (TELEPORT_ARM(uarmf)) {
 		if (donning(otmp)) cancel_don();
 		Your("boots vanish!");
@@ -4675,15 +4711,20 @@ struct obj *atmp;
 			HPanicking += 1+rnd(6);
 		}
 	} else if (DESTROY_ARM(uarmg)) {
-		if (donning(otmp)) cancel_don();
-		pline("The tentacles tear apart your gloves!");
-		(void) Gloves_off();
-		useup(otmp);
-		selftouch("You");
-		if(roll_madness(MAD_TALONS)){
-			You("panic after having your gloves shredded!");
-			HPanicking += 1+rnd(6);
-		}
+        if(otmp->oartifact == ART_OMNITRIX){
+            pline("The tentacles grab the Omnitrix, but instantly release it.");
+        }
+        else{
+            if (donning(otmp)) cancel_don();
+            pline("The tentacles tear apart your gloves!");
+            (void) Gloves_off();
+            useup(otmp);
+            selftouch("You");
+            if(roll_madness(MAD_TALONS)){
+                You("panic after having your gloves shredded!");
+                HPanicking += 1+rnd(6);
+            }
+        }
 	} else if (DESTROY_ARM(uarmf)) {
 		if (donning(otmp)) cancel_don();
 		pline("The tentacles tear your boots apart!");

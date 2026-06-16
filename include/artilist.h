@@ -1731,7 +1731,7 @@ A("The Shard from Morgoth's Crown",	RIN_ADORNMENT,			"twisted band of jagged iro
 /*Needs encyc entry*/
 A("The Omnitrix",	PLASTEEL_GAUNTLETS,			"glowing green watch",
 	3500L, MT_DEFAULT, MZ_DEFAULT, 15,
-	A_NONE, NON_PM, NON_PM, TIER_B, ARTG_INHER,
+	A_NONE, NON_PM, NON_PM, TIER_B, ARTG_NOGEN|ARTG_NOWISH,
 	NO_MONS(),
 	NO_ATTK(), NOFLAG,
 	PROPS(UNCHANGING), NOFLAG,
