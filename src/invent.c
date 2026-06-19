@@ -856,6 +856,10 @@ carrying_applyable_gem()
 	for(otmp = invent; otmp; otmp = otmp->nobj)
 		if(otmp->otyp == ANTIMAGIC_RIFT
 		|| otmp->otyp == CATAPSI_VORTEX
+		|| otmp->otyp == SANCTIFIED_EMBER
+		|| otmp->otyp == SANCTIFIED_SPARK
+		|| otmp->otyp == SANCTIFIED_ICE_CRYSTAL
+		|| otmp->otyp == SANCTIFIED_CALCITE_CRYSTAL
 		|| (Role_if(PM_ANACHRONONAUT) && !otmp->oartifact && otmp->otyp == DILITHIUM_CRYSTAL)
 		)
 			return TRUE;
@@ -1417,6 +1421,11 @@ register const char *let,*word;
 			!sflm_smeltable_mithril(otmp))
 		|| (!strcmp(word, "burn in the silver flame") && 
 			!(otmp->blessed || otmp->cursed))
+		|| (!strcmp(word, "armor piece to receive sanction") &&
+		    (!is_suit(otmp) && !is_cloak(otmp)))
+		|| (!strcmp(word, "item to receive sanctified gem") &&
+		    (!is_suit(otmp) && !is_cloak(otmp) && !is_helmet(otmp) &&
+		     !is_gloves(otmp) && !is_boots(otmp)))
 		|| (!strcmp(word, "armor piece to repair") &&
 		    (!is_imperial_elven_armor(otmp)))
 		|| (!strcmp(word, "repair the helm with") &&
@@ -3821,6 +3830,36 @@ winid *datawin;
 			Sprintf(buf2, "Conducts arcane forces.");
 			OBJPUTSTR(buf2);
 		}
+		if (obj && (is_suit(obj) || is_cloak(obj)) && obj->known) {
+			buf[0] = '\0';
+			ADDCLASSPROP(check_oprop(obj, OPROP_FIRE_SNCT), "hellfire resistance");
+			ADDCLASSPROP(check_oprop(obj, OPROP_COLD_SNCT), "hellrime resistance");
+			ADDCLASSPROP(check_oprop(obj, OPROP_ELEC_SNCT), "hellvolt resistance");
+			ADDCLASSPROP(check_oprop(obj, OPROP_ACID_SNCT), "hellacid resistance");
+			if (buf[0]) {
+				Sprintf(buf2, "Sanctions: %s.", buf);
+				OBJPUTSTR(buf2);
+			}
+		}
+		if (obj && (is_suit(obj) || is_cloak(obj) || is_helmet(obj) ||
+		            is_gloves(obj) || is_boots(obj)) && obj->known) {
+			if (check_oprop(obj, OPROP_FIRE_HOLY_SNCT)) {
+				Sprintf(buf2, "Bears a sanctified ember, conferring holy fire resistance upon its wearer.");
+				OBJPUTSTR(buf2);
+			}
+			if (check_oprop(obj, OPROP_COLD_HOLY_SNCT)) {
+				Sprintf(buf2, "Bears a sanctified ice crystal, conferring holy cold resistance upon its wearer.");
+				OBJPUTSTR(buf2);
+			}
+			if (check_oprop(obj, OPROP_ELEC_HOLY_SNCT)) {
+				Sprintf(buf2, "Bears a sanctified spark, conferring holy shock resistance upon its wearer.");
+				OBJPUTSTR(buf2);
+			}
+			if (check_oprop(obj, OPROP_ACID_HOLY_SNCT)) {
+				Sprintf(buf2, "Bears a hexagon of sanctified calcite, conferring holy acid resistance upon its wearer.");
+				OBJPUTSTR(buf2);
+			}
+		}
 	}
 	if(obj && obj->expert_traits){
 		buf[0] = '\0';
@@ -3873,10 +3912,18 @@ winid *datawin;
 			OBJPUTSTR(buf2);
 		}
 		buf[0] = '\0';
-		ADDCLASSPROP(check_oprop(obj, OPROP_FIRE), "fire resistance");
-		ADDCLASSPROP(check_oprop(obj, OPROP_COLD), "cold resistance");
-		ADDCLASSPROP(check_oprop(obj, OPROP_ELEC), "shock resistance");
-		ADDCLASSPROP(check_oprop(obj, OPROP_ACID), "acid resistance");
+		ADDCLASSPROP(check_oprop(obj, OPROP_FIRE_HOLY), "sanctified fire resistance");
+		ADDCLASSPROP(check_oprop(obj, OPROP_FIRE_HELL) && !check_oprop(obj, OPROP_FIRE_HOLY), "hellfire resistance");
+		ADDCLASSPROP(check_oprop(obj, OPROP_FIRE) && !check_oprop(obj, OPROP_FIRE_HELL) && !check_oprop(obj, OPROP_FIRE_HOLY), "fire resistance");
+		ADDCLASSPROP(check_oprop(obj, OPROP_COLD_HOLY), "sanctified cold resistance");
+		ADDCLASSPROP(check_oprop(obj, OPROP_COLD_HELL) && !check_oprop(obj, OPROP_COLD_HOLY), "hellrime resistance");
+		ADDCLASSPROP(check_oprop(obj, OPROP_COLD) && !check_oprop(obj, OPROP_COLD_HELL) && !check_oprop(obj, OPROP_COLD_HOLY), "cold resistance");
+		ADDCLASSPROP(check_oprop(obj, OPROP_ELEC_HOLY), "sanctified shock resistance");
+		ADDCLASSPROP(check_oprop(obj, OPROP_ELEC_HELL) && !check_oprop(obj, OPROP_ELEC_HOLY), "hellvolt resistance");
+		ADDCLASSPROP(check_oprop(obj, OPROP_ELEC) && !check_oprop(obj, OPROP_ELEC_HELL) && !check_oprop(obj, OPROP_ELEC_HOLY), "shock resistance");
+		ADDCLASSPROP(check_oprop(obj, OPROP_ACID_HOLY), "sanctified acid resistance");
+		ADDCLASSPROP(check_oprop(obj, OPROP_ACID_HELL) && !check_oprop(obj, OPROP_ACID_HOLY), "hellacid resistance");
+		ADDCLASSPROP(check_oprop(obj, OPROP_ACID) && !check_oprop(obj, OPROP_ACID_HELL) && !check_oprop(obj, OPROP_ACID_HOLY), "acid resistance");
 		if (buf[0]) {
 			Sprintf(buf2, "Confers while wielded: %s.", buf);
 			OBJPUTSTR(buf2);

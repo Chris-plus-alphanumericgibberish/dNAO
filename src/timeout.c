@@ -2312,6 +2312,8 @@ struct obj * obj;
 		break;
 	case POT_OIL:
 	case STICK_OF_DYNAMITE:
+	case SANCTIFIED_EMBER:
+	case SANCTIFIED_SPARK:
 		radius = 1;     /* very dim light */
 		break;
 	case CANDELABRUM_OF_INVOCATION:
@@ -2989,6 +2991,37 @@ long timeout;
 }
 
 void
+cloud_drift(arg, timeout)
+genericptr_t arg;
+long timeout;
+{
+	struct obj *obj = (struct obj *) arg;
+	int x, y, count, pick;
+
+	if (obj->where == OBJ_CONTAINED || !Is_airlevel(&u.uz))
+		return;
+
+	count = 0;
+	for (x = 1; x < COLNO; x++)
+		for (y = 0; y < ROWNO; y++)
+			if (IS_CLOUD(levl[x][y].typ))
+				count++;
+	if (!count)
+		return;
+
+	pick = rn2(count);
+	for (x = 1; x < COLNO; x++)
+		for (y = 0; y < ROWNO; y++)
+			if (IS_CLOUD(levl[x][y].typ) && pick-- == 0)
+				goto found;
+	return;
+found:
+	obj_extract_and_unequip_self(obj);
+	place_object(obj, x, y);
+	start_timer((long)d(7,7), TIMER_OBJECT, CLOUD_DRIFT, (genericptr_t)obj);
+}
+
+void
 slow_wheel(arg, timeout)
 genericptr_t arg;
 long timeout;
@@ -3108,6 +3141,7 @@ static const ttable timeout_funcs[NUM_TIME_FUNCS] = {
 	TTAB(revert_aureate_deluge,(timeout_proc)0,"revert_aureate_deluge"),
 	TTAB(gray_moldy_corpse,(timeout_proc)0,"gray_moldy_corpse"),
 	TTAB(slow_wheel,		(timeout_proc)0,	"slow_wheel"),
+	TTAB(cloud_drift,		(timeout_proc)0,	"cloud_drift"),
 };
 #undef TTAB
 

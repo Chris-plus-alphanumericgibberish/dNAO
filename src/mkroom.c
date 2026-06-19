@@ -415,6 +415,9 @@ int misc_devil_vault[] = {
 				MISOTHEISTIC_PYRAMID, DIMENSIONAL_LOCK, 
 				PRESERVATIVE_ENGINE
 			};
+int misc_devil_sanctions[] = {
+				FIRE_RESISTANCE_SANCTION, COLD_RESISTANCE_SANCTION, SHOCK_RESISTANCE_SANCTION, ACID_RESISTANCE_SANCTION
+			};
 int misc_demon_vault[] = {
 				VITAL_SOULSTONE, SPIRITUAL_SOULSTONE,
 				VITAL_SOULSTONE, SPIRITUAL_SOULSTONE,
@@ -451,14 +454,19 @@ int vn;
 	}
 	else if(vn < LIMIT_VN_RANGE_4_DEVIL){
 		// Devil
-		type = ROLL_FROM(misc_devil_vault);
+		if(rn2(10)){
+			type = ROLL_FROM(misc_devil_vault);
+		}
+		else {
+			type = ROLL_FROM(misc_devil_sanctions);
+		}
 	}
 	else if(vn < LIMIT_VN_RANGE_5_DEMON){
 		// Demon
 		type = ROLL_FROM(misc_demon_vault);
 	}
 	else {
-		impossible("Vault number %d out-of-ramge in get_misc", vn);
+		impossible("Vault number %d out-of-range in get_misc", vn);
 		type = ROLL_FROM(misc_hell_vault);
 	}
 	return type;

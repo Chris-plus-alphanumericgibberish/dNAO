@@ -1727,6 +1727,15 @@ POTION(("blood", "blood-red"),            0, 18, 50,  CLR_RED, O_USKWN(1)),	/* e
 		O_MAT(GOLD), O_COLOR(HI_GOLD), O_WT(50)), /* Shopkeepers aren't interested in these */
 #undef SCROLL
 
+/* scrolls ... */
+#define SANCTION(names,mgc,prob,cost,...) OBJECT( \
+		DEF_BLINDNAME(names, "foil talisman"), BITS(0,1,0,0,mgc,0,0,0,MZ_SMALL,0,0,0,0,P_NONE,LEAD,0), {0}, \
+		SANCTION_CLASS, prob, 0, 5, cost, {0}, {0}, 0, 0, 0, 6, CLR_BLACK, __VA_ARGS__)
+	SANCTION(("fire-resistance sanction", "unknown lead-foil talisman"),              1, 500, 9000),
+	SANCTION(("cold-resistance sanction", "unknown lead-foil talisman"),              1, 250, 9000),
+	SANCTION(("shock-resistance sanction", "unknown lead-foil talisman"),             1, 150, 9000),
+	SANCTION(("acid-resistance sanction", "unknown lead-foil talisman"),              1, 100, 9000),
+#undef SANCTION
 #define CERAMIC_TILE(names,prob,...) OBJECT( \
 		DEF_BLINDNAME(names, "shard"), BITS(0,1,0,0,1,0,0,0,MZ_TINY,0,0,0,0,P_NONE,MINERAL, IDED|UNIDED), {0}, \
 		TILE_CLASS, prob, 0, 3, 300, {0}, {0}, 0, 0, 0, 6, CLR_WHITE, __VA_ARGS__)
@@ -1993,8 +2002,14 @@ ROCK(("crystal"),		1,  0,   1, 0, 6, 6, 0, 0, 10, 5, IRON, HI_METAL, O_MATSPEC(I
 
 ROCK(("eye"),		1,  0,   1, 0, 1, 1, 0, 0, 10, 5.5, GLASS, HI_GLASS, O_MATSPEC(IDED|UNIDED), O_MERGE(0)),
 
-GEM(("antimagic rift", "black-flawed white"),  0,  1, 4500, 15,  6, GEMSTONE, CLR_BLACK),
-GEM(("catapsi vortex",  "gray-flawed white"),  0,  1, 4500, 15,  6, GEMSTONE, CLR_GRAY),
+GEM(("antimagic rift", "black-flawed white"),  0,  1, 4500, 15, 10, GEMSTONE, CLR_BLACK),
+GEM(("catapsi vortex",  "gray-flawed white"),  0,  1, 4500, 15, 10, GEMSTONE, CLR_GRAY),
+
+GEM(("sanctified ember", "glowing orange"),  0,  1,				777, 15,  9, GEMSTONE, CLR_ORANGE),
+GEM(("sanctified spark", "glowing white"),  0,  1, 				777, 15,  9, GEMSTONE, CLR_WHITE),
+GEM(("sanctified ice crystal", "hexagonal prism"),  0,  1, 		777, 15,  1, GEMSTONE, HI_GLASS),
+GEM(("sanctified calcite crystal", "hexagonal prism"),  0,  1, 	777, 15,  3, GEMSTONE, CLR_WHITE), 
+
 #undef GEM
 #undef ROCK
 

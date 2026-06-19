@@ -2779,6 +2779,7 @@ boolean ordinary;
 		    if (!Shock_resistance) {
 				You("shock yourself!");
 				damage = d(12,6);
+				damage = elemental_dmg_resistance(&youmonst, (struct monst *)0, damage, AD_ELEC);
 				exercise(A_CON, FALSE);
 		    } else {
 				shieldeff(u.ux, u.uy);
@@ -2819,6 +2820,7 @@ boolean ordinary;
 		    } else {
 				pline("You've set yourself afire!");
 				damage = d(12,6);
+				damage = elemental_dmg_resistance(&youmonst, (struct monst *)0, damage, AD_FIRE);
 		    }
 			if(!UseInvFire_res(&youmonst)){
 				destroy_item(&youmonst, SCROLL_CLASS, AD_FIRE);
@@ -2842,6 +2844,7 @@ boolean ordinary;
 		    } else {
 				You("imitate a popsicle!");
 				damage = d(12,6);
+				damage = elemental_dmg_resistance(&youmonst, (struct monst *)0, damage, AD_COLD);
 		    }
 			roll_frigophobia();
 			if(!UseInvCold_res(&youmonst)){

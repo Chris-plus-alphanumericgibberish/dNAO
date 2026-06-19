@@ -1741,6 +1741,7 @@ asGuardian:
 							break;
 						}
 						dmg = reduce_dmg(&youmonst,dmg,FALSE,TRUE);
+						dmg = elemental_dmg_resistance(&youmonst, mtmp, dmg, u.oonaenergy);
 						if(dmg) dmg = min(dmg,Upolyd ? (u.mh - 1) : (u.uhp - 1));
 						if(dmg) mdamageu(mtmp,dmg);
 					}
@@ -4624,8 +4625,11 @@ int tx,ty;
 						destroyedForge = TRUE;
 					} else {
 						pline("Molten lava surges up and splashes all over you!");
-						if(!Fire_resistance)
-							losehp(d(6, 6), "conducting a ritual at a forge", KILLED_BY);
+						if(!Fire_resistance) {
+							int fire_dmg = d(6, 6);
+							fire_dmg = elemental_dmg_resistance(&youmonst, (struct monst *)0, fire_dmg, AD_FIRE);
+							losehp(fire_dmg, "conducting a ritual at a forge", KILLED_BY);
+						}
 					}
 				}
 				else {
@@ -5749,7 +5753,7 @@ int floorID;
 		break;
 	case AMON:
 		propchain[i++] = EXTRAMISSION;
-		propchain[i++] = COLD_RES;
+		propchain[i++] = HOLY_COLD_RES;
 		break;
 	case ANDREALPHUS:
 		propchain[i++] = WARN_OF_MON;
@@ -5759,7 +5763,7 @@ int floorID;
 		break;
 	case ASTAROTH:
 		propchain[i++] = MAGICAL_BREATHING;
-		propchain[i++] = SHOCK_RES;
+		propchain[i++] = HOLY_SHOCK_RES;
 		break;
 	case BALAM:
 		propchain[i++] = HALF_SPDAM;
@@ -5775,7 +5779,7 @@ int floorID;
 		propchain[i++] = TELEPAT;
 		break;
 	case ECHIDNA:
-		propchain[i++] = ACID_RES;
+		propchain[i++] = HOLY_ACID_RES;
 		break;
 	case EDEN:
 		propchain[i++] = REFLECTING;
@@ -5793,7 +5797,7 @@ int floorID;
 		break;
 	case MAEGERA:
 		propchain[i++] = INFRAVISION;
-		propchain[i++] = FIRE_RES;
+		propchain[i++] = HOLY_FIRE_RES;
 		break;
 	case HUGINN_MUNINN:
 		propchain[i++] = WARNING;

@@ -2091,6 +2091,7 @@ int mode;
 	    /* Objects too silly to engrave with */
 	    case FOOD_CLASS:
 	    case SCROLL_CLASS:
+	    case SANCTION_CLASS:
 	    case SPBOOK_CLASS:
 		Your("%s would get %s.", xname(otmp),
 			is_ice(u.ux,u.uy) ?	"all frosty" :	"too dirty");

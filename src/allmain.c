@@ -5330,6 +5330,9 @@ printAttacks(buf, ptr)
 		"[[unholy ice]]",		/*163*/
 		"[[gray mold]]",			/*164*/
 		"[[sonic]]",			/*165*/
+		"[[smoke cloud]]",		/*166*/
+		"[[slowing cold cloud]]",	/*167*/
+		"[[hellish energy]]",	/*168*/
 		// "[[ahazu abduction]]",	/**/
 		"[[stone choir]]",		/* */
 		"[[water vampire]]",	/* */
@@ -6337,6 +6340,7 @@ struct monst *mon;
 						pline("A few drops of spittle drip onto you.");
 						if (!Acid_resistance) {
 							pline("It burns!");
+							dmg = elemental_dmg_resistance(&youmonst, (struct monst *)0, dmg, AD_ACID);
 							losehp(dmg, "hungry goat", KILLED_BY_AN);
 						}
 					}

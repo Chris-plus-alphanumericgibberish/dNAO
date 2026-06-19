@@ -2562,6 +2562,9 @@ get_description_of_damage_type(uchar id)
 	case AD_UHCD: return "unholy ice";
 	case AD_GMLD: return "gray mold spores";
 	case AD_SONC: return "sonic blast";
+	case AD_SMOK: return "smoke cloud";
+	case AD_SLWC: return "slowing cold cloud";
+	case AD_HELL: return "hellish energy";
 	default:
 			impossible("bug in get_description_of_damage_type(%d)", id);
 			return "<MISSING DESCRIPTION, THIS IS A BUG>";

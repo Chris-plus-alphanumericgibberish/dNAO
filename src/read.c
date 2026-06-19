@@ -22,7 +22,7 @@
 boolean	known;
 
 static NEARDATA const char readable[] =
-		   { ALL_CLASSES, SCROLL_CLASS, TILE_CLASS, SPBOOK_CLASS, 0 };
+		   { ALL_CLASSES, SCROLL_CLASS, TILE_CLASS, SPBOOK_CLASS, SANCTION_CLASS, 0 };
 static const char all_count[] = { ALLOW_COUNT, ALL_CLASSES, 0 };
 static const int random_cloud_types[] = { AD_FIRE, AD_COLD, AD_ELEC, AD_ACID};
 
@@ -36,6 +36,7 @@ static void FDECL(forget_single_object, (int));
 static void FDECL(maybe_tame, (struct monst *,struct obj *));
 static void FDECL(ranged_set_lightsources, (int, int, genericptr_t));
 static int FDECL(read_tile, (struct obj *));
+static int FDECL(do_read_sanction, (struct obj *));
 static int FDECL(study_word, (struct obj *));
 static int NDECL(learn_word);
 static void FDECL(learn_spell_aphanactonan, (int));
@@ -687,6 +688,8 @@ doread()
 			return MOVE_READ;
 		}
 #endif	/* TOURIST */
+	} else if (scroll->oclass == SANCTION_CLASS){
+		return do_read_sanction(scroll);
 	} else if (scroll->oclass == TILE_CLASS){
 		return read_tile(scroll);
 	} else if (scroll->oclass != SCROLL_CLASS
@@ -804,6 +807,44 @@ doread()
 			useup(scroll);
 		else scroll->in_use = FALSE;
 	}
+	return MOVE_READ;
+}
+
+static
+int
+do_read_sanction(struct obj *sanction)
+{
+	if (Blind) {
+		You_cant("make out the markings on the talisman.");
+		return MOVE_INSTANT;
+	}
+	if(ACURR(A_INT) < 19){
+		pline("This is some sort of legal document, but you cannot decipher its exact purpose.");
+		return MOVE_READ;
+	}
+	pline("This document sanctions the bearer's presence in Gehennom, but contains clauses subjecting the bearer to the laws of Hell.");
+	switch (sanction->otyp) {
+	case FIRE_RESISTANCE_SANCTION:
+		pline("The specific wording of the sanction protects the bearer from hellfire.");
+		break;
+	case COLD_RESISTANCE_SANCTION:
+		pline("The specific wording of the sanction protects the bearer from hellfrost.");
+		break;
+	case SHOCK_RESISTANCE_SANCTION:
+		pline("The specific wording of the sanction protects the bearer from hellish lightning.");
+		break;
+	case ACID_RESISTANCE_SANCTION:
+		pline("The specific wording of the sanction protects the bearer from hellish acid.");
+		break;
+	default:
+		impossible("Unknown sanction type in do_read_sanction.");
+		break;
+	}
+	if (!sanction->dknown) {
+		sanction->dknown = 1;
+		makeknown(sanction->otyp);
+	}
+	u.uconduct.literate++;
 	return MOVE_READ;
 }
 

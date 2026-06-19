@@ -5366,6 +5366,7 @@ boolean initialize;
     if (!Fire_resistance) {
 		if(Wwalking) {
 			dmg = d(6,6);
+			dmg = elemental_dmg_resistance(&youmonst, (struct monst *)0, dmg, AD_FIRE);
 			pline_The("lava here burns you!");
 			if(dmg < u.uhp) {
 			losehp(dmg, lava_killer, KILLED_BY);

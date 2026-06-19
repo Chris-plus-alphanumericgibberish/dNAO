@@ -81,7 +81,7 @@ const struct icp rogueprobs[] = {
 const struct icp hellprobs[] = {
 {20, WEAPON_CLASS},
 {20, ARMOR_CLASS},
-{ 8, FOOD_CLASS},
+{ 6, FOOD_CLASS},
 { 6, BELT_CLASS},
 {12, TOOL_CLASS},
 {12, GEM_CLASS},
@@ -89,7 +89,8 @@ const struct icp hellprobs[] = {
 { 1, SCROLL_CLASS},
 { 8, WAND_CLASS},
 { 8, RING_CLASS},
-{ 4, AMULET_CLASS}
+{ 5, AMULET_CLASS},
+{ 1, SANCTION_CLASS}
 };
 
 /* Object material probabilities.*/
@@ -1745,6 +1746,10 @@ int mkflags;
 	switch (otmp->otyp) {
 	    case CORPSE:
 		start_corpse_timeout(otmp);
+		break;
+	    case SANCTIFIED_SPARK:
+		if (Is_airlevel(&u.uz))
+		    start_timer((long)d(7,7), TIMER_OBJECT, CLOUD_DRIFT, (genericptr_t)otmp);
 		break;
 	}
 

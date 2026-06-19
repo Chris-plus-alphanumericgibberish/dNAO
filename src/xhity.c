@@ -2672,6 +2672,16 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			break;
 		}
 	}
+	if(attk->adtyp == AD_HELL){
+		if(youagr){
+			attk->adtyp = AD_FIRE;
+			attk->damn += max(1, mlev(magr)/10);
+		}
+		else {
+			attk->adtyp = magr->melement;
+			attk->damn += hell_dice();
+		}
+	}
 	/* Moon puppets actually have a variety of special attacks -- shown in pokedex */
 	if(has_template(magr, TONGUE_PUPPET) && attk->aatyp == AT_TONG){
 		switch(hash((unsigned long)magr->m_id)%6){
@@ -4121,6 +4131,9 @@ int dmg;				/* damage to deal */
 	if(dmg > 0 && youdef && youagr){
 		dmg = (dmg - ACURR(A_DEX))/2;
 		dmg = max(1, dmg);
+	}
+	if(dmg > 0 && attk){
+		dmg = elemental_dmg_resistance(mdef, magr, dmg, attk->adtyp);
 	}
 
 	/* if defender is already dead, avoid re-killing them; just note that they are dead */
@@ -20438,6 +20451,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 						if (youagr && u.uvaul_duration)
 							flashdmg = (flashdmg + 1) / 2;
 						shockdmg = reduce_dmg(magr, shockdmg, FALSE, TRUE);
+						shockdmg = elemental_dmg_resistance(mdef, magr, shockdmg, AD_ELEC);
 						if(!Shock_res(magr)){
 							newres = xdamagey(mdef, magr, passive, shockdmg);
 							if (newres&MM_DEF_DIED)
@@ -25224,6 +25238,7 @@ struct monst * mdef;
 			}
 			dmg = d(min((mlev(magr)+2)/3, MAX_BONUS_DICE), 6);
 			dmg = reduce_dmg(mdef,dmg,FALSE,TRUE);
+			dmg = elemental_dmg_resistance(mdef, magr, dmg, AD_ELEC);
 
 			/* damage inventory */
 			if (!UseInvShock_res(mdef)){
@@ -25285,6 +25300,7 @@ struct monst * mdef;
 				dmg = (dmg + 1) / 2;
 			
 			dmg = reduce_dmg(mdef,dmg,FALSE,TRUE);
+			dmg = elemental_dmg_resistance(mdef, magr, dmg, AD_ELEC);
 
 			/* damage inventory */
 			if (!UseInvShock_res(mdef)){
@@ -25334,6 +25350,97 @@ boolean magical;
 	/* Priests of Asmodeus */
 	if(mdef != &youmonst && flags.spriest_level && is_demon(mdef->data) && is_lawful_mon(mdef) && !mdef->mpeaceful)
 		dmg = (dmg + 1) / 2;
+	return dmg;
+}
+
+int
+elemental_dmg_resistance(struct monst *mdef, struct monst *magr, int dmg, int damtype)
+{
+	boolean has_base, has_hell, has_base_both, has_hell_both;
+
+	if(mdef == &youmonst) {
+		switch(damtype) {
+		case AD_FIRE:
+			has_base = u.uprops[FIRE_RES].intrinsic || u.uprops[FIRE_RES].extrinsic ||
+			           (species_resists_fire(&youmonst) && !(Race_if(PM_ANDROID) && !Upolyd));
+			has_hell  = u.uprops[HELL_FIRE_RES].intrinsic || u.uprops[HELL_FIRE_RES].extrinsic;
+			has_base_both = (u.uprops[FIRE_RES].intrinsic || (species_resists_fire(&youmonst) && !(Race_if(PM_ANDROID) && !Upolyd)))
+			                && u.uprops[FIRE_RES].extrinsic;
+			has_hell_both = u.uprops[HELL_FIRE_RES].intrinsic && u.uprops[HELL_FIRE_RES].extrinsic;
+			break;
+		case AD_COLD:
+			has_base = u.uprops[COLD_RES].intrinsic || u.uprops[COLD_RES].extrinsic ||
+			           species_resists_cold(&youmonst);
+			has_hell  = u.uprops[HELL_COLD_RES].intrinsic || u.uprops[HELL_COLD_RES].extrinsic;
+			has_base_both = (u.uprops[COLD_RES].intrinsic || species_resists_cold(&youmonst))
+			                && u.uprops[COLD_RES].extrinsic;
+			has_hell_both = u.uprops[HELL_COLD_RES].intrinsic && u.uprops[HELL_COLD_RES].extrinsic;
+			break;
+		case AD_ELEC:
+			has_base = u.uprops[SHOCK_RES].intrinsic || u.uprops[SHOCK_RES].extrinsic ||
+			           (species_resists_elec(&youmonst) && !(Race_if(PM_ANDROID) && !Upolyd));
+			has_hell  = u.uprops[HELL_SHOCK_RES].intrinsic || u.uprops[HELL_SHOCK_RES].extrinsic;
+			has_base_both = (u.uprops[SHOCK_RES].intrinsic || (species_resists_elec(&youmonst) && !(Race_if(PM_ANDROID) && !Upolyd)))
+			                && u.uprops[SHOCK_RES].extrinsic;
+			has_hell_both = u.uprops[HELL_SHOCK_RES].intrinsic && u.uprops[HELL_SHOCK_RES].extrinsic;
+			break;
+		case AD_ACID:
+			has_base = u.uprops[ACID_RES].intrinsic || u.uprops[ACID_RES].extrinsic ||
+			           species_resists_acid(&youmonst);
+			has_hell  = u.uprops[HELL_ACID_RES].intrinsic || u.uprops[HELL_ACID_RES].extrinsic;
+			has_base_both = (u.uprops[ACID_RES].intrinsic || species_resists_acid(&youmonst))
+			                && u.uprops[ACID_RES].extrinsic;
+			has_hell_both = u.uprops[HELL_ACID_RES].intrinsic && u.uprops[HELL_ACID_RES].extrinsic;
+			break;
+		default:
+			return dmg;
+		}
+	} else {
+		switch(damtype) {
+		case AD_FIRE:
+			has_base = species_resists_fire(mdef) || mon_resistance(mdef, FIRE_RES);
+			has_hell  = mon_resistance(mdef, HELL_FIRE_RES);
+			has_base_both = (species_resists_fire(mdef) || mon_intrinsic(mdef, FIRE_RES)) && mon_extrinsic(mdef, FIRE_RES);
+			has_hell_both = mon_intrinsic(mdef, HELL_FIRE_RES) && mon_extrinsic(mdef, HELL_FIRE_RES);
+			break;
+		case AD_COLD:
+			has_base = species_resists_cold(mdef) || mon_resistance(mdef, COLD_RES);
+			has_hell  = mon_resistance(mdef, HELL_COLD_RES);
+			has_base_both = (species_resists_cold(mdef) || mon_intrinsic(mdef, COLD_RES)) && mon_extrinsic(mdef, COLD_RES);
+			has_hell_both = mon_intrinsic(mdef, HELL_COLD_RES) && mon_extrinsic(mdef, HELL_COLD_RES);
+			break;
+		case AD_ELEC:
+			has_base = species_resists_elec(mdef) || mon_resistance(mdef, SHOCK_RES);
+			has_hell  = mon_resistance(mdef, HELL_SHOCK_RES);
+			has_base_both = (species_resists_elec(mdef) || mon_intrinsic(mdef, SHOCK_RES)) && mon_extrinsic(mdef, SHOCK_RES);
+			has_hell_both = mon_intrinsic(mdef, HELL_SHOCK_RES) && mon_extrinsic(mdef, HELL_SHOCK_RES);
+			break;
+		case AD_ACID:
+			has_base = species_resists_acid(mdef) || mon_resistance(mdef, ACID_RES);
+			has_hell  = mon_resistance(mdef, HELL_ACID_RES);
+			has_base_both = (species_resists_acid(mdef) || mon_intrinsic(mdef, ACID_RES)) && mon_extrinsic(mdef, ACID_RES);
+			has_hell_both = mon_intrinsic(mdef, HELL_ACID_RES) && mon_extrinsic(mdef, HELL_ACID_RES);
+			break;
+		default:
+			return dmg;
+		}
+	}
+
+	if(In_endgame(&u.uz)) {
+		if(has_hell) {
+			dmg /= 3;
+			if(has_hell_both) dmg /= 3;
+		} else if(has_base) {
+			dmg = 2 * dmg / 3;
+			if(has_base_both) dmg = 2 * dmg / 3;
+		}
+	} else if(Inhell) {
+		if(has_base) {
+			dmg /= 2;
+			if(has_base_both) dmg /= 2;
+		}
+	}
+
 	return dmg;
 }
 
@@ -25449,13 +25556,18 @@ bonus_ac(struct monst *magr, struct monst *mdef)
 	int agrrot = calc_agrrot(magr);
 	int agralign = (magr == &youmonst) ? sgn(u.ualign.type) : sgn(magr->data->maligntyp);
 	int agrmoral = calc_agrmoral(magr);
+	int agrldemon = 0;
+	if (magr != &youmonst) {
+		if (is_law_demon(magr->data)) agrldemon = is_dnoble(magr->data) ? 3 : 1;
+		else if (is_cha_demon(magr->data)) agrldemon = -1;
+	}
 	struct obj *curarm;
 	if(mdef == &youmonst){
 		struct obj * uarmor[] = ARMOR_SLOTS;
 		for (int i = 0; i < SIZE(uarmor); i++) {
 			if((curarm = uarmor[i])){
 				if(curarm->oclass == ARMOR_CLASS){
-					ac_mod += properties_ac(curarm, agrimpure, agrrot, agralign, agrmoral);
+					ac_mod += properties_ac(curarm, agrimpure, agrrot, agralign, agrmoral, agrldemon);
 				}
 			}
 		}
@@ -25465,7 +25577,7 @@ bonus_ac(struct monst *magr, struct monst *mdef)
 		for (int i = 0; i < SIZE(marmor); i++) {
 			if((curarm = which_armor(mdef, marmor[i]))){
 				if(curarm->oclass == ARMOR_CLASS){
-					ac_mod += properties_ac(curarm, agrimpure, agrrot, agralign, agrmoral);
+					ac_mod += properties_ac(curarm, agrimpure, agrrot, agralign, agrmoral, agrldemon);
 				}
 			}
 		}

@@ -1087,7 +1087,9 @@ int dx, dy;
 						pline("Molten lava from the forge splashes onto your boots.");
 					}
 					if(is_metallic(uarmf) && !Fire_resistance){
-						losehp(d(2,8), "red hot boots", KILLED_BY);
+						int fire_dmg = d(2,8);
+						fire_dmg = elemental_dmg_resistance(&youmonst, (struct monst *)0, fire_dmg, AD_FIRE);
+						losehp(fire_dmg, "red hot boots", KILLED_BY);
 					}
 				}
 				else {
@@ -1097,7 +1099,9 @@ int dx, dy;
 					}
 					else {
 						pline("It burns!");
-						losehp(d(6,6), "splash of molten lava", KILLED_BY_AN);
+						int fire_dmg = d(6,6);
+						fire_dmg = elemental_dmg_resistance(&youmonst, (struct monst *)0, fire_dmg, AD_FIRE);
+						losehp(fire_dmg, "splash of molten lava", KILLED_BY_AN);
 					}
 				}
 			}

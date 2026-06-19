@@ -114,6 +114,7 @@ enum {
 #define IS_SOIL(typ)	((typ) == SOIL)
 #define IS_SAND(typ)	((typ) == SAND)
 #define IS_AIR(typ)	((typ) == AIR || (typ) == CLOUD)
+#define IS_CLOUD(typ)	((typ) == CLOUD)
 #define IS_SOFT(typ)	((typ) == AIR || (typ) == CLOUD || IS_POOL(typ))
 #define IS_PUDDLE(typ)	((typ) == PUDDLE)
 #define IS_PUDDLE_OR_POOL(typ)	(IS_PUDDLE(typ) || IS_POOL(typ))

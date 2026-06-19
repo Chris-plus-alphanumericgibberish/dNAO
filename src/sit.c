@@ -595,8 +595,11 @@ struct obj *chair;
 					if (!rn2(6)) destroy_item(&youmonst, SCROLL_CLASS, AD_FIRE);
 					if (!rn2(10)) destroy_item(&youmonst, SPBOOK_CLASS, AD_FIRE);
 				}
-				if(!Fire_resistance)
-					losehp(rnd(20), "red-hot electrodes", KILLED_BY);
+				if(!Fire_resistance) {
+					int fire_dmg = rnd(20);
+					fire_dmg = elemental_dmg_resistance(&youmonst, (struct monst *)0, fire_dmg, AD_FIRE);
+					losehp(fire_dmg, "red-hot electrodes", KILLED_BY);
+				}
 				/* other effects */
 				burn_away_slime();
 				melt_frozen_air();
@@ -772,13 +775,13 @@ void
 attrcurse()
 {
 	switch(rnd(13)) {
-	case 13 : if (HAcid_resistance & TIMEOUT) {
-			HAcid_resistance &= ~TIMEOUT;
+	case 13 : if (u.uprops[ACID_RES].intrinsic & TIMEOUT) {
+			u.uprops[ACID_RES].intrinsic &= ~TIMEOUT;
 			You_feel("sensitive.");
 			break;
 		}
-	case 12 : if (HShock_resistance & TIMEOUT) {
-			HShock_resistance &= ~TIMEOUT;
+	case 12 : if (u.uprops[SHOCK_RES].intrinsic & TIMEOUT) {
+			u.uprops[SHOCK_RES].intrinsic &= ~TIMEOUT;
 			You_feel("unmoored.");
 			break;
 		}
@@ -787,8 +790,8 @@ attrcurse()
 			You_feel("sleepy.");
 			break;
 		}
-	case 1 : if (HFire_resistance & TIMEOUT) {
-			HFire_resistance &= ~TIMEOUT;
+	case 1 : if (u.uprops[FIRE_RES].intrinsic & TIMEOUT) {
+			u.uprops[FIRE_RES].intrinsic &= ~TIMEOUT;
 			You_feel("warmer.");
 			break;
 		}
@@ -809,8 +812,8 @@ attrcurse()
 			Your("senses fail!");
 			break;
 		}
-	case 5 : if (HCold_resistance & TIMEOUT) {
-			HCold_resistance &= ~TIMEOUT;
+	case 5 : if (u.uprops[COLD_RES].intrinsic & TIMEOUT) {
+			u.uprops[COLD_RES].intrinsic &= ~TIMEOUT;
 			You_feel("cooler.");
 			break;
 		}

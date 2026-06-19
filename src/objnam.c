@@ -445,6 +445,9 @@ register int otyp;
 	case SCROLL_CLASS:
 		Strcpy(buf, "scroll");
 		break;
+	case SANCTION_CLASS:
+		Strcpy(buf, "sanction");
+		break;
 	case TILE_CLASS:
 		Strcpy(buf, "shard");
 		break;
@@ -1046,14 +1049,30 @@ boolean dofull;
 			Strcat(buf, "magic-resistant ");
 		if(check_oprop(obj, OPROP_REFL))
 			Strcat(buf, "reflective ");
-		if(obj->otyp != PEST_GLAIVE){
-			if(check_oprop(obj, OPROP_FIRE) && obj->known)
+		if(obj->otyp != PEST_GLAIVE && obj->known){
+			if(check_oprop(obj, OPROP_FIRE_HOLY))
+				Strcat(buf, "sanctified flameproof ");
+			else if(check_oprop(obj, OPROP_FIRE_HELL))
+				Strcat(buf, "hellfire-proof ");
+			else if(check_oprop(obj, OPROP_FIRE))
 				Strcat(buf, "flameproof ");
-			if(check_oprop(obj, OPROP_COLD) && obj->known)
+			if(check_oprop(obj, OPROP_COLD_HOLY))
+				Strcat(buf, "sanctified coldproof ");
+			else if(check_oprop(obj, OPROP_COLD_HELL))
+				Strcat(buf, "hellrime-proof ");
+			else if(check_oprop(obj, OPROP_COLD))
 				Strcat(buf, "coldproof ");
-			if(check_oprop(obj, OPROP_ELEC) && obj->known)
+			if(check_oprop(obj, OPROP_ELEC_HOLY))
+				Strcat(buf, "sanctified voltproof ");
+			else if(check_oprop(obj, OPROP_ELEC_HELL))
+				Strcat(buf, "hellvolt-proof ");
+			else if(check_oprop(obj, OPROP_ELEC))
 				Strcat(buf, "voltproof ");
-			if(check_oprop(obj, OPROP_ACID) && obj->known)
+			if(check_oprop(obj, OPROP_ACID_HOLY))
+				Strcat(buf, "sanctified acidproof ");
+			else if(check_oprop(obj, OPROP_ACID_HELL))
+				Strcat(buf, "hellacid-proof ");
+			else if(check_oprop(obj, OPROP_ACID))
 				Strcat(buf, "acidproof ");
 		}
 		if(check_oprop(obj, OPROP_DISN) && obj->known)
@@ -3345,13 +3364,13 @@ static const char *wrp[] = {
 	"wand", "ring", "potion", "scroll", "shard", "wage", "strange coin", "gem", "amulet",
 	"spellbook", "spell book",
 	/* for non-specific wishes */
-	"weapon", "armor", "armour", "tool", "food", "comestible","belt",
+	"weapon", "armor", "armour", "tool", "food", "comestible","belt", "sanction"
 };
 static const char wrpsym[] = {
 	WAND_CLASS, RING_CLASS, POTION_CLASS, SCROLL_CLASS, TILE_CLASS, SCOIN_CLASS, SCOIN_CLASS, GEM_CLASS,
 	AMULET_CLASS, SPBOOK_CLASS, SPBOOK_CLASS,
 	WEAPON_CLASS, ARMOR_CLASS, ARMOR_CLASS, TOOL_CLASS, FOOD_CLASS,
-	FOOD_CLASS, BELT_CLASS
+	FOOD_CLASS, BELT_CLASS, SANCTION_CLASS
 };
 
 #endif /* OVLB */
@@ -4728,14 +4747,62 @@ int wishflags;
 		} else if (!strncmpi(bp, "magic-resistant ", l=16)) {
 			add_oprop_list(oprop_list, OPROP_MAGC);
 
+		} else if (!strncmpi(bp, "sanctified flameproof ", l=22)) {
+			add_oprop_list(oprop_list, OPROP_FIRE_HOLY);
+
+		} else if (!strncmpi(bp, "hellfire-proof ", l=15)) {
+			add_oprop_list(oprop_list, OPROP_FIRE_HELL);
+
+		} else if (!strncmpi(bp, "fire-sanctioned ", l=16)) {
+			add_oprop_list(oprop_list, OPROP_FIRE_SNCT);
+
 		} else if (!strncmpi(bp, "flameproof ", l=11)) {
 			add_oprop_list(oprop_list, OPROP_FIRE);
+
+		} else if (!strncmpi(bp, "sanctified coldproof ", l=21)) {
+			add_oprop_list(oprop_list, OPROP_COLD_HOLY);
+
+		} else if (!strncmpi(bp, "hellrime-proof ", l=15)) {
+			add_oprop_list(oprop_list, OPROP_COLD_HELL);
+
+		} else if (!strncmpi(bp, "cold-sanctioned ", l=16)) {
+			add_oprop_list(oprop_list, OPROP_COLD_SNCT);
 
 		} else if (!strncmpi(bp, "coldproof ", l=10)) {
 			add_oprop_list(oprop_list, OPROP_COLD);
 
+		} else if (!strncmpi(bp, "sanctified voltproof ", l=21)) {
+			add_oprop_list(oprop_list, OPROP_ELEC_HOLY);
+
+		} else if (!strncmpi(bp, "hellvolt-proof ", l=15)) {
+			add_oprop_list(oprop_list, OPROP_ELEC_HELL);
+
+		} else if (!strncmpi(bp, "shock-sanctioned ", l=17)) {
+			add_oprop_list(oprop_list, OPROP_ELEC_SNCT);
+
 		} else if (!strncmpi(bp, "voltproof ", l=10)) {
 			add_oprop_list(oprop_list, OPROP_ELEC);
+
+		} else if (!strncmpi(bp, "sanctified acidproof ", l=21)) {
+			add_oprop_list(oprop_list, OPROP_ACID_HOLY);
+
+		} else if (!strncmpi(bp, "hellacid-proof ", l=15)) {
+			add_oprop_list(oprop_list, OPROP_ACID_HELL);
+
+		} else if (!strncmpi(bp, "acid-sanctioned ", l=16)) {
+			add_oprop_list(oprop_list, OPROP_ACID_SNCT);
+
+		} else if (!strncmpi(bp, "fire-sanctified ", l=16)) {
+			add_oprop_list(oprop_list, OPROP_FIRE_HOLY_SNCT);
+
+		} else if (!strncmpi(bp, "cold-sanctified ", l=16)) {
+			add_oprop_list(oprop_list, OPROP_COLD_HOLY_SNCT);
+
+		} else if (!strncmpi(bp, "shock-sanctified ", l=17)) {
+			add_oprop_list(oprop_list, OPROP_ELEC_HOLY_SNCT);
+
+		} else if (!strncmpi(bp, "acid-sanctified ", l=16)) {
+			add_oprop_list(oprop_list, OPROP_ACID_HOLY_SNCT);
 
 		} else if (!strncmpi(bp, "acidproof ", l=10)) {
 			add_oprop_list(oprop_list, OPROP_ACID);

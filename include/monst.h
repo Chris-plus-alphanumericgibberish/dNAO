@@ -350,6 +350,8 @@ struct monst {
 	//	time:  AT_LARVA+x, where x=time, and AT_LARVA is large, 10000 or so.
 	//utype = PM_HATCHLING_NAME
 	//inventory
+	int melement; //Element for chosen for a monster's variable-element attacks
+#define	mvar_hdBreath	melement
 	long mvar1;
 #define	mvar_paleWarning	mvar1
 #define	mvar_witchID	mvar1
@@ -358,7 +360,6 @@ struct monst {
 #define	mvar_syllable	mvar1
 #define	mvar_vector	mvar1
 #define	mvar_spList_1	mvar1
-#define	mvar_hdBreath	mvar1
 #define	mvar_dreadPrayer_cooldown	mvar1
 #define	mvar_dracaePreg	mvar1
 #define	mvar_dollTypes	mvar1

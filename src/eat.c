@@ -61,7 +61,7 @@ STATIC_OVL NEARDATA const char offerables[] = { FOOD_CLASS, TOOL_CLASS, 0 };
 STATIC_OVL NEARDATA const char allobj[] = {
 	COIN_CLASS, WEAPON_CLASS, ARMOR_CLASS, POTION_CLASS, SCROLL_CLASS, TILE_CLASS,
 	WAND_CLASS, RING_CLASS, AMULET_CLASS, FOOD_CLASS, TOOL_CLASS,
-	GEM_CLASS, ROCK_CLASS, BALL_CLASS, CHAIN_CLASS, SPBOOK_CLASS, BED_CLASS, SCOIN_CLASS, BELT_CLASS, 0 };
+	GEM_CLASS, ROCK_CLASS, BALL_CLASS, CHAIN_CLASS, SPBOOK_CLASS, BED_CLASS, SCOIN_CLASS, BELT_CLASS, SANCTION_CLASS, 0 };
 
 STATIC_OVL boolean force_save_hs = FALSE;
 
@@ -1998,17 +1998,23 @@ eatcorpse(otmp)		/* called when a corpse is selected as food */
 	} else if (acidic(&mons[mtyp]) && !Acid_resistance) {
 		tp++;
 		You("have a very bad case of stomach acid."); /* not body_part() */
-		losehp(rnd(15), "acidic corpse", KILLED_BY_AN);
+		int acid_dmg = rnd(15);
+		acid_dmg = elemental_dmg_resistance(&youmonst, (struct monst *)0, acid_dmg, AD_ACID);
+		losehp(acid_dmg, "acidic corpse", KILLED_BY_AN);
 	} if (freezing(&mons[mtyp]) && !Cold_resistance) {
 		tp++;
 		You("feel your stomach freeze!"); /* not body_part() */
 		roll_frigophobia();
-		losehp(d(2, 12), "cryonic corpse", KILLED_BY_AN);
+		int cold_dmg = d(2, 12);
+		cold_dmg = elemental_dmg_resistance(&youmonst, (struct monst *)0, cold_dmg, AD_COLD);
+		losehp(cold_dmg, "cryonic corpse", KILLED_BY_AN);
 	}
 	if (burning(&mons[mtyp]) && !Fire_resistance) {
 		tp++;
 		You("feel your stomach boil!"); /* not body_part() */
-		losehp(rnd(20), "boiling hot corpse", KILLED_BY_AN);
+		int fire_dmg = rnd(20);
+		fire_dmg = elemental_dmg_resistance(&youmonst, (struct monst *)0, fire_dmg, AD_FIRE);
+		losehp(fire_dmg, "boiling hot corpse", KILLED_BY_AN);
 	}
 	if (poisonous(&mons[mtyp]) && rn2(5)) {
 		tp++;
@@ -3807,7 +3813,9 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 			}
 			if((otmp->opoisoned & OPOISON_ACID) && !Acid_resistance){
 				You("have a very bad case of stomach acid."); /* not body_part() */
-				losehp(rnd(15), "acidic meal", KILLED_BY_AN);
+				int acid_dmg = rnd(15);
+				acid_dmg = elemental_dmg_resistance(&youmonst, (struct monst *)0, acid_dmg, AD_ACID);
+				losehp(acid_dmg, "acidic meal", KILLED_BY_AN);
 			}
 			if((otmp->opoisoned & OPOISON_SILVER) && hates_silver(youracedata)){
 				pline("The silver sears the inside of your mouth!"); /* not body_part() */

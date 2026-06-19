@@ -442,6 +442,7 @@
 #define is_vampire(ptr)		(((ptr)->mflagsa & MA_VAMPIRE) != 0L)
 #define is_half_dragon(ptr)		attacktype_fordmg(ptr, AT_BREA, AD_HDRG)
 #define is_boreal_dragoon(ptr)		(attacktype_fordmg(ptr, AT_WEAP, AD_HDRG) || attacktype_fordmg(ptr, AT_XWEP, AD_HDRG))
+#define is_hellish_wielder(ptr)		dmgtype(ptr, AD_HELL)
 #define is_elf(ptr)			(((ptr)->mflagsa & MA_ELF) != 0L && !is_drow(ptr))
 #define is_drow(ptr)		(((ptr)->mflagsa & MA_DROW) != 0L)
 #define is_myrkalfr(ptr)	((ptr)->mtyp == PM_MYRKALFAR_WARRIOR || (ptr)->mtyp == PM_MYRKALFAR_MATRON || (ptr)->mtyp == PM_MYRKALFR || (ptr)->mtyp == PM_ALIDER)

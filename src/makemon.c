@@ -16933,13 +16933,13 @@ struct monst *mtmp;
 			give_mintrinsic(mtmp, SEARCHING);
 		}
 		if(mtmp->m_lev >= 11){
-			give_mintrinsic(mtmp, FIRE_RES);
+			give_mintrinsic(mtmp, HOLY_FIRE_RES);
 		}
 		if(mtmp->m_lev >= 13){
-			give_mintrinsic(mtmp, COLD_RES);
+			give_mintrinsic(mtmp, HOLY_COLD_RES);
 		}
 		if(mtmp->m_lev >= 15){
-			give_mintrinsic(mtmp, SHOCK_RES);
+			give_mintrinsic(mtmp, HOLY_SHOCK_RES);
 		}
 		if(mtmp->m_lev >= 25){
 			give_mintrinsic(mtmp, DISINT_RES);
@@ -17192,6 +17192,12 @@ struct monst *mtmp;
 		if(mtmp->m_lev >= 7){
 			give_mintrinsic(mtmp, FAST);
 		}
+		if(mtmp->m_lev >= 14){
+			give_mintrinsic(mtmp, HELL_COLD_RES);
+		}
+		if(mtmp->m_lev >= 21){
+			give_mintrinsic(mtmp, HOLY_COLD_RES);
+		}
 	}
 	if(mon_wizard(mtmp)){
 		if(mtmp->m_lev >= 17){
@@ -17232,7 +17238,7 @@ struct monst *mtmp;
 	}
 	if(is_vampire(mtmp->data)){
 		if(mtmp->m_lev >= 11){
-			give_mintrinsic(mtmp, COLD_RES);
+			give_mintrinsic(mtmp, HELL_COLD_RES);
 		}
 	}
 	if(is_half_dragon(mtmp->data)){

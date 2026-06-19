@@ -10,9 +10,9 @@
 
 extern const int monstr[];
 static const char gems[] = { GEM_CLASS, 0 };
-static const char tools[] = { CHAIN_CLASS, SCOIN_CLASS, TOOL_CLASS, WEAPON_CLASS, WAND_CLASS, 0 };
+static const char tools[] = { CHAIN_CLASS, SCOIN_CLASS, TOOL_CLASS, WEAPON_CLASS, WAND_CLASS, SANCTION_CLASS, 0 };
 static const char tools_too[] = { ALL_CLASSES, SCOIN_CLASS, TOOL_CLASS, POTION_CLASS,
-				  WEAPON_CLASS, WAND_CLASS, GEM_CLASS, CHAIN_CLASS, 0 };
+				  WEAPON_CLASS, WAND_CLASS, GEM_CLASS, CHAIN_CLASS, SANCTION_CLASS, 0 };
 static const char apply_armor[] = { ARMOR_CLASS, 0 };
 static const char imperial_repairs[] = { AMULET_CLASS, ARMOR_CLASS, RING_CLASS, WAND_CLASS, 0 };
 static const char apply_corpse[] = { FOOD_CLASS, 0 };
@@ -89,6 +89,7 @@ STATIC_DCL int FDECL(use_doll_tear, (struct obj *));
 STATIC_DCL int FDECL(use_pyramid, (struct obj *));
 STATIC_DCL int FDECL(use_vortex, (struct obj *));
 STATIC_DCL int FDECL(use_rift, (struct obj *));
+STATIC_DCL int FDECL(do_apply_sanctified_gem, (struct obj *));
 STATIC_DCL int FDECL(do_break_wand, (struct obj *));
 STATIC_DCL int FDECL(do_flip_coin, (struct obj *));
 STATIC_DCL void FDECL(soul_crush_consequence, (struct obj *));
@@ -3598,7 +3599,7 @@ reanimation_upgrade(struct obj *research_kit)
 	boolean minor_upgrade = FALSE;
 	if(n == 1){
 		add_reanimation(RE_BOLT_RES);
-		HShock_resistance |= W_UPGRADE;
+		u.uprops[SHOCK_RES].intrinsic |= W_UPGRADE;
 		You("feel well-shielded.");
 	}
 	if(n == 2){
@@ -3696,7 +3697,7 @@ defile_preserve(struct obj *obj, struct obj *research_kit)
 	else if(!check_preservation(PRESERVE_COLD_RES)){
 		You("no longer feel cold.");
 		add_preservation(PRESERVE_COLD_RES);
-		HCold_resistance |= W_UPGRADE;
+		u.uprops[COLD_RES].intrinsic |= W_UPGRADE;
 	}
 	else if(!check_preservation(PRESERVE_SLEEP_RES)){
 		You("no longer feel sleepy.");
@@ -10023,6 +10024,121 @@ struct obj * obj;
 }
 
 STATIC_OVL int
+do_apply_sanctified_gem(gem)
+struct obj *gem;
+{
+	struct obj *otmp;
+	int new_oprop, gem_otyp;
+	const char *resist_name;
+	boolean needs_pair;
+	NEARDATA const char armor_classes[] = { ARMOR_CLASS, 0 };
+
+	gem_otyp = gem->otyp;
+	switch (gem_otyp) {
+	case SANCTIFIED_EMBER:           new_oprop = OPROP_FIRE_HOLY_SNCT; resist_name = "holy fire";  break;
+	case SANCTIFIED_SPARK:           new_oprop = OPROP_ELEC_HOLY_SNCT; resist_name = "holy shock"; break;
+	case SANCTIFIED_ICE_CRYSTAL:     new_oprop = OPROP_COLD_HOLY_SNCT; resist_name = "holy cold";  break;
+	case SANCTIFIED_CALCITE_CRYSTAL: new_oprop = OPROP_ACID_HOLY_SNCT; resist_name = "holy acid";  break;
+	default: return MOVE_CANCELLED;
+	}
+
+	otmp = getobj(armor_classes, "item to receive sanctified gem");
+	if (!otmp) return MOVE_CANCELLED;
+
+	if (!is_suit(otmp) && !is_cloak(otmp) && !is_helmet(otmp) &&
+	    !is_gloves(otmp) && !is_boots(otmp)) {
+		pline("Sanctified gems can only be bonded to body armor, cloaks, helms, gloves, or boots.");
+		return MOVE_CANCELLED;
+	}
+	if (count_sanctions(otmp) > 0) {
+		pline("The gem is repelled by the hellish sanction%s displayed on %s.", plur(count_sanctions(otmp)), yname(otmp));
+		return MOVE_CANCELLED;
+	}
+	if (count_holy_sanctifications(otmp) > 0) {
+		pline("%s already bears a sanctified gem.", Yname2(otmp));
+		return MOVE_CANCELLED;
+	}
+
+	needs_pair = (is_gloves(otmp) || is_boots(otmp));
+	if (needs_pair) {
+		long total = 0;
+		struct obj *tmp;
+		for (tmp = invent; tmp; tmp = tmp->nobj)
+			if (tmp->otyp == gem_otyp) total += tmp->quan;
+		if (total < 2) {
+			pline("Bonding a sanctified gem to gloves or boots requires two matching gems.");
+			return MOVE_CANCELLED;
+		}
+	}
+
+	if (needs_pair) {
+		You("press both gems into %s.", yname(otmp));
+		pline("They bond permanently to the surface, suffusing it with %s resistance.", resist_name);
+	} else {
+		You("press the gem into %s.", yname(otmp));
+		pline("It bonds permanently to the surface, suffusing it with %s resistance.", resist_name);
+	}
+	add_oprop(otmp, new_oprop);
+	otmp->known = TRUE;
+	useup(gem);
+	if (needs_pair) {
+		struct obj *second = carrying(gem_otyp);
+		if (second) useup(second);
+	}
+	return MOVE_STANDARD;
+}
+
+STATIC_OVL int
+do_apply_sanction(sanction)
+struct obj *sanction;
+{
+	struct obj *otmp;
+	int new_oprop;
+	const char *resist_name;
+	NEARDATA const char armor_classes[] = { ARMOR_CLASS, 0 };
+
+	switch (sanction->otyp) {
+	case FIRE_RESISTANCE_SANCTION:  new_oprop = OPROP_FIRE_SNCT; resist_name = "hellfire";  break;
+	case COLD_RESISTANCE_SANCTION:  new_oprop = OPROP_COLD_SNCT; resist_name = "hellrime";  break;
+	case SHOCK_RESISTANCE_SANCTION: new_oprop = OPROP_ELEC_SNCT; resist_name = "hellvolt";  break;
+	case ACID_RESISTANCE_SANCTION:  new_oprop = OPROP_ACID_SNCT; resist_name = "hellacid";  break;
+	default: return MOVE_CANCELLED;
+	}
+
+	otmp = getobj(armor_classes, "armor piece to receive sanction");
+	if (!otmp) return MOVE_CANCELLED;
+
+	if (!is_suit(otmp) && !is_cloak(otmp)) {
+		pline("Sanctions can only be bonded to body armor or cloaks.");
+		return MOVE_CANCELLED;
+	}
+	if (check_oprop(otmp, new_oprop)) {
+		pline("%s already bears an identical sanction.", Yname2(otmp));
+		return MOVE_CANCELLED;
+	}
+	if (count_holy_sanctifications(otmp) > 0) {
+		pline("The talisman is repelled by the sanctified gem%s bonded to %s.", plur(count_holy_sanctifications(otmp)), yname(otmp));
+		return MOVE_CANCELLED;
+	}
+	if (is_cloak(otmp) && count_sanctions(otmp) >= 1) {
+		pline("A cloak can only bear at most one sanction.");
+		return MOVE_CANCELLED;
+	}
+	if (is_suit(otmp) && count_sanctions(otmp) >= 3) {
+		pline("Body armor can only bear at most three sanctions.");
+		return MOVE_CANCELLED;
+	}
+
+	You("press the talisman to %s.", yname(otmp));
+	pline("It seals itself to %s, making it %s-proof.", yname(otmp), resist_name);
+	pline("It doesn't look like it's coming off anytime soon...");
+	add_oprop(otmp, new_oprop);
+	otmp->known = TRUE;
+	useup(sanction);
+	return MOVE_STANDARD;
+}
+
+STATIC_OVL int
 do_soul_coin(obj)
 struct obj *obj;
 {
@@ -12096,7 +12212,9 @@ doapply()
 	    return do_soul_coin(obj);
 	else if (obj->oclass == RING_CLASS || obj->oclass == AMULET_CLASS)
 	    return do_present_item(obj);
-	else if(is_knife(obj) && !(obj->oartifact==ART_PEN_OF_THE_VOID && obj->ovara_seals&SEAL_MARIONETTE)) 
+	else if (obj->oclass == SANCTION_CLASS)
+		return do_apply_sanction(obj);
+	else if(is_knife(obj) && !(obj->oartifact==ART_PEN_OF_THE_VOID && obj->ovara_seals&SEAL_MARIONETTE))
 		return do_carve_obj(obj);
 	
 	if(obj->oartifact == ART_SILVER_STARLIGHT) res = do_play_instrument(obj);
@@ -12876,6 +12994,12 @@ doapply()
 	break;
 	case ANTIMAGIC_RIFT:
 		res = use_rift(obj);
+	break;
+	case SANCTIFIED_EMBER:
+	case SANCTIFIED_SPARK:
+	case SANCTIFIED_ICE_CRYSTAL:
+	case SANCTIFIED_CALCITE_CRYSTAL:
+		res = do_apply_sanctified_gem(obj);
 	break;
 	case CRYSTAL:
 		if(obj->obj_material == FLESH)

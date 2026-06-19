@@ -30,19 +30,49 @@
 /* With intrinsics and extrinsics */
 #define HNo_prop		u.uprops[NO_PROP].intrinsic
 
-#define HFire_resistance	u.uprops[FIRE_RES].intrinsic
-#define EFire_resistance	u.uprops[FIRE_RES].extrinsic
-#define Fire_resistance		(HFire_resistance || EFire_resistance || \
-				 (species_resists_fire(&youmonst) && !(Race_if(PM_ANDROID) && !Upolyd)) || \
+#define BaseHFire_resistance	(u.uprops[FIRE_RES].intrinsic && !Inhell && !In_endgame(&u.uz))
+#define BaseEFire_resistance	(u.uprops[FIRE_RES].extrinsic && !Inhell && !In_endgame(&u.uz))
+#define BaseFire_resistance		((u.uprops[FIRE_RES].intrinsic || u.uprops[FIRE_RES].extrinsic || \
+				 (species_resists_fire(&youmonst) && !(Race_if(PM_ANDROID) && !Upolyd))) && !Inhell && !In_endgame(&u.uz))
+
+#define BaseHellHFire_resistance	(u.uprops[HELL_FIRE_RES].intrinsic && !In_endgame(&u.uz))
+#define BaseHellEFire_resistance	(u.uprops[HELL_FIRE_RES].extrinsic && !In_endgame(&u.uz))
+#define BaseHellFire_resistance		((u.uprops[HELL_FIRE_RES].intrinsic || u.uprops[HELL_FIRE_RES].extrinsic) && !In_endgame(&u.uz))
+
+#define BaseHolyHFire_resistance	(u.uprops[HOLY_FIRE_RES].intrinsic && !In_endgame(&u.uz))
+#define BaseHolyEFire_resistance	(u.uprops[HOLY_FIRE_RES].extrinsic && !In_endgame(&u.uz))
+#define BaseHolyFire_resistance		((u.uprops[HOLY_FIRE_RES].intrinsic || u.uprops[HOLY_FIRE_RES].extrinsic))
+
+#define HFire_resistance	(BaseHFire_resistance || BaseHellHFire_resistance || BaseHolyHFire_resistance)
+#define EFire_resistance	(BaseEFire_resistance || BaseHellEFire_resistance || BaseHolyEFire_resistance)
+#define Fire_resistance		(BaseFire_resistance || BaseHellFire_resistance || BaseHolyFire_resistance || \
 				 ward_at(u.ux,u.uy) == SIGIL_OF_CTHUGHA )
 #define InvFire_resistance	(EFire_resistance || Preservation || ward_at(u.ux,u.uy) == SIGIL_OF_CTHUGHA)
+#define HellFire_resistance	(BaseHellFire_resistance || BaseHolyFire_resistance || ward_at(u.ux,u.uy) == SIGIL_OF_CTHUGHA)
+#define HolyFire_resistance	(BaseHolyFire_resistance || ward_at(u.ux,u.uy) == SIGIL_OF_CTHUGHA)
 
-#define HCold_resistance	u.uprops[COLD_RES].intrinsic
-#define ECold_resistance	u.uprops[COLD_RES].extrinsic
+#define BaseHCold_resistance	(u.uprops[COLD_RES].intrinsic && !Inhell && !In_endgame(&u.uz))
+#define BaseECold_resistance	(u.uprops[COLD_RES].extrinsic && !Inhell && !In_endgame(&u.uz))
+#define BaseCold_resistance		((u.uprops[COLD_RES].intrinsic || u.uprops[COLD_RES].extrinsic || \
+				 species_resists_cold(&youmonst)) && !Inhell && !In_endgame(&u.uz))
+
+#define BaseHellHCold_resistance	(u.uprops[HELL_COLD_RES].intrinsic && !In_endgame(&u.uz))
+#define BaseHellECold_resistance	(u.uprops[HELL_COLD_RES].extrinsic && !In_endgame(&u.uz))
+#define BaseHellCold_resistance		((u.uprops[HELL_COLD_RES].intrinsic || u.uprops[HELL_COLD_RES].extrinsic) && !In_endgame(&u.uz))
+
+#define BaseHolyHCold_resistance	(u.uprops[HOLY_COLD_RES].intrinsic && !In_endgame(&u.uz))
+#define BaseHolyECold_resistance	(u.uprops[HOLY_COLD_RES].extrinsic && !In_endgame(&u.uz))
+#define BaseHolyCold_resistance		((u.uprops[HOLY_COLD_RES].intrinsic || u.uprops[HOLY_COLD_RES].extrinsic))
+
 #define NCold_resistance		(species_resists_cold(&youmonst) || \
 				 ward_at(u.ux,u.uy) == BRAND_OF_ITHAQUA)
-#define Cold_resistance		(HCold_resistance || ECold_resistance || NCold_resistance)
+#define HCold_resistance	(BaseHCold_resistance || BaseHellHCold_resistance || BaseHolyHCold_resistance)
+#define ECold_resistance	(BaseECold_resistance || BaseHellECold_resistance || BaseHolyECold_resistance)
+#define Cold_resistance		(BaseCold_resistance || BaseHellCold_resistance || BaseHolyCold_resistance || \
+				 ward_at(u.ux,u.uy) == BRAND_OF_ITHAQUA)
 #define InvCold_resistance	(ECold_resistance || Preservation || ward_at(u.ux,u.uy) == BRAND_OF_ITHAQUA)
+#define HellCold_resistance	(BaseHellCold_resistance || BaseHolyCold_resistance || ward_at(u.ux,u.uy) == BRAND_OF_ITHAQUA)
+#define HolyCold_resistance	(BaseHolyCold_resistance || ward_at(u.ux,u.uy) == BRAND_OF_ITHAQUA)
 
 #define HSleep_resistance	u.uprops[SLEEP_RES].intrinsic
 #define ESleep_resistance	u.uprops[SLEEP_RES].extrinsic
@@ -54,12 +84,26 @@
 #define Disint_resistance	(HDisint_resistance || EDisint_resistance || \
 				 species_resists_disint(&youmonst))
 
-#define HShock_resistance	u.uprops[SHOCK_RES].intrinsic
-#define EShock_resistance	u.uprops[SHOCK_RES].extrinsic
-#define Shock_resistance	(HShock_resistance || EShock_resistance || \
-				 (species_resists_elec(&youmonst) && !(Race_if(PM_ANDROID) && !Upolyd)) || \
+#define BaseHShock_resistance	(u.uprops[SHOCK_RES].intrinsic && !Inhell && !In_endgame(&u.uz))
+#define BaseEShock_resistance	(u.uprops[SHOCK_RES].extrinsic && !Inhell && !In_endgame(&u.uz))
+#define BaseShock_resistance	((u.uprops[SHOCK_RES].intrinsic || u.uprops[SHOCK_RES].extrinsic || \
+				 (species_resists_elec(&youmonst) && !(Race_if(PM_ANDROID) && !Upolyd))) && !Inhell && !In_endgame(&u.uz))
+
+#define BaseHellHShock_resistance	(u.uprops[HELL_SHOCK_RES].intrinsic && !In_endgame(&u.uz))
+#define BaseHellEShock_resistance	(u.uprops[HELL_SHOCK_RES].extrinsic && !In_endgame(&u.uz))
+#define BaseHellShock_resistance	((u.uprops[HELL_SHOCK_RES].intrinsic || u.uprops[HELL_SHOCK_RES].extrinsic) && !In_endgame(&u.uz))
+
+#define BaseHolyHShock_resistance	(u.uprops[HOLY_SHOCK_RES].intrinsic && !In_endgame(&u.uz))
+#define BaseHolyEShock_resistance	(u.uprops[HOLY_SHOCK_RES].extrinsic && !In_endgame(&u.uz))
+#define BaseHolyShock_resistance	((u.uprops[HOLY_SHOCK_RES].intrinsic || u.uprops[HOLY_SHOCK_RES].extrinsic))
+
+#define HShock_resistance	(BaseHShock_resistance || BaseHellHShock_resistance || BaseHolyHShock_resistance)
+#define EShock_resistance	(BaseEShock_resistance || BaseHellEShock_resistance || BaseHolyEShock_resistance)
+#define Shock_resistance	(BaseShock_resistance || BaseHellShock_resistance || BaseHolyShock_resistance || \
 				 ward_at(u.ux,u.uy) == TRACERY_OF_KARAKAL )
-#define InvShock_resistance	(EShock_resistance || Preservation || ward_at(u.ux,u.uy) == TRACERY_OF_KARAKAL || (HShock_resistance&FROMRACE && (Race_if(PM_ANDROID) || Race_if(PM_PARASITIZED_ANDROID))))
+#define InvShock_resistance	(EShock_resistance || Preservation || ward_at(u.ux,u.uy) == TRACERY_OF_KARAKAL || (u.uprops[SHOCK_RES].intrinsic&FROMRACE && (Race_if(PM_ANDROID) || Race_if(PM_PARASITIZED_ANDROID))))
+#define HellShock_resistance	(BaseHellShock_resistance || BaseHolyShock_resistance || ward_at(u.ux,u.uy) == TRACERY_OF_KARAKAL)
+#define HolyShock_resistance	(BaseHolyShock_resistance || ward_at(u.ux,u.uy) == TRACERY_OF_KARAKAL)
 
 #define HPoison_resistance	u.uprops[POISON_RES].intrinsic
 #define EPoison_resistance	u.uprops[POISON_RES].extrinsic
@@ -67,11 +111,25 @@
 				 species_resists_poison(&youmonst) || \
 				 (ward_at(u.ux,u.uy) == WINGS_OF_GARUDA && num_wards_at(u.ux, u.uy) > rn2(7)))
 
-#define HAcid_resistance	u.uprops[ACID_RES].intrinsic
-#define EAcid_resistance	u.uprops[ACID_RES].extrinsic
-#define Acid_resistance		(HAcid_resistance || EAcid_resistance ||\
-							 species_resists_acid(&youmonst))
+#define BaseHAcid_resistance	(u.uprops[ACID_RES].intrinsic && !Inhell && !In_endgame(&u.uz))
+#define BaseEAcid_resistance	(u.uprops[ACID_RES].extrinsic && !Inhell && !In_endgame(&u.uz))
+#define BaseAcid_resistance		((u.uprops[ACID_RES].intrinsic || u.uprops[ACID_RES].extrinsic || \
+				 species_resists_acid(&youmonst)) && !Inhell && !In_endgame(&u.uz))
+
+#define BaseHellHAcid_resistance	(u.uprops[HELL_ACID_RES].intrinsic && !In_endgame(&u.uz))
+#define BaseHellEAcid_resistance	(u.uprops[HELL_ACID_RES].extrinsic && !In_endgame(&u.uz))
+#define BaseHellAcid_resistance		((u.uprops[HELL_ACID_RES].intrinsic || u.uprops[HELL_ACID_RES].extrinsic) && !In_endgame(&u.uz))
+
+#define BaseHolyHAcid_resistance	(u.uprops[HOLY_ACID_RES].intrinsic && !In_endgame(&u.uz))
+#define BaseHolyEAcid_resistance	(u.uprops[HOLY_ACID_RES].extrinsic && !In_endgame(&u.uz))
+#define BaseHolyAcid_resistance		((u.uprops[HOLY_ACID_RES].intrinsic || u.uprops[HOLY_ACID_RES].extrinsic))
+
+#define HAcid_resistance	(BaseHAcid_resistance || BaseHellHAcid_resistance || BaseHolyHAcid_resistance)
+#define EAcid_resistance	(BaseEAcid_resistance || BaseHellEAcid_resistance || BaseHolyEAcid_resistance)
+#define Acid_resistance		(BaseAcid_resistance || BaseHellAcid_resistance || BaseHolyAcid_resistance)
 #define InvAcid_resistance	(EAcid_resistance || Preservation)
+#define HellAcid_resistance	(BaseHellAcid_resistance || BaseHolyAcid_resistance)
+#define HolyAcid_resistance	BaseHolyAcid_resistance
 
 #define HDrain_resistance	u.uprops[DRAIN_RES].intrinsic
 #define EDrain_resistance	u.uprops[DRAIN_RES].extrinsic

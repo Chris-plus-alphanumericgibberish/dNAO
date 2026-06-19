@@ -3398,6 +3398,8 @@ struct obj *obj;
 			return likes_magic(ptr);
 		case SCROLL_CLASS:
 			return likes_magic(ptr);
+		case SANCTION_CLASS:
+			return likes_magic(ptr);
 		case SPBOOK_CLASS:
 			return likes_magic(ptr);
 		case WAND_CLASS:

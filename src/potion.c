@@ -1706,8 +1706,9 @@ boolean your_fault;
 		if (!Acid_resistance) {
 		    pline("This burns%s!", obj->blessed ? " a little" :
 				    obj->cursed ? " a lot" : "");
-		    losehp(d(obj->cursed ? 2 : 1, obj->blessed ? 4 : 8),
-				    "potion of acid", KILLED_BY_AN);
+		    int acid_dmg = d(obj->cursed ? 2 : 1, obj->blessed ? 4 : 8);
+		    acid_dmg = elemental_dmg_resistance(&youmonst, (struct monst *)0, acid_dmg, AD_ACID);
+		    losehp(acid_dmg, "potion of acid", KILLED_BY_AN);
 		}
 		//Kills any skin gray mold
 		youmonst.mgmld_skin = 0;
@@ -1717,20 +1718,23 @@ boolean your_fault;
 		if(acidic(&mons[mtyp]) && !Acid_resistance){
 		    pline("This burns%s!", obj->blessed ? " a little" :
 				    obj->cursed ? " a lot" : "");
-		    losehp(d(obj->cursed ? 2 : 1, obj->blessed ? 4 : 8),
-				    "potion of acidic blood", KILLED_BY_AN);
+		    int acid_dmg = d(obj->cursed ? 2 : 1, obj->blessed ? 4 : 8);
+		    acid_dmg = elemental_dmg_resistance(&youmonst, (struct monst *)0, acid_dmg, AD_ACID);
+		    losehp(acid_dmg, "potion of acidic blood", KILLED_BY_AN);
 		}
 		if(freezing(&mons[mtyp]) && !Cold_resistance){
 		    pline("This burns%s!", obj->blessed ? " a little" :
 				    obj->cursed ? " a lot" : "");
-		    losehp(d(obj->cursed ? 2 : 1, obj->blessed ? 4 : 8),
-				    "potion of cryonic blood", KILLED_BY_AN);
+		    int cold_dmg = d(obj->cursed ? 2 : 1, obj->blessed ? 4 : 8);
+		    cold_dmg = elemental_dmg_resistance(&youmonst, (struct monst *)0, cold_dmg, AD_COLD);
+		    losehp(cold_dmg, "potion of cryonic blood", KILLED_BY_AN);
 		}
 		if(burning(&mons[mtyp]) && !Fire_resistance){
 		    pline("This burns%s!", obj->blessed ? " a little" :
 				    obj->cursed ? " a lot" : "");
-		    losehp(d(obj->cursed ? 2 : 1, obj->blessed ? 4 : 8),
-				    "potion of scalding blood", KILLED_BY_AN);
+		    int fire_dmg = d(obj->cursed ? 2 : 1, obj->blessed ? 4 : 8);
+		    fire_dmg = elemental_dmg_resistance(&youmonst, (struct monst *)0, fire_dmg, AD_FIRE);
+		    losehp(fire_dmg, "potion of scalding blood", KILLED_BY_AN);
 		}
 		if(poisonous(&mons[mtyp]) && !Poison_resistance){
 			if (Upolyd) {
@@ -3614,7 +3618,9 @@ dodip()
 		}
 		useup(potion);
 		if(!Shock_resistance){
-			losehp(d(3,6) + 3*obj->spe, "discharging sunrod", KILLED_BY_AN);
+			int shock_dmg = d(3,6) + 3*obj->spe;
+			shock_dmg = elemental_dmg_resistance(&youmonst, (struct monst *)0, shock_dmg, AD_ELEC);
+			losehp(shock_dmg, "discharging sunrod", KILLED_BY_AN);
 		}
 		if(!UseInvShock_res(&youmonst)){
 			if (!rn2(3)) destroy_item(&youmonst, WAND_CLASS, AD_ELEC);

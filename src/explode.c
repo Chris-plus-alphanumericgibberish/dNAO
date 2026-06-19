@@ -839,7 +839,8 @@ do_explode(int x, int y, ExplodeRegion *area, int adtyp, int olet, int dam, int 
 					mtmp->mconf = TRUE;
 				}
 			}
-			
+			if(!area->locations[i].shielded)
+				mdam = elemental_dmg_resistance(mtmp, (struct monst *)0, mdam, (int)adtyp);
 			if(adtyp == AD_SLIM && !Slime_res(mtmp) &&
 				(!resists_acid(mtmp) ? (mtmp->mhp <= mdam*2) : (mtmp->mhp <= mdam))
 			){
@@ -921,6 +922,8 @@ do_explode(int x, int y, ExplodeRegion *area, int adtyp, int olet, int dam, int 
 				change_usanity(-rnd(6), FALSE);
 			}
 		}
+		if(uhurt == 2)
+			damu = elemental_dmg_resistance(&youmonst, (struct monst *)0, damu, (int)adtyp);
 		ugolemeffects((int) adtyp, damu);
 
 		if (uhurt == 2 || uhurt == 3) {

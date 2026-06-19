@@ -310,7 +310,7 @@ Cloak_on()
 		break;
 	/* Alchemy smock gives poison _and_ acid resistance */
 	case ALCHEMY_SMOCK:
-		EAcid_resistance |= WORN_CLOAK;
+		u.uprops[ACID_RES].extrinsic |= WORN_CLOAK;
   		break;
 	default: impossible(unknown_type, c_cloak, uarmc->otyp);
     }
@@ -389,7 +389,7 @@ Cloak_off()
 		break;
 	/* Alchemy smock gives poison _and_ acid resistance */
 	case ALCHEMY_SMOCK:
-		EAcid_resistance &= ~WORN_CLOAK;
+		u.uprops[ACID_RES].extrinsic &= ~WORN_CLOAK;
   		break;
 	default: impossible(unknown_type, c_cloak, otyp);
     }
@@ -2637,7 +2637,7 @@ arm_dr_bonus(struct obj * otmp, int slot)
 }
 
 int
-properties_dr(struct obj *arm, int slot, int agralign, int agrmoral, int agrimpure, int agrrot)
+properties_dr(struct obj *arm, int slot, int agralign, int agrmoral, int agrimpure, int agrrot, int agrldemon)
 {
 	int bonus = 0;
 	int base = arm_dr_bonus(arm, slot);
@@ -2670,11 +2670,12 @@ properties_dr(struct obj *arm, int slot, int agralign, int agrmoral, int agrimpu
 		if(agrmoral > 0) bonus += base;
 		else if(agrmoral < 0) bonus -= base/2+1;
 	}
+	bonus -= count_sanctions(arm) * agrldemon;
 	return bonus;
 }
 
 int
-properties_ac(struct obj *arm, int agralign, int agrmoral, int agrimpure, int agrrot)
+properties_ac(struct obj *arm, int agralign, int agrmoral, int agrimpure, int agrrot, int agrldemon)
 {
 	int mod = 0;
 	if(is_silverknight_armor(arm)){
@@ -2682,6 +2683,7 @@ properties_ac(struct obj *arm, int agralign, int agrmoral, int agrimpure, int ag
 		if(agrrot > 0) mod -= 2;
 		if(agrimpure > 0) mod -= 1;
 	}
+	mod += count_sanctions(arm) * agrldemon;
 	return mod;
 }
 
@@ -3148,9 +3150,10 @@ uchar aatyp;
 	int agrmoral = 0;
 	int agrimpure = 0;
 	int agrrot = 0;
+	int agrldemon = 0;
 	if(magr){
 		agralign = (magr == &youmonst) ? sgn(u.ualign.type) : sgn(magr->data->maligntyp);
-		
+
 		if(magr == &youmonst){
 			if(hates_holy(youracedata))
 				agrmoral = -1;
@@ -3164,6 +3167,10 @@ uchar aatyp;
 		}
 		agrimpure = calc_agrimpure(magr);
 		agrrot = calc_agrrot(magr);
+		if (magr != &youmonst) {
+			if (is_law_demon(magr->data)) agrldemon = is_dnoble(magr->data) ? 3 : 1;
+			else if (is_cha_demon(magr->data)) agrldemon = -1;
+		}
 	}
 	
 	/* some slots may be unacceptable and must be replaced */
@@ -3185,7 +3192,7 @@ uchar aatyp;
 				if(depth && higher_depth(uarmor[i]->owornmask, depth))
 					continue;
 				arm_udr += arm_dr_bonus(uarmor[i], slot);
-				if (magr) arm_udr += properties_dr(uarmor[i], slot, agralign, agrmoral, agrimpure, agrrot);
+				if (magr) arm_udr += properties_dr(uarmor[i], slot, agralign, agrmoral, agrimpure, agrrot, agrldemon);
 				if (slot == HEAD_DR && uarmor[i]->bodytypeflag&MB_HORNS && !has_horns_mon(&youmonst)){
 					arm_udr -= 1;
 				}

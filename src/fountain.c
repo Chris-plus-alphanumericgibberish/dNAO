@@ -1887,8 +1887,9 @@ dipforge(struct obj *obj)
 			if (!rn2(3))
 				You("may want to remove your %s first...",
 					xname(obj));
-			losehp(d(2, 8),
-				   "dipping a worn object into a forge", KILLED_BY);
+			int fire_dmg = d(2, 8);
+			fire_dmg = elemental_dmg_resistance(&youmonst, (struct monst *)0, fire_dmg, AD_FIRE);
+			losehp(fire_dmg, "dipping a worn object into a forge", KILLED_BY);
 		}
 		else {
 			You("dip your worn %s into the forge.  This is fine.",
@@ -2021,8 +2022,11 @@ result:
 				return;
 			} else {
 				pline("Molten lava surges up and splashes all over you!");
-				if(!Fire_resistance)
-					losehp(d(6, 6), "dipping into a forge", KILLED_BY);
+				if(!Fire_resistance) {
+					int fire_dmg = d(6, 6);
+					fire_dmg = elemental_dmg_resistance(&youmonst, (struct monst *)0, fire_dmg, AD_FIRE);
+					losehp(fire_dmg, "dipping into a forge", KILLED_BY);
+				}
 			}
 			break;
 		case 23:

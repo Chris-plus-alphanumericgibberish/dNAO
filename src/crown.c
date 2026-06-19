@@ -326,12 +326,12 @@ gcrownu()
 
 	/* except for binders, being crowned grants a nice bunch of intrinsics and a ward */	
 	if(!Role_if(PM_EXILE)){
-		HSee_invisible |= FROMOUTSIDE;
-		HFire_resistance |= FROMOUTSIDE;
-		HCold_resistance |= FROMOUTSIDE;
-		HShock_resistance |= FROMOUTSIDE;
-		HSleep_resistance |= FROMOUTSIDE;
-		HPoison_resistance |= FROMOUTSIDE;
+		u.uprops[SEE_INVIS].intrinsic |= FROMOUTSIDE;
+		u.uprops[FIRE_RES].intrinsic |= FROMOUTSIDE;
+		u.uprops[COLD_RES].intrinsic |= FROMOUTSIDE;
+		u.uprops[SHOCK_RES].intrinsic |= FROMOUTSIDE;
+		u.uprops[SLEEP_RES].intrinsic |= FROMOUTSIDE;
+		u.uprops[POISON_RES].intrinsic |= FROMOUTSIDE;
 		u.wardsknown |= WARD_HEPTAGRAM;
 	}
 

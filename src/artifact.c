@@ -1017,6 +1017,30 @@ int oprop;
 	return !!(obj->oproperties[(oprop-1)/32] & (0x1L << ((oprop-1)%32)));
 }
 
+int
+count_sanctions(obj)
+struct obj *obj;
+{
+	int n = 0;
+	if (check_oprop(obj, OPROP_FIRE_SNCT)) n++;
+	if (check_oprop(obj, OPROP_COLD_SNCT)) n++;
+	if (check_oprop(obj, OPROP_ELEC_SNCT)) n++;
+	if (check_oprop(obj, OPROP_ACID_SNCT)) n++;
+	return n;
+}
+
+int
+count_holy_sanctifications(obj)
+struct obj *obj;
+{
+	int n = 0;
+	if (check_oprop(obj, OPROP_FIRE_HOLY_SNCT)) n++;
+	if (check_oprop(obj, OPROP_COLD_HOLY_SNCT)) n++;
+	if (check_oprop(obj, OPROP_ELEC_HOLY_SNCT)) n++;
+	if (check_oprop(obj, OPROP_ACID_HOLY_SNCT)) n++;
+	return n;
+}
+
 boolean
 oprops_match(obj1, obj2)
 struct obj *obj1;
@@ -1072,6 +1096,24 @@ unsigned long int *omod_list;
 
 #define ADD_WEAPON_ARMOR_OPROP(otmp, oproptoken) \
 	add_oprop(otmp, OPROP_##oproptoken);\
+	if(accepts_weapon_oprops(otmp) || otmp->oclass == RING_CLASS){\
+		if(rn2(3))\
+			add_oprop(otmp, OPROP_LESSER_##oproptoken##W);\
+		else\
+			add_oprop(otmp, OPROP_##oproptoken##W);\
+	}
+
+#define ADD_WEAPON_ARMOR_HELL_OPROP(otmp, oproptoken) \
+	add_oprop(otmp, OPROP_##oproptoken##_HELL);\
+	if(accepts_weapon_oprops(otmp) || otmp->oclass == RING_CLASS){\
+		if(rn2(3))\
+			add_oprop(otmp, OPROP_LESSER_##oproptoken##W);\
+		else\
+			add_oprop(otmp, OPROP_##oproptoken##W);\
+	}
+
+#define ADD_WEAPON_ARMOR_HOLY_OPROP(otmp, oproptoken) \
+	add_oprop(otmp, OPROP_##oproptoken##_HOLY);\
 	if(accepts_weapon_oprops(otmp) || otmp->oclass == RING_CLASS){\
 		if(rn2(3))\
 			add_oprop(otmp, OPROP_LESSER_##oproptoken##W);\
@@ -1139,16 +1181,16 @@ struct obj *otmp;	/* existing object */
 		}
 		if(rn2(3)) switch(rn2(5)){
 			case 0:
-				ADD_WEAPON_ARMOR_OPROP(otmp, ACID);
+				ADD_WEAPON_ARMOR_HELL_OPROP(otmp, ACID);
 			break;
 			case 1:
-				ADD_WEAPON_ARMOR_OPROP(otmp, FIRE);
+				ADD_WEAPON_ARMOR_HELL_OPROP(otmp, FIRE);
 			break;
 			case 2:
-				ADD_WEAPON_ARMOR_OPROP(otmp, ELEC);
+				ADD_WEAPON_ARMOR_HELL_OPROP(otmp, ELEC);
 			break;
 			case 3:
-				ADD_WEAPON_ARMOR_OPROP(otmp, COLD);
+				ADD_WEAPON_ARMOR_HELL_OPROP(otmp, COLD);
 			break;
 			case 4:
 				add_oprop(otmp, OPROP_BCRS);
@@ -1221,16 +1263,16 @@ struct obj *otmp;	/* existing object */
 		}
 		if(rn2(3)) switch(rn2(4)){
 			case 0:
-				ADD_WEAPON_ARMOR_OPROP(otmp, ACID);
+				ADD_WEAPON_ARMOR_HELL_OPROP(otmp, ACID);
 			break;
 			case 1:
-				ADD_WEAPON_ARMOR_OPROP(otmp, FIRE);
+				ADD_WEAPON_ARMOR_HELL_OPROP(otmp, FIRE);
 			break;
 			case 2:
-				ADD_WEAPON_ARMOR_OPROP(otmp, ELEC);
+				ADD_WEAPON_ARMOR_HELL_OPROP(otmp, ELEC);
 			break;
 			case 3:
-				ADD_WEAPON_ARMOR_OPROP(otmp, COLD);
+				ADD_WEAPON_ARMOR_HELL_OPROP(otmp, COLD);
 			break;
 		}
 		else if(rn2(3)){
@@ -1277,13 +1319,13 @@ struct obj *otmp;	/* existing object */
 		}
 		if(rn2(3)) switch(rnd(is_hard(otmp) ? 5 : 4)){
 			case 1:
-				ADD_WEAPON_ARMOR_OPROP(otmp, FIRE);
+				ADD_WEAPON_ARMOR_HOLY_OPROP(otmp, FIRE);
 			break;
 			case 2:
-				ADD_WEAPON_ARMOR_OPROP(otmp, ELEC);
+				ADD_WEAPON_ARMOR_HOLY_OPROP(otmp, ELEC);
 			break;
 			case 3:
-				ADD_WEAPON_ARMOR_OPROP(otmp, COLD);
+				ADD_WEAPON_ARMOR_HOLY_OPROP(otmp, COLD);
 			break;
 			case 4:
 				add_oprop(otmp, OPROP_BCRS);
@@ -1352,13 +1394,13 @@ struct obj *otmp;	/* existing object */
 		}
 		if(rn2(3)) switch(rnd(3)){
 			case 1:
-				ADD_WEAPON_ARMOR_OPROP(otmp, FIRE);
+				ADD_WEAPON_ARMOR_HOLY_OPROP(otmp, FIRE);
 			break;
 			case 2:
-				ADD_WEAPON_ARMOR_OPROP(otmp, ELEC);
+				ADD_WEAPON_ARMOR_HOLY_OPROP(otmp, ELEC);
 			break;
 			case 3:
-				ADD_WEAPON_ARMOR_OPROP(otmp, COLD);
+				ADD_WEAPON_ARMOR_HOLY_OPROP(otmp, COLD);
 			break;
 		}
 		if(!rn2(7)){
@@ -1404,13 +1446,13 @@ struct obj *otmp;	/* existing object */
 					otmp->obj_color = CLR_WHITE;
 			break;
 			case 1:
-				ADD_WEAPON_ARMOR_OPROP(otmp, FIRE);
+				ADD_WEAPON_ARMOR_HOLY_OPROP(otmp, FIRE);
 			break;
 			case 2:
-				ADD_WEAPON_ARMOR_OPROP(otmp, ELEC);
+				ADD_WEAPON_ARMOR_HOLY_OPROP(otmp, ELEC);
 			break;
 			case 3:
-				ADD_WEAPON_ARMOR_OPROP(otmp, COLD);
+				ADD_WEAPON_ARMOR_HOLY_OPROP(otmp, COLD);
 			break;
 			case 4:
 				add_oprop(otmp, OPROP_BCRS);
@@ -1489,13 +1531,13 @@ struct obj *otmp;	/* existing object */
 		}
 		if(rn2(3)) switch(rnd(3)){
 			case 1:
-				ADD_WEAPON_ARMOR_OPROP(otmp, FIRE);
+				ADD_WEAPON_ARMOR_HOLY_OPROP(otmp, FIRE);
 			break;
 			case 2:
-				ADD_WEAPON_ARMOR_OPROP(otmp, ELEC);
+				ADD_WEAPON_ARMOR_HOLY_OPROP(otmp, ELEC);
 			break;
 			case 3:
-				ADD_WEAPON_ARMOR_OPROP(otmp, COLD);
+				ADD_WEAPON_ARMOR_HOLY_OPROP(otmp, COLD);
 			break;
 		}
 		else if(rn2(3)){
@@ -1542,13 +1584,13 @@ struct obj *otmp;	/* existing object */
 	if(otmp->oclass == ARMOR_CLASS){
 		if(rn2(4)) switch(rn2(6)){
 			case 0:
-				ADD_WEAPON_ARMOR_OPROP(otmp, ELEC);
+				ADD_WEAPON_ARMOR_HELL_OPROP(otmp, ELEC);
 			break;
 			case 1:
-				ADD_WEAPON_ARMOR_OPROP(otmp, FIRE);
+				ADD_WEAPON_ARMOR_HELL_OPROP(otmp, FIRE);
 			break;
 			case 2:
-				ADD_WEAPON_ARMOR_OPROP(otmp, COLD);
+				ADD_WEAPON_ARMOR_HELL_OPROP(otmp, COLD);
 			break;
 			case 3:
 				ADD_WEAPON_ARMOR_OPROP(otmp, MAGC);
@@ -1599,13 +1641,13 @@ struct obj *otmp;	/* existing object */
 	else if(otmp->oclass == RING_CLASS){
 		if(rn2(4)) switch(rn2(6)){
 			case 0:
-				ADD_WEAPON_ARMOR_OPROP(otmp, ELEC);
+				ADD_WEAPON_ARMOR_HELL_OPROP(otmp, ELEC);
 			break;
 			case 1:
-				ADD_WEAPON_ARMOR_OPROP(otmp, FIRE);
+				ADD_WEAPON_ARMOR_HELL_OPROP(otmp, FIRE);
 			break;
 			case 2:
-				ADD_WEAPON_ARMOR_OPROP(otmp, COLD);
+				ADD_WEAPON_ARMOR_HELL_OPROP(otmp, COLD);
 			break;
 			case 3:
 				ADD_WEAPON_ARMOR_OPROP(otmp, MAGC);
@@ -1661,13 +1703,13 @@ struct obj *otmp;	/* existing object */
 	if(otmp->oclass == ARMOR_CLASS){
 		if(rn2(4)) switch(rn2(6)){
 			case 0:
-				ADD_WEAPON_ARMOR_OPROP(otmp, ACID);
+				ADD_WEAPON_ARMOR_HELL_OPROP(otmp, ACID);
 			break;
 			case 1:
-				ADD_WEAPON_ARMOR_OPROP(otmp, FIRE);
+				ADD_WEAPON_ARMOR_HELL_OPROP(otmp, FIRE);
 			break;
 			case 2:
-				ADD_WEAPON_ARMOR_OPROP(otmp, COLD);
+				ADD_WEAPON_ARMOR_HELL_OPROP(otmp, COLD);
 			break;
 			case 3:
 				ADD_WEAPON_ARMOR_OPROP(otmp, MAGC);
@@ -1721,13 +1763,13 @@ struct obj *otmp;	/* existing object */
 	else if(otmp->oclass == RING_CLASS){
 		if(rn2(4)) switch(rn2(6)){
 			case 0:
-				ADD_WEAPON_ARMOR_OPROP(otmp, ACID);
+				ADD_WEAPON_ARMOR_HELL_OPROP(otmp, ACID);
 			break;
 			case 1:
-				ADD_WEAPON_ARMOR_OPROP(otmp, FIRE);
+				ADD_WEAPON_ARMOR_HELL_OPROP(otmp, FIRE);
 			break;
 			case 2:
-				ADD_WEAPON_ARMOR_OPROP(otmp, COLD);
+				ADD_WEAPON_ARMOR_HELL_OPROP(otmp, COLD);
 			break;
 			case 3:
 				ADD_WEAPON_ARMOR_OPROP(otmp, MAGC);
@@ -1829,6 +1871,17 @@ int vn;
 	return otmp;
 }
 
+#define MK_SPECIAL_RESISTANCE(otmp, prop) \
+			if(rn2(20)){ \
+				ADD_WEAPON_ARMOR_OPROP(otmp, prop); \
+			} \
+			else if(rn2(7)){ \
+				ADD_WEAPON_ARMOR_HELL_OPROP(otmp, prop); \
+			} \
+			else { \
+				ADD_WEAPON_ARMOR_HOLY_OPROP(otmp, prop); \
+			}
+
 struct obj *
 mk_special(otmp)
 struct obj *otmp;	/* existing object */
@@ -1894,16 +1947,16 @@ struct obj *otmp;	/* existing object */
 		switch(prop)
 		{
 		case 1:
-			ADD_WEAPON_ARMOR_OPROP(otmp, FIRE);
+			MK_SPECIAL_RESISTANCE(otmp, FIRE);
 		break;
 		case 2:
-			ADD_WEAPON_ARMOR_OPROP(otmp, COLD);
+			MK_SPECIAL_RESISTANCE(otmp, COLD);
 		break;
 		case 3:
-			ADD_WEAPON_ARMOR_OPROP(otmp, ELEC);
+			MK_SPECIAL_RESISTANCE(otmp, ELEC);
 		break;
 		case 4:
-			ADD_WEAPON_ARMOR_OPROP(otmp, ACID);
+			MK_SPECIAL_RESISTANCE(otmp, ACID);
 		break;
 		case 5:
 			ADD_WEAPON_ARMOR_OPROP(otmp, MAGC);
@@ -1931,16 +1984,16 @@ struct obj *otmp;	/* existing object */
 		switch(prop)
 		{
 		case 1:
-			ADD_WEAPON_ARMOR_OPROP(otmp, FIRE);
+			MK_SPECIAL_RESISTANCE(otmp, FIRE);
 		break;
 		case 2:
-			ADD_WEAPON_ARMOR_OPROP(otmp, COLD);
+			MK_SPECIAL_RESISTANCE(otmp, COLD);
 		break;
 		case 3:
-			ADD_WEAPON_ARMOR_OPROP(otmp, ELEC);
+			MK_SPECIAL_RESISTANCE(otmp, ELEC);
 		break;
 		case 4:
-			ADD_WEAPON_ARMOR_OPROP(otmp, ACID);
+			MK_SPECIAL_RESISTANCE(otmp, ACID);
 		break;
 		case 5:
 			ADD_WEAPON_ARMOR_OPROP(otmp, MAGC);
@@ -3420,6 +3473,7 @@ get_premium_heart_multiplier()
 	return multiplier;
 }
 
+// #define DBON_DBUG TRUE
 /* special damage bonus */
 /* returns FALSE if no bonus damage was applicable */
 boolean
@@ -3429,6 +3483,14 @@ spec_dbon(struct obj *otmp, struct monst *mon, int basedmg, int *plusdmgptr, int
 	int damd = (int)weap->damage;
 	boolean goodpointers = (plusdmgptr && truedmgptr);
 	boolean youagr = (magr == &youmonst);
+#ifdef DBON_DBUG
+	int plusdmg_tracker = 0;
+	int truedmg_tracker = 0;
+	if(goodpointers){
+		plusdmg_tracker = *plusdmgptr;
+		truedmg_tracker = *truedmgptr;
+	}
+#endif
 	
 	/* check that we were given an artifact */
 	if (!weap)
@@ -3440,7 +3502,9 @@ spec_dbon(struct obj *otmp, struct monst *mon, int basedmg, int *plusdmgptr, int
 			double mult = 1;
 			if(fire_vulnerable(mon))
 				mult *= 1.5;
-			*truedmgptr += mult*basedmg;
+			int fire_dmg = (int)(mult*basedmg);
+			fire_dmg = elemental_dmg_resistance(mon, magr, fire_dmg, AD_FIRE);
+			*truedmgptr += fire_dmg;
 		}
 		if (!Magic_res(mon) && artinstance[otmp->oartifact].RRSlunar >= moves){
 			double mult = 1;
@@ -3449,6 +3513,18 @@ spec_dbon(struct obj *otmp, struct monst *mon, int basedmg, int *plusdmgptr, int
 			*truedmgptr += mult*basedmg;
 		}
 	}
+#ifdef DBON_DBUG
+	if (goodpointers) {
+		if(*plusdmgptr != plusdmg_tracker){
+			pline("Ringed Spear bonus damage: %d", *plusdmgptr - plusdmg_tracker);
+			plusdmg_tracker = *plusdmgptr;
+		}
+		if(*truedmgptr != truedmg_tracker){
+			pline("Ringed Spear true damage: %d", *truedmgptr - truedmg_tracker);
+			truedmg_tracker = *truedmgptr;
+		}
+	}
+#endif
 	
 	/* check that the artifact is offensive */
 	if (!(weap->adtyp || weap->damage || weap->accuracy))
@@ -3457,6 +3533,10 @@ spec_dbon(struct obj *otmp, struct monst *mon, int basedmg, int *plusdmgptr, int
 	/* The Annulus is a 2x damage artifact if it isn't a lightsaber */
 	if(otmp->oartifact == ART_ANNULUS && !is_lightsaber(otmp))
 		damd = 0;
+#ifdef DBON_DBUG
+	if(otmp->oartifact == ART_ANNULUS && !is_lightsaber(otmp))
+		pline("Annulus non-lightsaber: damd set to 0");
+#endif
 
 	/* The black arrow deals 4x damage + 108, and overkills Smaug */
 	if (otmp->oartifact == ART_BLACK_ARROW) {
@@ -3465,6 +3545,18 @@ spec_dbon(struct obj *otmp, struct monst *mon, int basedmg, int *plusdmgptr, int
 			if (mon->mtyp == PM_SMAUG)
 				*truedmgptr += mon->mhpmax;
 		}
+#ifdef DBON_DBUG
+		if (goodpointers) {
+			if(*plusdmgptr != plusdmg_tracker){
+				pline("Black Arrow bonus damage: %d", *plusdmgptr - plusdmg_tracker);
+				plusdmg_tracker = *plusdmgptr;
+			}
+			if(*truedmgptr != truedmg_tracker){
+				pline("Black Arrow true damage: %d", *truedmgptr - truedmg_tracker);
+				truedmg_tracker = *truedmgptr;
+			}
+		}
+#endif
 		/* return immediately */
 		return TRUE;
 	}
@@ -3475,6 +3567,9 @@ spec_dbon(struct obj *otmp, struct monst *mon, int basedmg, int *plusdmgptr, int
 			(weap->inv_prop == ICE_SHIKAI && artinstance[otmp->oartifact].SnSd3duration < monstermoves) /* only while invoked */
 			||	(otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD && !otmp->lamplit)	/* only while lit */
 			);
+#ifdef DBON_DBUG
+	pline("spec_dbon_applies: %s", spec_dbon_applies ? "TRUE" : "FALSE");
+#endif
 	/* determine if we will apply bonus damage */
 	if ((spec_dbon_applies && !(
 			(weap->adtyp == AD_SLEE) ||	(weap->adtyp == AD_STDY)	/* doesn't do damage */
@@ -3537,22 +3632,58 @@ spec_dbon(struct obj *otmp, struct monst *mon, int basedmg, int *plusdmgptr, int
 			damd = (damd + 1) / 2;
 			dmgtomulti = (dmgtomulti + 1) / 2;
 		}
+#ifdef DBON_DBUG
+		pline("spec_dbon: multiplier=%d, damd=%d, dmgtomulti=%d", multiplier, damd, dmgtomulti);
+#endif
 
 		/* add the damage to the appropriate pointer, if allowable */
 		if (goodpointers) {
+			int spec_bonus = damd ? d(multiplier, damd) : max(dmgtomulti, 1)*multiplier;
+			spec_bonus = elemental_dmg_resistance(mon, magr, spec_bonus, weap->adtyp);
 			if (spec_applies(otmp, mon, TRUE))
-				*truedmgptr += (damd ? d(multiplier, damd) : max(dmgtomulti, 1)*multiplier);
+				*truedmgptr += spec_bonus;
 			else
-				*plusdmgptr += (damd ? d(multiplier, damd) : max(dmgtomulti, 1)*multiplier);
+				*plusdmgptr += spec_bonus;
+#ifdef DBON_DBUG
+			if(*plusdmgptr != plusdmg_tracker){
+				pline("Main bonus damage: %d", *plusdmgptr - plusdmg_tracker);
+				plusdmg_tracker = *plusdmgptr;
+			}
+			if(*truedmgptr != truedmg_tracker){
+				pline("Main true damage: %d", *truedmgptr - truedmg_tracker);
+				truedmg_tracker = *truedmgptr;
+			}
+#endif
 
 			//Also do a fireball or a hail effect
 			if(otmp->oartifact == ART_FIRE_BRAND && spec_dbon_applies){
-				*truedmgptr += d(6*multiplier, 6);
+				int fire_bonus = d(6*multiplier, 6);
+				fire_bonus = elemental_dmg_resistance(mon, magr, fire_bonus, AD_FIRE);
+				*truedmgptr += fire_bonus;
+#ifdef DBON_DBUG
+				if(*truedmgptr != truedmg_tracker){
+					pline("Fire Brand fireball true damage: %d", *truedmgptr - truedmg_tracker);
+					truedmg_tracker = *truedmgptr;
+				}
+#endif
 			}
 			else if(otmp->oartifact == ART_FROST_BRAND){
-				if(spec_dbon_applies)
-					*truedmgptr += d(3*multiplier, 8);
-				*plusdmgptr += d(3*multiplier, 8);
+				if(spec_dbon_applies) {
+					int cold_truedmg = d(3*multiplier, 8);
+					cold_truedmg = elemental_dmg_resistance(mon, magr, cold_truedmg, AD_COLD);
+					*truedmgptr += cold_truedmg;
+				}
+				*plusdmgptr += d(3*multiplier, 8); /* physical hail impact */
+#ifdef DBON_DBUG
+				if(*plusdmgptr != plusdmg_tracker){
+					pline("Frost Brand hail bonus damage: %d", *plusdmgptr - plusdmg_tracker);
+					plusdmg_tracker = *plusdmgptr;
+				}
+				if(*truedmgptr != truedmg_tracker){
+					pline("Frost Brand hail true damage: %d", *truedmgptr - truedmg_tracker);
+					truedmg_tracker = *truedmgptr;
+				}
+#endif
 			}
 		}
 		return TRUE;
@@ -3741,7 +3872,9 @@ voidPen_hit(struct monst *magr, struct monst *mdef, struct obj *pen, int *dmgptr
 	    if (youdefend && FrozenAir) melt_frozen_air();
 	    // if(youdef ? (hates_unholy(youracedata)) : (hates_unholy_mon(mdef))){
 		if(youdefend ? !Fire_resistance : !resists_fire(mdef)){
-			*dmgptr += d(dnum,4);
+			int fire_damage = d(dnum,4);
+			fire_damage = elemental_dmg_resistance(mdef, (struct monst *) 0, fire_damage, AD_FIRE);
+			*dmgptr += fire_damage;
 		}
 	} // triggers narrow_voidPen_hit - fire res
 	if (pen->ovara_seals&SEAL_ASTAROTH) {
@@ -3756,7 +3889,9 @@ voidPen_hit(struct monst *magr, struct monst *mdef, struct obj *pen, int *dmgptr
 		if(youdefend ? !Shock_resistance : !resists_elec(mdef)){
 			if(shock_vulnerable(mdef))
 				dnum *= 2;
-			*dmgptr += d(dnum,4);
+			int shock_damage = d(dnum,4);
+			shock_damage = elemental_dmg_resistance(mdef, (struct monst *) 0, shock_damage, AD_ELEC);
+			*dmgptr += shock_damage;
 		}
 	} // nvPh - shock res
 	if (pen->ovara_seals&SEAL_BALAM) {
@@ -3768,7 +3903,9 @@ voidPen_hit(struct monst *magr, struct monst *mdef, struct obj *pen, int *dmgptr
 	    	if (!rn2(4)) (void) destroy_item(mdef, POTION_CLASS, AD_COLD);
 		}
 		if(youdefend ? !Cold_resistance : !resists_cold(mdef)){
-			*dmgptr += d(dnum,4);
+			int cold_damage = d(dnum,4);
+			cold_damage = elemental_dmg_resistance(mdef, (struct monst *) 0, cold_damage, AD_COLD);
+			*dmgptr += cold_damage;
 		}
 	} // nvPh - cold res
 	if (pen->ovara_seals&SEAL_BERITH){
@@ -3834,7 +3971,9 @@ voidPen_hit(struct monst *magr, struct monst *mdef, struct obj *pen, int *dmgptr
 		if(youdefend ? !Acid_resistance : !resists_acid(mdef)){
 			if(acid_vulnerable(mdef))
 				dnum *= 2;
-			*dmgptr += d(dnum,4);
+			int acid_dmg = d(dnum,4);
+			acid_dmg = elemental_dmg_resistance(mdef, (struct monst *) 0, acid_dmg, AD_ACID);
+			*dmgptr += acid_dmg;
 		}
 	} // nvPh - acid res
 	if (pen->ovara_seals&SEAL_ENKI) {
@@ -4288,11 +4427,13 @@ Mb_hit(struct monst *magr, struct monst *mdef, struct obj *mb, int *dmgptr, int 
 	} else if(mb->oartifact == ART_FRIEDE_S_SCYTHE){
 		if(youdefend){
 			if(!Cold_resistance){
-				if(cold_vulnerable(&youmonst)){
-					*dmgptr += 1.5 * (*dmgptr);
-				} else {
-					*dmgptr += *dmgptr;
-				}
+				int cold_bonus;
+				if(cold_vulnerable(&youmonst))
+					cold_bonus = (int)(1.5 * (*dmgptr));
+				else
+					cold_bonus = *dmgptr;
+				cold_bonus = elemental_dmg_resistance(mdef, magr, cold_bonus, AD_COLD);
+				*dmgptr += cold_bonus;
 				if(youmonst.mbleed >= 4){
 					u_slow_down();
 				}
@@ -4303,11 +4444,13 @@ Mb_hit(struct monst *magr, struct monst *mdef, struct obj *mb, int *dmgptr, int 
 			}
 		} else {
 			if(!resists_cold(mdef)){
-				if(cold_vulnerable(mdef)){
-					*dmgptr += 1.5 * (*dmgptr);
-				} else {
-					*dmgptr += *dmgptr;
-				}
+				int cold_bonus;
+				if(cold_vulnerable(mdef))
+					cold_bonus = (int)(1.5 * (*dmgptr));
+				else
+					cold_bonus = *dmgptr;
+				cold_bonus = elemental_dmg_resistance(mdef, magr, cold_bonus, AD_COLD);
+				*dmgptr += cold_bonus;
 				if(mdef->mbleed >= 4){
 					if(mdef->mspeed != MSLOW)
 						pline("%s slows down!", Monnam(mdef));
@@ -4607,22 +4750,30 @@ int * truedmgptr;
 	}
 	
 	if(!Fire_res(mdef)){
+		int fire_dmg = 0;
 		if(check_oprop(otmp, OPROP_FIREW))
-			*truedmgptr += silverknight_bonus*basedmg;
+			fire_dmg += silverknight_bonus*basedmg;
 		if(check_oprop(otmp, OPROP_OONA_FIREW))
-			*truedmgptr += d(1, 8);
+			fire_dmg += d(1, 8);
 		if(check_oprop(otmp, OPROP_LESSER_FIREW))
-			*truedmgptr += d(2, 6);
+			fire_dmg += d(2, 6);
 		if(check_oprop(otmp, OPROP_GOLDW))
-			*truedmgptr += d(5, spiritDsize());
+			fire_dmg += d(5, spiritDsize());
+		if(fire_dmg > 0)
+			fire_dmg = elemental_dmg_resistance(mdef, magr, fire_dmg, AD_FIRE);
+		*truedmgptr += fire_dmg;
 	}
 	if(!Cold_res(mdef)){
+		int cold_dmg = 0;
 		if(check_oprop(otmp, OPROP_COLDW))
-			*truedmgptr += silverknight_bonus*basedmg;
+			cold_dmg += silverknight_bonus*basedmg;
 		if(check_oprop(otmp, OPROP_OONA_COLDW))
-			*truedmgptr += d(1, 8);
+			cold_dmg += d(1, 8);
 		if(check_oprop(otmp, OPROP_LESSER_COLDW))
-			*truedmgptr += d(2, 6);
+			cold_dmg += d(2, 6);
+		if(cold_dmg > 0)
+			cold_dmg = elemental_dmg_resistance(mdef, magr, cold_dmg, AD_COLD);
+		*truedmgptr += cold_dmg;
 	}
 	if(check_oprop(otmp, OPROP_WATRW) || check_oprop(otmp, OPROP_LESSER_WATRW)){
 		struct obj *cloak = which_armor(mdef, W_ARMC);
@@ -4655,22 +4806,30 @@ int * truedmgptr;
 		int mult = 1;
 		if(shock_vulnerable(mdef))
 			mult *= 2;
+		int shock_dmg = 0;
 		if(check_oprop(otmp, OPROP_ELECW))
-			*truedmgptr += silverknight_bonus*mult*basedmg;
+			shock_dmg += silverknight_bonus*mult*basedmg;
 		if(check_oprop(otmp, OPROP_OONA_ELECW))
-			*truedmgptr += d(mult*1, 8);
+			shock_dmg += d(mult*1, 8);
 		if(check_oprop(otmp, OPROP_LESSER_ELECW))
-			*truedmgptr += d(mult*2, 6);
+			shock_dmg += d(mult*2, 6);
+		if(shock_dmg > 0)
+			shock_dmg = elemental_dmg_resistance(mdef, magr, shock_dmg, AD_ELEC);
+		*truedmgptr += shock_dmg;
 	}
-	
+
 	if (!Acid_res(mdef)){
 		int mult = 1;
 		if(acid_vulnerable(mdef))
 			mult *= 2;
+		int acid_dmg = 0;
 		if(check_oprop(otmp, OPROP_ACIDW))
-			*truedmgptr += silverknight_bonus*mult*basedmg;
+			acid_dmg += silverknight_bonus*mult*basedmg;
 		if(check_oprop(otmp, OPROP_LESSER_ACIDW))
-			*truedmgptr += d(mult*2, 6);
+			acid_dmg += d(mult*2, 6);
+		if(acid_dmg > 0)
+			acid_dmg = elemental_dmg_resistance(mdef, magr, acid_dmg, AD_ACID);
+		*truedmgptr += acid_dmg;
 	}
 	if (!Magic_res(mdef)){
 		double mult = 1;
@@ -4842,7 +5001,9 @@ int * truedmgptr;
 					int mult = 1;
 					if(acid_vulnerable(mdef))
 						mult *= 2;
-					*truedmgptr += mult*basedmg;
+					int acid_dmg = mult*basedmg;
+					acid_dmg = elemental_dmg_resistance(mdef, magr, acid_dmg, AD_ACID);
+					*truedmgptr += acid_dmg;
 				}
 			break;
 			case AD_DRST:
@@ -4863,7 +5024,9 @@ int * truedmgptr;
 					int mult = 1;
 					if(fire_vulnerable(mdef))
 						mult *= 2;
-					*truedmgptr += d(mult*3,10);
+					int fire_dmg = d(mult*3,10);
+					fire_dmg = elemental_dmg_resistance(mdef, magr, fire_dmg, AD_FIRE);
+					*truedmgptr += fire_dmg;
 				}
 			break;
 			case AD_COLD:
@@ -4871,7 +5034,9 @@ int * truedmgptr;
 					int mult = 1;
 					if(cold_vulnerable(mdef))
 						mult *= 2;
-					*truedmgptr += d(mult*3,8);
+					int cold_dmg = d(mult*3,8);
+					cold_dmg = elemental_dmg_resistance(mdef, magr, cold_dmg, AD_COLD);
+					*truedmgptr += cold_dmg;
 				}
 			break;
 			case AD_ELEC:
@@ -4879,7 +5044,9 @@ int * truedmgptr;
 					int mult = 1;
 					if(shock_vulnerable(mdef))
 						mult *= 2;
-					*truedmgptr += d(mult*3,8);
+					int shock_dmg = d(mult*3,8);
+					shock_dmg = elemental_dmg_resistance(mdef, magr, shock_dmg, AD_ELEC);
+					*truedmgptr += shock_dmg;
 				}
 			break;
 			case AD_ACID:
@@ -4887,7 +5054,9 @@ int * truedmgptr;
 					int mult = 1;
 					if(acid_vulnerable(mdef))
 						mult *= 2;
-					*truedmgptr += d(mult*4,4);
+					int acid_dmg = d(mult*4,4);
+					acid_dmg = elemental_dmg_resistance(mdef, magr, acid_dmg, AD_ACID);
+					*truedmgptr += acid_dmg;
 				}
 			break;
 		}
@@ -4904,7 +5073,9 @@ int * truedmgptr;
 					double mult = 1;
 					if(fire_vulnerable(mdef))
 						mult *= 1.5;
-					*truedmgptr += mult*rnd(6);
+					int fire_dmg = (int)(mult*rnd(6));
+					fire_dmg = elemental_dmg_resistance(mdef, magr, fire_dmg, AD_FIRE);
+					*truedmgptr += fire_dmg;
 				}
 			break;
 			// case AD_POLY:
@@ -5110,8 +5281,11 @@ int * truedmgptr;
 		int mult = 1;
 		if(shock_vulnerable(mdef))
 			mult *= 2;
-		if(!Shock_res(mdef) && magr)
-			*truedmgptr += mult*atr_dbon(otmp, magr, A_INT);
+		if(!Shock_res(mdef) && magr){
+			int shock_dmg = mult*atr_dbon(otmp, magr, A_INT);
+			shock_dmg = elemental_dmg_resistance(mdef, magr, shock_dmg, AD_ELEC);
+			*truedmgptr += shock_dmg;
+		}
 
 		if(check_reanimation(ANTENNA_ERRANT)){
 			if(youdef && !Tele_blind && (Blind_telepat || !rn2(5))){
@@ -5630,10 +5804,13 @@ boolean direct_weapon;
 	int amalg_otyp = otmp->oartifact == ART_AMALGAMATED_SKIES ? artinstance[ART_SKY_REFLECTED].ZerthOtyp : 0;
 	if (otmp->otyp == TORCH && otmp->lamplit) {
 		if (!Fire_res(mdef)) {
+			int fire_dmg;
 			if (fire_vulnerable(mdef))
-				(*truedmgptr) += 3 * (rnd(10) + otmp->spe) / 2;
+				fire_dmg = 3 * (rnd(10) + otmp->spe) / 2;
 			else
-				(*truedmgptr) += rnd(10) + otmp->spe;
+				fire_dmg = rnd(10) + otmp->spe;
+			fire_dmg = elemental_dmg_resistance(mdef, magr, fire_dmg, AD_FIRE);
+			(*truedmgptr) += fire_dmg;
 		}
 		if (!UseInvFire_res(mdef)){
 			if (!rn2(3)) destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
@@ -5645,18 +5822,24 @@ boolean direct_weapon;
 	}
 	if ((otmp->otyp == MAGIC_TORCH && otmp->lamplit) || amalg_otyp == MAGIC_TORCH){
 		if (!Fire_res(mdef)) {
+			int fire_dmg;
 			if (fire_vulnerable(mdef))
-				(*truedmgptr) += 3 * (rnd(8) + 2*otmp->spe) / 2;
+				fire_dmg = 3 * (rnd(8) + 2*otmp->spe) / 2;
 			else
-				(*truedmgptr) += rnd(8) + 2*otmp->spe;
+				fire_dmg = rnd(8) + 2*otmp->spe;
+			fire_dmg = elemental_dmg_resistance(mdef, magr, fire_dmg, AD_FIRE);
+			(*truedmgptr) += fire_dmg;
 		}
 	}
 	if (otmp->otyp == SHADOWLANDER_S_TORCH && otmp->lamplit){
 		if (!Cold_res(mdef)) {
+			int cold_dmg;
 			if (cold_vulnerable(mdef))
-				(*truedmgptr) += 3 * (rnd(10) + otmp->spe) / 2;
+				cold_dmg = 3 * (rnd(10) + otmp->spe) / 2;
 			else
-				(*truedmgptr) += rnd(10) + otmp->spe;
+				cold_dmg = rnd(10) + otmp->spe;
+			cold_dmg = elemental_dmg_resistance(mdef, magr, cold_dmg, AD_COLD);
+			(*truedmgptr) += cold_dmg;
 		}
 		if (!UseInvCold_res(mdef)){
 			if (!rn2(3)) destroy_item(mdef, POTION_CLASS, AD_COLD);
@@ -5689,19 +5872,16 @@ boolean direct_weapon;
 		}
 	}
 	if ((otmp->otyp == SUNROD && otmp->lamplit) || amalg_otyp == SUNROD) {
-		int num = 1, den = 1;
-		if(!Shock_res(mdef) && !Acid_res(mdef)){
-			num *= 3;
-			den *= 2;
+		int sunrod_base = rnd(10) + otmp->spe;
+		if(!Shock_res(mdef)){
+			int shock_dmg = shock_vulnerable(mdef) ? sunrod_base * 2 : sunrod_base;
+			shock_dmg = elemental_dmg_resistance(mdef, magr, shock_dmg, AD_ELEC);
+			(*truedmgptr) += shock_dmg;
 		}
-		if(shock_vulnerable(mdef)){
-			num *= 2;
-		}
-		if(acid_vulnerable(mdef)){
-			num *= 2;
-		}
-		if(!Shock_res(mdef) || !Acid_res(mdef)){
-			(*truedmgptr) += num * (rnd(10) + otmp->spe) / den;
+		if(!Acid_res(mdef)){
+			int acid_dmg = acid_vulnerable(mdef) ? sunrod_base * 2 : sunrod_base;
+			acid_dmg = elemental_dmg_resistance(mdef, magr, acid_dmg, AD_ACID);
+			(*truedmgptr) += acid_dmg;
 		}
 		if (!UseInvShock_res(mdef)){
 			if (!rn2(3)) destroy_item(mdef, WAND_CLASS, AD_ELEC);
@@ -5733,10 +5913,13 @@ boolean direct_weapon;
 		int tooth_type = amalg_otyp == TOOTH ? rnd(3) : otmp->ovar1_tooth_type;
 		if(tooth_type == MAGMA_TOOTH){
 			if (!Fire_res(mdef)) {
+				int fire_dmg;
 				if (fire_vulnerable(mdef))
-					(*truedmgptr) += 3 * (d(5,10) + otmp->spe) / 2;
+					fire_dmg = 3 * (d(5,10) + otmp->spe) / 2;
 				else
-					(*truedmgptr) += d(5,10) + otmp->spe;
+					fire_dmg = d(5,10) + otmp->spe;
+				fire_dmg = elemental_dmg_resistance(mdef, magr, fire_dmg, AD_FIRE);
+				(*truedmgptr) += fire_dmg;
 			}
 			if (!UseInvFire_res(mdef)){
 				if (rn2(3)) destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
@@ -5752,7 +5935,9 @@ boolean direct_weapon;
 				int mult = 1;
 				if(acid_vulnerable(mdef))
 					mult *= 2;
-				(*truedmgptr) += mult*(d(1,8) + otmp->spe);
+				int acid_dmg = mult*(d(1,8) + otmp->spe);
+				acid_dmg = elemental_dmg_resistance(mdef, magr, acid_dmg, AD_ACID);
+				(*truedmgptr) += acid_dmg;
 			}
 			if (!UseInvAcid_res(mdef)){
 				if (rn2(3)) destroy_item(mdef, POTION_CLASS, AD_FIRE);
@@ -5760,10 +5945,13 @@ boolean direct_weapon;
 		}
 		else if(tooth_type == VOID_TOOTH){
 			if (!Cold_res(mdef)) {
+				int cold_dmg;
 				if (cold_vulnerable(mdef))
-					(*truedmgptr) += 3 * (d(3,3) + otmp->spe) / 2;
+					cold_dmg = 3 * (d(3,3) + otmp->spe) / 2;
 				else
-					(*truedmgptr) += d(3,3) + otmp->spe;
+					cold_dmg = d(3,3) + otmp->spe;
+				cold_dmg = elemental_dmg_resistance(mdef, magr, cold_dmg, AD_COLD);
+				(*truedmgptr) += cold_dmg;
 			}
 			if (!UseInvCold_res(mdef)){
 				if (rn2(3)) destroy_item(mdef, POTION_CLASS, AD_COLD);
@@ -5776,10 +5964,13 @@ boolean direct_weapon;
 		if(shock_vulnerable(mdef))
 			modifier += 1;
 		if (!Shock_res(mdef)) {
+			int shock_dmg;
 			if(magr)
-				(*truedmgptr) += modifier*(rnd(10) + otmp->spe) + atr_dbon(otmp, magr, A_INT);
+				shock_dmg = modifier*(rnd(10) + otmp->spe) + atr_dbon(otmp, magr, A_INT);
 			else
-				(*truedmgptr) += modifier*(rnd(10) + otmp->spe);
+				shock_dmg = modifier*(rnd(10) + otmp->spe);
+			shock_dmg = elemental_dmg_resistance(mdef, magr, shock_dmg, AD_ELEC);
+			(*truedmgptr) += shock_dmg;
 		}
 		if (!UseInvShock_res(mdef)){
 			if (!rn2(3)) destroy_item(mdef, WAND_CLASS, AD_ELEC);
@@ -5826,7 +6017,9 @@ boolean direct_weapon;
 			}
 			if(dnum){
 				if(dtyp == AD_ELEC){
-					*truedmgptr += d(dnum, 6);
+					int shock_dmg = d(dnum, 6);
+					shock_dmg = elemental_dmg_resistance(mdef, magr, shock_dmg, AD_ELEC);
+					*truedmgptr += shock_dmg;
 					if (!UseInvShock_res(mdef)) {
 						if (!rn2(3)) destroy_item(mdef, WAND_CLASS, AD_ELEC);
 						if (!rn2(3)) destroy_item(mdef, RING_CLASS, AD_ELEC);
@@ -5853,10 +6046,13 @@ boolean direct_weapon;
 				if(shock_vulnerable(mdef)){
 					num *= 2;
 				}
+				int shock_dmg;
 				if (otmp->where == OBJ_MINVENT && otmp->ocarry->mtyp == PM_ARA_KAMEREL)
-					*truedmgptr += num*d(6, 6);
+					shock_dmg = num*d(6, 6);
 				else
-					*truedmgptr += num*d(2, 6);
+					shock_dmg = num*d(2, 6);
+				shock_dmg = elemental_dmg_resistance(mdef, magr, shock_dmg, AD_ELEC);
+				*truedmgptr += shock_dmg;
 			}
 			if (!UseInvShock_res(mdef)) {
 				if (!rn2(3)) destroy_item(mdef, WAND_CLASS, AD_ELEC);
@@ -6233,42 +6429,31 @@ boolean direct_weapon;
 			case WAGE_OF_WRATH:
 			case WAGE_OF_ENVY:
 				if(!Fire_res(mdef)){
-					if(fire_vulnerable(mdef)){
-						*truedmgptr += d(3, 9);
-					}
-					else {
-						*truedmgptr += d(2, 9);
-					}
+					int fire_dmg = fire_vulnerable(mdef) ? d(3, 9) : d(2, 9);
+					fire_dmg = elemental_dmg_resistance(mdef, magr, fire_dmg, AD_FIRE);
+					*truedmgptr += fire_dmg;
 				}
 			break;
 			case WAGE_OF_GREED:
 			case WAGE_OF_GLUTTONY:
 				if(!Acid_res(mdef)){
-					if(acid_vulnerable(mdef)){
-						*truedmgptr += d(4, 9);
-					}
-					else {
-						*truedmgptr += d(2, 9);
-					}
+					int acid_dmg = acid_vulnerable(mdef) ? d(4, 9) : d(2, 9);
+					acid_dmg = elemental_dmg_resistance(mdef, magr, acid_dmg, AD_ACID);
+					*truedmgptr += acid_dmg;
 				}
 			break;
 			case WAGE_OF_SLOTH:
 				if(!Cold_res(mdef)){
-					if(cold_vulnerable(mdef)){
-						*truedmgptr += d(3, 9);
-					}
-					else {
-						*truedmgptr += d(2, 9);
-					}
+					int cold_dmg = cold_vulnerable(mdef) ? d(3, 9) : d(2, 9);
+					cold_dmg = elemental_dmg_resistance(mdef, magr, cold_dmg, AD_COLD);
+					*truedmgptr += cold_dmg;
 				}
 			break;
 			case WAGE_OF_PRIDE:
 				if(!Shock_res(mdef)){
-					if(shock_vulnerable(mdef)){
-						*truedmgptr += d(4, 9);
-					}
-					else
-						*truedmgptr += d(2, 9);
+					int shock_dmg = shock_vulnerable(mdef) ? d(4, 9) : d(2, 9);
+					shock_dmg = elemental_dmg_resistance(mdef, magr, shock_dmg, AD_ELEC);
+					*truedmgptr += shock_dmg;
 				}
 			break;
 		}
@@ -6649,8 +6834,10 @@ boolean printmessages; /* print generic elemental damage messages */
 					d(6, 6),
 					EXPL_FIERY, 1);
 			}
-			else
+			else {
+				genoburn = elemental_dmg_resistance(mdef, magr, genoburn, AD_FIRE);
 				*truedmgptr += genoburn;
+			}
 		}
 	}
 	
@@ -7109,7 +7296,9 @@ boolean printmessages; /* print generic elemental damage messages */
 				pline_The("ice-cold blade-shadow freezes %s!", hittee);
 				*messaged = TRUE;
 			}
-			*truedmgptr += d(2, 6) + otmp->spe;
+			int cold_dmg = d(2, 6) + otmp->spe;
+			cold_dmg = elemental_dmg_resistance(mdef, magr, cold_dmg, AD_COLD);
+			*truedmgptr += cold_dmg;
 			if (!UseInvCold_res(mdef)) {
 				if (!rn2(4)) (void) destroy_item(mdef, POTION_CLASS, AD_COLD);
 			}
@@ -8401,8 +8590,9 @@ boolean printmessages; /* print generic elemental damage messages */
 		}
 		if(affected){
 			if(!Fire_res(mdef)){
-				*truedmgptr += d(2,6);
-				*truedmgptr += (basedmg)/2;
+				int fire_dmg = d(2,6) + (basedmg)/2;
+				fire_dmg = elemental_dmg_resistance(mdef, magr, fire_dmg, AD_FIRE);
+				*truedmgptr += fire_dmg;
 			}
 			if (!UseInvFire_res(mdef)) {
 				if (!rn2(4)) (void) destroy_item(mdef, POTION_CLASS, AD_FIRE);
@@ -8474,10 +8664,13 @@ boolean printmessages; /* print generic elemental damage messages */
 		//Torch effects when the moon is gibbous
 		if((phase_of_the_moon() == 3 || phase_of_the_moon() == 5) && otmp->otyp == CLAWED_HAND){
 			if(!Fire_res(mdef)){
+				int fire_dmg;
 				if (fire_vulnerable(mdef))
-					(*truedmgptr) += 3 * (rnd(16) + otmp->spe) / 2;
+					fire_dmg = 3 * (rnd(16) + otmp->spe) / 2;
 				else
-					(*truedmgptr) += rnd(16) + otmp->spe;
+					fire_dmg = rnd(16) + otmp->spe;
+				fire_dmg = elemental_dmg_resistance(mdef, magr, fire_dmg, AD_FIRE);
+				(*truedmgptr) += fire_dmg;
 			}
 			if (!UseInvFire_res(mdef)){
 				if (rn2(3)) destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
@@ -8491,8 +8684,11 @@ boolean printmessages; /* print generic elemental damage messages */
 		const struct artifact *weap = get_artifact(otmp);
 		if((weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART)){
 			if(activeMentalEdge(GSTYLE_COLD)){
-				if(!Cold_res(mdef))
-					(*truedmgptr) += EDGE_KENSEI ? d(6,6) : u.usanity > 50 ? 0 : u.usanity > 25 ? d(2,6) : u.usanity > 10 ? d(4,6) : d(6,6);
+				if(!Cold_res(mdef)){
+					int cold_dmg = EDGE_KENSEI ? d(6,6) : u.usanity > 50 ? 0 : u.usanity > 25 ? d(2,6) : u.usanity > 10 ? d(4,6) : d(6,6);
+					cold_dmg = elemental_dmg_resistance(mdef, magr, cold_dmg, AD_COLD);
+					(*truedmgptr) += cold_dmg;
+				}
 				if(hates_unholy_mon(mdef))
 					(*truedmgptr) += EDGE_KENSEI ? d(3,9) : u.usanity > 50 ? 0 : u.usanity > 25 ? d(1,9) : u.usanity > 10 ? d(2,9) : d(3,9);
 			}
@@ -8549,6 +8745,7 @@ boolean printmessages; /* print generic elemental damage messages */
 			}
 			if(fire_vulnerable(mdef))
 				fire_damage *= 1.5;
+			fire_damage = elemental_dmg_resistance(mdef, magr, fire_damage, AD_FIRE);
 			*truedmgptr += fire_damage;
 			
 			if (!UseInvFire_res(mdef)){
@@ -8562,10 +8759,13 @@ boolean printmessages; /* print generic elemental damage messages */
 			if(!Acid_res(mdef)){
 				if(acid_vulnerable(mdef))
 					n *= 2;
+				int acid_dmg;
 				if(NightmareAware_Insanity >= 48)
-					*truedmgptr += d(n,12);
+					acid_dmg = d(n,12);
 				else
-					*truedmgptr += d(n,NightmareAware_Insanity/4);
+					acid_dmg = d(n,NightmareAware_Insanity/4);
+				acid_dmg = elemental_dmg_resistance(mdef, magr, acid_dmg, AD_ACID);
+				*truedmgptr += acid_dmg;
 			}
 			if(!UseInvAcid_res(mdef)){
 				if (rn2(3)) destroy_item(mdef, POTION_CLASS, AD_FIRE);
@@ -8831,8 +9031,10 @@ boolean printmessages; /* print generic elemental damage messages */
 				}
 			}
 			if(!Fire_res(mdef)){
-				*truedmgptr += d(2,6);
-				if(affected) *truedmgptr += (basedmg)/2;
+				int fire_dmg = d(2,6);
+				if(affected) fire_dmg += (basedmg)/2;
+				fire_dmg = elemental_dmg_resistance(mdef, magr, fire_dmg, AD_FIRE);
+				*truedmgptr += fire_dmg;
 			}
 			if (!UseInvFire_res(mdef)) {
 				if (!rn2(4)) (void) destroy_item(mdef, POTION_CLASS, AD_FIRE);
@@ -9053,14 +9255,11 @@ boolean printmessages; /* print generic elemental damage messages */
 	}
 	/* Stormbringer chaos storm */
 	if (oartifact == ART_STORMBRINGER && !Shock_res(mdef) && activeRune(FRUNE_CHAOS)) {
-		if(dieroll <= 2){
-			if(shock_vulnerable(mdef))
-				*plusdmgptr += 2*basedmg;
-			else *plusdmgptr += basedmg;
-		}
-		if(shock_vulnerable(mdef))
-			*plusdmgptr += d(2,8);
-		else *plusdmgptr += d(1,8);
+		int shock_dmg = shock_vulnerable(mdef) ? d(2,8) : d(1,8);
+		if(dieroll <= 2)
+			shock_dmg += shock_vulnerable(mdef) ? 2*basedmg : basedmg;
+		shock_dmg = elemental_dmg_resistance(mdef, magr, shock_dmg, AD_ELEC);
+		*plusdmgptr += shock_dmg;
 	}
 
 	/* the Tecpatl of Huehueteotl can sacrifice low-enough-health monsters (not you, though!) 
@@ -9173,14 +9372,18 @@ boolean printmessages; /* print generic elemental damage messages */
 	if (oartifact == ART_SHADOWLOCK) {
 		if (youagr) {
 			int nat_dr = slot_udr(ARM_DR, (struct monst *)0, W_UPGRADE, AD_PHYS);
-			int dmg = d(4,6) + otmp->spe + (Cold_resistance ? 0 : (d(2,6) + otmp->spe));
+			int cold_extra = Cold_resistance ? 0 : (d(2,6) + otmp->spe);
+			cold_extra = elemental_dmg_resistance(&youmonst, (struct monst *)0, cold_extra, AD_COLD);
+			int dmg = d(4,6) + otmp->spe + cold_extra;
 			dmg = max(dmg-nat_dr, 0);
 			losehp(dmg, "a cold black blade", KILLED_BY);
 			if(!Cold_resistance && !rn2(4)) (void) destroy_item(magr, POTION_CLASS, AD_COLD);
 		} else if(magr->mtyp != PM_LEVISTUS){
 			int base, armdr, nat_dr;
 			mon_slot_dr(magr, (struct monst *)0, ARM_DR, &base, &armdr, &nat_dr, 0);
-			int dmg = d(4,6) + otmp->spe + (resists_cold(magr) ? 0 : (d(2,6) + otmp->spe));
+			int cold_extra = resists_cold(magr) ? 0 : (d(2,6) + otmp->spe);
+			cold_extra = elemental_dmg_resistance(magr, (struct monst *)0, cold_extra, AD_COLD);
+			int dmg = d(4,6) + otmp->spe + cold_extra;
 			dmg = max(dmg-nat_dr, 0);
 			magr->mhp -= dmg;
 			if(!resists_cold(magr) && !rn2(4)) (void) destroy_item(magr, POTION_CLASS, AD_COLD);
@@ -9900,9 +10103,9 @@ struct obj *obj;
 	obj->ovara_carapace |= picked;
 	if(obj == uarm){
 		if(picked == CPROP_FIRE_RES)
-			EFire_resistance |= W_ARM;
+			u.uprops[FIRE_RES].intrinsic |= W_ARM;
 		else if(picked == CPROP_ACID_RES)
-			EAcid_resistance |= W_ARM;
+			u.uprops[ACID_RES].intrinsic |= W_ARM;
 		else if(picked == CPROP_REGEN)
 			ERegeneration |= W_ARM;
 		else if(picked == CPROP_DRAINRES)

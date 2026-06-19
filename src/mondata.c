@@ -108,30 +108,106 @@ int mtyp;
 	return;
 }
 
+int
+hell_dice()
+{
+	if (u.uz.dnum != dungeon_topology.d_hell1_level.dnum
+	    || u.uz.dlevel <= dungeon_topology.d_hell1_level.dlevel)
+		return 1;
+	if (u.uz.dlevel <= dungeon_topology.d_hell2_level.dlevel)
+		return 4;
+	return !mvitals[PM_ASMODEUS].died ? 9 : 4;
+}
+
+int
+choose_hellish_energy()
+{
+	int variant;
+	static const int chroma_types[] = { AD_FIRE, AD_ACID, AD_ELEC, AD_COLD, AD_DRCO };
+
+	if (u.uz.dnum != dungeon_topology.d_hell1_level.dnum
+	    || u.uz.dlevel < dungeon_topology.d_hell1_level.dlevel)
+		variant = 1;
+	else if (u.uz.dlevel < dungeon_topology.d_hell2_level.dlevel)
+		variant = 2;
+	else
+		variant = 3;
+
+	switch (variant) {
+	case 1:
+		switch (dungeon_topology.hell1_variant) {
+		case BAEL_LEVEL:     return AD_FIRE;
+		case DISPATER_LEVEL: return AD_FIRE;
+		case MAMMON_LEVEL:   return AD_ACID;
+		case BELIAL_LEVEL:   return AD_FIRE;
+		case CHROMA_LEVEL:   return chroma_types[rn2(5)];
+		default:             return AD_FIRE;
+		}
+	case 2:
+		switch (dungeon_topology.hell2_variant) {
+		case LEVIATHAN_LEVEL:      return AD_COLD;
+		case LILITH_LEVEL:         return AD_ACID;
+		case BAALZEBUB_LEVEL:      return AD_ELEC;
+		case MEPHISTOPHELES_LEVEL: return rn2(2) ? AD_FIRE : rn2(8) ? AD_COLD : AD_ECLD;
+		default:                   return AD_COLD;
+		}
+	default: { /* Asmodeus: 3/9 fire, 3/9 cold, 1/9 each phys/acid/elec */
+		int r = rn2(9);
+		if (r < 3) return AD_FIRE;
+		if (r < 6) return AD_COLD;
+		if (r < 7) return AD_DRLI;
+		if (r < 8) return AD_ACID;
+		return AD_ELEC;
+	}
+	}
+}
+
 void
 update_mon_mvar(mon, oldpm, newpm)
 struct monst *mon;
 int oldpm;
 int newpm;
 {
-	//set mvar1
-	if(is_vectored_mtyp(newpm)){
-		if(!is_vectored_mtyp(oldpm))
-			mon->mvar_vector = rn2(8);
-		//else same as old
-	}
-	else if(is_half_dragon(&mons[newpm])){
-		if(!is_half_dragon(&mons[oldpm])){
-			static const int half_dragon_types[] = { AD_COLD, AD_FIRE, AD_SLEE, AD_ELEC, AD_DRST, AD_ACID };
+	//set melement
+	if(is_half_dragon(&mons[newpm])){
+		static const int half_dragon_types[] = { AD_COLD, AD_FIRE, AD_SLEE, AD_ELEC, AD_DRST, AD_ACID };
+		boolean already_valid = FALSE;
+		for(int i = 0; i < SIZE(half_dragon_types); i++){
+			if(mon->mvar_hdBreath == half_dragon_types[i]){
+				already_valid = TRUE;
+				break;
+			}
+		}
+		if(!already_valid){
 			mon->mvar_hdBreath = half_dragon_types[rn2(6)];
 		}
 	}
 	else if(is_boreal_dragoon(&mons[newpm])){
 		if(!is_boreal_dragoon(&mons[oldpm])){
 			static const int boreal_dragon_types[] = { AD_COLD, AD_FIRE, AD_MAGM, AD_PHYS };
-			if (!mon->mvar_hdBreath)
+			boolean already_valid = FALSE;
+			for(int i = 0; i < SIZE(boreal_dragon_types); i++){
+				if(mon->mvar_hdBreath == boreal_dragon_types[i]){
+					already_valid = TRUE;
+					break;
+				}
+			}
+			if(!already_valid){
 				mon->mvar_hdBreath = boreal_dragon_types[rn2(4)];
+			}
 		}
+	}
+	else if(is_hellish_wielder(&mons[newpm])){
+		if(!is_hellish_wielder(&mons[oldpm]))
+			mon->melement = choose_hellish_energy();
+		/* else keep existing energy across poly forms */
+	}
+	//else leave as-is. May as well stay consistent between forms, if possib
+	//set mvar1
+	if(is_vectored_mtyp(newpm)){
+		if(!is_vectored_mtyp(oldpm))
+			mon->mvar_vector = rn2(8);
+		//else same as old
 	}
 	else if(has_sunflask(newpm)){
 		if(!has_sunflask(oldpm)){
@@ -311,6 +387,9 @@ struct permonst * ptr;
 			case AD_PHYS:
 			break;
 		}
+	} else if(is_hellish_wielder(ptr)){
+		if (!mon->melement)
+			mon->melement = choose_hellish_energy();
 	}
 #define set_mintrinsic(ptr_condition, intrinsic) \
 	if ((ptr_condition))	{ mon->mintrinsics[((intrinsic)-1)/32] |=  (1L<<((intrinsic)-1)%32); } \
@@ -319,6 +398,36 @@ struct permonst * ptr;
 #define set_mintrinsic_cancelable(ptr_condition, intrinsic) \
 	if ((ptr_condition) && !mon->mcan)	{ mon->mintrinsics[((intrinsic)-1)/32] |=  (1L<<((intrinsic)-1)%32); } \
 	else								{ mon->mintrinsics[((intrinsic)-1)/32] &= ~(1L<<((intrinsic)-1)%32); }
+
+	/* resistances */
+	if(ptr->mresists & MR_FIRE){
+		set_mintrinsic(TRUE, FIRE_RES);
+		set_mintrinsic(is_demon(ptr) || is_undead(ptr), HELL_FIRE_RES);
+		set_mintrinsic(is_angel(ptr) || is_elemental(ptr), HOLY_FIRE_RES);
+	}
+	if(ptr->mresists & MR_COLD){
+		set_mintrinsic(TRUE, COLD_RES);
+		set_mintrinsic(is_demon(ptr) || is_undead(ptr), HELL_COLD_RES);
+		set_mintrinsic(is_angel(ptr) || is_elemental(ptr), HOLY_COLD_RES);
+	}
+	set_mintrinsic(ptr->mresists & MR_SLEEP, SLEEP_RES);
+	set_mintrinsic(ptr->mresists & MR_DISINT, DISINT_RES);
+	if(ptr->mresists & MR_ELEC){
+		set_mintrinsic(TRUE, SHOCK_RES);
+		set_mintrinsic(is_demon(ptr) || is_undead(ptr), HELL_SHOCK_RES);
+		set_mintrinsic(is_angel(ptr) || is_elemental(ptr), HOLY_SHOCK_RES);
+	}
+	set_mintrinsic(ptr->mresists & MR_POISON, POISON_RES);
+	if(ptr->mresists & MR_ACID){
+		set_mintrinsic(TRUE, ACID_RES);
+		set_mintrinsic(is_demon(ptr) || is_undead(ptr), HELL_ACID_RES);
+		set_mintrinsic(is_angel(ptr) || is_elemental(ptr), HOLY_ACID_RES);
+	}
+	set_mintrinsic(ptr->mresists & MR_STONE, STONE_RES);
+	set_mintrinsic(ptr->mresists & MR_DRAIN, DRAIN_RES);
+	set_mintrinsic(ptr->mresists & MR_SICK, SICK_RES);
+	set_mintrinsic(ptr->mresists & MR_MAGIC, ANTIMAGIC);
+	set_mintrinsic(ptr->mresists & MR_REFLECT, REFLECTING);
 
 	/* other intrinsics */
 	set_mintrinsic(species_swims(mon->data), SWIMMING);
@@ -331,6 +440,33 @@ struct permonst * ptr;
 	set_mintrinsic_cancelable(species_teleports(mon->data), TELEPORT);
 	set_mintrinsic_cancelable(species_controls_teleports(mon->data), TELEPORT_CONTROL);
 	set_mintrinsic_cancelable(species_is_telepathic(mon->data), TELEPAT);
+	if(is_hellish_wielder(ptr)){
+		switch(mon->melement){
+		case AD_FIRE:
+			set_mintrinsic(TRUE, FIRE_RES);
+			set_mintrinsic(TRUE, HELL_FIRE_RES);
+		break;
+		case AD_COLD:
+		case AD_ECLD:
+			set_mintrinsic(TRUE, COLD_RES);
+			set_mintrinsic(TRUE, HELL_COLD_RES);
+		break;
+		case AD_ELEC:
+			set_mintrinsic(TRUE, SHOCK_RES);
+			set_mintrinsic(TRUE, HELL_SHOCK_RES);
+		break;
+		case AD_ACID:
+			set_mintrinsic(TRUE, ACID_RES);
+			set_mintrinsic(TRUE, HELL_ACID_RES);
+		break;
+		case AD_DRCO:
+			set_mintrinsic(TRUE, POISON_RES);
+		break;
+		case AD_DRLI:
+			set_mintrinsic(TRUE, DRAIN_RES);
+		break;
+		}
+	}
 #undef set_mintrinsic
 #undef set_mintrinsic_cancelable
 	for(i = 0; i < MPROP_SIZE; i++){
@@ -2619,8 +2755,25 @@ resists_fire(mon)
 	
 	if(mon_vulnerability(mon, FIRE_RES))
 		return FALSE;
-	
-	return (species_resists_fire(mon) || mon_resistance(mon, FIRE_RES) || (mon == u.usteed && u.sealsActive&SEAL_BERITH && Fire_resistance));
+
+	if(!mon->mpeaceful)
+		return (species_resists_fire(mon) || mon_resistance(mon, FIRE_RES) ||
+		        mon_resistance(mon, HELL_FIRE_RES) || mon_resistance(mon, HOLY_FIRE_RES) ||
+		        ward_at(mon->mx, mon->my) == SIGIL_OF_CTHUGHA);
+
+	if(mon_resistance(mon, HOLY_FIRE_RES) || (mon == u.usteed && u.sealsActive&SEAL_BERITH && Fire_resistance))
+		return TRUE;
+
+	if(mon_resistance(mon, HELL_FIRE_RES) && !In_endgame(&u.uz))
+		return TRUE;
+
+	if((species_resists_fire(mon) || mon_resistance(mon, FIRE_RES)) && !Inhell && !In_endgame(&u.uz))
+		return TRUE;
+
+	if(ward_at(mon->mx, mon->my) == SIGIL_OF_CTHUGHA)
+		return TRUE;
+
+	return FALSE;
 }
 
 boolean
@@ -2631,10 +2784,25 @@ resists_cold(mon)
 	
 	if(mon_vulnerability(mon, COLD_RES))
 		return FALSE;
-	
-	return (species_resists_cold(mon) || mon_resistance(mon, COLD_RES) || 
-		(has_template(mon, VAMPIRIC) && mon->m_lev > 10) ||  
-		(mon == u.usteed && u.sealsActive&SEAL_BERITH && Cold_resistance));
+
+	if(!mon->mpeaceful)
+		return (species_resists_cold(mon) || mon_resistance(mon, COLD_RES) ||
+		        mon_resistance(mon, HELL_COLD_RES) || mon_resistance(mon, HOLY_COLD_RES) ||
+		        ward_at(mon->mx, mon->my) == BRAND_OF_ITHAQUA);
+
+	if(mon_resistance(mon, HOLY_COLD_RES) || (mon == u.usteed && u.sealsActive&SEAL_BERITH && Cold_resistance))
+		return TRUE;
+
+	if(mon_resistance(mon, HELL_COLD_RES) && !In_endgame(&u.uz))
+		return TRUE;
+
+	if((species_resists_cold(mon) || mon_resistance(mon, COLD_RES)) && !Inhell && !In_endgame(&u.uz))
+		return TRUE;
+
+	if(ward_at(mon->mx, mon->my) == BRAND_OF_ITHAQUA)
+		return TRUE;
+
+	return FALSE;
 }
 
 boolean
@@ -2670,8 +2838,25 @@ resists_elec(mon)
 	
 	if(mon_vulnerability(mon, SHOCK_RES))
 		return FALSE;
-	
-	return (species_resists_elec(mon) || mon_resistance(mon, SHOCK_RES) || (mon == u.usteed && u.sealsActive&SEAL_BERITH && Shock_resistance));
+
+	if(!mon->mpeaceful)
+		return (species_resists_elec(mon) || mon_resistance(mon, SHOCK_RES) ||
+		        mon_resistance(mon, HELL_SHOCK_RES) || mon_resistance(mon, HOLY_SHOCK_RES) ||
+		        ward_at(mon->mx, mon->my) == TRACERY_OF_KARAKAL);
+
+	if(mon_resistance(mon, HOLY_SHOCK_RES) || (mon == u.usteed && u.sealsActive&SEAL_BERITH && Shock_resistance))
+		return TRUE;
+
+	if(mon_resistance(mon, HELL_SHOCK_RES) && !In_endgame(&u.uz))
+		return TRUE;
+
+	if((species_resists_elec(mon) || mon_resistance(mon, SHOCK_RES)) && !Inhell && !In_endgame(&u.uz))
+		return TRUE;
+
+	if(ward_at(mon->mx, mon->my) == TRACERY_OF_KARAKAL)
+		return TRUE;
+
+	return FALSE;
 }
 
 boolean
@@ -2695,8 +2880,121 @@ resists_acid(mon)
 	
 	if(mon_vulnerability(mon, ACID_RES))
 		return FALSE;
-	
-	return (species_resists_acid(mon) || mon_resistance(mon, ACID_RES) || (mon == u.usteed && u.sealsActive&SEAL_BERITH && Acid_resistance));
+
+	if(!mon->mpeaceful)
+		return (species_resists_acid(mon) || mon_resistance(mon, ACID_RES) ||
+		        mon_resistance(mon, HELL_ACID_RES) || mon_resistance(mon, HOLY_ACID_RES));
+
+	if(mon_resistance(mon, HOLY_ACID_RES) || (mon == u.usteed && u.sealsActive&SEAL_BERITH && Acid_resistance))
+		return TRUE;
+
+	if(mon_resistance(mon, HELL_ACID_RES) && !In_endgame(&u.uz))
+		return TRUE;
+
+	if((species_resists_acid(mon) || mon_resistance(mon, ACID_RES)) && !Inhell && !In_endgame(&u.uz))
+		return TRUE;
+
+	return FALSE;
+}
+
+boolean
+resists_hellfire(mon)
+	struct monst *mon;
+{
+	if (!mon) return FALSE;
+	if (mon_vulnerability(mon, FIRE_RES)) return FALSE;
+	if (!mon->mpeaceful)
+		return (mon_resistance(mon, HELL_FIRE_RES) || mon_resistance(mon, HOLY_FIRE_RES) ||
+		        ward_at(mon->mx, mon->my) == SIGIL_OF_CTHUGHA);
+	if (mon_resistance(mon, HOLY_FIRE_RES)) return TRUE;
+	if (mon_resistance(mon, HELL_FIRE_RES) && !In_endgame(&u.uz)) return TRUE;
+	if (ward_at(mon->mx, mon->my) == SIGIL_OF_CTHUGHA) return TRUE;
+	return FALSE;
+}
+
+boolean
+resists_hellcold(mon)
+	struct monst *mon;
+{
+	if (!mon) return FALSE;
+	if (mon_vulnerability(mon, COLD_RES)) return FALSE;
+	if (!mon->mpeaceful)
+		return (mon_resistance(mon, HELL_COLD_RES) || mon_resistance(mon, HOLY_COLD_RES) ||
+		        ward_at(mon->mx, mon->my) == BRAND_OF_ITHAQUA);
+	if (mon_resistance(mon, HOLY_COLD_RES)) return TRUE;
+	if (mon_resistance(mon, HELL_COLD_RES) && !In_endgame(&u.uz)) return TRUE;
+	if (ward_at(mon->mx, mon->my) == BRAND_OF_ITHAQUA) return TRUE;
+	return FALSE;
+}
+
+boolean
+resists_hellelec(mon)
+	struct monst *mon;
+{
+	if (!mon) return FALSE;
+	if (mon_vulnerability(mon, SHOCK_RES)) return FALSE;
+	if (!mon->mpeaceful)
+		return (mon_resistance(mon, HELL_SHOCK_RES) || mon_resistance(mon, HOLY_SHOCK_RES) ||
+		        ward_at(mon->mx, mon->my) == TRACERY_OF_KARAKAL);
+	if (mon_resistance(mon, HOLY_SHOCK_RES)) return TRUE;
+	if (mon_resistance(mon, HELL_SHOCK_RES) && !In_endgame(&u.uz)) return TRUE;
+	if (ward_at(mon->mx, mon->my) == TRACERY_OF_KARAKAL) return TRUE;
+	return FALSE;
+}
+
+boolean
+resists_hellacid(mon)
+	struct monst *mon;
+{
+	if (!mon) return FALSE;
+	if (mon_vulnerability(mon, ACID_RES)) return FALSE;
+	if (!mon->mpeaceful)
+		return (mon_resistance(mon, HELL_ACID_RES) || mon_resistance(mon, HOLY_ACID_RES));
+	if (mon_resistance(mon, HOLY_ACID_RES)) return TRUE;
+	if (mon_resistance(mon, HELL_ACID_RES) && !In_endgame(&u.uz)) return TRUE;
+	return FALSE;
+}
+
+boolean
+resists_holyfire(mon)
+	struct monst *mon;
+{
+	if (!mon) return FALSE;
+	if (mon_vulnerability(mon, FIRE_RES)) return FALSE;
+	if (mon_resistance(mon, HOLY_FIRE_RES)) return TRUE;
+	if (ward_at(mon->mx, mon->my) == SIGIL_OF_CTHUGHA) return TRUE;
+	return FALSE;
+}
+
+boolean
+resists_holycold(mon)
+	struct monst *mon;
+{
+	if (!mon) return FALSE;
+	if (mon_vulnerability(mon, COLD_RES)) return FALSE;
+	if (mon_resistance(mon, HOLY_COLD_RES)) return TRUE;
+	if (ward_at(mon->mx, mon->my) == BRAND_OF_ITHAQUA) return TRUE;
+	return FALSE;
+}
+
+boolean
+resists_holyelec(mon)
+	struct monst *mon;
+{
+	if (!mon) return FALSE;
+	if (mon_vulnerability(mon, SHOCK_RES)) return FALSE;
+	if (mon_resistance(mon, HOLY_SHOCK_RES)) return TRUE;
+	if (ward_at(mon->mx, mon->my) == TRACERY_OF_KARAKAL) return TRUE;
+	return FALSE;
+}
+
+boolean
+resists_holyacid(mon)
+	struct monst *mon;
+{
+	if (!mon) return FALSE;
+	if (mon_vulnerability(mon, ACID_RES)) return FALSE;
+	return mon_resistance(mon, HOLY_ACID_RES);
 }
 
 boolean

@@ -20,7 +20,6 @@
 STATIC_DCL void NDECL(makevtele);
 STATIC_DCL void NDECL(clear_level_structures);
 STATIC_DCL void NDECL(makelevel);
-STATIC_DCL void NDECL(mineralize);
 STATIC_DCL boolean FDECL(bydoor,(XCHAR_P,XCHAR_P));
 STATIC_DCL struct mkroom *FDECL(find_branch_room, (coord *));
 STATIC_DCL struct mkroom *FDECL(pos_to_room, (XCHAR_P, XCHAR_P));
@@ -1472,25 +1471,27 @@ mithardir_end:
  *	surrounding the rooms on the map.
  *	Also place kelp in water.
  */
-STATIC_OVL void
-mineralize()
+void
+mineralize(void)
 {
 	s_level *sp;
 	struct obj *otmp;
-	int goldprob, gemprob, silverprob, darkprob, fossilprob, x, y, cnt;
+	int goldprob, gemprob, silverprob, darkprob, fossilprob, x, y, cnt, d_lev, dun_lev;
 
 
 	/* Place kelp, except on the plane of water */
-	if (In_endgame(&u.uz)) return;
-	for (x = 2; x < (COLNO - 2); x++)
-	    for (y = 1; y < (ROWNO - 1); y++)
-		if ((levl[x][y].typ == POOL && !rn2(10)) ||
-			(levl[x][y].typ == MOAT && !rn2(30)))
-		    (void) mksobj_at(KELP_FROND, x, y, NO_MKOBJ_FLAGS);
+	if(!Is_waterlevel(&u.uz)){
+		for (x = 2; x < (COLNO - 2); x++)
+			for (y = 1; y < (ROWNO - 1); y++)
+			if ((levl[x][y].typ == POOL && !rn2(10)) ||
+				(levl[x][y].typ == MOAT && !rn2(30)))
+				(void) mksobj_at(KELP_FROND, x, y, NO_MKOBJ_FLAGS);
+	}
 
 	/* determine if it is even allowed;
 	   almost all special levels are excluded */
 	if (In_hell(&u.uz) || In_V_tower(&u.uz) ||
+		(In_endgame(&u.uz) && !Is_earthlevel(&u.uz) && !Is_firelevel(&u.uz)) ||
 #ifdef REINCARNATION
 		Is_rogue_level(&u.uz) ||
 #endif
@@ -1498,7 +1499,13 @@ mineralize()
 	) return;
 
 	/* basic level-related probabilities */
-	goldprob = 20 + depth(&u.uz) / 3;
+	if(Is_earthlevel(&u.uz))
+		d_lev = 60;
+	else d_lev = depth(&u.uz);
+	if(Is_earthlevel(&u.uz))
+		dun_lev = 30;
+	else dun_lev = dunlev(&u.uz);
+	goldprob = 20 + d_lev / 3;
 	gemprob = goldprob / 4;
 	silverprob = gemprob * 2;
 	fossilprob = gemprob / 2;
@@ -1558,7 +1565,7 @@ mineralize()
 				}
 			}
 			if (rn2(1000) < gemprob) {
-				for (cnt = rnd(2 + dunlev(&u.uz) / 3); cnt > 0; cnt--)
+				for (cnt = rnd(2 + dun_lev / 3); cnt > 0; cnt--)
 				if ((otmp = mkobj(GEM_CLASS, FALSE)) != 0) {
 					if (otmp->otyp == ROCK) {
 					dealloc_obj(otmp);	/* discard it */
@@ -1571,14 +1578,14 @@ mineralize()
 			}
 			if (rn2(1000) < silverprob) {
 				if ((otmp = mksobj(SILVER_SLINGSTONE, MKOBJ_NOINIT)) != 0) {
-					otmp->quan = 1L + rn2(dunlev(&u.uz));
+					otmp->quan = 1L + rn2(dun_lev);
 					otmp->owt = weight(otmp);
 					otmp->ox = x,  otmp->oy = y;
 					if (!rn2(3) && Can_dig_down(&u.uz)) add_to_buried(otmp);
 					else place_object(otmp, x, y);
 				}
 			}
-			if (depth(&u.uz) > 14 && rn2(1000) < darkprob) {
+			if (d_lev > 14 && rn2(1000) < darkprob) {
 				if ((otmp = mksobj(CHUNK_OF_FOSSIL_DARK, MKOBJ_NOINIT)) != 0) {
 					otmp->quan = 1L;
 					otmp->owt = weight(otmp);
@@ -1587,7 +1594,7 @@ mineralize()
 					else place_object(otmp, x, y);
 				}
 			}
-			if (depth(&u.uz) > 14 && rn2(1000) < fossilprob) {
+			if (d_lev > 14 && rn2(1000) < fossilprob) {
 				if(!rn2(20)){
 					otmp = mksobj(TOOTH, NO_MKOBJ_FLAGS);
 					otmp->ox = x,  otmp->oy = y;
@@ -1595,6 +1602,15 @@ mineralize()
 					else place_object(otmp, x, y);
 				}
 				else if ((otmp = mksobj(FOSSIL, NO_MKOBJ_FLAGS)) != 0) {
+					otmp->quan = 1L;
+					otmp->owt = weight(otmp);
+					otmp->ox = x,  otmp->oy = y;
+					if (!rn2(3) && Can_dig_down(&u.uz)) add_to_buried(otmp);
+					else place_object(otmp, x, y);
+				}
+			}
+			if(Is_earthlevel(&u.uz) && rn2(1000) < 1){
+				if ((otmp = mksobj(SANCTIFIED_CALCITE_CRYSTAL, NO_MKOBJ_FLAGS)) != 0) {
 					otmp->quan = 1L;
 					otmp->owt = weight(otmp);
 					otmp->ox = x,  otmp->oy = y;

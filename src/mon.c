@@ -5594,12 +5594,15 @@ boolean was_swallowed;			/* digestion */
 	    	    tmp = d((int)mdat->mlevel+1, (int)mdat->mattk[i].damd);
 	    	else tmp = 0;
 			if (was_swallowed && magr) {
+				if(tmp){
+					tmp = reduce_dmg(magr,tmp,TRUE,FALSE);
+					tmp = elemental_dmg_resistance(magr, mon, tmp, adtyp);
+				}
 				if (magr == &youmonst) {
 					There("is an explosion in your %s!",
 						  body_part(STOMACH));
 					Sprintf(killer_buf, "%s explosion",
 						s_suffix(mdat->mname));
-					tmp = reduce_dmg(&youmonst,tmp,TRUE,FALSE);
 					losehp(tmp, killer_buf, KILLED_BY_AN);
 				} 
 				else {
@@ -9808,17 +9811,19 @@ struct monst *mtmp;
 			}
 			for(tmpm = fmon; tmpm; tmpm = tmpm->nmon) if(valid_wastes_target_exhale(mtmp, tmpm)){
 				damage = d(5, 5);
-				if((!resists_fire(tmpm) && nonliving(tmpm->data))){
+				if((!resists_fire(tmpm) || nonliving(tmpm->data))){
+					//Ruin damage
 					damage += d(5, 5);
 				}
-				if(Half_spel(tmpm)) damage = (damage+1)/2;
+				damage = reduce_dmg(tmpm,damage,FALSE,TRUE);
 
 				xdamagey(mtmp, tmpm, (struct attack *)0, damage);
 				nomul(0, NULL); //Interrupt
 			}
 			if(you_wastes_target_exhale(mtmp)){
 				damage = d(5, 5);
-				if(!Fire_resistance && nonliving(youracedata)){
+				if(!Fire_resistance || nonliving(youracedata)){
+					//Ruin damage
 					damage += d(5, 5);
 				}
 				damage = reduce_dmg(&youmonst,damage,FALSE,TRUE);
@@ -9881,7 +9886,7 @@ struct monst *mtmp;
 					pline("Gray light is drawn under %s bell.", s_suffix(mon_nam(mtmp)));
 				}
 				damage = d(1, min(10, (mtmp->m_lev)/3));
-				if(Half_spel(tmpm)) damage = (damage+1)/2;
+				damage = reduce_dmg(tmpm,damage,FALSE,TRUE);
 
 				tmpm->mhp -= d(damage, 10);
 				if(tmpm->mhp < 1){
@@ -10072,7 +10077,8 @@ struct monst *mtmp;
 				pline("Heat shimmers are drawn into the open mouth of %s.", mon_nam(mtmp));
 			}
 			damage = d(min(10, (mtmp->m_lev)/3), 8);
-			if(Half_spel(tmpm)) damage = (damage+1)/2;
+			damage = reduce_dmg(tmpm,damage,FALSE,TRUE);
+			damage = elemental_dmg_resistance(tmpm, mtmp, damage, AD_COLD);
 
 			tmpm->mhp -= damage;
 			if(tmpm->mhp < 1){
@@ -10106,6 +10112,7 @@ struct monst *mtmp;
 			}
 			damage = d(min(10, (mtmp->m_lev)/3), 8);
 			damage = reduce_dmg(&youmonst,damage,FALSE,TRUE);
+			damage = elemental_dmg_resistance(&youmonst, mtmp, damage, AD_COLD);
 
 			losehp(damage, "heat drain", KILLED_BY);
 			mtmp->mhp += damage;
@@ -10797,7 +10804,9 @@ orc_mud_stabs(struct monst *mdef)
 	damage = max(damage, 1);
 
 	if (!Acid_res(mdef)) {
-		damage += d(number, 2) + d(number, 10);
+		int acid_dmg = d(number, 2) + d(number, 10);
+		acid_dmg = elemental_dmg_resistance(mdef, (struct monst *)0, acid_dmg, AD_ACID);
+		damage += acid_dmg;
 	}
 
 	if(mdef == &youmonst){

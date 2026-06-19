@@ -78,11 +78,11 @@ const struct innate {
 		     {  14, &(HSearching), "perceptive", "unaware" },
 		     {	16, &(HSee_invisible), "your vision sharpen", "your vision blur" },
 		     {  18, &(HWarning), "sensitive", "insensitive" },
-		     {  20, &(HFire_resistance), "cool", "warmer" },
-		     {  21, &(HCold_resistance), "warm", "cooler" },
-		     {  22, &(HShock_resistance), "insulated", "conductive" },
+		     {  20, &(u.uprops[FIRE_RES].intrinsic), "cool", "warmer" },
+		     {  21, &(u.uprops[COLD_RES].intrinsic), "warm", "cooler" },
+		     {  22, &(u.uprops[SHOCK_RES].intrinsic), "insulated", "conductive" },
 		     {  23, &(HTeleport_control), "controlled","uncontrolled" },
-		     {  24, &(HAcid_resistance), "thick-skinned","soft-skinned" },
+		     {  24, &(u.uprops[ACID_RES].intrinsic), "thick-skinned","soft-skinned" },
 		     {  25, &(HWwalking), "light on your feet","heavy" },
 		     {  26, &(HSick_resistance), "immunized","immunocompromised" },
 		     {  27, &(HDisint_resistance), "firm","less firm" },
@@ -98,11 +98,11 @@ const struct innate {
 		     {   5, &(HStealth), "stealthy", "noisy" },
 		     {   7, &(HWarning), "sensitive", "insensitive" },
 		     {   9, &(HSearching), "perceptive", "unaware" },
-		     {  11, &(HFire_resistance), "cool", "warmer" },
-		     {  13, &(HCold_resistance), "warm", "cooler" },
-		     {  15, &(HShock_resistance), "insulated", "conductive" },
+		     {  11, &(u.uprops[FIRE_RES].intrinsic), "cool", "warmer" },
+		     {  13, &(u.uprops[COLD_RES].intrinsic), "warm", "cooler" },
+		     {  15, &(u.uprops[SHOCK_RES].intrinsic), "insulated", "conductive" },
 		     {  17, &(HTeleport_control), "controlled","uncontrolled" },
-		     {  19, &(HAcid_resistance), "thick-skinned","soft-skinned" },
+		     {  19, &(u.uprops[ACID_RES].intrinsic), "thick-skinned","soft-skinned" },
 		     {  21, &(HWwalking), "light on your feet","heavy" },
 		     {  23, &(HSick_resistance), "immunized","immunocompromised" },
 		     {  25, &(HDisint_resistance), "firm","less firm" },
@@ -119,7 +119,7 @@ const struct innate {
 
 	elnob_abil[] = { {	 7, &(HFast), "quick", "slow" },
 			{	15, &(HWarning), "sensitive", "" },
-		     {  20, &(HFire_resistance), "cool", "warmer" },
+		     {  20, &(u.uprops[FIRE_RES].intrinsic), "cool", "warmer" },
 		     {	 0, 0, 0, 0 } },
 
 	pir_abil[] = {	{1, &(HSwimming), "", ""  },
@@ -128,7 +128,7 @@ const struct innate {
 		     {	 0, 0, 0, 0 } },
 
 	pri_abil[] = { {	15, &(HWarning), "sensitive", "" },
-		     {  20, &(HFire_resistance), "cool", "warmer" },
+		     {  20, &(u.uprops[FIRE_RES].intrinsic), "cool", "warmer" },
 		     {	 0, 0, 0, 0 } },
 
 	ran_abil[] = { {   1, &(HSearching), "", "" },
@@ -154,9 +154,11 @@ const struct innate {
 		     {  21, &(HSearching), "perceptive", "" },
 		     {	 0, 0, 0, 0 } },
 
-	val_abil[] = { {	 1, &(HCold_resistance), "", "" },
+	val_abil[] = { {	 1, &(u.uprops[COLD_RES].intrinsic), "", "" },
 		     {	 1, &(HStealth), "", "" },
 		     {   7, &(HFast), "quick", "slow" },
+			 {	14, &(u.uprops[HELL_COLD_RES].intrinsic), "even warmer", "not as warm" },
+			 {	21, &(u.uprops[HOLY_COLD_RES].intrinsic), "the warmth of enlightenment", "not as enlightened" },
 		     {	 0, 0, 0, 0 } },
 
 	wiz_abil[] = { {	15, &(HWarning), "sensitive", "" },
@@ -174,23 +176,23 @@ const struct innate {
 	clk_abil[] = { {	1, &(HPoison_resistance), "", "" },
 		     {	 1, &(HSick_resistance), "", "" },
 		     {	 1, &(HStone_resistance), "", "" },
-		     {	 5, &(HShock_resistance), "shock resistant", "less shock resistant" },
-		     {	 10, &(HCold_resistance), "cold resistant", "less cold resistant" },
-		     {	 15, &(HFire_resistance), "heat resistant", "less heat resistant" },
+		     {	 5, &(u.uprops[SHOCK_RES].intrinsic), "shock resistant", "less shock resistant" },
+		     {	 10, &(u.uprops[COLD_RES].intrinsic), "cold resistant", "less cold resistant" },
+		     {	 15, &(u.uprops[FIRE_RES].intrinsic), "heat resistant", "less heat resistant" },
 		     {	 0, 0, 0, 0 } },
 
 	and_abil[] = { {	1, &(HPoison_resistance), "", "" },
 		     {	 1, &(HSick_resistance), "", "" },
 		     {	 1, &(HStone_resistance), "", "" },
-		     {	 1, &(HCold_resistance), "", "" },
+		     {	 1, &(u.uprops[COLD_RES].intrinsic), "", "" },
 		     {   5, &(HStealth), ">Initiating short-range camouflage<", ">Short-range camouflage damaged<" },
-		     {  10, &(HShock_resistance), ">Initiating ion-channel re-direction<", ">Ion-channel re-direction non-operational<" },
-		     {  15, &(HFire_resistance), ">Activating asymmetrical heat sink<", ">Asymmetrical heat sink destroyed<" },
+		     {  10, &(u.uprops[SHOCK_RES].intrinsic), ">Initiating ion-channel re-direction<", ">Ion-channel re-direction non-operational<" },
+		     {  15, &(u.uprops[FIRE_RES].intrinsic), ">Activating asymmetrical heat sink<", ">Asymmetrical heat sink destroyed<" },
 		     {	 0, 0, 0, 0 } },
 
 	vam_abil[] = { {	1, &(HPoison_resistance), "", "" },
 			 {	 1, &(HSleep_resistance), "", "" },
-			 {	11, &(HCold_resistance), "the chill of the grave", "the warmth of life" },
+			 {	11, &(u.uprops[HELL_COLD_RES].intrinsic), "the chill of the grave", "the warmth of life" },
 		     {	 21, &(HPolymorph_control), "in control", "out of control" },
 		     {	 0, 0, 0, 0 } },
 
@@ -231,45 +233,45 @@ const struct innate {
 			  {	15, &(HSee_invisible), "your vision sharpen", "your vision blur" },
 			  {	 0, 0, 0, 0 } },
 
-	yki_abil[] = { {	1, &(HCold_resistance), "", "" },
-		     {  11, &(HFire_resistance), "cool", "warmer" },
+	yki_abil[] = { {	1, &(u.uprops[HOLY_COLD_RES].intrinsic), "", "" },
+		     {  11, &(u.uprops[FIRE_RES].intrinsic), "cool", "warmer" },
 		     {	 0, 0, 0, 0 } },
 
 	inc_abil[] = { {	1, &(HAntimagic), "", "" },
 		     {	 0, 0, 0, 0 } },
 	
 	aasi_abil[] = { 
-			 {	 1, &(HShock_resistance), "", "" },
+			 {	 1, &(u.uprops[HOLY_SHOCK_RES].intrinsic), "", "" },
 		     {	 0, 0, 0, 0 } },
 
 	aasi_archon_abil[] = { 
-			 {	 1, &(HShock_resistance), "", "" },
+			 {	 1, &(u.uprops[HOLY_SHOCK_RES].intrinsic), "", "" },
 			 {	14, &(HFlying), "your aura form into wings", "your aura lose cohesion" },
 		     {	 0, 0, 0, 0 } },
 
 	aasi_deva_abil[] = { 
-			 {	 1, &(HShock_resistance), "", "" },
+			 {	 1, &(u.uprops[HOLY_SHOCK_RES].intrinsic), "", "" },
 			 {	14, &(HNo_prop), "your aura form into arms", "your aura lose cohesion" },
 		     {	 0, 0, 0, 0 } },
 
 	aasi_storm_abil[] = { 
-			 {	 1, &(HShock_resistance), "", "" },
+			 {	 1, &(u.uprops[HOLY_SHOCK_RES].intrinsic), "", "" },
 			 {	14, &(HNo_prop), "your aura destabilize", "your aura stabilize" },
 		     {	 0, 0, 0, 0 } },
 
 	aasi_coure_abil[] = { 
-			 {	 1, &(HShock_resistance), "", "" },
+			 {	 1, &(u.uprops[HOLY_SHOCK_RES].intrinsic), "", "" },
 			 {	14, &(HNo_prop), "your aura form into blades of starlight", "your aura lose cohesion" },
 		     {	 0, 0, 0, 0 } },
 
 	aasi_gae_abil[] = { 
-			 {	 1, &(HShock_resistance), "", "" },
+			 {	 1, &(u.uprops[HOLY_SHOCK_RES].intrinsic), "", "" },
 			 {	14, &(HNo_prop), "your aura form into reaching vines", "your aura lose cohesion" },
 		     {	 0, 0, 0, 0 } },
 
 	aasi_prim_abil[] = { 
-			 {	 1, &(HShock_resistance), "", "" },
-			 {   7, &(HAcid_resistance), "thick-skinned","soft-skinned" },
+			 {	 1, &(u.uprops[HOLY_SHOCK_RES].intrinsic), "", "" },
+			 {   7, &(u.uprops[HOLY_ACID_RES].intrinsic), "thick-skinned","soft-skinned" },
 			 {	14, &(HStone_resistance), "", "stiff" },
 		     {	 0, 0, 0, 0 } },
 
@@ -283,14 +285,14 @@ const struct innate {
 		     {	 0, 0, 0, 0 } },
 
 	aasi_drow_abil[] = {
-			 {	 1, &(HShock_resistance), "", "" },
+			 {	 1, &(u.uprops[HOLY_SHOCK_RES].intrinsic), "", "" },
 			 {	 4, &(HSleep_resistance), "awake", "tired" },
 		     {	 0, 0, 0, 0 } },
 
 	frm_abil[] = { 
-			 {   3, &(HFire_resistance), "heat resistant", "less heat resistant" },
+			 {   3, &(u.uprops[FIRE_RES].intrinsic), "heat resistant", "less heat resistant" },
 			 {	 5, &(HPoison_resistance), "healthy", "sickly" },
-			 {   9, &(HAcid_resistance), "thick-skinned","soft-skinned" },
+			 {   9, &(u.uprops[ACID_RES].intrinsic), "thick-skinned","soft-skinned" },
 		     {	 0, 0, 0, 0 } },
 
 	cen_abil[] = { {	14, &(HJumping), "you feel light on your feet", "you feel heavier" },

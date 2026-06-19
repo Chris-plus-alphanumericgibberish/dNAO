@@ -3385,7 +3385,7 @@ u_init()
 			}
 			else {
 				flags.HDbreath = AD_COLD;
-				HCold_resistance |= (FROMRACE|FROMOUTSIDE);
+				u.uprops[COLD_RES].intrinsic |= (FROMRACE|FROMOUTSIDE);
 			}
 		} else if(Role_if(PM_MADMAN)){
 			if(flags.initgend){
@@ -3393,16 +3393,16 @@ u_init()
 			}
 			else {
 				flags.HDbreath = AD_FIRE;
-				HFire_resistance |= (FROMRACE|FROMOUTSIDE);
+				u.uprops[FIRE_RES].intrinsic |= (FROMRACE|FROMOUTSIDE);
 			}
 		} else switch(rnd(6)){
 			case 1:
 				flags.HDbreath = AD_COLD;
-				HCold_resistance |= (FROMRACE|FROMOUTSIDE);
+				u.uprops[COLD_RES].intrinsic |= (FROMRACE|FROMOUTSIDE);
 			break;
 			case 2:
 				flags.HDbreath = AD_FIRE;
-				HFire_resistance |= (FROMRACE|FROMOUTSIDE);
+				u.uprops[FIRE_RES].intrinsic |= (FROMRACE|FROMOUTSIDE);
 			break;
 			case 3:
 				flags.HDbreath = AD_SLEE;
@@ -3410,16 +3410,16 @@ u_init()
 			break;
 			case 4:
 				flags.HDbreath = AD_ELEC;
-				HShock_resistance |= (FROMRACE|FROMOUTSIDE);
+				u.uprops[SHOCK_RES].intrinsic |= (FROMRACE|FROMOUTSIDE);
 				HBlind_res |= (FROMRACE|FROMOUTSIDE);
 			break;
 			case 5:
 				flags.HDbreath = AD_DRST;
-				HPoison_resistance |= (FROMRACE|FROMOUTSIDE);
+				u.uprops[POISON_RES].intrinsic |= (FROMRACE|FROMOUTSIDE);
 			break;
 			case 6:
 				flags.HDbreath = AD_ACID;
-				HAcid_resistance |= (FROMRACE|FROMOUTSIDE);
+				u.uprops[ACID_RES].intrinsic |= (FROMRACE|FROMOUTSIDE);
 			break;
 		}
 	}

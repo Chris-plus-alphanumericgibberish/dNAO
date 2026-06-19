@@ -137,16 +137,48 @@ int otyp;
 				if (check_oprop(obj, OPROP_FIRE) || check_oprop(obj, OPROP_WOOL))
 					got_prop = TRUE;
 				break;
+			case HELL_FIRE_RES:
+				if (check_oprop(obj, OPROP_FIRE_HELL) || check_oprop(obj, OPROP_FIRE_SNCT))
+					got_prop = TRUE;
+				break;
+			case HOLY_FIRE_RES:
+				if (check_oprop(obj, OPROP_FIRE_HOLY) || check_oprop(obj, OPROP_FIRE_HOLY_SNCT))
+					got_prop = TRUE;
+				break;
 			case COLD_RES:
 				if (check_oprop(obj, OPROP_COLD) || check_oprop(obj, OPROP_WOOL))
+					got_prop = TRUE;
+				break;
+			case HELL_COLD_RES:
+				if (check_oprop(obj, OPROP_COLD_HELL) || check_oprop(obj, OPROP_COLD_SNCT))
+					got_prop = TRUE;
+				break;
+			case HOLY_COLD_RES:
+				if (check_oprop(obj, OPROP_COLD_HOLY) || check_oprop(obj, OPROP_COLD_HOLY_SNCT))
 					got_prop = TRUE;
 				break;
 			case SHOCK_RES:
 				if (check_oprop(obj, OPROP_ELEC))
 					got_prop = TRUE;
 				break;
+			case HELL_SHOCK_RES:
+				if (check_oprop(obj, OPROP_ELEC_HELL) || check_oprop(obj, OPROP_ELEC_SNCT))
+					got_prop = TRUE;
+				break;
+			case HOLY_SHOCK_RES:
+				if (check_oprop(obj, OPROP_ELEC_HOLY) || check_oprop(obj, OPROP_ELEC_HOLY_SNCT))
+					got_prop = TRUE;
+				break;
 			case ACID_RES:
 				if (check_oprop(obj, OPROP_ACID))
+					got_prop = TRUE;
+				break;
+			case HELL_ACID_RES:
+				if (check_oprop(obj, OPROP_ACID_HELL) || check_oprop(obj, OPROP_ACID_SNCT))
+					got_prop = TRUE;
+				break;
+			case HOLY_ACID_RES:
+				if (check_oprop(obj, OPROP_ACID_HOLY) || check_oprop(obj, OPROP_ACID_HOLY_SNCT))
 					got_prop = TRUE;
 				break;
 			case ANTIMAGIC:
@@ -1562,11 +1594,16 @@ int depth;
 	int agrmoral = 0;
 	int agrimpure = 0;
 	int agrrot = 0;
+	int agrldemon = 0;
 	if(magr){
 		agralign = (magr == &youmonst) ? sgn(u.ualign.type) : sgn(magr->data->maligntyp);
 		agrmoral = calc_agrmoral(magr);
 		agrrot = calc_agrrot(magr);
 		agrimpure = calc_agrimpure(magr);
+		if (magr != &youmonst) {
+			if (is_law_demon(magr->data)) agrldemon = is_dnoble(magr->data) ? 3 : 1;
+			else if (is_cha_demon(magr->data)) agrldemon = -1;
+		}
 	}
 	
 	/* some slots may be unacceptable and must be replaced */
@@ -1606,7 +1643,7 @@ int depth;
 							continue;
 					}
 					arm_mdr += arm_dr_bonus(curarm, slot);
-					if (magr) arm_mdr += properties_dr(curarm, slot, agralign, agrmoral, agrimpure, agrrot);
+					if (magr) arm_mdr += properties_dr(curarm, slot, agralign, agrmoral, agrimpure, agrrot, agrldemon);
 					if (slot == HEAD_DR && curarm->bodytypeflag&MB_HORNS && !has_horns_mon(mon)){
 						arm_mdr -= 1;
 					}
@@ -1618,7 +1655,7 @@ int depth;
 			else if(!depth){
 				if (slot&adfalt[i]){
 					arm_mdr += arm_dr_bonus(curarm, slot);
-					if (magr) arm_mdr += properties_dr(curarm, slot, agralign, agrmoral, agrimpure, agrrot);
+					if (magr) arm_mdr += properties_dr(curarm, slot, agralign, agrmoral, agrimpure, agrrot, agrldemon);
 					if (slot == HEAD_DR && curarm->bodytypeflag&MB_HORNS && !has_horns_mon(mon)){
 						arm_mdr -= 1;
 					}
