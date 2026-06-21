@@ -1663,6 +1663,114 @@ struct obj *otmp;	/* existing object */
 	return otmp;
 }
 
+struct obj *
+mk_chromatic_special(struct obj *otmp)
+{
+	if (otmp->oclass == WEAPON_CLASS || is_weptool(otmp)) {
+		/*Fossil teeth stay fossil*/
+		if (otmp->otyp != TOOTH) {
+			if (!rn2(3)) {
+				if (is_ammo(otmp)) set_material(otmp, DRAGON_HIDE);
+				else               set_material_gm(otmp, DRAGON_HIDE);
+			} else if (is_hard(otmp)) {
+				if (is_ammo(otmp)) set_material(otmp, rn2(2) ? GOLD : GREEN_STEEL);
+				else               set_material_gm(otmp, rn2(2) ? GOLD : GREEN_STEEL);
+			}
+			/* soft : keep material */
+		}
+		if (rn2(4)) {
+			if (otmp->obj_material == DRAGON_HIDE) {
+				/* non-chromatic elements, holy, axiomatic */
+				static const int lesser_elems[] = {
+					OPROP_LESSER_FIREW, OPROP_LESSER_COLDW,
+					OPROP_LESSER_ELECW, OPROP_LESSER_ACIDW,
+				};
+				switch (rn2(7)) {
+					case 0: ADD_WEAK_OR_STRONG_OPROP(otmp, MAGC); break; /* gray */
+					case 1: ADD_WEAK_OR_STRONG_OPROP(otmp, COLD); break; /* silver */
+					case 2:                                               /* shimmering */
+						add_oprop(otmp, lesser_elems[rn2(SIZE(lesser_elems))]);
+						if (rn2(5))
+							add_oprop(otmp, lesser_elems[rn2(SIZE(lesser_elems))]);
+					break;
+					case 3: add_oprop(otmp, OPROP_SECR_SLEP);             break; /* orange */
+					case 4: add_oprop(otmp, OPROP_DRANW);                 break; /* deep */
+					case 5: ADD_WEAK_OR_STRONG_OPROP(otmp, HOLY);         break;
+					case 6: ADD_WEAK_OR_STRONG_OPROP(otmp, AXIO);         break;
+				}
+			} else {
+				/* chromatic elements */
+				switch (rn2(7)) {
+					case 0: ADD_WEAK_OR_STRONG_OPROP(otmp, FIRE); break;
+					case 1: ADD_WEAK_OR_STRONG_OPROP(otmp, ELEC); break;
+					case 2: ADD_WEAK_OR_STRONG_OPROP(otmp, COLD); break;
+					case 3: ADD_WEAK_OR_STRONG_OPROP(otmp, ACID); break;
+					case 4: ADD_WEAK_OR_STRONG_OPROP(otmp, UNHY); break;
+					case 5: ADD_WEAK_OR_STRONG_OPROP(otmp, AXIO); break;
+					case 6:
+						add_oprop(otmp, OPROP_SECR_POSN);
+						add_omod(otmp, OMOD_SPIKED);
+					break;
+				}
+			}
+		}
+	} else if (otmp->oclass == ARMOR_CLASS) {
+		if (otmp->obj_material == DRAGON_HIDE)
+			; /* keep */
+		else if (is_metallic(otmp) && otmp->otyp != ORIHALCYON_GAUNTLETS)
+			set_material_gm(otmp, rn2(2) ? GOLD : GREEN_STEEL);
+		if (rn2(4)) switch (rn2(7)) {
+			case 0: ADD_WEAPON_ARMOR_HELL_OPROP(otmp, FIRE);  break;
+			case 1: ADD_WEAPON_ARMOR_HELL_OPROP(otmp, ELEC);  break;
+			case 2: ADD_WEAPON_ARMOR_HELL_OPROP(otmp, COLD);  break;
+			case 3: ADD_WEAPON_ARMOR_HELL_OPROP(otmp, ACID);  break;
+			case 4: ADD_WEAPON_ARMOR_OPROP(otmp, UNHY);       break;
+			case 5: ADD_WEAPON_ARMOR_OPROP(otmp, AXIO);       break;
+			case 6:
+				if (accepts_weapon_oprops(otmp)) {
+					add_oprop(otmp, OPROP_SECR_POSN);
+					if (!check_omod(otmp, OMOD_BLADED) && !check_omod(otmp, OMOD_SPIKED))
+						add_omod(otmp, OMOD_SPIKED);
+				}
+			break;
+		}
+		if (is_gloves(otmp) || is_boots(otmp)) {
+			if (!rn2(4))
+				add_omod(otmp, rn2(2) ? OMOD_BLADED : OMOD_SPIKED);
+		}
+	} else if (otmp->oclass == RING_CLASS) {
+		if (otmp->otyp == RIN_NOTHING) {
+			static const int lesser_elems[] = {
+				OPROP_LESSER_FIREW, OPROP_LESSER_COLDW,
+				OPROP_LESSER_ELECW, OPROP_LESSER_ACIDW,
+			};
+			set_material_gm(otmp, rn2(2) ? DRAGON_HIDE : PLATINUM);
+			ADD_WEAPON_ARMOR_OPROP(otmp, HOLY);
+			ADD_WEAPON_ARMOR_OPROP(otmp, AXIO);
+			switch (rn2(3)) {
+				case 0: ADD_WEAPON_ARMOR_OPROP(otmp, MAGC); break; /* gray */
+				case 1:                                             /* silver */
+					add_oprop(otmp, OPROP_REFL);
+					add_oprop(otmp, rn2(3) ? OPROP_LESSER_COLDW : OPROP_COLDW);
+				break;
+				case 2:                                             /* shimmering */
+					add_oprop(otmp, lesser_elems[rn2(SIZE(lesser_elems))]);
+					if (rn2(4))
+						add_oprop(otmp, lesser_elems[rn2(SIZE(lesser_elems))]);
+				break;
+			}
+		} else if (rn2(4)) switch (rn2(6)) {
+			case 0: ADD_WEAPON_ARMOR_HELL_OPROP(otmp, FIRE);  break;
+			case 1: ADD_WEAPON_ARMOR_HELL_OPROP(otmp, ELEC);  break;
+			case 2: ADD_WEAPON_ARMOR_HELL_OPROP(otmp, COLD);  break;
+			case 3: ADD_WEAPON_ARMOR_HELL_OPROP(otmp, ACID);  break;
+			case 4: ADD_WEAPON_ARMOR_OPROP(otmp, UNHY);       break;
+			case 5: ADD_WEAPON_ARMOR_OPROP(otmp, AXIO);       break;
+		}
+	}
+	return otmp;
+}
+
 STATIC_OVL struct obj *
 mk_ancient_special(otmp)
 struct obj *otmp;	/* existing object */
@@ -16191,6 +16299,8 @@ do_passive_attacks()
 			dojellysting(&youmonst);
 		if(is_tailslap_mtyp(youracedata))
 			dotailslap(&youmonst);
+		if(youracedata->mtyp == PM_CHROMATIC_DRAGON)
+			dochrombite(&youmonst);
 		if(uring_art(ART_STAR_EMPEROR_S_RING))
 			dostarblades(&youmonst);
 		if(flags.aasimar_subtype == AASIMAR_SUBTYPE_COURE && u.ulevel >= 14 && rn1(17, 13) < u.ulevel)
@@ -16240,6 +16350,8 @@ do_passive_attacks()
 				doyog(mtmp);
 			if(is_tailslap_mon(mtmp))
 				dotailslap(mtmp);
+			if(mtmp->mtyp == PM_CHROMATIC_DRAGON)
+				dochrombite(mtmp);
 			if(is_vines_mon(mtmp))
 				dovines(mtmp);
 			if(is_star_blades_mon(mtmp))

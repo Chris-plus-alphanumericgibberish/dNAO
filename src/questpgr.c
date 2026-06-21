@@ -267,7 +267,7 @@ char c;
 			break;
 	    case 'r':	str = rank_of(u.ulevel, Role_switch, flags.female);
 			break;
-	    case 'R':	str = rank_of(MIN_QUEST_LEVEL, Role_switch,
+	    case 'R':	str = rank_of(ROLE_MIN_QUEST_LEVEL, Role_switch,
 	    			flags.female);
 			break;
 	    case 's':	str = (flags.female) ? "sister" : "brother";

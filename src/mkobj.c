@@ -1062,6 +1062,9 @@ int mkflags;
 					otmp->olocked = !!(rn2(5));
 					otmp->otrapped = !(rn2(10));
 				}
+			case TROPHY_RELIQUARY:
+				if (otmp->otyp == TROPHY_RELIQUARY)
+					otmp->olocked = !!(rn2(5));
 			case ICE_BOX:
 			case SACK:
 			case OILSKIN_SACK:
@@ -2292,6 +2295,7 @@ struct obj* obj;
 		return NULL;
 		/* Any other cases for specific object types go here. */
 	case SARCOPHAGUS:
+	case TROPHY_RELIQUARY:
 	case SHIELD_OF_REFLECTION:
 		return shiny_materials;
 	case BOW:

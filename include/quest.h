@@ -71,6 +71,11 @@ struct q_score {			/* Quest "scorecard" */
 #endif
 #define MIN_QUEST_LEVEL 14	/* at least this u.ulevel to start */
 #define GNOMISH_MIN_QUEST_LEVEL 6	/* at least this u.ulevel to start */
+#define CAVEMAN_MIN_QUEST_LEVEL 18
   /* note: exp.lev. 14 is threshold level for 5th rank (class title, role.c) */
+#define ROLE_MIN_QUEST_LEVEL \
+    (Pantheon_if(PM_GNOME) ? GNOMISH_MIN_QUEST_LEVEL : \
+     Role_if(PM_CAVEMAN)   ? CAVEMAN_MIN_QUEST_LEVEL  : \
+                             MIN_QUEST_LEVEL)
 
 #endif /* QUEST_H */

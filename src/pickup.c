@@ -2868,6 +2868,355 @@ boolean past;
     return;
 }
 
+STATIC_OVL void
+fill_juiblex_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    for (i = 0; i < 6; i++) { otmp = mksobj(WAGE_OF_GLUTTONY, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 12; i++) mkhellvaultitem_cnt(box, VN_SHAYATEEN);
+}
+
+STATIC_OVL void
+fill_zuggtmoy_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    for (i = 0; i < 6; i++) { otmp = mksobj(WAGE_OF_GLUTTONY, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 12; i++) mkhellvaultitem_cnt(box, VN_SHAYATEEN);
+}
+
+STATIC_OVL void
+fill_orcus_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_PRIDE, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_SLOTH, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 18; i++) mkhellvaultitem_cnt(box, VN_SHAYATEEN);
+}
+
+STATIC_OVL void
+fill_dispater_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_GREED, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_ENVY, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_PRIDE, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 6; i++) mkhellvaultitem_cnt(box, VN_A_O_BLESSINGS);
+    for (i = 0; i < 3; i++) mkhellvaultitem_cnt(box, VN_APOCALYPSE);
+    for (i = 0; i < 18; i++) mkhellvaultitem_cnt(box, VN_N_PIT_FIEND);
+}
+
+STATIC_OVL void
+fill_belial_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    for (i = 0; i < 2; i++) { otmp = mksobj(WAGE_OF_LUST, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 2; i++) { otmp = mksobj(WAGE_OF_PRIDE, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 2; i++) { otmp = mksobj(WAGE_OF_WRATH, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 18; i++) mkhellvaultitem_cnt(box, VN_N_PIT_FIEND);
+    for (i = 0; i < 6; i++) if (rn2(100) < 75) mkhellvaultitem_cnt(box, VN_N_PIT_FIEND);
+}
+
+STATIC_OVL void
+fill_fierna_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    otmp = mksobj(WAGE_OF_LUST, NO_MKOBJ_FLAGS); add_to_container(box, otmp);
+    otmp = mksobj(WAGE_OF_PRIDE, NO_MKOBJ_FLAGS); add_to_container(box, otmp);
+    otmp = mksobj(WAGE_OF_WRATH, NO_MKOBJ_FLAGS); add_to_container(box, otmp);
+    for (i = 0; i < 9; i++) mkhellvaultitem_cnt(box, VN_N_PIT_FIEND);
+    for (i = 0; i < 3; i++) if (rn2(100) < 75) mkhellvaultitem_cnt(box, VN_N_PIT_FIEND);
+}
+
+STATIC_OVL void
+fill_lilith_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    for (i = 0; i < 2; i++) { otmp = mksobj(WAGE_OF_ENVY, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 2; i++) { otmp = mksobj(WAGE_OF_LUST, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 2; i++) { otmp = mksobj(WAGE_OF_PRIDE, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 12; i++) mkhellvaultitem_cnt(box, VN_N_PIT_FIEND);
+}
+
+STATIC_OVL void
+fill_baalzebub_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    for (i = 0; i < 6; i++) { otmp = mksobj(WAGE_OF_PRIDE, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_SLOTH, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 18; i++) mkhellvaultitem_cnt(box, VN_APOCALYPSE);
+    for (i = 0; i < 9; i++) mkhellvaultitem_cnt(box, VN_N_PIT_FIEND);
+}
+
+STATIC_OVL void
+fill_mephistopheles_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_PRIDE, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 2; i++) { otmp = mksobj(WAGE_OF_GREED, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 2; i++) { otmp = mksobj(WAGE_OF_ENVY, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 2; i++) { otmp = mksobj(WAGE_OF_WRATH, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 36; i++) mkhellvaultitem_cnt(box, VN_N_PIT_FIEND);
+    for (i = 0; i < 9; i++) if (rn2(100) < 75) mkhellvaultitem_cnt(box, VN_N_PIT_FIEND);
+}
+
+STATIC_OVL void
+fill_baalphegor_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    for (i = 0; i < 4; i++) { otmp = mksobj(ANTIMAGIC_RIFT, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 4; i++) { otmp = mksobj(CATAPSI_VORTEX, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    otmp = mksobj(PRESERVATIVE_ENGINE, NO_MKOBJ_FLAGS); add_to_container(box, otmp);
+    for (i = 0; i < 24; i++) mkhellvaultitem_cnt(box, VN_A_O_BLESSINGS);
+    for (i = 0; i < 8; i++) if (rn2(100) < 75) mkhellvaultitem_cnt(box, VN_A_O_BLESSINGS);
+}
+
+STATIC_OVL void
+fill_asmodeus_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    for (i = 0; i < 3; i++) { otmp = mksobj(ANTIMAGIC_RIFT, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 3; i++) { otmp = mksobj(CATAPSI_VORTEX, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_PRIDE, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 27; i++) mkhellvaultitem_cnt(box, VN_N_PIT_FIEND);
+    for (i = 0; i < 27; i++) if (rn2(100) < 90) mkhellvaultitem_cnt(box, VN_N_PIT_FIEND);
+    for (i = 0; i < 27; i++) if (rn2(100) < 45) mkhellvaultitem_cnt(box, VN_N_PIT_FIEND);
+}
+
+STATIC_OVL void
+fill_demogorgon_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_PRIDE, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_ENVY, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 6; i++) mkhellvaultitem_cnt(box, VN_A_O_BLESSINGS);
+    for (i = 0; i < 6; i++) mkhellvaultitem_cnt(box, VN_APOCALYPSE);
+    for (i = 0; i < 6; i++) mkhellvaultitem_cnt(box, VN_AKKABISH);
+    for (i = 0; i < 6; i++) mkhellvaultitem_cnt(box, VN_N_PIT_FIEND);
+    for (i = 0; i < 12; i++) mkhellvaultitem_cnt(box, VN_SHAYATEEN);
+}
+
+STATIC_OVL void
+fill_lamashtu_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_ENVY, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_GREED, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 12; i++) mkhellvaultitem_cnt(box, VN_APOCALYPSE);
+    for (i = 0; i < 12; i++) mkhellvaultitem_cnt(box, VN_AKKABISH);
+    for (i = 0; i < 12; i++) mkhellvaultitem_cnt(box, VN_SHAYATEEN);
+}
+
+STATIC_OVL void
+fill_yeenoghu_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_GLUTTONY, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_WRATH, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 12; i++) mkhellvaultitem_cnt(box, VN_SHAYATEEN);
+}
+
+STATIC_OVL void
+fill_baphomet_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_PRIDE, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_WRATH, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 12; i++) mkhellvaultitem_cnt(box, VN_SHAYATEEN);
+}
+
+STATIC_OVL void
+fill_pale_night_reliquary(struct obj *box)
+{
+    int i;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    for (i = 0; i < 6; i++) mkhellvaultitem_cnt(box, VN_AKKABISH);
+    for (i = 0; i < 6; i++) if (rn2(100) < 90) mkhellvaultitem_cnt(box, VN_AKKABISH);
+    for (i = 0; i < 6; i++) if (rn2(100) < 75) mkhellvaultitem_cnt(box, VN_AKKABISH);
+    for (i = 0; i < 6; i++) if (rn2(100) < 50) mkhellvaultitem_cnt(box, VN_AKKABISH);
+    for (i = 0; i < 6; i++) if (rn2(100) < 25) mkhellvaultitem_cnt(box, VN_AKKABISH);
+    for (i = 0; i < 6; i++) if (rn2(100) < 10) mkhellvaultitem_cnt(box, VN_AKKABISH);
+}
+
+STATIC_OVL void
+fill_kostchtchie_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_WRATH, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_SLOTH, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 12; i++) mkhellvaultitem_cnt(box, VN_SHAYATEEN);
+}
+
+STATIC_OVL void
+fill_malcanthet_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_LUST, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_ENVY, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 18; i++) mkhellvaultitem_cnt(box, VN_SHAYATEEN);
+}
+
+STATIC_OVL void
+fill_grazzt_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_PRIDE, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_LUST, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 18; i++) mkhellvaultitem_cnt(box, VN_SHAYATEEN);
+}
+
+STATIC_OVL void
+fill_avatar_of_lolth_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    for (i = 0; i < 2; i++) { otmp = mksobj(WAGE_OF_PRIDE, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 2; i++) { otmp = mksobj(WAGE_OF_LUST, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 2; i++) { otmp = mksobj(WAGE_OF_ENVY, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 18; i++) {
+        mklolthvaultitem_cnt(box);
+    }
+}
+
+STATIC_OVL void
+fill_chromatic_dragon_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    otmp = mksobj(WAGE_OF_SLOTH, NO_MKOBJ_FLAGS); add_to_container(box, otmp);
+    otmp = mksobj(WAGE_OF_LUST, NO_MKOBJ_FLAGS); add_to_container(box, otmp);
+    otmp = mksobj(WAGE_OF_GLUTTONY, NO_MKOBJ_FLAGS); add_to_container(box, otmp);
+    otmp = mksobj(WAGE_OF_GREED, NO_MKOBJ_FLAGS); add_to_container(box, otmp);
+    otmp = mksobj(WAGE_OF_WRATH, NO_MKOBJ_FLAGS); add_to_container(box, otmp);
+    otmp = mksobj(WAGE_OF_ENVY, NO_MKOBJ_FLAGS); add_to_container(box, otmp);
+    otmp = mksobj(WAGE_OF_PRIDE, NO_MKOBJ_FLAGS); add_to_container(box, otmp);
+    for (i = 0; i < 9; i++) mkhellvaultitem_cnt(box, VN_APOCALYPSE);
+    for (i = 0; i < 18; i++) mkchromaticvaultitem_cnt(box);
+}
+
+STATIC_OVL void
+fill_bael_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+
+    if (get_obj_location(box, &ox, &oy, 0))
+        box->ox = ox, box->oy = oy;
+
+    for (i = 0; i < 6; i++) {
+        otmp = mksobj(WAGE_OF_WRATH, NO_MKOBJ_FLAGS);
+        add_to_container(box, otmp);
+    }
+    for (i = 0; i < 3; i++) {
+        otmp = mksobj(WAGE_OF_ENVY, NO_MKOBJ_FLAGS);
+        add_to_container(box, otmp);
+    }
+    for (i = 0; i < 9; i++)
+        mkhellvaultitem_cnt(box, VN_APOCALYPSE);
+    for (i = 0; i < 9; i++)
+        mkhellvaultitem_cnt(box, VN_N_PIT_FIEND);
+    for (i = 0; i < 9; i++)
+        mkhellvaultitem_cnt(box, VN_SHAYATEEN);
+}
+
+void
+open_trophy_reliquary(struct obj *box)
+{
+	if(u.uwizard)
+		pline("As you break the seals, the reliquary suddenly grows heavier as the extradimensional space within dissipates.");
+	else
+		pline("As you break the seals, the reliquary suddenly grows heavier.");
+    switch (box->corpsenm) {
+    case PM_JUIBLEX:        fill_juiblex_reliquary(box);        break;
+    case PM_ZUGGTMOY:       fill_zuggtmoy_reliquary(box);       break;
+    case PM_ORCUS:          fill_orcus_reliquary(box);          break;
+    case PM_DISPATER:       fill_dispater_reliquary(box);       break;
+    case PM_BELIAL:         fill_belial_reliquary(box);         break;
+    case PM_FIERNA:         fill_fierna_reliquary(box);         break;
+    case PM_MOTHER_LILITH:
+    case PM_CRONE_LILITH:
+    case PM_DAUGHTER_LILITH: fill_lilith_reliquary(box);        break;
+    case PM_BAALZEBUB:      fill_baalzebub_reliquary(box);      break;
+    case PM_MEPHISTOPHELES: fill_mephistopheles_reliquary(box); break;
+    case PM_BAALPHEGOR:     fill_baalphegor_reliquary(box);     break;
+    case PM_ASMODEUS:       fill_asmodeus_reliquary(box);       break;
+    case PM_DEMOGORGON:     fill_demogorgon_reliquary(box);     break;
+    case PM_LAMASHTU:       fill_lamashtu_reliquary(box);       break;
+    case PM_YEENOGHU:       fill_yeenoghu_reliquary(box);       break;
+    case PM_BAPHOMET:       fill_baphomet_reliquary(box);       break;
+    case PM_PALE_NIGHT:     fill_pale_night_reliquary(box);     break;
+    case PM_KOSTCHTCHIE:    fill_kostchtchie_reliquary(box);    break;
+    case PM_MALCANTHET:     fill_malcanthet_reliquary(box);     break;
+    case PM_GRAZ_ZT:        fill_grazzt_reliquary(box);         break;
+    case PM_AVATAR_OF_LOLTH: fill_avatar_of_lolth_reliquary(box); break;
+    case PM_BAEL:           fill_bael_reliquary(box);           break;
+    case PM_CHROMATIC_DRAGON: fill_chromatic_dragon_reliquary(box); break;
+    default:
+        break;
+    }
+    box->owt = weight(box);
+    box->corpsenm = NON_PM;
+}
+
 void
 open_crazy_box(box, past)
 struct obj *box;
@@ -3620,6 +3969,14 @@ register int held;
 	    }
 	    return MOVE_CONTAINER;
 	}
+	if (obj->otyp == TROPHY_RELIQUARY && obj->corpsenm != NON_PM
+	    && mvitals[obj->corpsenm].died == 0) {
+	    pline("This reliquary is sealed by the will of %s.",
+	          mons[obj->corpsenm].mname);
+	    return MOVE_CANCELLED;
+	}
+	if (obj->otyp == TROPHY_RELIQUARY && obj->corpsenm != NON_PM)
+	    open_trophy_reliquary(obj);
 	current_container = obj;	/* for use by in/out_container */
 	if(Is_real_container(obj)){
 		if (obj->spe == 1) {

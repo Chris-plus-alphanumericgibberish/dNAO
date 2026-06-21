@@ -7553,6 +7553,9 @@ struct monst *magr;
 	if(!attk)
 		return;
 	
+	if(magr->mtyp == PM_CHROMATIC_DRAGON)
+		attk->aatyp = AT_STNG;
+	
 	//Attack one foe
 	for(j=8;j>=1;j--){
 		ax = x(magr)+clockwisex[(i+j)%8];
@@ -7602,6 +7605,83 @@ struct monst *magr;
 		
 		xmeleehity(magr, mdef, attk, (struct obj **)0, -1, 0, FALSE, 0);
 		return; //Only attack one foe
+	}
+}
+
+static struct monst *
+chrombite_find_target(struct monst *magr, const int *cx, const int *cy, int ringsize, boolean swallow_override, int skip_denom)
+{
+	boolean youagr = (magr == &youmonst);
+	boolean youdef;
+	struct monst *mdef;
+	int i = rnd(ringsize), j, ax, ay;
+
+	if(youagr && u.uswallow && !swallow_override)
+		return (struct monst *)0;
+
+	for(j = ringsize; j >= 1; j--){
+		ax = x(magr) + cx[(i+j)%ringsize];
+		ay = y(magr) + cy[(i+j)%ringsize];
+		if(swallow_override && youagr && u.ustuck && u.uswallow)
+			mdef = u.ustuck;
+		else if(!isok(ax, ay))
+			continue;
+		else if(onscary(ax, ay, magr))
+			continue;
+		else
+			mdef = m_at(ax, ay);
+
+		if(u.ux == ax && u.uy == ay)
+			mdef = &youmonst;
+		if(!mdef)
+			continue;
+
+		youdef = (mdef == &youmonst);
+
+		if(youagr && mdef->mpeaceful) continue;
+		if(youdef && magr->mpeaceful) continue;
+		if(youdef && Invulnerable) continue;
+		if(!youagr && !youdef && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame))) continue;
+		if(youdef && u.uswallow) continue;
+		if(!youdef && nonthreat(mdef)) continue;
+		if((touch_petrifies(mdef->data) || mdef->mtyp == PM_MEDUSA)
+		 && (youagr ? !Stone_resistance : !resists_ston(magr))) continue;
+		if(mdef->mtyp == PM_PALE_NIGHT) continue;
+		if(skip_denom && rn2(skip_denom)) continue;
+		return mdef;
+	}
+	return (struct monst *)0;
+}
+
+void
+dochrombite(struct monst *magr)
+{
+	extern const int clockwisex[8];
+	extern const int clockwisey[8];
+	extern const int clockwise2x[16];
+	extern const int clockwise2y[16];
+	struct attack attkbuff = {0};
+	boolean youagr = (magr == &youmonst);
+	struct permonst *pa;
+	const int dragon_pms[] = { PM_RED_DRAGON, PM_BLUE_DRAGON, PM_GREEN_DRAGON, PM_YELLOW_DRAGON, PM_BLACK_DRAGON, PM_WHITE_DRAGON };
+	int d;
+	struct attack *src;
+	struct monst *mdef;
+
+	pa = youagr ? youracedata : magr->data;
+
+	for(d = 0; d < SIZE(dragon_pms); d++){
+		src = attacktype_fordmg(&mons[dragon_pms[d]], AT_BITE, AD_ANY);
+		if(!src)
+			continue;
+		attkbuff = *src;
+
+		mdef = chrombite_find_target(magr, clockwisex, clockwisey, 8, TRUE, 3);
+		if(!mdef)
+			mdef = chrombite_find_target(magr, clockwise2x, clockwise2y, 16, FALSE, 2);
+
+		if(mdef)
+			xmeleehity(magr, mdef, &attkbuff, (struct obj **)0, -1, 0, FALSE, 0);
 	}
 }
 

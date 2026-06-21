@@ -619,6 +619,32 @@ mklolthvaultitem()
 	return otmp;
 }
 
+STATIC_OVL void
+add_vaultitem_cnt(struct obj *container, struct obj *otmp)
+{
+	struct obj *content, *ncontent;
+
+	if (Is_real_container(otmp)) {
+		for (content = otmp->cobj; content; content = ncontent) {
+			ncontent = content->nobj;
+			obj_extract_self(content);
+			add_to_container(container, content);
+		}
+		if (objects[otmp->otyp].oc_magic || otmp->oartifact)
+			add_to_container(container, otmp);
+		else
+			dealloc_obj(otmp);
+	} else {
+		add_to_container(container, otmp);
+	}
+}
+
+void
+mklolthvaultitem_cnt(struct obj *container)
+{
+	add_vaultitem_cnt(container, mklolthvaultitem());
+}
+
 struct obj *
 mk_jrt_obj(oclass)
 int oclass;
@@ -723,19 +749,91 @@ int vn;
 }
 
 void
-mkhellvaultitem_cnt(container, vn, bury)
-struct obj *container;
-int vn;
-boolean bury;
+mkhellvaultitem_cnt(struct obj *container, int vn)
 {
+	add_vaultitem_cnt(container, mkhellvaultitem(vn));
+}
+
+struct obj *
+mkchromaticvaultitem()
+{
+	static const int chromatic_dragon_armors[] = {
+		GRAY_DRAGON_SCALE_MAIL,       GRAY_DRAGON_SCALES,       GRAY_DRAGON_SCALE_SHIELD,
+		SILVER_DRAGON_SCALE_MAIL,     SILVER_DRAGON_SCALES,     SILVER_DRAGON_SCALE_SHIELD,
+		SHIMMERING_DRAGON_SCALE_MAIL, SHIMMERING_DRAGON_SCALES, SHIMMERING_DRAGON_SCALE_SHIELD,
+		ORANGE_DRAGON_SCALE_MAIL,     ORANGE_DRAGON_SCALES,     ORANGE_DRAGON_SCALE_SHIELD,
+		DEEP_DRAGON_SCALE_MAIL,       DEEP_DRAGON_SCALES,       DEEP_DRAGON_SCALE_SHIELD,
+	};
 	struct obj *otmp;
-	
-	otmp = mkhellvaultitem(vn);
-	if(Is_container(otmp)){
-		place_object(otmp, container->ox, container->oy);
-		if(bury) bury_an_obj(otmp);
+	int try_limit = 1000;
+	int type;
+	boolean sobj = FALSE;
+	otmp = (struct obj *)0;
+	if (!rn2(3)) {
+		/* armor: 50/50 curated non-chromatic dragon armors vs generic */
+		if (rn2(2)) {
+			type = ROLL_FROM(chromatic_dragon_armors);
+			sobj = TRUE;
+		} else {
+			type = ARMOR_CLASS;
+		}
+	} else if (rn2(2)) {
+		if (!rn2(20)) {
+			type = TOOTH;
+			sobj = TRUE;
+		} else {
+			type = WEAPON_CLASS;
+		}
+	} else if (!rn2(4)) {
+		type = SCOIN_CLASS;
+	} else if (!rn2(3)) {
+		type = get_vault_misc(VN_N_PIT_FIEND);
+		otmp = mksobj(type, NO_MKOBJ_FLAGS);
+		if (otmp) return otmp;
+		impossible("special %d obj failed??", type);
+		type = RANDOM_CLASS;
+	} else if (rn2(2)) {
+		if (!rn2(20)) {
+			type = RIN_NOTHING;
+			sobj = TRUE;
+		} else {
+			type = RING_CLASS;
+		}
+	} else {
+		type = RANDOM_CLASS;
 	}
-	else add_to_container(container, otmp);
+	do {
+		if (otmp) delobj(otmp);
+		otmp = sobj ? mksobj(type, MKOBJ_ARTIF) : mkobj(type, TRUE);
+		if (otmp->otyp == RIN_NOTHING) {
+			otmp = mk_chromatic_special(otmp);
+		} else if (!rn2(10) || ((objects[otmp->otyp].oc_magic || otmp->oartifact) && !rn2(3))) {
+			otmp = mk_chromatic_special(otmp);
+			if (otmp->oclass == WEAPON_CLASS || is_weptool(otmp) || otmp->oclass == ARMOR_CLASS)
+				otmp->spe = max_ints(d(3,3), otmp->spe);
+		} else if (!rn2(4) || ((objects[otmp->otyp].oc_magic || otmp->oartifact) && !rn2(2))) {
+			otmp = mk_chromatic_special(otmp);
+			if (otmp->oclass == WEAPON_CLASS || is_weptool(otmp) || otmp->oclass == ARMOR_CLASS)
+				otmp->spe = max_ints(d(3,3), otmp->spe);
+		} else if (!rn2(4) || otmp->oartifact) {
+			otmp = mk_minor_special(otmp);
+			if (otmp->oclass == WEAPON_CLASS || is_weptool(otmp) || otmp->oclass == ARMOR_CLASS)
+				otmp->spe = max_ints(d(1,7), otmp->spe);
+		} else {
+			if (otmp->oclass == WEAPON_CLASS || is_weptool(otmp) || otmp->oclass == ARMOR_CLASS)
+				otmp->spe = max_ints(d(2,3), otmp->spe);
+		}
+		if ((otmp->oclass == WEAPON_CLASS || is_weptool(otmp) || otmp->oclass == ARMOR_CLASS) && rn2(5))
+			otmp->oerodeproof = TRUE;
+	} while (--try_limit > 0 &&
+	  !(objects[otmp->otyp].oc_magic || otmp->oartifact || !check_oprop(otmp, OPROP_NONE) || Is_container(otmp)));
+	return otmp;
+}
+
+void
+mkchromaticvaultitem_cnt(struct obj *container)
+{
+	add_vaultitem_cnt(container, mkchromaticvaultitem());
 }
 
 STATIC_OVL

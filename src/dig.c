@@ -1607,7 +1607,7 @@ int x, y, type;
 	container->olocked = TRUE;
 	container->otrapped = TRUE;
 	for(int i = d(9,4); i > 0; i--)
-		mkhellvaultitem_cnt(container, type, TRUE);
+		mkhellvaultitem_cnt(container, type);
 	bury_an_obj(container);
 }
 
@@ -1633,7 +1633,7 @@ struct monst *levi;
 	otmp = mksobj(WAGE_OF_PRIDE, MKOBJ_NOINIT);
 	add_to_container(container, otmp);
 	for(int i = 3*9; i > 0; i--)
-		mkhellvaultitem_cnt(container, VN_N_PIT_FIEND, FALSE);
+		mkhellvaultitem_cnt(container, VN_N_PIT_FIEND);
 	if(levi->mtyp == PM_LEVIATHAN) mpickobj(levi, container);
 	else place_object(container, x, y);
 }

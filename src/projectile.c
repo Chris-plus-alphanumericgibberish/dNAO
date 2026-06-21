@@ -3162,6 +3162,10 @@ int tary;
 	static const int chromatic_dragon_breaths[] = { AD_FIRE, AD_COLD, AD_ELEC, AD_DRST, AD_DISN, AD_ACID };
 	static const int platinum_dragon_breaths[] = { AD_FIRE, AD_DISN, AD_SLEE, AD_ELEC };
 	static const int random_breaths[] = { AD_MAGM, AD_FIRE, AD_COLD, AD_SLEE, AD_DISN, AD_ELEC, AD_DRST, AD_ACID };
+	int multi_typs[6];
+	int multi_n = 1;
+	int multi_idx;
+	int sx, sy;
 	int dx, dy, dz;
 	int range;
 	boolean jacket = youagr ? Straitjacketed : straitjacketed_mon(magr);
@@ -3194,13 +3198,25 @@ int tary;
 	}
 
 	/* Random breath attacks */
-	if (typ == AD_RBRE){
-		if (pa->mtyp == PM_CHROMATIC_DRAGON)
-			typ = chromatic_dragon_breaths[rn2(SIZE(chromatic_dragon_breaths))];
-		else if (pa->mtyp == PM_PLATINUM_DRAGON)
-			typ = platinum_dragon_breaths[rn2(SIZE(platinum_dragon_breaths))];
-		else 
-			typ = random_breaths[rn2(SIZE(random_breaths))];
+	multi_typs[0] = typ;
+	if (typ == AD_RBRE) {
+		if (pa->mtyp == PM_CHROMATIC_DRAGON) {
+			/* all six heads fire in a random order */
+			multi_n = SIZE(chromatic_dragon_breaths);
+			for (multi_idx = 0; multi_idx < multi_n; multi_idx++)
+				multi_typs[multi_idx] = chromatic_dragon_breaths[multi_idx];
+			for (multi_idx = multi_n - 1; multi_idx > 0; multi_idx--) {
+				int swap = rn2(multi_idx + 1);
+				int tmp = multi_typs[multi_idx];
+				multi_typs[multi_idx] = multi_typs[swap];
+				multi_typs[swap] = tmp;
+			}
+		} else if (pa->mtyp == PM_PLATINUM_DRAGON) {
+			multi_typs[0] = platinum_dragon_breaths[rn2(SIZE(platinum_dragon_breaths))];
+		} else {
+			multi_typs[0] = random_breaths[rn2(SIZE(random_breaths))];
+		}
+		typ = multi_typs[0];
 	}
 	/* if cancelled, (or the player is strangled) can't use breath attack */
 	if (youagr ? Strangled_cant_speak : magr->mcan) {
@@ -3229,31 +3245,60 @@ int tary;
 	
 	/* message */
 	if (youagr || canseemon(magr)) {
-		char * bofp = flash_type(typ, ZAP_BREATH);
-		char * p = strstri(bofp, " of ");
+		if (multi_n > 1) {
+			if (jacket) {
+				if (youagr)
+					Your("straitjacket prevents you from taking a deep breath!");
+				else
+					pline("%s seems to be having trouble breathing.", Monnam(magr));
+			}
+			pline("%s breathe%s all colors!",
+				youagr ? "You" : Monnam(magr),
+				youagr ? "" : "s");
+		} else {
+			char * bofp = flash_type(typ, ZAP_BREATH);
+			char * p = strstri(bofp, " of ");
 
-		if (p) {
-			p += 4;
-			if (!*p) p = NULL;
+			if (p) {
+				p += 4;
+				if (!*p) p = NULL;
+			}
+
+			/* some breaths sound better as "a noun of x" */
+			if (typ == AD_DISN || typ == AD_BLUD)
+				p = NULL;
+
+			if (jacket) {
+				if (youagr)
+					Your("straitjacket prevents you from taking a deep breath!");
+				else
+					pline("%s seems to be having trouble breathing.", Monnam(magr));
+			}
+			pline("%s breathe%s %s!",
+				youagr ? "You" : Monnam(magr),
+				youagr ? "" : "s",
+				p ? p : an(bofp)
+				);
 		}
-		
-		/* some breaths sound better as "a noun of x" */
-		if (typ == AD_DISN || typ == AD_BLUD)
-			p = NULL;
-		
-		if(jacket){
-			if(youagr)
-				Your("straitjacket prevents you from taking a deep breath!");
-			else
-				pline("%s seems to be having trouble breathing.", Monnam(magr));
-		}
-		pline("%s breathe%s %s!",
-			youagr ? "You" : Monnam(magr),
-			youagr ? "" : "s",
-			p ? p : an(bofp)
-			);
 	}
 
+	for (multi_idx = 0; multi_idx < multi_n; multi_idx++) {
+	typ = multi_typs[multi_idx];
+	sx = x(magr);
+	sy = y(magr);
+	if (multi_n > 1) {
+		int xadj = 0, yadj = 0;
+		if (dy == 0)       yadj = d(1,3)-2 + d(1,3)-2;
+		else if (dx == 0)  xadj = d(1,3)-2 + d(1,3)-2;
+		else if (dx == dy) { int dd = d(1,3)-2 + d(1,3)-2; xadj = dd; yadj = -1*dd; }
+		else               { int dd = d(1,3)-2 + d(1,3)-2; xadj = yadj = dd; }
+		if (isok(x(magr)+xadj, y(magr)+yadj) &&
+		    ACCESSIBLE(levl[x(magr)+xadj][y(magr)+yadj].typ) &&
+		    clear_path(x(magr), y(magr), x(magr)+xadj, y(magr)+yadj)) {
+			sx = x(magr)+xadj;
+			sy = y(magr)+yadj;
+		}
+	}
 	/* set up zapdata */
 	basiczap(&zapdata, typ, ZAP_BREATH, 0);
 
@@ -3301,7 +3346,8 @@ int tary;
 		zapdata.damd = zapdata.damd/2+1;
 	}
 
-	zap(magr, x(magr), y(magr), dx, dy, range, &zapdata);
+	zap(magr, sx, sy, dx, dy, range, &zapdata);
+	} /* end multi-breath loop */
 
 	/* breath runs out sometimes. */ 
 	if (!youagr) {
