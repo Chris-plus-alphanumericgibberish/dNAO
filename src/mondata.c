@@ -4085,7 +4085,7 @@ struct permonst *ptr;
 	int size = 8;
 	if(ptr->mtyp == PM_ZHI_REN_MONK)
 		size = 4;
-	else if(ptr->mtyp == PM_ANCIENT_OF_DEATH)
+	else if(ptr->mtyp == PM_ANCIENT_OF_DEATH || ptr->mtyp == PM_BAALPHEGOR)
 		size = 20;
 	else if(ptr->mtyp == PM_TETTIGON_LEGATUS || ptr->mtyp == PM_UNMASKED_TETTIGON || ptr->mtyp == PM_TRANSCENDENT_TETTIGON)
 		size = 16;
