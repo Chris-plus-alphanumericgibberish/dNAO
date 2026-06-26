@@ -192,33 +192,33 @@ struct monst {
 	Bitfield(mspores,1); /* monster is being consumed by Zuggutmoy's spores */ /*118*/
 	Bitfield(mformication,1); /* monster is covered in imaginary insects */ /*119*/
 	Bitfield(mscorpions,1); /* monster is covered in stinging scorpions */ /*120*/
-	Bitfield(mvermin,1); /* monster is swarmed by stinging vermin */ /*120*/
-	Bitfield(mamnesia,1); /* monster is about to forget it hates the PC */ /*121*/
+	Bitfield(mvermin,1); /* monster is swarmed by stinging vermin */ /*121*/
+	Bitfield(mamnesia,1); /* monster is about to forget it hates the PC */ /*122*/
 	
-	Bitfield(deadmonster,2); /* is DEADMONSTER */ /*122*/
+	Bitfield(deadmonster,2); /* is DEADMONSTER */ /*124*/
 #define DEADMONSTER_DEAD	0x1
 #define DEADMONSTER_PURGE	0x2
 #define DEADMONSTER(mon)	((mon) != &youmonst && (mon)->deadmonster)
-	Bitfield(mnoise,1); /* made noise in the last turn (dochug) */ /*124*/
-	Bitfield(marriving,1); /* monster is arriving on the level and should be placed when there's space */ /*125*/
-	Bitfield(brainblooms,1);/* should rise as brainblossom */ /*126*/
-	Bitfield(mibitemarked,1); /* monster was damaged by the ibite arm and will be sacced if they die */ /*127*/
-	Bitfield(mpassive,1); /* if tame, won't attack monsters ever */ /*128*/
-	Bitfield(mwounded_legs,1);/* wounded legs */ /*129*/
-	Bitfield(mopen,2);/* open to sneak attacks */ /*131*/
+	Bitfield(mnoise,1); /* made noise in the last turn (dochug) */ /*126*/
+	Bitfield(marriving,1); /* monster is arriving on the level and should be placed when there's space */ /*127*/
+	Bitfield(brainblooms,1);/* should rise as brainblossom */ /*128*/
+	Bitfield(mibitemarked,1); /* monster was damaged by the ibite arm and will be sacced if they die */ /*129*/
+	Bitfield(mpassive,1); /* if tame, won't attack monsters ever */ /*130*/
+	Bitfield(mwounded_legs,1);/* wounded legs */ /*131*/
+	Bitfield(mopen,2);/* open to sneak attacks */ /*133*/
 	
-	Bitfield(mequipping,7); /*146*/
+	Bitfield(mequipping,7); /*140*/
 
-	Bitfield(mironmarked,1);/* recently hit by an iron weapon (elves/fey/rage-walker) */ /*147*/
-	Bitfield(mcaterpillars,1); /* monster is covered in rot scorpions */ /*148*/
-	Bitfield(momud,1); /* monster is covered in orc-mud */ /*148*/
-	Bitfield(mubled,1); /* You inflicted bleed damage on this monster and will be blamed if it dies */ /*149*/
-	Bitfield(mtecpatlmarked,1); /* the Tecpatl of Huehueteotl can sacrifice low-enough-health monsters */ /*150*/
-	Bitfield(mpunctured,4); /* This monster may take double damage from puncture attacks */ /*154*/
-	Bitfield(mprobed,1); /* monster has been probed by Magicbane et al, will display at end of attack if it lives */ /*155*/
-	Bitfield(mmired,1); /* monster was created in the mire */ /*156*/
-	Bitfield(mnopickup,1); /* pet will leave items on the ground */ /*157*/
-	Bitfield(mcombat,1); /* pet is currently engaged in combat */ /*158*/
+	Bitfield(mironmarked,1);/* recently hit by an iron weapon (elves/fey/rage-walker) */ /*141*/
+	Bitfield(mcaterpillars,1); /* monster is covered in rot scorpions */ /*142*/
+	Bitfield(momud,1); /* monster is covered in orc-mud */ /*143*/
+	Bitfield(mubled,1); /* You inflicted bleed damage on this monster and will be blamed if it dies */ /*144*/
+	Bitfield(mtecpatlmarked,1); /* the Tecpatl of Huehueteotl can sacrifice low-enough-health monsters */ /*145*/
+	Bitfield(mpunctured,4); /* This monster may take double damage from puncture attacks */ /*149*/
+	Bitfield(mprobed,1); /* monster has been probed by Magicbane et al, will display at end of attack if it lives */ /*150*/
+	Bitfield(mmired,1); /* monster was created in the mire */ /*151*/
+	Bitfield(mnopickup,1); /* pet will leave items on the ground */ /*152*/
+	Bitfield(mcombat,1); /* pet is currently engaged in combat */ /*153*/
 
 	unsigned long long int 	seenmadnesses;	/* monster has seen these madnesses */
 	
