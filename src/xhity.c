@@ -634,6 +634,9 @@ xattacky(struct monst *magr, struct monst *mdef, int tarx, int tary, long modifi
 	res[1] = MM_MISS;
 	res[2] = MM_MISS;
 	res[3] = MM_MISS;
+	/* record pre-chain stuck state so AT_SQUZ can gate on it */
+	if ((youdef && u.ustuck == magr) || (youagr && u.ustuck == mdef))
+		add_subout(subout, SUBOUT_SQUZ_ALLOW);
 	/* Now perform all attacks. */
 	do {
 		boolean dopassive_local = FALSE;
@@ -3456,6 +3459,11 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		/* Hugs attacks are similar, but will still happen if magr and mdef are stuck together */
 		(attk->aatyp == AT_HUGS && (prev_res[1] == MM_MISS || prev_res[2] == MM_MISS)
 			&& !(mdef && ((youdef && u.ustuck == magr) || (youagr && u.ustuck == mdef)))) ||
+		/* player-involved: only if grabbed before this turn started; mvm: only if previous attack hit */
+		(attk->aatyp == AT_SQUZ &&
+			((youagr || youdef)
+				? !check_subout(subout, SUBOUT_SQUZ_ALLOW)
+				: (prev_res[1] == MM_MISS))) ||
 		/* Demogorgon's item-stealing gaze only happens if previous two gazes worked AND he is close to his target */
 		(pa->mtyp == PM_DEMOGORGON && mdef && attk->aatyp == AT_GAZE && attk->adtyp == AD_SEDU && (
 			prev_res[1] == MM_MISS || prev_res[2] == MM_MISS))
@@ -3827,6 +3835,12 @@ struct attack *attk;
 				(pa->mtyp == PM_ROPE_GOLEM ? "choked" : "crushed")
 				);
 			break;
+		case AT_SQUZ:
+			pline("%s %s being squeezed.",
+				(youdef ? "You" : Monnam(mdef)),
+				(youdef ? "are" : "is")
+				);
+			break;
 		case AT_EXPL:
 		case AT_BOOM:
 			pline("%s %s!",
@@ -3916,10 +3930,39 @@ boolean ranged;
 	return;
 }
 
-/* slips_free() 
- * 
+/* grab_attk_agr_name()
+ *
+ * Fills buf with the name of the entity performing a grab/wrap attack,
+ * accounting for sub-entities (e.g. "The rotting monk's giant centipede").
+ * Returns TRUE if the subject is third-person (verb needs s/es suffix),
+ * FALSE if it is "You".
+ */
+static boolean
+grab_attk_agr_name(struct monst *magr, boolean youagr, char *buf)
+{
+	if (magr->mtyp == PM_ROTTING_MONK) {
+		Sprintf(buf, "%s giant centipede", youagr ? "Your" : s_suffix(Monnam(magr)));
+		return TRUE;
+	}
+	else if (magr->mtyp == PM_HYGIEIAN_ARCHON) {
+		Sprintf(buf, "%s snake", youagr ? "Your" : s_suffix(Monnam(magr)));
+		return TRUE;
+	}
+	else if (youagr) {
+		Sprintf(buf, "You");
+		return FALSE;
+	}
+	else {
+		Sprintf(buf, "%s", Monnam(magr));
+		return TRUE;
+	}
+}
+
+
+/* slips_free()
+ *
  * Checks whether slippery clothing protects from hug or wrap attack.
- * 
+ *
  * Prints messages.
  */
 boolean
@@ -3965,8 +4008,10 @@ int vis;
 	}
 
 	if(youdef && check_mutation(TT_SLIPPERY_SKIN)){
+		char agr[BUFSZ];
+		grab_attk_agr_name(magr, youagr, agr);
 		pline("%s %s%s your slippery %s!",
-			Monnam(magr),
+			agr,
 			(attk->adtyp == AD_WRAP ? "slips" : "grabs"),
 			(attk->adtyp == AD_WRAP ? " off of" : ", but cannot hold onto"),
 			body_part(BODY_SKIN));
@@ -3986,16 +4031,30 @@ int vis;
 		) {
 		/* print appropriate message */
 		if (vis&VIS_MDEF) {
-			pline("%s %s%s%s %s %s %s!",
-				(youagr ? "You" : Monnam(magr)),
-				(attk->adtyp == AD_WRAP ? "slip" : "grab"),
-				(youagr ? "" : "s"),
-				(attk->adtyp == AD_WRAP ? " off of" : ", but cannot hold onto"),
-				(youdef ? "your" : s_suffix(mon_nam(mdef))),
-				(obj->greased ? "greased" : "slippery"),
-				((obj->otyp == OILSKIN_CLOAK && !objects[obj->otyp].oc_name_known)
-				? cloak_simple_name(obj) : obj->otyp == find_mboots() ? "mud boots" : xname(obj))
+			char agr[BUFSZ];
+			boolean third = grab_attk_agr_name(magr, youagr, agr);
+			if(obj && obj->otyp == find_mboots() && (magr->mtyp == PM_A_GONE || magr->mtyp == PM_MINDLESS_THRALL)){
+				pline("%s step%s on %s %s mud boots and slip%s, releasing %s!",
+					agr,
+					(third ? "s" : ""),
+					(youdef ? "your" : s_suffix(mon_nam(mdef))),
+					(obj->greased ? "greased" : "slippery"),
+					(third ? "s" : ""),
+					(youdef ? "you" : mon_nam(mdef))
 				);
+			}
+			else {
+				pline("%s %s%s%s %s %s %s!",
+					agr,
+					(attk->adtyp == AD_WRAP ? "slip" : "grab"),
+					(third ? "s" : ""),
+					(attk->adtyp == AD_WRAP ? " off of" : ", but cannot hold onto"),
+					(youdef ? "your" : s_suffix(mon_nam(mdef))),
+					(obj->greased ? "greased" : "slippery"),
+					((obj->otyp == OILSKIN_CLOAK && !objects[obj->otyp].oc_name_known)
+					? cloak_simple_name(obj) : obj->otyp == find_mboots() ? "mud boots" : xname(obj))
+					);
+			}
 		}
 		/* remove grease (50% odds) */
 		if (obj->greased && !rn2(2)) {
@@ -5390,6 +5449,7 @@ xmeleehity(struct monst *magr, struct monst *mdef, struct attack *attk, struct o
 		/* hits if previous 2 attacks hit; always contacts */
 	case AT_REND:
 	case AT_HUGS:	// also a guaranteed hit if the player is involved and the player and other creature are stuck together
+	case AT_SQUZ:
 		/* xattacky() would have not called xmeleehity() if the conditions to make either aatyp weren't satisfied
 		 * We do not need to check previous attacks
 		 */
@@ -9995,6 +10055,13 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 								(youagr ? mon_nam(mtmp) : "you")
 								);
 						}
+						else if(pa->mtyp == PM_A_GONE || pa->mtyp == PM_MINDLESS_THRALL){
+						pline("%s cling%s to %s!",
+							(youagr ? "You" : Monnam(mtmp)),
+							(youagr ? "" : "s"),
+							(youagr ? mon_nam(mtmp) : "you")
+							);
+						}
 						else pline("%s swing%s %s around %s!",
 							(youagr ? "You" : Monnam(mtmp)),
 							(youagr ? "" : "s"),
@@ -10018,7 +10085,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 			/* if you are attached to the other creature, do the thing! */
 			else if (u.ustuck == mtmp) {
 				/* drowning? */
-				if ((is_pool(x(magr), y(magr), FALSE) || pa->mtyp == PM_DAUGHTER_OF_NAUNET)
+				if ((is_pool(x(magr), y(magr), FALSE) || is_pool(x(mdef), y(mdef), FALSE) || pa->mtyp == PM_DAUGHTER_OF_NAUNET)
 					&& !(youdef ? Swimming : mon_resistance(mdef, SWIMMING))
 					&& !(youdef ? Breathless : breathless_mon(mdef))
 					&& !(amphibious(pd))	/* Note: Amphibious is magical breathing, Swimming, or amphibious(). 
@@ -10090,7 +10157,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 				}
 				/* Gentle squeeze. Restore 1d3 points of sanity. Just kidding. */
 				else {
-					dmg = 0;
+					dmg = 0; //Flavor text only
 					if(pa->mtyp == PM_ROTTING_MONK){
 						pline("%s %s.",
 							youagr ? Monnam(mtmp) : s_suffix(Monnam(mtmp)),
@@ -10112,14 +10179,45 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 			/* nothing really happens */
 			else {
 				if (flags.verbose) {
-					if (youagr) {
-						You("brush against %s %s.",
-							s_suffix(mon_nam(mdef)),
-							mbodypart(mdef, LEG));
+					if (attk->aatyp == AT_TENT) {
+						struct obj *arm = outermost_armor_for_slot(mdef, UPPER_TORSO_DR);
+						pline("%s brush%s %s tentacles against %s %s.",
+							(youagr ? "You" : Monnam(mtmp)),
+							(youagr ? "" : "es"),
+							(youagr ? "your" : "its"),
+							(youagr ? s_suffix(mon_nam(mdef)) : "your"),
+							!arm ? (youagr ? mbodypart(mdef, BODY_SKIN) : body_part(BODY_SKIN)) : xname(arm)
+							);
 					}
-					else if (youdef) {
-						pline("%s brushes against your %s.", Monnam(mtmp),
-							body_part(LEG));
+					else if (pa->mtyp == PM_ROTTING_MONK) {
+						pline("%s giant centipede brushes against %s %s.",
+							(youagr ? "Your" : s_suffix(Monnam(mtmp))),
+							(youagr ? s_suffix(mon_nam(mdef)) : "your"),
+							(youagr ? mbodypart(mdef, LEG) : body_part(LEG))
+							);
+					}
+					else if (pa->mtyp == PM_HYGIEIAN_ARCHON) {
+						pline("%s snake brushes against %s %s.",
+							(youagr ? "Your" : s_suffix(Monnam(mtmp))),
+							(youagr ? s_suffix(mon_nam(mdef)) : "your"),
+							(youagr ? mbodypart(mdef, ARM) : body_part(ARM))
+							);
+					}
+					else if (pa->mtyp == PM_A_GONE || pa->mtyp == PM_MINDLESS_THRALL) {
+						pline("%s stumble%s.",
+							(youagr ? "You" : Monnam(mtmp)),
+							(youagr ? "" : "s"));
+					}
+					else {
+						if (youagr) {
+							You("brush against %s %s.",
+								s_suffix(mon_nam(mdef)),
+								mbodypart(mdef, LEG));
+						}
+						else if (youdef) {
+							pline("%s brushes against your %s.", Monnam(mtmp),
+								body_part(LEG));
+						}
 					}
 				}
 				/* return miss -- nothing happens */

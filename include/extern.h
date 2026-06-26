@@ -3642,6 +3642,7 @@ E int NDECL(heal_mlevel_bonus);
 E int NDECL(heal_vilya);
 E int NDECL(lev_lomya);
 E int NDECL(en_nenya);
+E struct obj * FDECL(outermost_armor_for_slot, (struct monst *, int));
 E void FDECL(saber_damage_slot, (struct monst *, struct obj *, int, boolean, boolean, boolean *));
 
 /* ### write.c ### */

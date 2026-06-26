@@ -117,7 +117,8 @@
 #define SUBOUT_A_MAR_4  49	/* Aasimar extra arm 4 */
 #define SUBOUT_A_ACID_TOUCH 50	/* Aasimar acidic touch attack */
 #define SUBOUT_A_SUCK  51	/* Aasimar priminal sucking attack */
-#define MAX_SUBOUT		51
+#define SUBOUT_SQUZ_ALLOW 52	/* target was already grabbed at the start of this attack chain */
+#define MAX_SUBOUT		52
 #define SUBOUT_ARRAY_SIZE (MAX_SUBOUT/(sizeof(int)*8)+1)
 
 #define ATTKFLAG_FORCE_BLEED		0x00000001L

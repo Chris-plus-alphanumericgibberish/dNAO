@@ -2373,6 +2373,7 @@ get_description_of_attack_type(uchar id)
 	case AT_WEAP: return "weapon";
 	case AT_MAGC: return "uses magic spell(s)";
 	case AT_REND: return "extra effect for previous attacks";
+	case AT_SQUZ: return "crushing grip";
 	default:
 			impossible("bug in get_description_of_attack_type(%d)", id);
 			return "<MISSING DECRIPTION, THIS IS A BUG>";

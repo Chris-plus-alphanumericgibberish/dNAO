@@ -3019,6 +3019,35 @@ next_armor_depth(long depth)
 	return 0L;
 }
 
+struct obj *
+outermost_armor_for_slot(struct monst *mon, int slot)
+{
+	long depth = W_ARMS;
+	boolean youmon = (mon == &youmonst);
+	struct obj *otmp;
+
+	while (depth) {
+		for (otmp = youmon ? invent : mon->minvent; otmp; otmp = otmp->nobj) {
+			if (!(otmp->owornmask & (W_ARMOR|W_BELT)))
+				continue;
+			if (armor_depth(otmp, slot) != depth)
+				continue;
+			if (otmp->oclass == ARMOR_CLASS) {
+				if (!(objects[otmp->otyp].oc_dtyp & slot)
+				    && !(!objects[otmp->otyp].oc_dtyp
+				         && default_coverage(slot, otmp->owornmask)))
+					continue;
+			} else {
+				if (!default_coverage(slot, otmp->owornmask))
+					continue;
+			}
+			return otmp;
+		}
+		depth = next_armor_depth(depth);
+	}
+	return (struct obj *)0;
+}
+
 void
 saber_damage_slot(struct monst *mdef, struct obj *saber, int slot, boolean lethal, boolean vis, boolean * messaged)
 {
