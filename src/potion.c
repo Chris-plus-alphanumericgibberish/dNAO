@@ -1259,9 +1259,7 @@ as_extra_healing:
 			break;
 		} else {
 			You_feel("completely healed.");
-			healup(enhanced ? 800 : 400, 
-					!(get_ox(otmp, OX_ESUM)) * (enhanced ? 2 : 1) * (4+4*bcsign(otmp)),
-					TRUE, TRUE);
+			healup(enhanced ? 800 : 400, 0, TRUE, TRUE);
 		}
 		/* Restore lost levels */
 		if (u.ulevel < u.ulevelmax) {
