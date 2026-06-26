@@ -78,6 +78,9 @@ const char *fmt, *arg;
 	skinback(FALSE);
 	u.uundetected = 0;
 
+	break_armor();
+	drop_weapon(1);
+
 	if (sticky) uunstick();
 	find_ac();
 	if (was_mimicking) {
