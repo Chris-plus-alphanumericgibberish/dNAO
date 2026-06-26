@@ -45,6 +45,7 @@ STATIC_DCL char NDECL(pick_bullet);
 STATIC_DCL char NDECL(pick_coin);
 STATIC_DCL struct obj * FDECL(pick_creatures_armor, (struct monst *, int *));
 STATIC_DCL struct obj * FDECL(pick_armor_for_creature, (struct monst *));
+STATIC_DCL struct obj * FDECL(pick_mon_item_for_water, (struct monst *));
 
 /* define for query_objlist() and autopickup() */
 #define FOLLOW(curr, flags) \
@@ -2164,6 +2165,115 @@ dopetequip()
     return timepassed ? MOVE_STANDARD : MOVE_CANCELLED;
 }
 
+/* dopetwater() -- apply holy/cursed water to an item in a tame monster's inventory.
+ * Returns amount of time passed.
+ */
+int
+dopetwater(struct obj *potion)
+{
+    coord cc;
+    struct monst *mtmp;
+    struct obj *otmp;
+    boolean useeit;
+    const char *tmp;
+
+    if (!get_adjacent_loc("Apply water in which direction?", "Invalid location",
+            u.ux, u.uy, &cc)) return MOVE_CANCELLED;
+
+    if (cc.x == u.ux && cc.y == u.uy) {
+        You("pour the water on yourself. Use dipping to affect your own items.");
+        return MOVE_CANCELLED;
+    }
+
+    mtmp = m_at(cc.x, cc.y);
+
+    if (!mtmp || !canspotmon(mtmp)) {
+        You_cant("find anyone there!");
+        return MOVE_CANCELLED;
+    }
+    if (!mtmp->mtame) {
+        pline("%s doesn't trust you.", Monnam(mtmp));
+        return MOVE_CANCELLED;
+    }
+    if (nolimbs(youracedata)) {
+        You_cant("do that without limbs.");
+        return MOVE_CANCELLED;
+    }
+    if (!mtmp->minvent) {
+        pline("%s isn't carrying anything.", Monnam(mtmp));
+        return MOVE_CANCELLED;
+    }
+
+    otmp = pick_mon_item_for_water(mtmp);
+    if (!otmp) return MOVE_CANCELLED;
+
+    useeit = !Blind && cansee(mtmp->mx, mtmp->my);
+
+    if (potion->blessed) {
+        if (otmp->cursed) {
+            if (useeit)
+                pline("%s %s %s.", s_suffix(Monnam(mtmp)),
+                      aobjnam(otmp, "softly glow"), hcolor(NH_AMBER));
+            uncurse(otmp);
+            if (useeit) {
+                otmp->bknown = 1;
+                potion->bknown = 1;
+            }
+        } else if (!otmp->blessed) {
+            tmp = hcolor(NH_LIGHT_BLUE);
+            if (useeit)
+                pline("%s %s with a%s %s aura.", s_suffix(Monnam(mtmp)),
+                      aobjnam(otmp, "softly glow"),
+                      index(vowels, *tmp) ? "n" : "", tmp);
+            bless(otmp);
+            if (useeit) {
+                otmp->bknown = 1;
+                potion->bknown = 1;
+            }
+        } else {
+            if (potion->bknown) otmp->bknown = 1;
+            else if (otmp->bknown) potion->bknown = 1;
+            pline("Nothing seems to happen.");
+            return MOVE_CANCELLED;
+        }
+    } else if (potion->cursed) {
+        if (otmp->blessed) {
+            if (useeit)
+                pline("%s %s %s.", s_suffix(Monnam(mtmp)),
+                      aobjnam(otmp, "glow"), hcolor((const char *)"brown"));
+            unbless(otmp);
+            if (useeit) {
+                otmp->bknown = 1;
+                potion->bknown = 1;
+            }
+        } else if (!otmp->cursed) {
+            tmp = hcolor(NH_BLACK);
+            if (useeit)
+                pline("%s %s with a%s %s aura.", s_suffix(Monnam(mtmp)),
+                      aobjnam(otmp, "glow"),
+                      index(vowels, *tmp) ? "n" : "", tmp);
+            curse(otmp);
+            if (useeit) {
+                otmp->bknown = 1;
+                potion->bknown = 1;
+            }
+        } else {
+            if (potion->bknown) otmp->bknown = 1;
+            else if (otmp->bknown) potion->bknown = 1;
+            pline("Nothing seems to happen.");
+            return MOVE_CANCELLED;
+        }
+    } else {
+        if (useeit && otmp->bknown) potion->bknown = 1;
+        pline("Nothing seems to happen.");
+        return MOVE_CANCELLED;
+    }
+
+    makeknown(POT_WATER);
+    useup(potion);
+    return MOVE_STANDARD;
+}
+
 /*
  * Decide whether an object being placed into a magic bag will cause
  * it to explode.  If the object is a bag itself, check recursively.
@@ -3845,6 +3955,52 @@ struct monst *mon;
 	} else pline("Nothing to equip!");
 	destroy_nhwindow(tmpwin);
 	if(n > 0){
+		struct obj *picked = selected[0].item.a_obj;
+		free(selected);
+		return picked;
+	}
+	return 0;
+}
+
+STATIC_OVL
+struct obj *
+pick_mon_item_for_water(struct monst *mon)
+{
+	winid tmpwin;
+	int n = 0, count = 0;
+	char buf[BUFSZ];
+	char incntlet = 'a';
+	struct obj *otmp;
+	menu_item *selected;
+	anything any;
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;
+
+	Sprintf(buf, "Inventory");
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+	for (otmp = mon->minvent; otmp; otmp = otmp->nobj) {
+#ifdef GOLDOBJ
+		if (otmp->oclass == COIN_CLASS) continue;
+#endif
+		Sprintf1(buf, doname(otmp));
+		any.a_obj = otmp;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf, MENU_UNSELECTED);
+		incntlet++;
+		if (incntlet > 'z') incntlet = 'A';
+		if (incntlet > 'Z' && incntlet < 'a') incntlet = 'a';
+		count++;
+	}
+	end_menu(tmpwin, "Apply water to what:");
+
+	if (count)
+		n = select_menu(tmpwin, PICK_ONE, &selected);
+	else
+		pline("Nothing to apply water to!");
+	destroy_nhwindow(tmpwin);
+	if (n > 0) {
 		struct obj *picked = selected[0].item.a_obj;
 		free(selected);
 		return picked;

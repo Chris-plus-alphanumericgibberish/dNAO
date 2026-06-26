@@ -2439,6 +2439,7 @@ E int NDECL(encumber_msg);
 E int NDECL(doloot);
 E int NDECL(dotip);
 E int NDECL(dopetequip);
+E int FDECL(dopetwater, (struct obj *));
 E int FDECL(use_container, (struct obj *,int));
 E int FDECL(use_massblaster, (struct obj *));
 E int FDECL(use_demon_claw, (struct obj *));

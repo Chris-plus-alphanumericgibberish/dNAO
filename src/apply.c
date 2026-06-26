@@ -12163,7 +12163,7 @@ doapply()
 
 	if(check_capacity((char *)0)) return MOVE_CANCELLED;
 
-	if (carrying(POT_OIL) || carrying(POT_BLOOD) || uhave_usablestone())
+	if (carrying(POT_OIL) || carrying(POT_BLOOD) || carrying(POT_WATER) || uhave_usablestone())
 		Strcpy(class_list, tools_too);
 	else
 		Strcpy(class_list, tools);
@@ -12720,6 +12720,9 @@ doapply()
 	case POT_OIL:
 		light_cocktail(obj);
 		obj = 0; //May have been dealocated, just get rid of it
+	break;
+	case POT_WATER:
+		return dopetwater(obj);
 	break;
 	case PHLEBOTOMY_KIT:
 		return blood_draw(obj);
