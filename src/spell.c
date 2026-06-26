@@ -444,6 +444,10 @@ learn()
 	}
 	exercise(A_WIS, TRUE);		/* you're studying. */
 	booktype = book->otyp;
+	if(booktype == SPE_BLANK_PAPER) {
+		book = 0;
+		return MOVE_FINISHED_OCCUPATION;
+	}
 	if(booktype == SPE_BOOK_OF_THE_DEAD) {
 	    deadbook(book);
 		book = 0;
@@ -6051,6 +6055,7 @@ int spell;
 	int difficulty;
 	int skill;
 	
+	if(!spellev(spell)) return 0;
 	if(Deadmagic && casting_stat == A_INT) return 0;
 	if(Catapsi && casting_stat == A_CHA) return 0;
 	if(Misotheism && casting_stat == A_WIS) return 0;
