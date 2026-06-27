@@ -1133,6 +1133,8 @@ struct obj {
 						  (otyp) == CANE || \
 						  (otyp) == WHIP_SAW || \
 						  (otyp) == CHURCH_HAMMER || \
+						  (otyp) == CHURCH_SHORTSWORD || \
+						  (otyp) == CHURCH_PICK || \
 						  (otyp) == ISAMUSEI || \
 						  (otyp) == DISKOS || \
 						  (otyp) == PINCER_STAFF || \
@@ -1142,6 +1144,8 @@ struct obj {
 						  (otyp) == DEMON_CLAW || \
 						  (otyp) == KAMEREL_VAJRA || \
 						  (otyp) == PEST_GLAIVE || \
+						  (otyp) == TONITRUS || \
+						  (otyp) == STAKE || \
 						  (otyp) == BREAKING_WHEEL)
 #define spec_prop_material(otmp)	(otmp->obj_material == MERCURIAL)
 #define is_multigen(otmp)	((otmp->oclass == WEAPON_CLASS && \
