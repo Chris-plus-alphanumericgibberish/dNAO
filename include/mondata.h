@@ -165,7 +165,7 @@
 #define has_head(ptr)		(((ptr)->mflagsb & MB_NOHEAD) == 0L)
 #define has_head_mon(mon) ((mon == &youmonst) ? (has_head(youracedata)) : (has_head((mon)->data)))
 #define has_horns(ptr)		(((ptr)->mflagsb & MB_HORNS) != 0L)
-#define has_horns_mon(mon) ((mon == &youmonst) ? (has_horns(youracedata)) : (has_horns((mon)->data)))
+#define has_horns_mon(mon) ((mon == &youmonst) ? (has_horns(youracedata) || (!Upolyd && TIEFLING_HORNS)) : (has_horns((mon)->data)))
 #define is_whirly(ptr)		((ptr)->mlet == S_VORTEX || \
 				 (ptr)->mtyp == PM_AIR_ELEMENTAL ||\
 				 (ptr)->mtyp == PM_ILLURIEN_OF_THE_MYRIAD_GLIMPSES ||\

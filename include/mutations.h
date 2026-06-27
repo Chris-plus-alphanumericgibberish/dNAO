@@ -242,6 +242,14 @@ struct mutationtype {
 	 || mut == TT_BULL_HORNS \
 	)
 
+#define TIEFLING_HORNS \
+	(has_mutation(TT_RAMS_HORN) \
+	 || has_mutation(TT_DEMON_HORN) \
+	 || has_mutation(TT_UNICORN_HORN) \
+	 || has_mutation(TT_ANTLERS) \
+	 || has_mutation(TT_BULL_HORNS) \
+	)
+
 #define is_holy_mut(mut) \
 	(mut == TT_FALLEN_ATTRACTIVE \
 	 || mut == TT_FALLEN_AURA \
