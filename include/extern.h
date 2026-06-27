@@ -3245,6 +3245,7 @@ E void FDECL(selftouch, (const char *));
 E void FDECL(mselftouch, (struct monst *,const char *,BOOLEAN_P));
 E void NDECL(float_up);
 E void FDECL(m_float_up, (struct monst *, boolean));
+E boolean NDECL(sokoban_unsolved);
 E void FDECL(fill_pit, (int,int));
 E int FDECL(float_down, (long, long));
 E void FDECL(m_float_down, (struct monst *, boolean));

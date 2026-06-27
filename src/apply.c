@@ -4540,7 +4540,7 @@ int magic; /* 0=Physical, otherwise skill level */
 	    (void) walk_path(&uc, &cc, hurtle_step, ((Role_if(PM_KENSEI) || Role_if(PM_MONK)) && uwep && is_pole(uwep)) ? &jumping_polearm : (void *) 0, (genericptr_t)&range);
 
 	    /* A little Sokoban guilt... */
-	    if (In_sokoban(&u.uz))
+	    if (sokoban_unsolved())
 		change_luck(-1);
 
 	    teleds(cc.x, cc.y, TRUE);

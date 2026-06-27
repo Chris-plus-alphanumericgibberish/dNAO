@@ -2877,6 +2877,18 @@ boolean silently;
 	return;
 }
 
+boolean
+sokoban_unsolved()
+{
+	struct trap *t;
+
+	if (!In_sokoban(&u.uz)) return FALSE;
+	for (t = ftrap; t; t = t->ntrap)
+	    if (t->ttyp == PIT || t->ttyp == HOLE)
+		return TRUE;
+	return FALSE;
+}
+
 void
 fill_pit(x, y)
 int x, y;
