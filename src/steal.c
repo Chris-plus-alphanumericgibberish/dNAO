@@ -578,7 +578,10 @@ struct monst *mtmp;
 	for(otmp = invent; otmp; otmp = otmp->nobj)
 	    if(is_quest_artifact(otmp)) break;
 	if (!otmp) return;	/* should we panic instead? */
-    } else if(u.uhave.bell) {
+    } else if(mtmp->mtyp == PM_WARDEN_ARIANNA && carrying_art(ART_IRON_BALL_OF_LEVITATION)) {
+ 	for(otmp = invent; otmp; otmp = otmp->nobj)
+	    if(otmp->oartifact == ART_IRON_BALL_OF_LEVITATION) break;
+   } else if(u.uhave.bell) {
 	real = BELL_OF_OPENING;
 	fake = BELL;
     } else if(u.uhave.book) {
@@ -594,17 +597,19 @@ struct monst *mtmp;
 			break;
     }
 
-    if (otmp) { /* we have something to snatch */
-	if (otmp->owornmask)
-	    remove_worn_item(otmp, TRUE);
-	freeinv(otmp);
-	/* mpickobj wont merge otmp because none of the above things
-	   to steal are mergable */
-	(void) mpickobj(mtmp,otmp);	/* may merge and free otmp */
-	pline("%s stole %s!", Monnam(mtmp), doname(otmp));
-	if (mon_resistance(mtmp,TELEPORT) && !tele_restrict(mtmp))
-	    (void) rloc(mtmp, TRUE);
-    }
+	if (otmp) { /* we have something to snatch */
+		boolean punish_holder = otmp == uball;
+		if (otmp->owornmask)
+			remove_worn_item(otmp, TRUE);
+		freeinv(otmp);
+		/* mpickobj wont merge otmp because none of the above things
+		to steal are mergable */
+		(void) mpickobj(mtmp,otmp);	/* may merge and free otmp */
+		pline("%s stole %s!", Monnam(mtmp), doname(otmp));
+		if (mon_resistance(mtmp,TELEPORT) && !tele_restrict(mtmp))
+			(void) rloc(mtmp, TRUE);
+		if (punish_holder) punish((struct obj *)0);
+	}
 }
 
 #endif /* OVLB */
