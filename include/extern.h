@@ -1545,7 +1545,7 @@ E boolean FDECL(mon_can_see_you, (struct monst *));
 E boolean FDECL(mon_can_see_mon, (struct monst *, struct monst *));
 E int FDECL(permonst_max_lev,(struct permonst *));
 E int FDECL(mon_max_lev,(struct monst *));
-E int FDECL(default_strongmonst_strength, (int));
+E int FDECL(default_strongmonst_strength, (struct permonst *));
 
 /* ### mapglyph.c ### */
 

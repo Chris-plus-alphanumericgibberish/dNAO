@@ -9354,7 +9354,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 			/* when the Nemeses hits, 1/10 steals the something special */
 			if (u.uhave.amulet ||
 				u.uhave.bell || u.uhave.book || u.uhave.menorah
-				|| u.uhave.questart) /* carrying the Quest Artifact */
+				|| u.uhave.questart || carrying_art(ART_IRON_BALL_OF_LEVITATION)) /* carrying the Quest Artifact */
 			if (!rn2(10)) stealquestart(magr);
 		}
 		alt_attk.adtyp = AD_PHYS;

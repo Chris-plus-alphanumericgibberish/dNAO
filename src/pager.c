@@ -2620,7 +2620,7 @@ get_description_of_attack(struct attack *mattk, char *main_temp_buf, struct mons
 				strength = STR19(25);
 			}
 			else {
-				strength = default_strongmonst_strength(mtmp->data->msize);
+				strength = default_strongmonst_strength(mtmp->data);
 			}
 			strength = strscore_dbon(strength);
 			if(strength > 0)
