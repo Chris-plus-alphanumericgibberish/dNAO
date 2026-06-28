@@ -832,11 +832,11 @@ int udist;
 	    droppables = TRUE;
 	}
 
-	    if((obj=level.objects[omx][omy]) && !index(nofetch,obj->oclass)
+	    if((obj=level.objects[omx][omy]) && !index(nofetch,obj->oclass) && obj != uball
 #ifdef MAIL
 			&& obj->otyp != SCR_MAIL
 #endif
-									){
+		){
 		int edible = dogfood(mtmp, obj);
 		
 	    if (!droppables && (edible <= CADAVER ||

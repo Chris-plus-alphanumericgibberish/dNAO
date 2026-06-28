@@ -2521,10 +2521,11 @@ register boolean unpaid_only;
 	    /* the "top" container is evaluated by caller */
 	    if (usell) {
 		if (saleable(shkp, otmp) &&
-			!otmp->unpaid && otmp->oclass != BALL_CLASS &&
+			!otmp->unpaid && otmp->oclass != BALL_CLASS && otmp != uball &&
 			!(otmp->oclass == FOOD_CLASS && otmp->oeaten) &&
 			!(Is_candle(otmp) && otmp->age <
-				20L * (long)objects[otmp->otyp].oc_cost))
+				20L * (long)objects[otmp->otyp].oc_cost)
+		)
 		    price += set_cost(otmp, shkp);
 	    } else if (!otmp->no_charge &&
 		      (!unpaid_only || (unpaid_only && otmp->unpaid))) {
@@ -3239,6 +3240,7 @@ xchar x, y;
 move_on:
 	if((!saleitem && !(container && cltmp > 0L))
 	   || eshkp->billct == BILLSZ
+	   || obj == uball
 	   || obj->oclass == BALL_CLASS
 	   || obj->oclass == CHAIN_CLASS || offer == 0L
 	   || get_ox(obj, OX_ESUM)

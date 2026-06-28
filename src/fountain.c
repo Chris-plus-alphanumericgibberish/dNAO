@@ -1903,7 +1903,7 @@ dipforge(struct obj *obj)
 
 	/* If punished and wielding a hammer, there's a good chance
 	 * you can use a forge to free yourself */
-	if (Punished && obj->otyp == BALL) {
+	if (Punished && obj == uball) {
 		if ((uwep && !is_hammer(uwep)) || !uwep) { /* sometimes drop a hint */
 			if (!rn2(4))
 				pline("You'll need a hammer to be able to break the chain.");
