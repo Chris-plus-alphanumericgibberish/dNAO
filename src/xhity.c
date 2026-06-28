@@ -22244,14 +22244,14 @@ monk_aura_bolt()
 			if(uwep->oartifact == ART_RINGIL){
 				zapdat.adtyp = AD_STAR;
 			}
-			else if(uwep->oartifact == ART_MALICE){
-				zapdat.adtyp = AD_UNHY;
-			}
-			else if(uwep->oartifact == ART_SEVEN_STAR_SWORD){
-				zapdat.adtyp = AD_HOLY;
-			}
 			else if(uwep->oartifact == ART_SKY_RENDER){
 				zapdat.adtyp = AD_VORP;
+			}
+			else if(is_always_holy(uwep)){
+				zapdat.adtyp = AD_HOLY;
+			}
+			else if(is_always_unholy(uwep)){
+				zapdat.adtyp = AD_UNHY;
 			}
 			else if(artilist[uwep->oartifact].adtyp == AD_COLD
 			 ||artilist[uwep->oartifact].adtyp == AD_FIRE

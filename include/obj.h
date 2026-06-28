@@ -1601,13 +1601,15 @@ struct obj {
 				)
 #define is_chupodible(otmp) ((otmp)->otyp == CORPSE && your_race(&mons[(otmp)->corpsenm]))
 
-#define is_holy(otmp)		((otmp)->oartifact == ART_SEVEN_STAR_SWORD || \
+#define is_always_holy(otmp) ((otmp)->oartifact == ART_SEVEN_STAR_SWORD)	
+#define is_holy(otmp)		(is_always_holy(otmp) || \
 							((otmp)->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD && artinstance[ART_GREEN_DRAGON_CRESCENT_BLAD].GDCBBlessedness&GDCB_BLESSED) || \
 							(otmp)->blessed)
-#define is_unholy(otmp)		((otmp)->oartifact == ART_STORMBRINGER || (otmp)->oartifact == ART_DIRGE || \
+#define is_always_unholy(otmp)	((otmp)->oartifact == ART_STORMBRINGER || (otmp)->oartifact == ART_DIRGE || \
 							(otmp)->oartifact == ART_MALICE || (otmp)->oartifact == ART_TECPATL_OF_HUEHUETEOTL || \
-							((otmp)->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD && artinstance[ART_GREEN_DRAGON_CRESCENT_BLAD].GDCBBlessedness&GDCB_CURSED) || \
-							(otmp)->oartifact == ART_ANGUIREL || (otmp)->cursed)
+							(otmp)->oartifact == ART_ANGUIREL)
+#define is_unholy(otmp)	(((otmp)->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD && artinstance[ART_GREEN_DRAGON_CRESCENT_BLAD].GDCBBlessedness&GDCB_CURSED) || \
+							is_always_unholy(otmp) || (otmp)->cursed)
 #define is_unblessed(otmp)	(!(is_holy(otmp) || is_unholy(otmp)) || ((otmp)->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD && artinstance[ART_GREEN_DRAGON_CRESCENT_BLAD].GDCBBlessedness&GDCB_UNBLESSED))
 /* material */
 #define is_flimsy(otmp)		((otmp)->obj_material <= LEATHER)
