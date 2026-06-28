@@ -1518,6 +1518,8 @@ Saddle_off()
 		impossible("Saddle_off() was called, but no saddle is worn.");
 		return;
 	}
+	if(u.urider)
+		rider_dismounts_you(DISMOUNT_FELL);
 	setworn((struct obj *)0, W_SADDLE);
 }
 
@@ -3635,6 +3637,14 @@ register struct obj *otmp;
 	    } else if (u.utrap && u.utraptype == TT_INFLOOR) {
 		You("are stuck in the %s, and cannot pull your %s out.",
 		    surface(u.ux, u.uy), makeplural(body_part(FOOT)));
+		return 0;
+	    }
+	}
+	/* special saddle checks */
+	if (otmp == usaddle) {
+	    if (u.urider) {
+		You("cannot remove your saddle while %s is riding you.",
+		    mon_nam(u.urider));
 		return 0;
 	    }
 	}

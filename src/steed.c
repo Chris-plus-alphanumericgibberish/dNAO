@@ -98,6 +98,19 @@ use_saddle(otmp)
 	    return 0;
 	}
 	if (!u.dx && !u.dy) {
+	    if (generic_saddle(youracedata)) {
+		if (usaddle) {
+		    You("are already wearing a saddle.");
+		    return 1;
+		}
+		if (otmp->oartifact && !touch_artifact(otmp, &youmonst, FALSE))
+		    return 1;
+		if (otmp->owornmask) remove_worn_item(otmp, FALSE);
+		setworn(otmp, W_SADDLE);
+		Saddle_on();
+		You("put on the saddle.");
+		return 1;
+	    }
 	    pline("Saddle yourself?  Very funny...");
 	    return 0;
 	}
@@ -775,7 +788,7 @@ rider_dismounts_you(int reason)
 {
 	struct monst *mtmp = u.urider;
 	coord cc;
-	const char *verb = "fell";
+	const char *verb = "falls";
 
 	mtmp = u.urider;		/* make a copy of rider pointer */
 	/* Sanity check */
@@ -787,9 +800,11 @@ rider_dismounts_you(int reason)
 	/* Check the reason for dismounting */
 	switch(reason){
 		case DISMOUNT_THROWN:
-			verb = "thrown";
+			verb = "is thrown";
+			/* fall through */
 		case DISMOUNT_FELL:
-			pline("%s %s off of you!", Monnam(mtmp), verb);
+			pline("%s %s off of your back!", Monnam(mtmp), verb);
+			break;
 		case DISMOUNT_VANISHED:
 			break;
 		case DISMOUNT_POLY:
