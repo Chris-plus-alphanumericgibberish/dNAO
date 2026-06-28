@@ -3291,14 +3291,14 @@ karemade:
 				}
 			}
 			
-			if(!rn2(9) && roll_madness(MAD_OVERLORD)){
+			if(!rn2(9) && (Inhell || !rn2(11)) && roll_madness(MAD_OVERLORD)){
 				You("feel its burning gaze upon you!");
 				u.ustdy += 9;
-				if(!UseInvFire_res(&youmonst) || !rn2(11)){
+				if(!UseInvFire_res(&youmonst) || (!rn2(11) && Inhell)){
 					destroy_item(&youmonst, POTION_CLASS, AD_FIRE);
 					destroy_item(&youmonst, SCROLL_CLASS, AD_FIRE);
 				}
-				if(!rn2(11) && roll_madness(MAD_OVERLORD)){
+				if(Inhell && !rn2(11) && roll_madness(MAD_OVERLORD)){
 					u.ustdy += 90;
 					destroy_item(&youmonst, SPBOOK_CLASS, AD_FIRE);
 					TRANSCENDENCE_IMPURITY_UP(FALSE)
