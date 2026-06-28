@@ -9129,6 +9129,8 @@ boolean printmessages; /* print generic elemental damage messages */
 					mdef->seenmadnesses = 0L;
 					you_inflict_madness(mdef);
 					affected = TRUE;
+					if (mdef->mhp <= 0)
+						return MM_DEF_DIED;
 				}
 			}
 			else {

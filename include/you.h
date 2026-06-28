@@ -69,8 +69,9 @@ struct u_event {
 	Bitfield(ascended,1);			/*34 has offered the Amulet */
 	Bitfield(knoxmade,1);			/*35 Portal to Ludios has been made in the main dungeon, teleport ok */
 	Bitfield(qrecalled,1);			/*36 Quest re-opened */
+	Bitfield(gehennom_madnesses,1);	/*37 Gehennom madnesses */
 	
-	Bitfield(padding, 9);			/*45 reseve another bitfield in event. */
+	Bitfield(padding, 8);			/*45 reseve another bitfield in event. */
 };
 
 /* KMH, conduct --
@@ -819,7 +820,8 @@ struct you {
 #define	MAD_REACHER			0x0000000200000000LL
 #define	MAD_SCORPIONS		0x0000000400000000LL
 #define	MAD_VERMIN			0x0000000800000000LL
-#define	LAST_MADNESS		MAD_SCORPIONS
+#define	MAD_PALE_NIGHT		0x0000001000000000LL
+#define	LAST_MADNESS		MAD_PALE_NIGHT
 	int 	uinsight;	/* to record level of insight */
 	/*Insight rate calculation: 40: "high insight" 300: "Approximate per-turn WoYendor intervention rate" 5: "total number of harmful effects" */
 #define INSIGHT_RATE (40*300*5)

@@ -314,7 +314,7 @@ boolean new;
 		if (level.flags.hero_memory)
 		    levl[x][y].glyph = GLYPH_INVISIBLE;
 		show_glyph(x, y, GLYPH_INVISIBLE);
-		if(new && u.umadness&MAD_PARANOIA && !BlockableClearThoughts && NightmareAware_Sanity < 80+rnd(20)){
+		if(new && u.umadness&MAD_PARANOIA && !BlockableClearThoughts && NightmareAware_Sanity + madness_adjust_san(MAD_PARANOIA) < 80+rnd(20)){
 			int x2, y2;
 			x2 = u.ux + (u.ux-x);
 			y2 = u.uy + (u.uy-y);

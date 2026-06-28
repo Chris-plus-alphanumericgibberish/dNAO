@@ -975,6 +975,8 @@ you_calc_movement()
 	if(u.umadness&MAD_NUDIST && !BlockableClearThoughts && NightmareAware_Sanity < 100){
 		int delta = NightmareAware_Insanity;
 		int discomfort = u_clothing_discomfort();
+		delta -= madness_adjust_san(MAD_NUDIST);
+		if(delta < 0) delta = 0;
 		discomfort = (discomfort * delta)/100;
 		if (moveamt - discomfort < NORMAL_SPEED/2) {
 			moveamt = min(moveamt, NORMAL_SPEED/2);
@@ -1642,6 +1644,10 @@ you_regen_san()
 	if(u.veil && In_depths(&u.uz)){
 		u.veil = FALSE;
 		change_uinsight(1);
+	}
+	if(!u.uevent.gehennom_madnesses && Insight >= 6 && Inhell){
+		u.uevent.gehennom_madnesses = TRUE;
+		confer_gehennom_madnesses();
 	}
 
 	int reglevel = san_threshhold();
@@ -3125,24 +3131,23 @@ karemade:
 				}
 			}
 			
-			if(has_blood(youracedata) && u.usanity < 50 && roll_madness(MAD_FRENZY)){
-				int *hp = (Upolyd) ? (&u.mh) : (&u.uhp);
-				Your("%s leaps through your %s!", body_part(BLOOD), body_part(BODY_SKIN));
-				IMPURITY_UP(u.uimp_blood)
-				//reduce current HP by 30% (round up, guranteed nonfatal)
-				if(ACURR(A_CON) > 3)
-					(void)adjattrib(A_CON, -1, FALSE);
-				*hp = *hp*.7+1;
-				u.umadness &= ~MAD_FRENZY;
-				flags.botl = 1;
-			} else if(u.umadness&MAD_FRENZY){
-				change_usanity(-1, FALSE);
-				if(!rn2(20)){
-					u.umadness &= ~MAD_FRENZY;
-				}
-			}
-			
 			if(!u.uinvulnerable){
+				if(has_blood(youracedata) && u.usanity < 50 && roll_madness(MAD_FRENZY)){
+					int *hp = (Upolyd) ? (&u.mh) : (&u.uhp);
+					Your("%s leaps through your %s!", body_part(BLOOD), body_part(BODY_SKIN));
+					IMPURITY_UP(u.uimp_blood)
+					//reduce current HP by 30% (round up, guranteed nonfatal)
+					if(ACURR(A_CON) > 3)
+						(void)adjattrib(A_CON, -1, FALSE);
+					*hp = *hp*.7+1;
+					u.umadness &= ~MAD_FRENZY;
+					flags.botl = 1;
+				} else if(u.umadness&MAD_FRENZY){
+					change_usanity(-1, FALSE);
+					if(!rn2(20)){
+						u.umadness &= ~MAD_FRENZY;
+					}
+				}
 				if(u.umadness&MAD_SCORPIONS){
 					change_usanity(-1, FALSE);
 					phantom_scorpions_sting(&youmonst);
@@ -3237,6 +3242,32 @@ karemade:
 						HStrangled += 1L;
 					}
 					losehp(skin_dmg + throat_dmg, "mold infection", KILLED_BY);
+				}
+				if(u.umadness&MAD_PALE_NIGHT){
+					(void) adjattrib(A_WIS, -1, TRUE);
+					(void) adjattrib(A_INT, -1, TRUE);
+					(void) adjattrib(A_CHA, -1, TRUE);
+					if(rn2( (int)(ACURR(A_WIS))) < 4){
+						u.umadness &= ~MAD_PALE_NIGHT;
+						You_feel("something horrible slip your mind. You find you have no memory of... whatever it was!");
+						exercise(A_WIS, FALSE);
+						exercise(A_WIS, FALSE);
+						exercise(A_WIS, FALSE);
+					}
+					else {
+						exercise(A_WIS, FALSE);
+						exercise(A_WIS, FALSE);
+						exercise(A_WIS, FALSE);
+						pline("There is something horrible lurking in your memory... the mere thought of it is consuming your mind from within!");
+						if(roll_madness(MAD_PALE_NIGHT)){
+							killer = "seeing something not meant for mortal eyes";
+							killer_format = KILLED_BY;
+							done(DIED);
+						}
+						else {
+							change_usanity(save_vs_sanloss() ? (-rnd(100)) : (-rnd(10)), TRUE);
+						}
+					}
 				}
 			}
 			

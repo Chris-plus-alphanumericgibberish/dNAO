@@ -1,5 +1,5 @@
 #include "hack.h"
-
+#include "xhity.h"
 #include "seduce.h"
 
 # ifdef SEDUCE
@@ -208,10 +208,8 @@ int
 dopaleseduce(mon)
 register struct monst *mon;
 {
-	register struct obj *ring, *nring;
 	boolean fem = !poly_gender(); /* male = 0, fem = 1, neuter = 2 */
 	boolean helpless = FALSE;
-	char qbuf[QBUFSZ];
 	
 	if(!monnear(mon, u.ux,u.uy)) return 0;
 	
@@ -225,7 +223,7 @@ register struct monst *mon;
 	
 	if (unconscious()) {/*Note: is probably not going to be possible to be unconscious and enter this function*/
 		You("are having a horrible dream.");
-		boolean helpless = TRUE;
+		helpless = TRUE;
 	}
 
 	if(mon->mvar_paleWarning == 1){
@@ -246,37 +244,22 @@ register struct monst *mon;
 	}
 
 	if (rn2(66) > 2*ACURR(A_WIS) - ACURR(A_INT) || helpless) {
-		int lifesaved = 0;
 		int wdmg = (int)(d(1,10)) + 1;
 		
 		sedu_undress(mon);
 
-		if(rn2( (int)(ACURR(A_WIS)/2))){
-			boolean loopingDeath = TRUE;
-			while(loopingDeath) {
-				boolean has_lifesaving = Lifesaved;
-				if (lifesaved){
-					pline("There is something horrible lurking in your memory... the mere thought of it is consuming your mind from within!");
-				}
-				else{
-					pline("As you pass through the shroud, your every sense goes mad.");
-					Your("whole world becomes an unbearable symphony of agony.");
-				}
+		if(rn2( (int)(ACURR(A_WIS)))){
+			pline("As you pass through the shroud, your every sense goes mad.");
+			Your("whole world becomes an unbearable symphony of agony.");
+			//TRANSCENDENCE_IMPURITY_UP(FALSE)
+			u.umadness |= MAD_PALE_NIGHT;
+			if(roll_madness(MAD_PALE_NIGHT)){
 				killer = "seeing something not meant for mortal eyes";
 				killer_format = KILLED_BY;
 				done(DIED);
-				lifesaved++;
-				/* avoid looping on "die(y/n)?" */
-				if (lifesaved && (discover || wizard || has_lifesaving)) {
-					if (has_lifesaving) {
-						/* used up AMULET_OF_LIFE_SAVING; still
-						   subject to dying from memory */
-						if(rn2( (int)(ACURR(A_WIS)/2)) < 4) loopingDeath = FALSE;
-					} else {
-						/* explicitly chose not to die */
-						loopingDeath = FALSE;
-					}
-				}
+			}
+			else {
+				change_usanity(-rnd(100), TRUE);
 			}
 		}
 		You("find yourself staggering away from %s, with no memory of why.", fem ? "her" : "him");
@@ -284,6 +267,8 @@ register struct monst *mon;
 		while( ABASE(A_WIS) > ATTRMIN(A_WIS) && wdmg > 0){
 			wdmg--;
 			(void) adjattrib(A_WIS, -1, TRUE);
+			(void) adjattrib(A_INT, -1, TRUE);
+			(void) adjattrib(A_CHA, -1, TRUE);
 			exercise(A_WIS, FALSE);
 		}
 		if(u.sealsActive&SEAL_HUGINN_MUNINN){

@@ -663,6 +663,16 @@ boolean force;
 	case POT_AMNESIA:
 		pline(Hallucination? "This tastes like champagne!" :
 			"This liquid bubbles and fizzes as you drink it.");
+
+		//All amnesia causes you to forget your crisis of faith
+		if(Doubt)
+			You("forget your doubts.");
+		make_doubtful(0L, FALSE);
+		if(u.umadness&MAD_PALE_NIGHT){
+			u.umadness &= ~MAD_PALE_NIGHT;
+			You_feel("something horrible fade from your mind. You find you have no memory of... whatever it was!");
+		}
+
 		forget(otmp->cursed ? 25 : otmp->blessed ? 0 : 10);
 		if (Hallucination)
 		    pline("Hakuna matata!");
@@ -695,10 +705,6 @@ boolean force;
 		    exercise(A_WIS, FALSE);
 		}
 		
-		//All amnesia causes you to forget your crisis of faith
-		if(Doubt)
-			You("forget your doubts.");
-		make_doubtful(0L, FALSE);
 		break;
 	case POT_WATER:
 		if(uclockwork){

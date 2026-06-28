@@ -4823,6 +4823,8 @@ struct zapdata * zapdata;
 				//reset seen madnesses
 				mdef->seenmadnesses = 0L;
 				you_inflict_madness(mdef);
+				if (mdef->mhp <= 0)
+					return MM_DEF_DIED;
 			}
 		}
 		else {

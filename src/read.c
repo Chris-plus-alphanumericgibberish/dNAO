@@ -1817,6 +1817,13 @@ losesaninsight(percent)
 	    mvitals[indices[i]].insight_gained = 0;
 	    mvitals[indices[i]].vis_insight = FALSE;
 	    mvitals[indices[i]].insightkill = FALSE;
+		if(indices[i] == PM_PALE_NIGHT && u.umadness&MAD_PALE_NIGHT){
+			u.umadness &= ~MAD_PALE_NIGHT;
+			You_feel("something horrible slip your mind. You find you have no memory of... whatever it was!");
+			exercise(A_WIS, FALSE);
+			exercise(A_WIS, FALSE);
+			exercise(A_WIS, FALSE);
+		}
 	}
 }
 
@@ -1906,6 +1913,11 @@ int howmuch;
 	//Silently reduce the doubt timer (itimeout_incr handles negative timeouts)
 	if(HDoubt){
 		make_doubtful(itimeout_incr(HDoubt, -1*howmuch), FALSE);
+	}
+	//First roll to get rid of pale night madness specifically. San/Insight can also get rid of the madness later as a side-effect
+	if(rn2(100) < howmuch && u.umadness&MAD_PALE_NIGHT){
+		u.umadness &= ~MAD_PALE_NIGHT;
+		You_feel("something horrible fade from your mind. You find you have no memory of... whatever it was!");
 	}
 	
 	/* 1 in 3 chance of forgetting some levels */

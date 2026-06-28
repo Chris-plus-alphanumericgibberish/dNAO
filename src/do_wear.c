@@ -2856,6 +2856,8 @@ base_uac()
 		}
 		if(u.umadness&MAD_NUDIST && !BlockableClearThoughts && NightmareAware_Sanity < 100){
 			int delta = NightmareAware_Insanity;
+			delta -= madness_adjust_san(MAD_NUDIST);
+			if(delta < 0) delta = 0;
 			int discomfort = u_clothing_discomfort();
 			if (discomfort) {
 				dexbonus -= (discomfort * delta)/20;
@@ -3086,6 +3088,8 @@ int base_udr()
 
 	if(u.umadness&MAD_NUDIST && !BlockableClearThoughts && NightmareAware_Sanity < 100){
 		int delta = NightmareAware_Insanity;
+		delta -= madness_adjust_san(MAD_NUDIST);
+		if(delta < 0) delta = 0;
 		int discomfort = u_clothing_discomfort();
 		if (discomfort) {
 			udr -= (discomfort * delta)/100;

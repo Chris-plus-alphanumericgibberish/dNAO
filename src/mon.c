@@ -2161,6 +2161,8 @@ movemon()
 	
 	if(Nightmare && mon_can_see_you(mtmp) && !mindless_mon(mtmp) && !mtmp->mpeaceful && !is_render(mtmp->mtyp)){
 		you_inflict_madness(mtmp);
+		if (mtmp->mhp <= 0)
+			continue;
 	}
 	
 	if(mtmp->mtyp == PM_METROID_QUEEN){

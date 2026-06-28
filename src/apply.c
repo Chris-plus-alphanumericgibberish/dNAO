@@ -6501,6 +6501,14 @@ struct obj *hypo;
 				if (!Unchanging) polyself(FALSE);
 			break;
 			case POT_AMNESIA:
+				//All amnesia causes you to forget your crisis of faith
+				if(Doubt)
+					You("forget your doubts.");
+				make_doubtful(0L, FALSE);
+				if(u.umadness&MAD_PALE_NIGHT){
+					u.umadness &= ~MAD_PALE_NIGHT;
+					You_feel("something horrible fade from your mind. You find you have no memory of... whatever it was!");
+				}
 				forget(amp->cursed ? 25 : amp->blessed ? 0 : 10);
 				if (Hallucination)
 					pline("Hakuna matata!");
@@ -6531,10 +6539,6 @@ struct obj *hypo;
 					exercise(A_WIS, FALSE);
 				}
 
-				//All amnesia causes you to forget your crisis of faith
-				if(Doubt)
-					You("forget your doubts.");
-				make_doubtful(0L, FALSE);
 			break;
 		}
 		if(nothing) {

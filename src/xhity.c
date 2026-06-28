@@ -20148,6 +20148,8 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 			else if(youdef){
 				if(mon_can_see_you(magr) && !mindless_mon(magr) && !magr->mtame && !is_render(magr->mtyp)){
 					you_inflict_madness(magr);
+					if (magr->mhp <= 0)
+						return result|MM_AGR_DIED;
 					magr->mconf = TRUE;
 				}
 			}

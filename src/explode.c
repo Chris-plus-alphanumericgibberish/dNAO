@@ -730,6 +730,8 @@ do_explode(int x, int y, ExplodeRegion *area, int adtyp, int olet, int dam, int 
 					//reset seen madnesses
 					mtmp->seenmadnesses = 0L;
 					you_inflict_madness(mtmp);
+					if (mtmp->mhp <= 0)
+						continue;
 				}
 			}
 			else {

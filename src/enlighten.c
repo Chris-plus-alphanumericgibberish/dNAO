@@ -874,6 +874,9 @@ boolean dumping;
 		if (u.umadness&MAD_REACHER){
 			enl_msg("Sometimes, a lurking thing ", "tries", "tried", " to reach in and grab you");
 		}
+		if (u.umadness&MAD_PALE_NIGHT){
+			enl_msg("There ", "is", "was", " something horrible lurking in your memory");
+		}
 	}
 	
 	if(u.utaneggs){
@@ -1574,6 +1577,9 @@ resistances_enlightenment()
 		}
 		if (u.umadness&MAD_REACHER){
 			putstr(en_win, 0, "You are being stalked by a blasphemous reacher.");
+		}
+		if (u.umadness&MAD_PALE_NIGHT){
+			putstr(en_win, 0, "Your mind is being destroyed by the memory of Pale Night.");
 		}
 		if(messaged){
 			//Clockworks specifically can't get drunk (androids can)

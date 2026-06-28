@@ -1803,6 +1803,28 @@ count_madnesses()
 		if(u.umadness&(0x1LL<<i))
 			count++;
 	}
+	return count;
+}
+
+int
+madness_adjust_san(long long int madness)
+{
+	int pm = madness_source(madness);
+	if(pm != NON_PM){
+		return pm_adjust_san(pm);
+	}
+	return 0;
+}
+
+int
+pm_adjust_san(int pm)
+{
+	if(mvitals[pm].died > 0){
+		if(ClearThoughts && Nightmare)
+			return 5;
+		else if(!ClearThoughts)
+			return 50;
+	}
 	return 0;
 }
 
@@ -1823,11 +1845,16 @@ roll_madness(long long int madness)
 	if(!(u.umadness&madness))
 		return 0;
 	
-	sanlevel = (int)(((float)rand()/(float)(RAND_MAX)) * ((float)rand()/(float)(RAND_MAX)) * 100);
+	if(madness == MAD_PALE_NIGHT)
+		sanlevel = (int)(((float)rand()/(float)(RAND_MAX)) * 100);
+	else
+		sanlevel = (int)(((float)rand()/(float)(RAND_MAX)) * ((float)rand()/(float)(RAND_MAX)) * 100);
 	
 	//Note: Clear Thoughts plus Walking Nightmare yields partial resistance rather than complete.
 	if(madness != MAD_GOAT_RIDDEN)
 		usan = NightmareAware_Sanity;
+	
+	usan += madness_adjust_san(madness);
 
 	if(usan < sanlevel)
 		return 1;
@@ -1854,6 +1881,8 @@ mad_turn(long long int madness)
 	if(madness != MAD_GOAT_RIDDEN && madness != MAD_CANNIBALISM)
 		usan = NightmareAware_Sanity;
 
+	usan += madness_adjust_san(madness);
+
 	if(usan < sanlevel)
 		return 1;
 	return 0;
@@ -1876,6 +1905,8 @@ flat_mad_turn(long long int madness)
 	//Note: Clear Thoughts plus Walking Nightmare yields partial resistance rather than complete.
 	if(madness != MAD_GOAT_RIDDEN && madness != MAD_CANNIBALISM)
 		usan = NightmareAware_Sanity;
+
+	usan += madness_adjust_san(madness);
 
 	if(usan < hashed%100)
 		return 1;
@@ -1901,6 +1932,8 @@ mad_monster_turn(struct monst *mon, long long int madness)
 	//Note: Clear Thoughts plus Walking Nightmare yields partial resistance rather than complete.
 	if(madness != MAD_GOAT_RIDDEN)
 		usan = NightmareAware_Sanity;
+
+	usan += madness_adjust_san(madness);
 
 	if(usan < sanlevel)
 		return 1;
@@ -1943,10 +1976,8 @@ roll_av_frigophobia()
 }
 
 void
-give_madness(mon)
-struct monst *mon;
+pm_give_madness(int mm)
 {
-	int mm = monsndx(mon->data);
 	switch(mm){
 		case PM_WALKING_DELIRIUM:
 			u.umadness |= MAD_DELUSIONS;
@@ -2029,6 +2060,158 @@ struct monst *mon;
 		break;
 	}
 	check_madman_trophy();
+}
+
+void
+give_madness(struct monst *mon)
+{
+	int mm = monsndx(mon->data);
+	pm_give_madness(mm);
+	check_madman_trophy();
+}
+
+void
+confer_gehennom_madnesses()
+{
+	switch(dungeon_topology.abyss_variant){
+		case JUIBLEX_LEVEL:
+			pm_give_madness(PM_JUIBLEX);
+		break;
+		case ZUGGTMOY_LEVEL:
+			pm_give_madness(PM_ZUGGTMOY);
+		break;
+		case YEENOGHU_LEVEL:
+			pm_give_madness(PM_YEENOGHU);
+		break;
+		case BAPHOMET_LEVEL:
+			pm_give_madness(PM_BAPHOMET);
+		break;
+		case NIGHT_LEVEL:
+			/* Pale Night confers no madness */
+		break;
+		case KOSTCH_LEVEL:
+			pm_give_madness(PM_KOSTCHTCHIE);
+		break;
+	}
+
+	switch(dungeon_topology.abys2_variant){
+		case ORCUS_LEVEL:
+			pm_give_madness(PM_ORCUS);
+		break;
+		case MALCANTHET_LEVEL:
+			pm_give_madness(PM_MALCANTHET);
+		break;
+		case GRAZ_ZT_LEVEL:
+			pm_give_madness(PM_GRAZ_ZT);
+		break;
+		case LOLTH_LEVEL:
+			pm_give_madness(PM_AVATAR_OF_LOLTH);
+		break;
+	}
+
+	// switch(dungeon_topology.brine_variant){
+	// 	case DEMOGORGON_LEVEL:
+	// 		pm_give_madness(PM_DEMOGORGON);
+	// 	break;
+	// 	case DAGON_LEVEL:
+	// 		pm_give_madness(PM_DAGON);
+	// 	break;
+	// 	case LAMASHTU_LEVEL:
+	// 		pm_give_madness(PM_LAMASHTU);
+	// 	break;
+	// }
+}
+
+int
+madness_source(int madness)
+{
+	switch(madness){
+		//Non unique-source madnesses 
+		// case MAD_DELUSIONS:
+		// 	return PM_WALKING_DELIRIUM;
+		// break;
+		// case MAD_VERMIN:
+		// 	return PM_VERMIURGE;//You are stung by vermin
+		// break;
+		// case MAD_FORMICATION:
+		// 	return PM_AKKABISH_TANNIN;
+		// break;
+		// case MAD_HOST:
+		// 	return PM_SHALOSH_TANNAH;
+		// break;
+		// case MAD_SCIAPHILIA:
+		// 	return PM_NACHASH_TANNIN;
+		// break;
+		// case MAD_FORGETFUL:
+		// 	return PM_KHAAMNUN_TANNIN;
+		// break;
+		// case MAD_TOO_BIG:
+		// 	return PM_RAGLAYIM_TANNIN;
+		// break;
+		// case MAD_ROTTING:
+		// 	return PM_SARTAN_TANNIN;
+		// break;
+		//Unique-source madnesses 
+		case MAD_REAL_DELUSIONS:
+			return PM_ALDINACH;
+		break;
+		case MAD_SANCTITY:
+			return PM_ALRUNES;
+		break;
+		case MAD_GLUTTONY:
+			return PM_JUIBLEX;
+		break;
+		case MAD_SPORES:
+			return PM_ZUGGTMOY;
+		break;
+		case MAD_FRIGOPHOBIA:
+			return PM_KOSTCHTCHIE;
+		break;
+		case MAD_RAGE:
+			return PM_BAPHOMET;
+		break;
+		case MAD_CANNIBALISM:
+			return PM_YEENOGHU;
+		break;
+		case MAD_NUDIST:
+			return PM_MALCANTHET;
+		break;
+		case MAD_OPHIDIOPHOBIA:
+			return PM_SHAKTARI;
+		break;
+		case MAD_ARACHNOPHOBIA:
+			return PM_AVATAR_OF_LOLTH;
+		break;
+		case MAD_ARGENT_SHEEN:
+			return PM_GRAZ_ZT;
+		break;
+		case MAD_SUICIDAL:
+			return PM_ORCUS;
+		break;
+		case MAD_THALASSOPHOBIA:
+			return PM_DAGON;
+		break;
+		case MAD_ENTOMOPHOBIA:
+			return PM_OBOX_OB;
+		break;
+		case MAD_TALONS:
+			return PM_LAMASHTU;
+		break;
+		case MAD_PARANOIA:
+			return PM_DEMOGORGON;
+		break;
+		// Can't be killed
+		// case MAD_HELMINTHOPHOBIA:
+		// 	return PM_ELDER_PRIEST;
+		// break;
+		// Also can't be killed but can be dispelled once to make you feel better about things.
+		case MAD_DREAMS:
+		case MAD_NON_EUCLID:
+		case MAD_SPIRAL:
+			return PM_GREAT_CTHULHU;
+		break;
+	}
+	return NON_PM;
 }
 
 /* A monster has seen/whatever you and may contract madnesses
@@ -2135,6 +2318,17 @@ struct monst *mon;
 					}
 					else if(madflag == MAD_VERMIN){
 						mon->mvermin = 1;
+					}
+					else if(madflag == MAD_PALE_NIGHT){
+						if(!(is_great_old_one(mon->data) || is_dnoble(mon->data) || (is_chaotic_mon(mon) && is_demon(mon->data)))){
+							// mon->mpale_night = 1;
+							if(resist(mon, WEAPON_CLASS, 0, NOTELL)){
+								m_losehp(mon, d(3,10), TRUE, "bad memories");
+							}
+							else {
+								xkilled(mon, 1);
+							}
+						}
 					}
 					// MAD_HOST:
 					// MAD_COLD_NIGHT:
