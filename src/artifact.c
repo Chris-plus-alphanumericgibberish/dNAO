@@ -7040,6 +7040,7 @@ boolean printmessages; /* print generic elemental damage messages */
 			if (cancel_monst(mdef, otmp, youagr, FALSE, FALSE, 0)){
 				if (youagr){
 					u.uen += 10;
+					if(u.uen > u.uenmax) u.uen = u.uenmax;
 				}
 				else {
 					set_mcan(magr, FALSE);
