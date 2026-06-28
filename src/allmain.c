@@ -4534,7 +4534,7 @@ boolean new_game;	/* false => restoring an old game */
 		else if(Role_if(PM_KNIGHT)){
 			pline("Use #style to use your specialized sword-and-shield styles.");
 		}
-		if(Race_if(PM_DROW)){
+		if(RACE_IF_DROW){
 			if(!(Role_if(PM_HEALER) || Role_if(PM_EXILE) || Role_if(PM_KENSEI)))
 				pline("Beware, droven armor evaporates in light!");
 			pline("Use #monster to create a patch of darkness.");
