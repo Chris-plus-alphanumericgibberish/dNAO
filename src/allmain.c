@@ -4336,37 +4336,77 @@ newgame()
 		while (!inher_arti) inher_arti = do_inheritance_menu();
 
 		u.inherited = inher_arti;
+		if(inher_arti > 0){
+			/* fix up artifact a little so we can use it fine */
+			/* the alignment check should be unnecessary, but otherwise this prevents intelligents from evading */
+			if (!Role_if(artilist[inher_arti].role)) artilist[inher_arti].role = ROLE_NONE;
+			if (!Pantheon_if(artilist[inher_arti].role)) artilist[inher_arti].role = ROLE_NONE;
+			if (!Race_if(artilist[inher_arti].race)) artilist[inher_arti].race = ROLE_NONE;
+			if (artilist[inher_arti].alignment != u.ualign.type) artilist[inher_arti].alignment = A_NONE;
+			artilist[inher_arti].gflags &= ~ARTG_GIFT;
+			artilist[inher_arti].gflags &= ~ARTG_NAME;
+			artilist[inher_arti].gflags |= ARTG_NOGEN;
+			artilist[inher_arti].gflags |= ARTG_NOWISH;
+			hack_artifacts();
 
-		/* fix up artifact a little so we can use it fine */
-		/* the alignment check should be unnecessary, but otherwise this prevents intelligents from evading */
-		if (!Role_if(artilist[inher_arti].role)) artilist[inher_arti].role = ROLE_NONE;
-		if (!Pantheon_if(artilist[inher_arti].role)) artilist[inher_arti].role = ROLE_NONE;
-		if (!Race_if(artilist[inher_arti].race)) artilist[inher_arti].race = ROLE_NONE;
-		if (artilist[inher_arti].alignment != u.ualign.type) artilist[inher_arti].alignment = A_NONE;
-		artilist[inher_arti].gflags &= ~ARTG_GIFT;
-		artilist[inher_arti].gflags &= ~ARTG_NAME;
-		artilist[inher_arti].gflags |= ARTG_NOGEN;
-		artilist[inher_arti].gflags |= ARTG_NOWISH;
-		hack_artifacts();
-
-		if (!Role_if(PM_MADMAN)){
-			otmp = mksobj((int)artilist[inher_arti].otyp, MKOBJ_NOINIT);
-			/* please do not have any artifacts where the otyp in artilist is not the same as the practical otyp after onaming */
-			discover_artifact(inher_arti);
-			if (!(Role_if(PM_CONVICT)
-				|| (urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH)
-			)){
-				otmp = oname(otmp, artilist[inher_arti].name);
-				fully_identify_obj(otmp);
-				expert_weapon_skill(is_shield(otmp) ? P_SHIELD : weapon_type(otmp));
-				otmp = hold_another_object(otmp, "Oops!  %s to the floor!",
-						   The(aobjnam(otmp, "slip")), (const char *)0);
-			} else {
-				//Create without creating
-				otmp->oartifact = inher_arti;
-				expert_weapon_skill(is_shield(otmp) ? P_SHIELD : weapon_type(otmp));
-				otmp->oartifact = 0;
-				delobj(otmp);
+			if (!Role_if(PM_MADMAN)){
+				otmp = mksobj((int)artilist[inher_arti].otyp, MKOBJ_NOINIT);
+				/* please do not have any artifacts where the otyp in artilist is not the same as the practical otyp after onaming */
+				discover_artifact(inher_arti);
+				if (!(Role_if(PM_CONVICT)
+					|| (urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH)
+				)){
+					change_luck(7);
+					otmp = oname(otmp, artilist[inher_arti].name);
+					fully_identify_obj(otmp);
+					expert_weapon_skill(is_shield(otmp) ? P_SHIELD : weapon_type(otmp));
+					otmp = hold_another_object(otmp, "Oops!  %s to the floor!",
+							The(aobjnam(otmp, "slip")), (const char *)0);
+				} else {
+					//Create without creating
+					otmp->oartifact = inher_arti;
+					expert_weapon_skill(is_shield(otmp) ? P_SHIELD : weapon_type(otmp));
+					otmp->oartifact = 0;
+					delobj(otmp);
+				}
+			}
+		}
+		else {
+			change_luck(7);
+			switch(inher_arti){
+				case INHERITED_SERAPH_BLOOD:
+					flags.aasimar_type = AASIMAR_TYPE_SERAPH;
+					u.seraph_eyes = 7;
+					HSee_invisible |= W_UPGRADE;
+					findit();
+					HExtramission |= W_UPGRADE;
+					doredraw();
+					expert_weapon_skill(P_SHIELD);
+				break;
+				case INHERITED_PRIMINAL_BLOOD:
+					flags.aasimar_type = AASIMAR_TYPE_PRIMINAL;
+					add_mutation(AAT_PRIMINAL);
+					add_mutation(AAT_PRIMINAL_TAIL);
+					skilled_weapon_skill(P_BEAST_MASTERY);
+					gm_weapon_skill(P_BARE_HANDED_COMBAT);
+					gm_weapon_skill(P_TWO_WEAPON_COMBAT);
+					u.umartial = TRUE;
+				break;
+				case INHERITED_CLOUDFACE_BLOOD:
+					flags.aasimar_type = AASIMAR_TYPE_CLOUDFACE;
+					u.veil = FALSE;
+					u.uinsight = 1;
+					for(struct obj *obj = invent; obj; obj = obj->nobj){
+						if ((obj->oclass == ARMOR_CLASS && arm_blocks_upper_body(obj->otyp))){
+							if (!check_omod(obj, OMOD_SHOULDER_BARING))
+								add_omod(obj, OMOD_SHOULDER_BARING);
+						}
+					}
+					expert_weapon_skill(P_BEAST_MASTERY);
+					free_skill_up(P_BEAST_MASTERY);
+					expert_weapon_skill(P_MUSICALIZE);
+					free_skill_up(P_MUSICALIZE);
+				break;
 			}
 		}
 	}
@@ -4464,6 +4504,28 @@ do_inheritance_menu()
 				MENU_UNSELECTED);
 			incntlet = (incntlet == 'z') ? 'A' : (incntlet == 'Z') ? 'a' : (incntlet + 1);
 		}
+	}
+	if(Role_if(PM_UNDEAD_HUNTER) && Race_if(PM_AASIMAR)){
+		Sprintf(buf, "The blood of a many-eyed angel");
+		any.a_int = INHERITED_SERAPH_BLOOD;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet == 'z') ? 'A' : (incntlet == 'Z') ? 'a' : (incntlet + 1);
+
+		Sprintf(buf, "The blood of an amorphous angel");
+		any.a_int = INHERITED_PRIMINAL_BLOOD;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet == 'z') ? 'A' : (incntlet == 'Z') ? 'a' : (incntlet + 1);
+
+		Sprintf(buf, "The blood of a cloud-faced angel");
+		any.a_int = INHERITED_CLOUDFACE_BLOOD;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+		incntlet = (incntlet == 'z') ? 'A' : (incntlet == 'Z') ? 'a' : (incntlet + 1);
 	}
 
 	end_menu(tmpwin, "Which artifact did you inherit?");

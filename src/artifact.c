@@ -527,6 +527,19 @@ int artinum;
 	return(artilist[artinum].name);
 }
 
+const char *
+inherited_name(int artinum)
+{
+	if (artinum > 0)
+		return artiname(artinum);
+	switch (artinum) {
+	case INHERITED_SERAPH_BLOOD:    return "the blood of a many-eyed angel";
+	case INHERITED_PRIMINAL_BLOOD:  return "the blood of an amorphous angel";
+	case INHERITED_CLOUDFACE_BLOOD: return "the blood of a cloud-faced angel";
+	default: return "unknown blood";
+	}
+}
+
 int
 arti_value(otmp)
 struct obj * otmp;
@@ -16191,7 +16204,7 @@ char *name;	/* target name or ""*/
 		}
 	} else if (!strcmp(name,  "Inherited")){
 		rem_ox(otmp, OX_ENAM);
-		if (flags.descendant){
+		if (flags.descendant && u.inherited > 0){
 			struct obj *art;
 			art = mksartifact(u.inherited);
 			if(art){

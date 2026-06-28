@@ -516,6 +516,10 @@ struct you {
 	int uhouse; /* drow house info */
 	int start_house; /* starting drow house info */
 	int inherited; /* what you inherited at the start, if anything */
+/* negative values of u.inherited indicate non-artifact inheritances */
+#define INHERITED_SERAPH_BLOOD    -1
+#define INHERITED_PRIMINAL_BLOOD  -2
+#define INHERITED_CLOUDFACE_BLOOD -3
 	struct prop uprops[LAST_PROP+1];
 	int rift_count;
 	int vortex_count;

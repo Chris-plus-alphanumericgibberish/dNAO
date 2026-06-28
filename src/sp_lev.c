@@ -1873,7 +1873,7 @@ default_case:
 					size_items_to_pc(stuff)\
 					add_to_container(otmp, stuff);
 
-		if(flags.descendant){
+		if(flags.descendant && u.inherited > 0){
 			struct obj* stuff = mksobj((int)artilist[u.inherited].otyp, MKOBJ_NOINIT);
 			stuff = oname(stuff, artilist[u.inherited].name);
 			add_to_container(otmp, stuff);

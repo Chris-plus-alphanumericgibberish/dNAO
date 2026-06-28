@@ -122,6 +122,7 @@ E void FDECL(restore_artifacts, (int));
 E int NDECL(n_artifacts);
 E struct artifact * NDECL(add_artifact);
 E const char *FDECL(artiname, (int));
+E const char *FDECL(inherited_name, (int));
 E int FDECL(arti_value, (struct obj *));
 E struct obj *FDECL(mk_randart, (struct obj *));
 E struct obj *FDECL(mk_artifact, (struct obj *,ALIGNTYP_P));

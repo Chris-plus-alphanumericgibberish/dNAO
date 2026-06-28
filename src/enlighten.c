@@ -229,7 +229,7 @@ minimal_enlightenment()
 
 	/* Starting inheritance */
 	if (flags.descendant){
-		Sprintf(buf, fmtstr, "inheritance", artilist[u.inherited].name);
+		Sprintf(buf, fmtstr, "inheritance", inherited_name(u.inherited));
 		add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, buf, FALSE);
 	}
 
@@ -487,7 +487,7 @@ boolean dumping;
 	}
 	
 	if (final && flags.descendant) {
-		enl_msg("You ", "inherited ", "inherited ", artilist[u.inherited].name);
+		enl_msg("You ", "inherited ", "inherited ", inherited_name(u.inherited));
 	}
 	if (wizard || final) {
 		Sprintf(buf, "%ld gold ", u.spawnedGold);
