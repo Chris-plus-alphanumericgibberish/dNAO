@@ -4537,7 +4537,7 @@ int magic; /* 0=Physical, otherwise skill level */
 	    if (range < temp)
 		range = temp;
 		u.lastmoved = monstermoves;
-	    (void) walk_path(&uc, &cc, hurtle_step, ((Role_if(PM_KENSEI) || Role_if(PM_MONK)) && uwep && is_pole(uwep)) ? &jumping_polearm : (void *) 0, (genericptr_t)&range);
+	    (void) walk_path(&uc, &cc, hurtle_step, (uwep && is_pole(uwep)) ? &jumping_polearm : (void *) 0, (genericptr_t)&range);
 
 	    /* A little Sokoban guilt... */
 	    if (sokoban_unsolved())

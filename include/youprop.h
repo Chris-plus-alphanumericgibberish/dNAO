@@ -783,4 +783,7 @@
 								|| u.ugodbase[UGOD_CURRENT] == GOD_THE_DEEP_BLUE_SEA \
 								) && Race_if(PM_DROW) && !flags.stag)
 
+#define AerialCombat \
+    (((Role_if(PM_MONK) || (Role_if(PM_KENSEI) && ((uwep && is_kensei_weapon(uwep)) || !uwep)) || has_mutation(AAT_PRIMINAL)) && !Upolyd) || activeFightingForm(FFORM_ATARU))
+
 #endif /* YOUPROP_H */
