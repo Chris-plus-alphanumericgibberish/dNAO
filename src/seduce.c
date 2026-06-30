@@ -259,7 +259,7 @@ register struct monst *mon;
 				done(DIED);
 			}
 			else {
-				change_usanity(-rnd(100), TRUE);
+				change_usanity(save_vs_sanloss() ? (-rnd(100)) : (-rnd(10)), TRUE);
 			}
 		}
 		You("find yourself staggering away from %s, with no memory of why.", fem ? "her" : "him");
