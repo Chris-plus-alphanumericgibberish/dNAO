@@ -7778,6 +7778,14 @@ use_pest_glaive(struct obj *obj)
 				}
 			}
 
+			if (consumed->otyp == ATHAME && !(obj->ovar1_pestglaive_props & PG_ATHAME)) {
+				couldve_changed = TRUE;
+				if(!rn2(20)){
+					obj->ovar1_pestglaive_props |= PG_ATHAME;
+					gained_something = TRUE;
+				}
+			}
+
 			if (consumed->spe > obj->spe) {
 				couldve_changed = TRUE;
 				if(!rn2(20)){
@@ -7785,8 +7793,24 @@ use_pest_glaive(struct obj *obj)
 					gained_something = TRUE;
 				}
 			}
-		}
-		else {
+		} else if (consumed->otyp == TIN_OPENER) {
+			if (!already_extended) {
+				pline("The glaive extends its %s and devours %s.",
+				    pg_appendage_name(obj, PGD_FEEDING),
+				    the(xname(consumed)));
+				already_extended = TRUE;
+			} else {
+				pline("The glaive devours %s.", the(xname(consumed)));
+			}
+
+			if (!(obj->ovar1_pestglaive_props & PG_TIN_OPENER)) {
+				couldve_changed = TRUE;
+				if (!rn2(20)) {
+					obj->ovar1_pestglaive_props |= PG_TIN_OPENER;
+					gained_something = TRUE;
+				}
+			}
+		} else {
 			pline("The glaive seems uninterested in %s!", the(xname(consumed)));
 			break;
 		}

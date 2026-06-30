@@ -2347,14 +2347,14 @@ int mode;
 				}
 			}
 			else Your("%s is deactivated!", aobjnam(otmp,"are"));
-		} else if (is_blade(otmp)) {
-		    if ((int)otmp->spe > -3 
-			|| levl[u.ux][u.uy].typ == GRASS 
-			|| levl[u.ux][u.uy].typ == SOIL
-			|| levl[u.ux][u.uy].typ == SAND
-		)
+		} else if (is_blade(otmp) || (otmp->otyp == PEST_GLAIVE && (otmp->ovar1_pestglaive_props & PG_ATHAME))) {
+			if ((int)otmp->spe > -3
+				|| levl[u.ux][u.uy].typ == GRASS
+				|| levl[u.ux][u.uy].typ == SOIL
+				|| levl[u.ux][u.uy].typ == SAND
+			)
 				type = ENGRAVE;
-		    else
+			else
 				Your("%s too dull for engraving.", aobjnam(otmp,"are"));
 		} else if(otmp->otyp == RAYGUN){
 			if(otmp->altmode == AD_DISN && otmp->ovar1_charges >= 15){
@@ -2933,7 +2933,8 @@ int mode;
 	    case ENGRAVE:
 			multi = -(len/10);
 			if ((otmp->oclass == WEAPON_CLASS || arti_is_prop(otmp, ARTI_ENGRAVE))
-				&& ((otmp->otyp != ATHAME && !arti_is_prop(otmp, ARTI_ENGRAVE)) || otmp->cursed)
+				&& ((otmp->otyp != ATHAME && !arti_is_prop(otmp, ARTI_ENGRAVE)
+				     && !(otmp->otyp == PEST_GLAIVE && (otmp->ovar1_pestglaive_props & PG_ATHAME))) || otmp->cursed)
 			) {
 				if(levl[u.ux][u.uy].typ == GRASS 
 				|| levl[u.ux][u.uy].typ == SOIL

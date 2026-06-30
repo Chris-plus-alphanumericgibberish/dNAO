@@ -1794,6 +1794,12 @@ start_tin(otmp)		/* called when starting to open a tin */
 		case TIN_OPENER:
 			tmp = 1;
 			break;
+		case PEST_GLAIVE:
+			if (uwep->ovar1_pestglaive_props & PG_TIN_OPENER) {
+				tmp = 1;
+				break;
+			}
+			goto no_opener;
 		case DAGGER:
 		case ELVEN_DAGGER:
 		case ORCISH_DAGGER:

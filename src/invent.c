@@ -2516,7 +2516,8 @@ struct obj *obj;
 			"Drop this item", MENU_UNSELECTED);
 	/* e: eat item; eat.c provides is_edible to check */
 	any.a_void = (genericptr_t)doeat;
-	if (obj->otyp == TIN && uwep && uwep->otyp == TIN_OPENER)
+	if (obj->otyp == TIN && uwep && (uwep->otyp == TIN_OPENER ||
+	    (uwep->otyp == PEST_GLAIVE && (uwep->ovar1_pestglaive_props & PG_TIN_OPENER))))
 		add_menu(win, NO_GLYPH, &any, 'e', 0, ATR_NONE,
 				"Open and eat this tin with your tin opener", MENU_UNSELECTED);
 	else if (obj->otyp == TIN)
@@ -3940,6 +3941,8 @@ winid *datawin;
 		ADDCLASSPROP((obj->ovar1_pestglaive_props&PG_AXE), "can cut trees");
 		ADDCLASSPROP((obj->ovar1_pestglaive_props&PG_CROOK), "has a shepherd's crook");
 		ADDCLASSPROP((obj->ovar1_pestglaive_props&PG_SPEARTHROWER), "can launch spears");
+		ADDCLASSPROP((obj->ovar1_pestglaive_props&PG_ATHAME), "can engrave");
+		ADDCLASSPROP((obj->ovar1_pestglaive_props&PG_TIN_OPENER), "can open tins");
 		if (buf[0]) {
 			Sprintf(buf2, "Additional traits: %s.", buf);
 			OBJPUTSTR(buf2);
@@ -4999,7 +5002,9 @@ dump_pestglaive_props(struct obj *obj)
 		{ PG_JOUST,        "jousting tip"      },
 		{ PG_AXE,          "axe blade"         },
 		{ PG_CROOK,        "crook head"        },
-		{ PG_SPEARTHROWER, "spearthrower loop" },
+		{ PG_SPEARTHROWER, "spearthrower notch" },
+		{ PG_ATHAME,       "athame queue"       },
+		{ PG_TIN_OPENER,   "tin-opening hook"  },
 		{ 0, 0 }
 	};
 	char buf[LONGBUFSZ];

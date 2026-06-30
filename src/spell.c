@@ -6232,6 +6232,13 @@ int spell;
 				cast_bon *= 2;
 			splcaster -= urole.spelarmr * cast_bon / 3;
 		}
+
+		if (uwep->otyp == PEST_GLAIVE && (uwep->ovar1_pestglaive_props & PG_ATHAME)) {
+			cast_bon = 0;
+			if (spell_skilltype(spellid(spell)) == P_ATTACK_SPELL || spell_skilltype(spellid(spell)) == P_ENCHANTMENT_SPELL)
+				cast_bon += 1;
+			splcaster -= urole.spelarmr * cast_bon / 3;
+		}
 		
 		if(uwep && uwep->oartifact == ART_CALLANDOR && !flags.initgend){	// sa'angreal
 			cast_bon = 2;

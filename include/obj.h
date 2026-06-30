@@ -416,6 +416,8 @@ struct obj {
 #define PG_AXE			0x00000010L
 #define PG_CROOK		0x00000020L
 #define PG_SPEARTHROWER	0x00000040L
+#define PG_ATHAME		0x00000080L
+#define PG_TIN_OPENER	0x00000100L
 /* pg_appendage_name() activity constants */
 #define PGD_FEEDING	0
 #define PGD_SNAGGING	1
