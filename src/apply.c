@@ -11514,6 +11514,7 @@ resizeArmor()
 		&& ptr == youracedata
 		&& !(u.dx || u.dy || u.dz)
 		&& arm_blocks_upper_body(otmp->otyp)
+		&& !is_mummy_wrap(otmp)
 		&& !check_omod(otmp, OMOD_SHOULDER_BARING)
 	){
 		add_omod(otmp, OMOD_SHOULDER_BARING);

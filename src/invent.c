@@ -6893,6 +6893,7 @@ u_breath_penalty()
 			|| uarmc->otyp == SMOKY_VIOLET_FACELESS_ROBE
 			|| uarmc->otyp == ROBE
 		)
+		&& !check_omod(uarmc, OMOD_SHOULDER_BARING)
 	)
 		count++;
 	return count;
