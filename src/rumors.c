@@ -663,7 +663,7 @@ register struct monst *oracl;
 							switch (dungeon_topology.abys2_variant){ // orcus, mal, grazzt, lolth
 								case ORCUS_LEVEL:
 									if(u.sealsActive&SEAL_TENEBROUS) {
-										if (u.ufirst_light) pline("They see that if Creation began with light, then darkness will persist at the end of all things.");
+										if (u.ufirst_light) pline("They say that if Creation began with light, then darkness will persist at the end of all things.");
 										else pline("They say that the Word that echoes around you lives on.");
 									}
 									else pline("They say that death is only a temporary setback to some denizens of the Abyss.");
