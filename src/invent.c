@@ -1421,6 +1421,10 @@ register const char *let,*word;
 			!sflm_smeltable_mithril(otmp))
 		|| (!strcmp(word, "burn in the silver flame") && 
 			!(otmp->blessed || otmp->cursed))
+		|| (!strcmp(word, "have repaired by the smith") &&
+		    (!is_metallic(otmp) || (!otmp->oeroded && !otmp->oeroded2)))
+		|| (!strcmp(word, "have repaired by the treesinger") &&
+		    ((otmp->obj_material != WOOD && otmp->obj_material != CLOTH) || (!otmp->oeroded && !otmp->oeroded2)))
 		|| (!strcmp(word, "armor piece to receive sanction") &&
 		    (!is_suit(otmp) && !is_cloak(otmp)))
 		|| (!strcmp(word, "item to receive sanctified gem") &&

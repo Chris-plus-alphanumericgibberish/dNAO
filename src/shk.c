@@ -6557,12 +6557,18 @@ struct monst *smith;
 		// any.a_int = 5;
 		// add_menu(tmpwin, NO_GLYPH, &any , 'f', 0, ATR_NONE,
 			 // "Ask her to build a new follower.", MENU_UNSELECTED);
+		any.a_int = 7;
+		add_menu(tmpwin, NO_GLYPH, &any , 'f', 0, ATR_NONE,
+			 "Repair an item.", MENU_UNSELECTED);
 		any.a_int = 6;
 		add_menu(tmpwin, NO_GLYPH, &any , 'p', 0, ATR_NONE,
 			 "Contribute some platinum.", MENU_UNSELECTED);
 		Sprintf(sbuf, "Services Available:");
 	}
 	else {
+		any.a_int = 7;
+		add_menu(tmpwin, NO_GLYPH, &any , 'f', 0, ATR_NONE,
+			 "Repair an item.", MENU_UNSELECTED);
 		any.a_int = 6;
 		add_menu(tmpwin, NO_GLYPH, &any , 'p', 0, ATR_NONE,
 			 "Contribute some platinum.", MENU_UNSELECTED);
@@ -6605,6 +6611,24 @@ d_weapon:
 				default:
 					otyp = 0;
 			}
+		}break;
+		case 7:{
+			struct obj *robj = getobj(identify_types, "have repaired by the smith");
+			if(!robj) { continue; }
+			if(!is_metallic(robj)){
+				verbalize("I can only repair metal items.");
+				continue;
+			}
+			if(robj->oeroded == 0 && robj->oeroded2 == 0){
+				verbalize("This doesn't need repairs.");
+				continue;
+			}
+			if(robj->oeroded + robj->oeroded2 > 2)
+				verbalize("Yikes!  This thing's a mess!");
+			robj->oeroded = robj->oeroded2 = 0;
+			verbalize("It's done.");
+			update_inventory();
+			continue;
 		}break;
 		// case 5:{
 			// if(!smith->mtame || !get_mx(smith, MX_EDOG) || EDOG(smith)->dracae_pets >= dog_limit()/2){
@@ -7208,6 +7232,8 @@ struct monst *smith;
 	add_menu(tmpwin, NO_GLYPH, &any , 'c', 0, ATR_NONE,
 		 "Ask for a copy of an item.", MENU_UNSELECTED);
 	any.a_int = 5;
+	add_menu(tmpwin, NO_GLYPH, &any , 'f', 0, ATR_NONE,
+		 "Repair an item.", MENU_UNSELECTED);
 
 	Sprintf(sbuf, "Services Available:");
 	end_menu(tmpwin, sbuf);
@@ -7247,6 +7273,35 @@ d_weapon:
 				default:
 					otyp = 0;
 			}
+		}break;
+		case 5:{
+			struct obj *robj = getobj(identify_types, "have repaired by the treesinger");
+			if(!robj) { continue; }
+			if(robj->obj_material != WOOD && robj->obj_material != CLOTH){
+				verbalize("I can only repair wood and cloth items.");
+				continue;
+			}
+			if(robj->oeroded == 0 && robj->oeroded2 == 0){
+				verbalize("This doesn't need repairs.");
+				continue;
+			}
+			if(robj->oeroded + robj->oeroded2 > 2)
+				verbalize("Yikes!  This thing's a mess!");
+			if(!smith->mtame){
+				char *slang;
+				if(humanoid_upperbody(youracedata) != humanoid_upperbody(smith->data))
+					slang = "ugly";
+				else
+					slang = (flags.female) ? "lady" : "buddy";
+				long charge = (get_cost(robj, smith) * (robj->oeroded + robj->oeroded2 + 1)+2)/3;
+				if(robj->oartifact) charge = charge * 3 / 2;
+				if(shk_offer_price(slang, charge, smith) == FALSE)
+					continue;
+			}
+			robj->oeroded = robj->oeroded2 = 0;
+			verbalize("It's done.");
+			update_inventory();
+			continue;
 		}break;
 	}
 	if(otyp == 0){
@@ -7375,6 +7430,11 @@ int threshold;
 		any.a_int = 4;
 		add_menu(tmpwin, NO_GLYPH, &any , 'c', 0, ATR_NONE,
 			 "Ask for a copy of an item.", MENU_UNSELECTED);
+		if(metallic_material(mat)){
+			any.a_int = 5;
+			add_menu(tmpwin, NO_GLYPH, &any , 'f', 0, ATR_NONE,
+				 "Repair an item.", MENU_UNSELECTED);
+		}
 		any.a_int = 6;
 		Sprintf(buffer, "Contribute some %s.", resourceString);
 		add_menu(tmpwin, NO_GLYPH, &any , 'r', 0, ATR_NONE,
@@ -7382,6 +7442,11 @@ int threshold;
 		Sprintf(sbuf, "Services Available:");
 	}
 	else {
+		if(metallic_material(mat)){
+			any.a_int = 5;
+			add_menu(tmpwin, NO_GLYPH, &any , 'f', 0, ATR_NONE,
+				 "Repair an item.", MENU_UNSELECTED);
+		}
 		any.a_int = 6;
 		Sprintf(buffer, "Contribute some %s.", resourceString);
 		add_menu(tmpwin, NO_GLYPH, &any , 'r', 0, ATR_NONE,
@@ -7425,6 +7490,35 @@ d_weapon:
 				default:
 					otyp = 0;
 			}
+		}break;
+		case 5:{
+			struct obj *robj = getobj(identify_types, "have repaired by the smith");
+			if(!robj) { continue; }
+			if(!is_metallic(robj)){
+				verbalize("I can only repair metal items.");
+				continue;
+			}
+			if(robj->oeroded == 0 && robj->oeroded2 == 0){
+				verbalize("This doesn't need repairs.");
+				continue;
+			}
+			if(robj->oeroded + robj->oeroded2 > 2)
+				verbalize("Yikes!  This thing's a mess!");
+			if(!smith->mtame){
+				char *slang;
+				if(humanoid_upperbody(youracedata) != humanoid_upperbody(smith->data))
+					slang = "ugly";
+				else
+					slang = (flags.female) ? "lady" : "buddy";
+				long charge = (get_cost(robj, smith) * (robj->oeroded + robj->oeroded2 + 1)+2)/3;
+				if(robj->oartifact) charge = charge * 3 / 2;
+				if(shk_offer_price(slang, charge, smith) == FALSE)
+					continue;
+			}
+			robj->oeroded = robj->oeroded2 = 0;
+			verbalize("It's done.");
+			update_inventory();
+			continue;
 		}break;
 		case 6:{
 			struct obj *resource;
