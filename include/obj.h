@@ -1650,6 +1650,7 @@ struct obj {
 							|| onum == SMOKY_VIOLET_FACELESS_ROBE\
 							|| onum == CONSORT_S_SUIT\
 							|| onum == GENTLEMAN_S_SUIT\
+							|| onum == GENTLEWOMAN_S_SUIT\
 							|| onum == find_gcirclet())
 
 #define is_readable_armor_otyp(onum)	(onum == NOBLE_S_DRESS\

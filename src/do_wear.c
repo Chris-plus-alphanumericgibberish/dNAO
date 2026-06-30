@@ -902,7 +902,7 @@ Armor_on()
 		ABON(A_CHA) += 2;
 		flags.botl = 1;
 	}
-	else if(uarm->otyp == GENTLEWOMAN_S_DRESS || uarm->otyp == GENTLEMAN_S_SUIT){
+	else if(uarm->otyp == GENTLEWOMAN_S_DRESS || uarm->otyp == GENTLEMAN_S_SUIT || uarm->otyp == GENTLEWOMAN_S_SUIT){
 		You("%s very elegant in your %s.", Blind ||
 				(Invis && !See_invisible(u.ux, u.uy)) ? "feel" : "look",
 				OBJ_NAME(objects[uarm->otyp]));
@@ -953,7 +953,7 @@ Armor_gone_or_off_abon()
 		ABON(A_CHA) -= 2;
 		flags.botl = 1;
 	}
-	else if((uarm->otyp == GENTLEWOMAN_S_DRESS || uarm->otyp == GENTLEMAN_S_SUIT) && !cancelled_don){
+	else if((uarm->otyp == GENTLEWOMAN_S_DRESS || uarm->otyp == GENTLEMAN_S_SUIT || uarm->otyp == GENTLEWOMAN_S_SUIT) && !cancelled_don){
 		ABON(A_CHA) -= 2;
 		flags.botl = 1;
 	}
@@ -4763,7 +4763,7 @@ adj_abon(struct obj *otmp, schar delta)
 				flags.botl = 1;
 			}
 		}
-		if(otyp == GENTLEWOMAN_S_DRESS || otyp == GENTLEMAN_S_SUIT){
+		if(otyp == GENTLEWOMAN_S_DRESS || otyp == GENTLEMAN_S_SUIT || otyp == GENTLEWOMAN_S_SUIT){
 			if (delta) {
 				ABON(A_CHA) += delta;
 				flags.botl = 1;

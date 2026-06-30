@@ -954,6 +954,8 @@ SUIT(("consort's suit", "loud foppish suit", "clothes"), /*Needs encyc entry*//*
 	0, 0, MZ_MEDIUM,  ARMSZ_HEAVY,  0,  5,  10, 1000, 10, 1, 1, CLOTH, CLR_BRIGHT_MAGENTA),
 SUIT(("gentleman's suit", "expensive clothes"), /*Needs encyc entry*/
 	0, 0, MZ_MEDIUM, ARMSZ_MEDIUM,  0,  5,  10, 1000, 10, 1, 2, CLOTH, CLR_BLACK),
+SUIT(("gentlewoman's suit", "expensive clothes"), /*Needs encyc entry*/
+	0, 0, MZ_MEDIUM, ARMSZ_MEDIUM,  0,  5,  10, 1000, 10, 1, 2, CLOTH, CLR_BLACK),
 SUIT(("gentlewoman's dress", "expensive dress"), /*Needs encyc entry*/
 	0, 0,  MZ_LARGE,  ARMSZ_HEAVY,  0,  6, 100, 1000, 10, 1, 3, BONE, CLR_RED), /*Specifically, whale bone*/
 SUIT(("crystal plate mail"), /*Needs encyc entry*/

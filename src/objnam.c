@@ -1626,7 +1626,7 @@ boolean adjective;
 		if (check_oprop(obj, OPROP_WOOL))
 			return (adjective ? "woolen" : "wool");
 		/* overly fancy clothing */
-		else if (obj->otyp == GENTLEMAN_S_SUIT || obj->otyp == GENTLEWOMAN_S_DRESS)
+		else if (obj->otyp == GENTLEMAN_S_SUIT || obj->otyp == GENTLEWOMAN_S_SUIT || obj->otyp == GENTLEWOMAN_S_DRESS)
 			return "silk";
 		else if (obj->oartifact == ART_SPIDERSILK)
 			return "spidersilk";

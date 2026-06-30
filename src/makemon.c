@@ -13661,6 +13661,10 @@ boolean greatequip;
 				// (void) mongets(mtmp, POT_FULL_HEALING, mkobjflags);
 			break;
 			case PM_DAUGHTER_LILITH:
+				(void)mongets(mtmp, RUFFLED_SHIRT, mkobjflags);
+				(void)mongets(mtmp, GENTLEMAN_S_SUIT, mkobjflags);
+				(void)mongets(mtmp, HIGH_BOOTS, mkobjflags);
+				(void)mongets(mtmp, GLOVES, mkobjflags);
 				(void)mongets(mtmp, OILSKIN_CLOAK, mkobjflags);
 				otmp = mksobj(DAGGER, mkobjflags);
 				otmp = oname(otmp, artiname(ART_THUNDER_S_VOICE));
@@ -13678,6 +13682,10 @@ boolean greatequip;
 				(void) mpickobj(mtmp, otmp);
 			break;
 			case PM_MOTHER_LILITH:
+				(void)mongets(mtmp, RUFFLED_SHIRT, mkobjflags);
+				(void)mongets(mtmp, GENTLEWOMAN_S_SUIT, mkobjflags);
+				(void)mongets(mtmp, HIGH_BOOTS, mkobjflags);
+				(void)mongets(mtmp, GLOVES, mkobjflags);
 				(void)mongets(mtmp, CLOAK_OF_MAGIC_RESISTANCE, mkobjflags);
 				otmp = mksobj(ATHAME, mkobjflags);
 				otmp = oname(otmp, artiname(ART_SERPENT_S_TOOTH));
@@ -13693,6 +13701,10 @@ boolean greatequip;
 				(void) mpickobj(mtmp, otmp);
 			break;
 			case PM_CRONE_LILITH:
+				(void)mongets(mtmp, RUFFLED_SHIRT, mkobjflags);
+				(void)mongets(mtmp, GENTLEMAN_S_SUIT, mkobjflags);
+				(void)mongets(mtmp, HIGH_BOOTS, mkobjflags);
+				(void)mongets(mtmp, GLOVES, mkobjflags);
 				(void)mongets(mtmp, BOULDER, mkobjflags);
 				(void)mongets(mtmp, BOULDER, mkobjflags);
 				(void)mongets(mtmp, BOULDER, mkobjflags);

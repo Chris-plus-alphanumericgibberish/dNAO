@@ -437,6 +437,7 @@ const int sand_weapons[] = {
 const int fancy_clothes[] = {
 	ELVEN_TOGA,
 	GENTLEMAN_S_SUIT,
+	GENTLEWOMAN_S_SUIT,
 	GENTLEWOMAN_S_DRESS,
 	JACKET,
 	FEDORA,
