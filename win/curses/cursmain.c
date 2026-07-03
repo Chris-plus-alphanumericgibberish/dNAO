@@ -566,13 +566,26 @@ curses_print_glyph(winid wid, XCHAR_P x, XCHAR_P y, int glyph)
     glyph_t ch;
     int color;
     unsigned int bgcolor;
+    int oattr = GLYPH_ATR_NONE;
     int attr = -1;
 
     /* map glyph to character and color */
-    mapglyph(glyph, &ch, &color, &bgcolor, x, y);
+    mapglyph(glyph, &ch, &color, &bgcolor, &oattr, x, y);
 	if (bgcolor != NO_COLOR) {
 		attr = curses_color_attr(color, bgcolor);
 	}
+	if (oattr & GLYPH_ATR_ULINE) {
+		if (attr == -1)
+			attr = curses_color_attr(color, NO_COLOR);
+		attr |= A_UNDERLINE;
+	}
+#ifdef A_ITALIC
+	if (oattr & GLYPH_ATR_ITALIC) {
+		if (attr == -1)
+			attr = curses_color_attr(color, NO_COLOR);
+		attr |= A_ITALIC;
+	}
+#endif
 
     if (iflags.cursesgraphics)
         ch = curses_convert_glyph(ch, glyph);

@@ -15930,6 +15930,9 @@ int faction;
 		break;
 		case S_DEMON:
 //			pline("%d\n",mtmp->mhpmax);
+			if(mndx == PM_PIT_FIEND || mndx == PM_NESSIAN_PIT_FIEND){
+				mtmp->mstance = MSTANCE_MAGIC;
+			}
 			if(mndx == PM_JUIBLEX){
 				mtmp->mhpmax = 4*mtmp->mhpmax;
 				mtmp->mhp = mtmp->mhpmax;

@@ -102,10 +102,7 @@ int glyph;
 
 /*ARGSUSED*/
 void
-mapglyph(glyph, ochar, ocolor, obgcolor, x, y)
-int glyph, *ocolor, x, y;
-glyph_t *ochar;
-unsigned int *obgcolor;
+mapglyph(int glyph, glyph_t *ochar, int *ocolor, unsigned int *obgcolor, int *oattr, int x, int y)
 {
 	register int offset;
 #if defined(TEXTCOLOR) || defined(ROGUE_COLOR)
@@ -114,6 +111,7 @@ unsigned int *obgcolor;
 #endif
 	glyph_t ch;
 	unsigned special = 0;
+	int attr = GLYPH_ATR_NONE;
 	boolean is_monster_glyph = FALSE;
 	struct trap *ttmp = t_at(x,y);
 
@@ -792,9 +790,12 @@ unsigned int *obgcolor;
 
     if (is_monster_glyph) {
 		struct monst *mtmp = m_at(x, y);
+		if (mtmp && mtmp->mstance == MSTANCE_MAGIC)
+			attr |= GLYPH_ATR_ULINE;
 	}
     *ochar = ch;
     *obgcolor = bgcolor;
+    *oattr = attr;
 #ifdef TEXTCOLOR
     *ocolor = color;
 #endif

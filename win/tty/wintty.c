@@ -1411,8 +1411,9 @@ struct WinDesc *cw;
 			int glyph_color = NO_COLOR;
 			glyph_t character;
 			unsigned bgcolor; /* unused */
+			int dummy_attr = GLYPH_ATR_NONE;
 			/* map glyph to character and color */
-			mapglyph(curr->glyph, &character, &glyph_color, &bgcolor, 0, 0);
+			mapglyph(curr->glyph, &character, &glyph_color, &bgcolor, &dummy_attr, 0, 0);
 
 			print_vt_code(AVTC_GLYPH_START, glyph2tile[curr->glyph]);
 			if (glyph_color != NO_COLOR) term_start_color(glyph_color);
@@ -2655,6 +2656,7 @@ tty_print_glyph(window, x, y, glyph)
     boolean reverse_on = FALSE;
     int	    color, bgcolor=NO_COLOR;
     unsigned bgcolor_ret;
+    int oattr = GLYPH_ATR_NONE;
     
 #ifdef CLIPPING
     if(clipping) {
@@ -2663,7 +2665,7 @@ tty_print_glyph(window, x, y, glyph)
     }
 #endif
     /* map glyph to character and color */
-    mapglyph(glyph, &ch, &color, &bgcolor_ret, x, y);
+    mapglyph(glyph, &ch, &color, &bgcolor_ret, &oattr, x, y);
 
     print_vt_code(AVTC_SELECT_WINDOW, window);
 
@@ -2707,6 +2709,7 @@ tty_print_glyph(window, x, y, glyph)
 		reverse_on = TRUE;
     }
 
+    if (oattr & GLYPH_ATR_ULINE) term_start_attr(ATR_ULINE);
 #if defined(USE_TILES) && defined(MSDOS)
     if (iflags.grmode && iflags.tile_view)
       xputg(glyph,ch,special);
@@ -2721,6 +2724,7 @@ tty_print_glyph(window, x, y, glyph)
 #else
 	g_putch(ch);		/* print the character */
 #endif
+    if (oattr & GLYPH_ATR_ULINE) term_end_attr(ATR_ULINE);
 
     if (reverse_on) {
     	term_end_attr(ATR_INVERSE);

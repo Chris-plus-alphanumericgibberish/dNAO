@@ -103,11 +103,12 @@ X11_print_glyph(window, x, y, glyph)
 	register unsigned char *ch_ptr;
 	int			color,och;
 	unsigned		special;
+	int			oattr;
 #ifdef TEXTCOLOR
 	register unsigned char *co_ptr;
 #endif
 	/* map glyph to character and color */
-        mapglyph(glyph, &och, &color, &special, x, y);
+        mapglyph(glyph, &och, &color, &special, &oattr, x, y);
 	ch = (uchar)och;
 	
 	/* Only update if we need to. */

@@ -1555,6 +1555,7 @@ register int after;	/* this is extra fast monster movement */
 	}
 
 	// Possibly adjust stance
+	switch_stance(mtmp, TRUE);
 	if(MON_WEP(mtmp) && !mtmp->mconf && !mtmp->mberserk && m_martial_skill(mtmp->data) == P_EXPERT && !mtarget_adjacent(mtmp)){
 		adjust_etrait_stance(mtmp);
 	}

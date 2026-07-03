@@ -944,9 +944,10 @@ void mar_print_gl_char(window, x, y, glyph)
     int   ch;
     int	    color;
     unsigned special;
+    int     oattr;
 
     /* map glyph to character and color */
-    mapglyph(glyph, &ch, &color, &special, x, y);
+    mapglyph(glyph, &ch, &color, &special, &oattr, x, y);
 
 #ifdef TEXTCOLOR
     /* Turn off color if rogue level. */

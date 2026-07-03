@@ -225,6 +225,11 @@ struct monst {
 	char mbdrown;	/* drowning in blood */
 	char mtaneggs;	/* tannin eggs */
 	char munburn;	/* silverknight buff */
+	uchar mstance;	/* MSTANCE_* engagement preference */
+#define MSTANCE_DEFAULT	0	/* normal behavior */
+#define MSTANCE_MELEE	1	/* prefer to close; actively approaches */
+#define MSTANCE_MAGIC	2	/* prefer distance; use spellcasting when adjacent */
+#define non_weapon_stance(mon)	((mon)->mstance != MSTANCE_DEFAULT && (mon)->mstance != MSTANCE_MELEE)
 	long mwait;/* if tame, won't follow between levels (turn last ordered to wait on) */
 	int encouraged;	/* affected by Encourage song */
 	int mfell;	/* slowed by fell expert trait */

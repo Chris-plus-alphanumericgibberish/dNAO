@@ -1525,6 +1525,20 @@ show_glyph(x,y,glyph)
     }
 }
 
+/*
+ * Force a cell to be repainted on the next flush even if the glyph integer
+ * hasn't changed.  Use when per-instance state (e.g. mstance) affects how
+ * mapglyph renders the cell but doesn't alter the glyph value itself.
+ */
+void
+mark_glyph_dirty(int x, int y)
+{
+    if (!isok(x, y)) return;
+    gbuf[y][x].new = 1;
+    if (gbuf_start[y] > x) gbuf_start[y] = x;
+    if (gbuf_stop[y]  < x) gbuf_stop[y]  = x;
+}
+
 
 /*
  * Reset the changed glyph borders so that none of the 3rd screen has

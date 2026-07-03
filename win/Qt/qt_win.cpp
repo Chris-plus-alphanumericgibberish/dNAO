@@ -1673,10 +1673,11 @@ void NetHackQtMapWindow::paintEvent(QPaintEvent* event)
 		uchar ch;
 		int color, och;
 		unsigned special;
+		int oattr;
 
 		painter.setPen( green );
 		/* map glyph to character and color */
-    		mapglyph(g, &och, &color, &special, i, j);
+    		mapglyph(g, &och, &color, &special, &oattr, i, j);
 		ch = (uchar)och;
 #ifdef TEXTCOLOR
 		painter.setPen( nhcolor_to_pen(color) );

@@ -2499,6 +2499,18 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 				attk->aatyp = AT_MARI;
 		}
 	}
+	/* monsters in magic stance restrict themselves to spellcasting attacks,
+	   but also keep squeeze, passive, and explosion attacks */
+	if (!youagr && magr->mstance == MSTANCE_MAGIC) {
+		if (!is_null_attk(attk) && attk->aatyp != AT_MAGC && attk->aatyp != AT_MMGC
+		    && attk->aatyp != AT_SQUZ && attk->aatyp != AT_NONE && attk->aatyp != AT_BOOM)
+			GETNEXT
+	}
+	/* monsters in melee stance suppress spellcasting attacks */
+	if (!youagr && magr->mstance == MSTANCE_MELEE) {
+		if (!is_null_attk(attk) && (attk->aatyp == AT_MAGC || attk->aatyp == AT_MMGC))
+			GETNEXT
+	}
 	/*Lilitus actually skip their spellcasting attack unless the target has their status ailment*/
 	if(!by_the_book && pa->mtyp == PM_LILITU && attk->adtyp == AD_CLRC){
 		if(!mdef)

@@ -48,6 +48,11 @@ typedef struct mi {
 #define ATR_BLINK   5
 #define ATR_INVERSE 7
 
+/* bitmask flags for mapglyph() oattr; powers of two, distinct from ATR_* */
+#define GLYPH_ATR_NONE     0x00
+#define GLYPH_ATR_ULINE    0x01
+#define GLYPH_ATR_ITALIC   0x02
+
 /* nh_poskey() modifier types */
 #define CLICK_1     1
 #define CLICK_2     2

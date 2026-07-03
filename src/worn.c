@@ -900,7 +900,7 @@ struct monst *mon;
 			base -= 5;
 		}
 	}
-	if(!mon->mcan){
+	if(!mon->mcan && mon->mstance != MSTANCE_MAGIC){
 		base -= mon->data->pac;
 		if(mon->mtyp == PM_CENTER_OF_ALL && Insight < 32)
 			base -= (32-Insight)/2;
@@ -1165,14 +1165,14 @@ struct monst *mon;
 			base -= 5;
 		}
 	}
-	if(!mon->mcan && !(mon->mtyp == PM_SHADOWSMITH && dimness(mon->mx,mon->my) <= 0)){
+	if(!mon->mcan && mon->mstance != MSTANCE_MAGIC && !(mon->mtyp == PM_SHADOWSMITH && dimness(mon->mx,mon->my) <= 0)){
 		base -= mon->data->pac;
 		if(mon->mtyp == PM_CENTER_OF_ALL && Insight < 32)
 			base -= (32-Insight)/2;
 	}
 	if(mon->mtyp == PM_VERMIURGE && mon->mvar_vermiurge > 0)
 		base -= min(mon->mvar_vermiurge/10, 20);
-	
+
 	if(Role_if(PM_ANACHRONONAUT) && !quest_status.leader_is_dead && mon->mfaction == QUEST_FACTION && Is_qhome(&u.uz)){
 		if(mon->mtyp != PM_SARA__THE_LAST_ORACLE){
 			base -= min(mon->m_lev, 20);
@@ -1469,7 +1469,7 @@ struct monst *mon;
 		base += 10;
 	
 
-	if(!mon->mcan && !(mon->mtyp == PM_SHADOWSMITH && dimness(mon->mx,mon->my) <= 0)){
+	if(!mon->mcan && mon->mstance != MSTANCE_MAGIC && !(mon->mtyp == PM_SHADOWSMITH && dimness(mon->mx,mon->my) <= 0)){
 		int dr = 0;
 #define m_bdr mon->data->spe_bdr
 #define m_ldr mon->data->spe_ldr
@@ -1707,7 +1707,7 @@ int depth;
 			nat_mdr += 5;
 		}
 	}
-	if (!mon->mcan && !(mon->mtyp == PM_SHADOWSMITH && dimness(mon->mx,mon->my) <= 0)) {
+	if (!mon->mcan && mon->mstance != MSTANCE_MAGIC && !(mon->mtyp == PM_SHADOWSMITH && dimness(mon->mx,mon->my) <= 0)) {
 		switch (slot)
 		{
 		case UPPER_TORSO_DR: bas_mdr += mon->data->spe_bdr; break;

@@ -2248,6 +2248,7 @@ register struct monst *mtmp;
 		}
 	}
 
+	switch_stance(mtmp, TRUE);
 	if(!mtarget_adjacent(mtmp)){ /* don't fight at range if there's a melee target */
 		/* Look for other monsters to fight (at a distance) */
 		struct monst *mtmp2 = mfind_target(mtmp, FALSE, TRUE);

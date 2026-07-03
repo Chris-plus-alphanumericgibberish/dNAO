@@ -543,6 +543,7 @@ E void NDECL(curs_on_u);
 E int NDECL(doredraw);
 E void NDECL(docrt);
 E void FDECL(show_glyph, (int,int,int));
+E void FDECL(mark_glyph_dirty, (int,int));
 E void NDECL(clear_glyph_buffer);
 E void FDECL(row_refresh, (int,int,int));
 E void NDECL(cls);
@@ -1549,7 +1550,7 @@ E int FDECL(default_strongmonst_strength, (struct permonst *));
 
 /* ### mapglyph.c ### */
 
-E void FDECL(mapglyph, (int, glyph_t *, int *, unsigned *, int, int));
+E void FDECL(mapglyph, (int, glyph_t *, int *, unsigned *, int *, int, int));
 
 /* ### mcastu.c ### */
 
@@ -2005,6 +2006,7 @@ E boolean FDECL(can_equip, (struct monst *, struct obj *));
 E boolean FDECL(phantom_scorpions_sting, (struct monst *));
 E boolean FDECL(rot_caterpillars_bite, (struct monst *));
 E boolean FDECL(orc_mud_stabs, (struct monst *));
+E void FDECL(switch_stance, (struct monst *, boolean));
 E void FDECL(adjust_etrait_stance, (struct monst *));
 
 /* ### monst.c ### */

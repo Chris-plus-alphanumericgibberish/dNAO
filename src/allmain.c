@@ -2694,6 +2694,7 @@ karemade:
 						mtmp->movement = -12;
 					}
 				}
+				switch_stance(mtmp, FALSE);
 			} /* movement rations */
 			
 			static boolean LBbreach = FALSE;

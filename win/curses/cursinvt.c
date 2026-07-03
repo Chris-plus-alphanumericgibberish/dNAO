@@ -72,10 +72,11 @@ curses_add_inv(int y, int glyph, CHAR_P accelerator, attr_t attr,
 
     if (accelerator && glyph != NO_GLYPH && iflags.use_menu_glyphs) {
         unsigned dummy = 0; /* Not used */
+        int dummy_attr = GLYPH_ATR_NONE;
         long int symbol = 0;
         nethack_char nch;
         nch.attr = NONE;
-        mapglyph(glyph, &symbol, &nch.color, &dummy,
+        mapglyph(glyph, &symbol, &nch.color, &dummy, &dummy_attr,
                      u.ux, u.uy);
         nch.ch = symbol;
         int y, x;

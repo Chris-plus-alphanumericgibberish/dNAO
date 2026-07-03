@@ -1640,6 +1640,10 @@ struct monst *mon;
 		mmove = mmove/2;
 	}
 	
+	if(mon->mstance == MSTANCE_MELEE){
+		mmove += 2;
+	}
+
 	if(mon->mtyp == PM_PYTHON && !no_upos(mon) && 
 		dist2(mon->mx, mon->my, mon->mux, mon->muy) <= 8)
 		mmove *= 4;
@@ -3450,7 +3454,7 @@ mfndpos(mon, poss, info, flag)
 	uchar nowtyp;
 	boolean wantpool, puddleispool, wantdry, poolok, cubewaterok, lavaok, nodiag, quantumlock;
 	boolean rockok = FALSE, treeok = FALSE, thrudoor;
-	boolean stand_off = standoff(mdat) && !mon->mpeaceful;
+	boolean stand_off = (standoff(mdat) || mon->mstance == MSTANCE_MAGIC) && !mon->mpeaceful;
 	int maxx, maxy;
 	
 	if(mdat->mtyp == PM_SWARM_OF_SNAKING_TENTACLES || mdat->mtyp == PM_LONG_SINUOUS_TENTACLE){
@@ -10826,8 +10830,41 @@ orc_mud_stabs(struct monst *mdef)
 }
 
 void
+switch_stance(struct monst *mon, boolean reaction)
+{
+	boolean changed = FALSE;
+
+	if (mon->mstance == MSTANCE_MAGIC) {
+		/* Cancellation makes magic stance impossible; always react */
+		if (mon->mcan) {
+			mon->mstance = MSTANCE_MELEE;
+			changed = TRUE;
+			pline("%s snorts in anger and readies %s claws!", Monnam(mon), mhis(mon));
+		}
+		/* PC closing to melee range is a tactical choice, not a stance
+		   impossibility; only fire when not in reaction mode */
+		else if (!reaction &&
+			!mon->mpeaceful && !mon->mflee && !mon->mconf && !mon->mstun &&
+			monnear(mon, mon->mux, mon->muy) && !rn2(4)
+		) {
+			mon->mstance = MSTANCE_MELEE;
+			changed = TRUE;
+			pline("%s readies %s claws and bares %s fangs!", Monnam(mon), mhis(mon), mhis(mon));
+		}
+	}
+
+	if (changed && canspotmon(mon)) {
+		newsym(mon->mx, mon->my);
+		mark_glyph_dirty(mon->mx, mon->my);
+	}
+	// return changed;
+}
+
+void
 adjust_etrait_stance(struct monst *mon)
 {
+	if (non_weapon_stance(mon))
+		return;
 	struct obj *weap = MON_WEP(mon);
 	if(weap->o_e_trait && rn2(100))
 		return; //Don't change too often

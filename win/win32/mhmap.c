@@ -564,6 +564,7 @@ void onPaint(HWND hWnd)
 				int   color;
 				unsigned special;
 				int mgch;
+				int oattr;
 				HBRUSH back_brush;
 				COLORREF OldFg;
 
@@ -575,7 +576,7 @@ void onPaint(HWND hWnd)
 #else
 				/* rely on NetHack core helper routine */
 				mapglyph(data->map[i][j], &mgch, &color,
-						&special, i, j);
+						&special, &oattr, i, j);
 				ch = (char)mgch;
 				if (((special & MG_PET) && iflags.hilite_pet) ||
 					(special & MG_ZOMBIE) ||
