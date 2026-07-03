@@ -297,8 +297,8 @@
  *
  * ridden	Represents all monsters being ridden.  Count: NUMMONS 
  *
- * object	A set of 16 for each (non-rogue) color for each
- *      object.  Count: NUM_OBJECTS*16
+ * object	A set of 256 (16 bgcolor nibbles x 16 fgcolor nibbles) for each
+ *      object.  Count: NUM_OBJECTS*256
  *
  * cmap		One for each entry in the character map.  The character map
  *		is the dungeon features and other miscellaneous things.
@@ -324,6 +324,11 @@
  *
  * The following are offsets used to convert to and from a glyph.
  */
+/* Object glyph encoding: bits 0-3 = fgcolor, bits 4-7 = bgcolor (0 = none),
+ * bits 8+ = otyp.  GLYPH_OBJ_OTYP_SHIFT is how far otyp is shifted left. */
+#define GLYPH_OBJ_BGCOLOR_SHIFT	4
+#define GLYPH_OBJ_OTYP_SHIFT	8
+
 #define NUM_ZAP CLR_MAX	/* number of zap beam types */
 #define NUM_CLOUDS NUM_AD_TYPES	/* number of cloud display types */
 
@@ -336,7 +341,7 @@
 #define GLYPH_BODY_OFF		(NUMMONS	+ GLYPH_DETECT_OFF)
 #define GLYPH_RIDDEN_OFF	(NUMMONS	+ GLYPH_BODY_OFF)
 #define GLYPH_OBJ_OFF		(NUMMONS	+ GLYPH_RIDDEN_OFF)
-#define GLYPH_CMAP_OFF		((NUM_OBJECTS << 4)	+ GLYPH_OBJ_OFF)
+#define GLYPH_CMAP_OFF		((NUM_OBJECTS << GLYPH_OBJ_OTYP_SHIFT)	+ GLYPH_OBJ_OFF)
 #define GLYPH_EXPLODE_OFF	((MAXPCHARS - MAXEXPCHARS) + GLYPH_CMAP_OFF)
 #define GLYPH_ZAP_OFF		((MAXEXPCHARS * EXPL_MAX) + GLYPH_EXPLODE_OFF)
 #define GLYPH_CLOUD_OFF		((NUM_ZAP << 2) + GLYPH_ZAP_OFF)
@@ -365,7 +370,7 @@
 			cmap_to_glyph(trap_to_defsym(what_trap((trap)->ttyp)))
 
 /* Not affected by hallucination.  Gives a generic body for CORPSE */
-#define objnum_to_glyph(onum)	((int) ((onum) << 4) + objects[onum].oc_color + GLYPH_OBJ_OFF)
+#define objnum_to_glyph(onum)	((int) ((onum) << GLYPH_OBJ_OTYP_SHIFT) + objects[onum].oc_color + GLYPH_OBJ_OFF)
 #define monnum_to_glyph(mtyp)	((int) (mtyp) + GLYPH_MON_OFF)
 #define detected_monnum_to_glyph(mtyp)	((int) (mtyp) + GLYPH_DETECT_OFF)
 #define ridden_monnum_to_glyph(mtyp)	((int) (mtyp) + GLYPH_RIDDEN_OFF)
@@ -403,7 +408,7 @@
 	NO_GLYPH)
 #define glyph_to_obj(glyph)						\
 	(glyph_is_body(glyph) ? CORPSE :				\
-	glyph_is_normal_object(glyph) ? ((glyph-GLYPH_OBJ_OFF)>>4) :	\
+	glyph_is_normal_object(glyph) ? ((glyph-GLYPH_OBJ_OFF)>>GLYPH_OBJ_OTYP_SHIFT) :	\
 	NO_GLYPH)
 #define glyph_to_trap(glyph)						\
 	(glyph_is_trap(glyph) ?						\
@@ -449,7 +454,7 @@
     ((glyph) >= GLYPH_DETECT_OFF && (glyph) < (GLYPH_DETECT_OFF+NUMMONS))
 #define glyph_is_invisible(glyph) ((glyph) == GLYPH_INVISIBLE)
 #define glyph_is_normal_object(glyph)					\
-    ((glyph) >= GLYPH_OBJ_OFF && (glyph) < (GLYPH_OBJ_OFF+(NUM_OBJECTS<<4)))
+    ((glyph) >= GLYPH_OBJ_OFF && (glyph) < (GLYPH_OBJ_OFF+(NUM_OBJECTS<<GLYPH_OBJ_OTYP_SHIFT)))
 #define glyph_is_object(glyph)						\
 		(glyph_is_normal_object(glyph)				\
 		|| glyph_is_body(glyph))

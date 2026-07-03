@@ -442,6 +442,8 @@ register int x, y, typ;
 	    ttmp->ntrap = ftrap;
 	    ftrap = ttmp;
 	}
+	if (cansee(x, y))
+	    newsym(x, y);
 	return(ttmp);
 }
 

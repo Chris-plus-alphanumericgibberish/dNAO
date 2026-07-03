@@ -140,6 +140,7 @@ static struct Bool_Opt
 	{"use_inverse",   &iflags.wc_inverse, FALSE, SET_IN_GAME},		/*WC*/
 #endif
 	{"hilite_hidden_stairs",    &iflags.hilite_hidden_stairs, TRUE, SET_IN_GAME},	/*WC*/
+	{"hilite_hidden_traps",    &iflags.hilite_hidden_traps, TRUE, SET_IN_GAME},	/*WC*/
 	{"hilite_obj_piles",    &iflags.hilite_obj_piles, FALSE, SET_IN_GAME},	/*WC*/
 	{"hitpointbar", &iflags.hitpointbar, FALSE, SET_IN_GAME},
 	{"hp_monitor", (boolean *)0, TRUE, SET_IN_FILE}, /* For backward compat, HP monitor patch */

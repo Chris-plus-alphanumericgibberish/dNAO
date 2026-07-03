@@ -862,7 +862,7 @@ void nhglyph2charcolor(short g, uchar* ch, int* color)
 		*ch = showsyms[offset];
 		cmap_color(offset);
 	} else if ((offset = (g - GLYPH_OBJ_OFF)) >= 0) {	/* object */
-		*ch = oc_syms[(int)objects[offset].oc_class];
+		*ch = oc_syms[(int)objects[offset >> GLYPH_OBJ_OTYP_SHIFT].oc_class];
 		obj_color(offset);
 	} else if ((offset = (g - GLYPH_BODY_OFF)) >= 0) {	/* a corpse */
 		*ch = oc_syms[(int)objects[CORPSE].oc_class];

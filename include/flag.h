@@ -423,6 +423,7 @@ struct instance_flags {
     boolean notice_walls;
     boolean use_menu_glyphs;
     boolean hilite_hidden_stairs;
+    boolean hilite_hidden_traps;
     boolean hilite_obj_piles;
 	
     boolean role_obj_names;

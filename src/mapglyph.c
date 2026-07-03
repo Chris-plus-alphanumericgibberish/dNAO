@@ -114,6 +114,7 @@ unsigned int *obgcolor;
 #endif
 	glyph_t ch;
 	unsigned special = 0;
+	boolean is_monster_glyph = FALSE;
 	struct trap *ttmp = t_at(x,y);
 
     /*
@@ -125,7 +126,8 @@ unsigned int *obgcolor;
     if ((offset = (glyph - GLYPH_WARNING_OFF)) >= 0) {	/* a warning flash */
     	ch = warnsyms[offset];
 		if ((On_stairs(x,y) || levl[x][y].typ == STAIRS) && levl[x][y].seenv) special |= MG_STAIRS;
-		if (ttmp && ttmp->ttyp == MAGIC_PORTAL && levl[x][y].seenv) special |= MG_PORTAL;
+		if (ttmp && ttmp->ttyp == MAGIC_PORTAL && ttmp->tseen && levl[x][y].seenv) special |= MG_PORTAL;
+		if (ttmp && ttmp->tseen && ttmp->ttyp != MAGIC_PORTAL) special |= MG_TRAP;
 
 # ifdef ROGUE_COLOR
 	if (HAS_ROGUE_IBM_GRAPHICS)
@@ -583,10 +585,10 @@ unsigned int *obgcolor;
 		}
 		if (color == NO_COLOR) cmap_color(offset);
 	} else if ((offset = (glyph - GLYPH_OBJ_OFF)) >= 0) {	/* object */
-		/* color should come first as it is in the first 4 bits*/
+		/* fgcolor in bits 0-3, bgcolor in bits 4-7, otyp in bits 8+ */
 #ifdef ROGUE_COLOR
 		if (HAS_ROGUE_IBM_GRAPHICS && iflags.use_color) {
-			switch (objects[offset >> 4].oc_class) {
+			switch (objects[offset >> GLYPH_OBJ_OTYP_SHIFT].oc_class) {
 			case COIN_CLASS: color = CLR_YELLOW; break;
 			case FOOD_CLASS: color = CLR_RED; break;
 			default: color = CLR_BRIGHT_BLUE; break;
@@ -595,10 +597,16 @@ unsigned int *obgcolor;
 		else
 #endif
 			obj_color(offset);
-		/* shift out the 4 bits of color to leave the otyp */
-		offset = offset >> 4;
+		/* extract baked bgcolor (0 = no highlight) before shifting it away */
+		if (bgcolor == NO_COLOR) {
+			int bg = (offset >> GLYPH_OBJ_BGCOLOR_SHIFT) & 0x0f;
+			if (bg != 0) bgcolor = bg;
+		}
+		/* shift out the 8 bits of color+bgcolor to leave the otyp */
+		offset = offset >> GLYPH_OBJ_OTYP_SHIFT;
 		if ((On_stairs(x,y) || levl[x][y].typ == STAIRS) && levl[x][y].seenv) special |= MG_STAIRS;
-		if (ttmp && ttmp->ttyp == MAGIC_PORTAL && levl[x][y].seenv) special |= MG_PORTAL;
+		if (ttmp && ttmp->ttyp == MAGIC_PORTAL && ttmp->tseen && levl[x][y].seenv) special |= MG_PORTAL;
+		if (ttmp && ttmp->tseen && ttmp->ttyp != MAGIC_PORTAL) special |= MG_TRAP;
 		if ((offset == BOULDER || offset == MASSIVE_STONE_CRATE || offset == MASS_OF_STUFF) && iflags.bouldersym) ch = iflags.bouldersym;
 		else ch = get_objsym(offset);
 
@@ -608,8 +616,10 @@ unsigned int *obgcolor;
 		    special |= MG_OBJPILE;
 		}
     } else if ((offset = (glyph - GLYPH_RIDDEN_OFF)) >= 0) {	/* mon ridden */
+		is_monster_glyph = TRUE;
 		if ((On_stairs(x,y) || levl[x][y].typ == STAIRS) && levl[x][y].seenv) special |= MG_STAIRS;
-		if (ttmp && ttmp->ttyp == MAGIC_PORTAL && levl[x][y].seenv) special |= MG_PORTAL;
+		if (ttmp && ttmp->ttyp == MAGIC_PORTAL && ttmp->tseen && levl[x][y].seenv) special |= MG_PORTAL;
+		if (ttmp && ttmp->tseen && ttmp->ttyp != MAGIC_PORTAL) special |= MG_TRAP;
 
 		ch = get_monsym(offset);
 #ifdef ROGUE_COLOR
@@ -624,7 +634,8 @@ unsigned int *obgcolor;
 	    special |= MG_RIDDEN;
     } else if ((offset = (glyph - GLYPH_BODY_OFF)) >= 0) {	/* a corpse */
 		if ((On_stairs(x,y) || levl[x][y].typ == STAIRS) && levl[x][y].seenv) special |= MG_STAIRS;
-		if (ttmp && ttmp->ttyp == MAGIC_PORTAL && levl[x][y].seenv) special |= MG_PORTAL;
+		if (ttmp && ttmp->ttyp == MAGIC_PORTAL && ttmp->tseen && levl[x][y].seenv) special |= MG_PORTAL;
+		if (ttmp && ttmp->tseen && ttmp->ttyp != MAGIC_PORTAL) special |= MG_TRAP;
 
 		ch = get_objsym(CORPSE);
 #ifdef ROGUE_COLOR
@@ -640,8 +651,10 @@ unsigned int *obgcolor;
 	    special |= MG_OBJPILE;
 	}
     } else if ((offset = (glyph - GLYPH_DETECT_OFF)) >= 0) {	/* mon detect */
+		is_monster_glyph = TRUE;
 		if ((On_stairs(x,y) || levl[x][y].typ == STAIRS) && levl[x][y].seenv) special |= MG_STAIRS;
-		if (ttmp && ttmp->ttyp == MAGIC_PORTAL && levl[x][y].seenv) special |= MG_PORTAL;
+		if (ttmp && ttmp->ttyp == MAGIC_PORTAL && ttmp->tseen && levl[x][y].seenv) special |= MG_PORTAL;
+		if (ttmp && ttmp->tseen && ttmp->ttyp != MAGIC_PORTAL) special |= MG_TRAP;
 
 		ch = get_monsym(offset);
 #ifdef ROGUE_COLOR
@@ -654,8 +667,10 @@ unsigned int *obgcolor;
 	/* is_reverse = TRUE; */
 	    special |= MG_DETECT;
     } else if ((offset = (glyph - GLYPH_INVIS_OFF)) >= 0) {	/* invisible */
+		is_monster_glyph = TRUE;
 		if ((On_stairs(x,y) || levl[x][y].typ == STAIRS) && levl[x][y].seenv) special |= MG_STAIRS;
-		if (ttmp && ttmp->ttyp == MAGIC_PORTAL && levl[x][y].seenv) special |= MG_PORTAL;
+		if (ttmp && ttmp->ttyp == MAGIC_PORTAL && ttmp->tseen && levl[x][y].seenv) special |= MG_PORTAL;
+		if (ttmp && ttmp->tseen && ttmp->ttyp != MAGIC_PORTAL) special |= MG_TRAP;
 
 		ch = DEF_INVISIBLE;
 #ifdef ROGUE_COLOR
@@ -666,8 +681,10 @@ unsigned int *obgcolor;
 	    invis_color(offset);
 	    special |= MG_INVIS;
     } else if ((offset = (glyph - GLYPH_MTEMPLATE_OFF)) >= 0) {	/* a templated monster */
+		is_monster_glyph = TRUE;
 		if ((On_stairs(x,y) || levl[x][y].typ == STAIRS) && levl[x][y].seenv) special |= MG_STAIRS;
-		if (ttmp && ttmp->ttyp == MAGIC_PORTAL && levl[x][y].seenv) special |= MG_PORTAL;
+		if (ttmp && ttmp->ttyp == MAGIC_PORTAL && ttmp->tseen && levl[x][y].seenv) special |= MG_PORTAL;
+		if (ttmp && ttmp->tseen && ttmp->ttyp != MAGIC_PORTAL) special |= MG_TRAP;
 
 		ch = monsyms[(int)mons[offset % NUMMONS].mlet];
 		int template = (glyph - GLYPH_MTEMPLATE_OFF) / NUMMONS + 1;
@@ -687,8 +704,10 @@ unsigned int *obgcolor;
 		else
 	    	mtemplate_color(offset % NUMMONS);
     } else if ((offset = (glyph - GLYPH_PEACE_OFF)) >= 0) {	/* a peaceful monster */
+		is_monster_glyph = TRUE;
 		if ((On_stairs(x,y) || levl[x][y].typ == STAIRS) && levl[x][y].seenv) special |= MG_STAIRS;
-		if (ttmp && ttmp->ttyp == MAGIC_PORTAL && levl[x][y].seenv) special |= MG_PORTAL;
+		if (ttmp && ttmp->ttyp == MAGIC_PORTAL && ttmp->tseen && levl[x][y].seenv) special |= MG_PORTAL;
+		if (ttmp && ttmp->tseen && ttmp->ttyp != MAGIC_PORTAL) special |= MG_TRAP;
 
 		ch = monsyms[(int)mons[offset].mlet];
 #ifdef ROGUE_COLOR
@@ -699,8 +718,10 @@ unsigned int *obgcolor;
 	    peace_color(offset);
 	    special |= MG_PEACE;
     } else if ((offset = (glyph - GLYPH_PET_OFF)) >= 0) {	/* a pet */
+		is_monster_glyph = TRUE;
 		if ((On_stairs(x,y) || levl[x][y].typ == STAIRS) && levl[x][y].seenv) special |= MG_STAIRS;
-		if (ttmp && ttmp->ttyp == MAGIC_PORTAL && levl[x][y].seenv) special |= MG_PORTAL;
+		if (ttmp && ttmp->ttyp == MAGIC_PORTAL && ttmp->tseen && levl[x][y].seenv) special |= MG_PORTAL;
+		if (ttmp && ttmp->tseen && ttmp->ttyp != MAGIC_PORTAL) special |= MG_TRAP;
 
 		ch = monsyms[(int)mons[offset].mlet];
 #ifdef ROGUE_COLOR
@@ -711,8 +732,10 @@ unsigned int *obgcolor;
 	    pet_color(offset);
 	    special |= MG_PET;
     } else {							/* a monster */
+		is_monster_glyph = TRUE;
 		if ((On_stairs(x,y) || levl[x][y].typ == STAIRS) && levl[x][y].seenv) special |= MG_STAIRS;
-		if (ttmp && ttmp->ttyp == MAGIC_PORTAL && levl[x][y].seenv) special |= MG_PORTAL;
+		if (ttmp && ttmp->ttyp == MAGIC_PORTAL && ttmp->tseen && levl[x][y].seenv) special |= MG_PORTAL;
+		if (ttmp && ttmp->tseen && ttmp->ttyp != MAGIC_PORTAL) special |= MG_TRAP;
 
 		ch = get_monsym(glyph);
 #ifdef ROGUE_COLOR
@@ -743,6 +766,8 @@ unsigned int *obgcolor;
 			bgcolor = CLR_RED;
 		else if ((special & MG_PORTAL) && iflags.hilite_hidden_stairs)
 			bgcolor = CLR_RED;
+		else if ((special & MG_TRAP) && iflags.hilite_hidden_traps)
+			bgcolor = CLR_CYAN;
 		else if ((special & MG_PEACE) && iflags.hilite_peaceful)
 			bgcolor = CLR_BROWN;
 		else if ((special & MG_DETECT) && iflags.hilite_detected)
@@ -765,6 +790,9 @@ unsigned int *obgcolor;
 	color = NO_COLOR;
 #endif
 
+    if (is_monster_glyph) {
+		struct monst *mtmp = m_at(x, y);
+	}
     *ochar = ch;
     *obgcolor = bgcolor;
 #ifdef TEXTCOLOR

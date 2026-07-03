@@ -265,7 +265,20 @@ obj_to_glyph(obj)
 	return corpsenm + GLYPH_BODY_OFF;
     }
     int ocolor = Hallucination ? rn2(16) : object_color(obj);
-    return (otyp << 4) + ocolor + GLYPH_OBJ_OFF;
+    int obgcolor = 0;
+    if (obj->where == OBJ_FLOOR) {
+        int ox = obj->ox, oy = obj->oy;
+        struct trap *trap = t_at(ox, oy);
+        if (trap && trap->tseen && trap->ttyp != MAGIC_PORTAL
+                && iflags.hilite_hidden_traps)
+            obgcolor = CLR_CYAN;
+        else if (otyp != BOULDER && level.objects[ox][oy]
+                && level.objects[ox][oy]->nexthere
+                && iflags.hilite_obj_piles)
+            obgcolor = CLR_BLUE;
+    }
+    return (otyp << GLYPH_OBJ_OTYP_SHIFT) + (obgcolor << GLYPH_OBJ_BGCOLOR_SHIFT)
+           + ocolor + GLYPH_OBJ_OFF;
 }
 
 
@@ -636,7 +649,7 @@ feel_location(x, y)
 	     * We could also just display what is currently on the top of the
 	     * object stack (if anything).
 	     */
-	    if (lev->glyph == objnum_to_glyph(BOULDER)) {
+	    if (glyph_to_obj(lev->glyph) == BOULDER) {
 		if (lev->typ != ROOM && lev->seenv) {
 		    map_background(x, y, 1);
 		} else {
@@ -1639,7 +1652,7 @@ int glyph;
     } else if ((offset = (glyph - GLYPH_CMAP_OFF)) >= 0) {	/* cmap */
 	ch = defsyms[offset].sym;
     } else if ((offset = (glyph - GLYPH_OBJ_OFF)) >= 0) {	/* object */
-	ch = def_oc_syms[(int)objects[offset >> 4].oc_class];
+	ch = def_oc_syms[(int)objects[offset >> GLYPH_OBJ_OTYP_SHIFT].oc_class];
     } else if ((offset = (glyph - GLYPH_RIDDEN_OFF)) >= 0) { /* mon ridden */
 	ch = def_monsyms[(int)mons[offset].mlet];
     } else if ((offset = (glyph - GLYPH_BODY_OFF)) >= 0) {	/* a corpse */
