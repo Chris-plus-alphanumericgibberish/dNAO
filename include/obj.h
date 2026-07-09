@@ -277,7 +277,8 @@ struct obj {
 	Bitfield(blood_smithed,1);	/* improved by blood smithing */
 	Bitfield(improved_mat,1);	/* improved over base material (used for shadowsteel weapons) */
 	Bitfield(mired,1);	/* created in the mire and may repair itself during level loading */
-	/* 12 free bits in this field, I think -CM */
+	Bitfield(suppressed,1);	/* magic is suppressed */
+	/* 11 free bits in this field, I think -CM */
 	
 	int obj_material;		/*Object material (from lookup table)*/
 	int sub_material;		/*Sub-material*/

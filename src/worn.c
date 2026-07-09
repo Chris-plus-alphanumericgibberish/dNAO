@@ -953,16 +953,18 @@ struct monst *mon;
 		if(uring_art(ART_NARYA) && def_narya())
 			base -= sgn(def_narya())*rnd(abs(def_narya()));
 
+		int weapon_spe = (uwep && !uwep->suppressed && !Is_spire(&u.uz)) ? uwep->spe : 0;
+		int swapwep_spe = (uswapwep && !uswapwep->suppressed && !Is_spire(&u.uz)) ? uswapwep->spe : 0;
 		if(uwep){
 			const struct artifact *weap = get_artifact(uwep);
 			if(weap && (weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART) && activeMentalEdge(GSTYLE_DEFENSE)){
-				base -= EDGE_KENSEI ? 3+max(uwep->spe/2,0) : u.usanity < 50 ? 0 : u.usanity < 75 ? max(uwep->spe/2,0) : u.usanity < 90 ? 1+max(uwep->spe/2,0) : 3+max(uwep->spe/2,0);
+				base -= EDGE_KENSEI ? 3+max(weapon_spe/2,0) : u.usanity < 50 ? 0 : u.usanity < 75 ? max(weapon_spe/2,0) : u.usanity < 90 ? 1+max(weapon_spe/2,0) : 3+max(weapon_spe/2,0);
 			}
 		}
 		if(uswapwep){
 			const struct artifact *weap = get_artifact(uswapwep);
 			if(weap && (weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART) && activeMentalEdge(GSTYLE_DEFENSE)){
-				base -= EDGE_KENSEI ? 3+max(uswapwep->spe/2,0) : u.usanity < 50 ? 0 : u.usanity < 75 ? max(uswapwep->spe/2,0) : u.usanity < 90 ? 1+max(uswapwep->spe/2,0) : 3+max(uswapwep->spe/2,0);
+				base -= EDGE_KENSEI ? 3+max(swapwep_spe/2,0) : u.usanity < 50 ? 0 : u.usanity < 75 ? max(swapwep_spe/2,0) : u.usanity < 90 ? 1+max(swapwep_spe/2,0) : 3+max(swapwep_spe/2,0);
 			}
 		}
 		if(artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_STEEL)
@@ -971,11 +973,12 @@ struct monst *mon;
 
 	monwep = MON_WEP(mon);
 	if(monwep){
-		if(monwep->oartifact == ART_LANCE_OF_LONGINUS) base -= max((monwep->spe+1)/2,0);
+		int monwep_spe = (!monwep->suppressed && !Is_spire(&u.uz)) ? monwep->spe : 0;
+		if(monwep->oartifact == ART_LANCE_OF_LONGINUS) base -= max((monwep_spe+1)/2,0);
 		else if(monwep->oartifact == ART_TENSA_ZANGETSU){
-			base -= max( (monwep->spe+1)/2,0);
-			if(!uarmc || !uarm) base -= max( monwep->spe,0);
-			if(!uarmc && !uarm) base -= max( (monwep->spe+1)/2,0);
+			base -= max( (monwep_spe+1)/2,0);
+			if(!uarmc || !uarm) base -= max( monwep_spe,0);
+			if(!uarmc && !uarm) base -= max( (monwep_spe+1)/2,0);
 		}
 		else if(monwep->oartifact == ART_LASH_OF_THE_COLD_WASTE){
 			if(Insight >= 20)
@@ -1108,18 +1111,19 @@ struct monst *mon;
 	//Weapon AC (primary only)
 	struct obj *monwep = MON_WEP(mon);
 	if(monwep){
+		int monwep_spe = (!monwep->suppressed && !Is_spire(&u.uz)) ? monwep->spe : 0;
 		if((is_rapier(monwep) && !arti_phasing(monwep)))
 			armac += mon_weapon_dam_bonus(mon->data, monwep, weapon_type(monwep));
 		if(monwep->oartifact == ART_TOBIUME)
-			armac += max(monwep->spe,0);
+			armac += max(monwep_spe,0);
 		if(monwep->otyp == NAGINATA && !which_armor(mon, W_ARMS)){
 			if(monwep->oartifact == ART_JINJA_NAGINATA)
-				armac += 2+monwep->spe;
+				armac += 2+monwep_spe;
 			else
-				armac += 1+(monwep->spe)/2;
+				armac += 1+(monwep_spe)/2;
 		}
 		if(monwep->otyp == SILVERKNIGHT_SPEAR && !which_armor(mon, W_ARMS)){
-			armac += 1+monwep->spe;
+			armac += 1+monwep_spe;
 			if(mon_knight(mon) || mon_dark_knight(mon)){
 				if(mon->m_lev >= 28)
 					armac += 8;
@@ -1229,16 +1233,18 @@ struct monst *mon;
 		if(uring_art(ART_NARYA))
 			base -= def_narya();
 
+		int weapon_spe = (uwep && !uwep->suppressed && !Is_spire(&u.uz)) ? uwep->spe : 0;
+		int swapwep_spe = (uswapwep && !uswapwep->suppressed && !Is_spire(&u.uz)) ? uswapwep->spe : 0;
 		if(uwep){
 			const struct artifact *weap = get_artifact(uwep);
 			if(weap && (weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART) && activeMentalEdge(GSTYLE_DEFENSE)){
-				base -= EDGE_KENSEI ? 3+max(uwep->spe/2,0) : u.usanity < 50 ? 0 : u.usanity < 75 ? max(uwep->spe/2,0) : u.usanity < 90 ? 1+max(uwep->spe/2,0) : 3+max(uwep->spe/2,0);
+				base -= EDGE_KENSEI ? 3+max(weapon_spe/2,0) : u.usanity < 50 ? 0 : u.usanity < 75 ? max(weapon_spe/2,0) : u.usanity < 90 ? 1+max(weapon_spe/2,0) : 3+max(weapon_spe/2,0);
 			}
 		}
 		if(uswapwep){
 			const struct artifact *weap = get_artifact(uswapwep);
 			if(weap && (weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART) && activeMentalEdge(GSTYLE_DEFENSE)){
-				base -= EDGE_KENSEI ? 3+max(uswapwep->spe/2,0) : u.usanity < 50 ? 0 : u.usanity < 75 ? max(uswapwep->spe/2,0) : u.usanity < 90 ? 1+max(uswapwep->spe/2,0) : 3+max(uswapwep->spe/2,0);
+				base -= EDGE_KENSEI ? 3+max(swapwep_spe/2,0) : u.usanity < 50 ? 0 : u.usanity < 75 ? max(swapwep_spe/2,0) : u.usanity < 90 ? 1+max(swapwep_spe/2,0) : 3+max(swapwep_spe/2,0);
 			}
 		}
 		if(artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_STEEL)
@@ -1269,18 +1275,19 @@ struct monst *mon;
 	//Weapon AC (primary only)
 	struct obj *monwep = MON_WEP(mon);
 	if(monwep){
+		int monwep_spe = (!monwep->suppressed && !Is_spire(&u.uz)) ? monwep->spe : 0;
 		if((is_rapier(monwep) && !arti_phasing(monwep)))
 			armac += mon_weapon_dam_bonus(mon->data, monwep, weapon_type(monwep));
 		if(monwep->oartifact == ART_TOBIUME)
-			armac += max(monwep->spe,0);
+			armac += max(monwep_spe,0);
 		if(monwep->otyp == NAGINATA && !which_armor(mon, W_ARMS)){
 			if(monwep->oartifact == ART_JINJA_NAGINATA)
-				armac += 2+monwep->spe;
+				armac += 2+monwep_spe;
 			else
-				armac += 1+(monwep->spe)/2;
+				armac += 1+(monwep_spe)/2;
 		}
 		if(monwep->otyp == SILVERKNIGHT_SPEAR && !which_armor(mon, W_ARMS)){
-			armac += 1+monwep->spe;
+			armac += 1+monwep_spe;
 			if(mon_knight(mon) || mon_dark_knight(mon)){
 				if(mon->m_lev >= 28)
 					armac += 8;
@@ -1415,16 +1422,18 @@ struct monst *mon;
 		if(uring_art(ART_LOMYA))
 			base += def_lomya();
 
+		int weapon_spe = (uwep && !uwep->suppressed && !Is_spire(&u.uz)) ? uwep->spe : 0;
+		int swapwep_spe = (uswapwep && !uswapwep->suppressed && !Is_spire(&u.uz)) ? uswapwep->spe : 0;
 		if(uwep){
 			const struct artifact *weap = get_artifact(uwep);
 			if(weap && (weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART) && activeMentalEdge(GSTYLE_DEFENSE)){
-				base += EDGE_KENSEI ? 3+max(uwep->spe/2,0) : u.usanity < 50 ? 0 : u.usanity < 75 ? max(uwep->spe/2,0) : u.usanity < 90 ? 1+max(uwep->spe/2,0) : 3+max(uwep->spe/2,0);
+				base += EDGE_KENSEI ? 3+max(weapon_spe/2,0) : u.usanity < 50 ? 0 : u.usanity < 75 ? max(weapon_spe/2,0) : u.usanity < 90 ? 1+max(weapon_spe/2,0) : 3+max(weapon_spe/2,0);
 			}
 		}
 		if(uswapwep){
 			const struct artifact *weap = get_artifact(uswapwep);
 			if(weap && (weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART) && activeMentalEdge(GSTYLE_DEFENSE)){
-				base += EDGE_KENSEI ? 3+max(uswapwep->spe/2,0) : u.usanity < 50 ? 0 : u.usanity < 75 ? max(uswapwep->spe/2,0) : u.usanity < 90 ? 1+max(uswapwep->spe/2,0) : 3+max(uswapwep->spe/2,0);
+				base += EDGE_KENSEI ? 3+max(swapwep_spe/2,0) : u.usanity < 50 ? 0 : u.usanity < 75 ? max(swapwep_spe/2,0) : u.usanity < 90 ? 1+max(swapwep_spe/2,0) : 3+max(swapwep_spe/2,0);
 			}
 		}
 	}
@@ -1665,12 +1674,13 @@ int depth;
 	}
 	/* Tensa Zangetsu adds to worn armor */
 	if(MON_WEP(mon)){
+		int monwep_spe = (!MON_WEP(mon)->suppressed && !Is_spire(&u.uz)) ? MON_WEP(mon)->spe : 0;
 		if (MON_WEP(mon)->oartifact == ART_TENSA_ZANGETSU) {
 			if (!which_armor(mon, W_ARMC) && (slot & CLOAK_DR)) {
-				arm_mdr += max(1 + (MON_WEP(mon)->spe + 1) / 2, 0);
+				arm_mdr += max(1 + (monwep_spe + 1) / 2, 0);
 			}
 			if (!which_armor(mon, W_ARM) && (slot & TORSO_DR)) {
-				arm_mdr += max(1 + (MON_WEP(mon)->spe + 1) / 2, 0);
+				arm_mdr += max(1 + (monwep_spe + 1) / 2, 0);
 			}
 		}
 		else if(MON_WEP(mon)->oartifact == ART_LASH_OF_THE_COLD_WASTE){

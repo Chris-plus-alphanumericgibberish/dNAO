@@ -2103,6 +2103,66 @@ choose_magic_special(struct monst *mtmp, unsigned int type, int i)
 			break;
 		}
 	break;
+	case PM_PIT_FIEND:
+		switch(rn2(9)){
+			case 0:
+				return choose_magic_spell(wzrd_spell_power, mtmp->m_id,!(mtmp->mpeaceful));
+			break;
+			case 1:
+			break;
+			case 2:
+				return RAISE_DEAD;
+			break;
+			case 3:
+				return DISPEL_MAGIC;
+			break;
+			case 4:
+				return PSI_BOLT;
+			break;
+			case 5:
+				return STUN_YOU;
+			break;
+			case 6:
+				return METEOR_SWARM;
+			break;
+			case 7:
+				return MON_FIRA;
+			break;
+			case 8:
+				return HASTE_SELF;
+			break;
+		}
+	break;
+	case PM_NESSIAN_PIT_FIEND:
+		switch(rn2(9)){
+			case 0:
+				return choose_magic_spell(wzrd_spell_power, mtmp->m_id,!(mtmp->mpeaceful));
+			break;
+			case 1:
+			break;
+			case 2:
+				return RAISE_DEAD;
+			break;
+			case 3:
+				return DISPEL_MAGIC;
+			break;
+			case 4:
+				return PSI_BOLT;
+			break;
+			case 5:
+				return PAIN_BOLT;
+			break;
+			case 6:
+				return METEOR_SWARM;
+			break;
+			case 7:
+				return MON_FIRAGA;
+			break;
+			case 8:
+				return HASTE_SELF;
+			break;
+		}
+	break;
 	case PM_ANCIENT_OF_THE_BURNING_WASTES:
 		switch(rn2(2)){
 			case 0:
@@ -2462,6 +2522,8 @@ const char * spellname[] =
 	//110
 	"SANDSTORM",
 	"MOON_BEAM",
+	"DISPEL_MAGIC",
+	"METEOR_SWARM",
 };
 
 /* Returns the word the monster uses when casting a psionic spell */
@@ -4374,6 +4436,46 @@ int tary;
 
 			/* player cold madness*/
 			if (youdef) roll_frigophobia();
+		}
+		return xdamagey(magr, mdef, attk, dmg);
+	case METEOR_SWARM:
+		if (!foundem) {
+			impossible("meteor swarm with no mdef?");
+			return MM_MISS;
+		}
+		else {
+			int pdmg = ((dmg + 1)/2);	/* physical */
+			int cdmg = ((dmg + 1)/2);	/* fire */
+			/* message */
+			if (youagr || youdef || canseemon(mdef)) {
+				pline("Burning rocks pummel %s from all sides!",
+					youdef ? "you" : mon_nam(mdef));
+			}
+			if(youdef){
+				IMPURITY_UP(u.uimp_disaster)
+			}
+
+			/* calculate physical damage */
+			pdmg = reduce_dmg(mdef,pdmg,TRUE,FALSE);
+			/* apply average DR */
+			pdmg -= max(0, (youdef ? u.udr : avg_mdr(mdef)));
+			if (pdmg < 1)
+				pdmg = 1;
+
+			/* calculate fire damage */
+			if (Fire_res(mdef)) {
+				shieldeff(x(mdef), y(mdef));
+				cdmg = 0;
+			}
+			else {
+				cdmg = reduce_dmg(mdef,cdmg,FALSE,TRUE);
+			}
+			if (!UseInvFire_res(mdef)) {
+				destroy_item(mdef, POTION_CLASS, AD_FIRE);
+			}
+
+			/* sum damage components to override dmg */
+			dmg = pdmg + cdmg;
 		}
 		return xdamagey(magr, mdef, attk, dmg);
 
@@ -7048,6 +7150,52 @@ int tary;
 			stop_occupation();
 		}
 		return MM_HIT;
+	case DISPEL_MAGIC:
+		if (!mdef) {
+			impossible("dispel magic with no target?");
+			return MM_MISS;
+		}
+		else {
+			struct obj *dm_candidates[12];
+			int dm_n = 0, dm_i;
+			struct obj *dm_chosen;
+
+#define DM_ADD(x) do { struct obj *_o = (x); if (_o && !_o->suppressed) dm_candidates[dm_n++] = _o; } while(0)
+			if (youdef) {
+				struct obj *uarmor[] = ARMOR_SLOTS;
+				for (dm_i = 0; dm_i < SIZE(uarmor); dm_i++) DM_ADD(uarmor[dm_i]);
+				DM_ADD(uwep);
+				DM_ADD(uswapwep);
+			} else {
+				struct obj *marmor[] = MON_ARMOR_SLOTS(mdef);
+				for (dm_i = 0; dm_i < SIZE(marmor); dm_i++) DM_ADD(marmor[dm_i]);
+				DM_ADD(MON_WEP(mdef));
+				DM_ADD(MON_SWEP(mdef));
+			}
+#undef DM_ADD
+
+			if (dm_n == 0) {
+				if (youdef)
+					Your("equipment shimmers briefly.");
+				else if (canseemon(mdef))
+					pline("%s equipment shimmers briefly.",
+						s_suffix(Monnam(mdef)));
+			} else {
+				dm_chosen = dm_candidates[rn2(dm_n)];
+				attach_unsuppress_timeout(dm_chosen, dmg ? dmg : 1);
+				if (youdef) {
+					pline("Your %s shimmers and its enchantment fades!",
+						xname(dm_chosen));
+					find_ac();
+					update_inventory();
+				} else if (canseemon(mdef)) {
+					pline("%s %s shimmers and its enchantment fades!",
+						s_suffix(Monnam(mdef)), xname(dm_chosen));
+				}
+				stop_occupation();
+			}
+		}
+		return MM_HIT;
 	case VULNERABILITY:
 		if (TRUE) {
 			struct monst *cmon;
@@ -7394,6 +7542,7 @@ int spellnum;
 	case BLOOD_RAIN:
 	case HAIL_FLURY:
 	case ICE_STORM:
+	case METEOR_SWARM:
 	case PYRO_STORM:
 	case SANDSTORM:
 	case GOD_RAY:
@@ -7530,6 +7679,7 @@ int spellnum;
 	case WEAKEN_STATS:
 	case DESTRY_WEPN:
 	case DESTRY_ARMR:
+	case DISPEL_MAGIC:
 	case VULNERABILITY:
 	case EVIL_EYE:
 	case CURSE_ITEMS:
@@ -7916,6 +8066,11 @@ int tary;
 	/* don't destroy armor if target has no armor */
 	if (!some_armor(mdef) && (
 		spellnum == DESTRY_ARMR
+		))
+		return TRUE;
+	/* don't dispel magic if target has nothing suppressible */
+	if (!has_suppressible_item(mdef) && (
+		spellnum == DISPEL_MAGIC
 		))
 		return TRUE;
 	/* make visible spell by spellcaster with see invisible. */

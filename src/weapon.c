@@ -197,10 +197,12 @@ struct monst *magr;
 		ptr = youracedata;
 	
 	if (Is_weapon || (otmp->otyp >= LUCKSTONE && otmp->otyp <= ROCK && otmp->ovar1_projectileSkill == -P_FIREARM)){
-		if(youagr && Race_if(PM_ORC) && otmp->where == OBJ_INVENT){
-			tmp += max((u.ulevel+2)/3, otmp->spe);
-		} else {
-			tmp += otmp->spe;
+		if (!Is_spire(&u.uz) && !otmp->suppressed) {
+			if(youagr && Race_if(PM_ORC) && otmp->where == OBJ_INVENT){
+				tmp += max((u.ulevel+2)/3, otmp->spe);
+			} else {
+				tmp += otmp->spe;
+			}
 		}
 	}
 
@@ -1707,7 +1709,7 @@ struct monst *magr;
 
 
 	/* enchantment damage */
-	if (!Is_spire(&u.uz) && ((otmp->oclass == WEAPON_CLASS) || is_weptool(otmp)
+	if (!Is_spire(&u.uz) && !otmp->suppressed && ((otmp->oclass == WEAPON_CLASS) || is_weptool(otmp)
 		|| (otmp->otyp >= LUCKSTONE && otmp->otyp <= ROCK && otmp->ovar1_projectileSkill == -P_FIREARM)
 		|| (is_shield(otmp) && magr == &youmonst && activeFightingForm(FFORM_SHIELD_BASH)))
 	){

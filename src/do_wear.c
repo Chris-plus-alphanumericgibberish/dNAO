@@ -2468,7 +2468,7 @@ struct obj * otmp;
 	if (otmp->otyp == find_gcirclet()) def /= 2;
 
 	// add enchantment
-	if (!Is_spire(&u.uz) && otmp->spe && (!is_belt(otmp) || otmp->otyp == KIDNEY_BELT))
+	if (!Is_spire(&u.uz) && !otmp->suppressed && otmp->spe && (!is_belt(otmp) || otmp->otyp == KIDNEY_BELT))
 	{
 		int spemult = 1; // out of 2
 		// shields get full enchantment to AC
@@ -2490,7 +2490,7 @@ struct obj * otmp;
 	}
 
 	// artifact bonus def
-	if(!Is_spire(&u.uz)) switch (otmp->oartifact)
+	if(!Is_spire(&u.uz) && !otmp->suppressed) switch (otmp->oartifact)
 	{
 	case ART_STEEL_SCALES_OF_KURTULMAK:
 		def += objects[otmp->otyp].a_ac;
@@ -2580,7 +2580,7 @@ arm_dr_bonus(struct obj * otmp, int slot)
 
 
 	// add enchantment
-	if (!Is_spire(&u.uz) && otmp->spe && (!is_belt(otmp) || otmp->otyp == KIDNEY_BELT))
+	if (!Is_spire(&u.uz) && !otmp->suppressed && otmp->spe && (!is_belt(otmp) || otmp->otyp == KIDNEY_BELT))
 	{
 		int spemult = 1; // out of 2
 		// shields get no enchantment to DR
@@ -2597,7 +2597,7 @@ arm_dr_bonus(struct obj * otmp, int slot)
 	}
 
 	// artifact bonus def
-	if(!Is_spire(&u.uz)) switch (otmp->oartifact)
+	if(!Is_spire(&u.uz) && !otmp->suppressed) switch (otmp->oartifact)
 	{
 	case ART_STEEL_SCALES_OF_KURTULMAK:
 		def += objects[otmp->otyp].a_dr;
@@ -2715,26 +2715,28 @@ base_uac()
 	if(!flat_foot && uring_art(ART_NENYA))
 		uac -= (ACURR(A_WIS)-11)/2;
 
+	int weapon_spe = (uwep && !uwep->suppressed && !Is_spire(&u.uz)) ? uwep->spe : 0;
+	int swapwep_spe = (uswapwep && !uswapwep->suppressed && !Is_spire(&u.uz)) ? uswapwep->spe : 0;
 
 	if(uwep && hand_protecting(uwep) && arti_phasing(uwep)){
 		if(!u.twoweap)
-			uac -= 2 + material_def_bonus(uwep, 2, TRUE) + (uwep->spe)/2 - min((int)greatest_erosion(uwep), 2);
+			uac -= 2 + material_def_bonus(uwep, 2, TRUE) + (weapon_spe)/2 - min((int)greatest_erosion(uwep), 2);
 		else if(uswapwep && hand_protecting(uswapwep) && arti_phasing(uswapwep))
-			uac -= (2 + material_def_bonus(uwep, 2, TRUE) + (uwep->spe)/2 - min((int)greatest_erosion(uwep), 2)
-					+ 2 + material_def_bonus(uswapwep, 2, TRUE) + (uswapwep->spe)/2 - min((int)greatest_erosion(uswapwep), 2)
+			uac -= (2 + material_def_bonus(uwep, 2, TRUE) + (weapon_spe)/2 - min((int)greatest_erosion(uwep), 2)
+					+ 2 + material_def_bonus(uswapwep, 2, TRUE) + (swapwep_spe)/2 - min((int)greatest_erosion(uswapwep), 2)
 					)/2;
 		else
-			uac -= (2 + material_def_bonus(uwep, 2, TRUE) + (uwep->spe)/2 - min((int)greatest_erosion(uwep), 2))/2;
+			uac -= (2 + material_def_bonus(uwep, 2, TRUE) + (weapon_spe)/2 - min((int)greatest_erosion(uwep), 2))/2;
 	}
 	else if(u.twoweap && uswapwep && hand_protecting(uswapwep) && arti_phasing(uswapwep))
-		uac -= (2 + material_def_bonus(uswapwep, 2, TRUE) + (uswapwep->spe)/2 - min((int)greatest_erosion(uswapwep), 2))/2;
+		uac -= (2 + material_def_bonus(uswapwep, 2, TRUE) + (swapwep_spe)/2 - min((int)greatest_erosion(uswapwep), 2))/2;
 
 	if(uwep){
-		if(uwep->oartifact == ART_LANCE_OF_LONGINUS) uac -= max((uwep->spe+1)/2,0);
+		if(uwep->oartifact == ART_LANCE_OF_LONGINUS) uac -= max((weapon_spe+1)/2,0);
 		else if(uwep->oartifact == ART_TENSA_ZANGETSU){
-			if(!flat_foot) uac -= max( (uwep->spe+1)/2,0);
-			if(!uarmc || !uarm) uac -= max( uwep->spe,0);
-			if(!uarmc && !uarm) uac -= max( (uwep->spe+1)/2,0);
+			if(!flat_foot) uac -= max( (weapon_spe+1)/2,0);
+			if(!uarmc || !uarm) uac -= max( weapon_spe,0);
+			if(!uarmc && !uarm) uac -= max( (weapon_spe+1)/2,0);
 		}
 		else if(uwep->oartifact == ART_LASH_OF_THE_COLD_WASTE){
 			if(Insight >= 20)
@@ -2848,7 +2850,7 @@ base_uac()
 		)
 	)
 		uac -= 8;
-	if(u.specialSealsActive&SEAL_UNKNOWN_GOD && uwep && uwep->oartifact == ART_PEN_OF_THE_VOID) uac -= 2*uwep->spe;
+	if(u.specialSealsActive&SEAL_UNKNOWN_GOD && uwep && uwep->oartifact == ART_PEN_OF_THE_VOID) uac -= 2*weapon_spe;
 	if(multi < 0 || mad_turn(MAD_SUICIDAL) || u.ustuck){
 		dexbonus = -5;
 	} else {
@@ -2924,7 +2926,9 @@ void
 find_ac()
 {
 	int uac;
-	
+	int weapon_spe = (uwep && !uwep->suppressed && !Is_spire(&u.uz)) ? uwep->spe : 0;
+	int swapwep_spe = (uswapwep && !uswapwep->suppressed && !Is_spire(&u.uz)) ? uswapwep->spe : 0;
+
 	uac = base_uac();
 	uac -= (u.uuur+1)/2;
 	if(u.urider && mon_knight_riding(u.urider)) uac -= def_mountedCombat();
@@ -2955,17 +2959,17 @@ find_ac()
 	
 	if(uwep && hand_protecting(uwep) && !arti_phasing(uwep)){
 		if(!u.twoweap)
-			uac -= 2 + material_def_bonus(uwep, 2, TRUE) + (uwep->spe)/2 - min((int)greatest_erosion(uwep), 2);
+			uac -= 2 + material_def_bonus(uwep, 2, TRUE) + (weapon_spe)/2 - min((int)greatest_erosion(uwep), 2);
 		else if(uswapwep && hand_protecting(uswapwep) && !arti_phasing(uswapwep))
-			uac -= (2 + material_def_bonus(uwep, 2, TRUE) + (uwep->spe)/2 - min((int)greatest_erosion(uwep), 2)
-					+ 2 + material_def_bonus(uswapwep, 2, TRUE) + (uswapwep->spe)/2 - min((int)greatest_erosion(uswapwep), 2)
+			uac -= (2 + material_def_bonus(uwep, 2, TRUE) + (weapon_spe)/2 - min((int)greatest_erosion(uwep), 2)
+					+ 2 + material_def_bonus(uswapwep, 2, TRUE) + (swapwep_spe)/2 - min((int)greatest_erosion(uswapwep), 2)
 					)/2;
 		else
-			uac -= (2 + material_def_bonus(uwep, 2, TRUE) + (uwep->spe)/2 - min((int)greatest_erosion(uwep), 2))/2;
-		uac -= 2 + material_def_bonus(uwep, 2, TRUE) + (uwep->spe)/2 - min((int)greatest_erosion(uwep), 2);
+			uac -= (2 + material_def_bonus(uwep, 2, TRUE) + (weapon_spe)/2 - min((int)greatest_erosion(uwep), 2))/2;
+		uac -= 2 + material_def_bonus(uwep, 2, TRUE) + (weapon_spe)/2 - min((int)greatest_erosion(uwep), 2);
 	}
 	else if(u.twoweap && uswapwep && hand_protecting(uswapwep) && !arti_phasing(uswapwep))
-		uac -= (2 + material_def_bonus(uswapwep, 2, TRUE) + (uswapwep->spe)/2 - min((int)greatest_erosion(uswapwep), 2))/2;
+		uac -= (2 + material_def_bonus(uswapwep, 2, TRUE) + (swapwep_spe)/2 - min((int)greatest_erosion(uswapwep), 2))/2;
 
 	if(uwep){
 		if((is_rapier(uwep) && !arti_phasing(uwep)))
@@ -2976,25 +2980,25 @@ find_ac()
 				)
 			,0);
 		if(uwep->oartifact == ART_TOBIUME)
-			uac -= max(uwep->spe,0);
+			uac -= max(weapon_spe,0);
 		if(uwep->otyp == NAGINATA && !uarms){
 			if(uwep->oartifact == ART_JINJA_NAGINATA)
-				uac -= 2+uwep->spe;
+				uac -= 2+weapon_spe;
 			else
-				uac -= 1+(uwep->spe)/2;
+				uac -= 1+(weapon_spe)/2;
 		}
 		if(uwep->otyp == SILVERKNIGHT_SPEAR && !uarms){
-			uac -= 1+uwep->spe+shield_skill(uwep);
+			uac -= 1+weapon_spe+shield_skill(uwep);
 		}
 		const struct artifact *weap = get_artifact(uwep);
 		if(weap && (weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART) && activeMentalEdge(GSTYLE_DEFENSE)){
-			uac -= EDGE_KENSEI ? 5+max(uwep->spe,0) : u.usanity < 50 ? 0 : u.usanity < 75 ? max(uwep->spe,0) : u.usanity < 90 ? 2+max(uwep->spe,0) : 5+max(uwep->spe,0);
+			uac -= EDGE_KENSEI ? 5+max(weapon_spe,0) : u.usanity < 50 ? 0 : u.usanity < 75 ? max(weapon_spe,0) : u.usanity < 90 ? 2+max(weapon_spe,0) : 5+max(weapon_spe,0);
 		}
 	}
 	if(uswapwep){
 		const struct artifact *weap = get_artifact(uswapwep);
 		if(weap && (weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART) && activeMentalEdge(GSTYLE_DEFENSE)){
-			uac -= EDGE_KENSEI ? 3+max(uswapwep->spe/2,0) : u.usanity < 50 ? 0 : u.usanity < 75 ? max(uswapwep->spe/2,0) : u.usanity < 90 ? 1+max(uswapwep->spe/2,0) : 3+max(uswapwep->spe/2,0);
+			uac -= EDGE_KENSEI ? 3+max(swapwep_spe/2,0) : u.usanity < 50 ? 0 : u.usanity < 75 ? max(swapwep_spe/2,0) : u.usanity < 90 ? 1+max(swapwep_spe/2,0) : 3+max(swapwep_spe/2,0);
 		}
 	}
 	if(Race_if(PM_HALF_DRAGON)){
@@ -3071,13 +3075,14 @@ int base_nat_udr()
 int base_udr()
 {
 	int udr = 0;
-	
+	int weapon_spe = (uwep && !uwep->suppressed && !Is_spire(&u.uz)) ? uwep->spe : 0;
+
 	if(uring_art(ART_SHARD_FROM_MORGOTH_S_CROWN)){
 		udr += 3;
 	}
 	
 	if(uwep){
-		if(uwep->oartifact == ART_LANCE_OF_LONGINUS) udr += max((uwep->spe)/2,0);
+		if(uwep->oartifact == ART_LANCE_OF_LONGINUS) udr += max((weapon_spe)/2,0);
 		else if(uwep->oartifact == ART_LASH_OF_THE_COLD_WASTE){
 			if(Insight >= 40)
 				udr += 5;
@@ -3209,18 +3214,19 @@ uchar aatyp;
 		}
 	}
 	/* Tensa Zangetsu adds to worn armor */
+	int weapon_spe = (uwep && !uwep->suppressed && !Is_spire(&u.uz)) ? uwep->spe : 0;
 	if(uwep){
 		if (uwep->oartifact == ART_TENSA_ZANGETSU) {
 			if (!uarmc && (slot & CLOAK_DR)) {
-				arm_udr += max(1 + (uwep->spe + 1) / 2, 0);
+				arm_udr += max(1 + (weapon_spe + 1) / 2, 0);
 			}
 			if (!uarm && (slot & TORSO_DR)) {
-				arm_udr += max(1 + (uwep->spe + 1) / 2, 0);
+				arm_udr += max(1 + (weapon_spe + 1) / 2, 0);
 			}
 		}
 		if(hand_protecting(uwep) && slot&ARM_DR){
 			if(!u.twoweap || (uswapwep && hand_protecting(uswapwep)))
-				arm_udr += 4 + material_def_bonus(uwep, 4, FALSE) + (uwep->spe + 1) / 2 - min((int)greatest_erosion(uwep), 4);
+				arm_udr += 4 + material_def_bonus(uwep, 4, FALSE) + (weapon_spe + 1) / 2 - min((int)greatest_erosion(uwep), 4);
 		}
 	}
 	if (active_glyph(BEASTS_EMBRACE) && u.uencouraged > 0 && arm_udr > 0){
@@ -3530,6 +3536,28 @@ struct monst *victim;
 	otmp = (victim == &youmonst) ? uarms : which_armor(victim, W_ARMS);
 	if(otmp && (!otmph || !rn2(4))) otmph = otmp;
 	return(otmph);
+}
+
+/* TRUE if mon has at least one worn/wielded item that is not already suppressed */
+boolean
+has_suppressible_item(mon)
+struct monst *mon;
+{
+	int i;
+	if (mon == &youmonst) {
+		struct obj *uarmor[] = ARMOR_SLOTS;
+		for (i = 0; i < SIZE(uarmor); i++)
+			if (uarmor[i] && !uarmor[i]->suppressed) return TRUE;
+		if (uwep && !uwep->suppressed) return TRUE;
+		if (uswapwep && !uswapwep->suppressed) return TRUE;
+	} else {
+		struct obj *marmor[] = MON_ARMOR_SLOTS(mon);
+		for (i = 0; i < SIZE(marmor); i++)
+			if (marmor[i] && !marmor[i]->suppressed) return TRUE;
+		if (MON_WEP(mon) && !MON_WEP(mon)->suppressed) return TRUE;
+		if (MON_SWEP(mon) && !MON_SWEP(mon)->suppressed) return TRUE;
+	}
+	return FALSE;
 }
 
 /* erode some arbitrary armor worn by the victim */

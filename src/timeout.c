@@ -2920,6 +2920,37 @@ long timeout;
 
 
 void
+unsuppress_object(arg, timeout)
+genericptr_t arg;
+long timeout;
+{
+	struct obj *obj = (struct obj *) arg;
+	if (obj->owornmask & (W_WEP)) {
+		start_timer(1, TIMER_OBJECT,
+					UNSUPPRESS_OBJECT, (genericptr_t)obj);
+	} else if ((obj->owornmask & (W_SWAPWEP)) && (obj->where == OBJ_MINVENT || u.twoweap)) {
+		start_timer(1, TIMER_OBJECT,
+					UNSUPPRESS_OBJECT, (genericptr_t)obj);
+	} else {
+		obj->suppressed = 0;
+		find_ac();
+		if (obj->where == OBJ_INVENT)
+			update_inventory();
+	}
+}
+
+void
+attach_unsuppress_timeout(obj, duration)
+struct obj *obj;
+long duration;
+{
+	if (obj->timed)
+		(void) stop_timer(UNSUPPRESS_OBJECT, obj->timed);
+	obj->suppressed = 1;
+	start_timer(duration, TIMER_OBJECT, UNSUPPRESS_OBJECT, (genericptr_t)obj);
+}
+
+void
 revert_mercurial(arg, timeout)
 genericptr_t arg;
 long timeout;
@@ -3142,6 +3173,7 @@ static const ttable timeout_funcs[NUM_TIME_FUNCS] = {
 	TTAB(gray_moldy_corpse,(timeout_proc)0,"gray_moldy_corpse"),
 	TTAB(slow_wheel,		(timeout_proc)0,	"slow_wheel"),
 	TTAB(cloud_drift,		(timeout_proc)0,	"cloud_drift"),
+	TTAB(unsuppress_object,	(timeout_proc)0,	"unsuppress_object"),
 };
 #undef TTAB
 
