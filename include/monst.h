@@ -219,6 +219,7 @@ struct monst {
 	Bitfield(mmired,1); /* monster was created in the mire */ /*151*/
 	Bitfield(mnopickup,1); /* pet will leave items on the ground */ /*152*/
 	Bitfield(mcombat,1); /* pet is currently engaged in combat */ /*153*/
+	Bitfield(mgroup_summoned,1); /* monster has used its group summon ability */ /*154*/
 
 	unsigned long long int 	seenmadnesses;	/* monster has seen these madnesses */
 	
@@ -302,7 +303,9 @@ struct monst {
 #define	MOON_FACTION		FACTION_PADDING+14	/* Undead Hunter lycanthrope faction */
 #define	ROT_FACTION			FACTION_PADDING+15	/* Rot monster faction */
 #define	NUNCIO_FACTION		FACTION_PADDING+16	/* Nuncio from the far reaches */
-
+#define	HELL_FACTION		FACTION_PADDING+17	/* Hell faction */
+#define	ABYSS_FACTION		FACTION_PADDING+18	/* Generic Abyss faction */
+	
 /* template applied to monster to create a new-ish monster */
 	int mtemplate;
 #define	ZOMBIFIED		1	/* zombies */
@@ -402,6 +405,7 @@ struct monst {
 #define	mvar1_tettigon_uncancel	mvar1
 #define	mvar1_afreet_lastsaw	mvar1
 #define mvar1_halo_sec_element	mvar1
+#define	mvar1_summon_ID			mvar1
 	long mvar2;
 #define	mvar_dracaePregTimer	mvar2
 #define	mvar_spList_2	mvar2

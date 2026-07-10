@@ -1301,7 +1301,7 @@ boolean called;
 		if(has_template(mtmp, SPARK_SKELETON)){
 			Strcat(buf, "reanimated ");
 		}
-		else
+		else if(mtmp->mtyp != PM_SUMMONING_VORTEX)
 			Strcat(buf, "summoned ");
 	}
 	if (do_invis)

@@ -14652,6 +14652,10 @@ struct monst * mon;
 		out_faction = SEROPAENES_FACTION;
 	else if(rot_monster(mon) && check_rot(ROT_KIN))
 		out_faction = ROT_FACTION;
+	else if(is_law_demon(mon->data))
+		out_faction = HELL_FACTION;
+	else if(is_cha_demon(mon->data))
+		out_faction = ABYSS_FACTION;
 	else if(In_quest(&u.uz) && Role_if(PM_UNDEAD_HUNTER)){
 		if(!peaceful)
 			out_faction = MOON_FACTION;

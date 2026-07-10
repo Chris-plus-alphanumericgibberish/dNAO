@@ -2784,6 +2784,7 @@ genericptr_t arg;
 long timeout;
 {
 	struct monst * mon = (struct monst *)arg;
+	struct monst *summoner = (struct monst *)0;
 	if (DEADMONSTER(mon)) {
 		/* already dead, necessary cleanup will be done by cleanup_msummon() */
 		return;
@@ -2793,6 +2794,7 @@ long timeout;
 		return;
 	}
 	if (get_mx(mon, MX_ESUM) && mon->mextra_p->esum_p->summoner) {
+		summoner = mon->mextra_p->esum_p->summoner;
 		mon->mextra_p->esum_p->summoner->summonpwr -= mon->mextra_p->esum_p->summonstr;
 		mon->mextra_p->esum_p->summoner = (struct monst *)0;
 		mon->mextra_p->esum_p->sm_id = 0;
@@ -2817,6 +2819,9 @@ long timeout;
 			pline("%s vanishes.", Monnam(mon));
 		}
 		monvanished(mon);
+		/* vortex has vacated its square; spawn the pre-selected monster type */
+		if (mon->mtyp == PM_SUMMONING_VORTEX && mon->mvar1_summon_ID != NON_PM)
+			(void) msummon_place((int)mon->mvar1_summon_ID, mon->mx, mon->my, summoner);
 	}
 }
 

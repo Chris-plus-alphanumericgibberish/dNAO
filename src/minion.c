@@ -8,112 +8,184 @@
 
 extern const int monstr[];
 
-/* mon summons a monster 
- * 
+/* Select which of godnum's minions to summon based on current level difficulty.
+ * Returns a PM index, or NON_PM if no suitable minion exists. */
+static int
+select_god_minion(int godnum)
+{
+	const int *minions = god_minions(godnum);
+	int mtyp = NON_PM, mlev, num = 0, first, last;
+
+	mlev = level_difficulty();
+
+	for (first = 0; minions[first] != NON_PM; first++)
+		if (!(mvitals[minions[first]].mvflags & G_GONE && !In_quest(&u.uz)) && monstr[minions[first]] > mlev/2) break;
+
+	mlev = (mlev + u.ulevel) / 2;
+	if (minions[first] == NON_PM) { /* all minions too weak, or no minions */
+		if (first == 0) return NON_PM;
+		else mtyp = minions[first-1];
+	} else {
+		for (last = first; minions[last] != NON_PM; last++)
+			if (!(mvitals[minions[last]].mvflags & G_GONE && !In_quest(&u.uz))) {
+				if (monstr[minions[last]] > mlev+5) break;
+				num += min(1, mons[minions[last]].geno & G_FREQ);
+			}
+
+		if (!num) { /* all minions too strong, or gap between weak and strong */
+			if (first == 0) return NON_PM;
+			else mtyp = minions[first-1];
+		} else {
+/*			Assumption: minions are presented in ascending order of strength. */
+			for (num = rnd(num); num > 0; first++)
+				if (!(mvitals[minions[first]].mvflags & G_GONE && !In_quest(&u.uz))) {
+					/* skew towards lower value monsters at lower exp. levels */
+					num -= min(1, mons[minions[first]].geno & G_FREQ);
+					if (num && adj_lev(&mons[minions[first]]) > (u.ulevel*2)) {
+						/* but not when multiple monsters are same level */
+						if (mons[first].mlevel != mons[first+1].mlevel)
+							num--;
+					}
+				}
+			first--; /* correct an off-by-one error */
+			mtyp = minions[first];
+		}
+	}
+	return mtyp;
+}
+
+/* Resolve the effective alignment and god number for a summoner. ptr must be non-NULL. */
+static void
+msummon_resolve(struct monst *mon, struct permonst *ptr, aligntyp *atyp_out, int *gnum_out)
+{
+	aligntyp atyp = (ptr->maligntyp == A_NONE) ? A_NONE : sgn(ptr->maligntyp);
+	int gnum = (ptr->maligntyp == A_NONE) ? GOD_MOLOCH : align_to_god(sgn(ptr->maligntyp));
+
+	if (gnum == GOD_THE_COLLEGE)
+		gnum = GOD_PTAH;
+	else if (gnum == GOD_THE_CHOIR)
+		gnum = GOD_THOTH;
+	else if (gnum == GOD_DEFILEMENT)
+		gnum = GOD_ANHUR;
+
+	if (mon) {
+		if (get_mx(mon, MX_EPRI)) {
+			atyp = EPRI(mon)->shralign;
+			gnum = EPRI(mon)->godnum;
+		} else if (get_mx(mon, MX_EMIN)) {
+			atyp = EMIN(mon)->min_align;
+			gnum = EMIN(mon)->godnum;
+		}
+	}
+	*atyp_out = atyp;
+	*gnum_out = gnum;
+}
+
+/*
+ * Determine what mon would summon without creating anything.
+ * Returns FALSE if nothing would be summoned.
+ * On TRUE: *dtype_out is a valid PM index, *cnt_out >= 1.
+ */
+boolean
+msummon_select(struct monst *mon, struct permonst *ptr, int *dtype_out, int *cnt_out)
+{
+	int dtype = NON_PM, cnt = 0;
+	aligntyp atyp;
+	int gnum;
+
+	if (mon && !ptr)
+		ptr = mon->data;
+	else if (!ptr)
+		ptr = &mons[PM_WIZARD_OF_YENDOR];
+
+	msummon_resolve(mon, ptr, &atyp, &gnum);
+
+	if (ptr->mtyp == PM_SHAKTARI) {
+		dtype = PM_MARILITH;
+		cnt = d(1,6);
+	} else if (ptr->mtyp == PM_BAALPHEGOR && rn2(4)) {
+		dtype = rn2(4) ? PM_METAMORPHOSED_NUPPERIBO : PM_ANCIENT_NUPPERIBO;
+		cnt = d(4,4);
+	} else if (is_ancient(ptr) && ptr->mtyp != PM_BAALPHEGOR) {
+		dtype = rn2(4) ? PM_METAMORPHOSED_NUPPERIBO : PM_ANCIENT_NUPPERIBO;
+		cnt = d(1,4);
+	} else if (is_dprince(ptr) || (ptr->mtyp == PM_WIZARD_OF_YENDOR)) {
+		dtype = (!rn2(20)) ? dprince(ptr, atyp) :
+				(!rn2(4)) ? dlord(ptr, atyp) : ndemon(atyp);
+		cnt = (!rn2(4) && is_normal_demon(&mons[dtype])) ? 2 : 1;
+	} else if (is_dlord(ptr)) {
+		dtype = (!rn2(50)) ? dprince(ptr, atyp) :
+				(!rn2(20)) ? dlord(ptr, atyp) : ndemon(atyp);
+		cnt = (!rn2(4) && is_normal_demon(&mons[dtype])) ? 2 : 1;
+	} else if (is_normal_demon(ptr)) {
+		dtype = (!rn2(20) && Inhell) ? dlord(ptr, atyp) :
+				((mons[monsndx(ptr)].geno & G_UNIQ) || !rn2(6)) ? ndemon(atyp) : monsndx(ptr);
+		cnt = 1;
+	} else if (!mon) {
+		/* if no mon, skip all these special cases which might query mon */;
+	} else if (is_lminion(mon)) {
+		if (is_keter(mon->data)) {
+			if (mon->mtyp == PM_MALKUTH_SEPHIRAH && rn2(8)) return FALSE;
+			dtype = PM_MALKUTH_SEPHIRAH;
+			cnt = (!rn2(4) && !is_lord(&mons[dtype])) ? 2 : 1;
+		} else if (In_endgame(&u.uz)) {
+			dtype = (is_lord(ptr) && !rn2(20)) ? llord() :
+				(is_lord(ptr) || (mons[monsndx(ptr)].geno & G_UNIQ) || !rn2(6)) ? lminion() : monsndx(ptr);
+			cnt = (!rn2(4) && !is_lord(&mons[dtype])) ? 2 : 1;
+		}
+	} else if (is_nminion(mon) && In_endgame(&u.uz)) {
+		dtype = (is_lord(ptr) && !rn2(20)) ? nlord() :
+			(is_lord(ptr) || (mons[monsndx(ptr)].geno & G_UNIQ) || !rn2(6)) ? nminion() : monsndx(ptr);
+		cnt = (!rn2(4) && !is_lord(&mons[dtype])) ? 2 : 1;
+	} else if (is_cminion(mon) && In_endgame(&u.uz)) {
+		dtype = (is_lord(ptr) && !rn2(20)) ? clord() : cminion();
+		cnt = (!rn2(4) && !is_lord(&mons[dtype])) ? 2 : 1;
+	} else if (ptr->mtyp == PM_ANGEL) {
+		if (rn2(6)) {
+			dtype = select_god_minion(gnum);
+			if (dtype == NON_PM) return FALSE;
+			cnt = 1;
+		} else {
+			dtype = PM_ANGEL;
+			cnt = (!rn2(4) && !is_lord(&mons[dtype])) ? 2 : 1;
+		}
+	}
+
+	if (dtype == NON_PM) return FALSE;
+	*dtype_out = dtype;
+	*cnt_out = cnt;
+	return TRUE;
+}
+
+/* mon summons a monster
+ *
  * if mon is null, treat as if as being summoned by a far-off Wizard of Yendor
  * Monster hell-p function
  */
 void
-msummon(mon, ptr)
-struct monst *mon;		/* mon to attribute summons to */
-struct permonst * ptr;	/* summon as though you were <X> */
+msummon(struct monst *mon, struct permonst *ptr)
 {
-	register int dtype = NON_PM, cnt = 0;
+	int dtype, cnt;
 	aligntyp atyp;
 	int gnum;
 	struct monst *mtmp;
 
 	/* Wielded Demonbane prevents demons from gating in others. From Sporkhack*/
 	if (uwep && uwep->oartifact && arti_worn_prop(uwep, ARTP_NOCALL) && mon && is_demon(mon->data)) {
-		pline("%s looks puzzled for a moment.",Monnam(mon));
+		pline("%s looks puzzled for a moment.", Monnam(mon));
 		return;
 	}
 	if (DimensionalLock)
 		return;
 
-	if (mon && !ptr) {
+	if (mon && !ptr)
 		ptr = mon->data;
-	    atyp = (ptr->maligntyp==A_NONE) ? A_NONE : sgn(ptr->maligntyp);
-		gnum = (ptr->maligntyp==A_NONE) ? GOD_MOLOCH : align_to_god(sgn(ptr->maligntyp));
-		if(gnum == GOD_THE_COLLEGE)
-			gnum = GOD_PTAH;
-		else if(gnum == GOD_THE_CHOIR)
-			gnum = GOD_THOTH;
-		else if(gnum == GOD_DEFILEMENT)
-			gnum = GOD_ANHUR;
+	else if (!ptr)
+		ptr = &mons[PM_WIZARD_OF_YENDOR];
 
-	    if (get_mx(mon, MX_EPRI)) {
-			atyp = EPRI(mon)->shralign;
-			gnum = EPRI(mon)->godnum;
-		}
-		else if (get_mx(mon, MX_EMIN)) {
-			atyp = EMIN(mon)->min_align;
-			gnum = EMIN(mon)->godnum;
-		}
-	} else {
-	    if (!ptr) ptr = &mons[PM_WIZARD_OF_YENDOR];
-	    atyp = (ptr->maligntyp==A_NONE) ? A_NONE : sgn(ptr->maligntyp);
-		gnum = (ptr->maligntyp==A_NONE) ? GOD_MOLOCH : align_to_god(sgn(ptr->maligntyp));
+	msummon_resolve(mon, ptr, &atyp, &gnum);
 
-		if(gnum == GOD_THE_COLLEGE)
-			gnum = GOD_PTAH;
-		else if(gnum == GOD_THE_CHOIR)
-			gnum = GOD_THOTH;
-		else if(gnum == GOD_DEFILEMENT)
-			gnum = GOD_ANHUR;
-	}
-
-	if (!mon) {
-		/* if no mon, skip all these special cases which might query mon */;
-	} else if(ptr->mtyp == PM_SHAKTARI) {
-	    dtype = PM_MARILITH;
-		cnt = d(1,6);
-	} else if(ptr->mtyp == PM_BAALPHEGOR && rn2(4)) {
-	    dtype = rn2(4) ? PM_METAMORPHOSED_NUPPERIBO : PM_ANCIENT_NUPPERIBO;
-		cnt = d(4,4);
-	} else if(is_ancient(ptr) && ptr->mtyp != PM_BAALPHEGOR) {
-	    dtype = rn2(4) ? PM_METAMORPHOSED_NUPPERIBO : PM_ANCIENT_NUPPERIBO;
-		cnt = d(1,4);
-	} else if (is_dprince(ptr) || (ptr->mtyp == PM_WIZARD_OF_YENDOR)) {
-	    dtype = (!rn2(20)) ? dprince(ptr, atyp) :
-				 (!rn2(4)) ? dlord(ptr, atyp) : ndemon(atyp);
-	    cnt = (!rn2(4) && is_normal_demon(&mons[dtype])) ? 2 : 1;
-	} else if (is_dlord(ptr)) {
-	    dtype = (!rn2(50)) ? dprince(ptr, atyp) :
-				 (!rn2(20)) ? dlord(ptr, atyp) : ndemon(atyp);
-	    cnt = (!rn2(4) && is_normal_demon(&mons[dtype])) ? 2 : 1;
-	} else if (is_normal_demon(ptr)) {
-	    dtype = (!rn2(20) && Inhell) ? dlord(ptr, atyp) :
-				 ((mons[monsndx(ptr)].geno & G_UNIQ) || !rn2(6)) ? ndemon(atyp) : monsndx(ptr);
-	    cnt = 1;
-	} else if (is_lminion(mon)) {
-		if(is_keter(mon->data)){
-			if(mon->mtyp == PM_MALKUTH_SEPHIRAH && rn2(8)) return;
-			dtype = PM_MALKUTH_SEPHIRAH;
-			cnt = (!rn2(4) && !is_lord(&mons[dtype])) ? 2 : 1;
-		} else if(In_endgame(&u.uz)){
-			dtype = (is_lord(ptr) && !rn2(20)) ? llord() :
-				 (is_lord(ptr) || (mons[monsndx(ptr)].geno & G_UNIQ) || !rn2(6)) ? lminion() : monsndx(ptr);
-			cnt = (!rn2(4) && !is_lord(&mons[dtype])) ? 2 : 1;
-		}
-	} else if (is_nminion(mon) && In_endgame(&u.uz)) {
-	    dtype = (is_lord(ptr) && !rn2(20)) ? nlord() :
-		     (is_lord(ptr) || (mons[monsndx(ptr)].geno & G_UNIQ) || !rn2(6)) ? nminion() : monsndx(ptr);
-	    cnt = (!rn2(4) && !is_lord(&mons[dtype])) ? 2 : 1;
-	} else if (is_cminion(mon) && In_endgame(&u.uz)) {
-	    dtype = (is_lord(ptr) && !rn2(20)) ? clord() : cminion();
-	    cnt = (!rn2(4) && !is_lord(&mons[dtype])) ? 2 : 1;
-	} else if (ptr->mtyp == PM_ANGEL) {
-	    if (rn2(6)) {
-			(void) summon_god_minion(gnum, FALSE);
-			return;
-	    } else {
-			dtype = PM_ANGEL;
-	    }
-	    cnt = (!rn2(4) && !is_lord(&mons[dtype])) ? 2 : 1;
-	}
-
-	if (dtype == NON_PM) return;
+	if (!msummon_select(mon, ptr, &dtype, &cnt)) return;
 
 	/* sanity checks */
 	if (cnt > 1 && (mons[dtype].geno & G_UNIQ)) cnt = 1;
@@ -122,23 +194,23 @@ struct permonst * ptr;	/* summon as though you were <X> */
 	 * could get this far with an extinct dtype), try another.
 	 */
 	if (mvitals[dtype].mvflags & G_GONE) {
-	    dtype = ndemon(atyp);
-	    if (dtype == NON_PM) return;
+		dtype = ndemon(atyp);
+		if (dtype == NON_PM) return;
 	}
-	
+
 	while (cnt > 0) {
 		int mmflags = ((mons[dtype].geno & G_UNIQ) ? NO_MM_FLAGS : MM_ESUM|MM_NOCOUNTBIRTH);
 		mtmp = makemon(&mons[dtype], u.ux, u.uy, mmflags);
-	    if (mtmp) {
-			if (mmflags&MM_ESUM)
+		if (mtmp) {
+			if (mmflags & MM_ESUM)
 				mark_mon_as_summoned(mtmp, mon, ESUMMON_PERMANENT, 0);
-			
+
 			if (dtype == PM_ANGEL) {
 				/* alignment should match the summoner */
 				add_mx(mtmp, MX_EMIN);
 				EMIN(mtmp)->min_align = atyp;
 				EMIN(mtmp)->godnum = gnum;
-				if(mon && mon->isminion) mtmp->isminion = TRUE;
+				if (mon && mon->isminion) mtmp->isminion = TRUE;
 				mtmp->mpeaceful = mon && mon->mpeaceful;
 			}
 
@@ -158,123 +230,608 @@ struct permonst * ptr;	/* summon as though you were <X> */
 				set_template(mtmp, get_template(mon));
 			}
 			/* as are factions */
-			if (mon && mon->mfaction){
+			if (mon && mon->mfaction) {
 				set_faction(mtmp, mon->mfaction);
 			}
-			if(!is_lord(mtmp->data) && !is_prince(mtmp->data)){
+			if (!is_lord(mtmp->data) && !is_prince(mtmp->data)) {
 				mtmp->mpeaceful = mon && mon->mpeaceful;
 				set_malign(mtmp);
 			}
-	    }
-	    cnt--;
+		}
+		cnt--;
+	}
+}
+
+/* Create one standard (non-summon-tracked) monster of dtype at (x, y),
+ * propagating faction from summoner if non-NULL.
+ * If summoner is itself a summoned monster, the new monster is registered
+ * as a summon of summoner's summoner so the grandparent-kill-dismisses chain
+ * remains intact.
+ * Returns the new monster, or NULL if extinct or placement fails. */
+struct monst *
+msummon_place(int dtype, int x, int y, struct monst *summoner)
+{
+	struct monst *spawned;
+	struct monst *grandparent = (struct monst *)0;
+
+	if (mvitals[dtype].mvflags & G_GONE)
+		return (struct monst *)0;
+
+	if (summoner && get_mx(summoner, MX_ESUM) && !(mons[dtype].geno & G_UNIQ))
+		grandparent = summoner->mextra_p->esum_p->summoner;
+
+	spawned = makemon(&mons[dtype], x, y, grandparent ? MM_ESUM : NO_MM_FLAGS);
+	if (spawned) {
+		if (summoner && summoner->mfaction)
+			set_faction(spawned, summoner->mfaction);
+		spawned->mgroup_summoned = TRUE;
+		if (grandparent)
+			mark_mon_as_summoned(spawned, grandparent, ESUMMON_PERMANENT, 0);
+	}
+	return spawned;
+}
+
+/* Given a summoner mon, select what it would summon and create one standard
+ * (non-summon-tracked) monster of that type at (x, y).
+ * Returns the new monster, or NULL on any failure including mon == NULL. */
+struct monst *
+msummon_create_at(struct monst *mon, int x, int y)
+{
+	int dtype, cnt;
+
+	if (!mon) return (struct monst *)0;
+
+	if (!msummon_select(mon, (struct permonst *)0, &dtype, &cnt))
+		return (struct monst *)0;
+
+	return msummon_place(dtype, x, y, mon);
+}
+
+/* Create a summoning vortex at (x,y) that will spawn dtype when it desummons. */
+struct monst *
+msummon_vortex(int dtype, int x, int y, struct monst *summoner)
+{
+	struct monst *vortex = makemon(&mons[PM_SUMMONING_VORTEX], x, y,
+	                               MM_ESUM|MM_ADJACENTOK);
+	if (vortex) {
+		vortex->mvar1_summon_ID = dtype;
+		mark_mon_as_summoned(vortex, summoner,
+		                     (mons[dtype].geno & G_UNIQ) ? 10 : 2, 0);
+		if (summoner && summoner->mfaction)
+			vortex->mfaction = summoner->mfaction;
+	}
+	return vortex;
+}
+
+static void
+scatter_coord(int cx, int cy, int scatter, int *ox, int *oy)
+{
+	int x = cx - scatter + rn2(2*scatter + 1);
+	int y = cy - scatter + rn2(2*scatter + 1);
+	if (!isok(x, y)) { x = cx; y = cy; }
+	*ox = x;
+	*oy = y;
+}
+
+static void
+count_vortex(struct monst *v, int *seen, int *sensed)
+{
+	if (!v) return;
+	if (canseemon(v)) (*seen)++;
+	else if (sensemon(v)) (*sensed)++;
+}
+
+void
+mcall_group(struct monst *mon, int x, int y, int scatter)
+{
+	int least_demons[] = {PM_MANES, PM_QUASIT};
+	int lesser_demons[] = {PM_SUCCUBUS, PM_INCUBUS};
+	int greater_demons[] = {PM_VROCK, PM_HEZROU, PM_NALFESHNEE};
+	int true_demons[] = {PM_MARILITH, PM_ALKILITH, PM_BALROG};
+	int least_devils[] = {PM_LEMURE, PM_IMP};
+	int lesser_devils[] = {PM_HORNED_DEVIL, PM_ERINYS, PM_BARBED_DEVIL};
+	int greater_devils[] = {PM_BONE_DEVIL, PM_ICE_DEVIL, PM_PIT_FIEND};
+	int seen_cnt = 0, sensed_cnt = 0;
+	mon->mgroup_summoned = TRUE;
+	if(uwep && uwep->oartifact && arti_worn_prop(uwep, ARTP_NOCALL) && is_demon(mon->data))
+		return;
+	switch(mon->mtyp){
+		//Nuncio
+		//case PM_AFREET: None
+		// case PM_CHAIN_DEVIL:
+		// break;
+		// case PM_INTERLOCUTOR_DEVIL:
+		// break;
+		// case PM_DAUGHTER_OF_BEDLAM:
+		// break;
+		// case PM_WALKING_DELIRIUM:
+		// break;
+		//Demons
+		case PM_SUCCUBUS:
+		case PM_INCUBUS:
+			if(Inhell && rn2(10) < 4){
+				struct monst *balrog = makemon(&mons[PM_BALROG], mon->mx, mon->my,
+				                             MM_ESUM|MM_ADJACENTOK);
+				if (balrog)
+					mark_mon_as_summoned(balrog, mon, ESUMMON_PERMANENT, 0);
+			}
+		break;
+		case PM_VROCK:
+			if(Inhell && rn2(10) < 5){
+				int i;
+				if(rn2(3)) {
+					for(i = rnd(6); i > 0; i--) {
+						int vx, vy;
+						scatter_coord(x, y, scatter, &vx, &vy);
+						count_vortex(msummon_vortex(PM_VROCK, vx, vy, mon), &seen_cnt, &sensed_cnt);
+					}
+				}
+				else {
+					for(i = d(2,10); i > 0; i--) {
+						int vx, vy;
+						scatter_coord(x, y, scatter, &vx, &vy);
+						count_vortex(msummon_vortex(PM_MANES, vx, vy, mon), &seen_cnt, &sensed_cnt);
+					}
+				}
+			}
+		break;
+		case PM_HEZROU:
+			if(Inhell && rn2(2)){
+				if(!rn2(3)) {
+					int dtype = ROLL_FROM(least_demons);
+					for(int i = d(4,10); i > 0; i--) {
+						int vx, vy;
+						scatter_coord(x, y, scatter, &vx, &vy);
+						count_vortex(msummon_vortex(dtype, vx, vy, mon), &seen_cnt, &sensed_cnt);
+					}
+				}
+				else if(rn2(2)) {
+					int dtype = ROLL_FROM(lesser_demons);
+					for(int i = rnd(10); i > 0; i--) {
+						int vx, vy;
+						scatter_coord(x, y, scatter, &vx, &vy);
+						count_vortex(msummon_vortex(dtype, vx, vy, mon), &seen_cnt, &sensed_cnt);
+					}
+				}
+				else {
+					int dtype = ROLL_FROM(greater_demons);
+					for(int i = rnd(4); i > 0; i--) {
+						int vx, vy;
+						scatter_coord(x, y, scatter, &vx, &vy);
+						count_vortex(msummon_vortex(dtype, vx, vy, mon), &seen_cnt, &sensed_cnt);
+					}
+				}
+			}
+		break;
+		case PM_LILITU:
+		break;
+		case PM_NALFESHNEE:
+			if(Inhell){
+				int j;
+				for(j = 0; j < 2; j++) {
+					if(rn2(2)) {
+						if(rn2(2)) {
+							for(int i = rnd(6); i > 0; i--) {
+								int vx, vy;
+								scatter_coord(x, y, scatter, &vx, &vy);
+								count_vortex(msummon_vortex(PM_VROCK, vx, vy, mon), &seen_cnt, &sensed_cnt);
+							}
+						}
+						else {
+							int vx, vy;
+							scatter_coord(x, y, scatter, &vx, &vy);
+							count_vortex(msummon_vortex(PM_HEZROU, vx, vy, mon), &seen_cnt, &sensed_cnt);
+						}
+					}
+				}
+			}
+		break;
+		case PM_OSSIFRUGE:
+			if(Inhell && rn2(10) < 5){
+				int i;
+				if(rn2(3)) {
+					for(i = rnd(6); i > 0; i--) {
+						int vx, vy;
+						scatter_coord(x, y, scatter, &vx, &vy);
+						count_vortex(msummon_vortex(PM_OSSIFRUGE, vx, vy, mon), &seen_cnt, &sensed_cnt);
+					}
+				}
+				else {
+					for(i = d(3,6); i > 0; i--) {
+						int vx, vy;
+						scatter_coord(x, y, scatter, &vx, &vy);
+						count_vortex(msummon_vortex(PM_VROCK, vx, vy, mon), &seen_cnt, &sensed_cnt);
+					}
+				}
+			}
+		break;
+		case PM_INVIDIAK:
+		break;
+		case PM_MARILITH:
+			//Note: 35% chance to reset once per 10 (global) turns
+			if(Inhell){
+				if(!rn2(4)) {
+					int dtype = ROLL_FROM(least_demons);
+					for(int i = d(2,10); i > 0; i--) {
+						int vx, vy;
+						scatter_coord(x, y, scatter, &vx, &vy);
+						count_vortex(msummon_vortex(dtype, vx, vy, mon), &seen_cnt, &sensed_cnt);
+					}
+				}
+				else if(!rn2(3)) {
+					int dtype = ROLL_FROM(lesser_demons);
+					for(int i = rnd(6); i > 0; i--) {
+						int vx, vy;
+						scatter_coord(x, y, scatter, &vx, &vy);
+						count_vortex(msummon_vortex(dtype, vx, vy, mon), &seen_cnt, &sensed_cnt);
+					}
+				}
+				else if(rn2(2)) {
+					int dtype = ROLL_FROM(greater_demons);
+					for(int i = rnd(4); i > 0; i--) {
+						int vx, vy;
+						scatter_coord(x, y, scatter, &vx, &vy);
+						count_vortex(msummon_vortex(dtype, vx, vy, mon), &seen_cnt, &sensed_cnt);
+					}
+				}
+				else {
+					int vx, vy;
+					scatter_coord(x, y, scatter, &vx, &vy);
+					count_vortex(msummon_vortex(PM_MARILITH, vx, vy, mon), &seen_cnt, &sensed_cnt);
+				}
+			}
+		break;
+		// case PM_ALKILITH:
+		// 	//Note: also per round summons
+		// break;
+		case PM_BALROG:
+			//Note: resets once per 10 (global) turns
+			if(Inhell){
+				if(!rn2(4)) {
+					int dtype = ROLL_FROM(least_demons);
+					for(int i = d(1,8); i > 0; i--) {
+						int vx, vy;
+						scatter_coord(x, y, scatter, &vx, &vy);
+						count_vortex(msummon_vortex(dtype, vx, vy, mon), &seen_cnt, &sensed_cnt);
+					}
+				}
+				else if(!rn2(3)) {
+					int dtype = ROLL_FROM(lesser_demons);
+					for(int i = rnd(6); i > 0; i--) {
+						int vx, vy;
+						scatter_coord(x, y, scatter, &vx, &vy);
+						count_vortex(msummon_vortex(dtype, vx, vy, mon), &seen_cnt, &sensed_cnt);
+					}
+				}
+				else if(rn2(2)) {
+					int dtype = ROLL_FROM(greater_demons);
+					for(int i = rnd(4); i > 0; i--) {
+						int vx, vy;
+						scatter_coord(x, y, scatter, &vx, &vy);
+						count_vortex(msummon_vortex(dtype, vx, vy, mon), &seen_cnt, &sensed_cnt);
+					}
+				}
+				else {
+					int vx, vy;
+					scatter_coord(x, y, scatter, &vx, &vy);
+					count_vortex(msummon_vortex(rn2(2) ? PM_MARILITH : PM_BALROG, vx, vy, mon), &seen_cnt, &sensed_cnt);
+				}
+			}
+		break;
+		case PM_SHAYATEEN:
+			//Note: resets once per 10 (global) turns
+			if(Inhell){
+				if(!rn2(3)) {
+					int dtype = ROLL_FROM(lesser_demons);
+					for(int i = d(4,10); i > 0; i--) {
+						int vx, vy;
+						scatter_coord(x, y, scatter, &vx, &vy);
+						count_vortex(msummon_vortex(dtype, vx, vy, mon), &seen_cnt, &sensed_cnt);
+					}
+				}
+				else if(rn2(2)) {
+					int dtype = ROLL_FROM(greater_demons);
+					for(int i = rnd(6); i > 0; i--) {
+						int vx, vy;
+						scatter_coord(x, y, scatter, &vx, &vy);
+						count_vortex(msummon_vortex(dtype, vx, vy, mon), &seen_cnt, &sensed_cnt);
+					}
+				}
+				else {
+					int dtype = rn2(2) ? PM_MARILITH : PM_BALROG;
+					for(int i = 2; i > 0; i--) {
+						int vx, vy;
+						scatter_coord(x, y, scatter, &vx, &vy);
+						count_vortex(msummon_vortex(dtype, vx, vy, mon), &seen_cnt, &sensed_cnt);
+					}
+				}
+			}
+		break;
+		//Devils
+		case PM_HORNED_DEVIL:
+			if(Inhell && rn2(2)){
+				for(int i = rnd(6); i > 0; i--) {
+					int vx, vy;
+					scatter_coord(x, y, scatter, &vx, &vy);
+					count_vortex(msummon_vortex(PM_HORNED_DEVIL, vx, vy, mon), &seen_cnt, &sensed_cnt);
+				}
+			}
+		break;
+		case PM_ERINYS:
+			if(Inhell && rn2(2)){
+				if(rn2(2)) {
+					for(int i = rnd(4); i > 0; i--) {
+						int vx, vy;
+						scatter_coord(x, y, scatter, &vx, &vy);
+						count_vortex(msummon_vortex(PM_HORNED_DEVIL, vx, vy, mon), &seen_cnt, &sensed_cnt);
+					}
+				}
+				else {
+					for(int i = rnd(8); i > 0; i--) {
+						int vx, vy;
+						scatter_coord(x, y, scatter, &vx, &vy);
+						count_vortex(msummon_vortex(PM_IMP, vx, vy, mon), &seen_cnt, &sensed_cnt);
+					}
+				}
+			}
+		break;
+		case PM_BARBED_DEVIL:
+			if(Inhell && rn2(2)){
+				if(rn2(2)) {
+					for(int i = d(2,6); i > 0; i--) {
+						int vx, vy;
+						scatter_coord(x, y, scatter, &vx, &vy);
+						count_vortex(msummon_vortex(PM_HORNED_DEVIL, vx, vy, mon), &seen_cnt, &sensed_cnt);
+					}
+				}
+				else {
+					for(int i = rnd(4); i > 0; i--) {
+						int vx, vy;
+						scatter_coord(x, y, scatter, &vx, &vy);
+						count_vortex(msummon_vortex(PM_BARBED_DEVIL, vx, vy, mon), &seen_cnt, &sensed_cnt);
+					}
+				}
+			}
+		break;
+		case PM_BONE_DEVIL:
+			if(Inhell && rn2(2)){
+				if(rn2(2)) {
+					for(int i = d(1,100); i > 0; i--) {
+						int vx, vy;
+						scatter_coord(x, y, scatter, &vx, &vy);
+						count_vortex(msummon_vortex(PM_NUPPERIBO, vx, vy, mon), &seen_cnt, &sensed_cnt);
+					}
+				}
+				else {
+					for(int i = rnd(2); i > 0; i--) {
+						int vx, vy;
+						scatter_coord(x, y, scatter, &vx, &vy);
+						count_vortex(msummon_vortex(PM_BONE_DEVIL, vx, vy, mon), &seen_cnt, &sensed_cnt);
+					}
+				}
+			}
+		break;
+		// case PM_YOCHLOL:
+		// break;
+		case PM_ICE_DEVIL:
+			if(Inhell && rn2(2)){
+				//Note: Also 25% to summon pit fiend when "losing"
+				if(!rn2(3)) {
+					for(int i = d(2,6); i > 0; i--) {
+						int vx, vy;
+						scatter_coord(x, y, scatter, &vx, &vy);
+						count_vortex(msummon_vortex(PM_HORNED_DEVIL, vx, vy, mon), &seen_cnt, &sensed_cnt);
+					}
+				}
+				else if(rn2(2)){
+					for(int i = d(2,4); i > 0; i--) {
+						int vx, vy;
+						scatter_coord(x, y, scatter, &vx, &vy);
+						count_vortex(msummon_vortex(PM_BONE_DEVIL, vx, vy, mon), &seen_cnt, &sensed_cnt);
+					}
+				}
+				else {
+					for(int i = rnd(2); i > 0; i--) {
+						int vx, vy;
+						scatter_coord(x, y, scatter, &vx, &vy);
+						count_vortex(msummon_vortex(PM_ICE_DEVIL, vx, vy, mon), &seen_cnt, &sensed_cnt);
+					}
+				}
+			}
+		break;
+		case PM_PIT_FIEND:
+			if(Inhell){
+				int entourage[] = {PM_ERINYS, PM_BONE_DEVIL, PM_ICE_DEVIL};
+				/* star pattern: 2 knight's-move above, 2 downward-hooking left/right, 1 three below */
+				int dx[] = { -1,  1, -2,  2,  0 };
+				int dy[] = { -2, -2,  1,  1,  3 };
+				int i;
+				for (i = 0; i < 5; i++) {
+					int vx = mon->mx + dx[i], vy = mon->my + dy[i];
+					if (isok(vx, vy))
+						count_vortex(msummon_vortex(ROLL_FROM(entourage), vx, vy, mon), &seen_cnt, &sensed_cnt);
+				}
+			}
+		break;
+		// case PM_FALLEN_ANGEL:
+		// break;
+		// case PM_APOCALYPSE_ANGEL:
+		// break;
+		case PM_NESSIAN_PIT_FIEND:
+			if(Inhell){
+				int entourage[] = {PM_FALLEN_ANGEL, PM_PIT_FIEND, PM_ICE_DEVIL};
+				/* star pattern: 2 knight's-move above, 2 downward-hooking left/right, 1 three below */
+				int dx[] = { -1,  1, -2,  2,  0 };
+				int dy[] = { -2, -2,  1,  1,  3 };
+				int i;
+				for (i = 0; i < 5; i++) {
+					int vx = mon->mx + dx[i], vy = mon->my + dy[i];
+					if (isok(vx, vy))
+						count_vortex(msummon_vortex(ROLL_FROM(entourage), vx, vy, mon), &seen_cnt, &sensed_cnt);
+				}
+			}
+		break;
+		//Ancients
+		// case PM_ANCIENT_OF_BLESSINGS:
+		// break;
+		// case PM_ANCIENT_OF_VITALITY:
+		// break;
+		// case PM_ANCIENT_OF_CORRUPTION:
+		// break;
+		// case PM_ANCIENT_OF_THE_BURNING_WASTES:
+		// break;
+		// case PM_ANCIENT_OF_THOUGHT:
+		// break;
+		// case PM_ANCIENT_OF_ICE:
+		// break;
+		// case PM_ANCIENT_OF_DEATH:
+		// break;
+		// case PM_STRANGE_LARVA:
+		// break;
+		//Tanninim
+		// case PM_AKKABISH_TANNIN:
+		// break;
+		// case PM_SHALOSH_TANNAH:
+		// break;
+		// case PM_NACHASH_TANNIN:
+		// break;
+		// case PM_KHAAMNUN_TANNIN:
+		// break;
+		// case PM_RAGLAYIM_TANNIN:
+		// break;
+		// case PM_TERAPHIM_TANNAH:
+		// break;
+		// case PM_SARTAN_TANNIN:
+		// break;
+		//Misc
+		// case PM_DAMNED_PIRATE:
+		// break;
+	}
+	{
+		int total = seen_cnt + sensed_cnt;
+		if (total)
+			pline("You %s %s summoning %s form.",
+			      seen_cnt ? "see" : "sense",
+			      total == 1 ? "a" : "some",
+			      total == 1 ? "vortex" : "vortices");
+	}
+}
+
+void
+mcall_pit_fiend(struct monst *mon, int x, int y, int scatter)
+{
+	int lesser_devils[] = {PM_HORNED_DEVIL, PM_ERINYS, PM_BARBED_DEVIL};
+	int greater_devils[] = {PM_BONE_DEVIL, PM_ICE_DEVIL, PM_PIT_FIEND};
+	int mod = mon->mtyp == PM_NESSIAN_PIT_FIEND ? 2 : 1;
+	int seen_cnt = 0, sensed_cnt = 0;
+	if(rn2(2)) {
+		int dtype = ROLL_FROM(lesser_devils);
+		for(int i = 2*mod; i > 0; i--) {
+			int vx, vy;
+			scatter_coord(x, y, scatter, &vx, &vy);
+			count_vortex(msummon_vortex(dtype, vx, vy, mon), &seen_cnt, &sensed_cnt);
+		}
+	}
+	else {
+		int dtype = ROLL_FROM(greater_devils);
+		for(int i = 1*mod; i > 0; i--) {
+			int vx, vy;
+			scatter_coord(x, y, scatter, &vx, &vy);
+			count_vortex(msummon_vortex(dtype, vx, vy, mon), &seen_cnt, &sensed_cnt);
+		}
+	}
+	{
+		int total = seen_cnt + sensed_cnt;
+		if (total)
+			pline("You %s %s summoning %s form.",
+			      seen_cnt ? "see" : "sense",
+			      total == 1 ? "a" : "some",
+			      total == 1 ? "vortex" : "vortices");
+	}
+}
+
+void
+mcall_alkilith(struct monst *mon, int x, int y, int scatter)
+{
+	int seen_cnt = 0, sensed_cnt = 0;
+	if (!rn2(66)) {
+		struct permonst *ptr = mkclass(rn2(2) ? S_DEMON : S_IMP, G_HELL);
+		if (ptr) {
+			int vx, vy;
+			scatter_coord(x, y, scatter, &vx, &vy);
+			count_vortex(msummon_vortex(monsndx(ptr), vx, vy, mon), &seen_cnt, &sensed_cnt);
+		}
+	}
+	{
+		int total = seen_cnt + sensed_cnt;
+		if (total)
+			pline("You %s %s summoning %s form.",
+			      seen_cnt ? "see" : "sense",
+			      total == 1 ? "a" : "some",
+			      total == 1 ? "vortex" : "vortices");
 	}
 }
 
 struct monst *
-summon_god_minion(godnum, talk)
-int godnum;
-boolean talk;
+summon_god_minion(int godnum, int talk)
 {
 	aligntyp alignment = galign(godnum);
-    const int *minions = god_minions(godnum);
-    int mtyp=NON_PM, mlev, num = 0, first, last;
+	int mtyp = select_god_minion(godnum);
 	struct monst *mon;
 
-	mlev = level_difficulty();
-	
-	for (first = 0; minions[first] != NON_PM; first++)
-	    if (!(mvitals[minions[first]].mvflags & G_GONE && !In_quest(&u.uz)) && monstr[minions[first]] > mlev/2) break;
-	
-	mlev = (mlev+u.ulevel)/2;
-	if(minions[first] == NON_PM){ //All minions too weak, or no minions
-		if(first == 0) return (struct monst *) 0;
-		else mtyp = minions[first-1];
-	}
-	else for (last = first; minions[last] != NON_PM; last++)
-	    if (!(mvitals[minions[last]].mvflags & G_GONE && !In_quest(&u.uz))) {
-			/* consider it */
-			if(monstr[minions[last]] > mlev+5) break;
-			num += min(1,mons[minions[last]].geno & G_FREQ);
-	    }
+	if (mtyp == NON_PM) return (struct monst *)0;
 
-	if(!num){ //All minions too strong, or gap between weak and strong minions
-		if(first == 0) return (struct monst *) 0;
-		else mtyp = minions[first-1];
-	}
-/*	Assumption:	minions are presented in ascending order of strength. */
-	else{
-		for(num = rnd(num); num > 0; first++) if (!(mvitals[minions[first]].mvflags & G_GONE && !In_quest(&u.uz))) {
-			/* skew towards lower value monsters at lower exp. levels */
-			num -= min(1, mons[minions[first]].geno & G_FREQ);
-			if (num && adj_lev(&mons[minions[first]]) > (u.ulevel*2)) {
-				/* but not when multiple monsters are same level */
-				if (mons[first].mlevel != mons[first+1].mlevel)
-				num--;
-			}
-	    }
-		first--; /* correct an off-by-one error */
-		mtyp = minions[first];
+	mon = makemon(&mons[mtyp], u.ux, u.uy, NO_MM_FLAGS);
+	if (mon) {
+		add_mx(mon, MX_EMIN);
+		mon->isminion = TRUE;
+		EMIN(mon)->min_align = alignment;
+		EMIN(mon)->godnum = godnum;
 	}
 
-
-    if (mtyp == NON_PM) {
-		mon = (struct monst *)0;
-    } else {
-		mon = makemon(&mons[mtyp], u.ux, u.uy, NO_MM_FLAGS);
-		if (mon) {
-			add_mx(mon, MX_EMIN);
-			mon->isminion = TRUE;
-			EMIN(mon)->min_align = alignment;
-			EMIN(mon)->godnum = godnum;
-		}
-	}
-
-    if (mon) {
+	if (mon) {
 		if (talk) {
 			godvoice(godnum, "Thou shalt pay for thy indiscretion!");
 			if (!Blind)
 				pline("%s appears before you.", An(Hallucination ? rndmonnam() : mon->data->mname));
 		}
-		if(mon->mpeaceful){
+		if (mon->mpeaceful) {
 			mon->mpeaceful = FALSE;
-			if(godnum != u.ugodbase[UGOD_CURRENT])
+			if (godnum != u.ugodbase[UGOD_CURRENT])
 				set_malign(mon);
 			/* else don't call set_malign(); player was naughty */
-			newsym(mon->mx,mon->my);
+			newsym(mon->mx, mon->my);
 		}
 		mon->msleeping = 0;
 		mon->mcanmove = 1;
-		
-		/* fix house setting */
-		if(is_drow(mon->data)){
-			int faction = god_faction(godnum);
-			if (faction != -1) { 
-				struct obj *otmp;
 
+		/* fix house setting */
+		if (is_drow(mon->data)) {
+			int faction = god_faction(godnum);
+			if (faction != -1) {
+				struct obj *otmp;
 				set_faction(mon, faction);
-				
-				for(otmp = mon->minvent; otmp; otmp = otmp->nobj){
-					if(otmp->otyp == find_signet_ring() || is_readable_armor_otyp(otmp->otyp)){
+				for (otmp = mon->minvent; otmp; otmp = otmp->nobj) {
+					if (otmp->otyp == find_signet_ring() || is_readable_armor_otyp(otmp->otyp))
 						otmp->oward = faction;
-					}
 				}
 			}
 		}
-		
-		if(godnum == GOD_THE_DREAD_FRACTURE && !has_template(mon, FRACTURED)){
+
+		if (godnum == GOD_THE_DREAD_FRACTURE && !has_template(mon, FRACTURED)) {
 			set_template(mon, FRACTURED);
 			mon->m_lev += 4;
 			mon->mhpmax = d(mon->m_lev, 8);
 			mon->mhp = mon->mhpmax;
-			newsym(mon->mx,mon->my);
+			newsym(mon->mx, mon->my);
 		}
 
-		if(godnum == GOD_XOLOTL && !has_template(mon, SKELIFIED)){
+		if (godnum == GOD_XOLOTL && !has_template(mon, SKELIFIED)) {
 			set_template(mon, SKELIFIED);
-			newsym(mon->mx,mon->my);
+			newsym(mon->mx, mon->my);
 		}
-    }
-	
+	}
+
 	return mon;
 }
 

@@ -1598,6 +1598,13 @@ E void FDECL(relink_ox, (struct obj *));
 /* ### minion.c ### */
 
 E void FDECL(msummon, (struct monst *, struct permonst *));
+E boolean FDECL(msummon_select, (struct monst *, struct permonst *, int *, int *));
+E struct monst * FDECL(msummon_place, (int, int, int, struct monst *));
+E struct monst * FDECL(msummon_create_at, (struct monst *, int, int));
+E struct monst * FDECL(msummon_vortex, (int, int, int, struct monst *));
+E void FDECL(mcall_group, (struct monst *, int, int, int));
+E void FDECL(mcall_pit_fiend, (struct monst *, int, int, int));
+E void FDECL(mcall_alkilith, (struct monst *, int, int, int));
 E struct monst * FDECL(summon_god_minion, (int,BOOLEAN_P));
 E struct monst * FDECL(summon_minion, (ALIGNTYP_P,BOOLEAN_P,BOOLEAN_P,BOOLEAN_P));
 E int FDECL(demon_talk, (struct monst *));

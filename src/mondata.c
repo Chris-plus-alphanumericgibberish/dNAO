@@ -295,6 +295,7 @@ int newpm;
 			//mon->mvar_star_vampire_blood = 0;
 			//mon->mvar_spellweaver_count = 0;
 			//mon->mvar1_tettigon_uncancel = 0;
+			//mon->mvar1_summonerID = 0;
 			mon->mvar1 = 0;
 		break;
 	}

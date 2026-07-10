@@ -500,10 +500,23 @@ xattacky(struct monst *magr, struct monst *mdef, int tarx, int tary, long modifi
 	/*	Special demon/minion handling code */
 	/* mvu only; we don't want it mvm and player's is handled as an ability */
 	if (youdef && !magr->cham && gates_in_help(pa) && !template_blocks_gate(magr)
-		&& !ranged && !missedyou && (magr->summonpwr < magr->data->mlevel)) {
-		 if (!magr->mcan && !rn2(13)) {
-			 msummon(magr, (struct permonst *)0);
-		 }
+		&& !ranged && !missedyou && (magr->summonpwr < magr->data->mlevel)
+		&& !(uwep && uwep->oartifact && arti_worn_prop(uwep, ARTP_NOCALL) && is_demon(magr->data))
+	) {
+		
+		if (!magr->mcan && !rn2(13)) {
+			int dtype, cnt;
+			if (msummon_select(magr, (struct permonst *)0, &dtype, &cnt)) {
+				int nx = u.ux-3+rn2(7);
+				int ny = u.uy-3+rn2(7);
+				if(!isok(nx, ny)){
+					nx = u.ux;
+					ny = u.uy;
+				}
+				while (cnt-- > 0)
+					(void) msummon_vortex(dtype, nx, ny, magr);
+			}
+		}
 	}
 
 	/*	Special lycanthrope handling code */

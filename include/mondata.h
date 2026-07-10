@@ -1001,6 +1001,7 @@
 #define is_dlord(ptr)		(is_demon(ptr) && is_lord(ptr))
 #define is_dprince(ptr)		(is_demon(ptr) && is_prince(ptr))
 #define is_dnoble(ptr)		(is_demon(ptr) && (is_lord(ptr) || is_prince(ptr)))
+#define is_greater_demon(ptr)	(is_demon(ptr) && (ptr)->mlet == S_DEMON)
 #define is_minion(ptr)		((ptr)->mflagsa & MA_MINION)
 #define likes_gold(ptr)		(((ptr)->mflagst & MT_GREEDY) != 0L)
 #define likes_gems(ptr)		(((ptr)->mflagst & MT_JEWELS) != 0L)

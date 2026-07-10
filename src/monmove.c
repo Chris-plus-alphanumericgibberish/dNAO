@@ -1455,8 +1455,28 @@ register struct monst *mtmp;
 			}
 		}
 	}
-	
-	
+	//True demons
+	if((mtmp->mtyp == PM_BALROG || mtmp->mtyp == PM_SHAYATEEN) && mtmp->mgroup_summoned && (monstermoves%10 == 0)) {
+		mtmp->mgroup_summoned = FALSE;
+	}
+	if(mtmp->mtyp == PM_MARILITH && mtmp->mgroup_summoned && (monstermoves%10 == 0) && rn2(100) < 35) {
+		mtmp->mgroup_summoned = FALSE;
+	}
+	if(is_greater_demon(mtmp->data) && spotted && !mtmp->mpeaceful && !mtmp->mgroup_summoned && !mtmp->mcan){
+		mcall_group(mtmp, u.ux, u.uy, 3);
+		return 0;
+	}
+	//Pit fiend per round
+	if(Inhell && (mtmp->mtyp == PM_PIT_FIEND || mtmp->mtyp == PM_NESSIAN_PIT_FIEND) && spotted && !mtmp->mpeaceful && !mtmp->mcan
+		&& !(uwep && uwep->oartifact && arti_worn_prop(uwep, ARTP_NOCALL))
+	)
+		mcall_pit_fiend(mtmp, u.ux, u.uy, 3);
+	//Alkilith per round
+	if(mtmp->mtyp == PM_ALKILITH && !mtmp->mpeaceful && !mtmp->mcan
+		&& !(uwep && uwep->oartifact && arti_worn_prop(uwep, ARTP_NOCALL))
+	)
+		mcall_alkilith(mtmp, mtmp->mx, mtmp->my, 1);
+
 	if(mdat->mtyp == PM_OONA && !mtmp->mspec_used){
 		nearby = FALSE;
 		struct monst *tmpm;

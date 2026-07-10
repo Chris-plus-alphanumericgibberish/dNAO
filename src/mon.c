@@ -4004,6 +4004,10 @@ boolean actual;			/* actual attack or faction check? */
 		return 0L;
 	if(magr->mfaction == mdef->mfaction && mdef->mfaction == NUNCIO_FACTION)
 		return 0L;
+	if(magr->mfaction == mdef->mfaction && mdef->mfaction == HELL_FACTION)
+		return 0L;
+	if(magr->mfaction == mdef->mfaction && mdef->mfaction == ABYSS_FACTION)
+		return 0L;
 	
 	// rot kin attack almost anything
 	if(magr->mfaction == ROT_FACTION || mdef->mfaction == ROT_FACTION) {
