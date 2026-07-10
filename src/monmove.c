@@ -770,6 +770,10 @@ boolean digest_meal;
 		if(mon_resistance(mon,REGENERATION)){
 			if(mon->mtyp == PM_ROTTING_MONK && !mon->mcan)
 				mon->mhp+=10;
+			else if(mon->mtyp == PM_NESSIAN_PIT_FIEND && !mon->mcan)
+				mon->mhp+=mon->m_lev*3;
+			else if(mon->mtyp == PM_PIT_FIEND && !mon->mcan)
+				mon->mhp+=mon->m_lev*2;
 			else
 				mon->mhp+=1;
 		}

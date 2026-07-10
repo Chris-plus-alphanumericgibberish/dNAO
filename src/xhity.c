@@ -10087,6 +10087,14 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 							(youagr ? mon_nam(mtmp) : "you")
 							);
 						}
+						else if(pa->mtyp == PM_PIT_FIEND || pa->mtyp == PM_NESSIAN_PIT_FIEND){
+						pline("%s swing%s %s tail around %s!",
+							(youagr ? "You" : Monnam(mtmp)),
+							(youagr ? "" : "s"),
+							(youagr ? "your" : "its"),
+							(youagr ? mon_nam(mtmp) : "you")
+							);
+						}
 						else pline("%s swing%s %s around %s!",
 							(youagr ? "You" : Monnam(mtmp)),
 							(youagr ? "" : "s"),

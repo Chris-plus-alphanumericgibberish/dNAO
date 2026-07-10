@@ -915,6 +915,7 @@ struct monst *mon;
 	}
 	
 	if(mon->mtyp == PM_ASMODEUS && base < -9) base = -9 + MONSTER_AC_VALUE(base+9);
+	else if(mon->mtyp == PM_GLASYA && base < -4) base = -4 + MONSTER_AC_VALUE(base+4);
 	else if(mon->mtyp == PM_PALE_NIGHT && base < -6) base = -6 + MONSTER_AC_VALUE(base+6);
 	else if(mon->mtyp == PM_BAALPHEGOR && base < -8) base = -8 + MONSTER_AC_VALUE(base+8);
 	else if(mon->mtyp == PM_ZAPHKIEL && base < -8) base = -8 + MONSTER_AC_VALUE(base+8);
