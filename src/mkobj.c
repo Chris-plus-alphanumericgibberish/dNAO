@@ -1720,6 +1720,7 @@ int mkflags;
 		case COIN_CLASS:
 		case TILE_CLASS:
 		case SCOIN_CLASS:
+		case SANCTION_CLASS:
 			break;	/* do nothing */
 		default:
 			impossible("impossible mkobj %d, sym '%c'.", otmp->otyp,
