@@ -29,7 +29,6 @@ STATIC_DCL void NDECL(make_niches);
 
 STATIC_PTR int FDECL( CFDECLSPEC do_comp,(const genericptr,const genericptr));
 
-STATIC_DCL void FDECL(dosdoor,(XCHAR_P,XCHAR_P,struct mkroom *,int));
 STATIC_DCL void FDECL(join,(int,int,BOOLEAN_P));
 STATIC_DCL void FDECL(do_room_or_subroom, (struct mkroom *,int,int,int,int,
 				       BOOLEAN_P,SCHAR_P,BOOLEAN_P,BOOLEAN_P));
@@ -610,7 +609,7 @@ register struct mkroom *aroom;
 	return tmp;
 }
 
-STATIC_OVL void
+void
 dosdoor(x,y,aroom,type)
 register xchar x, y;
 register struct mkroom *aroom;

@@ -3891,6 +3891,10 @@ dlb *fd;
     (void) memset((genericptr_t)&Map[0][0], 0, sizeof Map);
     load_common_data(fd, SP_LEV_MAZE);
 
+    /* MAZEWALK levels use hand-authored .des coordinates on the classic
+       1-wide grid, regardless of what create_maze() last requested */
+    maze_set_scale(1, 1);
+
     /* Initialize map */
     Fread((genericptr_t) &filling, 1, sizeof(filling), fd);
     if (!init_lev.init_present) { /* don't init if mkmap() has been called */

@@ -1630,6 +1630,7 @@ E void FDECL(add_subroom, (struct mkroom *,int,int,int,int,
 			   BOOLEAN_P,SCHAR_P,BOOLEAN_P));
 E void NDECL(makecorridors);
 E int FDECL(add_door, (int,int,struct mkroom *));
+E void FDECL(dosdoor, (XCHAR_P,XCHAR_P,struct mkroom *,int));
 E void FDECL(add_altar, (int, int, aligntyp, boolean, int));
 E int NDECL(random_special_room);
 E void NDECL(mkpoolroom);
@@ -1665,6 +1666,7 @@ E void FDECL(wallification, (int,int,int,int));
 E void FDECL(walkfrom, (int,int,int));
 E void FDECL(makemaz, (const char *));
 E void FDECL(mazexy, (coord *));
+E void FDECL(maze_set_scale, (int,int));
 E void NDECL(bound_digging);
 E void FDECL(mkportal, (XCHAR_P,XCHAR_P,int,int));
 E boolean FDECL(bad_location, (XCHAR_P,XCHAR_P,XCHAR_P,XCHAR_P,XCHAR_P,XCHAR_P));

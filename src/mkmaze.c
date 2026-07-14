@@ -21,10 +21,29 @@ STATIC_DCL boolean FDECL(put_lregion_here,(XCHAR_P,XCHAR_P,XCHAR_P,
 	XCHAR_P,XCHAR_P,XCHAR_P,XCHAR_P,BOOLEAN_P,d_level *));
 STATIC_DCL void NDECL(fixup_special);
 STATIC_DCL boolean FDECL(maze_inbounds, (XCHAR_P, XCHAR_P));
-STATIC_DCL void FDECL(move, (int *,int *,int));
+STATIC_DCL void FDECL(move, (int *,int *,int,int));
+STATIC_DCL boolean FDECL(is_corridor_coord, (int,int));
+STATIC_DCL int FDECL(maze_nblocks, (int));
+STATIC_DCL int FDECL(maze_base_typ, (int,int));
+STATIC_DCL void FDECL(maze_fill_block, (int,int,int,int,int));
+STATIC_DCL void FDECL(maze_fill_connector, (int,int,int,int,int));
+STATIC_DCL void NDECL(maze_fixup_doors);
 STATIC_DCL void NDECL(setup_waterlevel);
 STATIC_DCL void NDECL(unsetup_waterlevel);
 STATIC_DCL void NDECL(fill_dungeon_of_ill_regard);
+
+/*
+ * Variable maze scale: corridor blocks are maze_corrwid wide, separated by
+ * maze_wallthick-deep wall connectors; maze_scale is their sum (block pitch).
+ * Block anchors sit at maze_x_origin/maze_y_origin + k*maze_scale, shifted
+ * inward from the classic origin of 3 to center the maze in the map.
+ * maze_{x,y}_nblocks is how many full blocks fit on that axis.
+ *
+ * create_maze() sets these to the requested values; load_maze() (the
+ * MAZEWALK .des backend) always forces (1,1) for hand-authored levels.
+ */
+static int maze_corrwid, maze_wallthick, maze_scale;
+static int maze_x_origin, maze_y_origin, maze_x_nblocks, maze_y_nblocks;
 
 
 STATIC_OVL boolean
@@ -202,8 +221,7 @@ int x,y;
 register int dir;
 int depth;
 {
-	move(&x,&y,dir);
-	move(&x,&y,dir);
+	move(&x,&y,dir,maze_scale);
 	if(!maze_inbounds(x, y))
 		return(FALSE);
 	if((depth < 3) && (levl[x][y].roomno - ROOMOFFSET >= level.flags.sp_lev_nroom))	/* if we're early, we can bust through randomly-placed rooms */
@@ -219,8 +237,8 @@ maze0xy(cc)	/* find random starting point for maze generation */
 {
 	int tryct = 200;
 	do{
-		cc->x = 3 + 2 * rn2((x_maze_max >> 1) - 1);
-		cc->y = 3 + 2 * rn2((y_maze_max >> 1) - 1);
+		cc->x = maze_x_origin + rn2(maze_x_nblocks) * maze_scale;
+		cc->y = maze_y_origin + rn2(maze_y_nblocks) * maze_scale;
 	} while (levl[cc->x][cc->y].roomno != NO_ROOM && tryct-->0);
 	if (tryct == 0)
 		impossible("Could not place starting point for maze generation");
@@ -896,7 +914,96 @@ xchar x, y;
 	return (x >= 2 && y >= 2 && x < x_maze_max && y < y_maze_max && isok(x, y));
 }
 
-/* 
+/* true if c falls within a block's floor width (measured from origin),
+   not its wall connector. c<origin is always "not corridor" -- guard
+   explicitly, since C's % on a negative dividend returns a negative
+   result and would otherwise satisfy "< maze_corrwid" by accident. */
+static boolean
+is_corridor_coord(int c, int origin)
+{
+	return (c >= origin) && (((c - origin) % maze_scale) < maze_corrwid);
+}
+
+/* number of full corrwid-wide blocks that fit in a span of avail cells */
+static int
+maze_nblocks(int avail)
+{
+	return (avail - maze_corrwid) / maze_scale + 1;
+}
+
+/* the "raw" (uncarved) lattice typ at (x,y): STONE inside a corridor
+   block, HWALL everywhere else, including the map border and any leftover
+   space past the last full block on an axis. */
+static int
+maze_base_typ(int x, int y)
+{
+	if (x >= x_maze_max || y >= y_maze_max)
+		return HWALL;
+	if (x >= maze_x_origin + maze_x_nblocks * maze_scale
+			|| y >= maze_y_origin + maze_y_nblocks * maze_scale)
+		return HWALL;
+	return (is_corridor_coord(x, maze_x_origin) && is_corridor_coord(y, maze_y_origin))
+		? STONE : HWALL;
+}
+
+/* uniformly stamp a w-by-h block of typ starting at (x0,y0); every carve of
+   a scaled block or connector must go through here so that anchor-only state
+   checks (walkfrom, okay, maze_remove_deadends) stay valid */
+static void
+maze_fill_block(int x0, int y0, int w, int h, int typ)
+{
+	int x, y;
+
+	for (x = x0; x < x0 + w; x++)
+	for (y = y0; y < y0 + h; y++)
+		if (maze_inbounds(x, y)) {
+			levl[x][y].typ = typ;
+			levl[x][y].flags = 0;
+		}
+}
+
+/* fill the maze_wallthick-deep connector strip joining the corrwid-square
+   blocks anchored at (x,y) and (nx,ny) -- (nx,ny) must be (x,y) moved one
+   hop (maze_scale) in a cardinal direction. Does not touch either block
+   itself, only the wall lattice between them. */
+static void
+maze_fill_connector(int x, int y, int nx, int ny, int typ)
+{
+	if (x != nx)
+		maze_fill_block((x < nx ? x : nx) + maze_corrwid, y,
+				 maze_wallthick, maze_corrwid, typ);
+	else
+		maze_fill_block(x, (y < ny ? y : ny) + maze_corrwid,
+				 maze_corrwid, maze_wallthick, typ);
+}
+
+/* set the corridor-width/wall-thickness scale used by the shared maze
+   helpers, and center the block grid within the map. Must be called
+   before any of the other shared helpers run. */
+void
+maze_set_scale(int corrwid, int wallthick)
+{
+	int xavail, yavail, xspan, yspan;
+
+	maze_corrwid = corrwid;
+	maze_wallthick = wallthick;
+	maze_scale = corrwid + wallthick;
+
+	/* content range is [3, x_maze_max-1] / [3, y_maze_max-1] -- x_maze_max
+	   and y_maze_max themselves are always forced HWALL (maze_base_typ's
+	   first check), so they must NOT be counted as available space here */
+	xavail = x_maze_max - 3;
+	yavail = y_maze_max - 3;
+	maze_x_nblocks = maze_nblocks(xavail);
+	maze_y_nblocks = maze_nblocks(yavail);
+	xspan = (maze_x_nblocks - 1) * maze_scale + corrwid;
+	yspan = (maze_y_nblocks - 1) * maze_scale + corrwid;
+
+	maze_x_origin = 3 + (xavail - xspan) / 2;
+	maze_y_origin = 3 + (yavail - yspan) / 2;
+}
+
+/*
  * Returns true if the entire rectangle defined by its top-left and bottom-right corners
  * is overtop of a mazewalk-textured area.
  */
@@ -910,58 +1017,64 @@ xchar lx, ly, hx, hy;
 	if (!maze_inbounds(lx, ly) || !maze_inbounds(hx, hy))
 		return FALSE;
 
+	/* reject anything touching the masked margin outside the real block
+	   grid: it's uniformly HWALL, which would otherwise trivially pass
+	   the raw pattern check below */
+	if (lx < maze_x_origin || ly < maze_y_origin
+			|| hx >= maze_x_origin + maze_x_nblocks * maze_scale
+			|| hy >= maze_y_origin + maze_y_nblocks * maze_scale)
+		return FALSE;
+
 	for (x = lx; x <= hx; x++)
 	for (y = ly; y <= hy; y++)
 	{
-		if (levl[x][y].typ != (((x % 2) && (y % 2)) ? STONE : HWALL))
+		if (levl[x][y].typ != maze_base_typ(x, y))
 			return FALSE;
 	}
 	return TRUE;
 }
 
-/* 
+/*
  * The sophisticated and classy cousin of rectangle_in_mazewalk_area().
- * Determines if a cutting out a rectangle would immediately separate sections of mazewalk from each other
+ * Determines if cutting out a rectangle would immediately separate sections
+ * of mazewalk from each other.
+ *
+ * Walks the ring one cell outside [lx,ly,hx,hy], sampled every maze_scale
+ * cells (the anchor spacing), counting transitions between open ("okay")
+ * and blocked lattice around the ring. More than 2 transitions means this
+ * rectangle would sever the maze into more than 2 pieces along its border.
  */
 boolean
-maze_rectangle_border_is_okay(lx, ly, hx, hy)
-xchar lx, ly, hx, hy;
+maze_rectangle_border_is_okay(xchar lx, xchar ly, xchar hx, xchar hy)
 {
-	int x = lx-1;	// we want to be on the [stone] part of the mazewalk fill
-	int y = ly-1;
-	int dx = 2;
-	int dy = 0;
-	boolean prev_okay = (maze_inbounds(x, y) && !levl[x][y].typ);
+	int x, y;
+	boolean cur, prev, first_val;
 	int changes = 0;
+#define RING_OKAY(px, py) (maze_inbounds(px, py) && !levl[px][py].typ)
 
-	do{
-		/* record if whether or not */
-		if (prev_okay != (maze_inbounds(x, y) && !levl[x][y].typ)){
-			changes++;
-			prev_okay = (maze_inbounds(x, y) && !levl[x][y].typ);
-		}
-		/* move to next spot */
-		x += dx;
-		y += dy;
+	first_val = prev = RING_OKAY(lx - 1, ly - 1);
 
-		if (dx && (x - 1 == hx || x + 1 == lx))
-		{
-			dy = dx;
-			dx = 0;
-		}
-		else if (dy && (y - 1 == hy || y + 1 == ly))
-		{
-			dx = -dy;
-			dy = 0;
-		}
-	} while ((x != lx - 1) || (y != ly - 1));
-
-	if (changes > 2)
-	{
-		return FALSE;
+	for (x = lx - 1; x < hx + 1; x += maze_scale) {	/* top: L to R */
+		cur = RING_OKAY(x, ly - 1);
+		if (cur != prev) { changes++; prev = cur; }
 	}
-	else
-		return TRUE;
+	for (y = ly - 1; y < hy + 1; y += maze_scale) {	/* right: T to B */
+		cur = RING_OKAY(hx + 1, y);
+		if (cur != prev) { changes++; prev = cur; }
+	}
+	for (x = hx + 1; x > lx - 1; x -= maze_scale) {	/* bottom: R to L */
+		cur = RING_OKAY(x, hy + 1);
+		if (cur != prev) { changes++; prev = cur; }
+	}
+	for (y = hy + 1; y > ly - 1; y -= maze_scale) {	/* left: B to T */
+		cur = RING_OKAY(lx - 1, y);
+		if (cur != prev) { changes++; prev = cur; }
+	}
+	if (first_val != prev)		/* close the ring */
+		changes++;
+
+#undef RING_OKAY
+	return (changes <= 2);
 }
 
 /*
@@ -985,10 +1098,10 @@ struct mkroom * r;
 		rhy = r->hy;
 		switch (side)
 		{
-		case W_NORTH: rly -= 2; rhy = rly;	break;
-		case W_SOUTH: rhy += 2; rly = rhy;	break;
-		case W_EAST:  rhx += 2; rlx = rhx;	break;
-		case W_WEST:  rlx -= 2; rhx = rlx;	break;
+		case W_NORTH: rly -= maze_scale; rhy = rly;	break;
+		case W_SOUTH: rhy += maze_scale; rly = rhy;	break;
+		case W_EAST:  rhx += maze_scale; rlx = rhx;	break;
+		case W_WEST:  rlx -= maze_scale; rhx = rlx;	break;
 		}
 		if (!rectangle_in_mazewalk_area(rlx, rly, rhx, rhy))
 		{
@@ -1005,6 +1118,8 @@ void
 destroy_wall(x, y)
 xchar x, y;
 {
+	int dx, dy;
+
 	/* don't destroy walls of the maze border */
 	if (   !maze_inbounds(x + 1, y + 0)
 		|| !maze_inbounds(x - 1, y - 0)
@@ -1012,9 +1127,25 @@ xchar x, y;
 		|| !maze_inbounds(x - 0, y - 1)
 		)
 		return;
-	if (IS_WALL(levl[x][y].typ) || IS_DOOR(levl[x][y].typ) || IS_SDOOR(levl[x][y].typ)) {
+	/* IS_STWALL (not IS_WALL) also clears STONE, since wallification()
+	   buries fully-enclosed wall cells there -- common in the interior
+	   of thick (wallthick>1) connectors. SCORR (secret corridor, from
+	   maze_fixup_doors()) falls outside IS_STWALL's range and needs its
+	   own check. */
+	if (IS_STWALL(levl[x][y].typ) || IS_DOOR(levl[x][y].typ) || IS_SDOOR(levl[x][y].typ)
+			|| levl[x][y].typ == SCORR) {
 		levl[x][y].typ = ROOM;
 		levl[x][y].flags = 0; /* clear door mask */
+
+		/* un-bury any of the 8 neighbors that were only buried to STONE
+		   because this cell was solid; a later wallification() picks
+		   their real glyph */
+		for (dx = -1; dx <= 1; dx++)
+		for (dy = -1; dy <= 1; dy++)
+			if ((dx || dy) && isok(x + dx, y + dy) && levl[x + dx][y + dy].typ == STONE) {
+				levl[x + dx][y + dy].typ = HWALL;
+				levl[x + dx][y + dy].flags = 0;
+			}
 	}
 	return;
 }
@@ -1023,46 +1154,57 @@ xchar x, y;
  * Attempts to add rooms to the yet-unwalked mazewalk sections of a maze
  */
 void
-maze_add_rooms(attempts, maxsize)
-int attempts;
-int maxsize;
+maze_add_rooms(int attempts, int maxsize)
 {
-	xchar x, y;
-
 	/* Ineligible maze levels for rooms */
 	if (Invocation_lev(&u.uz))
 		return;
 
 	for (; attempts > 0; attempts--) {
-		int roomidx;
 		coord roompos;
 		xchar lx, ly, hx, hy, width, height;
+		int wblocks, hblocks;
 		int door_attempts = 3;
 		int no_doors_made = 0;
+		struct mkroom *r;
 
-		/* room must fit nicely in the maze; that is, its corner spaces should
-		* all be valid maze0xy() locations. Thus, it should have odd
-		* dimensions. */
+		/* room must fit nicely in the maze; that is, its corners should
+		 * all land on block anchors, so width/height are built from
+		 * whole multiples of maze_scale plus one corrwid. */
 		if (maxsize == -1)
 			maxsize = rn2(4);
-		width = 2 * rn2(maxsize+1) + 3;
-		height = 2 * rn2(maxsize+1) + 3;
+		wblocks = 1 + rn2(maxsize+1);
+		hblocks = 1 + rn2(maxsize+1);
+		/* keep some margin on both axes so a room can never span (or
+		   nearly span) the full grid -- an edge-to-edge room could
+		   sever the map into two pieces the walk can't fully connect,
+		   and the border-connectivity check below can't catch that
+		   before anything's been carved */
+		if (wblocks > maze_x_nblocks - 2)
+			wblocks = (maze_x_nblocks > 2) ? maze_x_nblocks - 2 : 1;
+		if (hblocks > maze_y_nblocks - 2)
+			hblocks = (maze_y_nblocks > 2) ? maze_y_nblocks - 2 : 1;
+		width = maze_corrwid + maze_scale * wblocks;
+		height = maze_corrwid + maze_scale * hblocks;
 
 		/* Pick a corner location. Which directions the room points out from
 		* this corner are randomized so that we don't have a bias towards any
 		* edge of the map. */
 		maze0xy(&roompos);
 		if (rn2(2)) {
-			/* original roompos is a bottom corner */
-			roompos.y -= (height - 1);
+			/* original roompos is a bottom corner -- shift by whole
+			   blocks to stay on the anchor grid */
+			roompos.y -= hblocks * maze_scale;
 		}
 		if (rn2(2)) {
-			/* original roompos is a right corner */
-			roompos.x -= (width - 1);
+			/* original roompos is a right corner (see above) */
+			roompos.x -= wblocks * maze_scale;
 		}
-		/* these variables are the boundaries including walls */
-		lx = roompos.x - 1;
-		ly = roompos.y - 1;
+		/* fit-validation bounds only: reach a full wallthick-deep
+		 * connector margin past the near wall, unlike the room's
+		 * actual rendered walls, which stay 1 cell thick */
+		lx = roompos.x - maze_wallthick;
+		ly = roompos.y - maze_wallthick;
 		hx = roompos.x + width;
 		hy = roompos.y + height;
 
@@ -1070,10 +1212,10 @@ int maxsize;
 		if (!rectangle_in_mazewalk_area(lx, ly, hx, hy) ||	/* room itself has to fit */
 			(
 			/* a slightly larger room must also fit, to guarantee we can connect it into the larger maze */
-			!rectangle_in_mazewalk_area(lx - 2, ly, hx, hy) &&
-			!rectangle_in_mazewalk_area(lx, ly - 2, hx, hy) &&
-			!rectangle_in_mazewalk_area(lx, ly, hx + 2, hy) &&
-			!rectangle_in_mazewalk_area(lx, ly, hx, hy + 2)
+			!rectangle_in_mazewalk_area(lx - maze_scale, ly, hx, hy) &&
+			!rectangle_in_mazewalk_area(lx, ly - maze_scale, hx, hy) &&
+			!rectangle_in_mazewalk_area(lx, ly, hx + maze_scale, hy) &&
+			!rectangle_in_mazewalk_area(lx, ly, hx, hy + maze_scale)
 			))	{
 			/* can't place, out of bounds */
 			continue;
@@ -1087,10 +1229,11 @@ int maxsize;
 		if (!create_room(roompos.x, roompos.y, width, height,
 			1, 1, OROOM, -1))
 			continue;
-		struct mkroom *r = &rooms[nroom - 1];
+		r = &rooms[nroom - 1];
 
 		/* determine which walls border mazewalk area (so they are permeable at levelgen) */
 		maze_room_set_destructible_flags(r);
+
 
 
 		/* put in some doors */
@@ -1099,16 +1242,18 @@ int maxsize;
 		/* try to add the doors */
 		for (; door_attempts > 0; door_attempts--) {
 			/* don't use finddpos - it'll bias doors towards the top left of
-			* the room */
+			* the room. Doors are always 1 tile wide, snapped to a
+			* random interior block anchor so they line up with the
+			* maze grid on the far side. */
 			xchar doorx, doory;
 			boolean horiz = rn2(2) ? TRUE : FALSE;
 			if (horiz) {
-				doorx = rn2(hx - lx) / 2 * 2 + 1 + lx;
-				doory = rn2(2) ? ly : hy;
+				doorx = roompos.x + rn2(wblocks) * maze_scale;
+				doory = rn2(2) ? (roompos.y - 1) : hy;
 			}
 			else {
-				doorx = rn2(2) ? hx : lx;
-				doory = rn2(hy - ly) / 2 * 2 + 1 + ly;
+				doorx = rn2(2) ? hx : (roompos.x - 1);
+				doory = roompos.y + rn2(hblocks) * maze_scale;
 			}
 			/* Don't generate doors where the space outside of them is blocked.
 			 * Shouldn't need okdoor() - with previous location generation, doors can't be next to
@@ -1116,11 +1261,9 @@ int maxsize;
 			 */
 			if (   !maze_inbounds(doorx + !horiz, doory + horiz)	// cannot be on the maze edge
 				|| !maze_inbounds(doorx - !horiz, doory - horiz)	// cannot be on the maze edge
-				//|| IS_WALL(levl[doorx + !horiz][doory + horiz].typ)	// cannot be blocked by walls
-				//|| IS_WALL(levl[doorx - !horiz][doory - horiz].typ)	// cannot be blocked by walls
-				|| (r->solidwall & (((doory == ly)*W_NORTH) +
+				|| (r->solidwall & (((doory == roompos.y - 1)*W_NORTH) +
 									((doory == hy)*W_SOUTH) +
-									((doorx == lx)*W_WEST)  +
+									((doorx == roompos.x - 1)*W_WEST)  +
 									((doorx == hx)*W_EAST)))		// cannot be on a solid wall
 				)
 			{
@@ -1135,6 +1278,26 @@ int maxsize;
 				continue;
 			}
 			dodoor(doorx, doory, r);
+			/* carve a matching 1-wide strip from the door out to the
+			   neighboring block, so it isn't sealed behind the raw
+			   wallthick-deep margin beyond the room's own wall */
+			if (maze_wallthick > 1) {
+				if (horiz) {
+					if (doory == roompos.y - 1)
+						maze_fill_block(doorx, doory - (maze_wallthick - 1),
+								 1, maze_wallthick - 1, ROOM);
+					else
+						maze_fill_block(doorx, doory + 1,
+								 1, maze_wallthick - 1, ROOM);
+				} else {
+					if (doorx == roompos.x - 1)
+						maze_fill_block(doorx - (maze_wallthick - 1), doory,
+								 maze_wallthick - 1, 1, ROOM);
+					else
+						maze_fill_block(doorx + 1, doory,
+								 maze_wallthick - 1, 1, ROOM);
+				}
+			}
 		}
 		/* set roomno so mazewalk and other maze generation ignore it */
 		topologize(r);
@@ -1149,8 +1312,6 @@ void
 maze_add_openings(attempts)
 int attempts;
 {
-	xchar x, y;
-
 	/* Ineligible maze levels for rooms */
 	if (Invocation_lev(&u.uz))
 		return;
@@ -1158,19 +1319,21 @@ int attempts;
 	for (; attempts > 0; attempts--) {
 		coord roompos;
 		xchar lx, ly, hx, hy;
-		xchar x, y;
+		int dir;
 
 		/* Pick the location. */
 		maze0xy(&roompos);
 
-		/* area around the center location */
-		lx = roompos.x - 1;
-		ly = roompos.y - 1;
-		hx = roompos.x + 1;
-		hy = roompos.y + 1;
+		/* area around the center block: the block itself plus a
+		   maze_wallthick-deep connector margin on every side */
+		lx = roompos.x - maze_wallthick;
+		ly = roompos.y - maze_wallthick;
+		hx = roompos.x + maze_corrwid - 1 + maze_wallthick;
+		hy = roompos.y + maze_corrwid - 1 + maze_wallthick;
 
 		/* validate location */
-		if (!rectangle_in_mazewalk_area(lx - 1, ly - 1, hx + 1, hy + 1))	{
+		if (!rectangle_in_mazewalk_area(lx - maze_wallthick, ly - maze_wallthick,
+						 hx + maze_wallthick, hy + maze_wallthick))	{
 			/* can't place, close to out of bounds or actually out of bounds */
 			continue;
 		}
@@ -1178,12 +1341,15 @@ int attempts;
 			/* can't place, the space would probably cut the map in two */
 			continue;
 		}
-		/* place the opening into the the maze */
-		for (x = lx; x <= hx; x++)
-		for (y = ly; y <= hy; y++)
-		{
-			if (!((x - roompos.x) && (y - roompos.y)))
-				levl[x][y].typ = ROOM;
+		/* place the opening: the center block, plus a full connector
+		   punched through toward each in-bounds orthogonal neighbor
+		   anchor (not reaching into the neighbor block itself) */
+		maze_fill_block(roompos.x, roompos.y, maze_corrwid, maze_corrwid, ROOM);
+		for (dir = 0; dir < 4; dir++) {
+			int nx = roompos.x, ny = roompos.y;
+			move(&nx, &ny, dir, maze_scale);
+			if (maze_inbounds(nx, ny))
+				maze_fill_connector(roompos.x, roompos.y, nx, ny, ROOM);
 		}
 	}
 	return;
@@ -1202,20 +1368,21 @@ int careful;
 	int x, y, dir, idx, idx2, dx, dy, dx2, dy2;
 
 	dirok[0] = 0; /* lint suppression */
-	for (x = 2; x < x_maze_max; x++)
-	for (y = 2; y < y_maze_max; y++)
-	if ((levl[x][y].typ == floortyp) && (x % 2) && (y % 2)) {
+	for (x = maze_x_origin; x < maze_x_origin + maze_x_nblocks * maze_scale; x += maze_scale)
+	for (y = maze_y_origin; y < maze_y_origin + maze_y_nblocks * maze_scale; y += maze_scale)
+	if (levl[x][y].typ == floortyp) {
 		idx = idx2 = 0;
 		for (dir = 0; dir < 4; dir++) {
 			dx = dx2 = x;
 			dy = dy2 = y;
-			move(&dx, &dy, dir);
+			/* dx,dy = a representative cell of the connector on this
+			   side (its near corner); dx2,dy2 = the next block anchor */
+			move(&dx, &dy, dir, maze_corrwid);
 			if (!maze_inbounds(dx, dy)) {
 				idx2++;
 				continue;
 			}
-			move(&dx2, &dy2, dir);
-			move(&dx2, &dy2, dir);
+			move(&dx2, &dy2, dir, maze_scale);
 			if (!maze_inbounds(dx2, dy2)) {
 				idx2++;
 				continue;
@@ -1240,17 +1407,38 @@ int careful;
 			}
 		}
 		if (idx2 >= 3 && idx > 0) {
-			dx = dx2 = x;
-			dy = dy2 = y;
+			dx2 = x;
+			dy2 = y;
 			dir = dirok[rn2(idx)];
-			move(&dx, &dy, dir);
-			move(&dx2, &dy2, dir);
-			move(&dx2, &dy2, dir);
+			move(&dx2, &dy2, dir, maze_scale);
 			if (levl[dx2][dy2].roomno != NO_ROOM) {
-				dodoor(dx, dy, &rooms[levl[dx2][dy2].roomno - ROOMOFFSET]);
+				/* single 1-wide door regardless of corrwid: carve only
+				   a 1-wide approach lane matching the door's own
+				   row/column, not maze_fill_connector's full
+				   corrwid-wide connector (that's for plain
+				   corridor-to-corridor reopens below). */
+				int wallx = x, wally = y;
+				if (dir == 1 || dir == 3) {
+					int lo = ((x < dx2) ? x : dx2) + maze_corrwid;
+					int mx0;
+					wallx = (dx2 > x) ? dx2 - 1 : dx2 + maze_corrwid;
+					mx0 = (wallx == lo) ? lo + 1 : lo;
+					if (maze_wallthick > 1)
+						maze_fill_block(mx0, y, maze_wallthick - 1, 1, floortyp);
+				} else {
+					int lo = ((y < dy2) ? y : dy2) + maze_corrwid;
+					int my0;
+					wally = (dy2 > y) ? dy2 - 1 : dy2 + maze_corrwid;
+					my0 = (wally == lo) ? lo + 1 : lo;
+					if (maze_wallthick > 1)
+						maze_fill_block(x, my0, 1, maze_wallthick - 1, floortyp);
+				}
+				dodoor(wallx, wally, &rooms[levl[dx2][dy2].roomno - ROOMOFFSET]);
 			}
 			else {
-				levl[dx][dy].typ = floortyp;
+				/* plain reopen between two corridor blocks: carve the
+				   whole connector, not just one representative cell */
+				maze_fill_connector(x, y, dx2, dy2, floortyp);
 			}
 		}
 	}
@@ -1265,13 +1453,13 @@ int careful;
 * chance/100 probability
 */
 void
-maze_damage_rooms(chance)
-int chance;
+maze_damage_rooms(int chance)
 {
 	xchar x, y;
 	xchar lx, ly, hx, hy;
+	int wlx, wly, whx, why;
 	int wallsgone;		// bitfield
-	int i;
+	int i, d, e;
 	struct mkroom * r;
 
 	for (r = &rooms[level.flags.sp_lev_nroom]; r != &rooms[nroom]; r++)
@@ -1282,7 +1470,7 @@ int chance;
 
 		if (!special_room_requires_full_walls(r->rtype) && !r->rlit && (rn2(100) < chance))
 		{
-			wallsgone = 0x15;
+			wallsgone = W_ANY;
 
 			lx = r->lx - 1;	// left wall
 			ly = r->ly - 1;	// top wall
@@ -1304,24 +1492,47 @@ int chance;
 			if (hx == x_maze_max)	wallsgone &= ~W_EAST;
 			if (lx == 2)			wallsgone &= ~W_WEST;
 
-			/* actually destroy walls */
-			for (x = lx + 1; x <= hx - 1; ++x) {
-				if (wallsgone & W_NORTH) destroy_wall(x, ly);	// top
-				if (wallsgone & W_SOUTH) destroy_wall(x, hy);	// bottom
-			}
-			for (y = ly + 1; y <= hy - 1; ++y) {
-				if (wallsgone & W_EAST) destroy_wall(hx, y);	// right
-				if (wallsgone & W_WEST) destroy_wall(lx, y);	// left
-			}
-			/* corners and middles are destroyed if the wall sections they connected were destroyed */
-			if ((wallsgone & W_NORTH) && (wallsgone & W_WEST)) destroy_wall(lx, ly);
-			if ((wallsgone & W_NORTH) && (wallsgone & W_EAST)) destroy_wall(hx, ly);
-			if ((wallsgone & W_SOUTH) && (wallsgone & W_EAST)) destroy_wall(hx, hy);
-			if ((wallsgone & W_SOUTH) && (wallsgone & W_WEST)) destroy_wall(lx, hy);
+			/* actually destroy walls -- reach the full maze_wallthick-deep
+			   connector strip beyond the room's own wall cell, not just
+			   that one cell, so the room actually joins the corridor
+			   lattice instead of opening into dead-space filler */
+			for (x = lx + 1; x <= hx - 1; ++x)
+				for (d = 0; d < maze_wallthick; d++) {
+					if (wallsgone & W_NORTH) destroy_wall(x, ly - d);	// top
+					if (wallsgone & W_SOUTH) destroy_wall(x, hy + d);	// bottom
+				}
+			for (y = ly + 1; y <= hy - 1; ++y)
+				for (d = 0; d < maze_wallthick; d++) {
+					if (wallsgone & W_EAST) destroy_wall(hx + d, y);	// right
+					if (wallsgone & W_WEST) destroy_wall(lx - d, y);	// left
+				}
+			/* corners: destroy the full wallthick-by-wallthick corner block
+			   if both of the walls meeting there were destroyed */
+			for (d = 0; d < maze_wallthick; d++)
+				for (e = 0; e < maze_wallthick; e++) {
+					if ((wallsgone & W_NORTH) && (wallsgone & W_WEST)) destroy_wall(lx - e, ly - d);
+					if ((wallsgone & W_NORTH) && (wallsgone & W_EAST)) destroy_wall(hx + e, ly - d);
+					if ((wallsgone & W_SOUTH) && (wallsgone & W_EAST)) destroy_wall(hx + e, hy + d);
+					if ((wallsgone & W_SOUTH) && (wallsgone & W_WEST)) destroy_wall(lx - e, hy + d);
+				}
 
-			/* re-draw walls*/
-			if (wallsgone)
-				wallification(lx, ly, hx, hy);
+			/* re-draw walls over the full extent that may have changed --
+			   only widen toward sides actually destroyed, and go one
+			   cell past the deepest destroyed cell (wallthick+1, since
+			   destroy_wall()'s neighbor-unburying can promote a STONE
+			   cell at offset wallthick back to a wall) so wallification()
+			   sees enough neighbors to pick the right glyph. */
+			if (wallsgone) {
+				wlx = lx - ((wallsgone & W_WEST)  ? (maze_wallthick + 1) : 0);
+				wly = ly - ((wallsgone & W_NORTH) ? (maze_wallthick + 1) : 0);
+				whx = hx + ((wallsgone & W_EAST)  ? (maze_wallthick + 1) : 0);
+				why = hy + ((wallsgone & W_SOUTH) ? (maze_wallthick + 1) : 0);
+				if (wlx < 2) wlx = 2;
+				if (wly < 2) wly = 2;
+				if (whx > x_maze_max) whx = x_maze_max;
+				if (why > y_maze_max) why = y_maze_max;
+				wallification(wlx, wly, whx, why);
+			}
 
 			/* note that r is not quite ordinary anymore */
 			if (wallsgone && r->rtype == OROOM)
@@ -1387,10 +1598,14 @@ int room_index;
 	int x, y;
 	struct mkroom *troom = &rooms[room_index];
 
-	for (x = troom->lx - 1; x <= troom->hx + 1; x++)
-	for (y = troom->ly - 1; y <= troom->hy + 1; y++)
+	/* reach maze_wallthick cells past the wall, not just 1, to also clear
+	   any door's wallthick-1-deep approach margin outside the room's own
+	   floor+wall bounds */
+	for (x = troom->lx - maze_wallthick; x <= troom->hx + maze_wallthick; x++)
+	for (y = troom->ly - maze_wallthick; y <= troom->hy + maze_wallthick; y++)
+	if (maze_inbounds(x, y))
 	{
-		levl[x][y].typ = ((x % 2) && (y % 2)) ? STONE : HWALL;
+		levl[x][y].typ = maze_base_typ(x, y);
 		levl[x][y].flags = 0;
 		levl[x][y].roomno = NO_ROOM;
 	}
@@ -1399,31 +1614,171 @@ int room_index;
 	return;
 }
 
+/*
+ * Call AFTER walkfrom()/maze_remove_deadends() to fix up two things per
+ * door placed by maze_add_rooms():
+ *
+ * - Dead doors: if the outward side isn't real corridor/room terrain,
+ *   it leads to permanent rock -- seal it back into a normal wall (and
+ *   revert its approach margin).
+ *
+ * - Secret doors: a secret door is only actually secret if the maze side
+ *   doesn't give it away. If a connected door is an SDOOR, make the
+ *   maze-facing end of its approach margin a matching secret door too,
+ *   and fill the space between the two SDOORs with SCORR (secret
+ *   corridor) instead of room floor so it isn't revealed early.
+ */
+STATIC_OVL void
+maze_fixup_doors()
+{
+	int i;
+
+	for (i = 0; i < doorindex; i++) {
+		xchar dx = doors[i].x, dy = doors[i].y;
+		int roomno = levl[dx][dy].roomno;
+		struct mkroom *r;
+		int nx = dx, ny = dy;
+		int mx0, my0, mw, mh;	/* the wallthick-1 approach margin, if any */
+		int sdx, sdy;		/* maze-facing end of the margin */
+		int ibx0, iby0, ibw, ibh;	/* space between the two SDOORs, if any */
+		boolean horiz_wall;
+		boolean connected;
+
+		if (roomno == NO_ROOM || roomno - ROOMOFFSET < level.flags.sp_lev_nroom)
+			continue;
+		r = &rooms[roomno - ROOMOFFSET];
+
+		/* figure out which of the room's 4 walls this door is on, where
+		   the neighboring block's anchor is, where its wallthick-1
+		   approach margin is, and which end faces the maze */
+		if (dx == r->lx - 1) {
+			nx = r->lx - maze_scale;
+			horiz_wall = FALSE;
+			mx0 = dx - (maze_wallthick - 1); my0 = dy;
+			mw = maze_wallthick - 1; mh = 1;
+			sdx = mx0; sdy = dy;
+			ibx0 = mx0 + 1; iby0 = dy; ibw = mw - 1; ibh = 1;
+		} else if (dx == r->hx + 1) {
+			nx = r->hx + 1 + maze_wallthick;
+			horiz_wall = FALSE;
+			mx0 = dx + 1; my0 = dy;
+			mw = maze_wallthick - 1; mh = 1;
+			sdx = mx0 + mw - 1; sdy = dy;
+			ibx0 = mx0; iby0 = dy; ibw = mw - 1; ibh = 1;
+		} else if (dy == r->ly - 1) {
+			ny = r->ly - maze_scale;
+			horiz_wall = TRUE;
+			mx0 = dx; my0 = dy - (maze_wallthick - 1);
+			mw = 1; mh = maze_wallthick - 1;
+			sdx = dx; sdy = my0;
+			ibx0 = dx; iby0 = my0 + 1; ibw = 1; ibh = mh - 1;
+		} else if (dy == r->hy + 1) {
+			ny = r->hy + 1 + maze_wallthick;
+			horiz_wall = TRUE;
+			mx0 = dx; my0 = dy + 1;
+			mw = 1; mh = maze_wallthick - 1;
+			sdx = dx; sdy = my0 + mh - 1;
+			ibx0 = dx; iby0 = my0; ibw = 1; ibh = mh - 1;
+		} else {
+			continue; /* not on this room's outer wall at all */
+		}
+
+		connected = maze_inbounds(nx, ny)
+				&& (levl[nx][ny].typ == CORR || levl[nx][ny].typ == ROOM);
+		if (!connected) {
+			int sealtyp = horiz_wall ? HWALL : VWALL;
+			levl[dx][dy].typ = sealtyp;
+			levl[dx][dy].flags = 0;
+			/* also revert the wallthick-1 approach margin carved to
+			   floor when this door was placed */
+			maze_fill_block(mx0, my0, mw, mh, sealtyp);
+			continue;
+		}
+
+		if (levl[dx][dy].typ == SDOOR && maze_wallthick > 1) {
+			int walltyp = horiz_wall ? HWALL : VWALL;
+			/* dosdoor() only makes a real SDOOR if the target is
+			   already a wall, so stamp it one first rather than
+			   hand-rolling the door state ourselves */
+			levl[sdx][sdy].typ = walltyp;
+			levl[sdx][sdy].flags = 0;
+			dosdoor(sdx, sdy, r, SDOOR);
+			/* SDOOR rendering picks H-vs-V from .horizontal, which
+			   this cell has no wall history to inherit, so set it
+			   explicitly */
+			levl[sdx][sdy].horizontal = horiz_wall;
+			if (ibw > 0 && ibh > 0) {
+				/* flank the secret corridor with plain rock, not wall
+				   texture -- a corridor-shaped tube of walls around
+				   rock is itself a giveaway. The access tunnel is
+				   always 1 cell wide regardless of corrwid. */
+				maze_fill_block(ibx0, iby0, ibw, ibh, SCORR);
+				if (horiz_wall) {
+					maze_fill_block(dx + 1, iby0, 1, ibh, STONE);
+					maze_fill_block(dx - 1, iby0, 1, ibh, STONE);
+				} else {
+					maze_fill_block(ibx0, dy + 1, ibw, 1, STONE);
+					maze_fill_block(ibx0, dy - 1, ibw, 1, STONE);
+				}
+			}
+		}
+	}
+}
+
+/* corrwid/wallthick: corridor width / wall thickness, per maze_set_scale();
+   -1 means randomize, rolling wallthick first so thick walls are favored
+   over wide corridors;
+   rmdeadends: whether to run maze_remove_deadends() after the walk;
+   addrooms: whether to carve rooms into the maze at all */
 void
-create_maze()
+create_maze(int corrwid, int wallthick, boolean rmdeadends, boolean addrooms)
 {
 	int x, y;
 	coord mm;
 
+	if (wallthick == -1)
+		wallthick = rnd(4);
+	if (corrwid == -1)
+		corrwid = rnd(4) - wallthick;
+
+	if (corrwid < 1)
+		corrwid = 1;
+	else if (corrwid > 5)
+		corrwid = 5;
+
+	if (wallthick < 1)
+		wallthick = 1;
+	else if (wallthick > 5)
+		wallthick = 5;
+
+	maze_set_scale(corrwid, wallthick);
+
 	/* make maze base */
 	for (x = 2; x <= x_maze_max; x++)
 	for (y = 2; y <= y_maze_max; y++)
-		levl[x][y].typ = ((x % 2) && (y % 2)) ? STONE : HWALL;
+		levl[x][y].typ = maze_base_typ(x, y);
 
-	/* add rooms */
-	maze_add_rooms( 5,-1);
-	maze_add_rooms(10, 3);
-	maze_add_rooms( 5, 0);
+	if (addrooms) {
+		/* add rooms */
+		maze_add_rooms( 5,-1);
+		maze_add_rooms(10, 3);
+		maze_add_rooms( 5, 0);
 
-	/* add maze openings */
-	maze_add_openings(5);
+		/* add maze openings */
+		maze_add_openings(5);
+	}
 
 	/* perform mazewalk */
 	maze0xy(&mm);
 	walkfrom((int)mm.x, (int)mm.y, 0);
 
 	/* remove dead ends */
-	maze_remove_deadends(ROOM, FALSE);
+	if (rmdeadends)
+		maze_remove_deadends(ROOM, FALSE);
+
+	/* seal dead doors and disguise secret doors' maze-side approach --
+	   must run after the walk/dead-end removal, see maze_fixup_doors() */
+	maze_fixup_doors();
 
 	/* put a boulder at the maze center */
 	(void)mksobj_at(BOULDER, (int)mm.x, (int)mm.y, NO_MKOBJ_FLAGS);
@@ -1563,7 +1918,13 @@ register const char *s;
 
 	level.flags.is_maze_lev = TRUE;
 
-	create_maze();
+	/* invocation level: unscaled corridors, no dead-end removal, no rooms.
+	   regular maze levels: randomized scale, dead ends removed 4/5. */
+	if (Invocation_lev(&u.uz)) {
+		create_maze(1, 1, FALSE, FALSE);
+	} else {
+		create_maze(-1, -1, !rn2(5), TRUE);
+	}
 
 	mazexy(&mm);
 	mkstairs(mm.x, mm.y, 1, room_at(mm.x,mm.y));		/* up */
@@ -1659,8 +2020,14 @@ int x,y,depth;
 {
 #define CELLS (ROWNO * COLNO) / 4		/* a maze cell is 4 squares */
 	char mazex[CELLS + 1], mazey[CELLS + 1];	/* char's are OK */
-	int q, a, dir, pos;
+	int q, a, dir, pos, ax, ay;
 	int dirs[4];
+	int walktyp;
+#ifndef WALLIFIED_MAZE
+	walktyp = CORR;
+#else
+	walktyp = ROOM;
+#endif
 
 	pos = 1;
 	mazex[pos] = (char) x;
@@ -1670,12 +2037,7 @@ int x,y,depth;
 		y = (int) mazey[pos];
 		if(!IS_DOOR(levl[x][y].typ)) {
 		    /* might still be on edge of MAP, so don't overwrite */
-#ifndef WALLIFIED_MAZE
-		    levl[x][y].typ = CORR;
-#else
-		    levl[x][y].typ = ROOM;
-#endif
-		    levl[x][y].flags = 0;
+		    maze_fill_block(x, y, maze_corrwid, maze_corrwid, walktyp);
 		}
 		q = 0;
 		for (a = 0; a < 4; a++)
@@ -1684,13 +2046,9 @@ int x,y,depth;
 			pos--;
 		else {
 			dir = dirs[rn2(q)];
-			move(&x, &y, dir);
-#ifndef WALLIFIED_MAZE
-			levl[x][y].typ = CORR;
-#else
-			levl[x][y].typ = ROOM;
-#endif
-			move(&x, &y, dir);
+			ax = x; ay = y;
+			move(&x, &y, dir, maze_scale);
+			maze_fill_connector(ax, ay, x, y, walktyp);
 			if (levl[x][y].roomno - ROOMOFFSET >= level.flags.sp_lev_nroom)
 				maze_remove_room(levl[x][y].roomno - ROOMOFFSET);
 			pos++;
@@ -1709,15 +2067,16 @@ int x,y,depth;
 {
 	register int q,a,dir;
 	int dirs[4];
+	int ax, ay, walktyp;
+#ifndef WALLIFIED_MAZE
+	walktyp = CORR;
+#else
+	walktyp = ROOM;
+#endif
 
 	if(!IS_DOOR(levl[x][y].typ)) {
 	    /* might still be on edge of MAP, so don't overwrite */
-#ifndef WALLIFIED_MAZE
-	    levl[x][y].typ = CORR;
-#else
-	    levl[x][y].typ = ROOM;
-#endif
-	    levl[x][y].flags = 0;
+	    maze_fill_block(x, y, maze_corrwid, maze_corrwid, walktyp);
 	}
 
 	while(1) {
@@ -1727,73 +2086,66 @@ int x,y,depth;
 				dirs[q++]= a;
 		if(!q) return;
 		dir = dirs[rn2(q)];
-		move(&x,&y,dir);
+		ax = x; ay = y;
+		/* check/remove at the far anchor (a full maze_scale hop),
+		   matching exactly what okay()'s depth<3 bypass just tested */
+		move(&x, &y, dir, maze_scale);
 		if (levl[x][y].roomno - ROOMOFFSET >= level.flags.sp_lev_nroom)
 			maze_remove_room(levl[x][y].roomno - ROOMOFFSET);
-#ifndef WALLIFIED_MAZE
-		levl[x][y].typ = CORR;
-#else
-		levl[x][y].typ = ROOM;
-#endif
-		move(&x,&y,dir);
+		maze_fill_connector(ax, ay, x, y, walktyp);
 		walkfrom(x,y,depth+1);
 		/* move x and y back to our original spot */
-		move(&x, &y, (dir + 2) % 4);
-		move(&x, &y, (dir + 2) % 4);
+		move(&x, &y, (dir + 2) % 4, maze_scale);
 	}
 }
 #endif /* MICRO */
 
+/* step (x,y) n cells in direction dir */
 STATIC_OVL void
-move(x,y,dir)
-register int *x, *y;
-register int dir;
+move(int *x, int *y, int dir, int n)
 {
 	switch(dir){
-		case 0: --(*y); break;
-		case 1: (*x)++; break;
-		case 2: (*y)++; break;
-		case 3: --(*x); break;
+		case 0: *y -= n; break;
+		case 1: *x += n; break;
+		case 2: *y += n; break;
+		case 3: *x -= n; break;
 		default: panic("move: bad direction");
 	}
 }
 
+/* find random point in generated corridors, so we don't create items in
+   moats, bunkers, or walls -- picks anywhere in the full grid rather than
+   stepping by 2, since "odd" no longer means anything under scaled mazes */
 void
-mazexy(cc)	/* find random point in generated corridors,
-		   so we don't create items in moats, bunkers, or walls */
-	coord	*cc;
+mazexy(coord *cc)
 {
-	int cpt=0;
+	int allowedtyp =
+#ifdef WALLIFIED_MAZE
+		ROOM;
+#else
+		CORR;
+#endif
+	int x, y, cpt = 0;
 
 	do {
-	    cc->x = 3 + 2*rn2((x_maze_max>>1) - 1);
-	    cc->y = 3 + 2*rn2((y_maze_max>>1) - 1);
-	    cpt++;
-	} while (cpt < 100 && levl[cc->x][cc->y].typ !=
-#ifdef WALLIFIED_MAZE
-		 ROOM
-#else
-		 CORR
-#endif
-		);
-	if (cpt >= 100) {
-		register int x, y;
-		/* last try */
-		for (x = 0; x < (x_maze_max>>1) - 1; x++)
-		    for (y = 0; y < (y_maze_max>>1) - 1; y++) {
-			cc->x = 3 + 2 * x;
-			cc->y = 3 + 2 * y;
-			if (levl[cc->x][cc->y].typ ==
-#ifdef WALLIFIED_MAZE
-			    ROOM
-#else
-			    CORR
-#endif
-			   ) return;
-		    }
-		panic("mazexy: can't find a place!");
-	}
-	return;
+		x = rnd(x_maze_max);
+		y = rnd(y_maze_max);
+		if (levl[x][y].typ == allowedtyp) {
+			cc->x = x;
+			cc->y = y;
+			return;
+		}
+	} while (++cpt < 100);
+
+	/* 100 random attempts failed; systematically try every possibility */
+	for (x = 1; x <= x_maze_max; x++)
+	for (y = 1; y <= y_maze_max; y++)
+		if (levl[x][y].typ == allowedtyp) {
+			cc->x = x;
+			cc->y = y;
+			return;
+		}
+	panic("mazexy: can't find a place!");
 }
 
 void
