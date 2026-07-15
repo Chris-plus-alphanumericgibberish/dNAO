@@ -88,12 +88,14 @@ struct permonst {
 			gdr,
 			ldr,
 			fdr, 
+			wdr, 
 			/* (special) dr values for head/body/gloves/legs/feet */
 			spe_hdr,
 			spe_bdr,
 			spe_gdr,
 			spe_ldr,
-			spe_fdr;
+			spe_fdr,
+			spe_wdr;
 	struct	attack	mattk[NATTK];		/* attacks matrix */
 	unsigned short	cwt,			/* weight of corpse */
 					cnutrit;		/* its nutritional value */

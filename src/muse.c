@@ -655,7 +655,7 @@ struct monst *mtmp;
 #define m_flee(m)	if (fleetim && !m->iswiz) \
 			{ monflee(m, fleetim, FALSE, FALSE); }
 
-	if(couldsee(mtmp->mx,mtmp->my) && OffensiveLuck && u.uluck > 0 && !mtmp->mpeaceful && otmp && rn2(20) < u.uluck){
+	if((couldsee(mtmp->mx,mtmp->my) && OffensiveLuck && u.uluck > 0 && !mtmp->mpeaceful && otmp && rn2(20) < u.uluck) || (mon_resistance(mtmp, FUMBLING) && !rn2(20))){
 		if(canseemon(mtmp))
 			pline("%s fumbles %s!", Monnam(mtmp), xname(otmp));
 		obj_extract_and_unequip_self(otmp);
@@ -1730,7 +1730,7 @@ struct monst *mtmp;
 		return i;
 	oseen = otmp && canseemon(mtmp);
 
-	if(couldsee(mtmp->mx,mtmp->my) && OffensiveLuck && u.uluck > 0 && !mtmp->mpeaceful && otmp && rn2(20) < u.uluck){
+	if((couldsee(mtmp->mx,mtmp->my) && OffensiveLuck && u.uluck > 0 && !mtmp->mpeaceful && otmp && rn2(20) < u.uluck) || (mon_resistance(mtmp, FUMBLING) && !rn2(20))) {
 		if(canseemon(mtmp))
 			pline("%s fumbles %s!", Monnam(mtmp), xname(otmp));
 		obj_extract_and_unequip_self(otmp);
@@ -2554,7 +2554,7 @@ struct monst *mtmp;
 	vismon = canseemon(mtmp);
 	oseen = otmp && vismon;
 
-	if(couldsee(mtmp->mx,mtmp->my) && OffensiveLuck && u.uluck > 0 && !mtmp->mpeaceful && otmp && rn2(20) < u.uluck){
+	if((couldsee(mtmp->mx,mtmp->my) && OffensiveLuck && u.uluck > 0 && !mtmp->mpeaceful && otmp && rn2(20) < u.uluck) || (mon_resistance(mtmp, FUMBLING) && !rn2(20))){
 		if(canseemon(mtmp))
 			pline("%s fumbles %s!", Monnam(mtmp), xname(otmp));
 		obj_extract_and_unequip_self(otmp);
@@ -3604,6 +3604,13 @@ const char *str;
 	    }
 	    return TRUE;
 	}
+	orefl = which_armor(mon, W_ARMW);
+	if ((orefl) && item_has_property(orefl, REFLECTING)) {
+	    if (str) {
+		pline(str, s_suffix(mon_nam(mon)), "wing-guards");
+	    }
+	    return TRUE;
+	}
 	orefl = which_armor(mon, W_SADDLE);
 	if ((orefl) && item_has_property(orefl, REFLECTING)) {
 	    if (str) {
@@ -3731,6 +3738,10 @@ const char *fmt, *str;
 	} else if (EReflecting & W_ARMU) {
 	    if (fmt && str)
 	    	pline(fmt, str, "underclothes");
+	    return TRUE;
+	} else if (EReflecting & W_ARMW) {
+	    if (fmt && str)
+	    	pline(fmt, str, "wing-guards");
 	    return TRUE;
 	} else if (EReflecting & W_ARMF) {
 	    if (fmt && str)

@@ -529,6 +529,11 @@ register struct monst *mtmp;
 		Sprintf(mbuf, "Foot Armor:       %d", base);
 		putstr(en_win, 0, mbuf);
 	}
+	if(has_wings_mon(mtmp)){
+		mslotdrtotal(WING_DR);
+		Sprintf(mbuf, "Wing Armor:       %d", base);
+		putstr(en_win, 0, mbuf);
+	}
 	
 	display_nhwindow(en_win, TRUE);
 	destroy_nhwindow(en_win);

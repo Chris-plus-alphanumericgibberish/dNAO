@@ -56,6 +56,7 @@
 #define AT_VOMT		46	/* Vomit attack */
 #define AT_JUGL		47	/* Juggles weapons */
 #define AT_SQUZ		48	/* Squeezes grappled opponent */
+#define AT_WING		49	/* Wing buffet; works like AT_CLAW, but concerns wing-guard armor (W_ARMW) instead of gloves */
 
 #define AT_WEAP		252	/* uses weapon */
 #define AT_XWEP		253	/* uses offhanded weapon */

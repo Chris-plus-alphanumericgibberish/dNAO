@@ -6322,6 +6322,11 @@ int spell;
 			splcaster += uarmfbon;
 	}
 
+	if (uarmw) {
+		if (metal_blocks_spellcasting(uarmw))
+			splcaster += uarmfbon;
+	}
+
 	if (uarms) {
 		splcaster += casting_stat == A_CHA ? 0 : urole.spelshld;
 	}

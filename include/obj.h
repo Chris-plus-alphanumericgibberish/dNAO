@@ -350,7 +350,8 @@ struct obj {
 //	define W_ARMF	    0x00000020L /* Footwear */
 //ifdef TOURIST
 //	define W_ARMU	    0x00000040L /* Undershirt */
-//	define W_ARMOR	     (W_ARM | W_ARMC | W_ARMH | W_ARMS | W_ARMG | W_ARMF | W_ARMU)
+//	define W_ARMW	    0x00000080L /* Wing-guard */
+//	define W_ARMOR	     (W_ARM | W_ARMC | W_ARMH | W_ARMS | W_ARMG | W_ARMF | W_ARMU | W_ARMW)
 //else
 //	define W_ARMOR	     (W_ARM | W_ARMC | W_ARMH | W_ARMS | W_ARMG | W_ARMF)
 //endif
@@ -914,7 +915,7 @@ struct obj {
 #define sflm_truedeathable(otmp)	(check_oprop(otmp, OPROP_SFLMW) && !check_oprop(otmp, OPROP_TDTHW))
 #define sflm_unworthyable(otmp)	(check_oprop(otmp, OPROP_SFLMW) && !check_oprop(otmp, OPROP_SFUWW))
 /* Can accept weapon props.  Not necessarily a weapon that you wield. */
-#define accepts_weapon_oprops(otmp)	((otmp)->oclass == WEAPON_CLASS || is_weptool(otmp) || is_gloves(otmp) || is_boots(otmp) || is_helmet(otmp) || (otmp)->otyp == NIGHTMARE_S_BULLET_MOLD)
+#define accepts_weapon_oprops(otmp)	((otmp)->oclass == WEAPON_CLASS || is_weptool(otmp) || is_gloves(otmp) || is_boots(otmp) || is_helmet(otmp) || is_wingguard(otmp) || (otmp)->otyp == NIGHTMARE_S_BULLET_MOLD)
 #define is_pole(otmp)	(((otmp)->oclass == WEAPON_CLASS || \
 			(otmp)->oclass == TOOL_CLASS) && \
 			 (objects[(otmp)->otyp].oc_skill == P_POLEARMS || \
@@ -1267,6 +1268,8 @@ struct obj {
 			 objects[otmp->otyp].oc_armcat == ARM_CLOAK)
 #define is_shirt(otmp)	(otmp->oclass == ARMOR_CLASS && \
 			 objects[otmp->otyp].oc_armcat == ARM_SHIRT)
+#define is_wingguard(otmp)	(otmp->oclass == ARMOR_CLASS && \
+			 objects[otmp->otyp].oc_armcat == ARM_WING)
 #define is_suit(otmp)	(otmp->oclass == ARMOR_CLASS && \
 			 objects[otmp->otyp].oc_armcat == ARM_SUIT)
 #define is_belt(otmp)	(otmp->oclass == BELT_CLASS && \
@@ -1709,7 +1712,7 @@ struct obj {
 		(depth&(W_BELT)) ? !!(armdepth&(W_ARMC|W_GLYPH)) :\
 		(depth&(W_DRESS_DEPTH)) ? !!(armdepth&(W_ARMC|W_GLYPH|W_BELT)) :\
 		(depth&(W_ARMS|W_WEP|W_QUIVER|W_SWAPWEP|W_AMUL|W_SADDLE|W_CHAIN)) ? (armdepth == W_ARMC) :\
-		(depth&(W_ARMH|W_ARMG|W_ARMF|W_ARM|W_RINGL|W_RINGR|W_TOOL)) ? (armdepth != W_ARMU) :\
+		(depth&(W_ARMH|W_ARMG|W_ARMF|W_ARM|W_ARMW|W_RINGL|W_RINGR|W_TOOL)) ? (armdepth != W_ARMU) :\
 		(depth&(W_ARMU|W_SKIN|W_UPGRADE)) ? TRUE :\
 		FALSE))
 

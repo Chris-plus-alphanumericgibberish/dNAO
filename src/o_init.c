@@ -6,7 +6,7 @@
 #include "lev.h"	/* save & restore info */
 
 STATIC_DCL void FDECL(setgemprobs, (d_level*));
-STATIC_DCL void FDECL(shuffle,(int,int,BOOLEAN_P));
+STATIC_DCL void FDECL(shuffle,(int,int,boolean,boolean));
 STATIC_DCL void NDECL(shuffle_all);
 STATIC_DCL int FDECL(find_otyp_of_desc, (const char *, const char **, int, int, boolean(*)(int)));
 STATIC_DCL void NDECL(randomize_nonmatwands);
@@ -74,9 +74,7 @@ d_level *dlev;
 
 /* shuffle descriptions on objects o_low to o_high */
 STATIC_OVL void
-shuffle(o_low, o_high, domaterial)
-	int o_low, o_high;
-	boolean domaterial;
+shuffle(int o_low, int o_high, boolean domaterial, boolean doarmor)
 {
 	int i, j, num_to_shuffle;
 	short sw;
@@ -106,6 +104,19 @@ shuffle(o_low, o_high, domaterial)
 			sw = objects[j].oc_material;
 			objects[j].oc_material = objects[i].oc_material;
 			objects[i].oc_material = sw;
+		}
+
+		/* shuffle armor class, damage reduction, and cancellation */
+		if (doarmor) {
+			sw = objects[j].a_ac;
+			objects[j].a_ac = objects[i].a_ac;
+			objects[i].a_ac = sw;
+			sw = objects[j].a_dr;
+			objects[j].a_dr = objects[i].a_dr;
+			objects[i].a_dr = sw;
+			sw = objects[j].a_can;
+			objects[j].a_can = objects[i].a_can;
+			objects[i].a_can = sw;
 		}
 	}
 }
@@ -221,7 +232,7 @@ shuffle_all()
 			 * and one-of-a-kind magical artifacts at the end of
 			 * their class in objects[] have fixed descriptions.
 			 */
-			shuffle(first, j, TRUE);
+			shuffle(first, j, TRUE, FALSE);
 		}
 	}
 	
@@ -234,21 +245,24 @@ shuffle_all()
 	   signetring== RIN_POLYMORPH ||
 	   signetring== RIN_POLYMORPH_CONTROL
 	){
-		shuffle(RIN_ADORNMENT, RIN_PROTECTION_FROM_SHAPE_CHAN, TRUE);
+		shuffle(RIN_ADORNMENT, RIN_PROTECTION_FROM_SHAPE_CHAN, TRUE, FALSE);
 		signetring = find_signet_ring();
 	}
 	
 	/* shuffle the helmets */
-	shuffle(HELMET, HELM_OF_DRAIN_RESISTANCE, TRUE);
-	
+	shuffle(HELMET, HELM_OF_DRAIN_RESISTANCE, TRUE, FALSE);
+
 	/* shuffle the gloves */
-	shuffle(GLOVES, GAUNTLETS_OF_DEXTERITY, FALSE);
+	shuffle(GLOVES, GAUNTLETS_OF_DEXTERITY, FALSE, FALSE);
 
 	/* shuffle the cloaks */
-	shuffle(CLOAK_OF_PROTECTION, CLOAK_OF_DISPLACEMENT, FALSE);
+	shuffle(CLOAK_OF_PROTECTION, CLOAK_OF_DISPLACEMENT, FALSE, FALSE);
 
 	/* shuffle the boots [if they change, update find_skates() below] */
-	shuffle(SPEED_BOOTS, FLYING_BOOTS, FALSE);
+	shuffle(SPEED_BOOTS, FLYING_BOOTS, FALSE, FALSE);
+
+	/* shuffle the wing-guards, including material, AC, DR, and cancellation */
+	shuffle(WING_GUARDS_OF_SPEED, WING_GUARDS_OF_BUMBLING, TRUE, TRUE);
 }
 
 /* called on init and restore
@@ -722,6 +736,24 @@ find_pcloth()
 		return i;
 	else
 		impossible("could not find piece of cloth");
+	return 0;
+}
+
+/* find the object index for the "diamaphorous wing-covers" appearance;
+ * used to force that item to always generate with cloth material
+ * (see material_list() in mkobj.c) regardless of which wing-guard
+ * otyp the shuffle happens to attach the appearance to */
+int
+find_dwingcovers()
+{
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
+
+	if ((i = find_otyp_of_desc("diamaphorous wing-covers", 0, WING_GUARDS_OF_SPEED, WING_GUARDS_OF_BUMBLING, 0)) != -1)
+		return i;
+	else
+		impossible("could not find diamaphorous wing-covers");
 	return 0;
 }
 

@@ -27,26 +27,28 @@ void NDECL(monst_init);
 	   {nam,sym,lvl,gen,def,atk,siz,mr1,mr2,flgm,flgt,flgf,flgb,flgc,flgg,flga,flgv,flgw, light, C(col),-1}
 
 /* DEF() uses macromagic to set AC and DR in MON() */
-#define DEF(...) SET13(0,0,0,0,0,0,0,0,0,0,0,0,0,__VA_ARGS__)
+#define DEF(...) SET15(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,__VA_ARGS__)
 /* AC quantities here are 0-based, since it's split into 3 components. NAT_AC(3), DEX_AC(1) will result in a monster with 10-3-1 = 6 AC. */
 #define NAT_AC(nac) C01(nac)
 #define DEX_AC(dac) C02(dac)
 #define SPE_AC(pac) C03(pac)
 /* DR is assumed to be full-body unless otherwise specified */
-#define NAT_DR(ndr) C04(ndr),C05(ndr),C06(ndr),C07(ndr),C08(ndr)
+#define NAT_DR(ndr) C04(ndr),C05(ndr),C06(ndr),C07(ndr),C08(ndr),C09(ndr)
 #define NAT_DR_ALL(hdr, bdr, gdr, ldr, fdr) C04(hdr),C05(bdr),C06(gdr),C07(ldr),C08(fdr)
-#define SPE_DR(adr) C09(adr),C10(adr),C11(adr),C12(adr),C13(adr)
-#define SPE_DR_ALL(hdr, bdr, gdr, ldr, fdr) C09(hdr),C10(bdr),C11(gdr),C12(ldr),C13(fdr)
+#define SPE_DR(adr) C10(adr),C11(adr),C12(adr),C13(adr),C14(adr),C15(adr)
+#define SPE_DR_ALL(hdr, bdr, gdr, ldr, fdr) C10(hdr),C11(bdr),C12(gdr),C13(ldr),C14(fdr)
 #define NAT_DR_HEAD(ndr) C04(ndr)
 #define NAT_DR_BODY(ndr) C05(ndr)
 #define NAT_DR_GLOV(ndr) C06(ndr)
 #define NAT_DR_LEGS(ndr) C07(ndr)
 #define NAT_DR_FEET(ndr) C08(ndr)
-#define SPE_DR_HEAD(adr) C09(adr)
-#define SPE_DR_BODY(adr) C10(adr)
-#define SPE_DR_GLOV(adr) C11(adr)
-#define SPE_DR_LEGS(adr) C12(adr)
-#define SPE_DR_FEET(adr) C13(adr)
+#define NAT_DR_WING(ndr) C09(ndr)
+#define SPE_DR_HEAD(adr) C10(adr)
+#define SPE_DR_BODY(adr) C11(adr)
+#define SPE_DR_GLOV(adr) C12(adr)
+#define SPE_DR_LEGS(adr) C13(adr)
+#define SPE_DR_FEET(adr) C14(adr)
+#define SPE_DR_WING(adr) C15(adr)
 
 /* LVL() and SIZ() collect several fields to cut down on # of args for MON() */
 #define LVL(lvl,mov,mr,aln) lvl,mov,mr,aln
@@ -2552,7 +2554,7 @@ then fill new spaces with our spawn!
 	LVL(15, 10, 55, 12), (G_PLANES|G_NOCORPSE|G_NOGEN),
 	DEF(NAT_AC(7), DEX_AC(7), SPE_AC(7), SPE_DR(3), SPE_DR_HEAD(0)),
 	A(ATTK(AT_WEAP, AD_DISE, 3, 7), ATTK(AT_WEAP, AD_DISE, 3, 7),
-	  ATTK(AT_CLAW, AD_PLYS, 3, 2), ATTK(AT_CLAW, AD_PLYS, 3, 3),
+	  ATTK(AT_WING, AD_PLYS, 3, 2), ATTK(AT_WING, AD_PLYS, 3, 3),
 	  ATTK(AT_MAGC, AD_HLUH, 2, 7)),
 	SIZ(WT_HUMAN, 400, MS_SILENT, MZ_HUMAN),
 	MR_COLD|MR_ELEC|MR_SLEEP|MR_POISON|MR_MAGIC, 0,
@@ -2620,7 +2622,7 @@ then fill new spaces with our spawn!
 	LVL(27, 17, 77, 17), (G_PLANES|G_NOCORPSE|1),
 	DEF(NAT_AC(10), SPE_AC(7), SPE_DR_HEAD(7), SPE_DR_BODY(3)),
 	A(ATTK(AT_WEAP, AD_PHYS, 2, 4), ATTK(AT_WEAP, AD_PHYS, 2, 4),
-	  ATTK(AT_WDGZ, AD_BLND, 3, 7), ATTK(AT_CLAW, AD_PHYS, 1, 8),
+	  ATTK(AT_WDGZ, AD_BLND, 3, 7), ATTK(AT_WING, AD_PHYS, 1, 8),
 	  ATTK(AT_MAGC, AD_SPEL, 0, 7)),
 	SIZ(WT_LARGE, 400, MS_CUSS, MZ_LARGE),
 	MR_DRAIN|MR_FIRE|MR_COLD|MR_ELEC|MR_SLEEP|MR_POISON|MR_MAGIC, 0,
@@ -2630,7 +2632,7 @@ then fill new spaces with our spawn!
     MON("Light Archon", S_LAW_ANGEL,//34 /* Needs encyc entry */
 	LVL(27, 17, 77, 17), (G_PLANES|G_NOCORPSE|1), //needs quote
 	DEF(NAT_AC(13), SPE_AC(14), SPE_DR(7)),
-	A(ATTK(AT_WEAP, AD_PHYS, 2, 4), ATTK(AT_CLAW, AD_PHYS, 1, 8),
+	A(ATTK(AT_WEAP, AD_PHYS, 2, 4), ATTK(AT_WING, AD_PHYS, 3, 8),
 	  ATTK(AT_ARRW, AD_SOLR, 3, 1), ATTK(AT_WDGZ, AD_BLND, 3, 7), 
 	  ATTK(AT_MAGC, AD_CLRC, 0, 7)),
 	SIZ(WT_LARGE, 400, MS_CUSS, MZ_LARGE),
@@ -3093,7 +3095,7 @@ then fill new spaces with our spawn!
 	
     MON("Jrt Netjer", S_CHA_ANGEL,//25 /*Needs tile*/ /*needs encyc entry*/
 	LVL(18, 16, 88, -12), (G_PLANES|G_NOCORPSE|G_NOGEN),
-	DEF(DEX_AC(4), SPE_AC(3), SPE_DR_ALL(21, 7, 4, 4, 4)),
+	DEF(DEX_AC(4), SPE_AC(3), SPE_DR_ALL(21, 7, 4, 4, 4), SPE_DR_WING(4)),
 	A(ATTK(AT_SRPR, AD_STAR, 4, 7), OFFHND_ATTK(AT_XSPR, AD_STAR, 4, 7),
 	  ATTK_LEV(AT_SRPR, AD_STAR, 4, 7, 22), OFFHND_ATTK_LEV(AT_XSPR, AD_STAR, 4, 7, 30),
 	  ATTK(AT_GAZE, AD_STDY, 3, 7)),
@@ -4692,7 +4694,7 @@ struct permonst _mons2[] = {
     MON("chiropteran mummy", S_MUMMY,//10
 	LVL(7, 12, 30, -6), (G_GENO|G_NOCORPSE|1),
 	DEF(NAT_AC(6)),
-	A(ATTK(AT_CLAW, AD_PHYS, 4, 10), ATTK(AT_CLAW, AD_PHYS, 4, 10),
+	A(ATTK(AT_WING, AD_PHYS, 4, 10), ATTK(AT_WING, AD_PHYS, 4, 10),
 	  POLYWEP_ATTK(AT_CLAW, AD_PHYS, 4, 4), OFFHND_ATTK(AT_CLAW, AD_PHYS, 4, 4),
 	  ATTK(AT_NONE, AD_MROT, 0, 0)),
 	SIZ(WT_LARGE, 175, MS_SQEEK, MZ_LARGE),
@@ -7009,7 +7011,7 @@ is a red right hand
 	MA_DEMON /*MA*/,  MV_EXTRAMISSION /*MV*/, MW_ELDER_EYE_PLANES /*MW*/, 0 /*light radius*/, CLR_BRIGHT_GREEN),
     MON("vrock", S_DEMON,//11
 	LVL(8, 12, 50, -9), (G_HELL|G_NOCORPSE|G_SGROUP|2), /*Needs encyc entry*/
-	DEF(NAT_AC(10), NAT_DR(10)),
+	DEF(NAT_AC(10), NAT_DR(10), NAT_DR_WING(0)),
 	A(ATTK(AT_WEAP, AD_PHYS, 1, 9),
 	  ATTK(AT_CLAW, AD_PHYS, 1,17),
 	  ATTK(AT_BITE, AD_PHYS, 1,13)),
@@ -7101,7 +7103,7 @@ is a red right hand
 	0 /*MM*/, MT_STALK|MT_HOSTILE|MT_TRAITOR /*MT*/, MF_MARTIAL_S|MF_LEVEL_30 /*MF*/,
 	MB_HUMANOID|MB_STRONG|MB_WINGS /*MB*/, MC_POIS  /*MC*/, MG_INFRAVISIBLE|MG_NASTY|MG_HATESSILVER /*MG*/,
 	MA_DEMON /*MA*/,  MV_CATSIGHT|MV_INFRAVISION /*MV*/, MW_ELDER_EYE_PLANES /*MW*/, 0 /*light radius*/, HI_ZAP),
-    MON("ossifruge", S_DEMON,//11
+    MON("ossifruge", S_DEMON,//16
 	LVL(12, 12, 50, -9), (G_HELL|G_NOCORPSE|G_NOGEN), /*Needs encyc entry*/
 	DEF(NAT_AC(10), NAT_DR(10)),
 	A(ATTK(AT_WEAP, AD_PHYS, 1, 14), ATTK(AT_WEAP, AD_PHYS, 1, 14),
@@ -7153,7 +7155,8 @@ is a red right hand
 	LVL(13, 10, 65, 13), (G_HELL|G_NOCORPSE|2),
 	DEF(NAT_AC(10), SPE_AC(13), NAT_DR(9), SPE_DR(9)),
 	A(ATTK(AT_WEAP, AD_PHYS, 6, 3), OFFHND_ATTK(AT_CLAW, AD_PHYS, 5, 4),
-	  ATTK(AT_BITE, AD_DRST, 5, 4), ATTK(AT_MAGC,AD_SPEL, 3, 9),
+	  ATTK(AT_WING, AD_PHYS, 5, 4), ATTK(AT_BITE, AD_DRST, 5, 4),
+	  ATTK(AT_MAGC,AD_SPEL, 3, 9),
 	  ATTK(AT_TAIL, AD_WRAP, 2, 4), ATTK(AT_SQUZ, AD_PHYS, 5, 4)),
 	SIZ(WT_LARGE, 400, MS_GROWL, MZ_LARGE), MR_FIRE|MR_POISON, 0,
 	MM_FLY /*MM*/, MT_STALK|MT_HOSTILE|MT_COLLECT|MT_TRAITOR|MT_BOLD /*MT*/, MF_MARTIAL_E|MF_BAB_FULL|MF_LEVEL_30 /*MF*/,
@@ -7163,7 +7166,7 @@ is a red right hand
 	LVL(15, 10, 55, 12), (G_HELL|G_NOCORPSE|0),
 	DEF(NAT_AC(5), DEX_AC(6), SPE_AC(13), SPE_DR(4), SPE_DR_HEAD(9)),
 	A(ATTK(AT_WEAP, AD_PHYS, 3, 7), ATTK(AT_WEAP, AD_PHYS, 3, 7), 
-	  ATTK(AT_CLAW, AD_PHYS, 5, 4), ATTK(AT_MAGC, AD_UNHY, 0, 9),
+	  ATTK(AT_WING, AD_PHYS, 5, 4), ATTK(AT_MAGC, AD_UNHY, 0, 9),
 	  ATTK(AT_NONE, AD_FIRE, 0, 9)),
 	SIZ(WT_HUMAN, 400, MS_CUSS, MZ_HUMAN),
 	MR_COLD|MR_ELEC|MR_SLEEP|MR_POISON|MR_MAGIC, 0,
@@ -7172,7 +7175,7 @@ is a red right hand
 	0 /*MA*/,  MV_EXTRAMISSION|MV_SEE_INVIS /*MV*/, MW_ELDER_EYE_PLANES /*MW*/, 2 /*light radius*/, CLR_WHITE),
     MON("apocalypse angel", S_DEMON,//19 /* Needs encyc entry */
 	LVL(15, 10, 99, 20), (G_HELL|G_NOCORPSE|G_NOGEN),
-	DEF(NAT_AC(6), SPE_AC(13), NAT_DR(6), SPE_DR_ALL(7, 3, 9, 3, 9)),
+	DEF(NAT_AC(6), SPE_AC(13), NAT_DR(6), SPE_DR_ALL(7, 3, 9, 3, 9), SPE_DR_WING(3)),
 	A(ATTK(AT_LNCK, AD_SVPN, 1, 6), ATTK(AT_HITS, AD_APCS, 0, 0),
 	  ATTK(AT_NONE, AD_FIRE, 0, 9)),
 	SIZ(WT_HUMAN, 400, MS_APOC, MZ_HUMAN),
@@ -7182,7 +7185,7 @@ is a red right hand
 	0 /*MA*/,  MV_EXTRAMISSION|MV_SEE_INVIS|MV_DETECTION|MV_OMNI /*MV*/, MW_ELDER_EYE_PLANES /*MW*/, 0 /*light radius*/, CLR_BRIGHT_MAGENTA),
     MON("ancient of blessings", S_DEMON,//23 /* Needs encyc entry */
 	LVL(15, 17, 77, 14), (G_HELL|G_NOCORPSE|G_NOGEN),  /*Needs encyc entry*/
-	DEF(NAT_AC(7), DEX_AC(3), SPE_AC(7), NAT_DR(7), SPE_DR_HEAD(17), SPE_DR_BODY(7), SPE_DR_GLOV(7), SPE_DR_LEGS(7), SPE_DR_FEET(7)),
+	DEF(NAT_AC(7), DEX_AC(3), SPE_AC(7), NAT_DR(7), SPE_DR_HEAD(17), SPE_DR_BODY(7), SPE_DR_GLOV(7), SPE_DR_LEGS(7), SPE_DR_FEET(7), SPE_DR_WING(17)),
 	A(ATTK(AT_DEVA, AD_ENCH, 1, 7), ATTK(AT_XWEP, AD_ENCH, 1, 7),
 	  ATTK(AT_MARI, AD_ENCH, 1, 7), ATTK(AT_MARI, AD_ENCH, 1, 7),
 	  ATTK(AT_NONE, AD_ENCH, 0, 0), ATTK(AT_BOOM, AD_FRWK, 77, 1)),
@@ -7277,7 +7280,8 @@ is a red right hand
 	LVL(16, 12, 99, 19), (G_NOGEN|G_HELL|G_NOCORPSE), /*Needs encyc entry*/
 	DEF(NAT_AC(16), SPE_AC(13), NAT_DR(9), SPE_DR(18)),
 	A(ATTK(AT_WEAP, AD_PHYS, 9, 3), OFFHND_ATTK(AT_CLAW, AD_PHYS, 9, 6),
-	  ATTK(AT_BITE, AD_DRST, 9, 3), ATTK(AT_MAGC,AD_SPEL, 1, 9), 
+	  ATTK(AT_WING, AD_PHYS, 9, 4), ATTK(AT_BITE, AD_DRST, 9, 4),
+	  ATTK(AT_MAGC,AD_SPEL, 1, 9), 
 	  ATTK(AT_TAIL, AD_WRAP, 3, 3), ATTK(AT_SQUZ, AD_PHYS, 9, 6),
 	  ATTK(AT_NONE,AD_FIRE, 8, 2)),
 	SIZ(WT_HUGE, 400, MS_GROWL, MZ_HUGE), MR_FIRE|MR_POISON, 0,
@@ -7286,7 +7290,7 @@ is a red right hand
 	MA_DEMON|MA_PRIMORDIAL /*MA*/,  MV_EXTRAMISSION|MV_SEE_INVIS /*MV*/, MW_ELDER_EYE_PLANES /*MW*/, 0 /*light radius*/, CLR_BRIGHT_MAGENTA),
     MON("shayateen", S_DEMON,//25 /* Needs encyc entry */
 	LVL(18, 18, 66, -16), (G_HELL|G_NOCORPSE|1), /*Needs encyc entry*/
-	DEF(NAT_AC(9), DEX_AC(3), SPE_AC(14), NAT_DR_HEAD(10), NAT_DR_BODY(66), NAT_DR_GLOV(10), NAT_DR_LEGS(66), NAT_DR_FEET(10)),
+	DEF(NAT_AC(9), DEX_AC(3), SPE_AC(14), NAT_DR_HEAD(10), NAT_DR_BODY(66), NAT_DR_GLOV(10), NAT_DR_LEGS(66), NAT_DR_FEET(10), NAT_DR_WING(10)),
 	A(ATTK(AT_WEAP, AD_PHYS, 1, 14), ATTK(AT_XWEP, AD_PHYS, 1, 14),
 	  ATTK(AT_HUGS, AD_VORP, 4, 6),
 	  ATTK(AT_MARI, AD_PHYS, 1, 14), ATTK(AT_MARI, AD_PHYS, 1, 14)),
@@ -7425,7 +7429,7 @@ is a red right hand
 	MA_DEMON /*MA*/,  MV_CATSIGHT|MV_INFRAVISION|MV_SEE_INVIS /*MV*/, MW_ELDER_EYE_PLANES /*MW*/, 0 /*light radius*/, CLR_BLACK),
     MON("Naome", S_DEMON,//39 /* Needs encyc entry */
 	LVL(34, 6, 65, 13), (G_HELL|G_NOCORPSE|G_NOGEN|G_UNIQ),
-	DEF(NAT_AC(5), SPE_AC(4), NAT_DR_GLOV(9), NAT_DR_LEGS(9), NAT_DR_FEET(9), SPE_DR(7)),
+	DEF(NAT_AC(5), SPE_AC(4), NAT_DR_GLOV(9), NAT_DR_LEGS(9), NAT_DR_FEET(9), NAT_DR_WING(9), SPE_DR(7)),
 	A(POLYWEP_ATTK(AT_SRPR, AD_EDRC, 4, 9), ATTK(AT_XWEP, AD_PHYS, 4, 2),
 	  ATTK(AT_MAGC,AD_SPEL, 3, 9)),
 	SIZ(WT_HUMAN, 400, MS_GROWL, MZ_HUMAN), MR_FIRE|MR_POISON|MR_STONE|MR_REFLECT, 0,
@@ -7434,7 +7438,7 @@ is a red right hand
 	MA_DEMON /*MA*/,  MV_EXTRAMISSION|MV_SEE_INVIS /*MV*/, MW_ELDER_EYE_PLANES /*MW*/, 0 /*light radius*/, HI_GOLD),
     MON("Bael", S_DEMON,//53
 	LVL(45, 14, 54, 18), (G_HELL|G_NOCORPSE|G_NOGEN|G_UNIQ),
-	DEF(NAT_AC(10), SPE_AC(13), NAT_DR(9), SPE_DR_ALL(18, 19, 9, 16, 9)),
+	DEF(NAT_AC(10), SPE_AC(13), NAT_DR(9), SPE_DR_ALL(18, 19, 9, 16, 9), SPE_DR_WING(9)),
 	A( ATTK(AT_WEAP, AD_PHYS, 9, 3), ATTK(AT_WEAP, AD_PHYS, 9, 3),
 		ATTK(AT_BUTT, AD_FIRE, 9, 9), ATTK(AT_BITE, AD_POSN, 9, 9), 
 		ATTK(AT_GAZE, AD_STDY, 1, 9)),
@@ -7525,10 +7529,12 @@ is a red right hand
 	DEF(NAT_AC(14), SPE_AC(12), NAT_DR(9), SPE_DR(12)),
 	A(ATTK(AT_WEAP, AD_PHYS, 4, 9), 
 	  OFFHND_ATTK(AT_CLAW, AD_SGLD, 3, 4), OFFHND_ATTK(AT_CLAW, AD_SGLD, 3, 4),
+	  ATTK(AT_WING, AD_PHYS, 3, 9),
 	  ATTK(AT_BITE, AD_DRST, 3, 9),
 	  ATTK(AT_BREA, AD_GOLD, 3, 9), 
-	  ATTK(AT_MAGC, AD_SPEL, 3, 9)
-	  ),
+	  ATTK(AT_MAGC, AD_SPEL, 3, 9),
+	  ATTK(AT_TAIL, AD_WRAP, 9, 1), ATTK(AT_SQUZ, AD_PHYS, 3, 9),
+	),
 	SIZ(WT_LARGE, 500, MS_BRIBE, MZ_LARGE), MR_FIRE|MR_POISON|MR_STONE, 0,
 	MM_SWIM|MM_FLY /*MM*/, MT_STALK|MT_HOSTILE|MT_COLLECT|MT_WAITFORU|MT_WANTSAMUL /*MT*/, MF_MARTIAL_S|MF_BAB_FULL /*MF*/,
 	MB_HUMANOID|MB_STRONG|MB_MALE|MB_WINGS|MB_HORNS /*MB*/, MC_POIS  /*MC*/, MG_NOTAME|MG_LORD|MG_NOPOLY|MG_NASTY|MG_INFRAVISIBLE|MG_HATESSILVER|MG_COMMANDER|MG_NOSPELLCOOLDOWN /*MG*/,
@@ -7672,7 +7678,7 @@ is a red right hand
 	MA_DEMON /*MA*/,  MV_EXTRAMISSION|MV_SEE_INVIS /*MV*/, MW_ELDER_EYE_PLANES /*MW*/, 0 /*light radius*/, HI_LORD),
     MON("Baalzebub", S_DEMON,//48 /*Needs encyc entry*/
 	LVL(89, 12, 85, 20), (G_HELL|G_NOCORPSE|G_NOGEN|G_UNIQ),
-	DEF(NAT_AC(7), DEX_AC(12), SPE_AC(16), NAT_DR(7), SPE_DR_HEAD(18), SPE_DR_BODY(9), SPE_DR_GLOV(9), SPE_DR_LEGS(9), SPE_DR_FEET(9)),
+	DEF(NAT_AC(7), DEX_AC(12), SPE_AC(16), NAT_DR(7), NAT_DR_WING(0), SPE_DR_HEAD(18), SPE_DR_BODY(9), SPE_DR_GLOV(9), SPE_DR_LEGS(9), SPE_DR_FEET(9), SPE_DR_WING(9)),
 	A(ATTK(AT_WEAP, AD_PHYS, 7, 2), ATTK(AT_WEAP, AD_PHYS, 7, 2),
 	  ATTK(AT_BITE, AD_DRIN, 1, 3), ATTK(AT_GAZE, AD_STUN, 2, 7),
 	  ATTK(AT_NONE, AD_FIRE, 0, 9)),
@@ -9796,7 +9802,7 @@ is a red right hand
 	MA_ORC /*MA*/,  MV_LOWLIGHT2 /*MV*/, 0 /*MW*/, 0 /*light radius*/, CLR_BRIGHT_MAGENTA),
     MON("Lungorthin", S_DEMON,//34 /*Needs encyc entry*//*Needs tile*/
 	LVL(24, 12, 80, -14), (G_NOCORPSE|G_NOGEN|G_UNIQ),
-	DEF(NAT_AC(8), DEX_AC(8), SPE_AC(8), SPE_DR(15)),
+	DEF(NAT_AC(8), DEX_AC(8), SPE_AC(8), NAT_DR(10), SPE_DR(15)),
 	A(ATTK(AT_WEAP, AD_PHYS, 1, 8), ATTK(AT_XWEP, AD_PHYS, 1, 8),
 	  ATTK(AT_ESPR, AD_FIRE, 2, 8), ATTK(AT_ESPR, AD_SHDW, 2, 8),
 	  ATTK(AT_CLAW, AD_SQUE, 1, 4), ATTK(AT_BOOM, AD_EFIR, 16, 11)),
@@ -10248,7 +10254,7 @@ is a red right hand
 	LVL(6, 12, 0, 5), (G_SGROUP|G_NOCORPSE|G_NOGEN),
 	DEF(NAT_AC(5), DEX_AC(2), SPE_AC(2), NAT_DR(5), SPE_DR_HEAD(2)),
 	A(ATTK(AT_WEAP, AD_PHYS, 1, 1), ATTK(AT_XWEP, AD_PHYS, 1, 1),
-	  ATTK(AT_CLAW, AD_PHYS, 1, 8), ATTK(AT_CLAW, AD_PHYS, 1, 8), 
+	  ATTK(AT_WING, AD_PHYS, 1, 8), ATTK(AT_WING, AD_PHYS, 1, 8), 
 	  ATTK(AT_GAZE, AD_STDY, 2, 6), ATTK(AT_NONE, AD_SOUL, 0, 0)
 	),
 	SIZ(WT_HUMAN, 0, MS_SILENT, MZ_HUMAN), MR_POISON|MR_STONE, 0,
@@ -10352,7 +10358,7 @@ is a red right hand
 	MA_ELF /*MA*/,  MV_CATSIGHT|MV_TELEPATHIC /*MV*/, 0 /*MW*/, 0 /*light radius*/, CLR_BLACK),
     MON("alider", S_CENTAUR,//43 /*Needs encyc entry*/
 	LVL(32, 15, 125, -18), (G_GENO|G_UNIQ|G_NOGEN),
-	DEF(SPE_AC(8), DEX_AC(4), SPE_DR_ALL(7,3,8,3,3)),
+	DEF(SPE_AC(8), DEX_AC(4), SPE_DR_ALL(7,3,8,3,3), SPE_DR_WING(3)),
 	A(ATTK(AT_WEAP, AD_PHYS, 2,10), ATTK(AT_XWEP, AD_PHYS, 2,10),
 	  ATTK(AT_MSPR, AD_SHDW, 4, 8), ATTK(AT_MSPR, AD_STAR, 4, 8), 
 	  ATTK(AT_ARRW, AD_SHDW, 1, 1), ATTK(AT_MMGC, AD_CLRC, 0, 8)),

@@ -1084,6 +1084,7 @@ register struct obj *obj, *merge;
 	else if (obj == uarmg) {Gloves_off(); setnotworn(obj);}
 	else if (obj == uarmu) {Shirt_off(); setnotworn(obj);}
 	else if (obj == uarmf) {Boots_off(); setnotworn(obj);}
+	else if (obj == uarmw) {WingGuard_off(); setnotworn(obj);}
 
 	dealloc_obj(obj);
 }

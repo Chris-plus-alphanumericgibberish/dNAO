@@ -542,6 +542,10 @@
 #define EJumping		u.uprops[JUMPING].extrinsic
 #define Jumping			(HJumping || EJumping)
 
+#define HJumpAttk		u.uprops[AERIAL_COMBAT].intrinsic
+#define EJumpAttk		u.uprops[AERIAL_COMBAT].extrinsic
+#define JumpAttk			(HJumpAttk || EJumpAttk)
+
 #define HTeleportation		u.uprops[TELEPORT].intrinsic
 #define ETeleportation		u.uprops[TELEPORT].extrinsic
 #define Teleportation		(HTeleportation || ETeleportation || \
@@ -784,6 +788,6 @@
 								) && Race_if(PM_DROW) && !flags.stag)
 
 #define AerialCombat \
-    (((Role_if(PM_MONK) || (Role_if(PM_KENSEI) && ((uwep && is_kensei_weapon(uwep)) || !uwep)) || has_mutation(AAT_PRIMINAL)) && !Upolyd) || activeFightingForm(FFORM_ATARU))
+    (JumpAttk || ((Role_if(PM_MONK) || (Role_if(PM_KENSEI) && ((uwep && is_kensei_weapon(uwep)) || !uwep)) || has_mutation(AAT_PRIMINAL)) && !Upolyd) || activeFightingForm(FFORM_ATARU))
 
 #endif /* YOUPROP_H */

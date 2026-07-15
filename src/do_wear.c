@@ -31,6 +31,7 @@ static NEARDATA const char c_armor[]  = "armor",
 			   c_gloves[] = "gloves",
 			   c_boots[]  = "boots",
 			   c_helmet[] = "helmet",
+			   c_wingguard[] = "wing-guard",
 			   c_shield[] = "shield",
 			   c_weapon[] = "weapon",
 			   c_sword[]  = "sword",
@@ -877,6 +878,108 @@ Shirt_off()
     return 0;
 }
 
+int
+WingGuard_on()
+{
+	long oldprop =
+	    u.uprops[objects[uarmw->otyp].oc_oprop[0]].extrinsic & ~WORN_WINGS;
+
+	adj_abon(uarmw, uarmw->spe);
+	if(check_oprop(uarmw, OPROP_CURS) && !uarmw->cursed){
+		if (Blind)
+		pline("%s for a moment.", Tobjnam(uarmw, "vibrate"));
+		else
+		pline("%s %s for a moment.",
+			  Tobjnam(uarmw, "glow"), hcolor(NH_BLACK));
+		curse(uarmw);
+	}
+
+	if(uarmw->otyp == WING_GUARDS_OF_WEAKNESS){
+		flags.botl = 1;
+	}
+	if(uarmw->otyp == WING_GUARDS_OF_BUMBLING){
+		if (!oldprop && !(HFumbling & ~TIMEOUT))
+			incr_itimeout(&HFumbling, rnd(20));
+	}
+	if(uarmw->otyp == CONSTRICTING_WING_GUARDS){
+		pline("The %s constrict around your wings!", The(xname(uarmw)));
+		makeknown(uarmw->otyp);
+		if(Flying){
+			if(!Levitation){
+				(void) crash_down(0L, 0L);
+			}
+			flags.botl = 1;
+		}
+		if(!uarmw->cursed){
+			if (Blind)
+				pline("%s for a moment.", Tobjnam(uarmw, "vibrate"));
+			else
+				pline("%s %s for a moment.",
+					Tobjnam(uarmw, "glow"), hcolor(NH_BLACK));
+			curse(uarmw);
+		}
+	}
+	if(arti_lighten(uarmw, FALSE)) inv_weight();
+    return 0;
+}
+
+int
+WingGuard_off()
+{
+	boolean checkweight = FALSE;
+	long oldprop =
+	    u.uprops[objects[uarmw->otyp].oc_oprop[0]].extrinsic & ~WORN_WINGS;
+
+	if (!cancelled_don) adj_abon(uarmw, -uarmw->spe);
+
+    takeoff_mask &= ~W_ARMW;
+	if(arti_lighten(uarmw, FALSE)) checkweight = TRUE;
+/*
+    switch (uarmw->otyp) {
+	case HAWAIIAN_SHIRT:
+	case T_SHIRT:
+		break;
+	default: impossible(unknown_type, c_wingguard, uarmw->otyp);
+    }
+*/
+	if(uarmw->otyp == WING_GUARDS_OF_BUMBLING){
+		if (!oldprop && !(HFumbling & ~TIMEOUT))
+			HFumbling = EFumbling = 0;
+	}
+	if(uarmw->otyp == CONSTRICTING_WING_GUARDS){
+		if(Flying){
+			if(!Levitation){
+				(void) float_up();
+			}
+			makeknown(uarmw->otyp);
+			spoteffects(FALSE);
+		}
+		curse(uarmw);
+	}
+
+    setworn((struct obj *)0, W_ARMW);
+	if(checkweight) inv_weight();
+    return 0;
+}
+
+/* Re-validate worn wing-guards whenever the hero's wing status may have
+ * changed outside of a full polymorph (e.g. gaining or losing a level
+ * grants/revokes wings via a race ability or mutation). Mirrors the
+ * uarmw handling in break_armor().
+ */
+void
+wingguard_check()
+{
+	struct obj *otmp = uarmw;
+
+	if (otmp && !has_wings_mon(&youmonst)) {
+		if (donning(otmp)) cancel_don();
+		Your("wing-guards fall away!");
+		(void) WingGuard_off();
+		dropx(otmp);
+	}
+}
+
 /* This must be done in worn.c, because one of the possible intrinsics conferred
  * is fire resistance, and we have to immediately set HFire_resistance in worn.c
  * since worn.c will check it before returning.
@@ -1527,15 +1630,14 @@ Saddle_off()
 void
 set_wear()
 {
-#ifdef TOURIST
 	if (uarmu) (void) Shirt_on();
-#endif
 	if (uarm)  (void) Armor_on();
 	if (uarmc) (void) Cloak_on();
 	if (uarmf) (void) Boots_on();
 	if (uarmg) (void) Gloves_on();
 	if (uarmh) (void) Helmet_on();
 	if (uarms) (void) Shield_on();
+	if (uarmw) (void) WingGuard_on();
 }
 
 /* check whether the target object is currently being put on (or taken off) */
@@ -1550,11 +1652,12 @@ register struct obj *otmp;
     if (otmp == uarm)
 	result = (afternmv == Armor_on || afternmv == Armor_off ||
 		  what == WORN_ARMOR);
-#ifdef TOURIST
     else if (otmp == uarmu)
 	result = (afternmv == Shirt_on || afternmv == Shirt_off ||
 		  what == WORN_SHIRT);
-#endif
+    else if (otmp == uarmw)
+	result = (afternmv == WingGuard_on || afternmv == WingGuard_off ||
+		  what == WORN_WINGS);
     else if (otmp == uarmc)
 	result = (afternmv == Cloak_on || afternmv == Cloak_off ||
 		  what == WORN_CLOAK);
@@ -1615,6 +1718,7 @@ dotakeoff()
 	MOREARM(uarms);
 	MOREARM(uarmg);
 	MOREARM(uarmf);
+	MOREARM(uarmw);
 	if (uarmc) {
 		armorpieces++;
 		otmp = uarmc;
@@ -1693,7 +1797,7 @@ doremring()
 
 	if(!Accessories) {
 		pline("Not wearing any accessories.%s", (iflags.cmdassist &&
-			    (uarm || uarmc || uarmu ||
+			    (uarm || uarmc || uarmu || uarmw ||
 			     uarms || uarmh || uarmg || uarmf)) ?
 		      "  Use 'T' command to take off armor." : "");
 		return MOVE_CANCELLED;
@@ -1792,6 +1896,10 @@ register struct obj *otmp;
 		else if (otmp == uarmu) {
 			nomovemsg = "You finish taking off your shirt.";
 			afternmv = Shirt_off;
+		     }
+		else if (otmp == uarmw) {
+			nomovemsg = "You finish taking off your wing-guards.";
+			afternmv = WingGuard_off;
 		     }
 		else if (otmp == uarm){
 			nomovemsg = "You finish taking off your suit.";
@@ -2013,6 +2121,22 @@ boolean noisy;
 			err++;
 		} else
 			*mask = W_ARMU;
+	} else if (is_wingguard(otmp)) {
+		if (uarmw) {
+			if (uarmw) {
+				if (noisy) already_wearing(an(c_wingguard));
+			}
+			err++;
+		} else if(!has_wings_mon(&youmonst)){
+			if (noisy)
+				You("can't wear wing-guards because you don't have wings.");
+			err++;
+		} else if(youracedata->msize != otmp->objsize){
+			if (noisy)
+			pline_The("%s is the wrong size for you.", c_wingguard);
+			err++;
+		} else
+			*mask = W_ARMW;
 	} else if (is_cloak(otmp)) {
 		if (uarmc) {
 			if (noisy) already_wearing(an(cloak_simple_name(uarmc)));
@@ -2133,6 +2257,7 @@ dowear()
 		else if(is_gloves(otmp)) afternmv = Gloves_on;
 		else if(is_cloak(otmp)) afternmv = Cloak_on;
 		else if(is_shirt(otmp)) afternmv = Shirt_on;
+		else if(is_wingguard(otmp)) afternmv = WingGuard_on;
 		// else if(is_belt(otmp)) afternmv = Belt_on;
 		else if(otmp == uarm) afternmv = Armor_on;
 		nomovemsg = "You finish your dressing maneuver.";
@@ -2143,6 +2268,7 @@ dowear()
 		else if(is_gloves(otmp)) (void) Gloves_on();
 		else if(is_cloak(otmp)) (void) Cloak_on();
 		else if(is_shirt(otmp)) (void) Shirt_on();
+		else if(is_wingguard(otmp)) (void) WingGuard_on();
 		// else if(is_belt(otmp)) (void) Belt_on();
 		else if(otmp == uarm) (void) Armor_on();
 		on_msg(otmp);
@@ -2955,6 +3081,7 @@ find_ac()
 	}
 	if (uarmg)	uac -= arm_ac_bonus(uarmg);
 	if (uarmu)	uac -= arm_ac_bonus(uarmu);
+	if (uarmw)	uac -= arm_ac_bonus(uarmw);
 	if (ubelt)	uac -= arm_ac_bonus(ubelt);
 	
 	if(uwep && hand_protecting(uwep) && !arti_phasing(uwep)){
@@ -3191,6 +3318,8 @@ uchar aatyp;
 		slot = UPPER_TORSO_DR;
 	if (slot == LEG_DR && !can_wear_boots(youracedata))
 		slot = LOWER_TORSO_DR;
+	if (slot == WING_DR && !has_wings_mon(&youmonst))
+		slot = UPPER_TORSO_DR;
 	if (slot == ARM_DR && !can_wear_gloves(youracedata))
 		slot = UPPER_TORSO_DR;
 
@@ -3242,6 +3371,7 @@ uchar aatyp;
 		case HEAD_DR:        nat_udr += youracedata->hdr; break;
 		case LEG_DR:         nat_udr += youracedata->fdr; break;
 		case ARM_DR:         nat_udr += youracedata->gdr; break;
+		case WING_DR:        nat_udr += youracedata->wdr; break;
 		}
 	}
 	/* Aasimar holy auras */
@@ -3306,6 +3436,7 @@ uchar aatyp;
 		{
 		case UPPER_TORSO_DR: offset = 3; break;
 		case LOWER_TORSO_DR: offset = 1; break;
+		case WING_DR:        offset = 4; break;
 		case HEAD_DR:        offset = 4; break;
 		case LEG_DR:         offset = 0; break;
 		case ARM_DR:         offset = 2; break;
@@ -3364,30 +3495,35 @@ roll_udr_detail(struct monst *magr, int slot, int depth, uchar aatyp)
 	int udr;
 	int cap = 10;
 	
-	if(!slot) switch(rn2(9)){
-		case 0:
-		case 1:
-			slot = UPPER_TORSO_DR;
-		break;
-		case 2:
-		case 3:
-			slot = LOWER_TORSO_DR;
-		break;
-		case 4:
-			slot = HEAD_DR;
-		break;
-		case 5:
-			slot = LEG_DR;
-		break;
-		case 6:
-			slot = ARM_DR;
-		break;
-		case 7:
-		case 8:
-			if(slot_udr(UPPER_TORSO_DR, magr, 0, aatyp) > slot_udr(ARM_DR, magr, 0, aatyp))
+	if(!slot){
+		if(has_wings_mon(&youmonst) && rn2(11) < 2){
+			slot = WING_DR;
+		}
+		else switch(rn2(9)){
+			case 0:
+			case 1:
 				slot = UPPER_TORSO_DR;
-			else slot = ARM_DR;
-		break;
+			break;
+			case 2:
+			case 3:
+				slot = LOWER_TORSO_DR;
+			break;
+			case 4:
+				slot = HEAD_DR;
+			break;
+			case 5:
+				slot = LEG_DR;
+			break;
+			case 6:
+				slot = ARM_DR;
+			break;
+			case 7:
+			case 8:
+				if(slot_udr(UPPER_TORSO_DR, magr, 0, aatyp) > slot_udr(ARM_DR, magr, 0, aatyp))
+					slot = UPPER_TORSO_DR;
+				else slot = ARM_DR;
+			break;
+		}
 	}
 	udr = slot_udr(slot, magr, depth, aatyp);
 	if(active_glyph(DEEP_SEA))
@@ -3520,11 +3656,11 @@ struct monst *victim;
 		// if(otmph && !arm_blocks_upper_body(otmph->otyp) && rn2(2))
 			// otmph = 0;
 	}
-#ifdef TOURIST
 	if (!otmph)
 	    otmph = (victim == &youmonst) ? uarmu : which_armor(victim, W_ARMU);
-#endif
 	
+	otmp = (victim == &youmonst) ? uarmw : which_armor(victim, W_ARMW);
+	if(otmp && (!otmph || !rn2(4))) otmph = otmp;
 	otmp = (victim == &youmonst) ? uarmh : which_armor(victim, W_ARMH);
 	if(otmp && (!otmph || !rn2(4))) otmph = otmp;
 	otmp = (victim == &youmonst) ? uarmg : which_armor(victim, W_ARMG);
@@ -3721,9 +3857,8 @@ register struct obj *otmp;
 	else if(otmp == uarmg) takeoff_mask |= WORN_GLOVES;
 	else if(otmp == uarmh) takeoff_mask |= WORN_HELMET;
 	else if(otmp == uarms) takeoff_mask |= WORN_SHIELD;
-#ifdef TOURIST
 	else if(otmp == uarmu) takeoff_mask |= WORN_SHIRT;
-#endif
+	else if(otmp == uarmw) takeoff_mask |= WORN_WINGS;
 	else if(otmp == uleft) takeoff_mask |= LEFT_RING;
 	else if(otmp == uright) takeoff_mask |= RIGHT_RING;
 	else if(otmp == uamul) takeoff_mask |= WORN_AMUL;
@@ -3774,14 +3909,15 @@ do_takeoff()
 	} else if (taking_off == WORN_HELMET) {
 	  otmp = uarmh;
 	  if(!cursed(otmp)) (void) Helmet_off();
+	} else if (taking_off == WORN_WINGS) {
+	  otmp = uarmw;
+	  if(!cursed(otmp)) (void) WingGuard_off();
 	} else if (taking_off == WORN_SHIELD) {
 	  otmp = uarms;
 	  if(!cursed(otmp)) (void) Shield_off();
-#ifdef TOURIST
 	} else if (taking_off == WORN_SHIRT) {
 	  otmp = uarmu;
 	  if (!cursed(otmp)) (void) Shirt_off();
-#endif
 	} else if (taking_off == WORN_AMUL) {
 	  otmp = uamul;
 	  if(!cursed(otmp)) Amulet_off();
@@ -3859,17 +3995,17 @@ take_off()
 	  otmp = uarmh;
 	} else if (taking_off == WORN_SHIELD) {
 	  otmp = uarms;
-#ifdef TOURIST
 	} else if (taking_off == WORN_SHIRT) {
 	  otmp = uarmu;
 	  /* add the time to take off and put back on armor and/or cloak */
 	  if (uarm)  todelay += 2 * objects[uarm->otyp].oc_delay;
 	  if (uarmc) todelay += 2 * objects[uarmc->otyp].oc_delay + 1;
-#endif
 	} else if (taking_off == WORN_AMUL) {
 	  todelay = 1;
 	} else if (taking_off == WORN_BELT) {
 	  todelay = 1;
+	} else if (taking_off == WORN_WINGS) {
+	  otmp = uarmw;
 	} else if (taking_off == LEFT_RING) {
 	  todelay = 1;
 	} else if (taking_off == RIGHT_RING) {
@@ -4033,6 +4169,20 @@ register struct obj *atmp;
 		} else {
 			Your("underclothes resists destruction!");
 		}
+	} else if (DESTROY_ARM(uarmw)) {
+		if((!obj_resists(otmp, 0, 100))){
+			if (donning(otmp)) cancel_don();
+			Your("wing-guards turn to dust and fall to the %s!",
+				surface(u.ux,u.uy));
+			(void) WingGuard_off();
+			useup(otmp);
+			if(roll_madness(MAD_TALONS)){
+				You("panic after having your wing-guards destroyed!");
+				HPanicking += 1+rnd(6);
+			}
+		} else {
+			Your("wing-guards resist destruction!");
+		}
 	} else if (DESTROY_ARM(uarmh)) {
 		if((!obj_resists(otmp, 0, 100))){
 			if (donning(otmp)) cancel_don();
@@ -4127,6 +4277,9 @@ register struct obj *otmp;
 		if(unwornmask&W_ARM){
 			if(canseemon(mtmp))
 				pline("%s armor turns to dust!", s_suffix(Monnam(mtmp)));
+		} else if(unwornmask&W_ARMW){
+			if(canseemon(mtmp))
+				pline("%s wing armor turns to dust!", s_suffix(Monnam(mtmp)));
 		} else if(unwornmask&W_ARMC){
 			if(canseemon(mtmp))
 				pline("%s %s crumbles and turns to dust!", s_suffix(Monnam(mtmp)), cloak_simple_name(otmp));
@@ -4184,7 +4337,6 @@ register struct obj *atmp;
 			You("panic after having your armor ripped open!");
 			HPanicking += 1+rnd(6);
 		}
-#ifdef TOURIST
 	} else if (DESTROY_ARM(uarmu)) {
 		if (donning(otmp)) cancel_don();
 		Your("underclothes are torn off!");
@@ -4194,7 +4346,15 @@ register struct obj *atmp;
 			You("panic after having your underclothes torn off!");
 			HPanicking += 1+rnd(6);
 		}
-#endif
+	} else if (DESTROY_ARM(uarmw)) {
+		if (donning(otmp)) cancel_don();
+		Your("wing-guards are torn off!");
+		(void) WingGuard_off();
+		useup(otmp);
+		if(roll_madness(MAD_TALONS)){
+			You("panic after having your wing-guards torn off!");
+			HPanicking += 1+rnd(6);
+		}
 	} else if (DESTROY_ARM(uarmh)) {
 		if (donning(otmp)) cancel_don();
 		Your("helmet is knocked to pieces!");
@@ -4279,6 +4439,9 @@ register struct obj *otmp;
 		} else if(unwornmask&W_ARMH){
 			if(canseemon(mtmp))
 				pline("%s helm is knocked to pieces!", s_suffix(Monnam(mtmp)));
+		} else if(unwornmask&W_ARMW){
+			if(canseemon(mtmp))
+				pline("%s wing-guards are knocked to pieces!", s_suffix(Monnam(mtmp)));
 		} else if(unwornmask&W_ARMS){
 			if(canseemon(mtmp))
 				pline("%s shield shatters!", s_suffix(Monnam(mtmp)));
@@ -4330,7 +4493,6 @@ register struct obj *atmp;
 			You("panic after having your armor sliced apart!");
 			HPanicking += 1+rnd(6);
 		}
-#ifdef TOURIST
 	} else if (DESTROY_ARM(uarmu)) {
 		if (donning(otmp)) cancel_don();
 		Your("underclothes are sliced open!");
@@ -4340,7 +4502,15 @@ register struct obj *atmp;
 			You("panic after having your underclothes sliced off!");
 			HPanicking += 1+rnd(6);
 		}
-#endif
+	} else if (DESTROY_ARM(uarmw)) {
+		if (donning(otmp)) cancel_don();
+		Your("wing-guards are sliced open!");
+		(void) WingGuard_off();
+		useup(otmp);
+		if(roll_madness(MAD_TALONS)){
+			You("panic after having your wing-guards sliced off!");
+			HPanicking += 1+rnd(6);
+		}
 	} else if (DESTROY_ARM(uarmh)) {
 		if (donning(otmp)) cancel_don();
 		Your("helmet is sliced to pieces!");
@@ -4425,6 +4595,9 @@ register struct obj *otmp;
 		} else if(unwornmask&W_ARMH){
 			if(canseemon(mtmp))
 				pline("%s helm is sliced open!", s_suffix(Monnam(mtmp)));
+		} else if(unwornmask&W_ARMW){
+			if(canseemon(mtmp))
+				pline("%s wing-guards are sliced off!", s_suffix(Monnam(mtmp)));
 		} else if(unwornmask&W_ARMS){
 			if(canseemon(mtmp))
 				pline("%s shield is cut in two!", s_suffix(Monnam(mtmp)));
@@ -4488,6 +4661,18 @@ struct monst *mdef;
 			randomly_place_obj(otmp);
 			if(roll_madness(MAD_TALONS)){
 				You("panic after losing your underclothes!");
+				HPanicking += 1+rnd(6);
+			}
+		} else if (TELEPORT_ARM(uarmw)) {
+			if (donning(otmp)) cancel_don();
+			Your("wing-guards vanish!");
+			(void) WingGuard_off();
+			obj_extract_self(otmp);
+			otmp->ox = u.ux;
+			otmp->oy = u.uy;
+			randomly_place_obj(otmp);
+			if(roll_madness(MAD_TALONS)){
+				You("panic after losing your wing-guards!");
 				HPanicking += 1+rnd(6);
 			}
 		} else if (TELEPORT_ARM(uarmh)) {
@@ -4554,6 +4739,7 @@ struct monst *mdef;
 		}
 		else if(((otmp = which_armor(mdef, W_ARMC)) && !obj_resists(otmp, 66, 90))
 			|| ((otmp = which_armor(mdef, W_ARM)) && !obj_resists(otmp, 66, 90))
+			|| ((otmp = which_armor(mdef, W_ARMW)) && !obj_resists(otmp, 66, 90))
 			|| ((otmp = which_armor(mdef, W_ARMU)) && !obj_resists(otmp, 66, 90))
 			|| ((otmp = which_armor(mdef, W_ARMH)) && !obj_resists(otmp, 66, 90))
 			|| ((otmp = which_armor(mdef, W_ARMG)) && !obj_resists(otmp, 66, 90))
@@ -4612,6 +4798,16 @@ struct obj *atmp;
 		mpickobj(magr, otmp);
 		if(roll_madness(MAD_TALONS)){
 			You("panic after losing your underclothes!");
+			HPanicking += 1+rnd(6);
+		}
+	} else if (TELEPORT_ARM(uarmw)) {
+		if (donning(otmp)) cancel_don();
+		Your("wing-guards vanish!");
+		(void) WingGuard_off();
+		obj_extract_self(otmp);
+		mpickobj(magr, otmp);
+		if(roll_madness(MAD_TALONS)){
+			You("panic after losing your wing-guards!");
 			HPanicking += 1+rnd(6);
 		}
 	} else if (TELEPORT_ARM(uarmh)) {
@@ -4694,7 +4890,6 @@ struct obj *atmp;
 			You("panic after having your armor torn apart!");
 			HPanicking += 1+rnd(6);
 		}
-#ifdef TOURIST
 	} else if (DESTROY_ARM(uarmu)) {
 		if (donning(otmp)) cancel_don();
 		pline("The tentacles tear your underclothes to shreds!");
@@ -4704,7 +4899,15 @@ struct obj *atmp;
 			You("panic after having your underclothes shredded!");
 			HPanicking += 1+rnd(6);
 		}
-#endif
+	} else if (DESTROY_ARM(uarmw)) {
+		if (donning(otmp)) cancel_don();
+		pline("The tentacles tear your wing-guards to pieces!");
+		(void) WingGuard_off();
+		useup(otmp);
+		if(roll_madness(MAD_TALONS)){
+			You("panic after having your wing-guards torn apart!");
+			HPanicking += 1+rnd(6);
+		}
 	} else if (DESTROY_ARM(uarmh)) {
 		if (donning(otmp)) cancel_don();
 		pline("The tentacles break your helmet to pieces!");
@@ -4821,6 +5024,21 @@ adj_abon(struct obj *otmp, schar delta)
 			if (delta) {
 				makeknown(otmp->otyp);
 				ABON(A_DEX) += (delta);
+				flags.botl = 1;
+			}
+		}
+	}
+	if (uarmw && uarmw == otmp) {
+		if(otyp == DEXTEROUS_WING_GUARDS){
+			if (delta) {
+				makeknown(otmp->otyp);
+				ABON(A_DEX) += (delta);
+				flags.botl = 1;
+			}
+		}
+		if(otyp == WINGLETS_OF_ADORNMENT){
+			if (delta) {
+				ABON(A_CHA) += (delta);
 				flags.botl = 1;
 			}
 		}
@@ -6017,7 +6235,7 @@ struct obj *artifact;
 			if(youdef){
 				pline("The tentacles somehow disentangle several objects from your person, including %s from your grip and %s from your body!",
 					u.twoweap && weapon > 1 ? "your weapons" : u.twoweap ? "a weapon" : "your weapon",
-					(uarm || uarmc || uarmu || uarmh || uarmg || uarmf) ? "some clothes" : "the clothes"
+					(uarm || uarmc || uarmu || uarmh || uarmg || uarmf || uarmw) ? "some clothes" : "the clothes"
 				);
 				pline("You're pretty sure that wasn't physically possible.");
 			}
@@ -6035,7 +6253,7 @@ struct obj *artifact;
 			if(youdef){
 				pline("The tentacles somehow disentangle %s from your grip and %s from your body!",
 					u.twoweap && weapon > 1 ? "your weapons" : u.twoweap ? "a weapon" : "your weapon",
-					(uarm || uarmc || uarmu || uarmh || uarmg || uarmf) ? "some clothes" : "the clothes"
+					(uarm || uarmc || uarmu || uarmh || uarmg || uarmf || uarmw) ? "some clothes" : "the clothes"
 				);
 				pline("You're pretty sure that wasn't physically possible.");
 			}
@@ -6067,7 +6285,7 @@ struct obj *artifact;
 			else if(armor){
 				if(youdef){
 					pline("The tentacles somehow disentangle several objects from your person, including %s from your body!",
-						(uarm || uarmc || uarmu || uarmh || uarmg || uarmf) ? "some clothes" : "the clothes"
+						(uarm || uarmc || uarmu || uarmh || uarmg || uarmf || uarmw) ? "some clothes" : "the clothes"
 					);
 					pline("You're pretty sure that wasn't physically possible.");
 				}
@@ -6109,7 +6327,7 @@ struct obj *artifact;
 			else if(armor){
 				if(youdef){
 					pline("The tentacles somehow disentangle %s from your body!",
-						(uarm || uarmc || uarmu || uarmh || uarmg || uarmf) ? "some clothes" : "the clothes"
+						(uarm || uarmc || uarmu || uarmh || uarmg || uarmf || uarmw) ? "some clothes" : "the clothes"
 					);
 					pline("You're pretty sure that wasn't physically possible.");
 				}

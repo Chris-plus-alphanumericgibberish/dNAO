@@ -181,9 +181,8 @@ NEARDATA struct obj *invent = (struct obj *)0,
 	*uwep = (struct obj *)0, *uarm = (struct obj *)0,
 	*uswapwep = (struct obj *)0,
 	*uquiver = (struct obj *)0, /* quiver */
-#ifdef TOURIST
 	*uarmu = (struct obj *)0, /* under-wear, so to speak */
-#endif
+	*uarmw = (struct obj *)0, /* wing-guards */
 	*ubelt = (struct obj *)0,
 	*usaddle = (struct obj *)0,
 	*uskin = (struct obj *)0, /* dragon armor, if a dragon */

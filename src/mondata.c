@@ -432,7 +432,7 @@ struct permonst * ptr;
 
 	/* other intrinsics */
 	set_mintrinsic(species_swims(mon->data), SWIMMING);
-	set_mintrinsic((species_flies(mon->data) && (!mon->mcan || has_wings(mon->data))), FLYING);
+	set_mintrinsic((species_flies(mon->data) && (!mon->mcan || has_wings_mon(mon))), FLYING);
 	set_mintrinsic_cancelable(species_floats(mon->data), LEVITATION);
 	set_mintrinsic_cancelable(species_displaces(mon->data), DISPLACED);
 	set_mintrinsic_cancelable(species_passes_walls(mon->data), PASSES_WALLS);
@@ -887,6 +887,7 @@ int template;
 		ptr->spe_hdr += 6;
 		ptr->spe_bdr += 6;
 		ptr->spe_gdr += 6;
+		ptr->spe_wdr += 6;
 		ptr->spe_ldr += 6;
 		ptr->spe_fdr += 6;
 		ptr->mflagst &= ~(MT_ANIMAL|MT_MINDLESS);
@@ -947,6 +948,7 @@ int template;
 			AVG_AC(pac)
 			ptr->spe_bdr += 4;
 			ptr->spe_gdr += 2;
+			ptr->spe_wdr += 2;
 			ptr->spe_ldr += 2;
 		}
 		break;
@@ -1032,6 +1034,7 @@ int template;
 		ptr->spe_hdr += 3;
 		ptr->spe_bdr += 3;
 		ptr->spe_gdr += 3;
+		ptr->spe_wdr += 3;
 		ptr->spe_ldr += 3;
 		ptr->spe_fdr += 3;
 		ptr->mflagst |= (MT_HOSTILE | MT_STALK);
@@ -1071,6 +1074,7 @@ int template;
 		ptr->spe_hdr += 4;
 		ptr->spe_bdr += 4;
 		ptr->spe_gdr += 4;
+		ptr->spe_wdr += 4;
 		ptr->spe_ldr += 4;
 		ptr->spe_fdr += 4;
 		ptr->msound = MS_SCREAM;
@@ -1121,6 +1125,7 @@ int template;
 			ptr->spe_hdr = 0;
 			ptr->spe_bdr = 0;
 			ptr->spe_gdr = 0;
+			ptr->spe_wdr = 0;
 			ptr->spe_ldr = 0;
 			ptr->spe_fdr = 0;
 			ptr->mflagst |= MT_BOLD|MT_HOSTILE;
@@ -1146,6 +1151,7 @@ int template;
 			ptr->spe_hdr = 0;
 			ptr->spe_bdr = 0;
 			ptr->spe_gdr = 0;
+			ptr->spe_wdr = 0;
 			ptr->spe_ldr = 0;
 			ptr->spe_fdr = 0;
 			ptr->mmove = 0;
@@ -1212,6 +1218,7 @@ int template;
 		ptr->spe_gdr = 8;
 		ptr->spe_ldr = 8;
 		ptr->spe_fdr = 8;
+		ptr->spe_wdr = 8;
 		/* resists: */
 		ptr->mresists |= (MR_POISON|MR_STONE|MR_COLD|MR_MAGIC);
 		/* misc: */
@@ -2138,6 +2145,7 @@ int level_bonus;
 		horror->spe_gdr = 0;
 		horror->spe_ldr = 0;
 		horror->spe_fdr = 0;
+		horror->spe_wdr = 0;
 
 		horror->mr = rn2(11) * 10;				/* varying amounts of MR */
 		horror->maligntyp = d(2, 9) - 10;			/* any alignment */
@@ -3192,6 +3200,7 @@ struct obj *obj;		/* aatyp == AT_WEAP, AT_SPIT */
 	    break;
 
 	case AT_CLAW:
+	case AT_WING:
 	    /* e.g. raven: all ublindf, including LENSES, protect */
 	    if (is_you && ublindf)
 		return FALSE;
@@ -3779,6 +3788,18 @@ struct monst *mtmp;
 {
     if (mtmp == &youmonst && !Upolyd) return(&mons[urace.malenum]);
     else return(mtmp->data);
+}
+
+/*
+ * Other than has_wings(youmonst.data)
+ */
+boolean
+u_variable_wings()
+{
+	if(Race_if(PM_HALF_DRAGON) && (HFlying&FROMRACE)) return TRUE;
+	if(TIEFLING_WINGS) return TRUE;
+
+	return FALSE;
 }
 
 static const char *levitate[4]	= { "float", "Float", "wobble", "Wobble" };

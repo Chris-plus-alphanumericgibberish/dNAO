@@ -8812,7 +8812,7 @@ use_chrysalis(struct obj *obj)
 	}
 	if(n == 2){
 		add_rot(ROT_WINGS);
-		pline((Race_if(PM_HALF_DRAGON) && u.ulevel >= 14) || has_wings(youracedata) ? "Your wings rot!" : "Wings of rot grow from your back!");
+		pline(has_wings_mon(&youmonst) ? "Your wings rot!" : "Wings of rot grow from your back!");
 		HFlying |= FROMOUTSIDE;
 		float_up();
 		spoteffects(FALSE);

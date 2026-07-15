@@ -377,6 +377,14 @@ int mkflags;
 		oclass = iprobs->iclass;
 	}
 
+	if (oclass == ARMOR_CLASS) {
+		if (Inhell) {
+			if (!rn2(100)) return mkwingguard(mkflags);
+		} else if (In_endgame(&u.uz)) {
+			if (!rn2(10)) return mkwingguard(mkflags);
+		}
+	}
+
 	i = bases[(int)oclass];
 	while((prob -= objects[i].oc_prob) > 0) i++;
 
@@ -384,6 +392,34 @@ int mkflags;
 		panic("probtype error, oclass=%d i=%d", (int) oclass, i);
 
 	return(mksobj(i, mkflags));
+}
+
+/* wing guards all have oc_prob 0, so mkobj() can never roll them normally;
+   the mundane wing-guards are weighted 10x any other individual wing guard */
+struct obj *
+mkwingguard(mkflags)
+int mkflags;
+{
+	int i, nwing, otyp, pick;
+
+	nwing = 0;
+	for (i = bases[ARMOR_CLASS];
+	     i < NUM_OBJECTS && objects[i].oc_class == ARMOR_CLASS; i++)
+		if (objects[i].oc_armcat == ARM_WING) nwing++;
+
+	otyp = WING_GUARDS;
+	pick = rn2((nwing - 1) + 10);
+	for (i = bases[ARMOR_CLASS];
+	     i < NUM_OBJECTS && objects[i].oc_class == ARMOR_CLASS; i++) {
+		if (objects[i].oc_armcat != ARM_WING) continue;
+		pick -= (i == WING_GUARDS) ? 10 : 1;
+		if (pick < 0) {
+			otyp = i;
+			break;
+		}
+	}
+
+	return mksobj(otyp, mkflags);
 }
 
 STATIC_OVL void
@@ -1537,6 +1573,9 @@ int mkflags;
 			if (rn2(10) && (otmp->otyp == FUMBLE_BOOTS ||
 				otmp->otyp == HELM_OF_OPPOSITE_ALIGNMENT ||
 				otmp->otyp == GAUNTLETS_OF_FUMBLING ||
+				otmp->otyp == WING_GUARDS_OF_WEAKNESS ||
+				otmp->otyp == WING_GUARDS_OF_BUMBLING ||
+				otmp->otyp == CONSTRICTING_WING_GUARDS ||
 				!rn2(11))) {
 				curse(otmp);
 				otmp->spe = -rne(3);
@@ -2361,6 +2400,11 @@ struct obj* obj;
      * list exists. */
 	if (otyp == find_gcirclet()) {
 		return shiny_materials;
+	}
+	else if (otyp == find_dwingcovers()) {
+		/* diamaphorous wing-covers must always be cloth, regardless of
+		 * which wing-guard otyp the shuffle assigns the appearance to */
+		return NULL;
 	}
 	else if (is_firearm(obj) && (default_material == IRON || default_material == METAL)) {
 		return resonant_materials;	// guns and bells are surprisingly similar (see: Wheel of Time)

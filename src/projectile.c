@@ -2940,11 +2940,12 @@ int * dz;
 		&&
 		/* at a 1/7 chance */
 		(*dx || *dy) && !rn2(7)
-		) || (
+		) || ((
 			/* Bad luck */
 			!youagr && !magr->mpeaceful && couldsee(magr->mx,magr->my)
 			&& OffensiveLuck && u.uluck > 0
 			&& rn2(20) < u.uluck
+			) || (!youagr && mon_resistance(magr, FUMBLING) && !rn2(20))
 		))
 		) {
 		boolean slipok = TRUE;

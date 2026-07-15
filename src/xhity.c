@@ -1170,7 +1170,8 @@ xattacky(struct monst *magr, struct monst *mdef, int tarx, int tary, long modifi
 // MELEE
 //////////////////////////////////////////////////////////////
 			/* basic hand-to-hand attacks, check covering for hitting *trices */
-		case AT_CLAW:	// 
+		case AT_CLAW:	//
+		case AT_WING:	//
 		case AT_KICK:	// 
 		case AT_BITE:	// not used by vampires against creatures with deadly corpses
 		case AT_OBIT:	//
@@ -2619,7 +2620,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 					|| dmgtype(pd, AD_SSEX)
 					|| dmgtype(pd, AD_LSEX)
 					|| !could_seduce(magr,mdef,0)
-					|| !(uarm || uarmu || uarmh || uarmg || uarmf || uarmc || uwep || uswapwep)
+					|| !(uarm || uarmu || uarmh || uarmg || uarmf || uarmc || uarmw || uwep || uswapwep)
 				))){
 					add_subout(subout, SUBOUT_GOATSPWN);
 					attk->aatyp = AT_CLAW;
@@ -2635,7 +2636,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 					|| dmgtype(pd, AD_LSEX)
 					|| magr->mcan 
 					|| !(mdef && could_seduce(magr,mdef,0))
-					|| (mdef && !(which_armor(mdef, W_ARM) || which_armor(mdef, W_ARMU) || which_armor(mdef, W_ARMH) || 
+					|| (mdef && !(which_armor(mdef, W_ARM) || which_armor(mdef, W_ARMU) || which_armor(mdef, W_ARMW) || which_armor(mdef, W_ARMH) || 
 						 which_armor(mdef, W_ARMG) || which_armor(mdef, W_ARMF) || which_armor(mdef, W_ARMC) ||
 						 MON_WEP(mdef) || MON_SWEP(mdef)
 					))
@@ -4806,6 +4807,11 @@ int *shield_margin;
 				if (otmp->otyp == GAUNTLETS_OF_POWER || (otmp->otyp == IMPERIAL_ELVEN_GAUNTLETS && check_imp_mod(otmp, IEA_GOPOWER)))
 					bons_acc += 3;
 			}
+			/* simulate accuracy from stat bonuses from wing guards */
+			if ((otmp = which_armor(magr, W_ARMW))) {
+				if (otmp->otyp == DEXTEROUS_WING_GUARDS)
+					bons_acc += otmp->spe;
+			}
 			if ((otmp = which_armor(magr, W_ARMH))) {
 				if(otmp && otmp->otyp == IMPERIAL_ELVEN_HELM && check_imp_mod(otmp, IEA_INC_ACC))
 					bons_acc += otmp->spe;
@@ -5435,6 +5441,7 @@ xmeleehity(struct monst *magr, struct monst *mdef, struct attack *attk, struct o
 //////////////////////////////////////////////////////////////
 		/* basic hand-to-hand attacks */
 	case AT_CLAW:
+	case AT_WING:
 	case AT_KICK:
 	case AT_BITE:
 	case AT_OBIT:
@@ -15553,6 +15560,7 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 	boolean unarmed_punch = FALSE;
 	boolean unarmed_kick = FALSE;
 	boolean unarmed_butt = FALSE;
+	boolean unarmed_wing = FALSE;
 	boolean natural_strike = FALSE;
 	boolean ulightsaberhit = FALSE;
 
@@ -16211,13 +16219,17 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 	if (weapon)
 		slot = W_WEP;	// note: the pointer <weapon>, which is not necessarily magr's wielded weapon
 	else
-		slot = attk_equip_slot(magr, attk->aatyp);
+		slot = attk_equip_slot(magr, attk->aatyp, attk->adtyp);
 
 	switch (slot)
 	{
 	case W_ARMG:
 		otmp = (youagr ? uarmg : which_armor(magr, slot));
 		unarmed_punch = TRUE;
+		break;
+	case W_ARMW:
+		otmp = (youagr ? uarmw : which_armor(magr, slot));
+		unarmed_wing = TRUE;
 		break;
 	case W_ARMF:
 		otmp = (youagr ? uarmf : which_armor(magr, slot));
@@ -17397,6 +17409,13 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 			basedmg += otmp->spe;
 		}
 	}
+	else if (unarmed_wing) {
+		/* wing-guard enchantment increases wing buffet damage */
+		otmp = (youagr ? uarmw : which_armor(magr, W_ARMW));
+		if (otmp) {
+			basedmg += otmp->spe;
+		}
+	}
 	else {
 		basedmg = 0;
 	}
@@ -18168,6 +18187,19 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 					artif_hit = TRUE;
 			}
 		}
+		/* unarmed wing buffets proc effects of worn wing-guards */
+		if (unarmed_wing) {
+			//Monsters have extra damage for their attacks, it makes sense to treat it as part of the unarmed damage.
+			int unarmed_basedmg = basedmg + ((youagr && !natural_strike) ? 0 : monsdmg);
+			otmp = (youagr ? uarmw : which_armor(magr, W_ARMW));
+			if (otmp) {
+				returnvalue = apply_hit_effects(magr, mdef, otmp, (struct obj *)0, unarmed_basedmg, &artidmg, &elemdmg, dieroll, &hittxt, TRUE, TRUE);
+				if (returnvalue == MM_MISS || (returnvalue & (MM_DEF_DIED | MM_DEF_LSVD | MM_AGR_STOP)))
+					return returnvalue;
+				if (otmp->oartifact)
+					artif_hit = TRUE;
+			}
+		}
 		/* all valid attacks proc effects of offensive rings */
 		if(youagr){
 			struct obj *rings[] = {uleft, uright};
@@ -18430,6 +18462,14 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 			attackmask = WHACK;
 
 			otmp = (youagr ? uarmf : which_armor(magr, W_ARMF));
+			if(otmp)
+				attackmask = attack_mask(otmp, 0, 0, magr);
+		}
+		else if (unarmed_wing) {
+			//Can always whack someone
+			attackmask = WHACK;
+
+			otmp = (youagr ? uarmw : which_armor(magr, W_ARMW));
 			if(otmp)
 				attackmask = attack_mask(otmp, 0, 0, magr);
 		}
@@ -19229,13 +19269,17 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 
 		/* gloves/boots/helmet -- assumes only one of the three will be used. */
 		if (magr && attk && !weapon)
-			slot = attk_equip_slot(magr, attk->aatyp);
+			slot = attk_equip_slot(magr, attk->aatyp, attk->adtyp);
 		else
 			slot = 0L;
 		switch (slot)
 		{
 		case W_ARMG:
 			otmp = (youagr ? uarmg : which_armor(magr, slot));
+			plural = TRUE;
+			break;
+		case W_ARMW:
+			otmp = (youagr ? uarmw : which_armor(magr, slot));
 			plural = TRUE;
 			break;
 		case W_ARMF:
@@ -20371,7 +20415,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 			switch (passive->adtyp)
 			{
 			case AD_STON:
-				slot = attk_protection(attk->aatyp);
+				slot = attk_protection(attk->aatyp, attk->adtyp);
 				/* Touching is fatal */
 				if (touch_petrifies(pd) && !(Stone_res(magr))
 					&& badtouch(magr, mdef, attk, weapon))
@@ -20396,7 +20440,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 				break;
 			case AD_SLVR:
 				/* Eden's silver body sears attackers */
-				slot = attk_protection(attk->aatyp);
+				slot = attk_protection(attk->aatyp, attk->adtyp);
 				if (hates_silver(pa)
 					&& badtouch(magr, mdef, attk, weapon))
 				{
@@ -21207,12 +21251,15 @@ struct attack * passive;	/* specific passive attack being used */
 		if (!magr || !attk || is_null_attk(attk))
 			return;
 		boolean youagr = (magr == &youmonst);
-		long slot = attk_equip_slot(magr, attk->aatyp);
+		long slot = attk_equip_slot(magr, attk->aatyp, attk->adtyp);
 
 		switch (slot)
 		{
 		case W_ARMG:
 			otmp = (youagr ? uarmg : which_armor(magr, slot));
+			break;
+		case W_ARMW:
+			otmp = (youagr ? uarmw : which_armor(magr, slot));
 			break;
 		case W_ARMF:
 			otmp = (youagr ? uarmf : which_armor(magr, slot));
@@ -25706,9 +25753,9 @@ bonus_ac(struct monst *magr, struct monst *mdef)
 		}
 	}
 	else {
-		int marmor[] = { W_ARM, W_ARMC, W_ARMF, W_ARMH, W_ARMG, W_ARMS, W_ARMU };
+		struct obj * marmor[] = MON_ARMOR_SLOTS(mdef);
 		for (int i = 0; i < SIZE(marmor); i++) {
-			if((curarm = which_armor(mdef, marmor[i]))){
+			if((curarm = marmor[i])){
 				if(curarm->oclass == ARMOR_CLASS){
 					ac_mod += properties_ac(curarm, agrimpure, agrrot, agralign, agrmoral, agrldemon);
 				}

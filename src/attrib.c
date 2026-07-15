@@ -1458,6 +1458,7 @@ struct monst *mon;
 	struct obj *armg = (is_player ? uarmg : which_armor(mon, W_ARMG));
 	struct obj *arms = (is_player ? uarms : which_armor(mon, W_ARMS));
 	struct obj *armh = (is_player ? uarmh : which_armor(mon, W_ARMH));
+	struct obj *armw = (is_player ? uarmw : which_armor(mon, W_ARMW));
 	struct obj *belt = (is_player ? ubelt : which_armor(mon, W_BELT));
 	struct obj *wep = (is_player ? uwep : MON_WEP(mon));
 	struct obj *swapwep = (is_player ? uswapwep : MON_SWEP(mon));
@@ -1526,6 +1527,7 @@ struct monst *mon;
 		}
 	}
 	if (x == A_STR) {
+		boolean weakened = (belt && belt->otyp == BELT_OF_WEAKNESS) || (armw && armw->otyp == WING_GUARDS_OF_WEAKNESS);
 		if(is_player && Race_if(PM_ORC)){
 			tmp += u.ulevel/3;
 			if(tmp > 18) tmp = STR19(tmp);
@@ -1545,8 +1547,8 @@ struct monst *mon;
 			// (swapwep && swapwep->oartifact == ART_STORMBRINGER) ||
 			(swapwep && swapwep->oartifact == ART_OGRESMASHER) ||
 			(arms && arms->oartifact == ART_GOLDEN_KNIGHT)
-		) return((belt && belt->otyp == BELT_OF_WEAKNESS) ? 14 : STR19(25));
-		else if(belt && belt->otyp == BELT_OF_WEAKNESS) return 3;
+		) return(weakened ? 14 : STR19(25));
+		else if(weakened) return 3;
 		else return((schar)((tmp >= STR19(25)) ? STR19(25) : (tmp <= 3) ? 3 : tmp));
 	} else if (x == A_CON) {
 		if (

@@ -70,6 +70,7 @@ struct monst {
 	int mpeacetime;		/* level of peacefulness, implies peaceful, ignored if tame */
 	unsigned long int mintrinsics[MPROP_SIZE];
 	unsigned long int mextrinsics[MPROP_SIZE];
+	unsigned long int mblocked[MPROP_SIZE];	/* per-monster analog of u.uprops[].blocked */
 	unsigned long int acquired_trinsics[MPROP_SIZE];
 	unsigned long int acquired_weaknesses[MPROP_SIZE];
 	int mspec_used;		/* monster's special ability attack timeout */

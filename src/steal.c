@@ -20,6 +20,7 @@ register struct obj *otmp;
 		(otmp == uarmf) ? "boots" :
 		(otmp == uarms) ? "shield" :
 		(otmp == uarmg) ? "gloves" :
+		(otmp == uarmw) ? "wing-guards" :
 		(otmp == uarmc) ? cloak_simple_name(otmp) :
 		(otmp == uarmh) ? "helmet" : "armor");
 }
@@ -201,9 +202,8 @@ boolean unchain_ball;	/* whether to unpunish or just unwield */
 	    else if (obj == uarmg) (void) Gloves_off();
 	    else if (obj == uarmh) (void) Helmet_off();
 	    else if (obj == uarms) (void) Shield_off();
-#ifdef TOURIST
 	    else if (obj == uarmu) (void) Shirt_off();
-#endif
+	    else if (obj == uarmw) (void) WingGuard_off();
 	    /* catchall -- should never happen */
 	    else setworn((struct obj *)0, obj->owornmask & W_ARMOR);
 	} else if (obj->owornmask & W_AMUL) {

@@ -2834,6 +2834,10 @@ xcasty(struct monst *magr, struct monst *mdef, struct attack *attk, int tarx, in
 		if(DefensiveLuck)
 			spell_roll = min_ints(spell_roll, rn2(spell_skill));
 	}
+	if(!youagr && mon_resistance(magr, FUMBLING)){
+		chance++;
+		spell_roll = min_ints(spell_roll, rn2(spell_skill));
+	}
 
 	/* failure chance determined, check if attack fumbles */
 	if (force_fail 
@@ -7830,7 +7834,7 @@ int tary;
 	/* don't cast red word if target is already disrobed/disrobing */
 	if (spellnum == MON_RED_WORD
 		&& (youdef ? 
-			(u.ufirst_know || !(uarmh || uarmc || uarm || ubelt || usaddle || uarmu || uarmg || uarmf || uamul || ublindf || uleft || uright))
+			(u.ufirst_know || !(uarmh || uarmc || uarm || ubelt || usaddle || uarmu || uarmw || uarmg || uarmf || uamul || ublindf || uleft || uright))
 			: (!(mdef->misc_worn_check&(W_ARMOR|W_AMUL|W_BELT|W_TOOL)) || mdef->mdisrobe)
 			)
 	)

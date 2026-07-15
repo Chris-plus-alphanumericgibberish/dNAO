@@ -2325,6 +2325,7 @@ get_description_of_attack_type(uchar id)
 	//case AT_ANY: return "fake attack; dmgtype_fromattack wildcard";
 	case AT_NONE: return "passive";
 	case AT_CLAW: return "claw";
+	case AT_WING: return "wing buffet";
 	case AT_BITE: return "bite";
 	case AT_OBIT: return "bite";
 	case AT_WBIT: return "bite";

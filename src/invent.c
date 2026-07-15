@@ -705,9 +705,8 @@ register struct obj *obj;
 	else if (obj == uarmh) setnotworn(obj);
 	else if (obj == uarms) setnotworn(obj);
 	else if (obj == uarmg) setnotworn(obj);
-#ifdef TOURIST
 	else if (obj == uarmu) setnotworn(obj);
-#endif
+	else if (obj == uarmw) setnotworn(obj);
 	else if (obj == uarmf) setnotworn(obj);
 
 	update_map = (obj->where == OBJ_FLOOR);
@@ -1190,12 +1189,10 @@ register const char *let,*word;
 
 		/* ugly check: remove inappropriate things */
 		if ((taking_off(word) &&
-		    (!(otmp->owornmask & (W_ARMOR | W_RING | W_AMUL | W_SADDLE | W_TOOL | W_BELT))
+		    (!(otmp->owornmask & (W_ARMOR | W_RING | W_AMUL | W_SADDLE | W_TOOL | W_BELT | W_ARMW))
 		     || (otmp==uarmc && usaddle)
 		     || (otmp==uarm && ((uarmc && arm_blocks_upper_body(uarm->otyp)) || usaddle))
-#ifdef TOURIST
 		     || (otmp==uarmu && ((uarm && arm_blocks_upper_body(uarm->otyp)) || uarmc || usaddle))
-#endif
 		    ))
 		|| (putting_on(word) &&
 		     (otmp->owornmask & (W_ARMOR | W_RING | W_AMUL | W_SADDLE | W_BELT | W_TOOL)))
@@ -1717,9 +1714,7 @@ boolean
 wearing_armor()
 {
 	return((boolean)(uarm || uarmc || uarmf || uarmg || uarmh || uarms
-#ifdef TOURIST
-		|| uarmu
-#endif
+		|| uarmu || uarmw
 		));
 }
 
@@ -4745,6 +4740,8 @@ winid *datawin;
 	if (otyp == MUMMY_WRAPPING || otyp == PRAYER_WARDED_WRAPPING)	OBJPUTSTR("Prevents invisibility.");
 	if (otyp == RIN_GAIN_STRENGTH)				OBJPUTSTR("Increases STR by its enchantment.");
 	if (otyp == GAUNTLETS_OF_DEXTERITY)		OBJPUTSTR("Increases DEX by its enchantment.");
+	if (otyp == DEXTEROUS_WING_GUARDS)			OBJPUTSTR("Increases DEX by its enchantment.");
+	if (otyp == WINGLETS_OF_ADORNMENT)			OBJPUTSTR("Increases CHA by its enchantment.");
 	if (otyp == RIN_GAIN_CONSTITUTION)			OBJPUTSTR("Increases CON by its enchantment.");
 	if (otyp == HELM_OF_BRILLIANCE)			OBJPUTSTR("Increases INT and WIS by its enchantment.");
 	if (otyp == RIN_INCREASE_DAMAGE)			OBJPUTSTR("Increases your weapon damage.");
@@ -6138,15 +6135,14 @@ doprarm()
 #endif
 		register int ct = 0;
 
-#ifdef TOURIST
 		if(uarmu) lets[ct++] = obj_to_let(uarmu);
-#endif
 		if(uarm) lets[ct++] = obj_to_let(uarm);
 		if(uarmc) lets[ct++] = obj_to_let(uarmc);
 		if(uarmh) lets[ct++] = obj_to_let(uarmh);
 		if(uarms) lets[ct++] = obj_to_let(uarms);
 		if(uarmg) lets[ct++] = obj_to_let(uarmg);
 		if(uarmf) lets[ct++] = obj_to_let(uarmf);
+		if(uarmw) lets[ct++] = obj_to_let(uarmw);
 		lets[ct] = 0;
 		(void) display_inventory(lets, FALSE);
 	}
@@ -6942,6 +6938,9 @@ u_clothing_discomfort()
 		if(uarmg->otyp == LONG_GLOVES)
 			count++;
 	}
+	if(uarmw){
+		count++;
+	}
 	if(uarmf){
 		count++;
 		if(uarmf->otyp == HEELED_BOOTS)
@@ -7014,6 +7013,10 @@ int material;
 	if(curarm && curarm->obj_material == material && !hasshirt && !marm_blocks_ub)
 		count++;
 
+	curarm = which_armor(mon, W_ARMW);
+	if(curarm && curarm->obj_material == material)
+		count++;
+
 	curarm = which_armor(mon, W_ARMH);
 	if(curarm && curarm->obj_material == material)
 		count++;
@@ -7082,6 +7085,10 @@ int bcu;
 	if(curarm && bcu(curarm) == bcu && !hasshirt && !marm_blocks_ub)
 		count++;
 
+	curarm = which_armor(mon, W_ARMW);
+	if(curarm && bcu(curarm) == bcu)
+		count++;
+
 	curarm = which_armor(mon, W_ARMH);
 	if(curarm && bcu(curarm) == bcu)
 		count++;
@@ -7133,6 +7140,8 @@ int material;
 		count++;
 	if(uarm && uarm->obj_material == material && !uarmu)
 		count++;
+	if(uarmw && uarmw->obj_material == material)
+		count++;
 	if(uarmc && uarmc->obj_material == material && !uarmu && !(uarm && arm_blocks_upper_body(uarm->otyp)))
 		count++;
 	if(uarmh && uarmh->obj_material == material)
@@ -7179,6 +7188,8 @@ int bcu;
 	if(uwep && bcu(uwep) == bcu && !uarmg)
 		count++;
 	if(uarm && bcu(uarm) == bcu && !uarmu)
+		count++;
+	if(uarmw && bcu(uarmw) == bcu)
 		count++;
 	if(uarmc && bcu(uarmc) == bcu && !uarmu && !(uarm && arm_blocks_upper_body(uarm->otyp)))
 		count++;

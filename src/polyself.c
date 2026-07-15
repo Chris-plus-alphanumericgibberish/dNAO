@@ -782,6 +782,17 @@ break_armor()
 			}
 		}
     }
+	if ((otmp = uarmw) != 0) {
+		if(otmp->objsize != youracedata->msize
+				|| !has_wings_mon(&youmonst) || is_gaseous_noequip(youracedata) || noncorporeal(youracedata)
+		){
+			if (donning(otmp)) cancel_don();
+			Your("wing-guards %s!", (!has_wings_mon(&youmonst) || is_gaseous_noequip(youracedata) || noncorporeal(youracedata)) ? "fall away" : "pop off");
+			(void) WingGuard_off();
+		// setworn((struct obj *)0, otmp->owornmask & W_ARMW);
+			dropx(otmp);
+		}
+    }
 	if ((otmp = uarmh) != 0){
 		boolean hat = is_hat(otmp);
 		if((!helm_match(&youmonst, uarmh) && !hat)

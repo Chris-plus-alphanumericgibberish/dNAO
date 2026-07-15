@@ -2593,7 +2593,7 @@ karemade:
 				} else mtmp->movement += mcalcmove(mtmp);
 
 				/* Luck blade makes monsters fumbling */
-				if(couldsee(mtmp->mx,mtmp->my) && OffensiveLuck && u.uluck > 0 && !mtmp->mpeaceful){
+				if((couldsee(mtmp->mx,mtmp->my) && OffensiveLuck && u.uluck > 0 && !mtmp->mpeaceful) || (mon_resistance(mtmp, FUMBLING) && !rn2(20))){
 					if(mtmp->movement > 0 && !stationary(mtmp->data) && mtmp->mcanmove && !mtmp->msleeping){
 						if(!rn2(20)){
 							if(canseemon(mtmp))

@@ -154,7 +154,8 @@
 #define HOLY_SHOCK_RES				1 + HELL_SHOCK_RES
 #define HELL_ACID_RES				1 + HOLY_SHOCK_RES
 #define HOLY_ACID_RES				1 + HELL_ACID_RES
-#define LAST_PROP					(HOLY_ACID_RES)
+#define AERIAL_COMBAT				1 + HOLY_ACID_RES
+#define LAST_PROP					(AERIAL_COMBAT)
 
 #define MPROP_SIZE					(LAST_PROP/32 + 1)
 
@@ -171,7 +172,8 @@ struct prop {
 #	define W_ARMG	    0x00000010L /* Gloves/gauntlets */
 #	define W_ARMF	    0x00000020L /* Footwear */
 #	define W_ARMU	    0x00000040L /* Undershirt */
-#	define W_ARMOR	     (W_ARM | W_ARMC | W_ARMH | W_ARMS | W_ARMG | W_ARMF | W_ARMU)
+#	define W_ARMW		0x00000080L	/* Wing armor */
+#	define W_ARMOR	     (W_ARM | W_ARMC | W_ARMH | W_ARMS | W_ARMG | W_ARMF | W_ARMU | W_ARMW)
 	/* Weapons and artifacts */
 #	define W_WEP	    0x00000100L /* Wielded weapon */
 #	define W_QUIVER     0x00000200L /* Quiver for (f)iring ammo */
@@ -232,6 +234,7 @@ struct prop {
 #define WORN_AMUL	W_AMUL
 #define WORN_BELT	W_BELT
 #define WORN_SADDLE	W_SADDLE
+#define WORN_WINGS	W_ARMW
 #define WORN_BLINDF	W_TOOL
 #ifdef TOURIST
 #define WORN_SHIRT	W_ARMU

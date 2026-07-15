@@ -1919,9 +1919,8 @@ u_init()
 // #if 0	/* documentation of more zero values as desirable */
 	// u.usick_cause[0] = 0;
 	// u.uluck  = u.moreluck = 0;
-// # ifdef TOURIST
 	// uarmu = 0;
-// # endif
+	// uarmw = 0;
 	// uarm = uarmc = uarmh = uarms = uarmg = uarmf = 0;
 	// uwep = uball = uchain = uleft = uright = urope = 0;
 	// uswapwep = uquiver = 0;
@@ -3990,10 +3989,10 @@ register struct trobj *trop;
 				setworn(obj, W_ARMH);
 			else if (is_gloves(obj) && !uarmg)
 				setworn(obj, W_ARMG);
-#ifdef TOURIST
 			else if (is_shirt(obj) && !uarmu)
 				setworn(obj, W_ARMU);
-#endif
+			else if (is_wingguard(obj) && !uarmw)
+				setworn(obj, W_ARMW);
 			else if (is_cloak(obj) && !uarmc)
 				setworn(obj, W_ARMC);
 			else if (is_boots(obj) && !uarmf)

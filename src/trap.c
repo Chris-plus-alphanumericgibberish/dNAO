@@ -68,8 +68,9 @@ boolean candestroy;
     if (!victim) return 0;
 	if(UseInvFire_res(victim)) return 0;
 #define burn_dmg(obj,descr) rust_dmg(obj, descr, 0, FALSE, victim, candestroy)
+	int out_of = has_wings_mon(victim) ? 6 : 5;
     while (1) {
-		switch (rn2(5)) {
+		switch (rn2(out_of)) {
 			case 0:
 				item = (victim == &youmonst) ? uarmh : which_armor(victim, W_ARMH);
 				if (item) {
@@ -103,6 +104,10 @@ boolean candestroy;
 			case 4:
 				item = (victim == &youmonst) ? uarmf : which_armor(victim, W_ARMF);
 				if (!burn_dmg(item, "boots")) continue;
+				break;
+			case 5:
+				item = (victim == &youmonst) ? uarmw : which_armor(victim, W_ARMW);
+				if (!burn_dmg(item, "wing-guards")) continue;
 				break;
 		}
 		break; /* Out of while loop */
@@ -1121,10 +1126,10 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst, FALSE);
 						1, TRUE, &youmonst, FALSE);
 			else if (uarm && (arm_blocks_upper_body(uarm->otyp) || rn2(2)))
 			    (void) rust_dmg(uarm, "armor", 1, TRUE, &youmonst, FALSE);
-#ifdef TOURIST
 			else if (uarmu)
 			    (void) rust_dmg(uarmu, "shirt", 1, TRUE, &youmonst, FALSE);
-#endif
+			// else if (uarmw)
+			    // (void) rust_dmg(uarmu, "shirt", 1, TRUE, &youmonst, FALSE);
 		}
 		update_inventory();
 		nomul(0, NULL);
@@ -2259,7 +2264,8 @@ struct monst *mtmp;
 					pline("Water gushes around %s!", mon_nam(mtmp));
 				break;
 			}
-			switch (rn2(5)) {
+			int out_of = has_wings_mon(mtmp) ? 6 : 5;
+			switch (rn2(out_of)) {
 			case 0:
 			    if (in_sight)
 				pline("%s %s on the %s!", A_gush_of_water_hits,
@@ -2284,6 +2290,12 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 			    if (in_sight)
 				pline("%s %s's right %s!", A_gush_of_water_hits,
 				    mon_nam(mtmp), mbodypart(mtmp, ARM));
+			    erode_obj(MON_WEP(mtmp), FALSE, TRUE);
+			    goto glovecheck;
+			case 5:
+			    if (in_sight)
+				pline("%s %s's right %s!", A_gush_of_water_hits,
+				    mon_nam(mtmp), mbodypart(mtmp, WINGS_BP));
 			    erode_obj(MON_WEP(mtmp), FALSE, TRUE);
 			    goto glovecheck;
 			default:
@@ -2906,6 +2918,35 @@ int x, y;
 	}
 }
 
+/* on the drow-nemesis quest's floating chunks of earth, standing on bare
+ * AIR without levitation or flight drops the hero through to the level
+ * below; shared by float_down(), crash_down(), and spoteffects() since
+ * it applies no matter how flight/levitation ended (or whether the hero
+ * simply walked/teleported onto the tile)
+ */
+boolean
+quest_air_fall(void)
+{
+	if (!Levitation && !Flying && In_quest(&u.uz) &&
+	    urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH &&
+	    levl[u.ux][u.uy].typ == AIR) {
+		if (on_level(&u.uz, &qstart_level) && !ok_to_quest()) {
+			pline("A mysterious force prevents you from falling.");
+		} else {
+			struct d_level target_level;
+			int dist;
+			target_level.dnum = u.uz.dnum;
+			target_level.dlevel = qlocate_level.dlevel+1;
+			dist = qlocate_level.dlevel+1 - u.uz.dlevel;
+			schedule_goto(&target_level, FALSE, TRUE, FALSE,
+				"You plummet through the cavern air!",
+				"You slam into the rocky floor!", d(dist*5,6), 0);
+		}
+		return TRUE;
+	}
+	return FALSE;
+}
+
 int
 float_down(hmask, emask)
 long hmask, emask;     /* might cancel timeout */
@@ -3014,18 +3055,7 @@ long hmask, emask;     /* might cancel timeout */
 	   it gets changed to reflect the new level before we can check it */
 	assign_level(&current_dungeon_level, &u.uz);
 
-	if(!Levitation && !Flying && In_quest(&u.uz) && urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH && levl[u.ux][u.uy].typ == AIR){
-		if(on_level(&u.uz, &qstart_level) && !ok_to_quest()){
-			pline("A mysterious force prevents you from falling.");
-		} else {
-			struct d_level target_level;
-			target_level.dnum = u.uz.dnum;
-			target_level.dlevel = qlocate_level.dlevel+1;
-			int dist = qlocate_level.dlevel+1 - u.uz.dlevel;
-			schedule_goto(&target_level, FALSE, TRUE, FALSE, "You plummet through the cavern air!", "You slam into the rocky floor!", d(dist*5,6), 0);
-		}
-	}
-	else if(trap)
+	if (!quest_air_fall() && trap)
 		switch(trap->ttyp) {
 		case STATUE_TRAP:
 			(void) activate_statue_trap(trap, trap->tx, trap->ty, FALSE);
@@ -3033,6 +3063,112 @@ long hmask, emask;     /* might cancel timeout */
 		case HOLE:
 		case TRAPDOOR:
 			if(!Can_fall_thru(&u.uz) || u.ustuck)
+				break;
+			/* fall into next case */
+		default:
+			if (!u.utrap) /* not already in the trap */
+				dotrap(trap, 0);
+	}
+
+	if (!Weightless && !Is_waterlevel(&u.uz) && !u.uswallow &&
+		/* falling through trap door calls goto_level,
+		   and goto_level does its own pickup() call */
+		on_level(&u.uz, &current_dungeon_level))
+	    (void) pickup(1);
+	return 1;
+}
+
+/* like float_down(), but for when Flying ends against the hero's will
+ * instead of by the hero's choice; hits the ground (or whatever's below)
+ * hard instead of settling onto it
+ */
+int
+crash_down(long hmask, long emask)
+{
+	struct trap *trap = (struct trap *)0;
+	d_level current_dungeon_level;
+	boolean no_msg = FALSE;
+	struct obj *obj;
+	static const char crashed_to_ground[] = "crashed to the ground";
+
+	HFlying &= ~hmask;
+	EFlying &= ~emask;
+	if (Flying || Levitation) return 0; /* still airborne some other way */
+
+	if (u.uswallow) {
+		You("crash down, but you are still %s.",
+		    is_animal(u.ustuck->data) ? "swallowed" : "engulfed");
+		return 1;
+	}
+
+	if (Punished && !carried(uball) &&
+	    (is_pool(uball->ox, uball->oy, FALSE) ||
+	     ((trap = t_at(uball->ox, uball->oy)) &&
+	      ((trap->ttyp == PIT) || (trap->ttyp == SPIKED_PIT) ||
+	       (trap->ttyp == TRAPDOOR) || (trap->ttyp == HOLE))))) {
+		u.ux0 = u.ux;
+		u.uy0 = u.uy;
+		u.ux = uball->ox;
+		u.uy = uball->oy;
+		movobj(uchain, uball->ox, uball->oy);
+		newsym(u.ux0, u.uy0);
+		vision_full_recalc = 1;	/* in case the hero moved. */
+	}
+
+	if (!u.uswallow && u.ustuck) {
+		if (sticks(&youmonst))
+			You("aren't able to maintain your hold on %s.",
+				mon_nam(u.ustuck));
+		else
+			pline("Startled, %s can no longer hold you!",
+				mon_nam(u.ustuck));
+		u.ustuck = 0;
+	}
+
+	/* check for falling into pool/lava, same as float_down() */
+	if (is_pool(u.ux, u.uy, FALSE) && !Wwalking && !Swimming && !u.uinwater)
+		no_msg = drown();
+
+	if (is_lava(u.ux, u.uy)) {
+		(void) lava_effects(TRUE);
+		no_msg = TRUE;
+	}
+
+	if (!trap)
+		trap = t_at(u.ux, u.uy);
+
+	if (Weightless) {
+		You("tumble wildly before catching yourself.");
+	} else if (Is_waterlevel(&u.uz) && !no_msg) {
+		You_feel("suddenly heavier.");
+	} else if (!u.uinwater && !no_msg) {
+		if (Hallucination)
+			pline("Bummer!  You wipe out!");
+		else
+			pline("You crash into the %s!", surface(u.ux, u.uy));
+		losehp(rn1(8, 25 - (int)ACURR(A_CON)), crashed_to_ground, NO_KILLER_PREFIX);
+		exercise(A_DEX, FALSE);
+		selftouch("Falling, you");
+		for (obj = level.objects[u.ux][u.uy]; obj; obj = obj->nexthere)
+			if (obj->oclass == WEAPON_CLASS || is_weptool(obj)) {
+			    You("land on %s.", doname(obj));
+			    losehp(rnd(3), crashed_to_ground, NO_KILLER_PREFIX);
+			    exercise(A_CON, FALSE);
+			}
+	}
+
+	/* can't rely on u.uz0 for detecting trap door-induced level change;
+	   it gets changed to reflect the new level before we can check it */
+	assign_level(&current_dungeon_level, &u.uz);
+
+	if (!quest_air_fall() && trap)
+		switch (trap->ttyp) {
+		case STATUE_TRAP:
+			(void) activate_statue_trap(trap, trap->tx, trap->ty, FALSE);
+		break;
+		case HOLE:
+		case TRAPDOOR:
+			if (!Can_fall_thru(&u.uz) || u.ustuck)
 				break;
 			/* fall into next case */
 		default:
@@ -3079,6 +3215,38 @@ boolean silently;
 		mselftouch(mon, "Falling, ", FALSE);
 	}
 
+	if (trap) {
+		mintrap(mon);
+	}
+
+	return;
+}
+
+/* like m_float_down(), but for when the monster's flight ends against its
+ * will instead of by choice; hits the ground hard instead of settling onto
+ * it, the monster equivalent of crash_down() */
+void
+m_crash_down(struct monst *mon, boolean silently)
+{
+	register struct trap *trap = (struct trap *)0;
+	boolean seen = canseemon(mon);
+
+	if (is_pool(mon->mx, mon->my, TRUE) || is_lava(mon->mx, mon->my))
+	{
+		if (seen && !silently)
+			pline("%s crashes down into the %s.", Monnam(mon), surface(mon->mx, mon->my));
+		silently = TRUE;	/* disable other messages from this function */
+		minliquid(mon);
+	}
+	else {
+		if (seen && !silently)
+			pline("%s crashes to the %s!", Monnam(mon), surface(mon->mx, mon->my));
+		if (thitm(mon, rnd(12), FALSE))
+			return;	/* mon died from the fall */
+		mselftouch(mon, "Falling, ", FALSE);
+	}
+
+	trap = t_at(mon->mx, mon->my);
 	if (trap) {
 		mintrap(mon);
 	}
@@ -3646,7 +3814,7 @@ boolean *lostsome;
 			  obj == uamul || obj == uleft || obj == uright ||
 			  obj == ublindf || obj == uarm || obj == uarmc ||
 			  obj == uarmg || obj == ubelt || obj == uarmf ||
-			  obj == uarmu || obj == usaddle ||
+			  obj == uarmu || obj == uarmw || obj == usaddle ||
 			  (obj->cursed && !Weldproof && (obj == uarmh || obj == uarms)) ||
 			  welded(obj)))
 			otmp = obj;
@@ -5412,6 +5580,7 @@ boolean initialize;
 					else if(obj == uarms) (void) Shield_off();
 					else if(obj == uarmg) (void) Gloves_off();
 					else if(obj == uarmf) (void) Boots_off();
+					else if(obj == uarmw) (void) WingGuard_off();
 					else if(obj == uarmu) setnotworn(obj);
 					else if(obj == uleft) Ring_gone(obj);
 					else if(obj == uright) Ring_gone(obj);
@@ -5508,6 +5677,7 @@ xchar x, y;
                 if (((obj->owornmask & W_ARM) && (obj == uarm))
                     || ((obj->owornmask & W_ARMC) && (obj == uarmc))
                     || ((obj->owornmask & W_ARMU) && (obj == uarmu))
+                    || ((obj->owornmask & W_ARMW) && (obj == uarmw))
                     || ((obj->owornmask & W_ARMG) && (obj == uarmg))
                     || ((obj->owornmask & W_ARMH) && (obj == uarmh))
                     || ((obj->owornmask & W_ARMF) && (obj == uarmf))

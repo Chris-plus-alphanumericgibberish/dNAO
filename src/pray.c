@@ -272,7 +272,8 @@ in_trouble()
 	 */
 	if(Punished) return(TROUBLE_PUNISHED);
 	if (Cursed_obj(uarmg, GAUNTLETS_OF_FUMBLING) ||
-		Cursed_obj(uarmf, FUMBLE_BOOTS))
+		Cursed_obj(uarmf, FUMBLE_BOOTS) ||
+		Cursed_obj(uarmw, WING_GUARDS_OF_BUMBLING))
 	    return TROUBLE_FUMBLING;
 	if (worst_cursed_item()) return TROUBLE_CURSED_ITEMS;
 #ifdef STEED
@@ -335,10 +336,10 @@ worst_cursed_item()
 	otmp = uarmh;
     } else if (uarmf && uarmf->cursed) {		/* boots */
 	otmp = uarmf;
-#ifdef TOURIST
     } else if (uarmu && uarmu->cursed) {		/* shirt */
 	otmp = uarmu;
-#endif
+    } else if (uarmw && uarmw->cursed) {		/* shirt */
+	otmp = uarmw;
     } else if (uamul && uamul->cursed) {		/* amulet */
 	otmp = uamul;
     } else if (ubelt && ubelt->cursed) {		/* belt */
@@ -581,6 +582,8 @@ register int trouble;
 			otmp = uarmg;
 		    else if (Cursed_obj(uarmf, FUMBLE_BOOTS))
 			otmp = uarmf;
+		    else if (Cursed_obj(uarmw, WING_GUARDS_OF_BUMBLING))
+			otmp = uarmw;
 		    goto decurse;
 		    /*NOTREACHED*/
 		    break;
@@ -734,12 +737,10 @@ int godnum;
 	    if (uarm && !(EReflecting & W_ARM) &&
 	    		!(EDisint_resistance & W_ARM) && !uarmc)
 		(void) destroy_arm(uarm);
-#ifdef TOURIST
 	    if (uarmu && 
 			!(EReflecting & W_ARMU) && !(EDisint_resistance & W_ARMU) &&
 			!(uarm && arm_blocks_upper_body(uarm->otyp)) && !uarmc
 		) (void) destroy_arm(uarmu);
-#endif
 	    if (!Disint_resistance)
 		fry_by_god(godnum);
 	    else {
@@ -3312,6 +3313,7 @@ god_benefit_identify_item(void)
 	else if (uarmc && not_fully_identified(uarmc)) identify(uarmc);
 	else if (uarm && not_fully_identified(uarm)) identify(uarm);
 	else if (uarmu && not_fully_identified(uarmu)) identify(uarmu);
+	else if (uarmw && not_fully_identified(uarmw)) identify(uarmw);
 	else if (uarmh && not_fully_identified(uarmh)) identify(uarmh);
 	else if (uarmg && not_fully_identified(uarmg)) identify(uarmg);
 	else if (uarmf && not_fully_identified(uarmf)) identify(uarmf);
@@ -3426,6 +3428,7 @@ god_benefit_repair_item(void)
 		else if select_item_to_repair_or_erodeproof(uarmc);
 		else if select_item_to_repair_or_erodeproof(uarm);
 		else if select_item_to_repair_or_erodeproof(uarmu);
+		else if select_item_to_repair_or_erodeproof(uarmw);
 		else if select_item_to_repair_or_erodeproof(uarmh);
 		else if select_item_to_repair_or_erodeproof(uarmg);
 		else if select_item_to_repair_or_erodeproof(uarmf);

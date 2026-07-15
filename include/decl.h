@@ -512,16 +512,15 @@ E uchar monsyms[MAXMCLASSES];		/* current class symbols */
 E NEARDATA struct obj *magic_chest_objs[10];
 E NEARDATA struct obj *invent,
 	*uarm, *uarmc, *uarmh, *uarms, *uarmg, *uarmf,
-#ifdef TOURIST
 	*uarmu,				/* under-wear, so to speak */
-#endif
+	*uarmw,				/* wing-guards */
 	*uskin, *uamul, *ubelt, *usaddle, *uleft, *uright, *ublindf,
 	*uwep, *uswapwep, *uquiver;
 
 /* Needs to update, so it's redefined each time whenever it's used */
-#define ARMOR_SLOTS { uarm, uarmc, uarmf, uarmh, uarmg, uarms, uarmu, ubelt }
-#define WORN_SLOTS { uarm, uarmc, uarmf, uarmh, uarmg, uarms, uarmu, uamul, ubelt, usaddle, uleft, uright, ublindf, uwep, uswapwep, uquiver }
-#define MON_ARMOR_SLOTS(mon) { which_armor(mon, W_ARM), which_armor(mon, W_ARMC), which_armor(mon, W_ARMF), which_armor(mon, W_ARMH), which_armor(mon, W_ARMG), which_armor(mon, W_ARMS), which_armor(mon, W_ARMU), which_armor(mon, W_BELT) }
+#define ARMOR_SLOTS { uarm, uarmc, uarmf, uarmh, uarmg, uarms, uarmu, uarmw, ubelt }
+#define WORN_SLOTS { uarm, uarmc, uarmf, uarmh, uarmg, uarms, uarmu, uarmw, uamul, ubelt, usaddle, uleft, uright, ublindf, uwep, uswapwep, uquiver }
+#define MON_ARMOR_SLOTS(mon) { which_armor(mon, W_ARM), which_armor(mon, W_ARMC), which_armor(mon, W_ARMF), which_armor(mon, W_ARMH), which_armor(mon, W_ARMG), which_armor(mon, W_ARMS), which_armor(mon, W_ARMU), which_armor(mon, W_ARMW), which_armor(mon, W_BELT) }
 
 E NEARDATA struct obj *urope;		/* defined only when entangled */
 E NEARDATA struct obj *uchain;		/* defined only when punished */

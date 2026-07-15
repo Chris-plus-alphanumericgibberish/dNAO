@@ -2156,7 +2156,8 @@ boolean getting_obj_base_desc;
 				typ == SUNGLASSES ||
 				typ == HAWAIIAN_SHORTS ||
 				is_boots(obj) ||
-				is_gloves(obj)
+				is_gloves(obj) ||
+				is_wingguard(obj)
 				) {
 				Strcat(buf, "pair of ");
 			}
@@ -3784,7 +3785,8 @@ const char *oldstr;
 
 			/* note: nurses, axes but boxes */
 			if (!BSTRCMP(bp, p-5, "boxes") ||
-			    !BSTRCMP(bp, p-4, "ches")) {
+			    !BSTRCMP(bp, p-4, "ches") ||
+			    !BSTRCMPI(bp, p-9, "cutlasses")) {
 				p[-2] = '\0';
 				return bp;
 			}
@@ -3795,6 +3797,7 @@ const char *oldstr;
 			    !BSTRCMP(bp, p-9, "soul-lens") ||
 			    !BSTRCMPI(bp, p-8, "shackles") ||
 			    !BSTRCMP(bp, p-5, "shoes") ||
+			    !BSTRCMPI(bp, p-6, "drapes") ||
 				!BSTRCMPI(bp, p-9, "vs curses") ||
 				!BSTRCMPI(bp, p-13, "versus curses") ||
 			    !BSTRCMPI(bp, p-12, "vs evil eyes") ||
@@ -3811,6 +3814,9 @@ const char *oldstr;
 			   !BSTRCMPI(bp, p-4, "mass") ||
 			   !BSTRCMPI(bp, p-7, "sandals") ||
 			   !BSTRCMPI(bp, p-9, "gauntlets") ||
+			   !BSTRCMPI(bp, p-6, "guards") ||
+			   !BSTRCMPI(bp, p-6, "covers") ||
+			   !BSTRCMPI(bp, p-7, "cutlass") ||
 			   !BSTRCMPI(bp, p-5, "bands") ||
 			   !BSTRCMPI(bp, p-6, "tricks") ||
 			   !BSTRCMPI(bp, p-9, "paralysis") ||

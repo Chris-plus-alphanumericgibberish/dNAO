@@ -843,6 +843,7 @@ struct attack *mattk;
 		return (mattk->aatyp == AT_TUCH || mattk->aatyp == AT_5SQR) ? "contact" :
 			(mattk->aatyp == AT_GAZE || mattk->aatyp == AT_WDGZ) ? "gaze" :
 			(mattk->aatyp == AT_CLAW) ? "claws" :
+			(mattk->aatyp == AT_WING) ? "wings" :
 			(mattk->aatyp == AT_TENT) ? "tentacles" :
 			(mattk->aatyp == AT_ENGL) ? "vapor" :
 			(mattk->aatyp == AT_BITE || mattk->aatyp == AT_OBIT || mattk->aatyp == AT_WBIT || mattk->aatyp == AT_LNCK || mattk->aatyp == AT_5SBT) ? "bite" :
@@ -923,8 +924,9 @@ boolean candestroy;
 	 * rusty metal, are not targets.  However, your body always
 	 * is, no matter what covers it.
 	 */
+	int outof = has_wings_mon(&youmonst) ? 6 : 5;
 	while (1) {
-	    switch(rn2(5)) {
+	    switch(rn2(outof)) {
 	    case 0:
 		if (!uarmh || !rust_dmg(uarmh, xname(uarmh), hurt, FALSE, &youmonst, candestroy))
 			continue;
@@ -954,6 +956,10 @@ boolean candestroy;
 		break;
 	    case 4:
 		if (!uarmf || !rust_dmg(uarmf, xname(uarmf), hurt, FALSE, &youmonst, candestroy))
+		    continue;
+		break;
+	    case 5:
+		if (!uarmw || !rust_dmg(uarmw, xname(uarmw), hurt, FALSE, &youmonst, candestroy))
 		    continue;
 		break;
 	    }
@@ -988,7 +994,7 @@ boolean candestroy;
 	* is, no matter what covers it.
 	*/
 	while (1) {
-		switch (rn2(5)) {
+		switch (rn2(6)) {
 		case 0:
 			target = which_armor(mdef, W_ARMH);
 			if (!target || !rust_dmg(target, xname(target), hurt, FALSE, mdef, candestroy))
@@ -1002,11 +1008,9 @@ boolean candestroy;
 			}
 			if ((target = which_armor(mdef, W_ARM)) != (struct obj *)0) {
 				(void)rust_dmg(target, xname(target), hurt, TRUE, mdef, candestroy);
-#ifdef TOURIST
 			}
 			else if ((target = which_armor(mdef, W_ARMU)) != (struct obj *)0) {
 				(void)rust_dmg(target, xname(target), hurt, TRUE, mdef, candestroy);
-#endif
 			}
 			break;
 		case 2:
@@ -1024,6 +1028,11 @@ boolean candestroy;
 			if (!target || !rust_dmg(target, xname(target), hurt, FALSE, mdef, candestroy))
 				continue;
 			break;
+		case 5:
+			target = which_armor(mdef, W_ARMW);
+			if (!target || !rust_dmg(target, xname(target), hurt, FALSE, mdef, candestroy))
+				continue;
+			break;
 		}
 		break; /* Out of while loop */
 	}
@@ -1033,15 +1042,18 @@ boolean candestroy;
 ///////////////////////////////////////////////////////////////////////////////
 
 /* attk_protection()
- * 
+ *
  * Returns types of armor needed to prevent specified attack from touching its target
  *   ex) gloves makes claw attacks not touch a cockatrice
  */
 long
-attk_protection(aatyp)
-int aatyp;
+attk_protection(int aatyp, int adtyp)
 {
 	long w_mask = 0L;
+
+	/* Lilitu-type wing-tip stingers count as a wing attack, not a normal sting */
+	if (aatyp == AT_STNG && adtyp == AD_DOBT)
+		return W_ARMW;
 
 	switch (aatyp) {
 	case AT_NONE:
@@ -1075,6 +1087,9 @@ int aatyp;
 	case AT_DEVA:
 	case AT_JUGL:
 		w_mask = W_ARMG;	/* caller needs to check for weapon */
+		break;
+	case AT_WING:
+		w_mask = W_ARMW;
 		break;
 	case AT_KICK:
 		w_mask = W_ARMF;
@@ -1110,12 +1125,15 @@ int aatyp;
  *   ex) silver gloves make punches do silver-searing damage
  */
 long
-attk_equip_slot(mon, aatyp)
-struct monst *mon;
-int aatyp;
+attk_equip_slot(struct monst *mon, int aatyp, int adtyp)
 {
 	/* some worn armor may be involved depending on the attack type */
 	long slot = 0L;
+
+	/* Lilitu-type wing-tip stingers count as a wing attack, not a normal sting */
+	if (aatyp == AT_STNG && adtyp == AD_DOBT)
+		return W_ARMW;
+
 	switch (aatyp)
 	{
 		/* gloves */
@@ -1131,14 +1149,11 @@ int aatyp;
 			|| mon->mtyp == PM_AGLAOPE
 		)
 			slot = W_ARMF;
-		else if(
-			mon->mtyp == PM_ARCADIAN_AVENGER
-			|| mon->mtyp == PM_THRONE_ARCHON
-			|| mon->mtyp == PM_LIGHT_ARCHON
-		)
-			slot = 0L; //Wing bash
 		else
 			slot = W_ARMG;
+		break;
+	case AT_WING:
+		slot = W_ARMW;
 		break;
 	case AT_HODS:
 	case AT_DEVA:
@@ -1172,7 +1187,7 @@ struct monst * mdef;
 struct attack * attk;
 struct obj * weapon;
 {
-	long slot = attk_protection(attk->aatyp);
+	long slot = attk_protection(attk->aatyp, attk->adtyp);
 	boolean youagr = (magr == &youmonst);
 
 	if (/* not using a weapon -- assumes weapons will only be passed if making a weapon attack */
@@ -1189,6 +1204,7 @@ struct obj * weapon;
 		((slot & W_ARMS) && !uarms) ||
 		((slot & W_ARMG) && !uarmg) ||
 		((slot & W_ARMF) && !uarmf) ||
+		((slot & W_ARMW) && !uarmw) ||
 		((slot & W_ARMU) && !uarmu)))
 		||
 		/* monster */
@@ -1229,7 +1245,7 @@ struct obj * weapon;
 struct permonst * pa;
 struct permonst * pd;
 {
-	long slot = attk_protection(attk->aatyp);
+	long slot = attk_protection(attk->aatyp, attk->adtyp);
 	boolean youagr = (magr == &youmonst);
 
 	/* if there is no defender, it's safe */
@@ -1865,11 +1881,14 @@ struct obj * weapon;
 	if (!weapon) {
 		/* some worn armor may be involved depending on the attack type */
 		struct obj * otmp;
-		long slot = attk_equip_slot(magr, attk ? attk->aatyp : 0);
+		long slot = attk_equip_slot(magr, attk ? attk->aatyp : 0, attk ? attk->adtyp : 0);
 		switch (magr ? slot : 0L)
 		{
 		case W_ARMG:
 			otmp = (youagr ? uarmg : which_armor(magr, slot));
+			break;
+		case W_ARMW:
+			otmp = (youagr ? uarmw : which_armor(magr, slot));
 			break;
 		case W_ARMF:
 			otmp = (youagr ? uarmf : which_armor(magr, slot));
@@ -3842,6 +3861,7 @@ struct attack * attk;
 	 && attk->aatyp != AT_XWEP
 	 && attk->aatyp != AT_MARI
 	 && attk->aatyp != AT_CLAW
+	 && attk->aatyp != AT_WING
 	 && attk->aatyp != AT_KICK
 	 && attk->aatyp != AT_BUTT
 	 && attk->aatyp != AT_TUCH

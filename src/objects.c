@@ -812,6 +812,8 @@ BOW(("bladed bow"), 1,  MZ_LARGE, 0, 60,  75,  0, IRON, P_BOW, HI_METAL, O_TRAIT
 	ARMOR(names, kn, mgc, MZ_SMALL, 0, {0}, prob, delay, wt, cost, ac, dr, can, ARM_DR, ARM_GLOVES, metal, c, __VA_ARGS__)
 #define BOOTS(names,kn,mgc,prob,delay,wt,cost,ac,dr,can,metal,c,...) \
 	ARMOR(names, kn, mgc, MZ_SMALL, 0, {0}, prob, delay, wt, cost, ac, dr, can, LEG_DR, ARM_BOOTS, metal, c, __VA_ARGS__)
+#define WING(names,kn,mgc,prob,delay,wt,cost,ac,dr,can,metal,c,...) \
+	ARMOR(names, kn, mgc, MZ_SMALL, 0, {0}, prob, delay, wt, cost, ac, dr, can, WING_DR, ARM_WING, metal, c, __VA_ARGS__)
 #define BELT(names,kn,mgc,prob,wt,cost,ac,dr,can,metal,c,...) \
 	OBJECT( \
 		names, BITS(kn,0,1,0,mgc,1,0,0,MZ_SMALL,0,0,0,LOWER_TORSO_DR,ARM_BELT,metal,0), {0}, \
@@ -1217,6 +1219,31 @@ BOOTS(("fumble boots", "riding boots"),
 		0, 1,  12, 2, 20, 30, 10, 1, 0, LEATHER, HI_LEATHER, O_POWER(FUMBLING)),
 BOOTS(("flying boots", "snow boots"),
 		0, 1,  12, 2, 15, 30,  9, 1, 0, LEATHER, HI_LEATHER, O_POWER(FLYING)),
+// #define WING(names,kn,mgc,prob,delay,wt,cost,ac,dr,can,metal,c,...) \
+// 	ARMOR(names, kn, mgc, MZ_SMALL, 0, {0}, prob, delay, wt, cost, ac, dr, can, WING_DR, ARM_WING, metal, c, __VA_ARGS__)
+WING(("wing-guards", "plate wing-guards"),
+		0, 0,  0, 2, 20, 225,  8, 2, 1, IRON, HI_METAL),
+WING(("wing-guards of reflection", "polished wing-guards"),
+		0, 1,  0, 2, 20, 100,  8, 1, 2, SILVER, HI_SILVER, O_POWER(REFLECTING)),
+WING(("winglets of adornment", "jeweled wing-chains"),
+		0, 1,  0, 2, 20, 200,  9, 0, 0, GOLD, HI_GOLD),
+/* With shuffled appearances... */
+WING(("wing-guards of speed", "rayed wing-guards"),
+		0, 1,  0, 2, 20, 100,  9, 1, 0, IRON, HI_METAL, O_POWER(FAST)),
+WING(("wing-guards of the raptor", "delicate wing-guards"),
+		0, 1,  0, 2, 20, 100,  10, 0, 0, IRON, HI_METAL, O_POWER(JUMPING, AERIAL_COMBAT)),
+WING(("dexterous wing-guards", "lacy wing-covers"),
+		0, 1,  0, 2, 20, 75,   10, 1, 2, CLOTH, CLR_WHITE, O_POWER(STEALTH)),
+WING(("wing-guards of displacement", "zigzag wing-covers"),
+		0, 1,  0, 2, 20, 100,  8, 1, 0, IRON, HI_METAL, O_POWER(DISPLACED)),
+WING(("wing-guards of invisibility", "diamaphorous wing-covers"),
+		0, 1,  0, 2, 20, 120, 10, 0, 0, CLOTH, CLR_BLACK, O_POWER(INVIS)),
+WING(("constricting wing-guards", "chain wing-drapes"),
+		0, 1,  0, 2, 20, 120, 10, 0, 0, LEAD, CLR_BLACK),
+WING(("wing-guards of weakness", "segmented wing guards"),
+		0, 1,  0, 2, 20, 100, 9, 1, 0, GOLD, HI_GOLD),
+WING(("wing-guards of bumbling", "spiral wing-guards"),
+		0, 1,  0, 2, 20, 60, 10, 1, 0, IRON, HI_METAL, O_POWER(FUMBLING)),
 
 BELT(("belt of power", "segmented belt"),
 		0, 1, 0, 15, 50, 10, 0, 0, IRON, CLR_BROWN),

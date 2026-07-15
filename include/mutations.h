@@ -250,6 +250,14 @@ struct mutationtype {
 	 || has_mutation(TT_BULL_HORNS) \
 	)
 
+#define TIEFLING_WINGS \
+	(has_mutation(TT_WINGS_1) \
+	 || has_mutation(TT_WINGS_2) \
+	 || has_mutation(TT_WINGS_3) \
+	 || has_mutation(TT_WINGS_4) \
+	 || has_mutation(TT_WINGS_5) \
+	)
+
 #define is_holy_mut(mut) \
 	(mut == TT_FALLEN_ATTRACTIVE \
 	 || mut == TT_FALLEN_AURA \

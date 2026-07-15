@@ -1887,6 +1887,14 @@ udr_enlightenment()
 		Sprintf(mbuf, "Foot Armor:       %d", dr);
 		putstr(en_win, 0, mbuf);
 	}
+	if(has_wings_mon(&youmonst)){
+		dr = slot_udr(WING_DR, (struct monst *)0, 0, AT_ANY);
+		if(dr > cap)
+		Sprintf(mbuf, "Wing Armor:       %d-%d", cap, dr);
+		else
+		Sprintf(mbuf, "Wing Armor:       %d", dr);
+		putstr(en_win, 0, mbuf);
+	}
 	
 	display_nhwindow(en_win, TRUE);
 	destroy_nhwindow(en_win);

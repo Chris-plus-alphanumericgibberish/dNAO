@@ -10462,6 +10462,7 @@ struct monst *mtmp;
 					(!uarmc || uarmc->cursed) &&
 					(!uarm || uarm->cursed) &&
 					(!uarmu || uarmu->cursed) &&
+					(!uarmw || uarmw->cursed) &&
 					(!uarmg || uarmg->cursed) &&
 					(!uarmf || uarmf->cursed)
 				) {
@@ -10552,6 +10553,7 @@ struct monst *mtmp;
 						!(targ->misc_worn_check & W_ARMC && (otmp = which_armor(targ, W_ARMC)) && !otmp->cursed) &&
 						!(targ->misc_worn_check & W_ARM && (otmp = which_armor(targ, W_ARM)) && !otmp->cursed) &&
 						!(targ->misc_worn_check & W_ARMU && (otmp = which_armor(targ, W_ARMU)) && !otmp->cursed) &&
+						!(targ->misc_worn_check & W_ARMW && (otmp = which_armor(targ, W_ARMW)) && !otmp->cursed) &&
 						!(targ->misc_worn_check & W_ARMG && (otmp = which_armor(targ, W_ARMG)) && !otmp->cursed) &&
 						!(targ->misc_worn_check & W_ARMF && (otmp = which_armor(targ, W_ARMF)) && !otmp->cursed)
 					) {

@@ -57,7 +57,7 @@ struct objclass {
 #define IMMEDIATE	2	/*		     directional */
 #define RAY		3	/*		     zap beams */
 
-	Bitfield(oc_dtyp,5);
+	Bitfield(oc_dtyp,6);
 #define WHACK		1
 #define PIERCE		2	/* for weapons & tools used as weapons */
 #define SLASH		4	/* (latter includes iron ball & chain) */
@@ -69,10 +69,11 @@ struct objclass {
 #define	HEAD_DR        0x04 /* helmet */
 #define	LEG_DR         0x08 /* boots, cloak */
 #define	ARM_DR         0x10 /* gloves */
+#define	WING_DR        0x20 /* wings */
 
 #define TORSO_DR       (UPPER_TORSO_DR|LOWER_TORSO_DR)
 #define CLOAK_DR       (UPPER_TORSO_DR|LOWER_TORSO_DR|LEG_DR)
-#define ALL_DR         (UPPER_TORSO_DR|LOWER_TORSO_DR|HEAD_DR|LEG_DR|ARM_DR)
+#define ALL_DR         (UPPER_TORSO_DR|LOWER_TORSO_DR|HEAD_DR|LEG_DR|ARM_DR|WING_DR)
 
 #define default_DR_slot(mask) (mask == W_ARM ? TORSO_DR :\
 							   mask == W_ARMC ? CLOAK_DR :\
@@ -176,6 +177,7 @@ struct objclass {
 #define ARM_CLOAK	5
 #define ARM_SHIRT	6
 #define ARM_BELT	7
+#define ARM_WING	8
 #define ARM_SUIT	0
 
 	uchar	oc_oprop[8];	/* property (invis, &c.) conveyed */

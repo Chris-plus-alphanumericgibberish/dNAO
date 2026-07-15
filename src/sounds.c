@@ -2662,7 +2662,7 @@ humanoid_sound:
 		}
 	    if (uwep && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep)))
 			verbl_msg = "Put that weapon away before you hurt someone!";
-	    else if (uarmc || uarm || uarmh || uarms || uarmg || uarmf)
+	    else if (uarmc || uarm || uarmh || uarms || uarmg || uarmf || uarmw)
 			verbl_msg = Role_if(PM_HEALER) ?
 			  "Doc, I can't help you unless you cooperate." :
 			  "Please undress so I can examine you.";

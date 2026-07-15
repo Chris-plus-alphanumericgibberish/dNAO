@@ -16,8 +16,9 @@
 #define has_phys_scaling(ptr)		((ptr)->mflagsf&MF_PHYS_SCALING)
 
 #define pm_resistance(ptr,typ)	(((ptr)->mresists & (typ)) != 0)
-#define mon_intrinsic(mon,typ)	(((mon)->mintrinsics[((typ)-1)/32] & (0x1L << ((typ)-1)%32)) != 0)
-#define mon_extrinsic(mon,typ)	(((mon)->mextrinsics[((typ)-1)/32] & (0x1L << ((typ)-1)%32)) != 0)
+#define mon_intrinsic(mon,typ)	((((mon)->mintrinsics[((typ)-1)/32] & (0x1L << ((typ)-1)%32)) != 0) && !mon_blocked(mon,typ))
+#define mon_extrinsic(mon,typ)	((((mon)->mextrinsics[((typ)-1)/32] & (0x1L << ((typ)-1)%32)) != 0) && !mon_blocked(mon,typ))
+#define mon_blocked(mon,typ)	(((mon)->mblocked[((typ)-1)/32] & (0x1L << ((typ)-1)%32)) != 0)
 #define mon_vulnerability(mon,typ)	(((mon)->acquired_weaknesses[((typ)-1)/32] & (0x1L << ((typ)-1)%32)) != 0)
 #define mon_acquired_trinsic(mon,typ) (((mon)->acquired_trinsics[((typ)-1)/32] & (0x1L << ((typ)-1)%32)) != 0)
 #define mon_resistance(mon,typ)	(mon_intrinsic(mon,typ) || mon_extrinsic(mon,typ) || (typ == SWIMMING && Is_waterlevel(&u.uz)) || \
@@ -326,6 +327,7 @@
 #define noboots(ptr)			((slithy(ptr) || nolimbs(ptr) || nofeet(ptr)) && !humanoid_feet(ptr))
 
 #define has_wings(ptr)			(((ptr)->mflagsb & MB_WINGS) != 0)
+#define has_wings_mon(mon)		(((mon) == &youmonst) ? (has_wings(youracedata) || u_variable_wings()) : has_wings((mon)->data))
 
 #define is_animal(ptr)		(((ptr)->mflagst & MT_ANIMAL) != 0L)
 #define is_plant(ptr)		(((ptr)->mflagsa & MA_PLANT) != 0L)

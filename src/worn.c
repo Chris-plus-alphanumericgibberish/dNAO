@@ -25,9 +25,8 @@ const struct worn {
 	{ W_ARMS, &uarms },
 	{ W_ARMG, &uarmg },
 	{ W_ARMF, &uarmf },
-#ifdef TOURIST
 	{ W_ARMU, &uarmu },
-#endif
+	{ W_ARMW, &uarmw },
 	{ W_RINGL, &uleft },
 	{ W_RINGR, &uright },
 	{ W_WEP, &uwep },
@@ -46,7 +45,9 @@ const struct worn {
 #define w_blocks(o,m) \
 		((is_mummy_wrap(o) && ((m) & W_ARMC)) ? INVIS : \
 		 (o->otyp == CORNUTHAUM && ((m) & W_ARMH) && \
-			!(u.uwizard || Race_if(PM_INCANTIFIER))) ? CLAIRVOYANT : 0)
+			!(u.uwizard || Race_if(PM_INCANTIFIER))) ? CLAIRVOYANT : \
+		 (o->otyp == CONSTRICTING_WING_GUARDS && ((m) & W_ARMW)) ? FLYING : \
+			0)
 		/* note: monsters don't have clairvoyance, so your role
 		   has no significant effect on their use of w_blocks() */
 
@@ -566,43 +567,49 @@ boolean verbose;
  * assumes single source of each blocked extrinsic
  */
 void
-mon_block_extrinsic(mon, obj, which, on, silently)
-struct monst *mon;
-struct obj *obj;
-int which;
-boolean on, silently;
+mon_block_extrinsic(struct monst *mon, struct obj *obj, int which, boolean on, boolean silently)
 {
-	if (on) {
-		switch (which)
-		{
-		case INVIS:
-			if (mon->mtyp != PM_HELLCAT){
+	boolean was_airborne = (which == LEVITATION || which == FLYING) &&
+				(mon_resistance(mon,LEVITATION) || mon_resistance(mon,FLYING));
+
+	if (on)
+		mon->mblocked[(which-1)/32] |= (1L << (which-1)%32);
+	else
+		mon->mblocked[(which-1)/32] &= ~(1L << (which-1)%32);
+
+	switch (which)
+	{
+	case INVIS:
+		if (mon->mtyp != PM_HELLCAT){
+			if (on) {
 				mon->invis_blkd = TRUE;
-				update_mon_intrinsic(mon, obj, which, !on, silently);
-			}
-			break;
-		default:
-			update_mon_intrinsic(mon, obj, which, !on, silently);
-			break;
-		}
-	}
-	else { /* off */
-		switch (which)
-		{
-		case INVIS:
-			if (mon->mtyp != PM_HELLCAT){
+				update_mon_intrinsic(mon, obj, which, FALSE, silently);
+			} else {
 				mon->invis_blkd = FALSE;
 				if (mon_gets_extrinsic(mon, which, obj))
-					update_mon_intrinsic(mon, obj, which, !on, silently);
+					update_mon_intrinsic(mon, obj, which, TRUE, silently);
 				if (mon->perminvis)
 					mon->minvis = TRUE;
 			}
-			break;
-		default:
-			if (mon_gets_extrinsic(mon, which, obj))
-				update_mon_intrinsic(mon, obj, which, !on, silently);
-			break;
 		}
+		break;
+	case LEVITATION:
+	case FLYING:
+		if (was_airborne && !mon_resistance(mon,LEVITATION) && !mon_resistance(mon,FLYING)) {
+			if (obj && obj->otyp == CONSTRICTING_WING_GUARDS)
+				m_crash_down(mon, silently);
+			else
+				m_float_down(mon, silently);
+			if (obj && !silently && canseemon(mon))
+				makeknown(obj->otyp);
+		} else if (!was_airborne && (mon_resistance(mon,LEVITATION) || mon_resistance(mon,FLYING))) {
+			m_float_up(mon, silently);
+			if (obj && !silently && canseemon(mon))
+				makeknown(obj->otyp);
+		}
+		break;
+	default:
+		break;	/* CLAIRVOYANT: no monster consumer, bit alone is enough */
 	}
 }
 
@@ -1099,6 +1106,7 @@ struct monst *mon;
 		}
 		if(uarmh) armac += arm_ac_bonus(uarmh);
 		if(uarmc) armac += arm_ac_bonus(uarmc);
+		if(uarmw) armac += arm_ac_bonus(uarmw);
 		if(armac < 0) armac *= -1;
 	}
 	else for (obj = mon->minvent; obj; obj = obj->nobj) {
@@ -1262,6 +1270,7 @@ struct monst *mon;
 		}
 		if(uarmh) armac += arm_ac_bonus(uarmh);
 		if(uarmc) armac += arm_ac_bonus(uarmc);
+		if(uarmw) armac += arm_ac_bonus(uarmw);
 		
 		if(armac < 0) armac *= -1;
 	}
@@ -1351,6 +1360,7 @@ struct monst *mon;
 		}
 		if(uarmh) armac += arm_ac_bonus(uarmh);
 		if(uarmc) armac += arm_ac_bonus(uarmc);
+		if(uarmw) armac += arm_ac_bonus(uarmw);
 		
 		if(armac < 0) armac *= -1;
 	}
@@ -1481,11 +1491,13 @@ struct monst *mon;
 
 	if(!mon->mcan && mon->mstance != MSTANCE_MAGIC && !(mon->mtyp == PM_SHADOWSMITH && dimness(mon->mx,mon->my) <= 0)){
 		int dr = 0;
+		int count = 7;
 #define m_bdr mon->data->spe_bdr
 #define m_ldr mon->data->spe_ldr
 #define m_hdr mon->data->spe_hdr
 #define m_fdr mon->data->spe_fdr
 #define m_gdr mon->data->spe_gdr
+#define m_wdr mon->data->spe_wdr
 		dr += m_bdr*2;
 		dr += m_ldr*2;
 
@@ -1498,12 +1510,17 @@ struct monst *mon;
 		if (can_wear_gloves(mon->data))	dr += m_gdr;
 		else							dr += m_bdr;
 		
+		if (has_wings_mon(mon)){
+			dr += 2*m_wdr;
+			count += 2;
+		}
 #undef m_bdr
 #undef m_ldr
 #undef m_hdr
 #undef m_fdr
 #undef m_gdr
-		base += (dr / 7);
+#undef m_wdr
+		base += (dr / count);
 		if(mon->mtyp == PM_CENTER_OF_ALL && Insight < 32)
 			base += (33-Insight)/2;
 
@@ -1530,24 +1547,29 @@ roll_mdr_detail(struct monst *mon, struct monst *magr, int slot, int depth, ucha
 	boolean youagr = (magr == &youmonst);
 	struct obj *magr_helm = magr ? (youagr ? uarmh : which_armor(magr, W_ARMH)) : NULL;
 	
-	if(!slot) switch(rn2(7)){
-		case 0:
-		case 1:
-			slot = UPPER_TORSO_DR;
-		break;
-		case 2:
-		case 3:
-			slot = LOWER_TORSO_DR;
-		break;
-		case 4:
-			slot = HEAD_DR;
-		break;
-		case 5:
-			slot = LEG_DR;
-		break;
-		case 6:
-			slot = ARM_DR;
-		break;
+	if(!slot){
+		if(has_wings_mon(mon) && rn2(9) < 2){
+			slot = WING_DR;
+		}
+		else switch(rn2(7)){
+			case 0:
+			case 1:
+				slot = UPPER_TORSO_DR;
+			break;
+			case 2:
+			case 3:
+				slot = LOWER_TORSO_DR;
+			break;
+			case 4:
+				slot = HEAD_DR;
+			break;
+			case 5:
+				slot = LEG_DR;
+			break;
+			case 6:
+				slot = ARM_DR;
+			break;
+		}
 	}
 	
 	mon_slot_dr(mon, magr, slot, &base, &armac, &nat_dr, depth);
@@ -1627,6 +1649,8 @@ int depth;
 		slot = LOWER_TORSO_DR;
 	if (slot == ARM_DR && !can_wear_gloves(mon->data))
 		slot = UPPER_TORSO_DR;
+	if (slot == WING_DR && !has_wings_mon(mon))
+		slot = UPPER_TORSO_DR;
 	if(mon->mtyp == PM_BLIBDOOLPOOLP_S_MINDGRAVEN_CHAMPION && magr && !depth){
 		if(slot != LEG_DR && rn2(3)){
 			slot = LOWER_TORSO_DR;
@@ -1637,8 +1661,8 @@ int depth;
 	}
 
 	/* DR of worn armor */
-	int marmor[] = { W_ARM,          				W_ARMC,         					  W_ARMF, W_ARMH,  W_ARMG, W_ARMS, W_ARMU };
-	int adfalt[] = { UPPER_TORSO_DR|LOWER_TORSO_DR, UPPER_TORSO_DR|LOWER_TORSO_DR|LEG_DR, LEG_DR, HEAD_DR, ARM_DR, 0,     UPPER_TORSO_DR };
+	int marmor[] = { W_ARM,          				W_ARMC,         					  W_ARMF, W_ARMH,  W_ARMG, W_ARMS, W_ARMU,        W_ARMW };
+	int adfalt[] = { UPPER_TORSO_DR|LOWER_TORSO_DR, UPPER_TORSO_DR|LOWER_TORSO_DR|LEG_DR, LEG_DR, HEAD_DR, ARM_DR, 0,     UPPER_TORSO_DR, WING_DR };
 	int i;
 	struct obj * curarm;
 	int dr_multiplier = (is_law_demon(mon->data) && (Inhell || u.uevent.udemigod)) ? 2 : 1;
@@ -1705,6 +1729,7 @@ int depth;
 	case HEAD_DR:        slotnatdr = mon->data->hdr; break;
 	case LEG_DR:         slotnatdr = mon->data->fdr; break;
 	case ARM_DR:         slotnatdr = mon->data->gdr; break;
+	case WING_DR:        slotnatdr = mon->data->wdr; break;
 	}
 	if(mon->mtyp == PM_OONA || mon->mtyp == PM_PORO_AULON){
 		slotnatdr = slotnatdr*mon->mhp/mon->mhpmax;
@@ -1726,6 +1751,7 @@ int depth;
 		case HEAD_DR:        bas_mdr += mon->data->spe_hdr; break;
 		case LEG_DR:         bas_mdr += mon->data->spe_fdr; break;
 		case ARM_DR:         bas_mdr += mon->data->spe_gdr; break;
+		case WING_DR:        bas_mdr += mon->data->spe_wdr; break;
 		}
 		if(mon->mtyp == PM_CENTER_OF_ALL && Insight < 32)
 			bas_mdr += (33-Insight)/2;
@@ -1753,8 +1779,10 @@ struct monst *mon;
 	int sum = 0;
 	int base, nat_dr, armac;
 	int slot;
+#define MAX_SLOTS 9
+	int count = MAX_SLOTS;
 	
-	for (i = 0; i < 7; i++){
+	for (i = 0; i < MAX_SLOTS; i++){
 		switch(i){
 			case 0:
 			case 1:
@@ -1773,6 +1801,15 @@ struct monst *mon;
 			case 6:
 				slot = ARM_DR;
 			break;
+			case 7:
+			case 8:
+				if(has_wings_mon(mon))
+					slot = WING_DR;
+				else{
+					count--;
+					continue;
+				}
+			break;
 		}
 		
 		mon_slot_dr(mon, (struct monst *) 0, slot, &base, &armac, &nat_dr, 0);
@@ -1789,7 +1826,7 @@ struct monst *mon;
 		sum += base;
 	}
 
-	return sum / 7;
+	return sum / count;
 }
 
 int
@@ -1799,11 +1836,13 @@ struct monst * mon;
 	/* only looks at a monster's base stats with minimal adjustment (and no worn armor) */
 	/* used for pokedex entry */
 	int dr = 0;
+	int count = 7;
 #define m_bdr (mon->data->bdr + mon->data->spe_bdr)
 #define m_ldr (mon->data->ldr + mon->data->spe_ldr)
 #define m_hdr (mon->data->hdr + mon->data->spe_hdr)
 #define m_fdr (mon->data->fdr + mon->data->spe_fdr)
 #define m_gdr (mon->data->gdr + mon->data->spe_gdr)
+#define m_wdr (mon->data->wdr + mon->data->spe_wdr)
 
 	dr += m_bdr*2;
 	dr += m_ldr*2;
@@ -1817,13 +1856,18 @@ struct monst * mon;
 	if (can_wear_gloves(mon->data))	dr += m_gdr;
 	else							dr += m_bdr;
 	
+	if (has_wings_mon(mon)){
+		dr += 2*m_wdr;
+		count += 2;
+	}
 #undef m_bdr
 #undef m_ldr
 #undef m_hdr
 #undef m_fdr
 #undef m_gdr
+#undef m_wdr
 
-	return (dr / 7);
+	return (dr / count);
 }
 
 /* weapons are handled separately; rings and eyewear aren't used by monsters */
@@ -1863,13 +1907,12 @@ boolean creation;
 		return;
 
 	m_dowear_type(mon, W_AMUL, creation, FALSE);
-#ifdef TOURIST
 	/* can't put on shirt if already wearing suit */
 	if (!(mon->misc_worn_check & W_ARM) || creation)
 	    m_dowear_type(mon, W_ARMU, creation, FALSE);
-#endif
 	/* treating small as a special case allows
 	   hobbits, gnomes, and kobolds to wear cloaks */
+	m_dowear_type(mon, W_ARMW, creation, FALSE);
 	m_dowear_type(mon, W_ARMC, creation, FALSE);
 	m_dowear_type(mon, W_ARMH, creation, FALSE);
 	if (!MON_WEP(mon) || !bimanual_mon(MON_WEP(mon),mon))
@@ -1929,6 +1972,9 @@ boolean racialexception;
 		    break;
 		case W_ARMU:
 		    if (!is_shirt(obj) || obj->objsize != mon->data->msize || !shirt_match(mon->data,obj)) continue;
+		    break;
+		case W_ARMW:
+		    if (!is_wingguard(obj) || obj->objsize != mon->data->msize || !has_wings_mon(mon)) continue;
 		    break;
 		case W_ARMC:
 			if((mon->mtyp == PM_CATHEZAR || mon->mtyp == PM_CHAIN_DEVIL) && obj->otyp == CHAIN)
@@ -2009,7 +2055,10 @@ outer_break:
 	    update_mon_intrinsics(mon, old, FALSE, creation);
 	mon->misc_worn_check |= flag;
 	best->owornmask |= flag;
-	if(check_oprop(best, OPROP_CURS)){
+	if(check_oprop(best, OPROP_CURS) ||
+			best->otyp == DUNCE_CAP ||
+			best->otyp == HELM_OF_OPPOSITE_ALIGNMENT ||
+			best->otyp == CONSTRICTING_WING_GUARDS){
 		curse(best);
 	}
 	update_mon_intrinsics(mon, best, TRUE, creation);
@@ -2060,7 +2109,7 @@ struct monst *mon;
 	
 	if (mon->mfrozen) return FALSE;
 	
-	do switch(rnd(8)){
+	do switch(rnd(9)){
 		case 1:
 			flag = W_ARM;
 		break;
@@ -2084,6 +2133,9 @@ struct monst *mon;
 		break;
 		case 8:
 			flag = W_BELT;
+		break;
+		case 9:
+			flag = W_ARMW;
 		break;
 	} while(tries-- && !(old = which_armor(mon, flag)));
 
@@ -2115,7 +2167,7 @@ struct monst *mon;
 	if (mon->mfrozen) return FALSE;
 	
 	for(i = 1; i<=7;i++){
-		switch(rnd(8)){
+		switch(rnd(9)){
 			case 1:
 				flag = W_ARM;
 			break;
@@ -2139,6 +2191,9 @@ struct monst *mon;
 			break;
 			case 8:
 				flag = W_BELT;
+			break;
+			case 9:
+				flag = W_ARMW;
 			break;
 		}
 
@@ -2323,6 +2378,15 @@ boolean polyspot;
 			}
 		}
 	}
+	if ((otmp = which_armor(mon, W_ARMW)) != 0) {
+		if(otmp->objsize != mon->data->msize || !has_wings_mon(mon) || is_gaseous_noequip(mon->data) || noncorporeal(mon->data)){
+			if (vis)
+			pline("%s wing-guards %s!", s_suffix(Monnam(mon)), 
+				(!has_wings_mon(mon) || is_gaseous_noequip(mon->data) || noncorporeal(mon->data)) ? "fall away" : "pop off");
+			if (polyspot) bypass_obj(otmp);
+			m_lose_armor(mon, otmp);
+		}
+	}
 	if ((otmp = which_armor(mon, W_ARMG)) != 0) {
 		if(nogloves(mon->data) || nolimbs(mon->data) || otmp->objsize != mon->data->msize || is_gaseous_noequip(mon->data) || noncorporeal(mon->data)){
 			if (vis)
@@ -2435,6 +2499,14 @@ struct obj *obj;
 		/* armor */
 	case EILISTRAN_ARMOR:
 		score += 10;
+		break;
+		/* wing guards */
+	case CONSTRICTING_WING_GUARDS:
+		if (species_flies(mon->data))
+			score += -20;
+		break;
+	case DEXTEROUS_WING_GUARDS:
+		score += (obj->spe / 2);
 		break;
 		/* facewear */
 	case LIVING_MASK:
@@ -2560,6 +2632,9 @@ struct monst *mon;
 	/* armor types for shirt, gloves, shoes, and shield may not currently
 	   provide any magic cancellation but we should be complete */
 	armor = (mon == &youmonst) ? uarmu : which_armor(mon, W_ARMU);
+	if (armor && armpro < objects[armor->otyp].a_can)
+	    armpro = objects[armor->otyp].a_can;
+	armor = (mon == &youmonst) ? uarmw : which_armor(mon, W_ARMW);
 	if (armor && armpro < objects[armor->otyp].a_can)
 	    armpro = objects[armor->otyp].a_can;
 	armor = (mon == &youmonst) ? uarmg : which_armor(mon, W_ARMG);
@@ -3004,6 +3079,9 @@ default_coverage(int slot, long wornmask)
 		case LEG_DR:
 			return !!(wornmask&(W_ARMF|W_ARMC));
 		break;
+		case WING_DR:
+			return !!(wornmask&(W_ARMW));
+		break;
 	}
 	return FALSE;
 }
@@ -3018,6 +3096,8 @@ next_armor_depth(long depth)
 	if(depth&W_BELT)
 		return W_DRESS_DEPTH;
 	if(depth&W_DRESS_DEPTH)
+		return W_ARMW;
+	if(depth&W_ARMW)
 		return W_ARM;
 	if(depth&W_ARM)
 		return W_ARMH;

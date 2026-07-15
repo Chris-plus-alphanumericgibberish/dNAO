@@ -589,7 +589,7 @@ int dmg;
 				if(allreadydone&(0x1<<6)) break;
 				allreadydone |= 0x1<<6;
 				n--; //else commit to the attack.
-				if(uarmc || uarm || uarmu || (uwep && uwep->oartifact==ART_TENSA_ZANGETSU)){
+				if(uarmc || uarm || uarmu || uarmw || (uwep && uwep->oartifact==ART_TENSA_ZANGETSU)){
 					You_feel("the tentacles sucking on your %s", uarm ? "armor" : "clothes");
 			break;  //blocked
 				} //else
@@ -716,7 +716,7 @@ int dmg;
 					You_feel("the tentacles writhe over your %s.", uarmc ? "cloak" : "shihakusho");
 			break;
 				} //else
-				if(invent && !uarmc && !uarm && !uarmu && !uarmf && !uarmg && !uarms && !uarmh && !uwep
+				if(invent && !uarmc && !uarm && !uarmw && !uarmu && !uarmf && !uarmg && !uarms && !uarmh && !uwep
 					){ //only steal if you have at least one item and everything else of interest is already gone.
 					n = 0;
 					You_feel("the tentacles pick through your remaining possessions.");
@@ -728,6 +728,41 @@ int dmg;
 							return 1;
 					}
 				}
+			break;
+			case 13:
+			if(allreadydone&(0x1<<13)) break;
+			allreadydone |= 0x1<<13;
+			if(uarmw){
+				n--;
+				if(!slips_free(mon, &youmonst,  &legblast, -1)){
+					You_feel("the tentacles squirm under your wing-guards.");
+					if( d(1,100) > 90){
+						if(!Preservation){
+							pline("The tentacles begin to tear at your wing-guards!");
+							if(uarmw->spe > 1){
+								for(i=rn2(4); i>=0; i--)
+									drain_item(uarmw);
+								Your("%s less effective.", aobjnam(uarmw, "seem"));
+							}
+							else{
+								tent_destroy_arm(uarmw);
+							}
+						}
+					}
+					else{
+						pline("The tentacles pull off your wing-guards!");
+						otmp = uarmw;
+						if (donning(otmp)) cancel_don();
+						(void) WingGuard_off();
+						freeinv(otmp);
+						(void) mpickobj(mon,otmp);
+						if(roll_madness(MAD_TALONS)){
+							You("panic after having your wing-guards stolen!");
+							HPanicking += 1+rnd(6);
+						}
+					}
+				}
+			}
 			break;
 		   }
 		}
@@ -803,6 +838,7 @@ boolean dontask;
 				(obj == uarmf) ? "let me rub your feet" :
 				(obj == uarmg) ? "they're too clumsy" :
 				(obj == uarmu) ? "let me massage you" :
+				(obj == uarmw) ? "let me rub your wings" :
 				/* obj == uarmh */
 				hairbuf
 			);
@@ -913,10 +949,8 @@ struct monst * mon;
 {
 	/* check no-clothes case */
 	if (!uarm && !uarmc && !uarmf && !uarmg && !uarms && !uarmh && !uwep && !uswapwep
-#ifdef TOURIST
-		&& !uarmu
-#endif
-		) {
+		&& !uarmu && !uarmw
+	) {
 		/* message */
 		switch (mon->mtyp)
 		{
@@ -991,10 +1025,9 @@ struct monst * mon;
 
 		if (mon->mtyp != PM_GRAZ_ZT) /* his seduces can replace your hat */
 			undressfunc(uarmh, "helmet", helpless);
-#ifdef TOURIST
 		if (!uarmc && !uarm)
 			undressfunc(uarmu, "clothes", helpless);
-#endif
+		undressfunc(uarmw, "wing-covers", helpless);
 	}
 
 	return;

@@ -2109,6 +2109,8 @@ dopetequip()
 			flag = W_AMUL;
 		} else if(is_shirt(otmp)){
 			flag = W_ARMU;
+		} else if(is_wingguard(otmp)){
+			flag = W_ARMW;
 		} else if(is_cloak(otmp)){
 			flag = W_ARMC;
 		} else if(is_helmet(otmp)){
@@ -3927,6 +3929,8 @@ struct monst *mon;
 			){
 				addArmorMenuOption
 			} else if(is_shirt(otmp) && !(mon->misc_worn_check&W_ARMU) && otmp->objsize == mon->data->msize && shirt_match(mon->data,otmp)){
+				addArmorMenuOption
+			} else if(is_wingguard(otmp) && !(mon->misc_worn_check&W_ARMW) && otmp->objsize == mon->data->msize && has_wings_mon(mon)){
 				addArmorMenuOption
 			} else if(is_cloak(otmp) && !(mon->misc_worn_check&W_ARMC) && (abs(otmp->objsize - mon->data->msize) <= 1)){
 				addArmorMenuOption
