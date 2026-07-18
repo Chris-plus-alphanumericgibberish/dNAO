@@ -5148,7 +5148,7 @@ struct permonst _mons2[] = {
 	MA_REPTILIAN|MA_DEMON /*MA*/,  MV_NORMAL|MV_INFRAVISION|MV_SCENT /*MV*/, 0 /*MW*/, 0 /*light radius*/, CLR_WHITE),
     MON("serpent priest", S_SNAKE,//18
 	LVL(12, 12, 99, 20),  G_S_INST(49)|G_NOCORPSE|G_HELL|1,
-	DEF(NAT_AC(10),SPE_AC(9),SPE_DR(9)),
+	DEF(NAT_AC(10),SPE_AC(9),NAT_DR(9),SPE_DR(9)),
 	A(ATTK(AT_WEAP, AD_PHYS, 4,10), ATTK(AT_KICK, AD_PHYS, 1, 4),
 	  ATTK(AT_MAGC, AD_CLRC, 0, 0), ATTK(AT_GAZE, AD_STDY, 9, 1)
 	),
