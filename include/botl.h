@@ -33,7 +33,8 @@
 #define BL_MASK_MISO     (BL_MASK_DEADMAGC << 1)
 #define BL_MASK_CATAPSI  (BL_MASK_MISO << 1)
 #define BL_MASK_DIMLOCK  (BL_MASK_CATAPSI << 1)
-//Note:29
+#define BL_MASK_GMOLD    (BL_MASK_DIMLOCK << 1)
+//Note:30
 
 struct status_effect {
 	long long mask;
@@ -51,6 +52,7 @@ static const struct status_effect status_effects[] = {
 	{ BL_MASK_FOODPOIS, "FoodPois", "Fpois", "Poi" },
 	/* Hunger and encumbrance should go here, but are special-cased */
 	{ BL_MASK_BLEED,    "Bleed",    "Bleed", "Bld" },
+	{ BL_MASK_GMOLD,    "GrayMold", "GMold", "GM"  },
 	/* Other status effects */
 	{ BL_MASK_BLIND,    "Blind",    "Blnd",  "Bl"  },
 	{ BL_MASK_STUN,     "Stun",     "Stun",  "St"  },
