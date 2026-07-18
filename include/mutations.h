@@ -164,7 +164,11 @@ struct mutationtype {
 #define TT_FALLEN_ATTRACTIVE	LAST_CULT_MUTATION+85
 #define TT_FALLEN_AURA		LAST_CULT_MUTATION+86
 #define TT_FALLEN_SCARS		LAST_CULT_MUTATION+87
-#define LAST_TIEFLING_TRAIT		TT_FALLEN_SCARS
+#define TT_WINGS_6			LAST_CULT_MUTATION+88
+#define TT_WING_CLAW_1		LAST_CULT_MUTATION+89
+#define TT_WING_CLAW_2		LAST_CULT_MUTATION+90
+#define TT_WING_CLAW_3		LAST_CULT_MUTATION+91
+#define LAST_TIEFLING_TRAIT		TT_WING_CLAW_3
 #define AAT_PRIMINAL			LAST_TIEFLING_TRAIT+1
 #define AAT_PRIMINAL_TAIL		LAST_TIEFLING_TRAIT+2
 #define	LAST_MUTATION		AAT_PRIMINAL_TAIL
@@ -250,12 +254,16 @@ struct mutationtype {
 	 || has_mutation(TT_BULL_HORNS) \
 	)
 
-#define TIEFLING_WINGS \
+#define TIEFLING_WING_SLOT \
 	(has_mutation(TT_WINGS_1) \
 	 || has_mutation(TT_WINGS_2) \
 	 || has_mutation(TT_WINGS_3) \
 	 || has_mutation(TT_WINGS_4) \
 	 || has_mutation(TT_WINGS_5) \
+	 || has_mutation(TT_WINGS_6) \
+	 || has_mutation(TT_WING_CLAW_1) \
+	 || has_mutation(TT_WING_CLAW_2) \
+	 || has_mutation(TT_WING_CLAW_3) \
 	)
 
 #define is_holy_mut(mut) \

@@ -145,6 +145,10 @@ const struct mutationtype mutationtypes[] =
 	{ TT_WINGS_3, WINGS_BP, "flying", "You fly on white-feathered wings.", "vestigial wings", "You have tiny white-feathered wings."},
 	{ TT_WINGS_4, WINGS_BP, "flying", "You fly on red-feathered wings.", "vestigial wings", "You have tiny red-feathered wings."},
 	{ TT_WINGS_5, WINGS_BP, "flying", "You fly on giant fly's wings.", "vestigial wings", "You have tiny fly's wings."},
+	{ TT_WINGS_6, WINGS_BP, "flying", "You fly on steel-feathered wings.", "vestigial wings", "You have tiny rainbow wings."},
+	{ TT_WING_CLAW_1, WINGS_BP, "wing claws", "You have giant wing-like claws.", "vestigial wings", "You have tiny wing-like claws."},
+	{ TT_WING_CLAW_2, WINGS_BP, "wing claws", "You have giant wing-like skeletal hands.", "vestigial wings", "You have tiny wing-like skeletal hands."},
+	{ TT_WING_CLAW_3, WINGS_BP, "wing stingers", "You have sting-tipped tentacles on your back.", "vestigial wings", "You have tiny sting-tipped tentacles on your back."},
 	// Aura traits
 	{ TT_NA_AURA, AURA_TRAIT, "unsetling aura", "Your unsettling aura turns away blows.", "unsettling aura", "You have an unsettling aura."},
 	{ TT_DR_AURA, AURA_TRAIT, "resistant aura", "Your unsettling aura resists blows.", "unsettling aura", "You have an unsettling aura."},
@@ -306,7 +310,7 @@ init_natural_mutations()
 		return;
 	}
 	if(!Race_if(PM_TIEFLING) && !Race_if(PM_DARK_FEY_RI)) return;
-	int mutation_blacklist[] = {TT_TEARS_OF_BLOOD, TT_BLINDING_HAIR, TT_WINGS_1, TT_WINGS_2, TT_WINGS_3, TT_WINGS_4, TT_WINGS_5, TT_MAGIC_BREATHING };
+	int mutation_blacklist[] = {TT_TEARS_OF_BLOOD, TT_BLINDING_HAIR, TT_WINGS_1, TT_WINGS_2, TT_WINGS_3, TT_WINGS_4, TT_WINGS_5, TT_WINGS_6, TT_WING_CLAW_1, TT_WING_CLAW_2, TT_MAGIC_BREATHING };
 	int possible_mutations[LAST_TIEFLING_TRAIT];
 	int possible_count = 0;
 	for(int j = 0; mutationtypes[j].mutation; j++){
@@ -610,7 +614,7 @@ mutation_effects(int mutation)
 		HSwimming |= W_UPGRADE;
 	}
 	else if(mutation == TT_WINGS_1 || mutation == TT_WINGS_2 || mutation == TT_WINGS_3 ||
-			mutation == TT_WINGS_4 || mutation == TT_WINGS_5
+			mutation == TT_WINGS_4 || mutation == TT_WINGS_5 || mutation == TT_WINGS_6
 	){
 		HFlying |= W_UPGRADE;
 	}

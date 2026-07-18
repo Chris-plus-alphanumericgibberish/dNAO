@@ -3797,7 +3797,7 @@ boolean
 u_variable_wings()
 {
 	if(Race_if(PM_HALF_DRAGON) && (HFlying&FROMRACE)) return TRUE;
-	if(TIEFLING_WINGS) return TRUE;
+	if(TIEFLING_WING_SLOT) return TRUE;
 
 	return FALSE;
 }

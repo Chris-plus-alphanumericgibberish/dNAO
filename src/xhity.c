@@ -3196,6 +3196,71 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		fromlist = FALSE;
 		add_subout(subout, SUBOUT_T_ANTLERS);
 	}
+	if(is_null_attk(attk) && youagr && check_mutation(TT_WINGS_6)
+		&& !check_subout(subout, SUBOUT_T_WING_BUFFET)
+	) {
+		attk->aatyp = AT_WING;
+		attk->adtyp = AD_PHYS;
+		if(mdef && bigmonst(mdef->data)){
+			attk->damn = u.ulevel >= 30 ? 6 : 2;
+			attk->damd = u.ulevel >= 30 ? 6 : u.ulevel >= 14 ? 12 : 8;
+		}
+		else {
+			attk->damn = 2;
+			attk->damd = u.ulevel >= 30 ? 12 : u.ulevel >= 14 ? 8 : 6;
+		}
+		fromlist = FALSE;
+		add_subout(subout, SUBOUT_T_WING_BUFFET);
+	}
+	if(is_null_attk(attk) && youagr && check_mutation(TT_WING_CLAW_1)
+		&& !check_subout(subout, SUBOUT_T_WING_CLAW_1)
+	) {
+		attk->aatyp = AT_WING;
+		attk->adtyp = check_rot(ROT_WINGS) ? AD_DISE : AD_PHYS;
+		attk->damn = 2;
+		attk->damd = u.ulevel >= 30 ? 20 : u.ulevel >= 14 ? 12 : 10;
+		fromlist = FALSE;
+		add_subout(subout, SUBOUT_T_WING_CLAW_1);
+	}
+	if(is_null_attk(attk) && youagr && check_mutation(TT_WING_CLAW_2)
+		&& !check_subout(subout, SUBOUT_T_WING_CLAW_2)
+	) {
+		attk->aatyp = AT_WING;
+		attk->damn = 2;
+		attk->damd = max(1, u.ulevel/3);
+		attk->adtyp = AD_SLOW;
+		fromlist = FALSE;
+		add_subout(subout, SUBOUT_T_WING_CLAW_2);
+	}
+	if(is_null_attk(attk) && youagr && check_mutation(TT_WING_CLAW_3)
+		&& (!check_subout(subout, SUBOUT_T_WING_CLAW_3A_1)
+			|| (check_subout(subout, SUBOUT_T_WING_CLAW_3B) && u.ulevel >= 14 && !check_subout(subout, SUBOUT_T_WING_CLAW_3A_2))
+			|| (check_subout(subout, SUBOUT_T_WING_CLAW_3B) && u.ulevel >= 30 && !check_subout(subout, SUBOUT_T_WING_CLAW_3A_3))
+		)
+	) {
+		attk->aatyp = AT_STNG;
+		attk->adtyp = AD_DOBT;
+		attk->damn = 1;
+		attk->damd = 12;
+		fromlist = FALSE;
+		if(check_subout(subout, SUBOUT_T_WING_CLAW_3A_2))
+			add_subout(subout, SUBOUT_T_WING_CLAW_3A_3);
+		else if(check_subout(subout, SUBOUT_T_WING_CLAW_3A_1))
+			add_subout(subout, SUBOUT_T_WING_CLAW_3A_2);
+		else
+			add_subout(subout, SUBOUT_T_WING_CLAW_3A_1);
+		remove_subout(subout, SUBOUT_T_WING_CLAW_3B);
+	}
+	if(is_null_attk(attk) && youagr && check_mutation(TT_WING_CLAW_3)
+		&& !check_subout(subout, SUBOUT_T_WING_CLAW_3B)
+	) {
+		attk->aatyp = AT_STNG;
+		attk->adtyp = AD_DOBT;
+		attk->damn = 1;
+		attk->damd = 12;
+		fromlist = FALSE;
+		add_subout(subout, SUBOUT_T_WING_CLAW_3B);
+	}
 	if(is_null_attk(attk) && youagr && check_mutation(TT_STINGER_TAIL)
 		&& !check_subout(subout, SUBOUT_T_SCORPION_TAIL)
 	) {
@@ -16348,6 +16413,12 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 				seardmg += rnd(mlev(mdef));
 				mdef->mironmarked = TRUE;
 			}
+			else if (youagr && unarmed_wing && check_mutation(TT_WINGS_6)) {
+				/* Steel-feathered wings, for the player buffeting with bare wings */
+				ironobj |= W_SKIN;
+				seardmg += rnd(mlev(mdef));
+				mdef->mironmarked = TRUE;
+			}
 		}
 
 		if (hates_holy_mon(mdef)){
@@ -18467,11 +18538,21 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 		}
 		else if (unarmed_wing) {
 			//Can always whack someone
-			attackmask = WHACK;
+			attackmask = (originalattk && originalattk->aatyp == AT_STNG) ? PIERCE : WHACK;
 
 			otmp = (youagr ? uarmw : which_armor(magr, W_ARMW));
 			if(otmp)
 				attackmask = attack_mask(otmp, 0, 0, magr);
+
+			if (youagr && check_mutation(TT_WINGS_6)) {
+				int subattackmask = (u.ulevel >= 30) ? SLASH
+					: (u.ulevel >= 14) ? (SLASH|PIERCE)
+					: PIERCE;
+				if(otmp)
+					attackmask |= subattackmask;
+				else
+					attackmask = subattackmask;
+			}
 		}
 		else {
 			/* something odd -- maybe it was a weapon attack and the weapon was destroyed earlier than usual? */
@@ -19144,10 +19225,11 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 					Strcat(buf, "cold-iron ");
 				if (grnstlobj & slot)
 					Strcat(buf, "green-steel ");
-				Strcat(buf, 
+				Strcat(buf,
 					(youagr && u.sealsActive&SEAL_SIMURGH) ? "claws"
+					: (youagr && unarmed_wing && check_mutation(TT_WINGS_6)) ? "wings"
 					: (youagr ? body_part(BODY_SKIN) : mbodypart(magr, BODY_SKIN)));
-				if (youagr && u.sealsActive&SEAL_SIMURGH)
+				if (youagr && (u.sealsActive&SEAL_SIMURGH || (unarmed_wing && check_mutation(TT_WINGS_6))))
 					plural = TRUE;
 			}
 		}

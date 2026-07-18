@@ -118,7 +118,14 @@
 #define SUBOUT_A_ACID_TOUCH 50	/* Aasimar acidic touch attack */
 #define SUBOUT_A_SUCK  51	/* Aasimar priminal sucking attack */
 #define SUBOUT_SQUZ_ALLOW 52	/* target was already grabbed at the start of this attack chain */
-#define MAX_SUBOUT		52
+#define SUBOUT_T_WING_BUFFET 53	/* Tiefling steel-feathered wing buffet attack */
+#define SUBOUT_T_WING_CLAW_1 54	/* Tiefling giant wing-claw attack */
+#define SUBOUT_T_WING_CLAW_2 55	/* Tiefling skeletal wing-claw attack */
+#define SUBOUT_T_WING_CLAW_3A_1 56	/* Tiefling doubt wing-sting attack */
+#define SUBOUT_T_WING_CLAW_3A_2 57	/* Tiefling doubt wing-sting attack */
+#define SUBOUT_T_WING_CLAW_3A_3 58	/* Tiefling doubt wing-sting attack */
+#define SUBOUT_T_WING_CLAW_3B 59	/* Tiefling doubt wing-sting attack */
+#define MAX_SUBOUT		59
 #define SUBOUT_ARRAY_SIZE (MAX_SUBOUT/(sizeof(int)*8)+1)
 
 #define ATTKFLAG_FORCE_BLEED		0x00000001L
