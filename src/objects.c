@@ -1421,7 +1421,7 @@ TOOL(("crystal ball", "glass orb"),
 TOOL(("misotheistic pyramid", "black-stone pyramid"),  /*Needs encyc entry*/
 								0,  MZ_TINY,  1, 1, 0,   0,  1, 200, OBSIDIAN_MT, CLR_BLACK),
 TOOL(("misotheistic fragment", "shattered mirrored pyramid"),/*Needs encyc entry*/
-								0,  MZ_TINY,  1, 1, 0,   0,  1, 200, GLASS, HI_SILVER),
+								0,  MZ_TINY,  1, 1, 0,   0,  1, 200, GLASS, HI_SILVER, O_NOWISH(1)),
 TOOL(("dimensional lock", "cerulean-willow-engraved disk", "disk"),
 								0,  MZ_SMALL,  1, 1, 0,   0, 10,2000, MINERAL, CLR_BRIGHT_BLUE),
 TOOL(("preservative engine", "infernal contraption"),
