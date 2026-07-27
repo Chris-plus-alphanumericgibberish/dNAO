@@ -228,6 +228,20 @@ MONSTER:'@',"verger",(53,11)
 MONSTER:'@',"verger",(53,12)
 MONSTER:'@',"nurse",(53,12),peaceful
 
+# Interior workbenches
+ALTAR:(63,09),neutral,altar
+OBJECT[10%]:'#',"twin-columnar crystal",(63,09)
+OBJECT[25%]:'%',"parasite",(63,09)
+OBJECT:'\\',"gurney",(63,10)
+OBJECT[10%]:'#',"human blood",(63,10)
+
+ALTAR:(67,10),law,altar
+OBJECT[10%]:'#',"twin-columnar crystal",(67,10)
+OBJECT[25%]:'#',"elvenqueen blood",(67,09)
+OBJECT:'(',"bell",(67,09)
+OBJECT:'\\',"gurney",(67,09)
+OBJECT[10%]:'#',"human blood",(67,09)
+
 #North row
 MONSTER:'@',"priest",(16,02),peaceful
 MONSTER:'@',"noblewoman",(18,02),peaceful
