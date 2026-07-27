@@ -897,7 +897,7 @@ NEARDATA struct permonst mons[] = {
 	MM_FLY|MM_BREATHLESS /*MM*/, MT_WANDER|MT_STALK|MT_COLLECT|MT_MAGIC /*MT*/, 0 /*MF*/,
 	MB_STRONG|MB_HUMANOID|MB_WINGS|MB_NOEYES /*MB*/, MC_POIS  /*MC*/, MG_INFRAVISIBLE|MG_NASTY|MG_REGEN|MG_INSIGHT /*MG*/,
 	MA_MINION|MA_PRIMORDIAL /*MA*/,  MV_SEE_INVIS|MV_EXTRAMISSION /*MV*/, MW_ELDER_SIGN /*MW*/, 0 /*light radius*/, CLR_BLUE),
-	MON("vegepygmy", S_GREMLIN,//
+	MON("vegepygmy", S_GREMLIN,//7
 	LVL(3, 10, 10, 0), (G_NOGEN|G_LGROUP),
 	DEF(NAT_AC(3), NAT_DR(4)),
 	A(ATTK(AT_WEAP, AD_GMLD, 1, 2), ATTK(AT_TUCH, AD_RUST, 1, 1), ATTK(AT_NONE, AD_GMLD, 1, 2)),
@@ -905,7 +905,7 @@ NEARDATA struct permonst mons[] = {
 	0 /*MM*/, MT_METALLIVORE|MT_CARNIVORE|MT_WANDER|MT_COLLECT /*MT*/, MF_MARTIAL_S /*MF*/,
 	MB_HUMANOID /*MB*/, MC_POIS|MC_HALUC  /*MC*/, 0 /*MG*/,
 	MA_PLANT|MA_ET /*MA*/,  MV_TELEPATHIC|MV_EARTHSENSE|MV_INFRAVISION /*MV*/, MW_ELDER_SIGN|MW_ELDER_EYE_ELEM, 0 /*light radius*/, CLR_RED),
-	MON("vegepygmy shaman", S_GREMLIN,//
+	MON("vegepygmy shaman", S_GREMLIN,//14
 	LVL(9, 12, 10, 0), (G_NOGEN),
 	DEF(NAT_AC(3), NAT_DR(4)),
 	A(ATTK(AT_WEAP, AD_GMLD, 1, 2), ATTK(AT_TUCH, AD_RUST, 1, 1), ATTK(AT_MAGC, AD_SPEL, 0, 4), ATTK(AT_NONE, AD_GMLD, 1, 2)),
@@ -1991,7 +1991,7 @@ NEARDATA struct permonst mons[] = {
 	MM_TPORT|MM_TPORT_CNTRL|MM_TENGTPORT|MM_WALLWALK|MM_STANDOFF /*MM*/, MT_HOSTILE|MT_MAGIC /*MT*/, MF_BAB_HALF /*MF*/,
 	MB_HUMANOID|MB_LONGHEAD|MB_OVIPAROUS|MB_STRONG /*MB*/, MC_POIS  /*MC*/, MG_REGEN|MG_SANLOSS|MG_INSIGHT|MG_NOSPELLCOOLDOWN|MG_NOWISH|MG_NOTAME|MG_NOPOLY|MG_NASTY|MG_BACKSTAB /*MG*/,
 	MA_ARACHNID|MA_DEMIHUMAN|MA_ET /*MA*/,  MV_NORMAL /*MV*/, 0 /*MW*/, 0 /*light radius*/, CLR_GREEN),
-    MON("spider-scorpion", S_SPIDER,//
+    MON("spider-scorpion", S_SPIDER,//19
 	LVL(12, 15, 0, 0), (G_GENO|G_LGROUP|2),
 	DEF(NAT_AC(9), NAT_DR(2)),
 	A(ATTK(AT_CLAW, AD_PHYS, 1, 8), OFFHND_ATTK(AT_CLAW, AD_PHYS, 1, 8),
@@ -2531,7 +2531,7 @@ then fill new spaces with our spawn!
 	MM_FLY /*MM*/, MT_STALK|MT_COLLECT|MT_BOLD /*MT*/, MF_MARTIAL_E|MF_BAB_FULL|MF_LEVEL_30 /*MF*/,
 	MB_STRONG|MB_HUMANOID|MB_WINGS /*MB*/, 0  /*MC*/, MG_NOPOLY|MG_NASTY|MG_INFRAVISIBLE|MG_HATESUNHOLY|MG_TRACKER /*MG*/,
 	MA_MINION /*MA*/,  MV_EXTRAMISSION|MV_SEE_INVIS /*MV*/, MW_ELDER_EYE_PLANES /*MW*/, 1 /*light radius*/, CLR_WHITE),
-    MON("aether wolf", S_DOG,//  /*needs encyc entry*/
+    MON("aether wolf", S_DOG,//23  /*needs encyc entry*/
 	LVL(15, 10, 55, 12), (G_PLANES|G_NOCORPSE|G_NOGEN),
 	DEF(NAT_AC(7), DEX_AC(7), SPE_AC(7), SPE_DR(3), SPE_DR_HEAD(0)),
 	A(ATTK(AT_WEAP, AD_PHYS, 3, 7), ATTK(AT_WEAP, AD_PHYS, 3, 7),
@@ -2541,7 +2541,7 @@ then fill new spaces with our spawn!
 	MM_FLY /*MM*/, MT_STALK|MT_COLLECT|MT_BOLD /*MT*/, MF_MARTIAL_E|MF_BAB_FULL|MF_LEVEL_30 /*MF*/,
 	MB_LONGHEAD|MB_STRONG|MB_HUMANOID|MB_WINGS /*MB*/, 0  /*MC*/, MG_NOPOLY|MG_NASTY|MG_INFRAVISIBLE|MG_HATESUNHOLY|MG_TRACKER /*MG*/,
 	MA_WERE|MA_MINION /*MA*/,  MV_EXTRAMISSION|MV_SCENT|MV_SEE_INVIS /*MV*/, MW_ELDER_EYE_PLANES /*MW*/, 0 /*light radius*/, CLR_WHITE),
-    MON("aether cyclone", S_VORTEX,// /*needs encyc entry*/
+    MON("aether cyclone", S_VORTEX,//17 /*needs encyc entry*/
 	LVL(15, 10, 55, 12), (G_PLANES|G_NOCORPSE|G_NOGEN),
 	DEF(NAT_AC(7), SPE_AC(7), SPE_DR(3)),
 	A(ATTK(AT_ENGL, AD_PHYS, 3, 7)),
@@ -2550,7 +2550,7 @@ then fill new spaces with our spawn!
 	MM_AMORPHOUS|MM_FLY|MM_BREATHLESS /*MM*/, MT_HOSTILE /*MT*/, MF_LEVEL_30 /*MF*/,
 	MB_NOEYES|MB_NOLIMBS|MB_NOHEAD /*MB*/, MC_UNSOLID|MC_INSUBSTANTIAL  /*MC*/, MG_RALL|MG_NOPOLY|MG_INFRAVISIBLE|MG_REGEN|MG_HATESUNHOLY|MG_TRACKER|MG_INSIGHT /*MG*/,
 	MA_WERE|MA_MINION /*MA*/,  MV_DETECTION|MV_SCENT|MV_SEE_INVIS /*MV*/, MW_ELDER_EYE_PLANES /*MW*/, 0 /*light radius*/, CLR_BRIGHT_GREEN),
-    MON("foetid angel", S_LAW_ANGEL,// /*needs encyc entry*/
+    MON("foetid angel", S_LAW_ANGEL,//24 /*needs encyc entry*/
 	LVL(15, 10, 55, 12), (G_PLANES|G_NOCORPSE|G_NOGEN),
 	DEF(NAT_AC(7), DEX_AC(7), SPE_AC(7), SPE_DR(3), SPE_DR_HEAD(0)),
 	A(ATTK(AT_WEAP, AD_DISE, 3, 7), ATTK(AT_WEAP, AD_DISE, 3, 7),
@@ -3425,7 +3425,7 @@ then fill new spaces with our spawn!
 	0 /*MM*/, MT_OMNIVORE /*MT*/, MF_LEVEL_30 /*MF*/,
 	MB_HUMANOID|MB_FEMALE|MB_NOHANDS|MB_NOFEET /*MB*/, 0  /*MC*/, MG_INFRAVISIBLE|MG_HATESIRON /*MG*/,
 	MA_ARACHNID|MA_DEMIHUMAN|MA_DROW|MA_ELF /*MA*/,  MV_DARKSIGHT /*MV*/, 0 /*MW*/, 0 /*light radius*/, CLR_BLACK),
-    MON("centaur chieftain", S_CENTAUR,// /*needs encyc entry*/
+    MON("centaur chieftain", S_CENTAUR,//18 /*needs encyc entry*/
 	LVL(14, 20, 20, 6), (G_GENO|1),
 	DEF(NAT_AC(9)),
 	A(ATTK(AT_WEAP, AD_PHYS, 1,12), ATTK(AT_XWEP, AD_PHYS, 1,6), 
@@ -3980,7 +3980,7 @@ then fill new spaces with our spawn!
 	MM_BREATHLESS /*MM*/, MT_MINDLESS|MT_NOTAKE|MT_HOSTILE /*MT*/, 0 /*MF*/,
 	MB_NOEYES|MB_NOLIMBS|MB_NOHEAD|MB_NEUTER /*MB*/, MC_HALUC  /*MC*/, 0 /*MG*/,
 	MA_PLANT /*MA*/,  MV_SCENT /*MV*/, MW_ELDER_EYE_ELEM /*MW*/, 0 /*light radius*/, CLR_MAGENTA),
-    MON("rusty-gray mold", S_FUNGUS,//2
+    MON("rusty-gray mold", S_FUNGUS,//7
 	LVL(6, 0, 0, 0), (G_S_INST(11)|1),
 	DEF(NAT_AC(2), NAT_DR(10)),
 	A(ATTK(AT_NONE, AD_GMLD, 2, 2)),
@@ -4041,7 +4041,7 @@ then fill new spaces with our spawn!
 	MM_BREATHLESS|MM_STATIONARY /*MM*/, MT_HOSTILE|MT_NOTAKE /*MT*/, 0 /*MF*/,
 	MB_NOEYES|MB_NOLIMBS /*MB*/, 0  /*MC*/, MG_SANLOSS|MG_INSIGHT|MG_NOSPELLCOOLDOWN|MG_REGEN /*MG*/,
 	MA_PLANT|MA_HUMAN /*MA*/,  MV_TELEPATHIC|MV_OMNI /*MV*/, MW_ELDER_SIGN|MW_ELDER_EYE_ELEM /*MW*/, 0 /*light radius*/, HI_ZAP),
-    MON("gray fungal tower", S_FUNGUS,//2
+    MON("gray fungal tower", S_FUNGUS,//21
 	LVL(18, 12, 0, 0), (G_S_INST(22)|1),
 	DEF(NAT_AC(1)),
 	A(ATTK(AT_MAGC, AD_SPEL, 0, 8), ATTK(AT_NONE, AD_GMLD, 10, 10)),
@@ -5288,7 +5288,7 @@ struct permonst _mons2[] = {
 /*
  * Unknown abominations
  */
-    MON("chuul", S_UMBER,// /*needs encyc entry*/
+    MON("chuul", S_UMBER,//7 /*needs encyc entry*/
 	LVL(4, 10, 0, -6), (G_GENO|G_SGROUP|1),
 	DEF(NAT_AC(5), NAT_DR_ALL(5, 5, 5, 5, 3)),
 	A(ATTK(AT_CLAW, AD_PHYS, 2, 6), OFFHND_ATTK(AT_CLAW, AD_PHYS, 2, 6),
