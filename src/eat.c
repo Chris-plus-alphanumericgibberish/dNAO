@@ -2619,7 +2619,7 @@ register struct obj *otmp;
 		}
 		break;
 	    case BRAINROOT:
-			if(mvitals[PM_BRAINBLOSSOM_PATCH].insight_gained < 3){
+			if(!u.veil && mvitals[PM_BRAINBLOSSOM_PATCH].insight_gained < 3){
 				pline("Alien impulses assault your mind!");
 				if(mvitals[PM_BRAINBLOSSOM_PATCH].insight_gained == 0 || !rn2(mvitals[PM_BRAINBLOSSOM_PATCH].insight_gained+1)){
 					mvitals[PM_BRAINBLOSSOM_PATCH].insight_gained++;
