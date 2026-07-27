@@ -1038,6 +1038,13 @@ struct mkroom	*croom;
 		mtmp->msleeping = m->asleep;
 #endif
 	    }
+		if (m->prisoner) {
+			struct obj *shackles = mongets(mtmp, SHACKLES, NO_MKOBJ_FLAGS);
+			if (shackles) {
+				mtmp->entangled_otyp = SHACKLES;
+				mtmp->entangled_oid = shackles->o_id;
+			}
+		}
 		if(Role_if(PM_UNDEAD_HUNTER) && quest_status.moon_close && Is_astralevel(&u.uz)){
 		// if(Role_if(PM_UNDEAD_HUNTER) && Is_astralevel(&u.uz)){
 			if(mtmp->mtyp != PM_DEATH
@@ -1707,13 +1714,28 @@ default_case:
 			int mtyp;
 			struct monst *mon;
 			struct obj *tmpo;
-			int prisoners[] = {
+			int prisoners[] = { //Mostly wizards and other magic-users
 				PM_ELF_LADY, PM_DWARF_QUEEN, PM_GNOMISH_WIZARD, PM_ORC_SHAMAN, PM_MORDOR_SHAMAN, PM_OGRE_MAGE,
-				PM_HILL_GIANT, PM_OWLBEAR, PM_OGRE, PM_APPRENTICE, PM_HEDROW_WIZARD
+				PM_HILL_GIANT, PM_OGRE, PM_APPRENTICE, PM_HEDROW_WIZARD, PM_GREY_ELF, PM_GREEN_ELF, PM_WOODLAND_ELF,
+				PM_SWAMP_NYMPH
 			};
 			mtyp = ROLL_FROM(prisoners);
 			mon = makemon(&mons[mtyp], otmp->ox, otmp->oy, MM_GOODEQUIP);
 			if(mon){
+				struct obj *obj, *nobj;
+				if(mon->mtyp == PM_GREY_ELF || mon->mtyp == PM_GREEN_ELF || mon->mtyp == PM_WOODLAND_ELF){
+					mon->female = TRUE; //Will grow into a magic-user
+				}
+				for(tmpo = fobj; tmpo; tmpo = tmpo->nobj){
+					if(tmpo->otyp == CHEST && (!tmpo->cobj || tmpo->cobj->otyp != RIN_WISHES)){
+						for(obj = mon->minvent; obj; obj = nobj){
+							nobj = obj->nobj;
+							obj_extract_and_unequip_self(obj);
+							add_to_container(tmpo, obj);
+						}
+						break;
+					}
+				}
 				tmpo = mongets(mon, SHACKLES, NO_MKOBJ_FLAGS);
 				if(tmpo){
 					mon->entangled_otyp = SHACKLES;
@@ -1850,6 +1872,27 @@ default_case:
 			if(tmpo){
 				mon->entangled_otyp = SHACKLES;
 				mon->entangled_oid = tmpo->o_id;
+			}
+		}
+	}
+	if (o->prison_chest) {
+		struct monst *mon;
+		struct obj *obj, *nobj;
+
+		for (mon = fmon; mon; mon = mon->nmon) {
+			if (mon->entangled_otyp != SHACKLES)
+				continue;
+			for (obj = mon->minvent; obj; obj = nobj) {
+				nobj = obj->nobj;
+				if (obj->o_id == mon->entangled_oid)
+					continue;
+				obj_extract_and_unequip_self(obj);
+				if (Is_real_container(otmp)) {
+					add_to_container(otmp, obj);
+				} else {
+					place_object(obj, otmp->ox, otmp->oy);
+					stackobj(obj);
+				}
 			}
 		}
 	}

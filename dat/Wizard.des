@@ -282,6 +282,7 @@ REGION:(44,11,45,12),unlit,"ordinary"
 REGION:(47,11,48,12),unlit,"ordinary"
 REGION:(50,04,60,14),lit,"ordinary"
 # Doors
+CONTAINER:'(',"chest",(32,09),prison_chest
 DOOR:locked,(19,06)
 DOOR:locked,(14,09)
 DOOR:locked,(31,09)
@@ -357,10 +358,10 @@ MONSTER:'B',"vampire bat",random
 MONSTER:'B',"vampire bat",random
 MONSTER:'i',random,random,hostile
 # Captive Monsters in the dungeon
-MONSTER:'@',"rogue",(35,06),peaceful,"Pug"
-MONSTER:'@',"wizard",(32,11),peaceful,asleep,"Newt"
+MONSTER:'@',"rogue",(35,06),peaceful,"Pug", prisoner
+MONSTER:'Y',"owlbear",(47,06),peaceful,asleep
+MONSTER:'@',"wizard",(32,11),peaceful,asleep,"Newt", prisoner
 OBJECT: '_', "chain", (38,06)
-OBJECT: '_', "chain", (47,06)
 OBJECT: '_', "chain", (35,11)
 OBJECT: '_', "chain", (41,11)
 OBJECT: '_', "chain", (44,11)

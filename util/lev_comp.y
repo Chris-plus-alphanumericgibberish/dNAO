@@ -156,6 +156,8 @@ extern const char *fname;
 %token	<i> SUBROOM_ID NAME_ID FLAGS_ID FLAG_TYPE MON_ATTITUDE MON_ALERTNESS
 %token	<i> MON_APPEARANCE
 %token	<i> CONTAINED
+%token	<i> PRISONER_ID
+%token	<i> PRISON_CHEST_ID
 %token	<i> SANITYFLAG
 %token	<i> ',' ':' '(' ')' '[' ']'
 %token	<map> STRING MAP_ID
@@ -849,6 +851,7 @@ monster_detail	: MONSTER_ID chance ':' monster_c ',' m_name ',' coordinate '[' S
 			tmpmonst[nmons]->class = $<i>4;
 			tmpmonst[nmons]->peaceful = -1; /* no override */
 			tmpmonst[nmons]->asleep = -1;
+			tmpmonst[nmons]->prisoner = 0;
 			tmpmonst[nmons]->align = - MAX_REGISTERS - 2;
 			tmpmonst[nmons]->name.str = 0;
 			tmpmonst[nmons]->appear = 0;
@@ -889,6 +892,7 @@ monster_detail	: MONSTER_ID chance ':' monster_c ',' m_name ',' coordinate '[' S
 			tmpmonst[nmons]->class = $<i>4;
 			tmpmonst[nmons]->peaceful = -1; /* no override */
 			tmpmonst[nmons]->asleep = -1;
+			tmpmonst[nmons]->prisoner = 0;
 			tmpmonst[nmons]->align = - MAX_REGISTERS - 2;
 			tmpmonst[nmons]->name.str = 0;
 			tmpmonst[nmons]->appear = 0;
@@ -939,6 +943,10 @@ monster_info	: ',' string
 		  {
 			tmpmonst[nmons]->asleep = $<i>2;
 		  }
+		| ',' PRISONER_ID
+		  {
+			tmpmonst[nmons]->prisoner = 1;
+		  }
 		| ',' alignment
 		  {
 			tmpmonst[nmons]->align = $<i>2;
@@ -971,6 +979,7 @@ object_desc	: chance ':' object_c ',' o_name
 			tmpobj[nobj]->curse_state = -1;
 			tmpobj[nobj]->name.str = 0;
 			tmpobj[nobj]->id = -1;
+			tmpobj[nobj]->prison_chest = 0;
 			
 			if ($5) {
 				if($3=='#')
@@ -1038,16 +1047,80 @@ object_infos	: /* nothing */
 	 * monster_id _all_ optional, since ",random" would be ambiguous.
 	 * We can't even just make enchantment mandatory, since if we do that
 	 * alone, ",random" requires too much lookahead to parse.
+	 *
+	 * object_extras (name and flag keywords, e.g. prison_chest) may
+	 * follow in any order once we're past that ambiguity; when there's
+	 * no curse_state/monster_id/enchantment at all, the first extra
+	 * must be a flag keyword rather than a bare name, since a leading
+	 * name is indistinguishable from monster_id (see the 'error'
+	 * alternatives below for the friendlier diagnostic on that mistake).
 	 */
 		  }
-		| ',' curse_state ',' monster_id ',' enchantment optional_name
+		| ',' curse_state ',' monster_id ',' enchantment object_extras
 		  {
 		  }
-		| ',' curse_state ',' enchantment optional_name
+		| ',' curse_state ',' monster_id ',' error
+		  {
+			yyerror("assuming the preceding name was meant as this "
+				"object's own name (no enchantment follows it here) -- "
+				"but the name must come after an enchantment value; "
+				"write \",uncursed,+0,\\\"name\\\"\" not "
+				"\",uncursed,\\\"name\\\",...\"");
+		  }
+		| ',' curse_state ',' enchantment object_extras
 		  {
 		  }
-		| ',' monster_id ',' enchantment optional_name
+		| ',' monster_id ',' enchantment object_extras
 		  {
+		  }
+		| ',' monster_id ',' error
+		  {
+			yyerror("assuming the preceding name was meant as this "
+				"object's own name (no enchantment follows it here) -- "
+				"but a name can't be the very first attribute; put a "
+				"flag keyword before it instead, e.g. "
+				"\",prison_chest,\\\"name\\\"\" not "
+				"\",\\\"name\\\",prison_chest\"");
+		  }
+		| ',' object_flag object_extras
+		  {
+			tmpobj[nobj]->spe = -127;
+		  }
+		;
+
+object_extras	: /* nothing */
+		  {
+		  }
+		| object_extras ',' object_extra
+		  {
+		  }
+		;
+
+object_extra	: NONE
+		  {
+		  }
+		| STRING
+		  {
+			if(tmpobj[nobj]->class==(int)'#')
+				yyerror("Name given for externally-parsed object");
+			else
+				tmpobj[nobj]->name.str = $1;
+		  }
+		| object_flag
+		  {
+		  }
+		;
+
+	/* New per-object flag keywords (e.g. a future 'foo'/'bar') are
+	 * added here as one alternative each, plus a matching field in the
+	 * `object' struct (sp_lev.h) defaulted to 0 in object_desc.  Since
+	 * each keyword has its own dedicated token, this list can never
+	 * conflict with curse_state/monster_id/enchantment or with each
+	 * other, no matter how many are added.
+	 */
+object_flag	: PRISON_CHEST_ID
+		  {
+			tmpobj[nobj]->prison_chest = 1;
 		  }
 		;
 
@@ -1082,19 +1155,6 @@ enchantment	: RANDOM_TYPE
 		  }
 		;
 
-optional_name	: /* nothing */
-		| ',' NONE
-		  {
-		  }
-		| ',' STRING
-		  {
-			if(tmpobj[nobj]->class==(int)'#')
-				yyerror("Name given for externally-parsed object");
-			else
-				tmpobj[nobj]->name.str = $2;
-		  }
-		;
-
 door_detail	: DOOR_ID ':' door_state ',' coordinate
 		  {
 			tmpdoor[ndoor] = New(door);
@@ -1102,6 +1162,7 @@ door_detail	: DOOR_ID ':' door_state ',' coordinate
 			tmpdoor[ndoor]->y = current_coord.y;
 			tmpdoor[ndoor]->mask = $<i>3;
 			tmpdoor[ndoor]->arti_text = 0;
+			tmpdoor[ndoor]->barred = 0;
 			if(current_coord.x >= 0 && current_coord.y >= 0 &&
 			   tmpmap[current_coord.y][current_coord.x] != DOOR &&
 			   tmpmap[current_coord.y][current_coord.x] != SDOOR)

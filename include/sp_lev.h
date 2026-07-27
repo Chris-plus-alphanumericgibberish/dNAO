@@ -72,7 +72,7 @@ typedef struct {
 	short id;
 	aligntyp align;
 	xchar x, y, chance, class, appear;
-	schar peaceful, asleep;
+	schar peaceful, asleep, prisoner;
 } monster;
 
 typedef struct {
@@ -80,7 +80,7 @@ typedef struct {
 	int   corpsenm;
 	short id, spe;
 	xchar x, y, chance, class, containment;
-	schar curse_state;
+	schar curse_state, prison_chest;
 } object;
 
 typedef struct {

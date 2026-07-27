@@ -182,6 +182,8 @@ peaceful	{ yylval.i=1; return MON_ATTITUDE; }
 hostile		{ yylval.i=0; return MON_ATTITUDE; }
 asleep		{ yylval.i=1; return MON_ALERTNESS; }
 awake		{ yylval.i=0; return MON_ALERTNESS; }
+prisoner	return PRISONER_ID;
+prison_chest	return PRISON_CHEST_ID;
 m_feature	{ yylval.i= M_AP_FURNITURE; return MON_APPEARANCE; }
 m_monster	{ yylval.i= M_AP_MONSTER;   return MON_APPEARANCE; }
 m_object	{ yylval.i= M_AP_OBJECT;    return MON_APPEARANCE; }
