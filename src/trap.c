@@ -1682,8 +1682,12 @@ struct trap *trap;
 	wake_nearto_noisy(trap->tx, trap->ty, 400);
 	/* ALI - artifact doors from Slash'em */
 	if (IS_DOOR(levl[trap->tx][trap->ty].typ) &&
-		!artifact_door(trap->tx, trap->ty))
-	    levl[trap->tx][trap->ty].doormask = D_BROKEN;
+		!artifact_door(trap->tx, trap->ty)) {
+	    if (IS_BARS(trap->tx, trap->ty))
+		break_iron_bars(trap->tx, trap->ty, FALSE);
+	    else
+		levl[trap->tx][trap->ty].doormask = D_BROKEN;
+	}
 	/* TODO: destroy drawbridge if present */
 	/* caller may subsequently fill pit, e.g. with a boulder */
 	trap->ttyp = PIT;		/* explosion creates a pit */
@@ -1937,15 +1941,22 @@ int style;
 		    }
 		}
 		if (otyp == BOULDER && closed_door(bhitpos.x,bhitpos.y)) {
-			if (cansee(bhitpos.x, bhitpos.y))
-				pline_The("boulder crashes through a door.");
-			levl[bhitpos.x][bhitpos.y].doormask = D_BROKEN;
-			if (dist) unblock_point(bhitpos.x, bhitpos.y);
+			if (IS_BARS(bhitpos.x,bhitpos.y)) {
+				if (cansee(bhitpos.x, bhitpos.y))
+					pline_The("boulder smashes through a barred door.");
+				break_iron_bars(bhitpos.x, bhitpos.y, FALSE);
+				if (dist) unblock_point(bhitpos.x, bhitpos.y);
+			} else {
+				if (cansee(bhitpos.x, bhitpos.y))
+					pline_The("boulder crashes through a door.");
+				levl[bhitpos.x][bhitpos.y].doormask = D_BROKEN;
+				if (dist) unblock_point(bhitpos.x, bhitpos.y);
+			}
 		}
 
-		/* if about to hit iron bars, do so now */
+		/* if about to hit iron bars (or a closed/locked barred door), do so now */
 		if (dist > 0 && isok(bhitpos.x + dx,bhitpos.y + dy) &&
-			levl[bhitpos.x + dx][bhitpos.y + dy].typ == IRONBARS) {
+			IS_BARS(bhitpos.x + dx, bhitpos.y + dy)) {
 		    x2 = bhitpos.x,  y2 = bhitpos.y;	/* object stops here */
 		    if (hits_bars(&singleobj, x2, y2, !rn2(20), 0)) {
 			if (!singleobj) used_up = TRUE;
@@ -5163,7 +5174,7 @@ struct obj * tool;
 	    return MOVE_CANCELLED;
 	}
 
-	switch (levl[x][y].doormask) {
+	switch (DOOR_BASE_STATE(levl[x][y].doormask)) {
 	    case D_NODOOR:
 		You("%s no door there.", Blind ? "feel" : "see");
 		return MOVE_CANCELLED;

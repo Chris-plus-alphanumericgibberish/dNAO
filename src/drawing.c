@@ -243,6 +243,10 @@ const struct symdef defsyms[MAXPCHARS] = {
 	{'|', "open door",	C(CLR_BROWN)},	/* hodoor */
 	{'+', "closed door",	C(CLR_BROWN)},	/* vcdoor */
 	{'+', "closed door",	C(CLR_BROWN)},	/* hcdoor */
+	{'-', "open barred door", C(HI_METAL)},	/* vobardoor: open-door shape, bars color */
+	{'|', "open barred door", C(HI_METAL)},	/* hobardoor: open-door shape, bars color */
+	{'+', "barred door",	C(HI_METAL)},	/* vcbardoor: closed-door shape, bars color */
+	{'+', "barred door",	C(HI_METAL)},	/* hcbardoor: closed-door shape, bars color */
 	{'#', "iron bars",	C(HI_METAL)},	/* bars */
 	{'#', "tree",		C(CLR_GREEN)},	/* tree */
 	{'#', "dead tree",	C(CLR_BROWN)},	/* dead tree */
@@ -368,6 +372,10 @@ const char * const symbol_names[MAXPCHARS] = {
 	"S_hodoor",
 	"S_vcdoor",
 	"S_hcdoor",
+	"S_vobardoor",
+	"S_hobardoor",
+	"S_vcbardoor",
+	"S_hcbardoor",
 	"S_bars",
 	"S_tree",
 	"S_deadtree",
@@ -497,6 +505,10 @@ static glyph_t ibm_graphics[MAXPCHARS] = {
 	0xfe,	/* S_hodoor:	meta-~, small centered square */
 	g_FILLER(S_vcdoor),
 	g_FILLER(S_hcdoor),
+	0xfe,	/* S_vobardoor: same shape as open door, bars color */
+	0xfe,	/* S_hobardoor: same shape as open door, bars color */
+	g_FILLER(S_vcbardoor),
+	g_FILLER(S_hcbardoor),
 	240,	/* S_bars:	equivalence symbol */
 	241,	/* S_tree:	plus or minus symbol */
 	241,	/* S_deadtree:	plus or minus symbol */
@@ -618,6 +630,10 @@ static glyph_t dec_graphics[MAXPCHARS] = {
 	0xe1,	/* S_hodoor:	meta-a, solid block */
 	g_FILLER(S_vcdoor),
 	g_FILLER(S_hcdoor),
+	0xe1,	/* S_vobardoor: same shape as open door, bars color */
+	0xe1,	/* S_hobardoor: same shape as open door, bars color */
+	g_FILLER(S_vcbardoor),
+	g_FILLER(S_hcbardoor),
 	0xfb,	/* S_bars:	meta-{, small pi */
 	0xe7,	/* S_tree:	meta-g, plus-or-minus */
 	0xe7,	/* S_deadtree:	meta-g, plus-or-minus */
@@ -737,6 +753,10 @@ static glyph_t mac_graphics[MAXPCHARS] = {
 	0xee,	/* S_hodoor */
 	0xef,	/* S_vcdoor */
 	0xef,	/* S_hcdoor */
+	0xee,	/* S_vobardoor: open-door shape */
+	0xee,	/* S_hobardoor: open-door shape */
+	0xef,	/* S_vcbardoor: closed-door shape */
+	0xef,	/* S_hcbardoor: closed-door shape */
 	0xf0,	/* S_bars:	equivalency symbol */
 	0xf1,	/* S_tree:	plus-or-minus */
 	0xf1,	/* S_deadtree:	plus-or-minus */
@@ -858,6 +878,10 @@ static glyph_t utf8_graphics[MAXPCHARS] = {
 	0x2592,	/* S_hodoor:	MEDIUM SHADE */
 	g_FILLER(S_vcdoor),
 	g_FILLER(S_hcdoor),
+	0x2592,	/* S_vobardoor: same shape as open door, bars color */
+	0x2592,	/* S_hobardoor: same shape as open door, bars color */
+	g_FILLER(S_vcbardoor),
+	g_FILLER(S_hcbardoor),
 	0x2261,	/* S_bars:	IDENTICAL TO */
 	0x03a8,	/* S_tree:	GREEK CAPITAL LETTER PSI */
 	0x03a8,	/* S_deadtree:GREEK CAPITAL LETTER PSI */

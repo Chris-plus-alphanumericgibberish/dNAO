@@ -3268,6 +3268,8 @@ postmov:
 		if(IS_DOOR(levl[mtmp->mx][mtmp->my].typ)
 			&& !mon_resistance(mtmp,PASSES_WALLS) /* doesn't need to open doors */
 			&& !can_tunnel /* taken care of below */
+			&& (amorphous_mon(mtmp) || can_open || can_unlock ||
+			    !IS_BARS(mtmp->mx,mtmp->my))
 		      ) {
 		    struct rm *here = &levl[mtmp->mx][mtmp->my];
 		    boolean btrapped = (here->doormask & D_TRAPPED);
@@ -3336,11 +3338,12 @@ postmov:
 			if (*in_rooms(mtmp->mx, mtmp->my, SHOPBASE))
 			    add_damage(mtmp->mx, mtmp->my, 0L);
 		    }
-		} else if (levl[mtmp->mx][mtmp->my].typ == IRONBARS && !Is_illregrd(&u.uz)) {
+		} else if (IS_BARS(mtmp->mx,mtmp->my) && !Is_illregrd(&u.uz)) {
 		    if ( (dmgtype(ptr,AD_RUST) && ptr->mtyp != PM_NAIAD) || dmgtype(ptr,AD_CORR) || ptr->mtyp == PM_GELATINOUS_CUBE) {
 				if (canseemon(mtmp)) {
-					pline("%s eats through the iron bars.", 
-					Monnam(mtmp)); 
+					pline("%s eats through the %s.", Monnam(mtmp),
+					      IS_DOOR(levl[mtmp->mx][mtmp->my].typ) ?
+						"barred door" : "iron bars");
 				}
 				dissolve_bars(mtmp->mx, mtmp->my);
 				if(mtmp->mtyp == PM_RUST_MONSTER && get_mx(mtmp, MX_EDOG)){
@@ -3451,21 +3454,22 @@ postmov:
 
 /* break iron bars at the given location */
 void
-break_iron_bars(x, y, heard)
-int x, y;			/* coordinates of iron bars */
-boolean heard;		/* print You_hear() message? */
+break_iron_bars(int x, int y, boolean heard)
 {
 	int numbars;
 	struct obj *obj;
+	boolean wasdoor = IS_DOOR(levl[x][y].typ);
 
-	if (levl[x][y].typ != IRONBARS) {
+	if (!wasdoor && levl[x][y].typ != IRONBARS) {
 		impossible("Breaking non-existant iron bars @ (%d,%d)", x, y);
 		return;
 	}
 
 	if (heard)
-		You_hear("a sharp crack!");
+		You_hear(wasdoor ? "a barred door shatter!" : "a sharp crack!");
 	levl[x][y].typ = (Is_special(&u.uz) || *in_rooms(x, y, 0)) ? ROOM : CORR;
+	if (wasdoor)
+		levl[x][y].doormask = 0;
 
 	for (numbars = d(2, 4) - 1; numbars > 0; numbars--){
 		obj = mksobj_at(BAR, x, y, MKOBJ_NOINIT);
@@ -3479,11 +3483,14 @@ boolean heard;		/* print You_hear() message? */
 
 //Malcolm Ryan's bar eating patch
 void
-dissolve_bars(x, y)
-register int x, y;
+dissolve_bars(int x, int y)
 {
-    levl[x][y].typ = (Is_special(&u.uz) || *in_rooms(x,y,0)) ? ROOM : CORR; 
-    newsym(x, y);    
+    boolean wasdoor = IS_DOOR(levl[x][y].typ);
+
+    levl[x][y].typ = (Is_special(&u.uz) || *in_rooms(x,y,0)) ? ROOM : CORR;
+    if (wasdoor)
+	levl[x][y].doormask = 0;
+    newsym(x, y);
 }
 
 

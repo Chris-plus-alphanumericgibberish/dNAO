@@ -81,42 +81,42 @@ OBJECT:'\\', "bedroll",(32,17),uncursed,1
 OBJECT:'\\', "bedroll",(36,17),uncursed,1
 OBJECT:'\\', "bedroll",(38,17),uncursed,1
 
-DOOR:locked,(27,02)
-DOOR:locked,(29,02)
-DOOR:locked,(33,02)
-DOOR:locked,(35,02)
-DOOR:locked,(39,02)
-DOOR:locked,(41,02)
+DOOR:locked,(27,02), barred
+DOOR:locked,(29,02), barred
+DOOR:locked,(33,02), barred
+DOOR:locked,(35,02), barred
+DOOR:locked,(39,02), barred
+DOOR:locked,(41,02), barred
 
-DOOR:locked,(28,04)
-DOOR:locked,(30,04)
-DOOR:locked,(34,04)
-DOOR:locked,(36,04)
-DOOR:locked,(40,04)
+DOOR:locked,(28,04), barred
+DOOR:locked,(30,04), barred
+DOOR:locked,(34,04), barred
+DOOR:locked,(36,04), barred
+DOOR:locked,(40,04), barred
 
-DOOR:locked,(27,08)
-DOOR:locked,(29,08)
-DOOR:locked,(33,08)
-DOOR:locked,(35,08)
-DOOR:locked,(39,08)
+DOOR:locked,(27,08), barred
+DOOR:locked,(29,08), barred
+DOOR:locked,(33,08), barred
+DOOR:locked,(35,08), barred
+DOOR:locked,(39,08), barred
 
-DOOR:locked,(30,10)
-DOOR:locked,(32,10)
-DOOR:locked,(36,10)
-DOOR:locked,(38,10)
-DOOR:locked,(42,10)
+DOOR:locked,(30,10), barred
+DOOR:locked,(32,10), barred
+DOOR:locked,(36,10), barred
+DOOR:locked,(38,10), barred
+DOOR:locked,(42,10), barred
 
-DOOR:locked,(29,14)
-DOOR:locked,(31,14)
-DOOR:locked,(35,14)
-DOOR:locked,(37,14)
-DOOR:locked,(41,14)
+DOOR:locked,(29,14), barred
+DOOR:locked,(31,14), barred
+DOOR:locked,(35,14), barred
+DOOR:locked,(37,14), barred
+DOOR:locked,(41,14), barred
 
-DOOR:locked,(27,16)
-DOOR:locked,(29,16)
-DOOR:locked,(33,16)
-DOOR:locked,(35,16)
-DOOR:locked,(39,16)
+DOOR:locked,(27,16), barred
+DOOR:locked,(29,16), barred
+DOOR:locked,(33,16), barred
+DOOR:locked,(35,16), barred
+DOOR:locked,(39,16), barred
 
 # Prison debris
 OBJECT[75%]: '_', "chain", random
@@ -237,28 +237,28 @@ OBJECT[75%]: '_', "chain", random
 OBJECT[50%]: '0', "ball", random
 OBJECT[50%]: '0', "ball", random
 
-DOOR:locked,(28,02)
-DOOR:locked,(31,02)
-DOOR:locked,(33,02)
-DOOR:locked,(37,02)
-DOOR:locked,(39,02)
+DOOR:locked,(28,02), barred
+DOOR:locked,(31,02), barred
+DOOR:locked,(33,02), barred
+DOOR:locked,(37,02), barred
+DOOR:locked,(39,02), barred
 
-DOOR:locked,(41,03)
-DOOR:locked,(41,05)
-DOOR:locked,(41,09)
-DOOR:locked,(41,11)
-DOOR:locked,(41,15)
+DOOR:locked,(41,03), barred
+DOOR:locked,(41,05), barred
+DOOR:locked,(41,09), barred
+DOOR:locked,(41,11), barred
+DOOR:locked,(41,15), barred
 
-DOOR:locked,(40,16)
-DOOR:locked,(36,16)
-DOOR:locked,(34,16)
-DOOR:locked,(30,16)
-DOOR:locked,(28,16)
+DOOR:locked,(40,16), barred
+DOOR:locked,(36,16), barred
+DOOR:locked,(34,16), barred
+DOOR:locked,(30,16), barred
+DOOR:locked,(28,16), barred
 
-DOOR:locked,(27,14)
-DOOR:locked,(27,12)
-DOOR:locked,(27,08)
-DOOR:locked,(27,06)
+DOOR:locked,(27,14), barred
+DOOR:locked,(27,12), barred
+DOOR:locked,(27,08), barred
+DOOR:locked,(27,06), barred
 
 DOOR:locked,(25,09)
 DOOR:locked,(22,07)
@@ -639,28 +639,28 @@ OBJECT[75%]: '_', "chain", random
 OBJECT[50%]: '0', "ball", random
 OBJECT[50%]: '0', "ball", random
 
-DOOR:locked,(27,02)
-DOOR:locked,(27,04)
-DOOR:locked,(27,08)
-DOOR:locked,(27,10)
-DOOR:locked,(27,14)
+DOOR:locked,(27,02), barred
+DOOR:locked,(27,04), barred
+DOOR:locked,(27,08), barred
+DOOR:locked,(27,10), barred
+DOOR:locked,(27,14), barred
 
-DOOR:locked,(29,05)
-DOOR:locked,(29,07)
-DOOR:locked,(29,11)
-DOOR:locked,(29,13)
+DOOR:locked,(29,05), barred
+DOOR:locked,(29,07), barred
+DOOR:locked,(29,11), barred
+DOOR:locked,(29,13), barred
 
-DOOR:locked,(33,04)
-DOOR:locked,(33,06)
-DOOR:locked,(33,10)
-DOOR:locked,(33,12)
-DOOR:locked,(33,16)
+DOOR:locked,(33,04), barred
+DOOR:locked,(33,06), barred
+DOOR:locked,(33,10), barred
+DOOR:locked,(33,12), barred
+DOOR:locked,(33,16), barred
 
-DOOR:locked,(35,03)
-DOOR:locked,(35,05)
-DOOR:locked,(35,09)
-DOOR:locked,(35,11)
-DOOR:locked,(35,15)
+DOOR:locked,(35,03), barred
+DOOR:locked,(35,05), barred
+DOOR:locked,(35,09), barred
+DOOR:locked,(35,11), barred
+DOOR:locked,(35,15), barred
 
 DOOR:locked,(39,01)
 DOOR:locked,(39,03)

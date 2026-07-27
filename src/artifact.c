@@ -11133,9 +11133,10 @@ arti_invoke(obj)
 				    }
 					zap_dig(x,y,1);
 				    typ = levl[bhitpos.x][bhitpos.y].typ;
-					
-				    if (typ == IRONBARS){
+
+				    if (IS_BARS(bhitpos.x, bhitpos.y)){
 						break_iron_bars(bhitpos.x, bhitpos.y, TRUE);
+						typ = levl[bhitpos.x][bhitpos.y].typ;
 				    }
 
 				    if (find_drawbridge(&x,&y))

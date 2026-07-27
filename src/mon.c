@@ -3519,26 +3519,37 @@ nexttry:
 	    /* KMH -- Added iron bars */
 	    if (ntyp == IRONBARS && !(flag & ALLOW_BARS)) continue;
 	    /* ALI -- Artifact doors (no passage unless open/openable) from Slash'em*/
-	    if (IS_DOOR(ntyp))
-			if (artifact_door(nx, ny) ?
-				(levl[nx][ny].doormask & D_CLOSED && !(flag & OPENDOOR))
-				  || levl[nx][ny].doormask & D_LOCKED :
-				!amorphous_mon(mon) &&
-			   ((levl[nx][ny].doormask & D_CLOSED && !(flag & OPENDOOR)) ||
-			(levl[nx][ny].doormask & D_LOCKED && !(flag & UNLOCKDOOR))) &&
-			   !thrudoor) continue;
+	    if (IS_DOOR(ntyp)) {
+			boolean bars_here = (levl[nx][ny].doormask & D_BARRED) &&
+				(levl[nx][ny].doormask & (D_CLOSED|D_LOCKED));
+			boolean doorblocks = artifact_door(nx, ny) ?
+				((levl[nx][ny].doormask & D_CLOSED && !(flag & OPENDOOR))
+				|| levl[nx][ny].doormask & D_LOCKED) :
+				(!amorphous_mon(mon) &&
+				((levl[nx][ny].doormask & D_CLOSED && !(flag & OPENDOOR)) ||
+				(levl[nx][ny].doormask & D_LOCKED && !(flag & UNLOCKDOOR))) &&
+				!(thrudoor && !bars_here));
+			boolean barsalt = bars_here && (flag & ALLOW_BARS);
+			if (doorblocks && !barsalt) continue;
+	    }
+	    {
+		boolean nowbarsexempt = IS_DOOR(nowtyp) &&
+			(levl[x][y].doormask & D_BARRED) && (flag & ALLOW_BARS);
+		boolean nbarsexempt = IS_DOOR(ntyp) &&
+			(levl[nx][ny].doormask & D_BARRED) && (flag & ALLOW_BARS);
 	    if(nx != x && ny != y && (nodiag || mdat->mtyp == PM_LONG_WORM ||
 #ifdef REINCARNATION
 	       ((IS_DOOR(nowtyp) &&
-		 ((levl[x][y].doormask & ~D_BROKEN) || Is_rogue_level(&u.uz))) ||
+		 (((levl[x][y].doormask & ~D_BROKEN) && !nowbarsexempt) || Is_rogue_level(&u.uz))) ||
 		(IS_DOOR(ntyp) &&
-		 ((levl[nx][ny].doormask & ~D_BROKEN) || Is_rogue_level(&u.uz))))
+		 (((levl[nx][ny].doormask & ~D_BROKEN) && !nbarsexempt) || Is_rogue_level(&u.uz))))
 #else
-	       ((IS_DOOR(nowtyp) && (levl[x][y].doormask & ~D_BROKEN)) ||
-		(IS_DOOR(ntyp) && (levl[nx][ny].doormask & ~D_BROKEN)))
+	       ((IS_DOOR(nowtyp) && (levl[x][y].doormask & ~D_BROKEN) && !nowbarsexempt) ||
+		(IS_DOOR(ntyp) && (levl[nx][ny].doormask & ~D_BROKEN) && !nbarsexempt))
 #endif
 	       ))
 			continue;
+	    }
 		if(is_vectored_mtyp(mdat->mtyp)){
 			if(x + xdir[(int)mon->mvar_vector] != nx || 
 			   y + ydir[(int)mon->mvar_vector] != ny 

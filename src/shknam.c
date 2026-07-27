@@ -876,9 +876,9 @@ register struct mkroom *sroom;
 	    newsym(sx,sy);
     }
     if(levl[sx][sy].doormask & D_TRAPPED)
-	    levl[sx][sy].doormask = D_LOCKED;
+	    levl[sx][sy].doormask = D_LOCKED | (levl[sx][sy].doormask & D_BARRED);
 
-    if(levl[sx][sy].doormask == D_LOCKED) {
+    if(DOOR_BASE_STATE(levl[sx][sy].doormask) == D_LOCKED) {
 	    register int m = sx, n = sy;
 
 	    if(inside_shop(sx+1,sy)) m--;

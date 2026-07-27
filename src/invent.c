@@ -5723,11 +5723,18 @@ char *buf;
 	static char altbuf[BUFSZ];
 
 	if (IS_DOOR(ltyp)) {
-	    switch (lev->doormask) {
+	    switch (DOOR_BASE_STATE(lev->doormask)) {
 	    case D_NODOOR:	cmap = S_ndoor; break;	/* "doorway" */
-	    case D_ISOPEN:	cmap = S_vodoor; break;	/* "open door" */
+	    case D_ISOPEN:
+		cmap = (lev->doormask & D_BARRED) ? S_vobardoor : S_vodoor;
+		break;
 	    case D_BROKEN:	dfeature = "broken door"; break;
-	    default:	cmap = S_vcdoor; break;	/* "closed door" */
+	    default:
+		if (lev->doormask & D_BARRED)
+		    dfeature = "barred door";
+		else
+		    cmap = S_vcdoor;		/* "closed door" */
+		break;
 	    }
 	    /* override door description for open drawbridge */
 	    if (is_drawbridge_wall(x, y) >= 0)

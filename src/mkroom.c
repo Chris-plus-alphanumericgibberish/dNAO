@@ -7343,8 +7343,9 @@ int dx,dy;
 	struct obj *obj;
 	levl[sx][sy].typ = CORR;
 	unblock_point(sx,sy);
-	levl[sx-dx][sy-dy].typ = IRONBARS;
-	unblock_point(sx,sy);
+	levl[sx-dx][sy-dy].typ = DOOR;
+	levl[sx-dx][sy-dy].doormask = D_LOCKED | D_BARRED;
+	unblock_point(sx-dx,sy-dy);
 	mon = prisoner(kingtype, sx, sy);
 	if(mon){
 		for(obj = mon->minvent; obj; obj = mon->minvent){

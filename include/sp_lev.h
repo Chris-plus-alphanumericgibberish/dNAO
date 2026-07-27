@@ -53,12 +53,14 @@ typedef struct {
 typedef struct {
 	xchar x, y, mask;
 	short arti_text;		/* Index of the text string for this (artifact) door */
+	xchar barred;		/* explicit .des 'barred' keyword; never set by random mask */
 } door;
 
 typedef struct {
 	xchar wall, pos, secret, mask;
 //	short arti_key;		/* Index (ART_) of key for this door */
 	short arti_text;	/* Index of the text string for this door */
+	xchar barred;		/* explicit .des 'barred' keyword; never set by random mask */
 } room_door;
 
 typedef struct {

@@ -155,18 +155,19 @@ xchar x, y;
 		(ispick||is_saber||is_seismic) && sobj_at(BOULDER, x, y) ? DIGTYP_BOULDER :
 		(ispick||is_saber||is_seismic) && sobj_at(MASSIVE_STONE_CRATE, x, y) ? DIGTYP_CRATE :
 		(ispick||is_saber||is_seismic) && sobj_at(MASS_OF_STUFF, x, y) ? DIGTYP_MS_O_STF :
+		IS_BARS(x, y) ?
+			((is_saber || is_seismic) ? DIGTYP_BARS : DIGTYP_UNDIGGABLE) :
 		(closed_door(x, y) ||
 			levl[x][y].typ == SDOOR) ? DIGTYP_DOOR :
 		IS_TREES(levl[x][y].typ) ?
 			((ispick && !(is_axe || is_saber || is_seismic)) ? DIGTYP_UNDIGGABLE : DIGTYP_TREE) :
 		(ispick || is_seismic) && IS_ROCK(levl[x][y].typ) &&
 			(!level.flags.arboreal || IS_WALL(levl[x][y].typ)) ?
-			DIGTYP_ROCK : 
+			DIGTYP_ROCK :
 		is_saber && (levl[x][y].typ == DRAWBRIDGE_DOWN || is_drawbridge_wall(x, y) >= 0) ?
-			DIGTYP_BRIDGE : 
+			DIGTYP_BRIDGE :
 		is_saber && IS_WALL(levl[x][y].typ) ?
-			DIGTYP_ROCK : 
-		(is_saber || is_seismic) && levl[x][y].typ == IRONBARS ? DIGTYP_BARS : 
+			DIGTYP_ROCK :
 			DIGTYP_UNDIGGABLE);
 }
 
@@ -535,6 +536,12 @@ dig()
 			digtxt = "You break through a secret door!";
 			if(!(lev->doormask & D_TRAPPED))
 				lev->doormask = D_BROKEN;
+		} else if(IS_BARS(dpx, dpy)) {
+			if(digitem->otyp == SEISMIC_HAMMER)
+				digtxt = "You shatter the barred door.";
+			else
+				digtxt = "You cut through the barred door.";
+			break_iron_bars(dpx, dpy, FALSE);
 		} else if(closed_door(dpx, dpy)) {
 			digtxt = "You break through the door.";
 			if(!(lev->doormask&D_LOCKED) && u.sealsActive&SEAL_OTIAX) unbind(SEAL_OTIAX, TRUE);
@@ -2179,7 +2186,7 @@ struct obj *obj;
 					nomul(-d(2,2), "entangled in a web");
 					nomovemsg = "You pull free.";
 				}
-			} else if (lev->typ == IRONBARS) {
+			} else if (IS_BARS(rx,ry)) {
 			    pline("Clang!");
 			    wake_nearby_noisy();
 			} else if (IS_TREES(lev->typ))

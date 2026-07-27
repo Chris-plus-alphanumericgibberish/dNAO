@@ -200,7 +200,8 @@ does_block(x,y,lev)
 
     /* Features that block . . */
     if (IS_ROCK(lev->typ) || lev->typ == TREE || (IS_DOOR(lev->typ) &&
-			    (lev->doormask & (D_CLOSED|D_LOCKED|D_TRAPPED) )))
+			    (lev->doormask & (D_CLOSED|D_LOCKED|D_TRAPPED)) &&
+			    !(lev->doormask & D_BARRED)))
 	return 1;
 
     if (lev->typ == CLOUD || //lev->typ == WATER ||

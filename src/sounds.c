@@ -1329,7 +1329,7 @@ asGuardian:
 						/* maketrap() clears doormask, so it should be NODOOR */
 					continue;
 						}
-						switch (((int)door->doormask) & ~D_TRAPPED) {
+						switch (((int)door->doormask) & ~(D_TRAPPED|D_BARRED)) {
 							case D_CLOSED:
 							if (key)
 								msg = "The door closes!";
@@ -1357,11 +1357,12 @@ asGuardian:
 							break;
 						}
 						if(res){
-							block_point(ix, iy);
+							if (does_block(ix,iy,door))
+								block_point(ix, iy);
 							if (key)
-								door->doormask = D_CLOSED | (door->doormask & D_TRAPPED);
+								door->doormask = D_CLOSED | (door->doormask & (D_TRAPPED|D_BARRED));
 							else
-								door->doormask = D_LOCKED | (door->doormask & D_TRAPPED);
+								door->doormask = D_LOCKED | (door->doormask & (D_TRAPPED|D_BARRED));
 							newsym(ix,iy);
 						}
 					}
@@ -3126,7 +3127,7 @@ int dz;
 		if(strcmp(buf, "Mellon") == 0){
 			register struct rm *here;
 			here = &levl[tx][ty];
-			here->doormask = D_ISOPEN;
+			here->doormask = D_ISOPEN | (here->doormask & D_BARRED);
 			unblock_point(tx,ty);
 			newsym(tx,ty);
 		}

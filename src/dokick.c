@@ -731,6 +731,8 @@ char *buf;
 	const char *what;
 
 	if (kickobj) what = distant_name(kickobj,doname);
+	else if (IS_DOOR(maploc->typ) && (maploc->doormask & D_BARRED))
+	    what = "a barred door";
 	else if (IS_DOOR(maploc->typ)) what = "a door";
 	else if (IS_TREE(maploc->typ)) what = "a tree";
 	else if (IS_STWALL(maploc->typ)) what = "a wall";
@@ -968,6 +970,7 @@ int dx, dy;
 
 	if(!IS_DOOR(maploc->typ)) {
 		if(maploc->typ == SDOOR) {
+		    if (maploc->doormask & D_BARRED) goto ouch;
 		    if(!Levitation && rn2(30) < avrg_attrib) {
 			cvt_sdoor_to_door(maploc);	/* ->typ = DOOR */
 			pline("Crash!  %s a secret door!",
@@ -1108,7 +1111,7 @@ int dx, dy;
             exercise(A_DEX, TRUE);
             return 1;
         }
-		if(IS_GRAVE(maploc->typ) || maploc->typ == IRONBARS)
+		if(IS_GRAVE(maploc->typ) || IS_BARS(x,y))
 		    goto ouch;
 		if(IS_TREE(maploc->typ)) {
 		    struct obj *treefruit;
@@ -1515,9 +1518,9 @@ ouch:
 		goto dumb;
 	}
 
-	if(maploc->doormask == D_ISOPEN ||
-	   maploc->doormask == D_BROKEN ||
-	   maploc->doormask == D_NODOOR) {
+	if(DOOR_BASE_STATE(maploc->doormask) == D_ISOPEN ||
+	   DOOR_BASE_STATE(maploc->doormask) == D_BROKEN ||
+	   DOOR_BASE_STATE(maploc->doormask) == D_NODOOR) {
 dumb:
 		exercise(A_DEX, FALSE);
 		if (martial() || ACURR(A_DEX) >= 16 || rn2(3)) {
@@ -1536,6 +1539,8 @@ dumb:
 
 	/* Ali - artifact doors from slashem*/
 	if (artifact_door(x, y)) goto ouch;
+
+	if (IS_BARS(x,y)) goto ouch;
 
 	/* not enough leverage to kick open doors while levitating */
 	if(Levitation) goto ouch;

@@ -469,7 +469,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 		/* projectile is on a sink (it "sinks" down) or is on a non-allowable square */
 		if ((range != initrange || initrange == 0) &&
 			((!ZAP_POS(levl[bhitpos.x][bhitpos.y].typ)) ||
-			closed_door(bhitpos.x, bhitpos.y) ||
+			(closed_door(bhitpos.x, bhitpos.y) && !IS_BARS(bhitpos.x, bhitpos.y)) ||
 			(IS_SINK(levl[bhitpos.x][bhitpos.y].typ))))
 		{
 			range = 0;
@@ -489,7 +489,8 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 
 		/* space ahead has wall and no monster */
 		if (!isok(bhitpos.x + dx, bhitpos.y + dy) ||
-			((!ZAP_POS(levl[bhitpos.x + dx][bhitpos.y + dy].typ) || closed_door(bhitpos.x + dx, bhitpos.y + dy)) &&
+			((!ZAP_POS(levl[bhitpos.x + dx][bhitpos.y + dy].typ) ||
+			  (closed_door(bhitpos.x + dx, bhitpos.y + dy) && !IS_BARS(bhitpos.x + dx, bhitpos.y + dy))) &&
 			!m_at(bhitpos.x+dx, bhitpos.y+dy)))
 		{
 			do_digging_projectile(magr, thrownobj, dx, dy);
@@ -505,10 +506,10 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 				}
 			}
 		}
-		/* space ahead has iron bars and no monster */
+		/* space ahead has iron bars (or a closed/locked barred door) and no monster */
 		/* 1/5 chance for 'small' objects (see hits_bars), unless if launched from right beside the iron bars */
 		if (isok(bhitpos.x + dx, bhitpos.y + dy) &&
-		    levl[bhitpos.x + dx][bhitpos.y + dy].typ == IRONBARS &&
+		    IS_BARS(bhitpos.x + dx, bhitpos.y + dy) &&
 			!m_at(bhitpos.x + dx, bhitpos.y + dy) &&
 			hits_bars(
 				/* object fired   */ thrownobj_p,
@@ -672,9 +673,10 @@ int dy;							/* */
 	if (!((thrownobj->otyp == BLASTER_BOLT || thrownobj->otyp == HEAVY_BLASTER_BOLT || thrownobj->otyp == CARCOSAN_BOLT || thrownobj->otyp == LASER_BEAM)))
 		return;
 
-	/* Doors (but not artifact doors) */
-	if ((closed_door(newx, newy) || room->typ == SDOOR) &&
-		!artifact_door(newx, newy)) 
+	/* Doors (but not artifact doors, and not barred doors -- those fall
+	   through to the Iron Bars case below like plain bars would) */
+	if (((closed_door(newx, newy) && !IS_BARS(newx, newy)) || room->typ == SDOOR) &&
+		!artifact_door(newx, newy))
 	{
 		/* message */
 		if (cansee(newx, newy)) (thrownobj->otyp == LASER_BEAM) ?
@@ -788,17 +790,21 @@ int dy;							/* */
 		if (!Blind && cansee(newx, newy))
 			newsym(newx, newy);
 	}
-	/* Iron Bars (laser cutter only) */
-	else if (isok(newx, newy) && (room->typ == IRONBARS) && 
+	/* Iron Bars, or a closed/locked barred door (laser cutter only) */
+	else if (isok(newx, newy) && IS_BARS(newx, newy) &&
 		(thrownobj->otyp == LASER_BEAM)
 		) {
 		int numbars;
 		struct obj *otmp;
+		boolean wasdoor = IS_DOOR(room->typ);
 		/* message */
 		if (cansee(newx, newy))
-			pline("The %s cuts through the bars!", xname(thrownobj));
+			pline("The %s cuts through the %s!", xname(thrownobj),
+			      wasdoor ? "barred door" : "bars");
 		/* create opening */
 		room->typ = CORR;
+		if (wasdoor)
+			room->doormask = 0;
 		/* create iron bars */
 		for (numbars = d(2, 4) - 1; numbars > 0; numbars--){
 			otmp = mksobj_at(BAR, newx, newy, MKOBJ_NOINIT);
@@ -841,9 +847,10 @@ int y;							/* */
 	if(!youagr && !clear_path(x(magr), y(magr), x, y))
 		return;
 
-	/* Doors (but not artifact doors) */
-	if ((closed_door(x, y) || room->typ == SDOOR) &&
-		!artifact_door(x, y)) 
+	/* Doors (but not artifact doors, and not barred doors -- those are
+	   left untouched here, same as plain iron bars already are) */
+	if (((closed_door(x, y) && !IS_BARS(x, y)) || room->typ == SDOOR) &&
+		!artifact_door(x, y))
 	{
 		/* message */
 		if (cansee(x, y))

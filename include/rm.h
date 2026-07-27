@@ -91,6 +91,10 @@ enum {
 #define IS_ROCK(typ)	((typ) < POOL)		/* absolutely nonaccessible */
 #define IS_DOOR(typ)	((typ) == DOOR)
 #define IS_SDOOR(typ)	((typ) == SDOOR)
+#define IS_BARS(x,y)	(levl[x][y].typ == IRONBARS || \
+			 (IS_DOOR(levl[x][y].typ) && \
+			  (levl[x][y].doormask & D_BARRED) && \
+			  (levl[x][y].doormask & (D_CLOSED|D_LOCKED))))
 #define IS_TREE(typ)	((typ) == TREE || \
 			(level.flags.arboreal && (typ) == STONE))
 #define IS_DEADTREE(typ) ((typ) == DEADTREE)
@@ -146,6 +150,10 @@ enum {
     S_hodoor,
     S_vcdoor,	/* closed door, vertical wall */
     S_hcdoor,	/* closed door, horizontal wall */
+    S_vobardoor,	/* open barred door, vertical wall */
+    S_hobardoor,	/* open barred door, horizontal wall */
+    S_vcbardoor,	/* closed/locked barred door, vertical wall */
+    S_hcbardoor,	/* closed/locked barred door, horizontal wall */
     S_bars,	/* KMH -- iron bars */
     S_tree,	/* KMH */
     S_deadtree,	/* youkan */
@@ -300,6 +308,11 @@ extern const char * const symbol_names[MAXPCHARS];
 #define D_CLOSED	4
 #define D_LOCKED	8
 #define D_TRAPPED	16
+#define D_BARRED	32
+
+/* mask out orthogonal modifier bits (D_TRAPPED, D_BARRED) to get the base
+ * open/closed/locked/broken/nodoor state for exact-match/switch comparisons */
+#define DOOR_BASE_STATE(m)	((m) & (D_NODOOR|D_BROKEN|D_ISOPEN|D_CLOSED|D_LOCKED))
 
 /*
  * Thrones should only be looted once.
@@ -427,7 +440,7 @@ struct rm {
 	schar typ;		/* what is really there */
 	Bitfield(styp, 6);	/* last seen/touched dungeon typ */
 	uchar seenv;		/* seen vector */
-	Bitfield(flags,5);	/* extra information for typ */
+	Bitfield(flags,6);	/* extra information for typ */
 	Bitfield(horizontal,1); /* wall/door/etc is horiz. (more typ info) */
 	Bitfield(lit,1);	/* speed hack for lit rooms */
 	Bitfield(waslit,1);	/* remember if a location was lit */

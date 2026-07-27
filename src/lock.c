@@ -132,7 +132,7 @@ picklock()	/* try to open/close a lock */
 			xlock.usedtime = 0;
 			return MOVE_CANCELLED;		/* you moved */
 	    }
-	    switch (xlock.door->doormask) {
+	    switch (DOOR_BASE_STATE(xlock.door->doormask)) {
 		case D_NODOOR:
 		    pline("This doorway has no door.");
 			xlock.usedtime = 0;
@@ -166,9 +166,10 @@ picklock()	/* try to open/close a lock */
 		    if (*in_rooms(u.ux+u.dx, u.uy+u.dy, SHOPBASE))
 			add_damage(u.ux+u.dx, u.uy+u.dy, 0L);
 		    newsym(u.ux+u.dx, u.uy+u.dy);
-	    } else if (xlock.door->doormask & D_LOCKED) xlock.door->doormask = D_CLOSED;
+	    } else if (xlock.door->doormask & D_LOCKED)
+		xlock.door->doormask = D_CLOSED | (xlock.door->doormask & D_BARRED);
 	    else{
-			xlock.door->doormask = D_LOCKED;
+			xlock.door->doormask = D_LOCKED | (xlock.door->doormask & D_BARRED);
 			if(u.sealsActive&SEAL_OTIAX) unbind(SEAL_OTIAX,TRUE);
 		}
 	} else {
@@ -316,7 +317,7 @@ forcedoor()      /* try to break/pry open a door */
 	    xlock.usedtime = 0;
 		return MOVE_CANCELLED; /* you moved */
 	} 
-	switch (xlock.door->doormask) {
+	switch (DOOR_BASE_STATE(xlock.door->doormask)) {
 	    case D_NODOOR:
 		pline("This doorway has no door.");
 		xlock.usedtime = 0;
@@ -330,7 +331,12 @@ forcedoor()      /* try to break/pry open a door */
 		xlock.usedtime = 0;
 		return MOVE_CANCELLED;
 	}
-	
+	if ((xlock.door->doormask & D_BARRED) && xlock.picktyp != 2 && xlock.picktyp != 3) {
+	    pline("The iron bars refuse to budge.");
+	    xlock.usedtime = 0;
+	    return MOVE_CANCELLED;
+	}
+
 	if (xlock.usedtime++ >= 50
 		|| ((nohands(youracedata) || !freehand()) 
 		&& !(u.sealsActive&SEAL_OTIAX))
@@ -355,7 +361,9 @@ forcedoor()      /* try to break/pry open a door */
 	    b_trapped("door", 0);
 	    xlock.door->doormask = D_NODOOR;
 	} else if (xlock.picktyp == 3) {
-	    xlock.door->doormask = D_ISOPEN;
+	    xlock.door->doormask = D_ISOPEN | (xlock.door->doormask & D_BARRED);
+	} else if (xlock.door->doormask & D_BARRED) {
+	    break_iron_bars(u.ux+u.dx, u.uy+u.dy, FALSE);
 	} else if (xlock.picktyp == 1)
 	    xlock.door->doormask = D_BROKEN;
 	else xlock.door->doormask = D_NODOOR;
@@ -636,7 +644,7 @@ struct obj *container; /* container, for autounlock */
 		}
 		return MOVE_CANCELLED;
 		}
-	    switch (door->doormask) {
+	    switch (DOOR_BASE_STATE(door->doormask)) {
 		case D_NODOOR:
 		    pline("This doorway has no door.");
 		    return MOVE_CANCELLED;
@@ -701,7 +709,7 @@ struct obj *container; /* container, for autounlock */
 				} else if(In_quest(&u.uz) && urole.neminum == PM_BOLG && xlock.key == ART_KEY_OF_EREBOR){
 					register struct rm *here;
 					here = &levl[cc.x][cc.y];
-					here->doormask = D_ISOPEN;
+					here->doormask = D_ISOPEN | (here->doormask & D_BARRED);
 					unblock_point(cc.x,cc.y);
 					newsym(cc.x,cc.y);
 					return MOVE_STANDARD;
@@ -867,7 +875,7 @@ nodoor_force:
 		pline("This door is too solid to force open.");
 		return MOVE_CANCELLED;
 	    }
-	    switch (door->doormask) {
+	    switch (DOOR_BASE_STATE(door->doormask)) {
 		case D_NODOOR:
 		    pline("This doorway has no door.");
 		    return MOVE_CANCELLED;
@@ -878,6 +886,10 @@ nodoor_force:
 		    pline("This door is broken.");
 		    return MOVE_CANCELLED;
 		default:
+		    if ((door->doormask & D_BARRED) && picktyp != 3) {
+			pline("The iron bars refuse to budge.");
+			return MOVE_CANCELLED;
+		    }
 		    if(picktyp == 3) c = yn("Force the door's lock?");
 			else c = yn("Break down the door?");
 		    if(c == 'n') return MOVE_CANCELLED;
@@ -972,7 +984,7 @@ nodoor_indr:
             boolean locked = FALSE;
             struct obj* unlocktool;
 
-	    switch (door->doormask) {
+	    switch (DOOR_BASE_STATE(door->doormask)) {
 	    case D_BROKEN: mesg = " is broken"; break;
 	    case D_NODOOR: mesg = "way has no door"; break;
 	    case D_ISOPEN: mesg = " is already open"; break;
@@ -1002,7 +1014,7 @@ nodoor_indr:
 		door->doormask = D_NODOOR;
 		if (*in_rooms(cc.x, cc.y, SHOPBASE)) add_damage(cc.x, cc.y, 0L);
 	    } else
-		door->doormask = D_ISOPEN;
+		door->doormask = D_ISOPEN | (door->doormask & D_BARRED);
 	    if (Blind)
 		feel_location(cc.x,cc.y);	/* the hero knows she opened it  */
 	    else
@@ -1111,7 +1123,7 @@ nodoor:
 	    return MOVE_CANCELLED;
 	}
 
-	if(door->doormask == D_ISOPEN) {
+	if(DOOR_BASE_STATE(door->doormask) == D_ISOPEN) {
 	    if(verysmall(youracedata)
 #ifdef STEED
 		&& !u.usteed
@@ -1126,12 +1138,13 @@ nodoor:
 #endif
 		rn2(25) < (ACURRSTR+ACURR(A_DEX)+ACURR(A_CON))/3) {
 		pline_The("door closes.");
-		door->doormask = D_CLOSED;
+		door->doormask = (door->doormask & ~D_ISOPEN) | D_CLOSED;
 		if (Blind)
 		    feel_location(x,y);	/* the hero knows she closed it */
 		else
 		    newsym(x,y);
-		block_point(x,y);	/* vision:  no longer see there */
+		if (does_block(x,y,door))
+		    block_point(x,y);	/* vision:  no longer see there */
 	    }
 	    else {
 	        exercise(A_STR, TRUE);
@@ -1251,7 +1264,7 @@ int x, y;
 		return FALSE;
 	    }
 
-	    switch (door->doormask & ~D_TRAPPED) {
+	    switch (door->doormask & ~(D_TRAPPED|D_BARRED)) {
 	    case D_CLOSED:
 		if (key)
 		    msg = "The door closes!";
@@ -1282,18 +1295,19 @@ int x, y;
 		res = FALSE;
 		break;
 	    }
-	    block_point(x, y);
+	    if (does_block(x,y,door))
+			block_point(x, y);
 	    if (key)
-			door->doormask = D_CLOSED | (door->doormask & D_TRAPPED);
+			door->doormask = D_CLOSED | (door->doormask & (D_TRAPPED|D_BARRED));
 	    else
-		    door->doormask = D_LOCKED | (door->doormask & D_TRAPPED);
+		    door->doormask = D_LOCKED | (door->doormask & (D_TRAPPED|D_BARRED));
 	    newsym(x,y);
 	    break;
 	case WAN_OPENING:
 	case SPE_KNOCK:
 	    if (!key && door->doormask & D_LOCKED) {
 		msg = "The door unlocks!";
-		door->doormask = D_CLOSED | (door->doormask & D_TRAPPED);
+		door->doormask = D_CLOSED | (door->doormask & (D_TRAPPED|D_BARRED));
 	    } else res = FALSE;
 	break;
 	case WAN_STRIKING:

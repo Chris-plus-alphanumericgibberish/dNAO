@@ -3857,9 +3857,10 @@ boolean *obj_destroyed;/* has object been deallocated? Pointer to boolean, may b
 	    }
 
 	    typ = levl[bhitpos.x][bhitpos.y].typ;
-	    if (typ == IRONBARS){
+	    if (IS_BARS(bhitpos.x, bhitpos.y)){
 			if ((obj->otyp == SPE_FORCE_BOLT || obj->otyp == ROD_OF_FORCE || obj->otyp == WAN_STRIKING)){
 				break_iron_bars(bhitpos.x, bhitpos.y, TRUE);
+				typ = levl[bhitpos.x][bhitpos.y].typ;
 			}
 		}
 
@@ -4338,7 +4339,8 @@ struct zapdata * zapdata;	/* lots of flags and data about the zap */
 
 		}/* isok && !lev != stone */
 
-		if ((!isok(sx, sy) || !ZAP_POS(lev->typ) || closed_door(sx, sy)) && (range >= 0)) {
+		if ((!isok(sx, sy) || !ZAP_POS(lev->typ) ||
+		     (closed_door(sx, sy) && !IS_BARS(sx, sy))) && (range >= 0)) {
 			int bounce;
 			uchar rmn;
 
@@ -5728,20 +5730,24 @@ boolean *shopdamage;
 			// (void) create_gas_cloud(x, y, 1, 8, rn1(20, 5), yours);
 		}
 	}
-	else if(adtyp == AD_GMLD && levl[x][y].typ == IRONBARS) {
+	else if(adtyp == AD_GMLD && IS_BARS(x,y)) {
+	    boolean wasdoor = IS_DOOR(levl[x][y].typ);
 	    if (cansee(x, y))
-		pline_The("iron bars are covered in gray mold!");
+		pline_The(wasdoor ? "barred door is covered in gray mold!" :
+				    "iron bars are covered in gray mold!");
 		dissolve_bars(x, y);
 		makemon(&mons[PM_RUSTY_GRAY_MOLD], x, y, MM_NOCOUNTBIRTH);
 	}
-	else if (adtyp == AD_ACID && levl[x][y].typ == IRONBARS && (flags.drgn_brth || !rn2(5))) {
+	else if (adtyp == AD_ACID && IS_BARS(x,y) && (flags.drgn_brth || !rn2(5))) {
+	    boolean wasdoor = IS_DOOR(levl[x][y].typ);
 	    if (cansee(x, y))
-		pline_The("iron bars are dissolved!");
+		pline_The(wasdoor ? "barred door is dissolved!" :
+				    "iron bars are dissolved!");
 	    else
 		You_hear(Hallucination ? "angry snakes!" : "a hissing noise.");
 	    dissolve_bars(x, y);
 	}
-	if(closed_door(x, y)) {
+	if(closed_door(x, y) && !IS_BARS(x, y)) {
 		int new_doormask = -1;
 		const char *see_txt = 0, *sense_txt = 0, *hear_txt = 0;
 		rangemod = -1000;

@@ -2710,7 +2710,7 @@ karemade:
 						for(int y = 0; y < ROWNO; y++){
 							if(levl[x][y].typ == SDOOR){
 								levl[x][y].typ = DOOR;
-								levl[x][y].doormask = D_CLOSED | (levl[x][y].doormask & D_TRAPPED);
+								levl[x][y].doormask = D_CLOSED | (levl[x][y].doormask & (D_TRAPPED|D_BARRED));
 								newsym(x,y);
 							}
 						}

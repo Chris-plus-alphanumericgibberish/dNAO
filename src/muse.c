@@ -1681,8 +1681,9 @@ struct obj *obj;			/* 2nd arg to fhitm/fhito */
 		    if(hitanything)	range--;
 		}
 		typ = levl[bhitpos.x][bhitpos.y].typ;
-		if (typ == IRONBARS && (obj->otyp==WAN_STRIKING || obj->otyp==ROD_OF_FORCE)){
+		if (IS_BARS(bhitpos.x, bhitpos.y) && (obj->otyp==WAN_STRIKING || obj->otyp==ROD_OF_FORCE)){
 			break_iron_bars(bhitpos.x, bhitpos.y, TRUE);
+			typ = levl[bhitpos.x][bhitpos.y].typ;
 		}
 		if(IS_DOOR(typ) || typ == SDOOR) {
 		    switch (obj->otyp) {

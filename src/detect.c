@@ -1484,9 +1484,12 @@ genericptr_t num;
 				   (flags.soundok ? "hear" :
 						"feel the shock of"));
 			wake_nearto_noisy(zx, zy, 11*11);
-			levl[zx][zy].doormask = D_NODOOR;
+			if (IS_BARS(zx, zy))
+				break_iron_bars(zx, zy, FALSE);
+			else
+				levl[zx][zy].doormask = D_NODOOR;
 		} else
-			levl[zx][zy].doormask = D_ISOPEN;
+			levl[zx][zy].doormask = D_ISOPEN | (levl[zx][zy].doormask & D_BARRED);
 		unblock_point(zx, zy);
 		newsym(zx, zy);
 		(*(int*)num)++;

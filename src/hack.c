@@ -388,7 +388,7 @@ still_chewing(x,y)
 	    (IS_ROCK(lev->typ) && !IS_TREES(lev->typ) ? 30 : 60) + u.udaminc + aeshbon();
 	You("start chewing %s.",
 	    boulder ? (boulder_at(x,y))->otyp==STATUE ? "on a statue" : "on a boulder" :
-	    lev->typ == IRONBARS ? "on the iron bars" :
+	    IS_BARS(x,y) ? "on the iron bars" :
 	    IS_TREES(lev->typ) ? "on a tree" :
 	    IS_ROCK(lev->typ) ? "a hole in the rock" :
 	    "a hole in the door");
@@ -399,7 +399,7 @@ still_chewing(x,y)
 	    You("%s chewing on the %s.",
 		digging.chew ? "continue" : "begin",
 		boulder ? "boulder" :
-		lev->typ == IRONBARS ? "bars" :
+		IS_BARS(x,y) ? "bars" :
 		IS_TREES(lev->typ) ? "tree" :
 		IS_ROCK(lev->typ) ? "rock" : "door");
 	digging.chew = TRUE;
@@ -456,6 +456,10 @@ still_chewing(x,y)
 	    lev->doormask = D_BROKEN;
 	}
 	lev->typ = DOOR;
+
+    } else if (IS_BARS(x,y)) {
+		digtxt = "chew through the iron bars.";
+		break_iron_bars(x, y, FALSE);
 
     } else if (IS_DOOR(lev->typ)) {
 	if (*in_rooms(x, y, SHOPBASE)) {
@@ -682,9 +686,20 @@ int mode;
 		    }
 		}
 		return FALSE;
-	    }	    if (Passes_walls)
-		;	/* do nothing */
-	    else if (can_ooze(&youmonst)) {
+	    }
+		if (Passes_walls)
+			;	/* do nothing */
+	    else if ((tmpr->doormask & D_BARRED) && !Is_illregrd(&u.uz) &&
+		     mode == DO_MOVE &&
+		     (dmgtype(youracedata, AD_RUST) || dmgtype(youracedata, AD_CORR))
+		) {
+			You("eat through the iron bars.");
+			dissolve_bars(x, y);
+			if (youracedata->mtyp == PM_RUST_MONSTER)
+				lesshungry(objects[BAR].oc_nutrition);
+	    } else if ((tmpr->doormask & D_BARRED) && passes_bars(&youmonst)) {
+			if (mode == DO_MOVE) You("slip through the iron bars.");
+	    } else if (can_ooze(&youmonst)) {
 		if (mode == DO_MOVE) You("ooze under the door.");
 	    } else if (tunnels(youracedata) && !needspick(youracedata)) {
 		/* Eat the door. */
@@ -714,16 +729,20 @@ int mode;
 	    }
 	} else {
 	testdiag:
-	    if (dx && dy && !Passes_walls
-		&& ((tmpr->doormask & ~D_BROKEN)
+	    if (dx && dy && !Passes_walls) {
+			boolean bars_exempt = (tmpr->doormask & D_BARRED) &&
+						passes_bars(&youmonst);
+			if (((tmpr->doormask & ~D_BROKEN) && !bars_exempt)
 #ifdef REINCARNATION
-		    || Is_rogue_level(&u.uz)
+			    || Is_rogue_level(&u.uz)
 #endif
-		    || block_door(x,y))) {
-		/* Diagonal moves into a door are not allowed. */
-		if (Blind && mode == DO_MOVE)
-		    feel_location(x,y);
-		return FALSE;
+				|| block_door(x,y)
+			) {
+				/* Diagonal moves into a door are not allowed. */
+				if (Blind && mode == DO_MOVE)
+				feel_location(x,y);
+				return FALSE;
+			}
 	    }
 	}
     }
@@ -774,15 +793,21 @@ int mode;
     ust = &levl[ux][uy];
 
     /* Now see if other things block our way . . */
-    if (dx && dy && !Passes_walls
-		     && (IS_DOOR(ust->typ) && ((ust->doormask & ~D_BROKEN)
+    {
+		boolean ust_bars_exempt = (ust->doormask & D_BARRED) &&
+					passes_bars(&youmonst);
+		if (dx && dy && !Passes_walls
+			&& (IS_DOOR(ust->typ) &&
+				(((ust->doormask & ~D_BROKEN) && !ust_bars_exempt)
 #ifdef REINCARNATION
-			     || Is_rogue_level(&u.uz)
+					|| Is_rogue_level(&u.uz)
 #endif
-			     || block_entry(x, y))
-			 )) {
-	/* Can't move at a diagonal out of a doorway with door. */
-	return FALSE;
+					|| block_entry(x, y))
+			)
+		) {
+			/* Can't move at a diagonal out of a doorway with door. */
+			return FALSE;
+		}
     }
 
     if (boulder_at(x,y) && (In_sokoban(&u.uz) || !Passes_walls)) {

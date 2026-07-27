@@ -743,6 +743,8 @@ struct mkroom *broom;
 	doors[i].arti_text = dd->arti_text;
 	levl[x][y].typ = (dd->secret ? SDOOR : DOOR);
 	levl[x][y].doormask = dd->mask;
+	if (dd->barred)
+	    levl[x][y].doormask |= D_BARRED;
 }
 
 /*
@@ -4150,6 +4152,8 @@ dlb *fd;
 			if(typ < D_CLOSED)
 			    typ = D_CLOSED; /* force it to be closed */
 		}
+		if (tmpdoor.barred)
+		    typ |= D_BARRED;
 		levl[x][y].doormask = typ;
 
 		/* Now the complicated part, list it with each subroom */

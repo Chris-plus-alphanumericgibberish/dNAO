@@ -144,7 +144,7 @@ extern const char *fname;
 
 %token	<i> CHAR INTEGER BOOLEAN PERCENT
 %token	<i> MESSAGE_ID MAZE_ID LEVEL_ID LEV_INIT_ID GEOMETRY_ID NOMAP_ID
-%token	<i> OBJECT_ID COBJECT_ID MONSTER_ID TRAP_ID DOOR_ID DRAWBRIDGE_ID
+%token	<i> OBJECT_ID COBJECT_ID MONSTER_ID TRAP_ID DOOR_ID DRAWBRIDGE_ID BARRED_ID
 %token	<i> MAZEWALK_ID WALLIFY_ID REGION_ID FILLING
 %token	<i> RANDOM_OBJECTS_ID RANDOM_MONSTERS_ID RANDOM_PLACES_ID
 %token	<i> ALTAR_ID LADDER_ID STAIR_ID NON_DIGGABLE_ID NON_PASSWALL_ID ROOM_ID
@@ -601,6 +601,7 @@ room_door	: DOOR_ID ':' secret ',' door_state ',' door_wall ',' door_pos
 			    tmprdoor[ndoor]->wall = $7;
 			    tmprdoor[ndoor]->pos = $9;
 			    tmprdoor[ndoor]->arti_text = 0;
+			    tmprdoor[ndoor]->barred = 0;
 			}
 		  }
 		  room_door_infos
@@ -624,6 +625,11 @@ room_door_info	: ',' INTEGER
 
 			if (tmprdoor[ndoor])
 			    tmprdoor[ndoor]->arti_text = $2;
+		  }
+		| ',' BARRED_ID
+		  {
+			if (tmprdoor[ndoor])
+			    tmprdoor[ndoor]->barred = 1;
 		  }
 		;
 
@@ -1117,6 +1123,10 @@ door_infos	: /* nothing */
 door_info	: ',' INTEGER
 		  {
 			tmpdoor[ndoor]->arti_text = $2;
+		  }
+		| ',' BARRED_ID
+		  {
+			tmpdoor[ndoor]->barred = 1;
 		  }
 		;
 

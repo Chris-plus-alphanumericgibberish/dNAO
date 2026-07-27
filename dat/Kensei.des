@@ -1943,52 +1943,52 @@ MONSTER:'@',"dancing duelist",place[0],hostile
 MONSTER:'@',"dancing duelist",place[1],hostile
 OBJECT[50%]:'#',"thoroughly rotted bedroll",(26,11)
 MONSTER[50%]:'#',"zombified madman",(26,11),hostile
-DOOR:closed,(27,12)
+DOOR:closed,(27,12), barred
 OBJECT[50%]:'#',"thoroughly rotted bedroll",(26,09)
 MONSTER[50%]:'#',"zombified madwoman",(26,09),hostile
-DOOR:locked,(27,08)
+DOOR:locked,(27,08), barred
 OBJECT[50%]:'#',"thoroughly rotted bedroll",(26,05)
 MONSTER[50%]:'#',"zombified nobleman",(26,05),hostile
-DOOR:closed,(27,06)
+DOOR:closed,(27,06), barred
 OBJECT[50%]:'#',"thoroughly rotted bedroll",(26,03)
 MONSTER[50%]:'#',"zombified noblewoman",(26,03),hostile
-DOOR:locked,(28,02)
+DOOR:locked,(28,02), barred
 OBJECT[50%]:'#',"thoroughly rotted bedroll",(30,01)
 MONSTER[50%]:'#',"zombified madman",(30,01),hostile
-DOOR:closed,(31,02)
+DOOR:closed,(31,02), barred
 OBJECT[50%]:'#',"thoroughly rotted bedroll",(34,01)
 MONSTER[50%]:'#',"zombified madwoman",(34,01),hostile
-DOOR:locked,(33,02)
+DOOR:locked,(33,02), barred
 OBJECT[50%]:'#',"thoroughly rotted bedroll",(36,01)
 MONSTER[50%]:'#',"zombified convict",(36,01),hostile
-DOOR:closed,(37,02)
+DOOR:closed,(37,02), barred
 OBJECT[50%]:'#',"thoroughly rotted bedroll",(40,01)
 MONSTER[50%]:'#',"zombified convict",(40,01),hostile
-DOOR:locked,(39,02)
+DOOR:locked,(39,02), barred
 OBJECT[50%]:'#',"thoroughly rotted bedroll",(42,06)
 MONSTER[50%]:'#',"zombified madwoman",(42,06),hostile
-DOOR:closed,(41,05)
+DOOR:closed,(41,05), barred
 OBJECT[50%]:'#',"thoroughly rotted bedroll",(42,08)
 MONSTER[50%]:'#',"zombified madman",(42,08),hostile
-DOOR:locked,(41,09)
+DOOR:locked,(41,09), barred
 OBJECT[50%]:'#',"thoroughly rotted bedroll",(42,12)
 MONSTER[50%]:'#',"zombified priestess",(42,12),hostile
-DOOR:closed,(41,11)
+DOOR:closed,(41,11), barred
 OBJECT[50%]:'#',"thoroughly rotted bedroll",(42,14)
 MONSTER[50%]:'#',"zombified priest",(42,14),hostile
-DOOR:locked,(41,15)
+DOOR:locked,(41,15), barred
 OBJECT[50%]:'#',"thoroughly rotted bedroll",(31,17)
 MONSTER[50%]:'#',"zombified madman",(31,17),hostile
-DOOR:closed,(30,16)
+DOOR:closed,(30,16), barred
 OBJECT[50%]:'#',"thoroughly rotted bedroll",(33,17)
 MONSTER[50%]:'#',"zombified madwoman",(33,17),hostile
-DOOR:locked,(34,16)
+DOOR:locked,(34,16), barred
 OBJECT[50%]:'#',"thoroughly rotted bedroll",(37,17)
 MONSTER[50%]:'#',"zombified pirate",(37,17),hostile
-DOOR:closed,(36,16)
+DOOR:closed,(36,16), barred
 OBJECT[50%]:'#',"thoroughly rotted bedroll",(39,17)
 MONSTER[50%]:'#',"zombified pirate",(39,17),hostile
-DOOR:locked,(40,16)
+DOOR:locked,(40,16), barred
 
 MONSTER:'@',"dancing duelist",(34,12),hostile
 MONSTER:'@',"dancing duelist",(34,07),hostile

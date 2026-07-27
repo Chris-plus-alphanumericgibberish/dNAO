@@ -1823,6 +1823,10 @@ back_to_glyph(x,y)
 	    if (ptr->doormask) {
 		if (ptr->doormask & D_BROKEN)
 		    idx = S_ndoor;
+		else if (ptr->doormask & D_BARRED)
+		    idx = (ptr->doormask & D_ISOPEN)
+			? (ptr->horizontal ? S_hobardoor : S_vobardoor)
+			: (ptr->horizontal ? S_hcbardoor : S_vcbardoor);
 		else if (ptr->doormask & D_ISOPEN)
 		    idx = (ptr->horizontal) ? S_hodoor : S_vodoor;
 		else			/* else is closed */
