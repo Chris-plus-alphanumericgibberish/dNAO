@@ -870,6 +870,7 @@ int template;
 		if(!(ptr->mflagsw&MW_EYE_OF_YGG)){
 			ptr->mflagsw |= MW_ELDER_SIGN;
 		}
+		ptr->mflagsm |= (MM_STANDOFF);
 		break;
 	case CRANIUM_RAT:
 		/* defense: */
