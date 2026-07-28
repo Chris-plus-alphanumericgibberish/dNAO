@@ -19,6 +19,7 @@ STATIC_DCL boolean FDECL(okay,(int,int,int,int));
 STATIC_DCL void FDECL(maze0xy,(coord *));
 STATIC_DCL boolean FDECL(put_lregion_here,(XCHAR_P,XCHAR_P,XCHAR_P,
 	XCHAR_P,XCHAR_P,XCHAR_P,XCHAR_P,BOOLEAN_P,d_level *));
+STATIC_DCL void FDECL(place_forest_portal, (d_level *));
 STATIC_DCL void NDECL(fixup_special);
 STATIC_DCL boolean FDECL(maze_inbounds, (XCHAR_P, XCHAR_P));
 STATIC_DCL void FDECL(move, (int *,int *,int,int));
@@ -363,6 +364,33 @@ d_level *lev;
     return(TRUE);
 }
 
+/* like place_lregion(LR_PORTAL), but also rejects water/lava tiles, since
+   bad_location() alone allows PUDDLE (used for river/ford terrain) */
+STATIC_OVL void
+place_forest_portal(lev)
+d_level *lev;
+{
+	int trycnt;
+	xchar x, y;
+
+	for (trycnt = 0; trycnt < 200; trycnt++) {
+		x = rn1(COLNO-1, 1);
+		y = rn1(ROWNO-1, 1);
+		if (!bad_location(x, y, 0,0,0,0) && !is_pool(x, y, TRUE) && !is_lava(x, y)) {
+			mkportal(x, y, lev->dnum, lev->dlevel);
+			return;
+		}
+	}
+	for (x = 1; x < COLNO; x++)
+	for (y = 1; y < ROWNO; y++) {
+		if (!bad_location(x, y, 0,0,0,0) && !is_pool(x, y, TRUE) && !is_lava(x, y)) {
+			mkportal(x, y, lev->dnum, lev->dlevel);
+			return;
+		}
+	}
+	impossible("Couldn't place quest-link portal!");
+}
+
 static boolean was_waterlevel; /* ugh... this shouldn't be needed */
 
 static const int angelnums[] = {PM_JUSTICE_ARCHON, PM_SWORD_ARCHON, PM_SHIELD_ARCHON, PM_TRUMPET_ARCHON, PM_WARDEN_ARCHON, PM_THRONE_ARCHON, PM_LIGHT_ARCHON, 
@@ -456,6 +484,13 @@ fixup_special()
 	if(In_sokoban(&u.uz))
 		sokoban_detect();
 
+	/*Portal linking elf quest home to the Mordor chaos quest chain*/
+	if(urole.neminum == PM_NECROMANCER && chaos_dvariant == MORDOR){
+		if(Is_qstart(&u.uz))
+			place_forest_portal(&forest_1_level);
+		else if(on_level(&u.uz, &forest_1_level))
+			place_forest_portal(&qstart_level);
+	}
 	/* FORT KNOX: fill vault */
 	if (Is_knox(&u.uz)) {
 		/* using an unfilled morgue for rm id */

@@ -8525,7 +8525,9 @@ register int edge; /* Allows room walls to intrude slightly into river. */
 	register int monster = PM_JELLYFISH;
 	/* Don't liquify shop walls */
 	if (level.flags.has_shop && *in_rooms(x, y, SHOPBASE)) {return;}
-	
+	/* Don't liquify a square that already has a trap (e.g. a portal) */
+	if (t_at(x, y)) {return;}
+
 	/* Don't liquify other level features */
 	if(typ != TREE && typ != GRASS && typ != SOIL && typ != SAND)
 		return;
