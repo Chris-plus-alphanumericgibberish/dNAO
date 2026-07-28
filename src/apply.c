@@ -4668,7 +4668,7 @@ register struct obj *obj;
 
 	if(u.ublood_smithing && !check_parasitology(PARISITE_WINDOWS) && u.yog_sothoth_atten){
 		any.a_int = 6;
-		add_menu(tmpwin, NO_GLYPH, &any , 's', 0, ATR_NONE,
+		add_menu(tmpwin, NO_GLYPH, &any , 'v', 0, ATR_NONE,
 			 "Embrace the visions of Yog-Sothoth", MENU_UNSELECTED);
 	}
 
