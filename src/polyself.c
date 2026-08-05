@@ -11,6 +11,7 @@
  */
 
 #include "hack.h"
+#include "mattkbp.h"
 
 #ifdef OVLB
 STATIC_DCL void FDECL(polyman, (const char *,const char *));
@@ -2721,6 +2722,94 @@ ptrbodypart(struct permonst *mptr, int part, struct monst *mon)
 	if (humanoid(mptr))
 	    return humanoid_parts[part];
 	return animal_parts[part];
+}
+
+/* atkbp_bodypart_name(): the noun a piece of attack-attribution flavor text
+ * (e.g. "You grab the %s!") should use for a struct atkbp_set produced by
+ * attk_bodyparts() (src/mattkbp.c).
+ *
+ * Expects bp to be a single already-selected bit, not an arbitrary
+ * compound set -- picking which bit "wins" when an attack's attribution is
+ * a union of several (e.g. a mind flayer's TENTACLE_GENERIC|MOUTH) is a
+ * job for whatever composes the sentence, not this function. Returns NULL
+ * for bits with no physical noun at all (NONE/INNUMERABLE/MIND_NOLIMB) --
+ * callers must check.
+ */
+const char *
+atkbp_bodypart_name(struct atkbp_set bp, struct permonst *ptr)
+{
+	struct atkbp_set arm_words = atkbp_or((struct atkbp_set[]){
+	    ATKBP(ARM), ATKBP(ARM_DOMINANT), ATKBP(ARM_OFFHAND),
+	    ATKBP(ARM_3RD), ATKBP(ARM_4TH), ATKBP(ARM_5TH), ATKBP(ARM_6TH),
+	    ATKBP(ARM_7TH), ATKBP(ARM_8TH), ATKBP(MISKA_ARM_1ST), ATKBP(MISKA_ARM_2ND), ATKBP(NONE) });
+	struct atkbp_set arm_lower_words = atkbp_or((struct atkbp_set[]){
+	    ATKBP(ARM_LOWER), ATKBP(ARM_LOWER_DOMINANT),
+	    ATKBP(ARM_LOWER_OFFHAND), ATKBP(NONE) });
+	struct atkbp_set leg_words = atkbp_or((struct atkbp_set[]){
+	    ATKBP(LEG), ATKBP(LEG_REAR), ATKBP(LEG_FRONT),
+	    ATKBP(LEG_DOMINANT), ATKBP(LEG_OFFHAND),
+	    ATKBP(LEG_3RD), ATKBP(LEG_4TH), ATKBP(LEG_5TH),
+	    ATKBP(LEG_6TH), ATKBP(LEG_7TH), ATKBP(LEG_8TH), ATKBP(NONE) });
+	struct atkbp_set horn_words = atkbp_or((struct atkbp_set[]){
+	    ATKBP(HORN), ATKBP(HORN_1ST), ATKBP(HORN_2ND), ATKBP(HORN_3RD),
+	    ATKBP(HORN_4TH), ATKBP(HORN_5TH), ATKBP(HORN_6TH), ATKBP(NONE) });
+	struct atkbp_set tentacle_words = atkbp_or((struct atkbp_set[]){
+	    ATKBP(TENTACLE_GENERIC), ATKBP(TENTACLE_ARM_DOMINANT),
+	    ATKBP(TENTACLE_ARM_OFFHAND), ATKBP(TENTACLE_ARM_3RD),
+	    ATKBP(TENTACLE_ARM_4TH), ATKBP(TENTACLE_ARM_5TH),
+	    ATKBP(TENTACLE_ARM_6TH), ATKBP(NONE) });
+	struct atkbp_set alien_limb_words = atkbp_or((struct atkbp_set[]){
+	    ATKBP(ALIEN_LIMB_1ST), ATKBP(ALIEN_LIMB_2ND), ATKBP(NONE) });
+	struct atkbp_set no_noun = atkbp_or((struct atkbp_set[]){
+	    ATKBP(NONE), ATKBP(INNUMERABLE), ATKBP(MIND_NOLIMB), ATKBP(NONE) });
+
+	if (atkbp_intersects(bp, no_noun))
+	    return (const char *)0;
+
+	if (atkbp_intersects(bp, arm_words))
+	    return ptrbodypart(ptr, ARM, (struct monst *) 0);
+	if (atkbp_intersects(bp, leg_words))
+	    return ptrbodypart(ptr, LEG, (struct monst *) 0);
+	if (atkbp_intersects(bp, ATKBP(HEAD)))
+	    return ptrbodypart(ptr, HEAD, (struct monst *) 0);
+	if (atkbp_intersects(bp, ATKBP(EYES)))
+	    return ptrbodypart(ptr, EYE_BP, (struct monst *) 0);
+	if (atkbp_intersects(bp, ATKBP(TONGUE)))
+	    return ptrbodypart(ptr, TONGUE, (struct monst *) 0);
+	if (atkbp_intersects(bp, ATKBP(WING)))
+	    return ptrbodypart(ptr, WINGS_BP, (struct monst *) 0);
+
+	/* PM_*-scoped override, checked before the family's plain default */
+	if (ptr->mtyp == PM_BLIBDOOLPOOLP_S_MINDGRAVEN_CHAMPION
+		&& atkbp_intersects(bp, arm_lower_words))
+	    return "pincer";
+	if (atkbp_intersects(bp, arm_lower_words))
+	    return "lower arm";
+
+	if (atkbp_intersects(bp, ATKBP(LIMB_GENERIC))) return "limb";
+	if (atkbp_intersects(bp, ATKBP(LAUNCHER_GENERIC))) return "launcher";
+	if (atkbp_intersects(bp, ATKBP(MECHANISM_GENERIC))) return "mechanism";
+	if (atkbp_intersects(bp, ATKBP(WHOLE_BODY))) return "body";
+	if (atkbp_intersects(bp, horn_words)) return "horn";
+	if (atkbp_intersects(bp, ATKBP(MOUTH))) return "mouth";
+	if (atkbp_intersects(bp, ATKBP(TORSO_MAW))) return "maw";
+	if (atkbp_intersects(bp, ATKBP(SIPHON))) return "siphon";
+	if (atkbp_intersects(bp, ATKBP(HALO))) return "halo";
+	if (atkbp_intersects(bp, ATKBP(HORNED_LIGHT))) return "horned light";
+	if (atkbp_intersects(bp, ATKBP(SHADOW))) return "shadow";
+	if (atkbp_intersects(bp, ATKBP(AURA_ARM))) return "arm of light";
+	if (atkbp_intersects(bp, ATKBP(ARMOR_ARM))) return "armor arm";
+	if (atkbp_intersects(bp, ATKBP(TAIL))) return "tail";
+	if (atkbp_intersects(bp, ATKBP(STINGER))) return "stinger";
+	if (atkbp_intersects(bp, ATKBP(PROBOSCIS))) return "proboscis";
+	if (atkbp_intersects(bp, tentacle_words)) return "tentacle";
+	if (atkbp_intersects(bp, ATKBP(VINE))) return "vine";
+	if (atkbp_intersects(bp, ATKBP(OTHER_APPENDAGE))) return "appendage";
+	if (atkbp_intersects(bp, alien_limb_words)) return "limb";
+	if (atkbp_intersects(bp, ATKBP(SNAKE))) return "snake";
+	if (atkbp_intersects(bp, ATKBP(CENTIPEDE))) return "centipede";
+
+	return (const char *) 0;
 }
 
 const char *

@@ -2,6 +2,7 @@
 #include "hack.h"
 #include "artifact.h"
 #include "monflag.h"
+#include "mattkbp.h"
 
 #include "xhity.h"
 
@@ -15,7 +16,7 @@ STATIC_DCL void FDECL(wildmiss, (struct monst *, struct attack *, struct obj *, 
 STATIC_DCL boolean FDECL(u_surprise, (struct monst *, boolean));
 STATIC_DCL struct attack * FDECL(getnextspiritattack, (boolean));
 STATIC_DCL void FDECL(xswingsy, (struct monst *, struct monst *, struct obj *, boolean));
-STATIC_DCL void FDECL(xyhitmsg, (struct monst *, struct monst *, struct attack *));
+STATIC_DCL void FDECL(xyhitmsg, (struct monst *, struct monst *, struct attack *, struct obj *));
 STATIC_DCL void FDECL(noises, (struct monst *, struct attack *));
 STATIC_DCL void FDECL(xymissmsg, (struct monst *, struct monst *, struct attack *, int, boolean));
 STATIC_DCL int FDECL(do_weapon_multistriking_effects, (struct monst *, struct monst *, struct attack *, struct obj *, int));
@@ -1043,7 +1044,7 @@ xattacky(struct monst *magr, struct monst *mdef, int tarx, int tary, long modifi
 					if (!ranged && magr && (result&MM_DEF_DIED)){
 						struct obj *second = youagr ? (u.twoweap ? uswapwep : 0) : MON_SWEP(magr);
 						if(second && CHECK_ETRAIT(second, magr, ETRAIT_SECOND) && ROLL_ETRAIT(second, magr, TRUE, !rn2(4))){
-							struct attack secattk = {AT_XWEP, AD_PHYS, 0, 0}; 
+							struct attack secattk = {AT_XWEP, AD_PHYS, 0, 0, .bodypart = ATKBP(ARM_OFFHAND)};
 							int subresult = 0;
 							/* try to find direction (u.dx and u.dy may be incorrect) */
 							int dx = sgn(x(magr) - tarx);
@@ -1883,46 +1884,58 @@ boolean fresh;
 		{ AT_BITE, AD_NABERIUS, 1, 6 },
 		{ AT_WISP, AD_OTIAX, 1, 5 },
 		{ AT_CLAW, AD_SIMURGH, 1, 6 },
-		{ AT_MARI, AD_PHYS, 1, 8 },
+		{ AT_MARI, AD_PHYS, 1, 8 },	/* .bodypart set per-call below (MISKA_ARM_1ST/2ND) */
 		{ AT_WBIT, AD_DRST, 2, 4 },
 		{ AT_NONE, AD_SHDW, 4, 8 },
 		{ AT_NONE, AD_ACID, 1, 1 },	/* actually 1d(spiritDsize) */
 		{ AT_NONE, AD_FIRE, 1, 1 }, /* actually 1d(spiritDsize) */
 		{ AT_NONE, AD_SLVR, 1, 20 },
-		{ AT_NONE, AD_PHYS, 0, 0 } /* noattack */
+		{ AT_NONE, AD_PHYS, 0, 0 } /* noattack -- no bodypart needed */
 	};
 	int i;					/* loop counter */
 	static int indexnum;	/* which attack index to return -- kept between calls of this function */
+	static int miska_arms_given;
 	int curindex = 0;		/* which attack index has been reached */
 
 	/* possibly reset indexnum */
-	if (fresh)
+	if (fresh) {
 		indexnum = 0;
+		miska_arms_given = 0;
+	}
 	/* increment indexnum */
 	indexnum++;
 
 	/* Amon */
 	if (u.sealsActive&SEAL_AMON) {
-		if (++curindex == indexnum)
+		if (++curindex == indexnum) {
+			spiritattack[ATTK_AMON].bodypart = ATKBP(HORN);
 			return &spiritattack[ATTK_AMON];
+		}
 	}
 	/* Chupoclops */
 	if (u.sealsActive&SEAL_CHUPOCLOPS) {
-		if (++curindex == indexnum)
+		if (++curindex == indexnum) {
+			spiritattack[ATTK_CHUPOCLOPS].bodypart = ATKBP(MOUTH);
 			return &spiritattack[ATTK_CHUPOCLOPS];
+		}
 	}
 	/* Naberius */
 	if (u.sealsActive&SEAL_NABERIUS) {
-		if (++curindex == indexnum)
+		if (++curindex == indexnum) {
+			spiritattack[ATTK_NABERIUS].bodypart = ATKBP(MOUTH);
 			return &spiritattack[ATTK_NABERIUS];
+		}
 	}
 	/* Simurgh */
 	if (u.sealsActive&SEAL_SIMURGH) {
-		if (++curindex == indexnum)
+		if (++curindex == indexnum) {
+			spiritattack[ATTK_SIMURGH].bodypart = ATKBP(ARM);
 			return &spiritattack[ATTK_SIMURGH];
+		}
 	}
 	/* Miska */
 	if (u.specialSealsActive&SEAL_MISKA){
+		spiritattack[ATTK_MISKA_WOLF].bodypart = ATKBP(OTHER_APPENDAGE);
 		/* poison bite */
 		if (u.ulevel >= 10) {
 			if (++curindex == indexnum)
@@ -1936,12 +1949,16 @@ boolean fresh;
 		/* 2x non-wielded weapon */
 		if (u.ulevel >= 26) {
 			for (i = 0; i < 2; i++)
-			if (++curindex == indexnum)
+			if (++curindex == indexnum) {
+				spiritattack[ATTK_MISKA_ARM].bodypart =
+					(miska_arms_given++ == 0) ? ATKBP(MISKA_ARM_1ST) : ATKBP(MISKA_ARM_2ND);
 				return &spiritattack[ATTK_MISKA_ARM];
+			}
 		}
 	}
 	/* Iris */
 	if (u.sealsActive&SEAL_IRIS){
+		spiritattack[ATTK_IRIS].bodypart = ATKBP(TENTACLE_GENERIC);
 		if (++curindex == indexnum)
 			return &spiritattack[ATTK_IRIS];
 
@@ -1970,6 +1987,7 @@ boolean fresh;
 		if (curindex + 1 == indexnum)
 			tendrils = min(rnd(5), spiritDsize());
 
+		spiritattack[ATTK_OTIAX].bodypart = ATKBP(LIMB_GENERIC);
 		/* make that many attacks */
 		for (i = 0; i < tendrils; i++)
 		if (++curindex == indexnum) {
@@ -1979,23 +1997,28 @@ boolean fresh;
 	/* Passives! */
 	if (u.specialSealsActive&SEAL_BLACK_WEB && u.spiritPColdowns[PWR_WEAVE_BLACK_WEB] > moves + 20)
 	{
-		if (++curindex == indexnum)
+		if (++curindex == indexnum) {
+			spiritattack[PASV_SHADOW_WEB].bodypart = ATKBP(SHADOW);
 			return &spiritattack[PASV_SHADOW_WEB];
+		}
 	}
 	if (u.sealsActive&SEAL_ECHIDNA)
 	{
 		spiritattack[PASV_ECHIDNA].damd = spiritDsize();
+		spiritattack[PASV_ECHIDNA].bodypart = ATKBP(WHOLE_BODY);
 		if (++curindex == indexnum)
 			return &spiritattack[PASV_ECHIDNA];
 	}
 	if (u.sealsActive&SEAL_EDEN)
 	{
+		spiritattack[PASV_EDEN].bodypart = ATKBP(WHOLE_BODY);
 		if (++curindex == indexnum)
 			return &spiritattack[PASV_EDEN];
 	}
 	if (u.sealsActive&SEAL_MAEGERA)
 	{
 		spiritattack[PASV_MAEGERA].damd = spiritDsize();
+		spiritattack[PASV_MAEGERA].bodypart = ATKBP(WHOLE_BODY);
 		if (++curindex == indexnum)
 			return &spiritattack[PASV_MAEGERA];
 	}
@@ -2213,6 +2236,8 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	/* Iksh'na devas upgrade their weapon attack at max level. This may be switched back later if they're cancelled. */
 	if(pa->mtyp == PM_IKSH_NA_DEVA && mlev(magr) >= 45 && attk->aatyp == AT_WEAP && *indexnum == 0){
 		attk->aatyp = AT_DEVA;
+		attk->bodypart = atkbp_or((struct atkbp_set[]){
+		    ATKBP(INNUMERABLE), ATKBP(ARM), ATKBP(NONE) });
 	}
 	/* Carcosan courtiers gain extra dice on their tentacles. */
 	if(pa->mtyp == PM_CARCOSAN_COURTIER && attk->aatyp == AT_TENT && Insight > 5){
@@ -2662,22 +2687,27 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			case 1:
 				attk->aatyp = AT_TUCH;
 				//Use noted ad type
+				attk->bodypart = ATKBP(TENTACLE_GENERIC);
 			break;
 			case 2:
 				attk->aatyp = AT_BITE;
 				attk->adtyp = AD_PHYS;
+				attk->bodypart = ATKBP(MOUTH);
 			break;
 			case 3:
 				attk->aatyp = AT_KICK;
 				attk->adtyp = AD_PHYS;
+				attk->bodypart = ATKBP(LEG);
 			break;
 			case 4:
 				attk->aatyp = AT_BUTT;
 				attk->adtyp = AD_PHYS;
+				attk->bodypart = ATKBP(HORN);
 			break;
 			case 5:
 				attk->aatyp = AT_GAZE;
 				attk->adtyp = AD_STDY;
+				attk->bodypart = ATKBP(EYES);
 			break;
 		}
 	}
@@ -2686,18 +2716,22 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			case 1:
 				attk->aatyp = AT_TENT;
 				attk->adtyp = AD_DRST;
+				attk->bodypart = ATKBP(HORNED_LIGHT);
 			break;
 			case 2:
 				attk->aatyp = AT_BUTT;
 				attk->adtyp = AD_STUN;
+				attk->bodypart = ATKBP(HORN);
 			break;
 			case 3:
 				attk->aatyp = AT_GAZE;
 				attk->adtyp = AD_STDY;
+				attk->bodypart = ATKBP(EYES);
 			break;
 			case 4:
 				attk->aatyp = AT_CLAW;
 				attk->adtyp = AD_SEDU;
+				attk->bodypart = ATKBP(ARM);
 			break;
 		}
 	}
@@ -2765,36 +2799,27 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		// If using marilith-hands or sword archon, sub out entire attack chain
 		if (check_subout(subout, SUBOUT_BAEL1)){
 			*attk = swordArchon[*indexnum];
+			attk->bodypart = ATKBP(NONE);	/* animated hands, not Bael's own body */
 		}
 		else if (check_subout(subout, SUBOUT_BAEL2)){
 			*attk = marilithHands[*indexnum];
+			attk->bodypart = ATKBP(NONE);	/* animated hands, not Bael's own body */
 		}
 	}
 	/* Blibdoolpoolp switches to a worse attack routine at high insight -- shown in pokedex */
 	if (pa->mtyp == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH && *indexnum < NATTK && Insight >= 54) {
-		static const struct attack blib_alternate[NATTK] = {
-			{ AT_CLAW, AD_SQUE, 4, 8, 0, 0, 1 },
-			{ AT_CLAW, AD_SQUE, 4, 8, 0, 1, 0 },
-			{ AT_REND, AD_SHRD, 3, 12 },
-			{ AT_HUGS, AD_PHYS, 3, 4 },
-			{ AT_HITS, AD_TSMI, 0, 0 },
-			{ AT_MAGC, AD_CLRC, 2, 8 },
-			{ AT_NONE, AD_MROT, 0, 0 }
-		};
-		*attk = blib_alternate[*indexnum];
+		int real_idx = BLIB_ALT_REAL_INDEX(*indexnum);
+
+		*attk = blib_alt_attacks[*indexnum];
+		if (real_idx < 0)
+			/* the spliced-in AT_REND -- same limbs as the claw pair before it */
+			attk->bodypart = atkbp_or((struct atkbp_set[]){
+			    pa->mattk[0].bodypart, pa->mattk[1].bodypart, ATKBP(NONE) });
+		else
+			attk->bodypart = pa->mattk[real_idx].bodypart;
 	}
 	/* Lolth has alternate attack routines -- not shown in pokedex */
 	if (pa->mtyp == PM_AVATAR_OF_LOLTH && *indexnum < NATTK && !by_the_book) {
-		static const struct attack lolthHands[NATTK] = {
-			{ AT_WEAP, AD_PHYS, 4, 8 },
-			{ AT_XWEP, AD_PHYS, 4, 8 },
-			{ AT_MARI, AD_PHYS, 2, 8 },
-			{ AT_MARI, AD_PHYS, 2, 8 },
-			{ AT_MARI, AD_PHYS, 1, 8 },
-			{ AT_MARI, AD_PHYS, 1, 8 },
-			{ AT_MARI, AD_PHYS, 1, 8 },
-			{ AT_MARI, AD_PHYS, 1, 8 }
-		};
 		// first index -- determine which attack form
 		if (*indexnum == 0){
 			if (!magr->mcan && !Protection_from_shape_changers && rn2(2)){		// 1/2 of marilith-hands
@@ -2804,7 +2829,8 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		}
 		// If using marilith-hands sub out entire attack chain
 		if (check_subout(subout, SUBOUT_LOLTH1)){
-			*attk = lolthHands[*indexnum];
+			*attk = lolth_alt_attacks[*indexnum];
+			attk->bodypart = lolth_alt_bodypart(*indexnum);
 		}
 	}
 	/* Blasphemous hands have lurker attacks if they can't abduct the target to their temple*/
@@ -2814,6 +2840,8 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		};
 		int atypes[] = {AD_DETH, AD_PEST, AD_FAMN, AD_CNFT};
 		*attk = altblas[*indexnum];
+		/* same hand doing the abduction (mattk[0]) does this too */
+		attk->bodypart = pa->mattk[0].bodypart;
 		if(attk->aatyp == AT_TUCH)
 			attk->adtyp = atypes[(int) magr->m_id % SIZE(atypes)];
 	}
@@ -2836,6 +2864,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			attk->adtyp = AD_PHYS;
 			attk->damn = 1;
 			attk->damd = 4;
+			attk->bodypart = ATKBP(ARM_DOMINANT);
 			if (otmp->oartifact == ART_QUICKSILVER)
 				*tohitmod = -15;
 			fromlist = FALSE;
@@ -2858,6 +2887,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			attk->adtyp = AD_PHYS;
 			attk->damn = 1;
 			attk->damd = 4;
+			attk->bodypart = ATKBP(ARM_DOMINANT);
 			*tohitmod = -10 * (attacknum+1); //Correct off-by-one error, these are the *subout* attacks specifically
 			fromlist = FALSE;
 			if(check_subout(subout, SUBOUT_BARB1)){
@@ -2883,6 +2913,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			attk->adtyp = AD_PHYS;
 			attk->damn = 1;
 			attk->damd = 4;
+			attk->bodypart = ATKBP(ARM_DOMINANT);
 			*tohitmod = -10 * (attacknum+1); //Correct off-by-one error, these are the *subout* attacks specifically
 			fromlist = FALSE;
 			if(check_subout(subout, SUBOUT_BARB1)){
@@ -2914,6 +2945,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			attk->adtyp = AD_PHYS;
 			attk->damn = 2;
 			attk->damd = 8;
+			attk->bodypart = ATKBP(AURA_ARM);
 			fromlist = FALSE;
 			if(!check_subout(subout, SUBOUT_A_MAR_1))
 				add_subout(subout, SUBOUT_A_MAR_1);
@@ -2934,6 +2966,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			attk->adtyp = AD_PHYS;
 			attk->damn = 2;
 			attk->damd = 8;
+			attk->bodypart = ATKBP(ARMOR_ARM);
 			fromlist = FALSE;
 			if(check_subout(subout, SUBOUT_MARIARM1))
 				add_subout(subout, SUBOUT_MARIARM2);
@@ -2951,6 +2984,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			attk->adtyp = AD_FATK;
 			attk->damn = 1;
 			attk->damd = 4;
+			attk->bodypart = ATKBP(TONGUE);
 			fromlist = FALSE;
 			add_subout(subout, SUBOUT_SHUBTONG);
 		}
@@ -3060,6 +3094,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			attk->adtyp = AD_COLD;
 			attk->damn = (u.ulevel+5)/6;
 			attk->damd = 6;
+			attk->bodypart = ATKBP(ARM_OFFHAND);
 			fromlist = FALSE;
 			add_subout(subout, SUBOUT_T_COLD_TOUCH);
 		}
@@ -3070,6 +3105,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			attk->adtyp = AD_DRLI;
 			attk->damn = 1;
 			attk->damd = 6;
+			attk->bodypart = ATKBP(ARM_OFFHAND);
 			fromlist = FALSE;
 			add_subout(subout, SUBOUT_T_DRAIN_TOUCH);
 		}
@@ -3080,6 +3116,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			attk->adtyp = AD_FIRE;
 			attk->damn = (u.ulevel+5)/6;
 			attk->damd = 6;
+			attk->bodypart = ATKBP(ARM_OFFHAND);
 			fromlist = FALSE;
 			add_subout(subout, SUBOUT_T_FIRE_TOUCH);
 		}
@@ -3090,6 +3127,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			attk->adtyp = AD_ELEC;
 			attk->damn = (u.ulevel+5)/6;
 			attk->damd = 6;
+			attk->bodypart = ATKBP(ARM_OFFHAND);
 			fromlist = FALSE;
 			add_subout(subout, SUBOUT_T_SHOCK_TOUCH);
 		}
@@ -3100,6 +3138,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			attk->adtyp = AD_ACID;
 			attk->damn = (u.ulevel+6)/7;
 			attk->damd = 7;
+			attk->bodypart = ATKBP(ARM_OFFHAND);
 			fromlist = FALSE;
 			add_subout(subout, SUBOUT_A_ACID_TOUCH);
 		}
@@ -3111,6 +3150,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		attk->adtyp = AD_DRST;
 		attk->damn = 1;
 		attk->damd = 6;
+		attk->bodypart = ATKBP(MOUTH);
 		fromlist = FALSE;
 		add_subout(subout, SUBOUT_T_BITE);
 	}
@@ -3121,6 +3161,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		attk->adtyp = AD_VAMP;
 		attk->damn = 1;
 		attk->damd = 6;
+		attk->bodypart = ATKBP(MOUTH);
 		fromlist = FALSE;
 		add_subout(subout, SUBOUT_T_VAMPIRE);
 	}
@@ -3131,6 +3172,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		attk->adtyp = AD_DRST;
 		attk->damn = 1;
 		attk->damd = 6;
+		attk->bodypart = ATKBP(MOUTH);
 		fromlist = FALSE;
 		add_subout(subout, SUBOUT_T_SPIDER);
 	}
@@ -3141,6 +3183,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		attk->adtyp = AD_PHYS;
 		attk->damn = u.ulevel >= 30 ? 4 : 2;
 		attk->damd = u.ulevel >= 14 ? 4 : 3;
+		attk->bodypart = ATKBP(HORN);
 		fromlist = FALSE;
 		add_subout(subout, SUBOUT_T_RAMS_HORNS);
 	}
@@ -3151,6 +3194,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		attk->adtyp = AD_PHYS;
 		attk->damn = 2;
 		attk->damd = u.ulevel >= 30 ? 8 : u.ulevel >= 14 ? 6 : 4;
+		attk->bodypart = ATKBP(HORN);
 		fromlist = FALSE;
 		add_subout(subout, SUBOUT_T_BULL_HORNS);
 	}
@@ -3173,6 +3217,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			attk->damd = 2;
 			attk->adtyp = AD_PHYS;
 		}
+		attk->bodypart = ATKBP(HORN);
 		fromlist = FALSE;
 		add_subout(subout, SUBOUT_T_DEMON_HORNS);
 	}
@@ -3183,6 +3228,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		attk->adtyp = AD_CHRN;
 		attk->damn = 1;
 		attk->damd = u.ulevel >= 30 ? 12 : u.ulevel >= 14 ? 4 : 1;
+		attk->bodypart = ATKBP(HORN);
 		fromlist = FALSE;
 		add_subout(subout, SUBOUT_T_NIGHTHORN);
 	}
@@ -3193,6 +3239,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		attk->adtyp = AD_PHYS;
 		attk->damn = 2;
 		attk->damd = 2 + u.ulevel/3;
+		attk->bodypart = ATKBP(HORN);
 		fromlist = FALSE;
 		add_subout(subout, SUBOUT_T_ANTLERS);
 	}
@@ -3209,6 +3256,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			attk->damn = 2;
 			attk->damd = u.ulevel >= 30 ? 12 : u.ulevel >= 14 ? 8 : 6;
 		}
+		attk->bodypart = ATKBP(WING);
 		fromlist = FALSE;
 		add_subout(subout, SUBOUT_T_WING_BUFFET);
 	}
@@ -3219,6 +3267,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		attk->adtyp = check_rot(ROT_WINGS) ? AD_DISE : AD_PHYS;
 		attk->damn = 2;
 		attk->damd = u.ulevel >= 30 ? 20 : u.ulevel >= 14 ? 12 : 10;
+		attk->bodypart = ATKBP(WING);
 		fromlist = FALSE;
 		add_subout(subout, SUBOUT_T_WING_CLAW_1);
 	}
@@ -3229,6 +3278,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		attk->damn = 2;
 		attk->damd = max(1, u.ulevel/3);
 		attk->adtyp = AD_SLOW;
+		attk->bodypart = ATKBP(WING);
 		fromlist = FALSE;
 		add_subout(subout, SUBOUT_T_WING_CLAW_2);
 	}
@@ -3242,6 +3292,8 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		attk->adtyp = AD_DOBT;
 		attk->damn = 1;
 		attk->damd = 12;
+		attk->bodypart = atkbp_or((struct atkbp_set[]){
+		    ATKBP(TENTACLE_ARM_DOMINANT), ATKBP(WORN_LIKE_WING), ATKBP(NONE) });
 		fromlist = FALSE;
 		if(check_subout(subout, SUBOUT_T_WING_CLAW_3A_2))
 			add_subout(subout, SUBOUT_T_WING_CLAW_3A_3);
@@ -3258,6 +3310,8 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		attk->adtyp = AD_DOBT;
 		attk->damn = 1;
 		attk->damd = 12;
+		attk->bodypart = atkbp_or((struct atkbp_set[]){
+		    ATKBP(TENTACLE_ARM_DOMINANT), ATKBP(WORN_LIKE_WING), ATKBP(NONE) });
 		fromlist = FALSE;
 		add_subout(subout, SUBOUT_T_WING_CLAW_3B);
 	}
@@ -3268,6 +3322,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		attk->adtyp = AD_DRST;
 		attk->damn = 1;
 		attk->damd = 4;
+		attk->bodypart = ATKBP(TAIL);
 		fromlist = FALSE;
 		add_subout(subout, SUBOUT_T_SCORPION_TAIL);
 	}
@@ -3279,6 +3334,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			attk->adtyp = AD_PLYS;
 			attk->damn = 3;
 			attk->damd = 5;
+			attk->bodypart = ATKBP(EYES);
 			fromlist = FALSE;
 		}
 		add_subout(subout, SUBOUT_T_PARALYSIS_PASSIVE);
@@ -3290,6 +3346,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		attk->adtyp = AD_BARB;
 		attk->damn = (u.ulevel+9)/10;
 		attk->damd = 2+u.ulevel/3;
+		attk->bodypart = ATKBP(VINE);
 		fromlist = FALSE;
 		add_subout(subout, SUBOUT_T_THORN_HAIR);
 	}
@@ -3301,6 +3358,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			((youagr || youdef) && !u.uswallow && u.ustuck && u.ustuck == (youagr ? mdef : magr))) {
 			*attk = grapple;
 			attk->damn = youagr ? ((P_SKILL(P_BARE_HANDED_COMBAT) + 1) / 2 + martial_bonus()) : 2;
+			attk->bodypart = ATKBP(ARM);
 			add_subout(subout, SUBOUT_GRAPPLE);
 			fromlist = FALSE;
 		}
@@ -3342,6 +3400,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		attk->adtyp = AD_DRIN;
 		attk->damn = u.brainsuckers;
 		attk->damd = 2;
+		attk->bodypart = ATKBP(TENTACLE_GENERIC);
 		fromlist = FALSE;
 		add_subout(subout, SUBOUT_BRAINSUCK);
 	}
@@ -3355,6 +3414,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			attk->adtyp = AD_DISE;
 			attk->damn = 1;
 			attk->damd = 1;
+			attk->bodypart = ATKBP(MOUTH);
 			fromlist = FALSE;
 			make_sick(0L, (char *) 0, TRUE, SICK_VOMITABLE);
 			if(!umechanoid) morehungry(20*get_uhungersizemod());
@@ -3394,6 +3454,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		attk->adtyp = AD_DISE;
 		attk->damn = 1;
 		attk->damd = 1;
+		attk->bodypart = ATKBP(WHOLE_BODY);
 		fromlist = FALSE;
 		add_subout(subout, SUBOUT_ROT_SPORES);
 	}
@@ -3404,6 +3465,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		attk->adtyp = AD_DISE;
 		attk->damn = u.ulevel;
 		attk->damd = 1;
+		attk->bodypart = ATKBP(WHOLE_BODY);
 		fromlist = FALSE;
 		add_subout(subout, SUBOUT_T_SPORES);
 	}
@@ -3414,6 +3476,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		attk->adtyp = AD_FIRE;
 		attk->damn = (u.ulevel+5)/6;
 		attk->damd = 6;
+		attk->bodypart = ATKBP(WHOLE_BODY);
 		fromlist = FALSE;
 		add_subout(subout, SUBOUT_T_FLAMES);
 	}
@@ -3424,6 +3487,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		attk->adtyp = AD_COLD;
 		attk->damn = (u.ulevel+5)/6;
 		attk->damd = 6;
+		attk->bodypart = ATKBP(WHOLE_BODY);
 		fromlist = FALSE;
 		add_subout(subout, SUBOUT_T_COLD);
 	}
@@ -3434,6 +3498,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		attk->adtyp = AD_ACID;
 		attk->damn = (u.ulevel+5)/6;
 		attk->damd = 6;
+		attk->bodypart = ATKBP(WHOLE_BODY);
 		fromlist = FALSE;
 		add_subout(subout, SUBOUT_T_ACID);
 	}
@@ -3444,6 +3509,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		attk->adtyp = AD_POSN;
 		attk->damn = (u.ulevel+5)/6;
 		attk->damd = 6;
+		attk->bodypart = ATKBP(WHOLE_BODY);
 		fromlist = FALSE;
 		add_subout(subout, SUBOUT_T_POISON);
 	}
@@ -3488,43 +3554,16 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		/* If player was using 'k' to kick, they are only performing kick attacks (onlykicks is a state variable defined in dokick.c) */
 		(youagr && onlykicks && attk->aatyp != AT_KICK) ||
 		/* If player is stuck in a straitjacket */
-		(youagr && 
+		(youagr &&
 			((Straitjacketed) ||
 			 (uarmg && uarmg->otyp == SHACKLES && uarmg->cursed)
-			) && (
-			attk->aatyp == AT_WEAP || attk->aatyp == AT_XWEP || attk->aatyp == AT_WHIP
-			|| attk->aatyp == AT_HODS || attk->aatyp == AT_MMGC 
-			/* "Deva" rapiers are assumed to be the Masked Queen's lower arms, and "Energy" rapiers just sorta float or something */
-			|| attk->aatyp == AT_SRPR || attk->aatyp == AT_XSPR || attk->aatyp == AT_MSPR
-			|| attk->aatyp == AT_DEVA || attk->aatyp == AT_5SQR || attk->aatyp == AT_MARI
-			|| (attk->aatyp == AT_MAGC && attk->adtyp != AD_PSON)
-			|| (humanoid_torso(youracedata) && (
-				attk->aatyp == AT_TUCH
-				|| attk->aatyp == AT_LRCH
-			))
-			|| (humanoid(youracedata) && (
-				attk->aatyp == AT_CLAW
-				|| attk->aatyp == AT_HUGS
-			))
-		)) ||
+			) && would_straitjacket_block(attk)
+		) ||
 		/* If monster is stuck in a straitjacket */
-		(!youagr && 
-			( straitjacketed_mon(magr) ) && 
-			!(check_subout(subout, SUBOUT_BAEL1) || check_subout(subout, SUBOUT_BAEL2)) && (
-			attk->aatyp == AT_WEAP || attk->aatyp == AT_XWEP || attk->aatyp == AT_WHIP
-			|| attk->aatyp == AT_HODS || attk->aatyp == AT_MMGC 
-			/* "Deva" rapiers are assumed to be the Masked Queen's lower arms, and "Energy" rapiers just sorta float or something */
-			|| attk->aatyp == AT_SRPR || attk->aatyp == AT_XSPR || attk->aatyp == AT_MSPR
-			|| attk->aatyp == AT_DEVA || attk->aatyp == AT_5SQR || attk->aatyp == AT_MARI
-			|| ((attk->aatyp == AT_MAGC || attk->aatyp == AT_MMGC) && attk->adtyp != AD_PSON && !(magr->mtyp == PM_ITINERANT_PRIESTESS && has_template(magr, MISTWEAVER))) ||
-			(humanoid(pa) && (
-				attk->aatyp == AT_CLAW
-				/* Note: Dream-leech "touch" attacks are the dream leeches eating your brain like a 'flayer */
-				|| (attk->aatyp == AT_TUCH && !(attk->adtyp == AD_DRIN && has_template(magr, DREAM_LEECH)))
-				|| attk->aatyp == AT_HUGS
-				|| attk->aatyp == AT_LRCH
-			))
-		)) ||
+		(!youagr &&
+			( straitjacketed_mon(magr) ) &&
+			would_straitjacket_block(attk)
+		) ||
 		/* If player is wearing a faceless helm */
 		(youagr && 
 			(
@@ -3669,10 +3708,7 @@ boolean nearmiss;
  * Do not call this if the attack shouldn't be visible!
  */
 void
-xyhitmsg(magr, mdef, attk)
-struct monst *magr;
-struct monst *mdef;
-struct attack *attk;
+xyhitmsg(struct monst *magr, struct monst *mdef, struct attack *attk, struct obj *weapon)
 {
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
@@ -3940,6 +3976,23 @@ struct attack *attk;
 				);
 			break;
 		case AT_NONE:
+			break;
+		case AT_MARI:
+			{
+				boolean yours = (weapon && weapon->dknown && youagr);
+				const char * weapon_clause = "";
+				if (weapon)
+					weapon_clause = yours ? singular(weapon, xname) : (weapon->dknown ? the(singular(weapon, xname)) : an(singular(weapon, xname)));
+				pline("%s %s%s%s%s%s%s!",
+					(youagr ? "You" : Monnam(magr)),
+					(youagr ? "hit" : makeplural("hit")),
+					((youdef && !youagr) ? "" : " "),
+					((youdef && !youagr) ? "" : mon_nam_too(mdef, magr)),
+					(*weapon_clause ? " with " : ""),
+					yours ? "your " : "",
+					weapon_clause
+					);
+			}
 			break;
 		default:
 			pline("%s %s%s%s!",
@@ -6100,7 +6153,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_MAGM:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		/* does it do anything? Nullmagic gives utter and total immunity. MR gives immunity to the damage. */
 		if (notmcan
@@ -6139,7 +6192,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_FIRE:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		/* does it do anything? */
 		if (uncancelled || attk->adtyp == AD_EFIR)
@@ -6272,7 +6325,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_COLD:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		/* does it do anything? */
 		if (uncancelled || attk->adtyp == AD_ECLD)
@@ -6349,7 +6402,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_ELEC:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		/* does it do anything? */
 		if (uncancelled || attk->adtyp == AD_EELC)
@@ -6425,7 +6478,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_OMUD:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		/* active? */
 		if ((notmcan && !rn2(3)) || attk->adtyp == AD_EACD) {
@@ -6499,7 +6552,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_PSON:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		/* active? */
 		if (notmcan && (youdef || !mindless_mon(mdef)) && !Catapsi) {
@@ -6530,7 +6583,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_DISE:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		/* asymetric: diseasemu prints out messages, applies sickness to player*/
 		if(originalattk->aatyp == AT_VOMT){
@@ -6570,7 +6623,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_GMLD:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		if(is_gray_mold(pd))
 			return MM_HIT;
@@ -6638,7 +6691,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 		else {
 			/* print a basic hit message */
 			if (vis && dohitmsg) {
-				xyhitmsg(magr, mdef, originalattk);
+				xyhitmsg(magr, mdef, originalattk, weapon);
 			}
 			(void) destroy_items_sonic(mdef, FALSE);
 			dmg = reduce_dmg(mdef,dmg,TRUE,FALSE);
@@ -6647,7 +6700,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_POSN:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 
 		if (Poison_res(mdef)){
@@ -6683,7 +6736,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 			return MM_MISS;
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		mindstealer_conflict(mdef, magr);
 		if(DEADMONSTER(mdef)){
@@ -7050,7 +7103,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_POLN:
 		/* make physical attack */
 		if (vis && dohitmsg){
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		alt_attk.adtyp = AD_PHYS;
 		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged);
@@ -7091,7 +7144,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_RUST:
 		/* print hitmessage */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 
 		/* no special effect if cancelled */
@@ -7138,7 +7191,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_DCAY:
 		/* print hitmessage */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 
 		/* no special effect if cancelled */
@@ -7188,7 +7241,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_CORR:
 		/* print hitmessage */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		/* corrode armor */
 		if (youdef) {
@@ -7206,7 +7259,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_LETHE:
 		/* print hitmessage */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 			if (youdef)
 				You("are soaking wet!");
 			else if (vis&VIS_MDEF)
@@ -7221,7 +7274,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_ENCH:
 		/* print hitmessage */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		/* disenchant */
 		if (uncancelled) {
@@ -7263,7 +7316,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 		}
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		/* only activates 1/8 times even when uncancelled */
 		if (uncancelled && !rn2(8)) {
@@ -7334,7 +7387,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_DRLI:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		ptmp = min(*hp(mdef), d(2, 6));	/* amount of draining damage */
 
@@ -7518,7 +7571,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_MDWP:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 
 		/* level-draining effect caused by memory loss */
@@ -7566,7 +7619,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_DESC:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		if (nonliving(pd) || is_anhydrous(pd)){
 			if (vis) {
@@ -7595,7 +7648,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_STON:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 
 		/* 1/3 chance of special effects */
@@ -7641,7 +7694,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_SSTN:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 
 		/* 1/3 chance of special effects */
@@ -7661,7 +7714,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_SLIM:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		if (uncancelled) {
 			/* flaming immunity to slime */
@@ -7717,7 +7770,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_WISD:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		/* maybe drain WIS */
 		if (uncancelled && !rn2(8)) {
@@ -7755,7 +7808,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 		}
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		/* maybe drain stat */
 		if (notmcan) {
@@ -7787,7 +7840,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_DOBT:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		/* may inject doubt (blocked by MC or cancelling the monster) */
 		if (uncancelled) {
@@ -8053,7 +8106,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_LRVA:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		/* lay an egg */
 		if (notmcan) {
@@ -8072,7 +8125,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_CURS:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		if ((notmcan && (!rn2(10) || pa->mtyp == PM_SPIDER_SCORPION || pa->mtyp == PM_PALE_NIGHT))
 			&& !(pa->mtyp == PM_GREMLIN && !night())
@@ -8158,7 +8211,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 		else {
 			/* print basic hit message */
 			if (vis && dohitmsg) {
-				xyhitmsg(magr, mdef, originalattk);
+				xyhitmsg(magr, mdef, originalattk, weapon);
 			}
 		}
 
@@ -8363,7 +8416,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_MALK:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		/* attempt to stick */
 		if ((youagr || youdef)					/* the player must be involved in a sticking situation (gameplay limitation) */
@@ -8402,7 +8455,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_TCKL:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		/* weeping angels are entirely immune to the special effects */
 		if (!is_weeping(pd)) {
@@ -8758,7 +8811,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_UVUU:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		/* chance for vorpal-esque headsmashing */
 		if (!rn2(20)){
@@ -8860,7 +8913,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_TENT:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		/* the tentacle attack is only implemented vs the player */
 		if (youdef) {
@@ -8908,7 +8961,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_WEBS:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		if (!t_at(x(mdef), y(mdef))) {
 			struct trap *ttmp2 = maketrap(x(mdef), y(mdef), WEB);
@@ -8935,7 +8988,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_HOOK:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		if (!t_at(x(mdef), y(mdef)) 
 			&& !(amorphous_mon(mdef) || is_whirly(pd) || unsolid(pd))
@@ -8967,7 +9020,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_PSH3:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		int dx = x(magr) - x(mdef);
 		int dy = y(magr) - y(mdef);
@@ -9023,7 +9076,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_LICK:{
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		switch(rnd(4)){
 			case 1:
@@ -9065,7 +9118,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_BYAK:{
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		
 		struct obj *otmp = some_armor(mdef);
@@ -9151,7 +9204,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 			result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, dohitmsg, dmg, dieroll, vis, ranged);
 		}
 		else if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		/* return early if cannot continue the attack */
 		if (result&(MM_DEF_DIED|MM_DEF_LSVD))
@@ -9226,7 +9279,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 			result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, dohitmsg, dmg, dieroll, vis, ranged);
 		}
 		else if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		/* return early if cannot continue the attack */
 		if (result&(MM_DEF_DIED|MM_DEF_LSVD))
@@ -9428,7 +9481,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_SAMU:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		/* only special vs the player */
 		if (youdef) {
@@ -9444,7 +9497,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_SQUE:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		/* only special vs the player */
 		if (youdef) {
@@ -9460,7 +9513,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_STTP:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 
 		otmp = some_armor(mdef);
@@ -9727,7 +9780,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_DISN:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		/* maybe print glowy message */
 		if (!Blind && (youdef || canseemon(mdef))){
@@ -9817,7 +9870,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		/* entirely unharmed */
 		if (!has_head_mon(mdef)
@@ -10352,7 +10405,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_CHRN:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		/* vs player, do special effects like as a unicorn horn */
 		if (youdef) {
@@ -10647,7 +10700,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_PAIN:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		/* big picture: can stunlock monsters, can't stunlock you because it uses the Screaming status effect */
 		if((!nonliving(pd) || is_android(pd)) 
@@ -10698,7 +10751,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_MROT:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		/* Do the curse */
 		result |= mummy_curses_x(magr, mdef);
@@ -10832,7 +10885,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_IRIS:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		/* note when the player last made an Iris attack */
 		if (youagr) {
@@ -10868,7 +10921,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_NABERIUS:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		if (!youdef && mdef->mflee) {	/* what would be an acceptable condition for the player to be affected? */
 			if ((*hp(magr) < *hpmax(magr)) && vis) {
@@ -10903,7 +10956,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_OTIAX:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		/* note when the player last made an Otiax attack */
 		if (youagr) {
@@ -10969,7 +11022,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_SIMURGH:
 		/* print a basic hit message */
 		if (vis && dohitmsg) {
-			xyhitmsg(magr, mdef, originalattk);
+			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 
 		/* 4/5 chance of just iron-hating damage */
@@ -11393,7 +11446,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 
 			/* print a basic hit message */
 			if (vis && dohitmsg) {
-				xyhitmsg(magr, mdef, originalattk);
+				xyhitmsg(magr, mdef, originalattk, weapon);
 			}
 
 			if (tentacles){
@@ -13157,7 +13210,7 @@ int vis;
 
 	/* message */
 	if (vis)
-		xyhitmsg(magr, mdef, attk);
+		xyhitmsg(magr, mdef, attk, (struct obj *)0);
 	else
 		noises(magr, attk);
 
@@ -15021,7 +15074,7 @@ int vis;
 				if (MON_WEP(magr) && rn2(20)) return MM_HIT;
 			}
 			if (is_animal(pa)) {
-				xyhitmsg(magr, mdef, attk);
+				xyhitmsg(magr, mdef, attk, (struct obj *)0);
 				if (magr->mcan) break;
 				/* Continue below */
 			}
@@ -16284,7 +16337,7 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 	if (weapon)
 		slot = W_WEP;	// note: the pointer <weapon>, which is not necessarily magr's wielded weapon
 	else
-		slot = attk_equip_slot(magr, attk->aatyp, attk->adtyp);
+		slot = attk_equip_slot(attk);
 
 	switch (slot)
 	{
@@ -16303,6 +16356,10 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 	case W_ARMH:
 		otmp = (youagr ? uarmh : which_armor(magr, slot));
 		unarmed_butt = TRUE;
+		break;
+	case W_ARM:
+		otmp = (youagr ? uarm : which_armor(magr, slot));
+		unarmed_punch = TRUE;
 		break;
 	case W_WEP:
 		otmp = weapon;
@@ -18835,7 +18892,7 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 				!(youagr && lethaldamage) &&
 				!(youagr && snekdmg))
 			{
-				xyhitmsg(magr, mdef, originalattk);
+				xyhitmsg(magr, mdef, originalattk, weapon);
 			}
 		}
 	}
@@ -19351,7 +19408,7 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 
 		/* gloves/boots/helmet -- assumes only one of the three will be used. */
 		if (magr && attk && !weapon)
-			slot = attk_equip_slot(magr, attk->aatyp, attk->adtyp);
+			slot = attk_equip_slot(attk);
 		else
 			slot = 0L;
 		switch (slot)
@@ -19370,6 +19427,9 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 			break;
 		case W_ARMH:
 			otmp = (youagr ? uarmh : which_armor(magr, slot));
+			break;
+		case W_ARM:
+			otmp = (youagr ? uarm : which_armor(magr, slot));
 			break;
 		default:
 			otmp = (struct obj *)0;
@@ -20451,7 +20511,6 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 {
 	int newres;
 	int dmg;
-	long slot = 0L;
 	struct monst * mtmp = (struct monst *)0;
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
@@ -20497,7 +20556,6 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 			switch (passive->adtyp)
 			{
 			case AD_STON:
-				slot = attk_protection(attk->aatyp, attk->adtyp);
 				/* Touching is fatal */
 				if (touch_petrifies(pd) && !(Stone_res(magr))
 					&& badtouch(magr, mdef, attk, weapon))
@@ -20522,7 +20580,6 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 				break;
 			case AD_SLVR:
 				/* Eden's silver body sears attackers */
-				slot = attk_protection(attk->aatyp, attk->adtyp);
 				if (hates_silver(pa)
 					&& badtouch(magr, mdef, attk, weapon))
 				{
@@ -21052,7 +21109,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 					}
 					break;
 				case AD_PLYS:
-					if (pd->mlet == S_EYE || pd->mtyp == PM_IKSH_NA_DEVA) {	/* assumed to be gaze */
+					if (paralysis_is_gaze(pd)) {	/* assumed to be gaze */
 						/* the eye can't be blinded */
 						if (youdef ? Blind : is_blind(mdef)) {
 							if (youagr && pd->mtyp == PM_FLOATING_EYE) {
@@ -21333,7 +21390,7 @@ struct attack * passive;	/* specific passive attack being used */
 		if (!magr || !attk || is_null_attk(attk))
 			return;
 		boolean youagr = (magr == &youmonst);
-		long slot = attk_equip_slot(magr, attk->aatyp, attk->adtyp);
+		long slot = attk_equip_slot(attk);
 
 		switch (slot)
 		{
@@ -21348,6 +21405,9 @@ struct attack * passive;	/* specific passive attack being used */
 			break;
 		case W_ARMH:
 			otmp = (youagr ? uarmh : which_armor(magr, slot));
+			break;
+		case W_ARM:
+			otmp = (youagr ? uarm : which_armor(magr, slot));
 			break;
 		default:
 			otmp = (struct obj *)0;

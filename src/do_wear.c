@@ -4,6 +4,7 @@
 
 #include <math.h>
 #include "hack.h"
+#include "mattkbp.h"
 #include "xhity.h"
 #include "zap.h"
 #include "artifact.h"
@@ -5065,7 +5066,7 @@ struct obj *armor;
 	extern const int clockwisex[8];
 	extern const int clockwisey[8];
 	int i = rnd(8),j, lim=0;
-	struct attack symbiote = { AT_TENT, AD_PHYS, 3, 3 };
+	struct attack symbiote = { AT_TENT, AD_PHYS, 3, 3, .bodypart = ATKBP(ARMOR_ARM) };	/* used to represent generic armor tentacles here */
 	boolean youagr = (magr == &youmonst);
 	boolean youdef;
 	
@@ -5130,7 +5131,8 @@ struct obj *armor;
 	else {
 		symbiote = *attacktype_fordmg(&mons[PM_SCORPION], AT_STNG, AD_DRST);
 	}
-	
+	symbiote.bodypart = ATKBP(NONE);	/* the carapace's own sting, not the real scorpion's/Scorpius's TAIL that attacktype_fordmg() copied */
+
 	for(j=8;j>=1;j--){
 		if(youagr && u.ustuck && u.uswallow)
 			mdef = u.ustuck;
@@ -5697,7 +5699,8 @@ char etyp;
 	extern const int clockwisey[8];
 	int i = rnd(8),j, lim=0;
 	int striking = 0;
-	struct attack symbiote = { atyp, etyp, 4, 2 };
+	/* the armor's own effect, not the wearer's body */
+	struct attack symbiote = { atyp, etyp, 4, 2, .bodypart = ATKBP(NONE) };
 	boolean youagr = (magr == &youmonst);
 	boolean youdef;
 	
@@ -5728,11 +5731,8 @@ char etyp;
 		if(!youdef && nonthreat(mdef))
 			continue;
 
-		//Note: the armor avoids touching petrifying things even if you're immune
-		if(touch_petrifies(mdef->data)
-		 || mdef->mtyp == PM_MEDUSA
-		 || mdef->mtyp == PM_PALE_NIGHT
-		) continue;
+		/* Pale Night is dangerous regardless of bodypart and resistances. */
+		if(mdef->mtyp == PM_PALE_NIGHT) continue;
 		if (mdef && magr_can_attack_mdef(magr, mdef, x(magr) + clockwisex[(i + j) % 8], y(magr) + clockwisey[(i + j) % 8], FALSE)){
 			//More than one limb strikes at the same target.
 			symbiote.damn = rnd(3) + rnd(3);
@@ -5879,11 +5879,12 @@ struct obj *wep;
 	int i, j;
 	int delta = 1;
 	struct monst *mdef;
-	struct attack symbiote = { AT_WEAP, AD_PHYS, 0, 0 };
+	/* the ghost's own arm, not the wielder's body */
+	struct attack symbiote = { AT_WEAP, AD_PHYS, 0, 0, .bodypart = ATKBP(NONE) };
 	boolean youdef, youagr = (magr == &youmonst);
 	boolean peaceSafe = youagr || magr->mpeaceful;
 	if(youagr){
-		if(wep == uwep) delta = 2; 
+		if(wep == uwep) delta = 2;
 	}
 	else {
 		if(wep == MON_WEP(magr)) delta = 2; 
@@ -5929,7 +5930,8 @@ struct obj *wep;
 	int i, j;
 	struct monst *mdef;
 	int	targets = 0;
-	struct attack symbiote = { AT_MAGC, AD_CLRC, 6, 6 };
+	/* the ghost's own casting, not the wielder's body */
+	struct attack symbiote = { AT_MAGC, AD_CLRC, 6, 6, .bodypart = ATKBP(NONE) };
 	boolean youdef, youagr = (magr == &youmonst);
 	boolean peaceSafe = youagr || magr->mpeaceful;
 	
@@ -6513,7 +6515,8 @@ boolean invoked;
 	int x = x(magr), y = y(magr);
 	int i, j;
 	int delta = 1;
-	struct attack symbiote = { AT_HITS, AD_PHYS, 4, wep->spe/2};
+	/* the mandibles' own effect, not the wielder's body */
+	struct attack symbiote = { AT_HITS, AD_PHYS, 4, wep->spe/2, .bodypart = ATKBP(NONE) };
 	struct monst *mdef;
 	boolean youdef, youagr = (magr == &youmonst);
 	boolean peaceSafe = youagr || magr->mpeaceful;
@@ -6553,8 +6556,8 @@ boolean invoked;
 			
 			if ((youdef && (Flying || Levitation)) || (!youdef && (mon_resistance(mdef,FLYING) || mon_resistance(mdef,LEVITATION))))
 				continue;
-			
-			//Note: petrifying targets are safe, attacked by spikes from ground, this shouldn't trigger passives?
+
+			/* Pale Night is dangerous regardless of bodypart and resistances. */
 			if(mdef->mtyp == PM_PALE_NIGHT) continue;
 			if (magr_can_attack_mdef(magr, mdef, i, j, FALSE)){
 				if (message){
@@ -6585,7 +6588,7 @@ doliving_cricket(struct monst *magr)
 	boolean youdef;
 	int i, j;
 	struct monst *mdef;
-	struct attack symbiote = { AT_HITS, AD_SONC, mlev(magr)/10+1, 4};
+	struct attack symbiote = { AT_HITS, AD_SONC, mlev(magr)/10+1, 4, .bodypart = ATKBP(NONE) };
 	for(i = x(magr)-1; i <= x(magr)+1; i++)
 		for(j = y(magr)-1; j <= y(magr)+1; j++){
 			if(!isok(i,j))

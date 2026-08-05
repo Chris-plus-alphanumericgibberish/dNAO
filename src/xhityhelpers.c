@@ -6,6 +6,7 @@
 #include "hack.h"
 #include "artifact.h"
 #include "monflag.h"
+#include "mattkbp.h"
 
 #include "xhity.h"
 
@@ -1041,21 +1042,56 @@ boolean candestroy;
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
+/* recomputed on every call (a handful of trivial word-ops) rather than
+ * precomputed once -- not a hot loop */
+static struct atkbp_set
+standard_arm_slot_bodyparts(void)
+{
+	return atkbp_or((struct atkbp_set[]){
+	    ATKBP_ARM_ORDINALS_MASK(), ATKBP_MISKA_ARM_ORDINALS_MASK(), ATKBP(ARM),
+	    ATKBP_ARM_LOWER_ORDINALS_MASK(), ATKBP(ARM_LOWER), ATKBP(NONE) });
+}
+
+static struct atkbp_set
+standard_leg_slot_bodyparts(void)
+{
+	return atkbp_or((struct atkbp_set[]){
+	    ATKBP_LEG_ORDINALS_MASK(), ATKBP(LEG), ATKBP(LEG_FRONT),
+	    ATKBP(LEG_REAR), ATKBP(NONE) });
+}
+
+static struct atkbp_set
+standard_head_slot_bodyparts(void)
+{
+	return atkbp_or((struct atkbp_set[]){
+	    ATKBP_HORN_ORDINALS_MASK(), ATKBP(HEAD), ATKBP(HORN), ATKBP(NONE) });
+}
+
 /* attk_protection()
  *
  * Returns types of armor needed to prevent specified attack from touching its target
  *   ex) gloves makes claw attacks not touch a cockatrice
  */
 long
-attk_protection(int aatyp, int adtyp)
+attk_protection(struct attack *attk)
 {
-	long w_mask = 0L;
-
-	/* Lilitu-type wing-tip stingers count as a wing attack, not a normal sting */
-	if (aatyp == AT_STNG && adtyp == AD_DOBT)
+	if (atkbp_intersects(attk->bodypart, ATKBP(WORN_LIKE_WING)))
 		return W_ARMW;
 
-	switch (aatyp) {
+	/* PHASED is a modifier on an otherwise-ordinary identity bit */
+	if (atkbp_intersects(attk->bodypart, ATKBP(PHASED)))
+		return ~0L;
+
+	/* No physical contact between attack and defender */
+	if (atkbp_is_none(attk->bodypart)
+		|| atkbp_intersects(attk->bodypart, atkbp_or((struct atkbp_set[]){
+			ATKBP(MIND_NOLIMB), ATKBP(EYES), ATKBP(HALO),
+			ATKBP(LAUNCHER_GENERIC), ATKBP(MECHANISM_GENERIC), ATKBP(SHADOW),
+			ATKBP(AURA_ARM), ATKBP(NONE) })))
+		return ~0L;
+
+	switch (attk->aatyp) {
+	/* No physical contact between attacker and defender */
 	case AT_NONE:
 	case AT_SPIT:
 	case AT_EXPL:
@@ -1074,49 +1110,28 @@ attk_protection(int aatyp, int adtyp)
 	case AT_ESPR:
 	case AT_WISP:
 	case AT_VOMT:
-	case AT_REND:		/* If the previous attacks were OK, this one is too */
-		w_mask = ~0L;		/* special case; no defense needed */
-		break;
-	case AT_CLAW:
-	case AT_LRCH:
-	case AT_TUCH:
-	case AT_5SQR:
-	case AT_WEAP:
-	case AT_XWEP:
-	case AT_MARI:
-	case AT_DEVA:
-	case AT_JUGL:
-		w_mask = W_ARMG;	/* caller needs to check for weapon */
-		break;
-	case AT_WING:
-		w_mask = W_ARMW;
-		break;
-	case AT_KICK:
-		w_mask = W_ARMF;
-		break;
-	case AT_BUTT:
-		w_mask = W_ARMH;
-		break;
-	case AT_HUGS:
-		w_mask = (W_ARMC | W_ARMG); /* attacker needs both to be protected */
-		break;
-	case AT_TAIL:
-		w_mask = W_ARM;
-		break;
-	case AT_BITE:
-	case AT_OBIT:
-	case AT_WBIT:
-	case AT_LNCK:
-	case AT_5SBT:
-	case AT_STNG:
-	case AT_ENGL:
-	case AT_TENT:
-	case AT_TONG:
-	default:
-		w_mask = 0L;		/* no defense available */
-		break;
+	case AT_REND:	/* if the previous attacks were OK, this one is too */
+	case AT_HITS:
+		return ~0L;	/* special case; no defense needed */
 	}
-	return w_mask;
+
+	/* ARMOR_ARM: attached to and made out of W_ARM, not part of the
+	 * wearer's body */
+	if (atkbp_intersects(attk->bodypart, ATKBP(ARMOR_ARM)))
+		return W_ARM;
+
+	if (atkbp_intersects(attk->bodypart, standard_arm_slot_bodyparts()))
+		return W_ARMG;
+	if (atkbp_intersects(attk->bodypart, standard_leg_slot_bodyparts()))
+		return W_ARMF;
+	if (atkbp_intersects(attk->bodypart, standard_head_slot_bodyparts()))
+		return W_ARMH;
+	if (atkbp_intersects(attk->bodypart, ATKBP(WING)))
+		return W_ARMW;
+	if (atkbp_intersects(attk->bodypart, ATKBP(TAIL)))
+		return W_ARM;
+
+	return 0L;	/* no defense available */
 }
 
 /* attk_equip_slot()
@@ -1125,55 +1140,30 @@ attk_protection(int aatyp, int adtyp)
  *   ex) silver gloves make punches do silver-searing damage
  */
 long
-attk_equip_slot(struct monst *mon, int aatyp, int adtyp)
+attk_equip_slot(struct attack *attk)
 {
-	/* some worn armor may be involved depending on the attack type */
-	long slot = 0L;
+	if (!attk)
+		return 0L;
 
-	/* Lilitu-type wing-tip stingers count as a wing attack, not a normal sting */
-	if (aatyp == AT_STNG && adtyp == AD_DOBT)
+	if (atkbp_intersects(attk->bodypart, ATKBP(WORN_LIKE_WING)))
+		return W_ARMW;
+	/* AURA_ARM: use gauntlets offensively but unneeded for protection */
+	if (atkbp_intersects(attk->bodypart, ATKBP(AURA_ARM)))
+		return W_ARMG;
+	/* ARMOR_ARM: attached to and made out of W_ARM, not part of the
+	 * wearer's body */
+	if (atkbp_intersects(attk->bodypart, ATKBP(ARMOR_ARM)))
+		return W_ARM;
+	if (atkbp_intersects(attk->bodypart, standard_arm_slot_bodyparts()))
+		return W_ARMG;
+	if (atkbp_intersects(attk->bodypart, standard_leg_slot_bodyparts()))
+		return W_ARMF;
+	if (atkbp_intersects(attk->bodypart, standard_head_slot_bodyparts()))
+		return W_ARMH;
+	if (atkbp_intersects(attk->bodypart, ATKBP(WING)))
 		return W_ARMW;
 
-	switch (aatyp)
-	{
-		/* gloves */
-		/* caller needs to check for weapons */
-	case AT_CLAW:
-		if(!mon)
-			slot = W_ARMG;
-		else if(nogloves(mon->data))
-			slot = W_ARMF;
-		else if(
-			mon->mtyp == PM_CROW_WINGED_HALF_DRAGON
-			|| mon->mtyp == PM_VROCK
-			|| mon->mtyp == PM_AGLAOPE
-		)
-			slot = W_ARMF;
-		else
-			slot = W_ARMG;
-		break;
-	case AT_WING:
-		slot = W_ARMW;
-		break;
-	case AT_HODS:
-	case AT_DEVA:
-	case AT_JUGL:
-	case AT_REND:
-	case AT_WEAP:
-	case AT_XWEP:
-	case AT_MARI:
-		slot = W_ARMG;
-		break;
-		/* boots */
-	case AT_KICK:
-		slot = W_ARMF;
-		break;
-		/* helm */
-	case AT_BUTT:
-		slot = W_ARMH;
-		break;
-	}
-	return slot;
+	return 0L;
 }
 
 
@@ -1187,7 +1177,7 @@ struct monst * mdef;
 struct attack * attk;
 struct obj * weapon;
 {
-	long slot = attk_protection(attk->aatyp, attk->adtyp);
+	long slot = attk_protection(attk);
 	boolean youagr = (magr == &youmonst);
 
 	if (/* not using a weapon -- assumes weapons will only be passed if making a weapon attack */
@@ -1245,7 +1235,6 @@ struct obj * weapon;
 struct permonst * pa;
 struct permonst * pd;
 {
-	long slot = attk_protection(attk->aatyp, attk->adtyp);
 	boolean youagr = (magr == &youmonst);
 
 	/* if there is no defender, it's safe */
@@ -1881,7 +1870,7 @@ struct obj * weapon;
 	if (!weapon) {
 		/* some worn armor may be involved depending on the attack type */
 		struct obj * otmp;
-		long slot = attk_equip_slot(magr, attk ? attk->aatyp : 0, attk ? attk->adtyp : 0);
+		long slot = attk_equip_slot(attk);
 		switch (magr ? slot : 0L)
 		{
 		case W_ARMG:
@@ -1929,6 +1918,9 @@ struct obj * weapon;
 			return 2;
 
 		if (attk && attk->adtyp == AD_SHDW)
+			return 2;
+
+		if (attk && atkbp_intersects(attk->bodypart, ATKBP(HITS_INSUBSTANTIAL)))
 			return 2;
 
 		/*if (attk && (attk->adtyp == AD_MERC))

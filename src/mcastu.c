@@ -3,6 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
+#include "mattkbp.h"
 #include "xhity.h"
 
 extern void you_aggravate(struct monst *);
@@ -7244,7 +7245,7 @@ int tary;
 		return MM_HIT;
 
 	case EVIL_EYE:{
-		struct attack evilEye = { AT_GAZE, AD_LUCK, 1, 4 };
+		struct attack evilEye = { AT_GAZE, AD_LUCK, 1, 4, .bodypart = ATKBP(EYES) };
 		(void)xgazey(magr, mdef, &evilEye, -1);
 		return MM_HIT;
 	}

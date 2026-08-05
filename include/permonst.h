@@ -5,6 +5,8 @@
 #ifndef PERMONST_H
 #define PERMONST_H
 
+#include "atkbpnames.h"
+
 /*	This structure covers all attack forms.
  *	aatyp is the gross attack type (eg. claw, bite, breath, ...)
  *	adtyp is the damage type (eg. physical, fire, cold, spell, ...)
@@ -25,6 +27,7 @@ struct attack {
 	boolean		polywep;	/*This attack is changed to a weapon attack if you're poly'd into this form and wielding a weapon.*/
 	uchar		ins_req;	/*The PC must have reached X insight for the attacker to get this attack.*/
 	char		san_req;	/*The PC must have fallen below or risen above X sanity for the attacker to get this attack.*/
+	struct atkbp_set	bodypart;	/*Which body part(s) this attack comes from (include/mattkbp.h).*/
 };
 #define is_null_attk(attk)	((attk) && ((attk)->aatyp == 0 && (attk)->adtyp == 0 && (attk)->damn == 0 && (attk)->damd == 0))
 

@@ -6,6 +6,7 @@
 
 #include "horrordata.h"
 #include "mondata.h"
+#include "mattkbp.h"
 #include "xhity.h"
 
 /*	These routines provide basic data for any type of monster. */
@@ -1420,27 +1421,6 @@ int template;
 			}
 		}
 
-		/* mindless monsters don't use weapons */
-		if ((template == MINDLESS) && 
-			(
-			attk->aatyp == AT_HODS ||
-			attk->aatyp == AT_DEVA ||
-			attk->aatyp == AT_JUGL ||
-			attk->aatyp == AT_SRPR ||
-			attk->aatyp == AT_XSPR ||
-			attk->aatyp == AT_MSPR ||
-			attk->aatyp == AT_DSPR ||
-			attk->aatyp == AT_MARI ||
-			attk->aatyp == AT_WEAP ||
-			attk->aatyp == AT_XWEP
-			)
-		){
-			if(attk->aatyp == AT_XWEP || attk->aatyp == AT_XSPR)
-				attk->offhand = 1;
-			attk->aatyp = AT_CLAW;
-			attk->damn = max(attk->damn, ptr->mlevel / 10 + 1);
-			attk->damd = max(attk->damd, max(ptr->msize * 2, 4));
-		}
 		/* some templates want to adjust existing attacks, or add additional attacks */
 #define insert_okay(specvar) (!(specvar) && (is_null_attk(attk) || \
 		((attk->aatyp > AT_HUGS && !weapon_aatyp(attk->aatyp) \
@@ -1599,19 +1579,6 @@ int template;
 			attk->damd = max(4, max(ptr->msize * 2, attk->damd));
 			special = TRUE;
 		}
-		/* pseudonatural's bites become int-draining tentacles */
-		if (template == PSEUDONATURAL && (
-			(attk->aatyp == AT_BITE)
-			|| insert_okay(special)
-			))
-		{
-			maybe_insert();
-			attk->aatyp = AT_TENT;
-			attk->adtyp = AD_DRIN;
-			attk->damn = 1;
-			attk->damd = 4;
-			special = TRUE;
-		}
 		/* Cordyceps always have the same attacks */
 		if(template == CORDYCEPS){
 			if(i==0){
@@ -1719,7 +1686,9 @@ int template;
 			))
 		{
 			maybe_insert();
-			attk->aatyp = !attacktype(ptr, AT_WEAP) ? AT_SRPR : !attacktype(ptr, AT_XWEP) ? AT_XSPR : AT_ESPR;
+			attk->aatyp = nohands(ptr) ? AT_ESPR
+				: !attacktype(ptr, AT_WEAP) ? AT_SRPR
+				: !attacktype(ptr, AT_XWEP) ? AT_XSPR : AT_ESPR;
 			attk->adtyp = AD_SHDW;
 			attk->damn = 2; //4-6 with undead bonus.
 			attk->damd = 8;
@@ -1815,32 +1784,10 @@ int template;
 			attk->damd = 1;
 			special = TRUE;
 		}
-		if (template == DREAM_LEECH && (
-			end_insert_okay(special)
-			))
-		{
-			maybe_insert();
-			attk->aatyp = AT_TUCH;
-			attk->adtyp = AD_DRIN;
-			attk->damn = 1;
-			attk->damd = 5;
-			special = TRUE;
-		}
 		if (template == MAD_TEMPLATE && !is_null_attk(attk) && attk->adtyp != AD_DISN && attk->adtyp != AD_SURY){
 			if(attk->adtyp == AD_PHYS)
 				attk->damn++;
 			attk->damd += 4;
-		}
-		if (template == FALLEN_TEMPLATE && (
-			end_insert_okay(special)
-			))
-		{
-			maybe_insert();
-			attk->aatyp = AT_NONE;
-			attk->adtyp = AD_FIRE;
-			attk->damn = 0;
-			attk->damd = 9;
-			special = TRUE;
 		}
 		if (template == MOLY_TEMPLATE && (
 			end_insert_okay(special)
@@ -1922,9 +1869,99 @@ int template;
 			special_2 = TRUE;
 		}
 	}
+
+	/* pass 3: derive .bodypart for every finalized real attack via the
+	 * standard attribution rules. */
+	{
+		struct atkbp_set resolved[NATTK];
+		int nattk = attk_bodyparts_all(ptr, resolved, (boolean *)0);
+
+		for (i = 0; i < nattk; i++)
+			ptr->mattk[i].bodypart = resolved[i];
+	}
+
+	/* pass 4: attack adjustments with nonstandard attribution rules */
+	for (i = 0; i < NATTK; i++) {
+		attk = &(ptr->mattk[i]);
+		if (is_null_attk(attk))
+			break;
+
+		/* Standard limb, but no longer skillfully used */
+		if ((template == MINDLESS) &&
+			(
+			attk->aatyp == AT_HODS ||
+			attk->aatyp == AT_DEVA ||
+			attk->aatyp == AT_JUGL ||
+			attk->aatyp == AT_SRPR ||
+			attk->aatyp == AT_XSPR ||
+			attk->aatyp == AT_MSPR ||
+			attk->aatyp == AT_DSPR ||
+			attk->aatyp == AT_MARI ||
+			attk->aatyp == AT_WEAP ||
+			attk->aatyp == AT_XWEP
+			)
+		){
+			if(attk->aatyp == AT_XWEP || attk->aatyp == AT_XSPR)
+				attk->offhand = 1;
+			attk->aatyp = AT_CLAW;
+			attk->damn = max(attk->damn, ptr->mlevel / 10 + 1);
+			attk->damd = max(attk->damd, max(ptr->msize * 2, 4));
+		}
+
+		/* Mouth-tentacles */
+		if (template == PSEUDONATURAL && (
+			(attk->aatyp == AT_BITE)
+			|| insert_okay(special)
+			))
+		{
+			maybe_insert();
+			attk->aatyp = AT_TENT;
+			attk->adtyp = AD_DRIN;
+			attk->damn = 1;
+			attk->damd = 4;
+			attk->bodypart = has_head(ptr)
+				? atkbp_or((struct atkbp_set[]){ ATKBP(HEAD), ATKBP(TENTACLE_GENERIC), ATKBP(NONE) })
+				: ATKBP(TENTACLE_GENERIC);
+			special = TRUE;
+		}
+
+		/* Mind parasite */
+		if (template == DREAM_LEECH && (
+			end_insert_okay(special)
+			))
+		{
+			maybe_insert();
+			attk->aatyp = AT_TUCH;
+			attk->adtyp = AD_DRIN;
+			attk->damn = 1;
+			attk->damd = 5;
+			attk->bodypart = has_head(ptr)
+				? atkbp_or((struct atkbp_set[]){ ATKBP(OTHER_APPENDAGE), ATKBP(HEAD), ATKBP(PHASED), ATKBP(HITS_INSUBSTANTIAL), ATKBP(NONE) })
+				: atkbp_or((struct atkbp_set[]){ ATKBP(OTHER_APPENDAGE), ATKBP(PHASED), ATKBP(HITS_INSUBSTANTIAL), ATKBP(NONE) });
+			special = TRUE;
+		}
+
+		if (template == FALLEN_TEMPLATE && (
+			end_insert_okay(special)
+			))
+		{
+			maybe_insert();
+			attk->aatyp = AT_NONE;
+			attk->adtyp = AD_FIRE;
+			attk->damn = 0;
+			attk->damd = 9;
+			attk->bodypart = ATKBP(HALO);
+			special = TRUE;
+		}
+
+		/* Mistweavers cast with their tentacles, not their arms */
+		if (template == MISTWEAVER && attk->aatyp == AT_MMGC && attk->adtyp == AD_CLRC)
+			attk->bodypart = ATKBP(TENTACLE_GENERIC);
+	}
 #undef insert_okay
 #undef end_insert_okay
 #undef maybe_insert
+
 	/*Adjust the name*/
 	/* horrors are disallowed out of caution - they definitely break if this is enabled */
 	if(!is_horror(&mons[mtyp])){
@@ -2485,6 +2522,18 @@ int level_bonus;
 	/* all nameless horrors are set to difficulty 40 */
 	if (horror->mtyp == PM_NAMELESS_HORROR)
 		monstr[PM_NAMELESS_HORROR] = 40;
+
+	/* derive .bodypart for every finalized attack via the standard
+	 * attribution rules -- NULL for the validation-error out-param since a
+	 * malformed horror should not crash the game.
+	 */
+	{
+		struct atkbp_set resolved[NATTK];
+		int nattk = attk_bodyparts_all(horror, resolved, (boolean *)0);
+
+		for (i = 0; i < nattk; i++)
+			horror->mattk[i].bodypart = resolved[i];
+	}
 
 #undef get_random_of
 	return;
@@ -3333,34 +3382,13 @@ struct monst * mtmp;
 	return FALSE;
 }
 
-/* number of horns this type of monster has on its head */
 int
 num_horns(struct monst *mon)
 {
 	if(mon == &youmonst){
 		if (check_mutation(TT_UNICORN_HORN)) return 1;
 	}
-    switch (monsndx(mon->data)) {
-	case PM_DRACAE_ELADRIN:
-	case PM_FIERNA:
-	case PM_GRAZ_ZT:
-	return 6;
-	case PM_MUSIMON:
-	return 6;
-	case PM_TRICERATOPS:
-	return 3;
-    // case PM_HORNED_DEVIL:	/* ? "more than one" */
-	case PM_TITANOTHERE:
-    case PM_WHITE_UNICORN:
-    case PM_GRAY_UNICORN:
-    case PM_BLACK_UNICORN:
-    case PM_NIGHTMARE:
-    case PM_KI_RIN:
-    case PM_ANCIENT_OF_CORRUPTION:
-	return 1;
-    }
-    // default:
-	return 2;
+	return mon_horn_count(mon->data);
 }
 
 struct attack *

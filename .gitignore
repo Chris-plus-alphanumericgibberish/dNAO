@@ -4,6 +4,7 @@ Merge notes
 src/dnethack
 util/recover
 util/makedefs
+util/attkbpdefs
 util/dlb
 util/dgn_comp
 util/lev_comp
@@ -16,11 +17,13 @@ include/date.h
 include/onames.h
 include/gnames.h
 include/pm.h
+include/atkbpbits.h
 include/verinfo.h
 include/dgn_comp.h
 include/lev_comp.h
 
 src/monstr.c
+src/attkbp.c
 util/dgn_yacc.c
 util/lev_yacc.c
 util/dgn_lex.c
@@ -52,6 +55,8 @@ desktop.ini
 .DS_STORE
 dnethackdir
 mat
+
+__pycache__
 
 *.md
 *.json

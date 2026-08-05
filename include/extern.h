@@ -2032,6 +2032,15 @@ E void NDECL(monst_init);
 
 E void NDECL(monstr_init);
 
+/* ### attkbp.c ### */
+
+E void NDECL(attkbp_init);
+
+/* ### mattkbp.c ### */
+
+E struct atkbp_set FDECL(attk_bodyparts, (struct permonst *,struct attack *));
+E int FDECL(attk_bodyparts_all, (struct permonst *,struct atkbp_set *,boolean *));
+
 /* ### mplayer.c ### */
 
 E struct monst *FDECL(mk_mplayer, (struct permonst *,XCHAR_P, XCHAR_P,long));
@@ -2527,6 +2536,7 @@ E int FDECL(dowords, (int));
 E void FDECL(skinback, (BOOLEAN_P));
 E const char *FDECL(mbodypart, (struct monst *,int));
 E const char *FDECL(ptrbodypart, (struct permonst *,int, struct monst *));
+E const char *FDECL(atkbp_bodypart_name, (struct atkbp_set, struct permonst *));
 E const char *FDECL(body_part, (int));
 E boolean FDECL(separate_respiration, (struct permonst *));
 E int NDECL(poly_gender);
@@ -3754,8 +3764,8 @@ E int FDECL(sleep_monst, (struct monst *, int, int));
 E void FDECL(slept_monst, (struct monst *));
 E void FDECL(hurtarmor, (int, boolean));
 E void FDECL(hurtmarmor, (struct monst *, int, boolean));
-E long FDECL(attk_protection, (int, int));
-E long FDECL(attk_equip_slot, (struct monst *, int, int));
+E long FDECL(attk_protection, (struct attack *));
+E long FDECL(attk_equip_slot, (struct attack *));
 E boolean FDECL(badtouch, (struct monst *, struct monst *, struct attack *, struct obj *));
 E boolean FDECL(safe_attack, (struct monst *, struct monst *, struct attack *, struct obj *, struct permonst *, struct permonst *));
 E int FDECL(beastmastery, (struct monst *));

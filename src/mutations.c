@@ -1,5 +1,6 @@
 #include <math.h>
 #include "hack.h"
+#include "mattkbp.h"
 #include "mutations.h"
 
 STATIC_DCL void mutation_effects(int);
@@ -493,7 +494,7 @@ domutation()
 						if(nonthreat(mtmp)) continue;
 						if(mtmp->mtyp == PM_PALE_NIGHT) continue;
 						u.uen -= 20;
-						struct attack attk = {AT_HITS, AD_SONC, (u.ulevel+2)/3, 6};
+						struct attack attk = {AT_HITS, AD_SONC, (u.ulevel+2)/3, 6, .bodypart = ATKBP(MOUTH)};
 						xmeleehity(&youmonst, mtmp, &attk, (struct obj **)0, 0, 0, FALSE, 0); //Hits all adjacent targets
 						i = 2; //Break outer loop
 						break;
@@ -680,11 +681,11 @@ void
 mutation_autoattacks()
 {
 	if(check_mutation(TT_LASHING_TAIL)){
-		struct attack attack = {AT_TAIL, AD_PHYS, 1, 2+(u.ulevel/3)};
+		struct attack attack = {AT_TAIL, AD_PHYS, 1, 2+(u.ulevel/3), .bodypart = ATKBP(TAIL)};
 		dogenericattack(&youmonst, &attack, 1, 1);
 	}
 	if(check_mutation(TT_SNAKE_TAIL)){
-		struct attack attack = {AT_OBIT, AD_DRST, 1, 6};
+		struct attack attack = {AT_OBIT, AD_DRST, 1, 6, .bodypart = ATKBP(OTHER_APPENDAGE)};
 		dogenericattack(&youmonst, &attack, 1, 1);
 	}
 	if(check_mutation(TT_THIEVING_TAIL) || check_mutation(AAT_PRIMINAL_TAIL)){
@@ -708,15 +709,15 @@ mutation_autoattacks()
 		}
 	}
 	if(check_mutation(TT_SHADOW_PAIN)){
-		struct attack attack = {AT_ESPR, AD_PAIN, 1, 1+(u.ulevel/6)};
+		struct attack attack = {AT_ESPR, AD_PAIN, 1, 1+(u.ulevel/6), .bodypart = ATKBP(SHADOW)};
 		dogenericattack(&youmonst, &attack, 8, 1);
 	}
 	if(check_mutation(TT_SHADOW_SHRED)){
-		struct attack attack = {AT_ESPR, AD_SHRD, 1, 1+(u.ulevel/6)};
+		struct attack attack = {AT_ESPR, AD_SHRD, 1, 1+(u.ulevel/6), .bodypart = ATKBP(SHADOW)};
 		dogenericattack(&youmonst, &attack, 8, 1);
 	}
 	if(check_mutation(TT_BITING_HAIR)){
-		struct attack attack = {AT_OBIT, AD_VAMP, 1, 4};
+		struct attack attack = {AT_OBIT, AD_VAMP, 1, 4, .bodypart = ATKBP(OTHER_APPENDAGE)};
 		int mult = (u.ulevel+9)/10;
 		dogenericattack(&youmonst, &attack, 8*mult, mult);
 	}
@@ -735,7 +736,7 @@ mutation_autoattacks()
 				case 3: spell = OPEN_WOUNDS; break;
 				default: spell = PSI_BOLT; break;
 			}
-			struct attack attack = {AT_MAGC, AD_SPEL, 0, 6};
+			struct attack attack = {AT_MAGC, AD_SPEL, 0, 6, .bodypart = ATKBP(SHADOW)};
 			cast_spell(&youmonst, mtmp, &attack, spell, mtmp->mx, mtmp->my);
 			break;
 		}

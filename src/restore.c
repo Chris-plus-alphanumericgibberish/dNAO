@@ -697,6 +697,8 @@ register int fd;
 	int rtmp;
 	struct obj *otmp;
 
+	attkbp_init();
+
 #ifdef STORE_PLNAME_IN_FILE
 	mread(fd, (genericptr_t) plname, PL_NSIZ);
 #endif

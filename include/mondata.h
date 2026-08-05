@@ -141,13 +141,14 @@
 #define tunnels(ptr)			(((ptr)->mflagsm & MM_TUNNEL) != 0L)
 #define needspick(ptr)			(((ptr)->mflagsm & MM_NEEDPICK) != 0L)
 #define is_underswimmer(ptr)	((ptr)->mlet == S_EEL || (ptr)->mtyp == PM_CRYSTAL_OOZE)
+#define paralysis_is_gaze(ptr)	((ptr)->mlet == S_EYE || (ptr)->mtyp == PM_IKSH_NA_DEVA)
 #define hides_under(ptr)		(((ptr)->mflagst & MT_CONCEAL) != 0L)
 #define is_hider(ptr)			(((ptr)->mflagst & MT_HIDE) != 0L)
 #define is_backstabber(ptr)		(((ptr)->mflagsg & MG_BACKSTAB) != 0L)
 #define is_commander(ptr)		(((ptr)->mflagsg & MG_COMMANDER) != 0L)
 /*#define haseyes(ptr)			(((ptr)->mflagsb & MB_NOEYES) == 0L) when did this get duplicated???*/
 #define haseyes(ptr)			(((ptr)->mflagsb & MB_NOEYES) == 0L)
-#define nomouth(mtyp)			(mtyp==PM_NIGHTGAUNT || mtyp==PM_STRANGER || mtyp==PM_SUZERAIN || mtyp==PM_CARCOSAN_COURTIER)
+#define nomouth(mtyp)			(mtyp==PM_NIGHTGAUNT || mtyp==PM_STRANGER || mtyp==PM_SUZERAIN || mtyp==PM_CARCOSAN_COURTIER || mtyp==PM_TERAPHIM_TANNAH || mtyp==PM_HELLFIRE_ORB)
 #define goodsmeller(ptr)		(((ptr)->mflagsv & MV_SCENT) != 0L)
 #define is_tracker(ptr)			(((ptr)->mflagsg & MG_TRACKER) != 0L)
 #define eyecount(ptr)			(!haseyes(ptr) ? 0 : \
@@ -316,6 +317,7 @@
 #define humanoid_feet(ptr)	(((ptr)->mflagsb & MB_HAS_FEET) != 0)
 #define humanoid(ptr)		(((ptr)->mflagsb & MB_BODYTYPEMASK) == MB_HUMANOID)
 #define animaloid(ptr)		(((ptr)->mflagsb & MB_BODYTYPEMASK) == MB_ANIMAL)
+#define animal_bodied(ptr)	(((ptr)->mflagsb & MB_ANIMAL) != 0)
 #define serpentine(ptr)		(((ptr)->mflagsb & MB_BODYTYPEMASK) == MB_SLITHY)
 #define centauroid(ptr)		(((ptr)->mflagsb & MB_BODYTYPEMASK) == (MB_HUMANOID|MB_ANIMAL))
 #define snakemanoid(ptr)	(((ptr)->mflagsb & MB_BODYTYPEMASK) == (MB_HUMANOID|MB_SLITHY))

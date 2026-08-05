@@ -9,6 +9,7 @@
 #include <errno.h>    
 #include "hack.h"
 #include "artifact.h"
+#include "mattkbp.h"
 #include "xhity.h"
 #include "hashmap.h"
 #include "hashutil.h"
@@ -4218,6 +4219,8 @@ newgame()
 {
 	int i;
 
+	attkbp_init();
+
 #ifdef MFLOPPY
 	gameDiskPrompt();
 #endif
@@ -6696,14 +6699,16 @@ struct monst *magr;
 	extern const int clockwisey[8];
 	int i = rnd(8),j;
 	int ax, ay;
-	struct attack symbiote = { AT_TENT, AD_DRST, 4, 4 };
+	struct attack symbiote = { AT_TENT, AD_DRST, 4, 4, .bodypart = ATKBP(TENTACLE_GENERIC) };
 	boolean youagr = (magr == &youmonst);
 	boolean youdef;
 	struct permonst *pa;
-	
+
 	pa = youagr ? youracedata : magr->data;
-		
-	if(pa->mtyp == PM_MOTHERING_MASS){
+
+	if(pa->mtyp == PM_PARASITIC_WALL_HUGGER){
+		symbiote = *attacktype_fordmg(&mons[PM_PARASITIC_WALL_HUGGER], AT_TENT, AD_PHYS);
+	} else if(pa->mtyp == PM_MOTHERING_MASS){
 		symbiote.aatyp = AT_TENT;
 		symbiote.adtyp = AD_PHYS;
 		symbiote.damn = 2;
@@ -6743,20 +6748,24 @@ struct monst *magr;
 			default:
 			case 1:
 				symbiote.adtyp = AD_DRST;
+				symbiote.bodypart = ATKBP(HORNED_LIGHT);
 			break;
 			case 2:
 				symbiote.aatyp = AT_GAZE;
 				symbiote.adtyp = AD_STDY;
+				symbiote.bodypart = ATKBP(EYES);
 			break;
 			case 3:
 				symbiote.aatyp = AT_WEAP;
 				symbiote.adtyp = AD_PHYS;
+				symbiote.bodypart = ATKBP(ARM_DOMINANT);
 			break;
 			case 4:
 				symbiote.aatyp = AT_MAGC;
 				symbiote.adtyp = AD_CLRC;
 				symbiote.damn = 5;
 				symbiote.damd = 8;
+				symbiote.bodypart = ATKBP(HORNED_LIGHT);
 			break;
 		}
 	}
@@ -6765,22 +6774,27 @@ struct monst *magr;
 		switch(rnd(5)){
 			case 1:
 				symbiote.aatyp = AT_TUCH;
+				symbiote.bodypart = ATKBP(TENTACLE_GENERIC);
 			break;
 			case 2:
 				symbiote.aatyp = AT_BITE;
 				symbiote.adtyp = AD_PHYS;
+				symbiote.bodypart = ATKBP(MOUTH);
 			break;
 			case 3:
 				symbiote.aatyp = AT_KICK;
 				symbiote.adtyp = AD_PHYS;
+				symbiote.bodypart = ATKBP(LEG);
 			break;
 			case 4:
 				symbiote.aatyp = AT_BUTT;
 				symbiote.adtyp = AD_PHYS;
+				symbiote.bodypart = ATKBP(HORN);
 			break;
 			case 5:
 				symbiote.aatyp = AT_GAZE;
 				symbiote.adtyp = AD_STDY;
+				symbiote.bodypart = ATKBP(EYES);
 			break;
 		}
 	}
@@ -6847,7 +6861,7 @@ struct monst *magr;
 	extern const int clockwisey[8];
 	int i = rnd(8),j;
 	int ax, ay;
-	struct attack symbiote = { AT_BITE, AD_UNHY, 5, 4 };
+	struct attack symbiote = { AT_BITE, AD_UNHY, 5, 4, .bodypart = ATKBP(MOUTH) };
 	boolean youagr = (magr == &youmonst);
 	boolean youdef;
 	struct permonst *pa;
@@ -6857,20 +6871,24 @@ struct monst *magr;
 	//mostly uses default 5d4 damage dice
 	switch(rnd(4)){
 		//1: Bite
+			// mouth
 		case 2:
 			symbiote.aatyp = AT_GAZE;
 			symbiote.adtyp = AD_STDY;
+			symbiote.bodypart = ATKBP(EYES);
 		break;
 		case 3:
 			//Bad luck, curse items
 			symbiote.aatyp = AT_MAGC;
 			symbiote.adtyp = AD_CLRC;
+			// mouth
 		break;
 		case 4:
 			symbiote.aatyp = AT_SPIT;
 			symbiote.adtyp = AD_BLND;
 			symbiote.damn = 0;
 			symbiote.damd = 0;
+			// mouth
 		break;
 	}
 	
@@ -7150,7 +7168,7 @@ struct monst *magr;
 	extern const int clockwisey[8];
 	int i = rnd(8),j;
 	int x, y;
-	struct attack symbiote = { AT_ESPR, AD_SHDW, 1, 30 };
+	struct attack symbiote = { AT_ESPR, AD_SHDW, 1, 30, .bodypart = ATKBP(SHADOW) };
 	boolean youagr = (magr == &youmonst);
 	boolean youdef;
 	struct permonst *pa;
@@ -7306,7 +7324,7 @@ struct monst *magr;
 	boolean youdef;
 	boolean attacked = FALSE;
 	struct permonst *pa;
-	struct attack symbiote = { AT_TENT, AD_VAMP, 3, 3 };
+	struct attack symbiote = { AT_TENT, AD_VAMP, 3, 3, .bodypart = ATKBP(TENTACLE_GENERIC) };
 
 	pa = youagr ? youracedata : magr->data;
 
@@ -7391,7 +7409,7 @@ struct monst *magr;
 	boolean youdef;
 	boolean attacked = FALSE;
 	struct permonst *pa;
-	struct attack symbiote = { AT_TENT, AD_PAIN, u.jellyfish, 1 };
+	struct attack symbiote = { AT_TENT, AD_PAIN, u.jellyfish, 1, .bodypart = ATKBP(TENTACLE_GENERIC) };
 	int max = u.jellyfish*2;
 	int mult = u.jellyfish/3+1;
 
@@ -7526,7 +7544,7 @@ void
 dorotbite(struct monst *magr)
 {
 	struct attack * attk;
-	struct attack symbiote = { AT_OBIT, AD_DISE, 1, 3 };
+	struct attack symbiote = { AT_OBIT, AD_DISE, 1, 3, .bodypart = ATKBP(MOUTH) };
 	dogenericattack(magr, &symbiote, 1, 1);
 }
 
@@ -7534,7 +7552,7 @@ void
 dorotsting(struct monst *magr)
 {
 	struct attack * attk;
-	struct attack symbiote = { AT_STNG, AD_PFBT, 1, 4 };
+	struct attack symbiote = { AT_STNG, AD_PFBT, 1, 4, .bodypart = ATKBP(TAIL) };
 	dogenericattack(magr, &symbiote, 1, 1);
 }
 

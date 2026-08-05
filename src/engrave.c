@@ -1855,6 +1855,8 @@ int x, y;
 int
 freehand()
 {
+	if(youracedata->mtyp == PM_AASIMAR && !Upolyd && flags.aasimar_type == AASIMAR_TYPE_DEVA && u.ulevel >= 14)
+		return TRUE;
 	if(Straitjacketed)
 		return FALSE;
 	if(youracedata->mtyp == PM_SILVERMAN)
