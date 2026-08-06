@@ -2014,7 +2014,7 @@ choose_magic_special(struct monst *mtmp, unsigned int type, int i)
 				case 7:
 					return DEATH_TOUCH;
 				case 6:
-					return DRAIN_ENERGY;
+					return GREATER_DRAIN_ENERGY;
 				case 5:
 					return SUMMON_MONS;
 				case 4:
@@ -2110,14 +2110,16 @@ choose_magic_special(struct monst *mtmp, unsigned int type, int i)
 				return choose_magic_spell(wzrd_spell_power, mtmp->m_id,!(mtmp->mpeaceful));
 			break;
 			case 1:
+				// return BLASPHEMY;
 			break;
 			case 2:
-				return RAISE_DEAD;
+				return GREATER_DRAIN_ENERGY;
 			break;
 			case 3:
 				return DISPEL_MAGIC;
 			break;
 			case 4:
+				//Summon indwelling devil
 				return PSI_BOLT;
 			break;
 			case 5:
@@ -2140,14 +2142,16 @@ choose_magic_special(struct monst *mtmp, unsigned int type, int i)
 				return choose_magic_spell(wzrd_spell_power, mtmp->m_id,!(mtmp->mpeaceful));
 			break;
 			case 1:
+				// return BLASPHEMY;
 			break;
 			case 2:
-				return RAISE_DEAD;
+				return GREATER_DRAIN_ENERGY;
 			break;
 			case 3:
 				return DISPEL_MAGIC;
 			break;
 			case 4:
+				//Summon indwelling devil
 				return PSI_BOLT;
 			break;
 			case 5:
@@ -2525,6 +2529,8 @@ const char * spellname[] =
 	"MOON_BEAM",
 	"DISPEL_MAGIC",
 	"METEOR_SWARM",
+	"GREATER_DRAIN_ENERGY",
+	//115
 };
 
 /* Returns the word the monster uses when casting a psionic spell */
@@ -6929,6 +6935,32 @@ int tary;
 			stop_occupation();
 		}
 		return MM_HIT;
+	case GREATER_DRAIN_ENERGY:
+		if (!mdef) {
+			impossible("greater drain energy with no target?");
+			return MM_MISS;
+		}
+		else {
+			if (Magic_res(mdef) && !(youdef && Race_if(PM_INCANTIFIER))) {
+				if (youdef) {
+					drain_en(rn1(u.ulevel, (dmg+1)/2));
+				}
+				else {
+					mdef->mspec_used += (dmg+1)/2;
+				}
+			}
+			else {
+				if (youdef) {
+					drain_en(rn1(u.ulevel, dmg));
+				}
+				else {
+					mdef->mspec_used += dmg;
+				}
+			}
+			stop_occupation();
+		}
+		return MM_HIT;
+		break;
 
 	case WEAKEN_YOU:		/* drain strength */
 		if (!youdef) {
@@ -7680,6 +7712,7 @@ int spellnum;
 	case BLIND_YOU:
 	case NIGHTMARE:
 	case DRAIN_ENERGY:
+	case GREATER_DRAIN_ENERGY:
 	case WEAKEN_YOU:
 	case WEAKEN_STATS:
 	case DESTRY_WEPN:

@@ -13662,7 +13662,7 @@ boolean greatequip;
 			break;
 			case PM_DAUGHTER_LILITH:
 				(void)mongets(mtmp, RUFFLED_SHIRT, mkobjflags);
-				(void)mongets(mtmp, GENTLEMAN_S_SUIT, mkobjflags);
+				(void)mongets(mtmp, GENTLEWOMAN_S_SUIT, mkobjflags);
 				(void)mongets(mtmp, HIGH_BOOTS, mkobjflags);
 				(void)mongets(mtmp, GLOVES, mkobjflags);
 				(void)mongets(mtmp, OILSKIN_CLOAK, mkobjflags);
@@ -13702,7 +13702,7 @@ boolean greatequip;
 			break;
 			case PM_CRONE_LILITH:
 				(void)mongets(mtmp, RUFFLED_SHIRT, mkobjflags);
-				(void)mongets(mtmp, GENTLEMAN_S_SUIT, mkobjflags);
+				(void)mongets(mtmp, GENTLEWOMAN_S_SUIT, mkobjflags);
 				(void)mongets(mtmp, HIGH_BOOTS, mkobjflags);
 				(void)mongets(mtmp, GLOVES, mkobjflags);
 				(void)mongets(mtmp, BOULDER, mkobjflags);

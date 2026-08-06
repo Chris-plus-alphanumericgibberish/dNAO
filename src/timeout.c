@@ -3708,10 +3708,19 @@ int amt;
 {
 	struct esum * esum = get_mx(mon, MX_ESUM);
 	timer_element * tm;
+	long remaining;
 	if (!esum) return;
 	if (esum->permanent) return;
 	if (!(tm = get_timer(mon->timed, DESUMMON_MON))) return;
-	adjust_timer_duration(tm, -min(amt, tm->timeout - monstermoves));
+	remaining = tm->timeout - monstermoves;
+	if (mon->mtyp == PM_SUMMONING_VORTEX) {
+		/* a partial cut just shortens the fuse without stopping the demon
+		   from arriving -- only let a cut that desummons it outright through,
+		   and then make sure the summon it was carrying doesn't complete */
+		if (amt < remaining) return;
+		mon->mvar1_summon_ID = NON_PM;
+	}
+	adjust_timer_duration(tm, -min(amt, remaining));
 	run_timers();
 }
 /* when a summoner dies or changes levels, all of its summons disappear */
@@ -3754,6 +3763,11 @@ boolean travelling;	/* if true, don't vanish summoned items in its inventory */
 					}
 				}
 			}
+
+			/* this always collapses the timer to fire immediately (never a partial
+			   cut), so a vortex just needs its summon suppressed, not skipped */
+			if (tm->func_index == DESUMMON_MON && ((struct monst *)tm->arg)->mtyp == PM_SUMMONING_VORTEX)
+				((struct monst *)tm->arg)->mvar1_summon_ID = NON_PM;
 
 			adjust_timer_duration(tm, min(0, monstermoves - tm->timeout));
 			flags.run_timers = TRUE;

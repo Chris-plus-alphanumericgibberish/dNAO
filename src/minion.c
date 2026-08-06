@@ -118,7 +118,7 @@ msummon_select(struct monst *mon, struct permonst *ptr, int *dtype_out, int *cnt
 				(!rn2(20)) ? dlord(ptr, atyp) : ndemon(atyp);
 		cnt = (!rn2(4) && is_normal_demon(&mons[dtype])) ? 2 : 1;
 	} else if (is_normal_demon(ptr)) {
-		dtype = (!rn2(20) && Inhell) ? dlord(ptr, atyp) :
+		dtype = (!rn2(20) && Inhell && is_greater_demon(ptr)) ? dlord(ptr, atyp) :
 				((mons[monsndx(ptr)].geno & G_UNIQ) || !rn2(6)) ? ndemon(atyp) : monsndx(ptr);
 		cnt = 1;
 	} else if (!mon) {
@@ -289,14 +289,14 @@ msummon_create_at(struct monst *mon, int x, int y)
 
 /* Create a summoning vortex at (x,y) that will spawn dtype when it desummons. */
 struct monst *
-msummon_vortex(int dtype, int x, int y, struct monst *summoner)
+msummon_vortex(int dtype, int x, int y, struct monst *summoner, int base_duration)
 {
 	struct monst *vortex = makemon(&mons[PM_SUMMONING_VORTEX], x, y,
-	                               MM_ESUM|MM_ADJACENTOK);
+	                               MM_ESUM|MM_ADJACENTSTRICT);
 	if (vortex) {
 		vortex->mvar1_summon_ID = dtype;
-		mark_mon_as_summoned(vortex, summoner,
-		                     (mons[dtype].geno & G_UNIQ) ? 10 : 2, 0);
+		mark_mon_as_summoned(vortex, summoner, base_duration +
+		                     ((mons[dtype].geno & G_UNIQ) ? 9 : dtype == PM_PIT_FIEND ? 3 : 1), 0);
 		if (summoner && summoner->mfaction)
 			vortex->mfaction = summoner->mfaction;
 	}
@@ -363,14 +363,14 @@ mcall_group(struct monst *mon, int x, int y, int scatter)
 					for(i = rnd(6); i > 0; i--) {
 						int vx, vy;
 						scatter_coord(x, y, scatter, &vx, &vy);
-						count_vortex(msummon_vortex(PM_VROCK, vx, vy, mon), &seen_cnt, &sensed_cnt);
+						count_vortex(msummon_vortex(PM_VROCK, vx, vy, mon, 1), &seen_cnt, &sensed_cnt);
 					}
 				}
 				else {
 					for(i = d(2,10); i > 0; i--) {
 						int vx, vy;
 						scatter_coord(x, y, scatter, &vx, &vy);
-						count_vortex(msummon_vortex(PM_MANES, vx, vy, mon), &seen_cnt, &sensed_cnt);
+						count_vortex(msummon_vortex(PM_MANES, vx, vy, mon, 1), &seen_cnt, &sensed_cnt);
 					}
 				}
 			}
@@ -382,7 +382,7 @@ mcall_group(struct monst *mon, int x, int y, int scatter)
 					for(int i = d(4,10); i > 0; i--) {
 						int vx, vy;
 						scatter_coord(x, y, scatter, &vx, &vy);
-						count_vortex(msummon_vortex(dtype, vx, vy, mon), &seen_cnt, &sensed_cnt);
+						count_vortex(msummon_vortex(dtype, vx, vy, mon, 1), &seen_cnt, &sensed_cnt);
 					}
 				}
 				else if(rn2(2)) {
@@ -390,7 +390,7 @@ mcall_group(struct monst *mon, int x, int y, int scatter)
 					for(int i = rnd(10); i > 0; i--) {
 						int vx, vy;
 						scatter_coord(x, y, scatter, &vx, &vy);
-						count_vortex(msummon_vortex(dtype, vx, vy, mon), &seen_cnt, &sensed_cnt);
+						count_vortex(msummon_vortex(dtype, vx, vy, mon, 1), &seen_cnt, &sensed_cnt);
 					}
 				}
 				else {
@@ -398,7 +398,7 @@ mcall_group(struct monst *mon, int x, int y, int scatter)
 					for(int i = rnd(4); i > 0; i--) {
 						int vx, vy;
 						scatter_coord(x, y, scatter, &vx, &vy);
-						count_vortex(msummon_vortex(dtype, vx, vy, mon), &seen_cnt, &sensed_cnt);
+						count_vortex(msummon_vortex(dtype, vx, vy, mon, 1), &seen_cnt, &sensed_cnt);
 					}
 				}
 			}
@@ -414,13 +414,13 @@ mcall_group(struct monst *mon, int x, int y, int scatter)
 							for(int i = rnd(6); i > 0; i--) {
 								int vx, vy;
 								scatter_coord(x, y, scatter, &vx, &vy);
-								count_vortex(msummon_vortex(PM_VROCK, vx, vy, mon), &seen_cnt, &sensed_cnt);
+								count_vortex(msummon_vortex(PM_VROCK, vx, vy, mon, 1), &seen_cnt, &sensed_cnt);
 							}
 						}
 						else {
 							int vx, vy;
 							scatter_coord(x, y, scatter, &vx, &vy);
-							count_vortex(msummon_vortex(PM_HEZROU, vx, vy, mon), &seen_cnt, &sensed_cnt);
+							count_vortex(msummon_vortex(PM_HEZROU, vx, vy, mon, 1), &seen_cnt, &sensed_cnt);
 						}
 					}
 				}
@@ -433,14 +433,14 @@ mcall_group(struct monst *mon, int x, int y, int scatter)
 					for(i = rnd(6); i > 0; i--) {
 						int vx, vy;
 						scatter_coord(x, y, scatter, &vx, &vy);
-						count_vortex(msummon_vortex(PM_OSSIFRUGE, vx, vy, mon), &seen_cnt, &sensed_cnt);
+						count_vortex(msummon_vortex(PM_OSSIFRUGE, vx, vy, mon, 1), &seen_cnt, &sensed_cnt);
 					}
 				}
 				else {
 					for(i = d(3,6); i > 0; i--) {
 						int vx, vy;
 						scatter_coord(x, y, scatter, &vx, &vy);
-						count_vortex(msummon_vortex(PM_VROCK, vx, vy, mon), &seen_cnt, &sensed_cnt);
+						count_vortex(msummon_vortex(PM_VROCK, vx, vy, mon, 1), &seen_cnt, &sensed_cnt);
 					}
 				}
 			}
@@ -455,7 +455,7 @@ mcall_group(struct monst *mon, int x, int y, int scatter)
 					for(int i = d(2,10); i > 0; i--) {
 						int vx, vy;
 						scatter_coord(x, y, scatter, &vx, &vy);
-						count_vortex(msummon_vortex(dtype, vx, vy, mon), &seen_cnt, &sensed_cnt);
+						count_vortex(msummon_vortex(dtype, vx, vy, mon, 1), &seen_cnt, &sensed_cnt);
 					}
 				}
 				else if(!rn2(3)) {
@@ -463,7 +463,7 @@ mcall_group(struct monst *mon, int x, int y, int scatter)
 					for(int i = rnd(6); i > 0; i--) {
 						int vx, vy;
 						scatter_coord(x, y, scatter, &vx, &vy);
-						count_vortex(msummon_vortex(dtype, vx, vy, mon), &seen_cnt, &sensed_cnt);
+						count_vortex(msummon_vortex(dtype, vx, vy, mon, 1), &seen_cnt, &sensed_cnt);
 					}
 				}
 				else if(rn2(2)) {
@@ -471,13 +471,13 @@ mcall_group(struct monst *mon, int x, int y, int scatter)
 					for(int i = rnd(4); i > 0; i--) {
 						int vx, vy;
 						scatter_coord(x, y, scatter, &vx, &vy);
-						count_vortex(msummon_vortex(dtype, vx, vy, mon), &seen_cnt, &sensed_cnt);
+						count_vortex(msummon_vortex(dtype, vx, vy, mon, 1), &seen_cnt, &sensed_cnt);
 					}
 				}
 				else {
 					int vx, vy;
 					scatter_coord(x, y, scatter, &vx, &vy);
-					count_vortex(msummon_vortex(PM_MARILITH, vx, vy, mon), &seen_cnt, &sensed_cnt);
+					count_vortex(msummon_vortex(PM_MARILITH, vx, vy, mon, 1), &seen_cnt, &sensed_cnt);
 				}
 			}
 		break;
@@ -492,7 +492,7 @@ mcall_group(struct monst *mon, int x, int y, int scatter)
 					for(int i = d(1,8); i > 0; i--) {
 						int vx, vy;
 						scatter_coord(x, y, scatter, &vx, &vy);
-						count_vortex(msummon_vortex(dtype, vx, vy, mon), &seen_cnt, &sensed_cnt);
+						count_vortex(msummon_vortex(dtype, vx, vy, mon, 1), &seen_cnt, &sensed_cnt);
 					}
 				}
 				else if(!rn2(3)) {
@@ -500,7 +500,7 @@ mcall_group(struct monst *mon, int x, int y, int scatter)
 					for(int i = rnd(6); i > 0; i--) {
 						int vx, vy;
 						scatter_coord(x, y, scatter, &vx, &vy);
-						count_vortex(msummon_vortex(dtype, vx, vy, mon), &seen_cnt, &sensed_cnt);
+						count_vortex(msummon_vortex(dtype, vx, vy, mon, 1), &seen_cnt, &sensed_cnt);
 					}
 				}
 				else if(rn2(2)) {
@@ -508,13 +508,13 @@ mcall_group(struct monst *mon, int x, int y, int scatter)
 					for(int i = rnd(4); i > 0; i--) {
 						int vx, vy;
 						scatter_coord(x, y, scatter, &vx, &vy);
-						count_vortex(msummon_vortex(dtype, vx, vy, mon), &seen_cnt, &sensed_cnt);
+						count_vortex(msummon_vortex(dtype, vx, vy, mon, 1), &seen_cnt, &sensed_cnt);
 					}
 				}
 				else {
 					int vx, vy;
 					scatter_coord(x, y, scatter, &vx, &vy);
-					count_vortex(msummon_vortex(rn2(2) ? PM_MARILITH : PM_BALROG, vx, vy, mon), &seen_cnt, &sensed_cnt);
+					count_vortex(msummon_vortex(rn2(2) ? PM_MARILITH : PM_BALROG, vx, vy, mon, 1), &seen_cnt, &sensed_cnt);
 				}
 			}
 		break;
@@ -526,7 +526,7 @@ mcall_group(struct monst *mon, int x, int y, int scatter)
 					for(int i = d(4,10); i > 0; i--) {
 						int vx, vy;
 						scatter_coord(x, y, scatter, &vx, &vy);
-						count_vortex(msummon_vortex(dtype, vx, vy, mon), &seen_cnt, &sensed_cnt);
+						count_vortex(msummon_vortex(dtype, vx, vy, mon, 1), &seen_cnt, &sensed_cnt);
 					}
 				}
 				else if(rn2(2)) {
@@ -534,7 +534,7 @@ mcall_group(struct monst *mon, int x, int y, int scatter)
 					for(int i = rnd(6); i > 0; i--) {
 						int vx, vy;
 						scatter_coord(x, y, scatter, &vx, &vy);
-						count_vortex(msummon_vortex(dtype, vx, vy, mon), &seen_cnt, &sensed_cnt);
+						count_vortex(msummon_vortex(dtype, vx, vy, mon, 1), &seen_cnt, &sensed_cnt);
 					}
 				}
 				else {
@@ -542,7 +542,7 @@ mcall_group(struct monst *mon, int x, int y, int scatter)
 					for(int i = 2; i > 0; i--) {
 						int vx, vy;
 						scatter_coord(x, y, scatter, &vx, &vy);
-						count_vortex(msummon_vortex(dtype, vx, vy, mon), &seen_cnt, &sensed_cnt);
+						count_vortex(msummon_vortex(dtype, vx, vy, mon, 1), &seen_cnt, &sensed_cnt);
 					}
 				}
 			}
@@ -553,7 +553,7 @@ mcall_group(struct monst *mon, int x, int y, int scatter)
 				for(int i = rnd(6); i > 0; i--) {
 					int vx, vy;
 					scatter_coord(x, y, scatter, &vx, &vy);
-					count_vortex(msummon_vortex(PM_HORNED_DEVIL, vx, vy, mon), &seen_cnt, &sensed_cnt);
+					count_vortex(msummon_vortex(PM_HORNED_DEVIL, vx, vy, mon, 1), &seen_cnt, &sensed_cnt);
 				}
 			}
 		break;
@@ -563,14 +563,14 @@ mcall_group(struct monst *mon, int x, int y, int scatter)
 					for(int i = rnd(4); i > 0; i--) {
 						int vx, vy;
 						scatter_coord(x, y, scatter, &vx, &vy);
-						count_vortex(msummon_vortex(PM_HORNED_DEVIL, vx, vy, mon), &seen_cnt, &sensed_cnt);
+						count_vortex(msummon_vortex(PM_HORNED_DEVIL, vx, vy, mon, 1), &seen_cnt, &sensed_cnt);
 					}
 				}
 				else {
 					for(int i = rnd(8); i > 0; i--) {
 						int vx, vy;
 						scatter_coord(x, y, scatter, &vx, &vy);
-						count_vortex(msummon_vortex(PM_IMP, vx, vy, mon), &seen_cnt, &sensed_cnt);
+						count_vortex(msummon_vortex(PM_IMP, vx, vy, mon, 1), &seen_cnt, &sensed_cnt);
 					}
 				}
 			}
@@ -581,14 +581,14 @@ mcall_group(struct monst *mon, int x, int y, int scatter)
 					for(int i = d(2,6); i > 0; i--) {
 						int vx, vy;
 						scatter_coord(x, y, scatter, &vx, &vy);
-						count_vortex(msummon_vortex(PM_HORNED_DEVIL, vx, vy, mon), &seen_cnt, &sensed_cnt);
+						count_vortex(msummon_vortex(PM_HORNED_DEVIL, vx, vy, mon, 1), &seen_cnt, &sensed_cnt);
 					}
 				}
 				else {
 					for(int i = rnd(4); i > 0; i--) {
 						int vx, vy;
 						scatter_coord(x, y, scatter, &vx, &vy);
-						count_vortex(msummon_vortex(PM_BARBED_DEVIL, vx, vy, mon), &seen_cnt, &sensed_cnt);
+						count_vortex(msummon_vortex(PM_BARBED_DEVIL, vx, vy, mon, 1), &seen_cnt, &sensed_cnt);
 					}
 				}
 			}
@@ -599,14 +599,14 @@ mcall_group(struct monst *mon, int x, int y, int scatter)
 					for(int i = d(1,100); i > 0; i--) {
 						int vx, vy;
 						scatter_coord(x, y, scatter, &vx, &vy);
-						count_vortex(msummon_vortex(PM_NUPPERIBO, vx, vy, mon), &seen_cnt, &sensed_cnt);
+						count_vortex(msummon_vortex(PM_NUPPERIBO, vx, vy, mon, 1), &seen_cnt, &sensed_cnt);
 					}
 				}
 				else {
 					for(int i = rnd(2); i > 0; i--) {
 						int vx, vy;
 						scatter_coord(x, y, scatter, &vx, &vy);
-						count_vortex(msummon_vortex(PM_BONE_DEVIL, vx, vy, mon), &seen_cnt, &sensed_cnt);
+						count_vortex(msummon_vortex(PM_BONE_DEVIL, vx, vy, mon, 1), &seen_cnt, &sensed_cnt);
 					}
 				}
 			}
@@ -620,21 +620,21 @@ mcall_group(struct monst *mon, int x, int y, int scatter)
 					for(int i = d(2,6); i > 0; i--) {
 						int vx, vy;
 						scatter_coord(x, y, scatter, &vx, &vy);
-						count_vortex(msummon_vortex(PM_HORNED_DEVIL, vx, vy, mon), &seen_cnt, &sensed_cnt);
+						count_vortex(msummon_vortex(PM_HORNED_DEVIL, vx, vy, mon, 1), &seen_cnt, &sensed_cnt);
 					}
 				}
 				else if(rn2(2)){
 					for(int i = d(2,4); i > 0; i--) {
 						int vx, vy;
 						scatter_coord(x, y, scatter, &vx, &vy);
-						count_vortex(msummon_vortex(PM_BONE_DEVIL, vx, vy, mon), &seen_cnt, &sensed_cnt);
+						count_vortex(msummon_vortex(PM_BONE_DEVIL, vx, vy, mon, 1), &seen_cnt, &sensed_cnt);
 					}
 				}
 				else {
 					for(int i = rnd(2); i > 0; i--) {
 						int vx, vy;
 						scatter_coord(x, y, scatter, &vx, &vy);
-						count_vortex(msummon_vortex(PM_ICE_DEVIL, vx, vy, mon), &seen_cnt, &sensed_cnt);
+						count_vortex(msummon_vortex(PM_ICE_DEVIL, vx, vy, mon, 1), &seen_cnt, &sensed_cnt);
 					}
 				}
 			}
@@ -649,7 +649,7 @@ mcall_group(struct monst *mon, int x, int y, int scatter)
 				for (i = 0; i < 5; i++) {
 					int vx = mon->mx + dx[i], vy = mon->my + dy[i];
 					if (isok(vx, vy))
-						count_vortex(msummon_vortex(ROLL_FROM(entourage), vx, vy, mon), &seen_cnt, &sensed_cnt);
+						count_vortex(msummon_vortex(ROLL_FROM(entourage), vx, vy, mon, 5), &seen_cnt, &sensed_cnt);
 				}
 			}
 		break;
@@ -667,7 +667,7 @@ mcall_group(struct monst *mon, int x, int y, int scatter)
 				for (i = 0; i < 5; i++) {
 					int vx = mon->mx + dx[i], vy = mon->my + dy[i];
 					if (isok(vx, vy))
-						count_vortex(msummon_vortex(ROLL_FROM(entourage), vx, vy, mon), &seen_cnt, &sensed_cnt);
+						count_vortex(msummon_vortex(ROLL_FROM(entourage), vx, vy, mon, 5), &seen_cnt, &sensed_cnt);
 				}
 			}
 		break;
@@ -729,7 +729,7 @@ mcall_pit_fiend(struct monst *mon, int x, int y, int scatter)
 		for(int i = 2*mod; i > 0; i--) {
 			int vx, vy;
 			scatter_coord(x, y, scatter, &vx, &vy);
-			count_vortex(msummon_vortex(dtype, vx, vy, mon), &seen_cnt, &sensed_cnt);
+			count_vortex(msummon_vortex(dtype, vx, vy, mon, 1), &seen_cnt, &sensed_cnt);
 		}
 	}
 	else {
@@ -737,7 +737,7 @@ mcall_pit_fiend(struct monst *mon, int x, int y, int scatter)
 		for(int i = 1*mod; i > 0; i--) {
 			int vx, vy;
 			scatter_coord(x, y, scatter, &vx, &vy);
-			count_vortex(msummon_vortex(dtype, vx, vy, mon), &seen_cnt, &sensed_cnt);
+			count_vortex(msummon_vortex(dtype, vx, vy, mon, 1), &seen_cnt, &sensed_cnt);
 		}
 	}
 	{
@@ -759,7 +759,7 @@ mcall_alkilith(struct monst *mon, int x, int y, int scatter)
 		if (ptr) {
 			int vx, vy;
 			scatter_coord(x, y, scatter, &vx, &vy);
-			count_vortex(msummon_vortex(monsndx(ptr), vx, vy, mon), &seen_cnt, &sensed_cnt);
+			count_vortex(msummon_vortex(monsndx(ptr), vx, vy, mon, 1), &seen_cnt, &sensed_cnt);
 		}
 	}
 	{

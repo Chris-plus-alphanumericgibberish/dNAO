@@ -1604,7 +1604,7 @@ E void FDECL(msummon, (struct monst *, struct permonst *));
 E boolean FDECL(msummon_select, (struct monst *, struct permonst *, int *, int *));
 E struct monst * FDECL(msummon_place, (int, int, int, struct monst *));
 E struct monst * FDECL(msummon_create_at, (struct monst *, int, int));
-E struct monst * FDECL(msummon_vortex, (int, int, int, struct monst *));
+E struct monst * FDECL(msummon_vortex, (int, int, int, struct monst *, int));
 E void FDECL(mcall_group, (struct monst *, int, int, int));
 E void FDECL(mcall_pit_fiend, (struct monst *, int, int, int));
 E void FDECL(mcall_alkilith, (struct monst *, int, int, int));

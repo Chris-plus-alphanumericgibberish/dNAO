@@ -1646,7 +1646,7 @@ you_regen_san()
 		u.veil = FALSE;
 		change_uinsight(1);
 	}
-	if(!u.uevent.gehennom_madnesses && Insight >= 6 && Inhell){
+	if(!u.uevent.gehennom_madnesses && Insight >= 6 && Inhell_proper){
 		u.uevent.gehennom_madnesses = TRUE;
 		confer_gehennom_madnesses();
 	}

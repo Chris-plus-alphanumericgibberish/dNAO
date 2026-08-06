@@ -2402,7 +2402,7 @@ struct obj* obj;
 		return shiny_materials;
 	}
 	else if (otyp == find_dwingcovers()) {
-		/* diamaphorous wing-covers must always be cloth, regardless of
+		/* diaphanous wing-covers must always be cloth, regardless of
 		 * which wing-guard otyp the shuffle assigns the appearance to */
 		return NULL;
 	}

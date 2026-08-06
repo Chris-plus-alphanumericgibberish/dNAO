@@ -474,9 +474,11 @@
 #define SANDSTORM              PANIC_BOLT+1
 #define MOON_BEAM              SANDSTORM+1
 #define DISPEL_MAGIC           MOON_BEAM+1
-#define METEOR_SWARM          DISPEL_MAGIC+1
+#define METEOR_SWARM           DISPEL_MAGIC+1
+#define GREATER_DRAIN_ENERGY   METEOR_SWARM+1
 
-#define MON_LASTSPELL          METEOR_SWARM
+
+#define MON_LASTSPELL          GREATER_DRAIN_ENERGY
 //Not yet implemented
 // #define MON_FIRE               STRANGLE+1
 // #define MON_BLIZZARD           MON_FIRAGA+1

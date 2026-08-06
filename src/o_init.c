@@ -739,7 +739,7 @@ find_pcloth()
 	return 0;
 }
 
-/* find the object index for the "diamaphorous wing-covers" appearance;
+/* find the object index for the "diaphanous wing-covers" appearance;
  * used to force that item to always generate with cloth material
  * (see material_list() in mkobj.c) regardless of which wing-guard
  * otyp the shuffle happens to attach the appearance to */
@@ -750,10 +750,10 @@ find_dwingcovers()
 	register const char *s;
 	if (i != -1) return i;
 
-	if ((i = find_otyp_of_desc("diamaphorous wing-covers", 0, WING_GUARDS_OF_SPEED, WING_GUARDS_OF_BUMBLING, 0)) != -1)
+	if ((i = find_otyp_of_desc("diaphanous wing-covers", 0, WING_GUARDS_OF_SPEED, WING_GUARDS_OF_BUMBLING, 0)) != -1)
 		return i;
 	else
-		impossible("could not find diamaphorous wing-covers");
+		impossible("could not find diaphanous wing-covers");
 	return 0;
 }
 

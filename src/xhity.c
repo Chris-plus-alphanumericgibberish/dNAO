@@ -515,7 +515,7 @@ xattacky(struct monst *magr, struct monst *mdef, int tarx, int tary, long modifi
 					ny = u.uy;
 				}
 				while (cnt-- > 0)
-					(void) msummon_vortex(dtype, nx, ny, magr);
+					(void) msummon_vortex(dtype, nx, ny, magr, 1);
 			}
 		}
 	}

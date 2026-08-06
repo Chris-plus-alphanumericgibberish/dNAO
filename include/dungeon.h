@@ -248,6 +248,7 @@ typedef struct branch {
 #define In_moloch_temple(x)	((x)->dnum == temple_dnum)
 #define In_lost_tomb(x)		((x)->dnum == tomb_dnum)
 #define Inhell			In_hell(&u.uz)	/* now gehennom */
+#define Inhell_proper	(Inhell && !Is_valley(&u.uz))
 #define Infuture		(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz))
 #define In_endgame(x)		((x)->dnum == astral_level.dnum)
 
