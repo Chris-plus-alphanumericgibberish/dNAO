@@ -711,6 +711,8 @@ int mode;
 	bwrite(fd, (genericptr_t) &regions[i]->attach_2_u, sizeof (boolean));
 	n = 0;
 	bwrite(fd, (genericptr_t) &regions[i]->attach_2_m, sizeof (unsigned));
+	bwrite(fd, (genericptr_t) &regions[i]->rx, sizeof (int));
+	bwrite(fd, (genericptr_t) &regions[i]->ry, sizeof (int));
 	n = regions[i]->enter_msg != NULL ? strlen(regions[i]->enter_msg) : 0;
 	bwrite(fd, (genericptr_t) &n, sizeof n);
 	if (n > 0)
@@ -753,7 +755,7 @@ boolean ghostly; /* If a bones file restore */
 
     clear_regions();		/* Just for security */
     mread(fd, (genericptr_t) &tmstamp, sizeof (tmstamp));
-    if (ghostly) tmstamp = 0;
+    if (ghostly || !u.uz.dlevel) tmstamp = 0;
     else tmstamp = (moves - tmstamp);
     mread(fd, (genericptr_t) &n_regions, sizeof (n_regions));
     max_regions = n_regions;
@@ -771,6 +773,8 @@ boolean ghostly; /* If a bones file restore */
 	    mread(fd, (genericptr_t) &regions[i]->rects[j], sizeof (NhRect));
 	mread(fd, (genericptr_t) &regions[i]->attach_2_u, sizeof (boolean));
 	mread(fd, (genericptr_t) &regions[i]->attach_2_m, sizeof (unsigned));
+	mread(fd, (genericptr_t) &regions[i]->rx, sizeof (int));
+	mread(fd, (genericptr_t) &regions[i]->ry, sizeof (int));
 
 	mread(fd, (genericptr_t) &n, sizeof n);
 	if (n > 0) {
