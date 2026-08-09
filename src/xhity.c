@@ -16337,7 +16337,7 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 	if (weapon)
 		slot = W_WEP;	// note: the pointer <weapon>, which is not necessarily magr's wielded weapon
 	else
-		slot = attk_equip_slot(attk);
+		slot = attk_equip_slot(magr, attk);
 
 	switch (slot)
 	{
@@ -19408,7 +19408,7 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 
 		/* gloves/boots/helmet -- assumes only one of the three will be used. */
 		if (magr && attk && !weapon)
-			slot = attk_equip_slot(attk);
+			slot = attk_equip_slot(magr, attk);
 		else
 			slot = 0L;
 		switch (slot)
@@ -21390,7 +21390,7 @@ struct attack * passive;	/* specific passive attack being used */
 		if (!magr || !attk || is_null_attk(attk))
 			return;
 		boolean youagr = (magr == &youmonst);
-		long slot = attk_equip_slot(attk);
+		long slot = attk_equip_slot(magr, attk);
 
 		switch (slot)
 		{

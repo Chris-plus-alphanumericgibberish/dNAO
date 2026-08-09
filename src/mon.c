@@ -328,9 +328,6 @@ register struct monst *mtmp;
 		obj = mkcorpstat(STATUE, (struct monst *)0,
 			mdat, x, y, FALSE);
 		set_material_gm(obj, GLASS);
-	} else if(has_template(mtmp, TOMB_HERD)) {
-		obj = mkcorpstat(STATUE, (struct monst *)0,
-			mdat, x, y, FALSE);
 	} else switch(mndx) {
 	    case PM_LICH__THE_FIEND_OF_EARTH:
 			// if(mvitals[PM_GARLAND].died){
@@ -4404,6 +4401,8 @@ struct permonst *mptr;	/* reflects mtmp->data _prior_ to mtmp's death */
 	    /* to prevent an infinite relobj-flooreffects-hmon-killed loop */
 	mtmp->mtrapped = 0;
 	mtmp->mhp = 0; /* simplify some tests: force mhp to 0 */
+	if (has_template(mtmp, TOMB_HERD))
+		tomb_herd_stow(mtmp);
 	relobj(mtmp, 0, FALSE);
 	summoner_gone(mtmp, FALSE);
 	remove_monster(mtmp->mx, mtmp->my);
@@ -5202,6 +5201,12 @@ register struct monst *mtmp;
 		dead_familiar(mtmp->mvar_witchID);
 	}
 
+	/* A tomb-herd is a ghost wearing a statue's shape, so none of the
+	 * consequences of the depicted monster's death apply to it.
+	 */
+	if (has_template(mtmp, TOMB_HERD))
+		goto detach_only;
+
 	/* if MAXMONNO monsters of a given type have died, and it
 	 * can be done, extinguish that monster.
 	 *
@@ -5499,6 +5504,7 @@ register struct monst *mtmp;
 			give_nightmare_hunter_trophy();
 	}
 #endif
+detach_only:
 	if(glyph_is_invisible(levl[mtmp->mx][mtmp->my].glyph))
 		unmap_object(mtmp->mx, mtmp->my);
 	m_detach(mtmp, mptr);
@@ -5904,8 +5910,9 @@ boolean was_swallowed;			/* digestion */
 	if (has_template(mon, CRYSTALFIED))
 		return TRUE;
 
+	/* the statue it was piloting drops from its inventory instead */
 	if (has_template(mon, TOMB_HERD))
-		return TRUE;
+		return FALSE;
 
 	if (has_template(mon, POISON_TEMPLATE))
 		return TRUE;

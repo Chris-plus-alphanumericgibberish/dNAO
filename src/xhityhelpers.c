@@ -1067,30 +1067,74 @@ standard_head_slot_bodyparts(void)
 	    ATKBP_HORN_ORDINALS_MASK(), ATKBP(HEAD), ATKBP(HORN), ATKBP(NONE) });
 }
 
+/* Does [magr] actually have something worn in [slot]?
+ *
+ * Only meaningful for the ARMOR_SKIN fallback below, which reaches the
+ * shell exactly when the ordinary slot for the attack's body part is bare.
+ */
+static boolean
+attacker_slot_filled(struct monst *magr, long slot)
+{
+	if (!magr || !slot || slot == ~0L)
+		return FALSE;
+
+	if (magr == &youmonst)
+		return (((slot & W_ARM) && uarm)
+			|| ((slot & W_ARMC) && uarmc)
+			|| ((slot & W_ARMH) && uarmh)
+			|| ((slot & W_ARMS) && uarms)
+			|| ((slot & W_ARMG) && uarmg)
+			|| ((slot & W_ARMF) && uarmf)
+			|| ((slot & W_ARMW) && uarmw)
+			|| ((slot & W_ARMU) && uarmu)
+			|| ((slot & W_SKIN) && uskin));
+
+	return (magr->misc_worn_check & slot) != 0L;
+}
+
+/* ARMOR_SKIN: the attack is delivered by a shell worn over the whole body,
+ * which sits under anything else the attacker wears -- so whatever the
+ * underlying body part would ordinarily resolve to still applies while
+ * that slot is occupied, and only an empty slot exposes the shell itself.
+ */
+static long
+armor_skin_slot(struct monst *magr, struct attack *attk, long slot)
+{
+	if (magr && slot != ~0L
+		&& atkbp_intersects(attk->bodypart, ATKBP(ARMOR_SKIN))
+		&& !attacker_slot_filled(magr, slot))
+		return W_SKIN;
+
+	return slot;
+}
+
 /* attk_protection()
  *
  * Returns types of armor needed to prevent specified attack from touching its target
  *   ex) gloves makes claw attacks not touch a cockatrice
  */
 long
-attk_protection(struct attack *attk)
+attk_protection(struct monst *magr, struct attack *attk)
 {
-	if (atkbp_intersects(attk->bodypart, ATKBP(WORN_LIKE_WING)))
-		return W_ARMW;
+	long slot = 0L;	/* no defense available */
 
+	if (atkbp_intersects(attk->bodypart, ATKBP(WORN_LIKE_WING))) {
+		slot = W_ARMW;
+	}
 	/* PHASED is a modifier on an otherwise-ordinary identity bit */
-	if (atkbp_intersects(attk->bodypart, ATKBP(PHASED)))
-		return ~0L;
-
+	else if (atkbp_intersects(attk->bodypart, ATKBP(PHASED))) {
+		slot = ~0L;
+	}
 	/* No physical contact between attack and defender */
-	if (atkbp_is_none(attk->bodypart)
+	else if (atkbp_is_none(attk->bodypart)
 		|| atkbp_intersects(attk->bodypart, atkbp_or((struct atkbp_set[]){
 			ATKBP(MIND_NOLIMB), ATKBP(EYES), ATKBP(HALO),
 			ATKBP(LAUNCHER_GENERIC), ATKBP(MECHANISM_GENERIC), ATKBP(SHADOW),
-			ATKBP(AURA_ARM), ATKBP(NONE) })))
-		return ~0L;
-
-	switch (attk->aatyp) {
+			ATKBP(AURA_ARM), ATKBP(NONE) }))
+		) {
+		slot = ~0L;
+	}
+	else switch (attk->aatyp) {
 	/* No physical contact between attacker and defender */
 	case AT_NONE:
 	case AT_SPIT:
@@ -1112,26 +1156,27 @@ attk_protection(struct attack *attk)
 	case AT_VOMT:
 	case AT_REND:	/* if the previous attacks were OK, this one is too */
 	case AT_HITS:
-		return ~0L;	/* special case; no defense needed */
+		slot = ~0L;	/* special case; no defense needed */
+		break;
+	default:
+		/* ARMOR_ARM: attached to and made out of W_ARM, not part of the
+		 * wearer's body */
+		if (atkbp_intersects(attk->bodypart, ATKBP(ARMOR_ARM)))
+			slot = W_ARM;
+		else if (atkbp_intersects(attk->bodypart, standard_arm_slot_bodyparts()))
+			slot = W_ARMG;
+		else if (atkbp_intersects(attk->bodypart, standard_leg_slot_bodyparts()))
+			slot = W_ARMF;
+		else if (atkbp_intersects(attk->bodypart, standard_head_slot_bodyparts()))
+			slot = W_ARMH;
+		else if (atkbp_intersects(attk->bodypart, ATKBP(WING)))
+			slot = W_ARMW;
+		else if (atkbp_intersects(attk->bodypart, ATKBP(TAIL)))
+			slot = W_ARM;
+		break;
 	}
 
-	/* ARMOR_ARM: attached to and made out of W_ARM, not part of the
-	 * wearer's body */
-	if (atkbp_intersects(attk->bodypart, ATKBP(ARMOR_ARM)))
-		return W_ARM;
-
-	if (atkbp_intersects(attk->bodypart, standard_arm_slot_bodyparts()))
-		return W_ARMG;
-	if (atkbp_intersects(attk->bodypart, standard_leg_slot_bodyparts()))
-		return W_ARMF;
-	if (atkbp_intersects(attk->bodypart, standard_head_slot_bodyparts()))
-		return W_ARMH;
-	if (atkbp_intersects(attk->bodypart, ATKBP(WING)))
-		return W_ARMW;
-	if (atkbp_intersects(attk->bodypart, ATKBP(TAIL)))
-		return W_ARM;
-
-	return 0L;	/* no defense available */
+	return armor_skin_slot(magr, attk, slot);
 }
 
 /* attk_equip_slot()
@@ -1140,30 +1185,32 @@ attk_protection(struct attack *attk)
  *   ex) silver gloves make punches do silver-searing damage
  */
 long
-attk_equip_slot(struct attack *attk)
+attk_equip_slot(struct monst *magr, struct attack *attk)
 {
+	long slot = 0L;
+
 	if (!attk)
 		return 0L;
 
 	if (atkbp_intersects(attk->bodypart, ATKBP(WORN_LIKE_WING)))
-		return W_ARMW;
+		slot = W_ARMW;
 	/* AURA_ARM: use gauntlets offensively but unneeded for protection */
-	if (atkbp_intersects(attk->bodypart, ATKBP(AURA_ARM)))
-		return W_ARMG;
+	else if (atkbp_intersects(attk->bodypart, ATKBP(AURA_ARM)))
+		slot = W_ARMG;
 	/* ARMOR_ARM: attached to and made out of W_ARM, not part of the
 	 * wearer's body */
-	if (atkbp_intersects(attk->bodypart, ATKBP(ARMOR_ARM)))
-		return W_ARM;
-	if (atkbp_intersects(attk->bodypart, standard_arm_slot_bodyparts()))
-		return W_ARMG;
-	if (atkbp_intersects(attk->bodypart, standard_leg_slot_bodyparts()))
-		return W_ARMF;
-	if (atkbp_intersects(attk->bodypart, standard_head_slot_bodyparts()))
-		return W_ARMH;
-	if (atkbp_intersects(attk->bodypart, ATKBP(WING)))
-		return W_ARMW;
+	else if (atkbp_intersects(attk->bodypart, ATKBP(ARMOR_ARM)))
+		slot = W_ARM;
+	else if (atkbp_intersects(attk->bodypart, standard_arm_slot_bodyparts()))
+		slot = W_ARMG;
+	else if (atkbp_intersects(attk->bodypart, standard_leg_slot_bodyparts()))
+		slot = W_ARMF;
+	else if (atkbp_intersects(attk->bodypart, standard_head_slot_bodyparts()))
+		slot = W_ARMH;
+	else if (atkbp_intersects(attk->bodypart, ATKBP(WING)))
+		slot = W_ARMW;
 
-	return 0L;
+	return armor_skin_slot(magr, attk, slot);
 }
 
 
@@ -1177,7 +1224,7 @@ struct monst * mdef;
 struct attack * attk;
 struct obj * weapon;
 {
-	long slot = attk_protection(attk);
+	long slot = attk_protection(magr, attk);
 	boolean youagr = (magr == &youmonst);
 
 	if (/* not using a weapon -- assumes weapons will only be passed if making a weapon attack */
@@ -1870,7 +1917,7 @@ struct obj * weapon;
 	if (!weapon) {
 		/* some worn armor may be involved depending on the attack type */
 		struct obj * otmp;
-		long slot = attk_equip_slot(attk);
+		long slot = attk_equip_slot(magr, attk);
 		switch (magr ? slot : 0L)
 		{
 		case W_ARMG:
