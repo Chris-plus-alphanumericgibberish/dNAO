@@ -64,6 +64,42 @@ atkbp_intersects(struct atkbp_set a, struct atkbp_set b)
     return FALSE;
 }
 
+struct atkbp_set
+atkbp_and(struct atkbp_set a, struct atkbp_set b)
+{
+    struct atkbp_set result;
+    int i;
+
+    for (i = 0; i < ATKBP_NWORDS; i++)
+	result.w[i] = a.w[i] & b.w[i];
+    return result;
+}
+
+/* unlike atkbp_or(), safe when either operand is empty -- that one takes a
+ * terminated array and stops at the first empty entry.
+ */
+struct atkbp_set
+atkbp_union(struct atkbp_set a, struct atkbp_set b)
+{
+    struct atkbp_set result;
+    int i;
+
+    for (i = 0; i < ATKBP_NWORDS; i++)
+	result.w[i] = a.w[i] | b.w[i];
+    return result;
+}
+
+struct atkbp_set
+atkbp_diff(struct atkbp_set a, struct atkbp_set b)
+{
+    struct atkbp_set result;
+    int i;
+
+    for (i = 0; i < ATKBP_NWORDS; i++)
+	result.w[i] = a.w[i] & ~b.w[i];
+    return result;
+}
+
 /* claw_count()/claw_ordinal(): how many of ptr's attacks are AT_CLAW and
  * not already claimed by the offhand/polywep flags (those short-circuit
  * above before either is ever consulted), and which one (0-based) is
@@ -854,6 +890,10 @@ attk_bodyparts(struct permonst *ptr, struct attack *attk)
 	    case 3: return ATKBP(TENTACLE_ARM_OFFHAND);
 	    }
 	}
+	/* consolidated major tentacles, not mouth */
+	if (ptr->mtyp == PM_STAR_SPAWN)
+	    return atkbp_or((struct atkbp_set[]){
+		ATKBP(TENTACLE_ARM_DOMINANT), ATKBP(TENTACLE_ARM_OFFHAND), ATKBP(NONE) });
 	return is_mind_flayer(ptr)
 	       ? atkbp_or((struct atkbp_set[]){ ATKBP(TENTACLE_GENERIC), ATKBP(MOUTH), ATKBP(NONE) })
 	       : ATKBP(TENTACLE_GENERIC);
@@ -893,6 +933,10 @@ attk_bodyparts(struct permonst *ptr, struct attack *attk)
     case AT_BITE:
     case AT_LNCK:
     case AT_5SBT:
+	/* long mouth with tentacled end */
+	if (ptr->mtyp == PM_STAR_SPAWN && attk->aatyp == AT_LNCK)
+	    return atkbp_or((struct atkbp_set[]){
+		ATKBP(MOUTH), ATKBP(TENTACLE_GENERIC), ATKBP(NONE) });
 	return ATKBP(MOUTH);
     case AT_BUTT:
 	/* juggernaut/id juggernaut: a giant headless rolling ram, not a
@@ -1108,6 +1152,11 @@ attk_bodyparts(struct permonst *ptr, struct attack *attk)
 		    return tentacle_arm_ordinal_bit(ord);
 	    }
 	}
+	/* AT_DEVA is the "million-arm weapon" attack */
+	if (attk->aatyp == AT_DEVA)
+	    return atkbp_or((struct atkbp_set[]){
+		nohands(ptr) ? ATKBP(LIMB_GENERIC) : ATKBP(ARM),
+		ATKBP(INNUMERABLE), ATKBP(NONE) });
 	/* same category-only contract as AT_CLAW/AT_TUCH -- a nohands(ptr)
 	 * monster (e.g. cuboid's whip-like chains) has nothing confirmed to
 	 * credit this to but an unconfirmed limb.
@@ -1574,6 +1623,222 @@ mon_flag_bodyparts(struct permonst *ptr)
     }
     parts[n] = ATKBP(NONE);
     return atkbp_or(parts);
+}
+
+/* vague/unordinaled bits are dropped in favor of whatever concrete limb
+ * identity a different attack (or mon_flag_bodyparts()) establishes
+ * instead -- except under INNUMERABLE, where there's no concrete count to
+ * defer to (e.g. Legion's mass of arms).
+ */
+static struct atkbp_set
+mon_bodypart_bits(struct atkbp_set attk_bits)
+{
+    struct atkbp_set vague_mask = atkbp_or((struct atkbp_set[]){
+	ATKBP(ARM), ATKBP(LEG), ATKBP(ARM_LOWER), ATKBP(LEG_REAR), ATKBP(LEG_FRONT), ATKBP(NONE) });
+    struct atkbp_set always_drop = atkbp_or((struct atkbp_set[]){
+	ATKBP(WHOLE_BODY), ATKBP(MIND_NOLIMB), ATKBP(INNUMERABLE), ATKBP(NONE) });
+    struct atkbp_set result = attk_bits;
+    int i;
+
+    if (!atkbp_intersects(attk_bits, ATKBP(INNUMERABLE)))
+	for (i = 0; i < ATKBP_NWORDS; i++)
+	    result.w[i] &= ~vague_mask.w[i];
+    for (i = 0; i < ATKBP_NWORDS; i++)
+	result.w[i] &= ~always_drop.w[i];
+    return result;
+}
+
+/* Bounds-checked because leg_ordinal_bit() answers ATKBP(NONE) outside
+ * 1..8, which would truncate the atkbp_or() scan.
+ */
+static struct atkbp_set
+leg_ordinal_range(int from, int to)
+{
+    struct atkbp_set legs[9];
+    int n = 0, leg;
+
+    if (from < 1)
+	from = 1;
+    if (to > 8)
+	to = 8;
+    for (leg = from; leg <= to; leg++)
+	legs[n++] = leg_ordinal_bit(leg);
+    legs[n] = ATKBP(NONE);
+    return atkbp_or(legs);
+}
+
+/* The concrete parts one vague attribution bit stands in for. The
+ * front/rear split follows AT_KICK's round-robin convention: the rear legs
+ * are the last mon_rear_leg_count() ordinals.
+ */
+static struct atkbp_set
+vague_bit_members(struct permonst *ptr, struct atkbp_set vague)
+{
+    int total = mon_leg_count(ptr);
+    int rear = mon_rear_leg_count(ptr);
+
+    if (atkbp_intersects(vague, ATKBP(ARM)))
+	return atkbp_or((struct atkbp_set[]){
+	    ATKBP_ARM_ORDINALS_MASK(), ATKBP_MISKA_ARM_ORDINALS_MASK(), ATKBP(NONE) });
+    if (atkbp_intersects(vague, ATKBP(ARM_LOWER)))
+	return ATKBP_ARM_LOWER_ORDINALS_MASK();
+    if (atkbp_intersects(vague, ATKBP(LEG)))
+	return ATKBP_LEG_ORDINALS_MASK();
+    if (atkbp_intersects(vague, ATKBP(LEG_FRONT)))
+	return leg_ordinal_range(1, total - rear);
+    if (atkbp_intersects(vague, ATKBP(LEG_REAR)))
+	return leg_ordinal_range(total - rear + 1, total);
+    return ATKBP(NONE);
+}
+
+/* A concrete attribution names the limb responsible, so losing the use of
+ * it takes the attack away. A vague one only says "some arm" / "a hind
+ * leg", so it survives until every limb it could have meant is gone.
+ * Innumerable parts are never all gone at once, and are exempt outright.
+ *
+ * An attack listing more than one vague bit needs all of those families, so
+ * it is stopped as soon as any one of them is used up.
+ *
+ * `unusable` is not only injured parts -- a part ptr's plan has that the
+ * individual does not belongs here too. Family membership deliberately
+ * comes from ptr rather than from the individual's own plan, so that a
+ * part it no longer has still counts toward using its family up.
+ */
+boolean
+injuries_would_block_attk(struct permonst *ptr, struct attack *attk, struct atkbp_set unusable)
+{
+    struct atkbp_set vague[5];
+    int i;
+
+    if (atkbp_intersects(attk->bodypart, ATKBP(INNUMERABLE)))
+	return FALSE;
+    if (atkbp_intersects(attk->bodypart, unusable))
+	return TRUE;
+
+    vague[0] = ATKBP(ARM);
+    vague[1] = ATKBP(ARM_LOWER);
+    vague[2] = ATKBP(LEG);
+    vague[3] = ATKBP(LEG_FRONT);
+    vague[4] = ATKBP(LEG_REAR);
+    for (i = 0; i < 5; i++) {
+	struct atkbp_set members;
+
+	if (!atkbp_intersects(attk->bodypart, vague[i]))
+	    continue;
+	/* an empty family must not read as "all of them are gone" */
+	members = atkbp_and(vague_bit_members(ptr, vague[i]), ptr->bodyparts);
+	if (atkbp_is_none(members))
+	    continue;
+	if (atkbp_equal(members, atkbp_and(members, unusable)))
+	    return TRUE;
+    }
+    return FALSE;
+}
+
+/* Body parts a monster keeps hidden until the given insight, even though
+ * some attack the PC can already use would otherwise reveal them.
+ *
+ * Per-monster on purpose: whether a bit shared between a gated and an
+ * ungated attack should be visible has no general answer -- the carcosan
+ * courtier and the itinerant priestess cut in opposite directions.
+ *
+ * Note this only conceals the part from the monster's perceptible body
+ * plan. The attacks themselves keep their real attribution -- she does cast
+ * with three arms, whether or not the PC can see the third.
+ */
+static struct atkbp_set
+mon_insight_hidden_bits(struct permonst *ptr, int insight)
+{
+    /* her ungated AT_MMGC would otherwise leak ARM_3RD via spellcast_arm_bits() */
+    if (ptr->mtyp == PM_ITINERANT_PRIESTESS && insight < 40)
+	return ATKBP(ARM_3RD);
+    return ATKBP(NONE);
+}
+
+/* mon_bodyparts(): every body part this monster is known to have -- the
+ * union of each real attack's own attribution (filtered to specific limbs
+ * by mon_bodypart_bits()) plus whatever mon_flag_bodyparts() can tell from
+ * flags alone.
+ *
+ * Reads each attack's .bodypart as it currently stands, so every attack
+ * must already be attributed before calling: attkbp_init() has done that
+ * for real mons[] entries, attk_bodyparts_all() (plus any caller-specific
+ * overrides) for permonsts built at runtime.
+ *
+ * insight: attacks needing more than this are left out, matching the
+ * getattk() gate -- an insight-locked limb is genuinely part of the
+ * monster's body, but the PC can't perceive it yet. Pass INSIGHT_ALL for
+ * the whole potential body plan, which is what a permonst's own bodyparts
+ * field holds; the per-monster perceptible subset is
+ * mon_refresh_bodyparts()' job (src/mondata.c). Taken as an argument rather
+ * than read from Insight because this file is linked into
+ * util/attkbpdefs, which has no `u`.
+ */
+struct atkbp_set
+mon_bodyparts(struct permonst *ptr, int insight)
+{
+#define MAX_ALT_ATTACK_SET 1
+#define MB_PARTS_SLOT 1
+    struct atkbp_set parts[NATTK + MAX_ALT_ATTACK_SET + MB_PARTS_SLOT + 1];
+    struct atkbp_set filtered, result;
+    int i, n = 0;
+
+    /* filtering can legitimately zero out an attack's whole contribution
+     * (e.g. housecat's single claw, whose only bit is the excluded
+     * LEG_FRONT) -- atkbp_or() stops at the first empty entry, so only
+     * non-empty ones may be collected.
+     */
+    for (i = 0; i < NATTK; i++) {
+	if (is_null_attk(&ptr->mattk[i]))
+	    break;
+	if (insight != INSIGHT_ALL && ptr->mattk[i].ins_req > insight)
+	    continue;
+	filtered = mon_bodypart_bits(ptr->mattk[i].bodypart);
+	if (!atkbp_is_none(filtered))
+	    parts[n++] = filtered;
+    }
+    filtered = mon_flag_bodyparts(ptr);
+    if (!atkbp_is_none(filtered))
+	parts[n++] = filtered;
+    /* Lolth's real mattk[] alone doesn't reveal she has up to 8 arms --
+     * only her alternate "marilith-hands" routine (lolth_alt_attacks[])
+     * does. She has them regardless of whether that form gets rolled, so
+     * fold the same bits into her body plan here.
+     */
+    if (ptr->mtyp == PM_AVATAR_OF_LOLTH) {
+	struct atkbp_set lolth_alt[LOLTH_ALT_ATTACK_COUNT + 1];
+	int li;
+
+	for (li = 0; li < LOLTH_ALT_ATTACK_COUNT; li++)
+	    lolth_alt[li] = lolth_alt_bodypart(li);
+	lolth_alt[LOLTH_ALT_ATTACK_COUNT] = ATKBP(NONE);
+	filtered = atkbp_or(lolth_alt);
+	if (!atkbp_is_none(filtered))
+	    parts[n++] = filtered;
+    }
+    parts[n] = ATKBP(NONE);
+    result = atkbp_or(parts);
+
+    /* applied last, so it overrides every source above rather than racing
+     * whichever attack happened to contribute the bit */
+    if (insight != INSIGHT_ALL)
+	result = atkbp_diff(result, mon_insight_hidden_bits(ptr, insight));
+    return result;
+#undef MAX_ALT_ATTACK_SET
+#undef MB_PARTS_SLOT
+}
+
+/* The parts this form has but conceals below the given insight.
+ *
+ * Masking a monster's own full plan with this, rather than recomputing the
+ * visible plan from the permonst, is what lets an individual's body diverge
+ * from its form's: anything the individual gained or lost is preserved,
+ * while the insight-gated bits are still hidden.
+ */
+struct atkbp_set
+mon_insight_veil(struct permonst *ptr, int insight)
+{
+    return atkbp_diff(ptr->bodyparts, mon_bodyparts(ptr, insight));
 }
 
 /*mattkbp.c*/

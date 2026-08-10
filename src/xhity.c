@@ -3547,8 +3547,13 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		) {
 		attk->adtyp = AD_STUN;
 	}
+
 	/* Specific cases that prevent attacks */
 	if (!by_the_book && !is_null_attk(attk) && (
+		/* A body part this attack needs is unusable
+		 * Judged against magr's own body, not pa's -- a borrowed attack is
+		 * still made with the borrower's limbs.*/
+		injuries_block(magr, attk) ||
 		/* If player is the target and is engulfed, only targetable by engulf attacks */
 		(youdef && u.uswallow && (attk->aatyp != AT_ENGL && attk->aatyp != AT_ILUR)) ||
 		/* If player was using 'k' to kick, they are only performing kick attacks (onlykicks is a state variable defined in dokick.c) */

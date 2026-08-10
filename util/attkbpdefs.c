@@ -66,29 +66,6 @@ atkbp_bits_to_string(struct atkbp_set bits)
     return buf;
 }
 
-/* vague/unordinaled bits are dropped in favor of whatever concrete limb
- * identity a different attack (or mon_flag_bodyparts()) establishes
- * instead -- except under INNUMERABLE, where there's no concrete count to
- * defer to (e.g. Legion's mass of arms).
- */
-static struct atkbp_set
-mon_bodypart_bits(struct atkbp_set attk_bits)
-{
-    struct atkbp_set vague_mask = atkbp_or((struct atkbp_set[]){
-	ATKBP(ARM), ATKBP(LEG), ATKBP(ARM_LOWER), ATKBP(LEG_REAR), ATKBP(LEG_FRONT), ATKBP(NONE) });
-    struct atkbp_set always_drop = atkbp_or((struct atkbp_set[]){
-	ATKBP(WHOLE_BODY), ATKBP(MIND_NOLIMB), ATKBP(INNUMERABLE), ATKBP(NONE) });
-    struct atkbp_set result = attk_bits;
-    int i;
-
-    if (!atkbp_intersects(attk_bits, ATKBP(INNUMERABLE)))
-	for (i = 0; i < ATKBP_NWORDS; i++)
-	    result.w[i] &= ~vague_mask.w[i];
-    for (i = 0; i < ATKBP_NWORDS; i++)
-	result.w[i] &= ~always_drop.w[i];
-    return result;
-}
-
 static void
 do_attkbp(void)
 {
@@ -112,10 +89,6 @@ do_attkbp(void)
     Fprintf(ofp,"#include \"mattkbp.h\"\n");
     Fprintf(ofp,"\nstruct mon_atkbp attkbp[] = {\n");
     for (ptr = &mons[0]; ptr->mlet; ptr++) {
-#define MB_PARTS_SLOT 1
-#define MAX_ALT_ATTACK_SET 1
-	struct atkbp_set bodyparts[NATTK + MAX_ALT_ATTACK_SET + MB_PARTS_SLOT + 1];
-
 	/* attk_bodyparts_all(), not attk_bodyparts() directly, is needed here
 	 * for whole-attack-list-aware cases (AT_SQUZ/AT_MARI/AT_MSPR/AT_MAGC/
 	 * AT_MMGC). Real mons[] data is fixed build-time content -- an
@@ -133,67 +106,37 @@ do_attkbp(void)
 	    exit(EXIT_FAILURE);
 	}
 
-	/* bodyparts: the union of every attack resolved above (filtered to
-	 * specific limbs only, mon_bodypart_bits()) plus whatever
-	 * mon_flag_bodyparts() can tell from flags alone -- filtering can
-	 * legitimately zero out an attack's contribution entirely (e.g.
-	 * housecat's single claw, whose only bit was the now-excluded
-	 * LEG_FRONT).
+	/* mon_bodyparts() reads each attack's own .bodypart field, so stamp the
+	 * resolved values into this in-memory copy of mons[] first.
 	 */
-	{
-	    struct atkbp_set filtered;
-	    int nbp = 0;
-
-	    for (i = 0; i < nattk; i++) {
-			filtered = mon_bodypart_bits(resolved[i]);
-			if (!atkbp_is_none(filtered))
-				bodyparts[nbp++] = filtered;
-	    }
-	    filtered = mon_flag_bodyparts(ptr);
-	    if (!atkbp_is_none(filtered))
-		bodyparts[nbp++] = filtered;
-	    /* Lolth's real mattk[] alone doesn't reveal she has up to 8 arms --
-	     * only her alternate "marilith-hands" routine (lolth_alt_attacks[])
-	     * does. She has them regardless of whether that form gets rolled,
-	     * so fold the same bits into her body-plan summary here.
-	     */
-	    if (ptr->mtyp == PM_AVATAR_OF_LOLTH) {
-		struct atkbp_set lolth_alt[LOLTH_ALT_ATTACK_COUNT + 1];
-		int li;
-
-		for (li = 0; li < LOLTH_ALT_ATTACK_COUNT; li++)
-		    lolth_alt[li] = lolth_alt_bodypart(li);
-		lolth_alt[LOLTH_ALT_ATTACK_COUNT] = ATKBP(NONE);
-		filtered = atkbp_or(lolth_alt);
-		if (!atkbp_is_none(filtered))
-		    bodyparts[nbp++] = filtered;
-	    }
-	    bodyparts[nbp] = ATKBP(NONE);
-	}
+	for (i = 0; i < nattk; i++)
+	    ptr->mattk[i].bodypart = resolved[i];
 
 	Fprintf(ofp,"/* %s */\n{\n\t{\n", ptr->mname);
 	for (i = 0; i < nattk; i++)
 	    Fprintf(ofp,"\t\t%s,\n", atkbp_bits_to_string(resolved[i]));
-	Fprintf(ofp,"\t},\n\t%s\n},\n", atkbp_bits_to_string(atkbp_or(bodyparts)));
+	Fprintf(ofp,"\t},\n\t%s\n},\n", atkbp_bits_to_string(mon_bodyparts(ptr, INSIGHT_ALL)));
     }
     Fprintf(ofp,"};\n");
 
     /* attkbp_init(): copies this file's attkbp[] table into mons[]'s own
-     * mattk[].bodypart fields (include/permonst.h) at game startup, so
-     * every consumer can read attribution straight off the struct attack
-     * it already has in hand rather than going through a separate lookup.
-     * attkbp[] is indexed the same way mons[] is, so this is a direct
-     * element-wise copy -- no dependency on mons[i].mtyp having already
-     * been stamped (id_permonst()) first.
+     * mattk[].bodypart and bodyparts fields (include/permonst.h) at game
+     * startup, so every consumer can read attribution straight off the
+     * struct attack (or permonst) it already has in hand rather than going
+     * through a separate lookup. attkbp[] is indexed the same way mons[]
+     * is, so this is a direct element-wise copy -- no dependency on
+     * mons[i].mtyp having already been stamped (id_permonst()) first.
      */
     Fprintf(ofp,"\nvoid NDECL(attkbp_init);\n");
     Fprintf(ofp,"\nvoid\n");
     Fprintf(ofp,"attkbp_init()\n");
     Fprintf(ofp,"{\n");
     Fprintf(ofp,"    int i, j;\n\n");
-    Fprintf(ofp,"    for (i = 0; i < NUMMONS; i++)\n");
+    Fprintf(ofp,"    for (i = 0; i < NUMMONS; i++) {\n");
     Fprintf(ofp,"\tfor (j = 0; j < NATTK; j++)\n");
     Fprintf(ofp,"\t    mons[i].mattk[j].bodypart = attkbp[i].attacks[j];\n");
+    Fprintf(ofp,"\tmons[i].bodyparts = attkbp[i].bodyparts;\n");
+    Fprintf(ofp,"    }\n");
     Fprintf(ofp,"}\n");
     Fprintf(ofp,"\n/*attkbp.c*/\n");
 

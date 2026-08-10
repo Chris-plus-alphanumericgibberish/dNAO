@@ -122,6 +122,7 @@ struct permonst {
 	uchar		mcolor;			/* color to use */
 # endif
 	int				mtyp;			/* Index number of this permonst entry */
+	struct atkbp_set	bodyparts;	/*Every body part this form is known to have (include/mattkbp.h).*/
 };
 
 extern NEARDATA struct permonst

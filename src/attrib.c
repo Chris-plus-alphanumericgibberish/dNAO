@@ -1722,6 +1722,18 @@ int delta;
 	if(discover || wizard)
 		pline("= %d", u.uinsight);
 
+	/* insight-gated limbs just became perceptible (or stopped being) */
+	{
+		struct monst *mtmp;
+
+		for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
+			if (DEADMONSTER(mtmp))
+				continue;
+			mon_refresh_visible_bodyparts(mtmp);
+		}
+		mon_refresh_visible_bodyparts(&youmonst);
+	}
+
 	/* possibly (de)activate glyphs */
 	long int thought;
 	for (thought = 1L; thought <= u.thoughts; thought = thought << 1) {

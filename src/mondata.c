@@ -48,7 +48,7 @@ boolean state;
 		mon->m_insight_level += 35;
 		mon->mvar1_tettigon_uncancel = TRUE;
 	}
-	set_mon_data_core(mon, mon->data);
+	set_mon_data_core(mon, mon->data, FALSE);
 	weap_attack = mon_attacktype(mon, AT_WEAP) ? TRUE : FALSE;
 	xwep_attack = mon_attacktype(mon, AT_XWEP) ? TRUE : FALSE;
 	if(weap_attack && !MON_WEP(mon)){
@@ -66,15 +66,15 @@ boolean state;
 	}
 }
 
-/* 
+/*
  * Safely sets mon->data from an mtyp, including mon's template.
  * Gets and/or allocates (via permonst_of) memory for mon's data field
  * Calling `set_mon_data(mon, mon->mtyp)` is always ok.
+ *
+ * new_form: see set_mon_data_core().
  */
-void
-set_mon_data(mon, mtyp)
-struct monst *mon;
-int mtyp;
+static void
+set_mon_data_flagged(struct monst *mon, int mtyp, boolean new_form)
 {
 	struct permonst * bas;
 	struct permonst * ptr;
@@ -105,7 +105,134 @@ int mtyp;
 		bas = &mons[mtyp];
 	}
 	/* set monster data */
-	set_mon_data_core(mon, ptr);
+	set_mon_data_core(mon, ptr, new_form);
+	return;
+}
+
+/*
+ * Body parts a monster of this type has at the given level, over and above
+ * what its permonst lists -- the parts mon_bodyparts() cannot see because
+ * they depend on the individual. Its permonst-side counterpart is
+ * mon_insight_hidden_bits() (src/mattkbp.c).
+ *
+ * Takes the level rather than reading mlev(mon) so that a level change can
+ * be applied as a difference between two calls (mon_relevel_bodyparts()).
+ */
+static struct atkbp_set
+mon_extra_bodyparts(struct monst *mon, int lev)
+{
+	/* An Iksh'na deva at max level swings a million arms in place of her
+	 * weapon (getattk(), src/xhity.c) -- nothing in her stat block hints
+	 * at it. */
+	if (mon->mtyp == PM_IKSH_NA_DEVA && lev >= 45)
+		return ATKBP(ARM);
+	return ATKBP(NONE);
+}
+
+/* Drop injuries to parts mon no longer has. */
+static void
+prune_injuries(struct monst *mon)
+{
+	mon->minjuries = atkbp_and(mon->minjuries, mon->mbodyparts_full);
+	return;
+}
+
+/*
+ * Recompute which of mon's body parts the PC can currently perceive, by
+ * veiling the insight-gated ones. Derived from mbodyparts_full, not
+ * recomputed from the permonst.
+ *
+ * Deliberately leaves minjuries alone: a hidden limb is still there and can
+ * still be hurt, so injuries outlive their limb's visibility.
+ */
+void
+mon_refresh_visible_bodyparts(struct monst *mon)
+{
+	/* change_uinsight() can fire during u_init(), before init_uasmon() has
+	 * given youmonst a permonst to read a body plan out of */
+	if (!mon->data)
+		return;
+	mon->mbodyparts = atkbp_diff(mon->mbodyparts_full,
+				     mon_insight_veil(mon->data, Insight));
+	return;
+}
+
+/*
+ * Rebuild mon's whole body plan from its form, discarding whatever it held.
+ * Only for creation and for taking on a new form: everywhere else the full
+ * plan is the monster's own record, and may legitimately differ from its
+ * form's by parts it has gained or lost as an individual.
+ */
+void
+mon_refresh_bodyparts(struct monst *mon)
+{
+	if (!mon->data)
+		return;
+	mon->mbodyparts_full = atkbp_union(mon->data->bodyparts,
+					   mon_extra_bodyparts(mon, mlev(mon)));
+	prune_injuries(mon);
+	mon_refresh_visible_bodyparts(mon);
+	return;
+}
+
+
+/*
+ * Two things stop an attack: a part that has been injured, and a part mon's
+ * form has that mon itself does not -- missing stops an attack the same way
+ * wrecked does. A part the attack names that mon's form never had does not
+ * block, since that comes of a borrowed attack (a lillend wearing another
+ * monster's mask); the body plan used here is mon's own, not the mask's.
+ */
+boolean
+injuries_block(struct monst *mon, struct attack *attk)
+{
+	struct permonst *ptr = (mon == &youmonst) ? youracedata : mon->data;
+	struct atkbp_set missing;
+
+	if (!ptr)
+		return FALSE;
+	missing = atkbp_diff(ptr->bodyparts, mon->mbodyparts_full);
+	return injuries_would_block_attk(ptr, attk, atkbp_union(mon->minjuries, missing));
+}
+
+/*
+ * Move mon's body plan from the parts oldlev granted to the ones newlev
+ * does, touching nothing else -- so a part gained or lost as an individual
+ * survives a level change.
+ */
+void
+mon_relevel_bodyparts(struct monst *mon, int oldlev, int newlev)
+{
+	struct atkbp_set old_extra, new_extra, lost;
+
+	if (!mon->data)
+		return;
+	old_extra = mon_extra_bodyparts(mon, oldlev);
+	new_extra = mon_extra_bodyparts(mon, newlev);
+	/* a part the form itself provides is not the level's to take back */
+	lost = atkbp_diff(atkbp_diff(old_extra, new_extra), mon->data->bodyparts);
+	mon->mbodyparts_full = atkbp_union(atkbp_diff(mon->mbodyparts_full, lost), new_extra);
+	prune_injuries(mon);
+	mon_refresh_visible_bodyparts(mon);
+	return;
+}
+
+/* mon is taking on mtyp as a new form -- the ordinary case. */
+void
+set_mon_data(struct monst *mon, int mtyp)
+{
+	set_mon_data_flagged(mon, mtyp, TRUE);
+	return;
+}
+
+/* Re-point a restored monster's data field, which is the one part of it
+ * that can't be saved. */
+void
+restore_mon_data(struct monst *mon, int mtyp)
+{
+	set_mon_data_flagged(mon, mtyp, FALSE);
+	/* Insight may have moved while this monster's level was unloaded */
+	mon_refresh_visible_bodyparts(mon);
 	return;
 }
 
@@ -318,18 +445,25 @@ int newpm;
 
 /*
  * Safely sets mon->data from an existing data pointer.
- * Calling `set_mon_data_core(mon, mon->data)` is always ok.
+ * Calling `set_mon_data_core(mon, mon->data, FALSE)` is always ok.
+ *
+ * new_form: mon is taking on ptr as a new form, so its body plan should be
+ * re-read from it. FALSE for the callers that only want intrinsics
+ * recalculated against the form mon already has (set_mcan(),
+ * give_mintrinsic()).
  */
 void
-set_mon_data_core(mon, ptr)
-struct monst *mon;
-struct permonst * ptr;
+set_mon_data_core(struct monst *mon, struct permonst *ptr, boolean new_form)
 {
 	int i;
+	int oldpm = mon->mtyp;
 
 	/* data and type */
 	mon->data = ptr;
 	mon->mtyp = ptr->mtyp;
+
+	if (new_form)
+		mon_refresh_bodyparts(mon);
 
 	/* zero out intrinsics to be set now */
 	for(i = 0; i < MPROP_SIZE; i++){
@@ -337,8 +471,8 @@ struct permonst * ptr;
 	}
 
 	/*Updates monster mvar*/
-	if(mon->mtyp != ptr->mtyp)
-		update_mon_mvar(mon, mon->mtyp, ptr->mtyp);
+	if(new_form && oldpm != ptr->mtyp)
+		update_mon_mvar(mon, oldpm, ptr->mtyp);
 
 	/* resistances */
 	mon->mintrinsics[0] = (ptr->mresists & MR_MASK);
@@ -483,7 +617,7 @@ struct monst * mon;
 long intrinsic;
 {
 	mon->acquired_trinsics[((intrinsic)-1)/32] |=  (1L<<((intrinsic)-1)%32);
-	set_mon_data_core(mon, mon->data);
+	set_mon_data_core(mon, mon->data, FALSE);
 }
 
 void
@@ -492,7 +626,7 @@ struct monst * mon;
 long intrinsic;
 {
 	mon->acquired_trinsics[((intrinsic)-1)/32] &= ~(1L<<((intrinsic)-1)%32);
-	set_mon_data_core(mon, mon->data);
+	set_mon_data_core(mon, mon->data, FALSE);
 }
 
 //Note: intended to be mental things relating to a faction a monster belongs to
@@ -1962,6 +2096,10 @@ int template;
 #undef end_insert_okay
 #undef maybe_insert
 
+	/* pass 5: summarize the finished body plan. Runs after pass 4, not
+	 * with pass 3, so that the overrides above are part of the summary. */
+	ptr->bodyparts = mon_bodyparts(ptr, INSIGHT_ALL);
+
 	/*Adjust the name*/
 	/* horrors are disallowed out of caution - they definitely break if this is enabled */
 	if(!is_horror(&mons[mtyp])){
@@ -2533,6 +2671,7 @@ int level_bonus;
 
 		for (i = 0; i < nattk; i++)
 			horror->mattk[i].bodypart = resolved[i];
+		horror->bodyparts = mon_bodyparts(horror, INSIGHT_ALL);
 	}
 
 #undef get_random_of

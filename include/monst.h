@@ -7,6 +7,7 @@
 
 #include "prop.h"
 #include "attrib.h"
+#include "atkbpnames.h"
 
 /* The weapon_check flag is used two ways:
  * 1) When calling mon_wield_item, is 2-6 depending on what is desired.
@@ -419,6 +420,13 @@ struct monst {
 #define	mvar_lifesigns	mvar3
 #define	mvar_spellweaver_last_cast	mvar3
 #define has_lifesigns(mon)	(mon->mtyp != PM_SPELLWEAVER && mon->mtyp != PM_SPELLWEAVER_GODDESS_MOCKER && mon->mtyp != PM_CHAOS && mon->mvar_lifesigns)
+
+	/* seeded from data->bodyparts, but tracked per-monster: an individual
+	 * can have parts others of its form do not, and a few monsters can
+	 * only be partially perceived by the PC */
+	struct atkbp_set mbodyparts_full;	/* every body part it has */
+	struct atkbp_set mbodyparts;		/* those the PC can perceive */
+	struct atkbp_set minjuries;			/* those that have been injured */
 
 	struct ls_t * light;
 

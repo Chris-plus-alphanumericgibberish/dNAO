@@ -12,6 +12,9 @@
 extern struct atkbp_set FDECL(atkbp_lit, (int,long));
 extern struct atkbp_set FDECL(atkbp_or, (const struct atkbp_set *));
 extern boolean FDECL(atkbp_intersects, (struct atkbp_set,struct atkbp_set));
+extern struct atkbp_set FDECL(atkbp_and, (struct atkbp_set,struct atkbp_set));
+extern struct atkbp_set FDECL(atkbp_union, (struct atkbp_set,struct atkbp_set));
+extern struct atkbp_set FDECL(atkbp_diff, (struct atkbp_set,struct atkbp_set));
 extern boolean FDECL(atkbp_is_none, (struct atkbp_set));
 
 #define ATKBP_ARM_ORDINALS_MASK() \
@@ -60,12 +63,20 @@ extern int FDECL(mon_horn_count, (struct permonst *));
 
 extern struct atkbp_set FDECL(mon_flag_bodyparts, (struct permonst *));
 
+/* mon_bodyparts() insight argument: no gating, i.e. the whole potential body plan. */
+#define INSIGHT_ALL	(-1)
+
+extern struct atkbp_set FDECL(mon_bodyparts, (struct permonst *,int));
+
+extern struct atkbp_set FDECL(mon_insight_veil, (struct permonst *,int));
+
+extern boolean FDECL(injuries_would_block_attk, (struct permonst *,struct attack *,struct atkbp_set));
+
 /* struct mon_atkbp: one entry per monster (indexed the same way mons[] is).
  * `attacks[]` mirrors ptr->mattk[] -- same order, same per-attack meaning
- * attkbp[][NATTK] always had. `bodyparts` is the union of every entry in
- * `attacks[]` up to this monster's real attack count -- every body part
- * this monster's attacks are known to use, without a caller needing to
- * scan the per-attack array and OR them together itself.
+ * attkbp[][NATTK] always had. `bodyparts` is this monster's whole body
+ * plan as mon_bodyparts() computes it, precomputed so callers don't have
+ * to; attkbp_init() copies it into mons[]'s own permonst field.
  */
 struct mon_atkbp {
     struct atkbp_set attacks[NATTK];
