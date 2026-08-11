@@ -514,7 +514,7 @@ void
 clear_stale_fforms()
 {
 	for(int fform = NO_FFORM+1; fform <= LAST_FFORM; fform++){
-		if (!!(u.fightingForm[(fform-1)/16] & (0x1L << ((fform-1)%16))) && fform != FFORM_SHII_CHO && FightingFormSkillLevel(fform) <= P_ISRESTRICTED){
+		if (selectedFightingForm(fform) && fform != FFORM_SHII_CHO && FightingFormSkillLevel(fform) <= P_ISRESTRICTED){
 			unSetFightingForm(fform);
 			You("readjust your stance.");
 		}

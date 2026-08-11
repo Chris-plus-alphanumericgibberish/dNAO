@@ -2410,12 +2410,14 @@ int fform;
 		first = FIRST_ADV_KNI_FFORM;
 		last = LAST_ADV_KNI_FFORM;
 	} else {
+		/* overbroad, but the only safe default for a batch with no range arm */
+		if (wizard)
+			impossible("No unSetFightingForm() range covers form %d; clearing ALL fighting forms.", fform);
 		first = 0;
-		last = FFORM_LISTSIZE*16;
+		last = FFORM_LISTSIZE*FFORM_BATCH_SIZE;
 	}
 
-	/* this code assumes that each batch of 16 fighting forms are mutually exclusive, but not with other batches of 16 */
-	for(i=first/16; i <= last/16; i++)
+	for(i=FFORM_WORD(first); i <= FFORM_WORD(last); i++)
 		u.fightingForm[i] = 0L;
 
 }
@@ -2424,9 +2426,9 @@ void
 setFightingForm(fform)
 int fform;
 {
-	/* this code assumes that each batch of 16 fighting forms are mutually exclusive, but not with other batches of 16 */
+	/* clearing the batch first is what makes forms within it mutually exclusive */
 	unSetFightingForm(fform);
-	u.fightingForm[(fform-1)/16] |= (0x1L << ((fform-1)%16));
+	u.fightingForm[FFORM_WORD(fform)] |= FFORM_BIT(fform);
 }
 
 boolean
@@ -2473,7 +2475,7 @@ int fform;
 		return TRUE; //Found no fighting forms, return TRUE
 	}
 	
-	return !!(u.fightingForm[(fform-1)/16] & (0x1L << ((fform-1)%16)));
+	return !!(u.fightingForm[FFORM_WORD(fform)] & FFORM_BIT(fform));
 }
 
 int
