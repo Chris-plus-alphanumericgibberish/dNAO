@@ -2618,10 +2618,6 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	if(magr->mtyp == PM_TETTIGON_LEGATUS && magr->mcan &&attk->aatyp == AT_TUCH){
 		GETNEXT
 	}
-	/* Skip kicks with wounded legs */
-	if(!youagr && magr->mwounded_legs && attk->aatyp == AT_KICK){
-		GETNEXT
-	}
 	/* Skip attacks if stunned */
 	if(!youagr && magr->mstun && !by_the_book && !rn2(6)){
 		GETNEXT
@@ -9724,7 +9720,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 				alt_attk.damd = 0;
 			}
 			else {
-				mdef->mwounded_legs = TRUE;
+				injure_random_legs(mdef, 1, "");
 			}
 			alt_attk.adtyp = AD_PHYS;
 
@@ -17937,9 +17933,8 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 					int felldie = 20;
 					if(youagr && ZFOCUS(weapon))
 						felldie = ROLL_ETRAIT(weapon, magr, 4, 10);
-					if(!mdef->mwounded_legs && !rn2(felldie)){
-						mdef->mwounded_legs = 1;
-						pline("%s %s is injured in the fighting!", s_suffix(Monnam(mdef)), mbodypart(mdef, LEG));
+					if(!all_visible_legs_wounded(mdef) && !rn2(felldie)){
+						injure_random_legs(mdef, 1, "in the fighting");
 						struct weapon_dice wdice;
 						/* grab the weapon dice from dmgval_core */
 						dmgval_core(&wdice, bigmonst(pd), weapon, weapon->otyp, magr);
@@ -17949,6 +17944,8 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 							tratdmg += weapon_dam_bonus(weapon, weapon_type(weapon));
 					}
 				}
+				if(youagr)
+					morehungry(1*get_uhungersizemod());
 			}
 			int lhs = 5;
 			int s = 10;

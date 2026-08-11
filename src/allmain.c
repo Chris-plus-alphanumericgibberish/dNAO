@@ -2602,11 +2602,15 @@ karemade:
 							mtmp->movement = 0;
 							mtmp->mcanmove = 0;
 							mtmp->mfrozen = 2;
-							if(!mtmp->mwounded_legs && !rn2(20)){
-								mtmp->mwounded_legs = 1;
-								pline("%s %s is injured!", s_suffix(Monnam(mtmp)), mbodypart(mtmp, LEG));
-								mtmp->mspeed = MSLOW;
-								mtmp->permspeed = MSLOW;
+							if(!rn2(20)){
+								if(mon_body_leg_count(mtmp) > 0)
+									injure_random_legs(mtmp, rnd((mon_visible_leg_count(mtmp)+1)/2), "");
+								else if(mtmp->permspeed != MSLOW){
+									if(canseemon(mtmp))
+										pline("%s %s is injured!", s_suffix(Monnam(mtmp)), mbodypart(mtmp, LEG));
+									mtmp->mspeed = MSLOW;
+									mtmp->permspeed = MSLOW;
+								}
 							}
 						}
 						else mtmp->movement = max(0, mtmp->movement - 2);

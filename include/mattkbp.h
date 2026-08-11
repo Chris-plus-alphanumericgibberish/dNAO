@@ -16,6 +16,9 @@ extern struct atkbp_set FDECL(atkbp_and, (struct atkbp_set,struct atkbp_set));
 extern struct atkbp_set FDECL(atkbp_union, (struct atkbp_set,struct atkbp_set));
 extern struct atkbp_set FDECL(atkbp_diff, (struct atkbp_set,struct atkbp_set));
 extern boolean FDECL(atkbp_is_none, (struct atkbp_set));
+extern int FDECL(atkbp_bit_count, (struct atkbp_set));
+extern struct atkbp_set FDECL(atkbp_nth_bit, (struct atkbp_set,int));
+extern struct atkbp_set FDECL(leg_ordinal_bit, (int));
 
 #define ATKBP_ARM_ORDINALS_MASK() \
 	atkbp_or((struct atkbp_set[]){ \
@@ -58,6 +61,8 @@ extern struct atkbp_set FDECL(atkbp_spellcast_arm_mask, (struct permonst *));
 extern int FDECL(mon_leg_count, (struct permonst *));
 
 extern int FDECL(mon_rear_leg_count, (struct permonst *));
+
+extern int FDECL(atkbp_leg_count, (struct atkbp_set));
 
 extern int FDECL(mon_horn_count, (struct permonst *));
 

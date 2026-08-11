@@ -100,6 +100,35 @@ atkbp_diff(struct atkbp_set a, struct atkbp_set b)
     return result;
 }
 
+int
+atkbp_bit_count(struct atkbp_set s)
+{
+    int i, bit, n = 0;
+
+    for (i = 0; i < ATKBP_NWORDS; i++)
+	for (bit = 0; bit < 32; bit++)
+	    if (s.w[i] & (1L << bit))
+		n++;
+    return n;
+}
+
+/* The n'th bit of s, 0-based, counting up through the words. Out of range
+ * answers ATKBP(NONE).
+ */
+struct atkbp_set
+atkbp_nth_bit(struct atkbp_set s, int n)
+{
+    int i, bit;
+
+    if (n < 0)
+	return ATKBP(NONE);
+    for (i = 0; i < ATKBP_NWORDS; i++)
+	for (bit = 0; bit < 32; bit++)
+	    if ((s.w[i] & (1L << bit)) && n-- == 0)
+		return atkbp_lit(i, 1L << bit);
+    return ATKBP(NONE);
+}
+
 /* claw_count()/claw_ordinal(): how many of ptr's attacks are AT_CLAW and
  * not already claimed by the offhand/polywep flags (those short-circuit
  * above before either is ever consulted), and which one (0-based) is
@@ -174,7 +203,7 @@ kick_ordinal(struct permonst *ptr, struct attack *attk)
  * computed leg number (see the AT_KICK case below) into the matching
  * concrete bit.
  */
-static struct atkbp_set
+struct atkbp_set
 leg_ordinal_bit(int leg_number)
 {
     switch (leg_number) {
@@ -1553,6 +1582,20 @@ int
 mon_rear_leg_count(struct permonst *ptr)
 {
     return (mon_leg_count(ptr) / 4) * 2;
+}
+
+/* Counts the set rather than reading MB_ flags, so unlike mon_leg_count()
+ * above it can answer for one monster's own body and not just for a form.
+ */
+int
+atkbp_leg_count(struct atkbp_set parts)
+{
+    int leg, n = 0;
+
+    for (leg = 1; leg <= 8; leg++)
+	if (atkbp_intersects(parts, leg_ordinal_bit(leg)))
+	    n++;
+    return n;
 }
 
 int

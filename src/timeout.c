@@ -2744,8 +2744,6 @@ struct obj *obj;
 	EMON(obj)->mnotlaugh = mon->mnotlaugh;
 	EMON(obj)->mlaughing = mon->mlaughing;
 	EMON(obj)->mdoubt = mon->mdoubt;
-	EMON(obj)->mwounded_legs = mon->mwounded_legs;
-	
 	EMON(obj)->menvy = mon->menvy;
 	EMON(obj)->msanctity = mon->msanctity;
 	EMON(obj)->mgluttony = mon->mgluttony;

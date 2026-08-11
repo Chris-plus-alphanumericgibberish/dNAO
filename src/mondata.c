@@ -175,6 +175,136 @@ mon_refresh_bodyparts(struct monst *mon)
 	return;
 }
 
+/* A leg mon has lost is still counted -- it is a leg it ought to have and does
+ * not, which is what mon_injured_leg_count() below reports it as. */
+int
+mon_body_leg_count(struct monst *mon)
+{
+	if (!mon->data)
+		return atkbp_leg_count(mon->mbodyparts_full);
+	return atkbp_leg_count(atkbp_union(mon->mbodyparts_full, mon->data->bodyparts));
+}
+
+/* How many of those legs are unusable: injured, or missing outright. */
+int
+mon_injured_leg_count(struct monst *mon)
+{
+	struct atkbp_set missing;
+
+	if (!mon->data)
+		return atkbp_leg_count(mon->minjuries);
+	missing = atkbp_diff(mon->data->bodyparts, mon->mbodyparts_full);
+	return atkbp_leg_count(atkbp_union(mon->minjuries, missing));
+}
+
+/* Injuries are dealt against this set, not mbodyparts_full: hurting a limb
+ * must never be what reveals it. */
+int
+mon_visible_leg_count(struct monst *mon)
+{
+	return atkbp_leg_count(mon->mbodyparts);
+}
+
+/* The legs an injury could still land on: perceivable, and not already hurt. */
+static struct atkbp_set
+mon_injurable_legs(struct monst *mon)
+{
+	struct atkbp_set legs = ATKBP(NONE);
+	int leg;
+
+	for (leg = 1; leg <= 8; leg++)
+		legs = atkbp_union(legs, leg_ordinal_bit(leg));
+	return atkbp_diff(atkbp_and(mon->mbodyparts, legs), mon->minjuries);
+}
+
+/* True when injure_random_legs() below would find nothing to hurt. Legless
+ * monsters and monsters whose legs are all insight-hidden read as wounded
+ * here. */
+boolean
+all_visible_legs_wounded(struct monst *mon)
+{
+	return atkbp_is_none(mon_injurable_legs(mon));
+}
+
+/* `how` is the trailing phrase of the message -- "by the spears", or "" for no
+ * qualifier. Returns how many legs were newly hurt. */
+int
+injure_random_legs(struct monst *mon, int count, const char *how)
+{
+	struct atkbp_set hurt = ATKBP(NONE), pick;
+	int avail, n = 0;
+	const char *part;
+
+	while (count-- > 0) {
+		struct atkbp_set legs = atkbp_diff(mon_injurable_legs(mon), hurt);
+
+		avail = atkbp_bit_count(legs);
+		if (!avail)
+			break;
+		pick = atkbp_nth_bit(legs, rn2(avail));
+		hurt = atkbp_union(hurt, pick);
+		n++;
+	}
+	if (!n)
+		return 0;
+	mon->minjuries = atkbp_union(mon->minjuries, hurt);
+
+	if (canseemon(mon)) {
+		part = (n == 1) ? atkbp_bodypart_name(pick, mon->data)
+				: makeplural(mbodypart(mon, LEG));
+		pline("%s %s %s injured%s%s!", s_suffix(Monnam(mon)), part,
+			(n == 1) ? "is" : "are", *how ? " " : "", how);
+	}
+	return n;
+}
+
+/* Judged against the body mon has rather than the body the PC can see: walking
+ * is a fact about the monster. */
+boolean
+mon_hobbled(struct monst *mon)
+{
+	int hurt = mon_injured_leg_count(mon);
+	int legs;
+
+	if (!hurt)
+		return FALSE;
+	legs = mon_body_leg_count(mon);
+	return legs > 0 && hurt * 2 >= legs;
+}
+
+/* Injuries knit on their own only once mon is otherwise whole. Each is rolled
+ * independently, so a turn may mend none of them or all of them. */
+void
+mon_heal_injuries_natural(struct monst *mon)
+{
+	struct atkbp_set healed = ATKBP(NONE);
+	int i;
+
+	if (mon->mhp < mon->mhpmax || atkbp_is_none(mon->minjuries))
+		return;
+	for (i = atkbp_bit_count(mon->minjuries) - 1; i >= 0; i--)
+		if (!rn2(60))
+			healed = atkbp_union(healed, atkbp_nth_bit(mon->minjuries, i));
+	mon->minjuries = atkbp_diff(mon->minjuries, healed);
+	return;
+}
+
+/* Returns how many injuries were mended. */
+int
+mon_heal_injuries(struct monst *mon, int count)
+{
+	int avail, n = 0;
+
+	while (count == HEAL_ALL_INJURIES || count-- > 0) {
+		avail = atkbp_bit_count(mon->minjuries);
+		if (!avail)
+			break;
+		mon->minjuries = atkbp_diff(mon->minjuries,
+					    atkbp_nth_bit(mon->minjuries, rn2(avail)));
+		n++;
+	}
+	return n;
+}
 
 /*
  * Two things stop an attack: a part that has been injured, and a part mon's
