@@ -8055,6 +8055,8 @@ struct monst *magr;
 			continue;
 		if(!youagr && ((mdef->mpeaceful == magr->mpeaceful) || (!!mdef->mtame == !!magr->mtame)))
 			continue;
+		if(nonthreat(mdef))
+			continue;
 
 		if(distmin(x(magr), y(magr), x(mdef), y(mdef)) > range)
 			continue;
