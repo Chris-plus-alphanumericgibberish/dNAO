@@ -566,10 +566,39 @@ struct attack *mattk;
  *
  * Monster is attacking something. Use xattacky().
  */
-int
-mattacku(mtmp)
-register struct monst *mtmp;
+/* A hostile magr could hit instead of you, standing next to both of you. */
+static struct monst *
+crane_redirect_target(struct monst *magr)
 {
+	struct monst *mtmp, *found = (struct monst *)0;
+	int count = 0;
+
+	for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
+		if (DEADMONSTER(mtmp) || mtmp == magr)
+			continue;
+		if (mtmp->mpeaceful || mtmp->mtame)
+			continue;
+		if (distmin(u.ux, u.uy, mtmp->mx, mtmp->my) != 1)
+			continue;
+		if (distmin(x(magr), y(magr), mtmp->mx, mtmp->my) != 1)
+			continue;
+		/* pick uniformly among the candidates */
+		if (!rn2(++count))
+			found = mtmp;
+	}
+	return found;
+}
+
+int
+mattacku(struct monst *mtmp)
+{
+	struct monst *redirect;
+
+	if (u.uspin_crane && (redirect = crane_redirect_target(mtmp))) {
+		if (canseemon(mtmp) || canseemon(redirect))
+			You("spin aside, and %s strikes %s!", mon_nam(mtmp), mon_nam(redirect));
+		return xattacky(mtmp, redirect, x(redirect), y(redirect), 0L);
+	}
 	return xattacky(mtmp, &youmonst, mtmp->mux, mtmp->muy, 0L);
 }
 

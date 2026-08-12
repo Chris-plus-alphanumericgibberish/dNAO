@@ -437,6 +437,8 @@ struct you {
 #define FFORM_LISTSIZE	(LAST_FFORM/FFORM_BATCH_SIZE + 1)
 	unsigned long int fightingForm[FFORM_LISTSIZE];/* special properties */
 	int ueldritch_style;
+	xchar umartial_form_order[MNK_FFORM_COUNT];	/* order the monk's forms unlock in, rolled at game start */
+	unsigned long int umartial_forms_known;		/* FFORM_BIT() of each monk form learned so far */
 	Bitfield(uavoid_passives,1);
 	Bitfield(uavoid_msplcast,1);
 	Bitfield(uavoid_grabattk,1);
@@ -445,6 +447,8 @@ struct you {
 	Bitfield(uavoid_theft,1);
 	Bitfield(uno_auto_attacks,1);
 	Bitfield(uavoid_urpassives,1);
+	Bitfield(uspin_crane,1);	/* redirect the next attack aimed at you */
+	Bitfield(upray_mantis,1);	/* block one limbed attack from each attacker */
 	unsigned long long int umystic;	/*Monk mystic attacks active*/
 #define monk_style_active(style) (style > 0 && u.umystic & (1ULL << (style-1)))
 #define toggle_monk_style(style) (u.umystic  = u.umystic ^ (1ULL << (style-1)))
@@ -491,6 +495,7 @@ struct you {
 #define MORTAL_D  40
 #define DRAIN_L   41
 #define REPULSE   42
+#define TAP       43
 #define HATRED    44
 #define COMMAND_S 45
 #define MAGE_S	  46
@@ -500,11 +505,22 @@ struct you {
 #define CHAIN_MAG 50
 #define STEAL_S   51
 #define STRONG_P  52
-#define MAX_MYSTIC_FORMS 52
+#define CHI_SEVER 53
+#define FLY_KICKS 54
+#define HOLY_A    55
+#define PIERCE_C  56
+#define SPIN_CRANE 57
+#define PRAY_MANTIS 58
+#define SNAKE_S   59
+#define CLAP      60
+#define MAX_MYSTIC_FORMS 60
 
 #define MFORM_STREAM MAX_MYSTIC_FORMS+1
 #define MFORM_CHAINS MAX_MYSTIC_FORMS+2
 #define MFORM_KINSTL MAX_MYSTIC_FORMS+3
+
+#define u_blessed()	(u.ualign.record > 3)
+#define u_fallen()	(u.ualign.record < -3)
 
 	// long laststruck;
 	long lastmoved;

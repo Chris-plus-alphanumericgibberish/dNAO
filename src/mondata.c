@@ -205,16 +205,18 @@ mon_visible_leg_count(struct monst *mon)
 	return atkbp_leg_count(mon->mbodyparts);
 }
 
-/* The legs an injury could still land on: perceivable, and not already hurt. */
+/* The parts of `family` an injury could still land on: perceivable, and not
+ * already hurt. */
+static struct atkbp_set
+mon_injurable_parts(struct monst *mon, struct atkbp_set family)
+{
+	return atkbp_diff(atkbp_and(mon->mbodyparts, family), mon->minjuries);
+}
+
 static struct atkbp_set
 mon_injurable_legs(struct monst *mon)
 {
-	struct atkbp_set legs = ATKBP(NONE);
-	int leg;
-
-	for (leg = 1; leg <= 8; leg++)
-		legs = atkbp_union(legs, leg_ordinal_bit(leg));
-	return atkbp_diff(atkbp_and(mon->mbodyparts, legs), mon->minjuries);
+	return mon_injurable_parts(mon, ATKBP_LEG_ORDINALS_MASK());
 }
 
 /* True when injure_random_legs() below would find nothing to hurt. Legless
@@ -226,22 +228,41 @@ all_visible_legs_wounded(struct monst *mon)
 	return atkbp_is_none(mon_injurable_legs(mon));
 }
 
+/* No-op when the arm was empty, so callers can hand over MON_WEP()/MON_SWEP()
+ * unchecked. */
+static void
+mon_drop_wielded(struct monst *mon, struct obj *wep)
+{
+	if (!wep)
+		return;
+
+	if (canseemon(mon))
+		pline("%s drops %s %s!", Monnam(mon), mhis(mon), xname(wep));
+	obj_extract_and_unequip_self(wep);
+	mdrop_obj(mon, wep, FALSE);
+}
+
 /* `how` is the trailing phrase of the message -- "by the spears", or "" for no
- * qualifier. Returns how many legs were newly hurt. */
-int
-injure_random_legs(struct monst *mon, int count, const char *how)
+ * qualifier. `plural` names the family for a multi-part injury; it is copied up
+ * front because the callers build it out of the rotating name buffers.
+ * Returns how many parts were newly hurt. */
+static int
+injure_random_parts(struct monst *mon, struct atkbp_set family, int count,
+	const char *how, const char *plural)
 {
 	struct atkbp_set hurt = ATKBP(NONE), pick;
+	char plurbuf[BUFSZ];
 	int avail, n = 0;
 	const char *part;
 
+	Strcpy(plurbuf, plural);
 	while (count-- > 0) {
-		struct atkbp_set legs = atkbp_diff(mon_injurable_legs(mon), hurt);
+		struct atkbp_set parts = atkbp_diff(mon_injurable_parts(mon, family), hurt);
 
-		avail = atkbp_bit_count(legs);
+		avail = atkbp_bit_count(parts);
 		if (!avail)
 			break;
-		pick = atkbp_nth_bit(legs, rn2(avail));
+		pick = atkbp_nth_bit(parts, rn2(avail));
 		hurt = atkbp_union(hurt, pick);
 		n++;
 	}
@@ -250,12 +271,47 @@ injure_random_legs(struct monst *mon, int count, const char *how)
 	mon->minjuries = atkbp_union(mon->minjuries, hurt);
 
 	if (canseemon(mon)) {
-		part = (n == 1) ? atkbp_bodypart_name(pick, mon->data)
-				: makeplural(mbodypart(mon, LEG));
+		part = (n == 1) ? atkbp_bodypart_name(pick, mon->data) : plurbuf;
 		pline("%s %s %s injured%s%s!", s_suffix(Monnam(mon)), part,
 			(n == 1) ? "is" : "are", *how ? " " : "", how);
 	}
+	if (atkbp_intersects(hurt, ATKBP(ARM_DOMINANT)))
+		mon_drop_wielded(mon, MON_WEP(mon));
+	if (atkbp_intersects(hurt, ATKBP(ARM_OFFHAND)))
+		mon_drop_wielded(mon, MON_SWEP(mon));
 	return n;
+}
+
+int
+injure_random_limbs(struct monst *mon, int count, const char *how)
+{
+	return injure_random_parts(mon, ATKBP_LIMB_MASK(), count, how, "limbs");
+}
+
+/* TRUE when `attk` is made with a limb that could still be hurt. */
+boolean
+attack_limb_injurable(struct monst *mon, struct attack *attk)
+{
+	struct atkbp_set limbs = atkbp_and(attk->bodypart, ATKBP_LIMB_MASK());
+
+	return !atkbp_is_none(mon_injurable_parts(mon, limbs));
+}
+
+int
+injure_attack_limb(struct monst *mon, struct attack *attk, const char *how)
+{
+	struct atkbp_set limbs = atkbp_and(attk->bodypart, ATKBP_LIMB_MASK());
+
+	if (atkbp_is_none(limbs))
+		return 0;
+	return injure_random_parts(mon, limbs, 1, how, "limbs");
+}
+
+int
+injure_random_legs(struct monst *mon, int count, const char *how)
+{
+	return injure_random_parts(mon, ATKBP_LEG_ORDINALS_MASK(), count, how,
+		makeplural(mbodypart(mon, LEG)));
 }
 
 /* Judged against the body mon has rather than the body the PC can see: walking
@@ -2868,6 +2924,41 @@ struct monst *magr;
 		&& attk->aatyp != AT_TNKR && attk->aatyp != AT_WDGZ && attk->aatyp != AT_REND
 		)
 			return TRUE;
+	}
+
+    return FALSE;
+}
+
+boolean
+has_multi_or_nonweapon_nonkick_attk(struct monst *magr)
+{
+	struct attack *attk;
+	struct attack prev_attk = {0};
+	int real_attk_count = 0;
+	int	indexnum = 0,	/* loop counter */
+		subout[SUBOUT_ARRAY_SIZE] = {0},	/* remembers what attack substitutions have been made for [magr]'s attack chain */
+		tohitmod = 0,	/* flat accuracy modifier for a specific attack */
+		res[4];		/* results of previous 2 attacks ([0] -> current attack, [1] -> 1 ago, [2] -> 2 ago) -- this is dynamic! */
+
+	/* zero out res[] */
+	res[0] = MM_MISS;
+	res[1] = MM_MISS;
+	res[2] = MM_MISS;
+	res[3] = MM_MISS;
+	
+	for(attk = getattk(magr, (struct monst *) 0, res, &indexnum, &prev_attk, FALSE, subout, &tohitmod);
+		!is_null_attk(attk);
+		attk = getattk(magr, (struct monst *) 0, res, &indexnum, &prev_attk, FALSE, subout, &tohitmod)
+	){
+		if(attk->aatyp != AT_NONE && attk->aatyp != AT_SPIT && attk->aatyp != AT_BREA
+		&& attk->aatyp != AT_BOOM && attk->aatyp != AT_GAZE && attk->aatyp != AT_ARRW
+		&& attk->aatyp != AT_TNKR && attk->aatyp != AT_WDGZ && attk->aatyp != AT_REND
+		&& attk->aatyp != AT_KICK
+		){
+			real_attk_count++;
+			if((attk->aatyp != AT_WEAP) || real_attk_count > 1)
+				return TRUE;
+		}
 	}
 
     return FALSE;

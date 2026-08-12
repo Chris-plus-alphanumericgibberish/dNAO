@@ -135,6 +135,7 @@ STATIC_PTR int FDECL(ability_menu, (boolean, boolean));
 STATIC_PTR int NDECL(domountattk);
 STATIC_PTR int NDECL(hasfightingforms);
 STATIC_PTR int NDECL(doMysticForm);
+STATIC_PTR int NDECL(doMartialForm);
 STATIC_PTR int NDECL(doLightsaberForm);
 STATIC_PTR int NDECL(doKnightForm);
 STATIC_PTR int NDECL(dofightingform);
@@ -992,8 +993,33 @@ use_reach_attack()
 	return MOVE_STANDARD;
 }
 
+/* A slot with no move at all is listed, but is neither tagged active/disabled
+ * nor given a letter to toggle it by. */
+static char
+add_mystic_move(winid tmpwin, char incntlet, const char *arrow, int moveID)
+{
+	char buf[BUFSZ];
+	anything any;
+
+	any.a_void = 0;		/* zero out all bits */
+	if (!moveID) {
+		Sprintf(buf, "%s%s %s", arrow, forward_arrow(), move_name(moveID));
+		add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, buf, MENU_UNSELECTED);
+		return (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+
+	Sprintf(buf, "%s%s %s (%s)", arrow, forward_arrow(), move_name(moveID),
+		monk_style_active(moveID) ? "active" : "disabled");
+	any.a_int = moveID;
+	add_menu(tmpwin, NO_GLYPH, &any,
+		incntlet, 0, ATR_NONE, buf,
+		MENU_UNSELECTED);
+
+	return (incntlet != 'z') ? (incntlet+1) : 'A';
+}
+
 int
-doMysticForm()
+doMysticForm(void)
 {
 	winid tmpwin;
 	int n, how;
@@ -1006,61 +1032,13 @@ doMysticForm()
 	any.a_void = 0;		/* zero out all bits */
 	Sprintf(buf,	"Known Techniques");
 	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
-	if(monk_style_active(forward_move())) {
-		Sprintf(buf,	"%s%s %s (active)", forward_arrow(), forward_arrow(), move_name(forward_move()));
-	} else {
-		Sprintf(buf,	"%s%s %s (disabled)", forward_arrow(), forward_arrow(), move_name(forward_move()));
-	}
-	any.a_int = forward_move();
-	add_menu(tmpwin, NO_GLYPH, &any,
-		incntlet, 0, ATR_NONE, buf,
-		MENU_UNSELECTED);
 
-	incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
-	if(monk_style_active(bent_move())) {
-		Sprintf(buf,	"%s%s %s (active)", bent_arrow(), forward_arrow(), move_name(bent_move()));
-	} else {
-		Sprintf(buf,	"%s%s %s (disabled)", bent_arrow(), forward_arrow(), move_name(bent_move()));
-	}
-	any.a_int = bent_move();
-	add_menu(tmpwin, NO_GLYPH, &any,
-		incntlet, 0, ATR_NONE, buf,
-		MENU_UNSELECTED);
+	incntlet = add_mystic_move(tmpwin, incntlet, forward_arrow(), forward_move());
+	incntlet = add_mystic_move(tmpwin, incntlet, bent_arrow(), bent_move());
+	incntlet = add_mystic_move(tmpwin, incntlet, up_arrow(), hook_move());
+	incntlet = add_mystic_move(tmpwin, incntlet, uturn_arrow(), uturn_move());
+	incntlet = add_mystic_move(tmpwin, incntlet, backward_arrow(), alternated_move());
 
-	incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
-	if(monk_style_active(hook_move())) {
-		Sprintf(buf,	"%s%s %s (active)", up_arrow(), forward_arrow(), move_name(hook_move()));
-	} else {
-		Sprintf(buf,	"%s%s %s (disabled)", up_arrow(), forward_arrow(), move_name(hook_move()));
-	}
-	any.a_int = hook_move();
-	add_menu(tmpwin, NO_GLYPH, &any,
-		incntlet, 0, ATR_NONE, buf,
-		MENU_UNSELECTED);
-
-	incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
-	if(monk_style_active(uturn_move())) {
-		Sprintf(buf,	"%s%s %s (active)", uturn_arrow(), forward_arrow(), move_name(uturn_move()));
-	} else {
-		Sprintf(buf,	"%s%s %s (disabled)", uturn_arrow(), forward_arrow(), move_name(uturn_move()));
-	}
-	any.a_int = uturn_move();
-	add_menu(tmpwin, NO_GLYPH, &any,
-		incntlet, 0, ATR_NONE, buf,
-		MENU_UNSELECTED);
-
-	incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
-	if(monk_style_active(alternated_move())) {
-		Sprintf(buf,	"%s%s %s (active)", backward_arrow(), forward_arrow(), move_name(alternated_move()));
-	} else {
-		Sprintf(buf,	"%s%s %s (disabled)", backward_arrow(), forward_arrow(), move_name(alternated_move()));
-	}
-	any.a_int = alternated_move();
-	add_menu(tmpwin, NO_GLYPH, &any,
-		incntlet, 0, ATR_NONE, buf,
-		MENU_UNSELECTED);
-
-	incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
 
 	if(Role_if(PM_KENSEI) && u.role_variant == ART_SKY_REFLECTED && (artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_FOCUS)){
 		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
@@ -1130,6 +1108,77 @@ doMysticForm()
 	}
 
 }
+
+#define TIGER_FORM	(LAST_FFORM + 1)	/* menu entry for the monk's default (no form) */
+
+int
+doMartialForm(void)
+{
+	winid tmpwin;
+	int n, how, i;
+	char buf[BUFSZ];
+	menu_item *selected;
+	anything any;
+	boolean anyform = FALSE;
+
+	for (i = FIRST_MNK_FFORM; i <= LAST_MNK_FFORM; i++) {
+		if (selectedFightingForm(i))
+			anyform = TRUE;
+	}
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;		/* zero out all bits */
+
+	Sprintf(buf, "Known Martial Arts Forms");
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+
+	Strcpy(buf, "Tiger style");
+	if (!anyform)
+		Strcat(buf, " (active)");
+	any.a_int = TIGER_FORM;	/* must be non-zero */
+	add_menu(tmpwin, NO_GLYPH, &any,
+		'a', 0, ATR_NONE, buf,
+		MENU_UNSELECTED);
+
+	for (i = FIRST_MNK_FFORM; i <= LAST_MNK_FFORM; i++) {
+		if (!knownMartialForm(i))
+			continue;
+
+		Strcpy(buf, nameOfFightingForm(i));
+		if (selectedFightingForm(i))
+			Strcat(buf, " (active)");
+
+		any.a_int = i;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			'b' + (i - FIRST_MNK_FFORM), 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	end_menu(tmpwin, "Choose preferred martial arts form:");
+
+	how = PICK_ONE;
+	n = select_menu(tmpwin, how, &selected);
+	destroy_nhwindow(tmpwin);
+
+	if (n <= 0)
+		return MOVE_CANCELLED;
+
+	i = selected[0].item.a_int;
+	free(selected);
+
+	if (i == TIGER_FORM) {
+		if (!anyform)
+			return MOVE_CANCELLED;
+		unSetFightingForm(FIRST_MNK_FFORM);
+		return MOVE_INSTANT;
+	} else if (selectedFightingForm(i)) {
+		return MOVE_CANCELLED;
+	}
+	setFightingForm(i);
+	return MOVE_INSTANT;
+}
+
+#undef TIGER_FORM
 
 int
 doLightsaberForm()
@@ -1693,7 +1742,7 @@ doEtechForm()
 	}
 }
 
-#define MONK_FORMS			0x0001L
+#define MYSTIC_FORMS		0x0001L
 #define LIGHTSABER_FORMS	0x0002L
 #define KNIGHT_FORMS		0x0004L
 #define AVOID_PASSIVES		0x0008L
@@ -1708,6 +1757,7 @@ doEtechForm()
 #define BOREAL_FORMS		0x1000L
 #define AVOID_URPASSIVES	0x2000L
 #define STORM_FORMS			0x4000L
+#define MARTIAL_ARTS_FORMS	0x8000L
 
 int
 hasfightingforms(){
@@ -1739,7 +1789,9 @@ hasfightingforms(){
 
 	/* forms relevant due to situation/role are shown, even if you're bad at them (if applicable) */
 	if(Role_if(PM_MONK) || Role_if(PM_KENSEI))
-		formmask |= MONK_FORMS;
+		formmask |= MYSTIC_FORMS;
+	if(Role_if(PM_MONK))
+		formmask |= MARTIAL_ARTS_FORMS;
 	if(Role_if(PM_KNIGHT) || Role_if(PM_KENSEI))
 		formmask |= KNIGHT_FORMS;
 	if((uwep && is_lightsaber(uwep)) || (uswapwep && is_lightsaber(uswapwep)))
@@ -1890,7 +1942,7 @@ dofightingform()
 	tmpwin = create_nhwindow(NHW_MENU);
 	start_menu(tmpwin);
 	any.a_void = 0;		/* zero out all bits */
-#define	MONK_FORM	1
+#define	MYST_FORM	1
 #define	LGHT_FORM	2
 #define	KNIT_FORM	3
 #define	AVOD_FORM	4
@@ -1905,10 +1957,15 @@ dofightingform()
 #define	BOREAL_FORM	13
 #define	AVOD_PASV	14
 #define	STORM_FORM	15
+#define	MRTL_FORM	16
 
-	if (formmask & MONK_FORMS) {
-		any.a_int = MONK_FORM;
+	if (formmask & MYSTIC_FORMS) {
+		any.a_int = MYST_FORM;
 		add_menu(tmpwin, NO_GLYPH, &any, 'm', 0, ATR_NONE, "Select Mystic Forms", MENU_UNSELECTED);
+	}
+	if (formmask & MARTIAL_ARTS_FORMS) {
+		any.a_int = MRTL_FORM;
+		add_menu(tmpwin, NO_GLYPH, &any, 'f', 0, ATR_NONE, "Select Martial Arts Forms", MENU_UNSELECTED);
 	}
 	if (formmask & KNIGHT_FORMS) {
 		any.a_int = KNIT_FORM;
@@ -2004,8 +2061,10 @@ dofightingform()
 	}
 
 	switch (n){
-		case MONK_FORM:
+		case MYST_FORM:
 			return doMysticForm();
+		case MRTL_FORM:
+			return doMartialForm();
 		case LGHT_FORM:
 			return doLightsaberForm();
 		case KNIT_FORM:
@@ -2049,7 +2108,7 @@ dofightingform()
 	return MOVE_CANCELLED;
 }
 
-#undef	MONK_FORM
+#undef	MYST_FORM
 #undef	LGHT_FORM
 #undef	KNIT_FORM
 #undef	AVOD_FORM
@@ -2062,8 +2121,10 @@ dofightingform()
 #undef	AVOD_THFT
 #undef	AVOD_PASV
 #undef	STORM_FORM
+#undef	MRTL_FORM
 
-#undef MONK_FORMS
+#undef MYSTIC_FORMS
+#undef MARTIAL_ARTS_FORMS
 #undef LIGHTSABER_FORMS
 #undef KNIGHT_FORMS
 #undef AVOID_PASSIVES

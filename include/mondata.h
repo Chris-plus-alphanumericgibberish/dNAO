@@ -327,6 +327,7 @@
 #define noanatomy(ptr)			(noncorporeal(ptr) || amorphous(ptr) || naoid(ptr))
 
 #define noboots(ptr)			((slithy(ptr) || nolimbs(ptr) || nofeet(ptr)) && !humanoid_feet(ptr))
+#define nokicks(ptr)			((slithy(ptr) || nolimbs(ptr)) && !humanoid_feet(ptr))
 
 #define has_wings(ptr)			(((ptr)->mflagsb & MB_WINGS) != 0)
 #define has_wings_mon(mon)		(((mon) == &youmonst) ? (has_wings(youracedata) || u_variable_wings()) : has_wings((mon)->data))
@@ -1260,6 +1261,9 @@
 							) \
 							|| ((ptr)->mflagsc&MC_ORGANIC) \
 							)
+
+#define nerve_strike_vulnerable(ptr)	(!thick_skinned(ptr) && !nonliving(ptr) && is_organic_monst(ptr))
+#define disorienting_strike_vulnerable(ptr)		(!thick_skinned(ptr) && !mindless(ptr) && is_organic_monst(ptr))
 
 // #define is_indigestible(ptr)	((ptr)->mtyp == PM_DANCING_BLADE ||\
 								 // (ptr)->mtyp == PM_EARTH_ELEMENTAL ||\

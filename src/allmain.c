@@ -672,6 +672,9 @@ boolean affect_game_state;
 			){
 				current_cost -= NORMAL_SPEED / ROLL_ETRAIT(uwep, &youmonst, 3, 4);
 			}
+			if(!Upolyd && !uwep && (!uswapwep || CHECK_ETRAIT(uswapwep, &youmonst, ETRAIT_QUICK) || !u.twoweap) && activeFightingForm(FFORM_MNK_SNAKE)){
+				current_cost -= NORMAL_SPEED / 3;
+			}
 
 			/* some weapons are slower */
 			if (uwep
@@ -986,6 +989,9 @@ you_calc_movement()
 	}
 	
 	if(In_fog_cloud(&youmonst)) moveamt = max(moveamt/3, 1);
+	/* defensive monk stances last only for the remainder of the turn */
+	u.uspin_crane = 0;
+	u.upray_mantis = 0;
 	youmonst.movement += moveamt;
 	//floor how far into movement-debt you can fall.
 	if (youmonst.movement < -2*NORMAL_SPEED) youmonst.movement = -2*NORMAL_SPEED;

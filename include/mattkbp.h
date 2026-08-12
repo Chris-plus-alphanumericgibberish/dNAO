@@ -36,6 +36,11 @@ extern struct atkbp_set FDECL(leg_ordinal_bit, (int));
 	    ATKBP(LEG_DOMINANT), ATKBP(LEG_OFFHAND), \
 	    ATKBP(LEG_3RD), ATKBP(LEG_4TH), ATKBP(LEG_5TH), ATKBP(LEG_6TH), ATKBP(LEG_7TH), ATKBP(LEG_8TH), \
 	    ATKBP(NONE) })
+#define ATKBP_TENTACLE_ARM_ORDINALS_MASK() \
+	atkbp_or((struct atkbp_set[]){ \
+	    ATKBP(TENTACLE_ARM_DOMINANT), ATKBP(TENTACLE_ARM_OFFHAND), \
+	    ATKBP(TENTACLE_ARM_3RD), ATKBP(TENTACLE_ARM_4TH), ATKBP(TENTACLE_ARM_5TH), ATKBP(TENTACLE_ARM_6TH), \
+	    ATKBP(NONE) })
 #define ATKBP_HORN_ORDINALS_MASK() \
 	atkbp_or((struct atkbp_set[]){ \
 	    ATKBP(HORN_1ST), ATKBP(HORN_2ND), \
@@ -55,6 +60,16 @@ extern struct atkbp_set FDECL(leg_ordinal_bit, (int));
 
 #define ATKBP_LOWER_ARM_MASK() \
 	atkbp_or((struct atkbp_set[]){ ATKBP_ARM_LOWER_ORDINALS_MASK(), ATKBP(ARM_LOWER), ATKBP(NONE) })
+
+/* Every part that counts as one of a monster's limbs: concrete ordinals only,
+ * so the generic termini (LIMB_GENERIC, TENTACLE_GENERIC, OTHER_APPENDAGE) and
+ * the vague family bits are all excluded.
+ */
+#define ATKBP_LIMB_MASK() \
+	atkbp_or((struct atkbp_set[]){ \
+	    ATKBP_CONCRETE_ARM_MASK(), ATKBP_TENTACLE_ARM_ORDINALS_MASK(), ATKBP_LEG_ORDINALS_MASK(), \
+	    ATKBP(ALIEN_LIMB_1ST), ATKBP(ALIEN_LIMB_2ND), ATKBP(WING), ATKBP(TAIL), \
+	    ATKBP(NONE) })
 
 extern struct atkbp_set FDECL(atkbp_spellcast_arm_mask, (struct permonst *));
 

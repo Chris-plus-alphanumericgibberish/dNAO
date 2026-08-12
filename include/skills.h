@@ -127,6 +127,7 @@
 #define LIGHTSABER_BATCH_NUMBER		0
 #define BASIC_KNI_BATCH_NUMBER		1
 #define ADV_KNI_BATCH_NUMBER		2
+#define MNK_BATCH_NUMBER			3
 
 /* The word a form lives in, and its bit within that word. */
 #define FFORM_WORD(fform)	(((fform)-1)/FFORM_BATCH_SIZE)
@@ -157,7 +158,16 @@
 #define FIRST_ADV_KNI_FFORM			FFORM_KNI_SACRED
 #define LAST_ADV_KNI_FFORM			FFORM_KNI_RUNIC
 
-#define LAST_FFORM		FFORM_KNI_RUNIC
+/* the monk's default style is NO_FFORM, presented in the menu as the tiger style */
+#define FFORM_MNK_KIRIN		(1 + MNK_BATCH_NUMBER*FFORM_BATCH_SIZE)
+#define FFORM_MNK_CRANE		(2 + MNK_BATCH_NUMBER*FFORM_BATCH_SIZE)
+#define FFORM_MNK_SNAKE		(3 + MNK_BATCH_NUMBER*FFORM_BATCH_SIZE)
+#define FFORM_MNK_MANTIS	(4 + MNK_BATCH_NUMBER*FFORM_BATCH_SIZE)
+#define FIRST_MNK_FFORM		FFORM_MNK_KIRIN
+#define LAST_MNK_FFORM		FFORM_MNK_MANTIS
+#define MNK_FFORM_COUNT		(LAST_MNK_FFORM - FIRST_MNK_FFORM + 1)
+
+#define LAST_FFORM		FFORM_MNK_MANTIS
 
 #define FightingFormSkillLevel(i)	P_SKILL(getFightingFormSkill(i))
 /*

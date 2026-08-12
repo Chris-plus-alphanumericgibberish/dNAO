@@ -3545,6 +3545,9 @@ int skill;
 	You("are now %s skilled in %s.",
 	P_SKILL_CORE(skill, FALSE) >= P_MAX_SKILL_CORE(skill, FALSE) ? "most" : "more",
 	P_NAME(skill));
+
+	if (skill == P_MARTIAL_ARTS)
+		unlock_martial_forms();
 }
 
 static const struct skill_range {
