@@ -4452,7 +4452,7 @@ mkpluvillage()
 					}
 					flood_fill_rm(x+1, y+5,
 						  nroom+ROOMOFFSET, TRUE, TRUE);
-					add_room(x+1, y+4, x+sizebig1-2, y+6, TRUE, SHOPBASE + rn2(UNIQUESHOP - SHOPBASE), TRUE);
+					add_room(x+1, y+4, x+sizebig1-1, y+6, TRUE, SHOPBASE + rn2(UNIQUESHOP - SHOPBASE), TRUE);
 				break;
 				case 1: //Temple
 					for(i=1;i<sizebig1;i++){
@@ -4463,7 +4463,7 @@ mkpluvillage()
 					}
 					flood_fill_rm(x+1, y+5,
 						  nroom+ROOMOFFSET, TRUE, TRUE);
-					add_room(x+1, y+4, x+sizebig1-2, y+6, TRUE, TEMPLE, TRUE);
+					add_room(x+1, y+4, x+sizebig1-1, y+6, TRUE, TEMPLE, TRUE);
 					add_altar(x+2, y+5, A_NEUTRAL, TRUE, align_to_god(A_NEUTRAL));
 					priestini(&u.uz, &rooms[nroom - 1], x+2, y+5, FALSE);
 					level.flags.has_temple = 1;
@@ -4477,7 +4477,7 @@ mkpluvillage()
 					}
 					flood_fill_rm(x+1, y+5,
 						  nroom+ROOMOFFSET, TRUE, TRUE);
-					add_room(x+1, y+4, x+sizebig1-2, y+6, TRUE, BARRACKS, TRUE);
+					add_room(x+1, y+4, x+sizebig1-1, y+6, TRUE, BARRACKS, TRUE);
 				break;
 				case 3: //Courtroom
 					for(i=1;i<sizebig1;i++){
@@ -4489,7 +4489,7 @@ mkpluvillage()
 					flood_fill_rm(x+1, y+5,
 						  nroom+ROOMOFFSET, TRUE, TRUE);
 					throne = 1;
-					add_room(x+1, y+4, x+sizebig1-2, y+6, TRUE, COURT, TRUE);
+					add_room(x+1, y+4, x+sizebig1-1, y+6, TRUE, COURT, TRUE);
 				break;
 				case 4://Normal
 					for(i=1;i<sizebig1;i++){
@@ -4502,7 +4502,7 @@ mkpluvillage()
 					}
 					flood_fill_rm(x+1, y+5,
 						  nroom+ROOMOFFSET, TRUE, TRUE);
-					add_room(x+1, y+4, x+sizebig1-2, y+6, TRUE, OROOM, TRUE);
+					add_room(x+1, y+4, x+sizebig1-1, y+6, TRUE, OROOM, TRUE);
 				break;
 				case 5: //Gold vault
 					for(i=1;i<sizebig1;i++){
@@ -4515,7 +4515,7 @@ mkpluvillage()
 					}
 					flood_fill_rm(x+1, y+5,
 						  nroom+ROOMOFFSET, TRUE, TRUE);
-					add_room(x+1, y+4, x+sizebig1-2, y+6, TRUE, OROOM, TRUE);
+					add_room(x+1, y+4, x+sizebig1-1, y+6, TRUE, OROOM, TRUE);
 				break;
 				case 6://Tool shed
 					for(i=1;i<sizebig1;i++){
@@ -4527,7 +4527,7 @@ mkpluvillage()
 					}
 					flood_fill_rm(x+1, y+5,
 						  nroom+ROOMOFFSET, TRUE, TRUE);
-					add_room(x+1, y+4, x+sizebig1-2, y+6, TRUE, OROOM, TRUE);
+					add_room(x+1, y+4, x+sizebig1-1, y+6, TRUE, OROOM, TRUE);
 				break;
 				case 7:{//prison
 					struct obj *chest;
@@ -4545,7 +4545,7 @@ mkpluvillage()
 					}
 					flood_fill_rm(x+1, y+5,
 						  nroom+ROOMOFFSET, TRUE, TRUE);
-					add_room(x+1, y+4, x+sizebig1-2, y+6, TRUE, OROOM, TRUE);
+					add_room(x+1, y+4, x+sizebig1-1, y+6, TRUE, OROOM, TRUE);
 				}break;
 			}
 			add_door(x+sizebig1,y+5,&rooms[roomtypb]);
@@ -4743,14 +4743,14 @@ mkpluvillage()
 						}
 					}
 					chest = mksobj_at(CHEST, x+sizetot,y+5, NO_MKOBJ_FLAGS);
-					makemon(&mons[PM_CUPRILACH_RILMANI], x+1,y+5, MM_ADJACENTOK|MM_NOCOUNTBIRTH);
+					makemon(&mons[PM_CUPRILACH_RILMANI], x+sizetot,y+5, MM_ADJACENTOK|MM_NOCOUNTBIRTH);
 					for(i=sizetot;i>=sizetot+1-sizebig2+1;i-=2){
 						mkneucell(x+i,y+3,chest,0,1);
 						mkneucell(x+i,y+7,chest,0,-1);
 					}
 					flood_fill_rm(x+sizetot-1, y+5,
 						  nroom+ROOMOFFSET, TRUE, TRUE);
-					add_room(x+1, y+4, x+sizebig1-2, y+6, TRUE, OROOM, TRUE);
+					add_room(x+sizetot+1-sizebig2+1, y+4, x+sizetot+1-1, y+6, TRUE, OROOM, TRUE);
 				}break;
 			}
 			add_door(x+sizetot+1-sizebig2,y+5,&rooms[roomtypb]);

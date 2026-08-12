@@ -269,7 +269,8 @@ void
 replshk(mtmp)
 register struct monst *mtmp;
 {
-	rooms[ESHK(mtmp)->shoproom - ROOMOFFSET].resident = mtmp;
+	if (on_level(&(ESHK(mtmp)->shoplevel), &u.uz))
+		rooms[ESHK(mtmp)->shoproom - ROOMOFFSET].resident = mtmp;
 }
 
 /* do shopkeeper specific structure munging -dlc */

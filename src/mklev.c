@@ -1026,6 +1026,11 @@ clear_level_structures()
 	
 	level.lastmove = monstermoves;
 
+	/* rooms[] (and subrooms[], which aliases its back half) are global
+	   and reused across levels, so a freshly generated room can otherwise
+	   inherit a stale resident pointer left behind by whatever level
+	   previously occupied that array slot */
+	(void) memset((genericptr_t)rooms, 0, sizeof(rooms));
 	nroom = 0;
 	rooms[0].hx = -1;
 	nsubroom = 0;
