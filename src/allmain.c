@@ -514,7 +514,7 @@ void
 clear_stale_fforms()
 {
 	for(int fform = NO_FFORM+1; fform <= LAST_FFORM; fform++){
-		if (!!(u.fightingForm[(fform-1)/16] & (0x1L << ((fform-1)%16))) && fform != FFORM_SHII_CHO && FightingFormSkillLevel(fform) <= P_ISRESTRICTED){
+		if (selectedFightingForm(fform) && fform != FFORM_SHII_CHO && FightingFormSkillLevel(fform) <= P_ISRESTRICTED){
 			unSetFightingForm(fform);
 			You("readjust your stance.");
 		}
@@ -671,6 +671,9 @@ boolean affect_game_state;
 				&& (!u.twoweap || (uswapwep && CHECK_ETRAIT(uswapwep, &youmonst, ETRAIT_QUICK)) || (uwep->otyp == BESTIAL_CLAW && !uswapwep))
 			){
 				current_cost -= NORMAL_SPEED / ROLL_ETRAIT(uwep, &youmonst, 3, 4);
+			}
+			if(!Upolyd && !uwep && (!uswapwep || CHECK_ETRAIT(uswapwep, &youmonst, ETRAIT_QUICK) || !u.twoweap) && activeFightingForm(FFORM_MNK_SNAKE)){
+				current_cost -= NORMAL_SPEED / 3;
 			}
 
 			/* some weapons are slower */
@@ -986,6 +989,9 @@ you_calc_movement()
 	}
 	
 	if(In_fog_cloud(&youmonst)) moveamt = max(moveamt/3, 1);
+	/* defensive monk stances last only for the remainder of the turn */
+	u.uspin_crane = 0;
+	u.upray_mantis = 0;
 	youmonst.movement += moveamt;
 	//floor how far into movement-debt you can fall.
 	if (youmonst.movement < -2*NORMAL_SPEED) youmonst.movement = -2*NORMAL_SPEED;
@@ -2602,11 +2608,15 @@ karemade:
 							mtmp->movement = 0;
 							mtmp->mcanmove = 0;
 							mtmp->mfrozen = 2;
-							if(!mtmp->mwounded_legs && !rn2(20)){
-								mtmp->mwounded_legs = 1;
-								pline("%s %s is injured!", s_suffix(Monnam(mtmp)), mbodypart(mtmp, LEG));
-								mtmp->mspeed = MSLOW;
-								mtmp->permspeed = MSLOW;
+							if(!rn2(20)){
+								if(mon_body_leg_count(mtmp) > 0)
+									injure_random_legs(mtmp, rnd((mon_visible_leg_count(mtmp)+1)/2), "");
+								else if(mtmp->permspeed != MSLOW){
+									if(canseemon(mtmp))
+										pline("%s %s is injured!", s_suffix(Monnam(mtmp)), mbodypart(mtmp, LEG));
+									mtmp->mspeed = MSLOW;
+									mtmp->permspeed = MSLOW;
+								}
 							}
 						}
 						else mtmp->movement = max(0, mtmp->movement - 2);

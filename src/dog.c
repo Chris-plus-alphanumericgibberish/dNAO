@@ -476,6 +476,8 @@ boolean with_you;
 	mtmp->nmon = fmon;
 	mtmp->marriving = FALSE;
 	fmon = mtmp;
+	/* Insight may have moved while this monster was in limbo */
+	mon_refresh_visible_bodyparts(mtmp);
 	if (mtmp->isshk)
 	    set_residency(mtmp, FALSE);
 	if(mtmp->m_ap_type == M_AP_MONSTER && (BlockableClearThoughts || (!mtmp->iswiz && !(u.umadness&MAD_DELUSIONS)))){

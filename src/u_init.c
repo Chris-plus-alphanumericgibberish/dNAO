@@ -1892,6 +1892,7 @@ u_init()
 	u.uavoid_theft = 0;			// by default, allow theft attacks
 	u.uavoid_urpassives = 0;	// by default, allow passive attacks
 	u.umystic = ~0;				// by default, all monk style attacks are active
+	init_martial_forms();
 
 	u.summonMonster = FALSE;
 	u.uleadamulet = FALSE;

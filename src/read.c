@@ -1845,7 +1845,7 @@ mon_forget(struct monst *mtmp, int howmuch, boolean blessed, boolean cursed, boo
 		mtmp->mberserk = 0;
 		mtmp->mdisrobe = 0;
 		mtmp->mdoubt = 0;
-		mtmp->mwounded_legs = 0;
+		mon_heal_injuries(mtmp, HEAL_ALL_INJURIES);
 		mtmp->msanctity = 0;
 		mtmp->mgluttony = 0;
 		mtmp->mfrigophobia = 0;

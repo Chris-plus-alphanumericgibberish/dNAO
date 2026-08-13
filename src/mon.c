@@ -1684,6 +1684,9 @@ struct monst *mon;
     else if (mon->mspeed == MFAST)
 	mmove = (4 * mmove + 2) / 3;
 
+    if (mon_hobbled(mon))
+	mmove = (2 * mmove + 1) / 3;
+
 #ifdef STEED
     if (mon == u.usteed) {
 	if (u.ugallop && flags.mv) {

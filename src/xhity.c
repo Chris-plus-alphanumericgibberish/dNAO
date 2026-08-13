@@ -248,6 +248,11 @@ struct monst * mdef;
 	}
 	if (u.twoweap && !test_twoweapon())
 		untwoweapon();
+	if(activeFightingForm(FFORM_MNK_KIRIN) && !has_multi_or_nonweapon_nonkick_attk(&youmonst)){
+		dokick_core(u.dx, u.dy);
+		//Dokick can't move you
+		return TRUE;
+	}
 
 	if (unweapon) {
 		unweapon = FALSE;
@@ -651,6 +656,7 @@ xattacky(struct monst *magr, struct monst *mdef, int tarx, int tary, long modifi
 	/* record pre-chain stuck state so AT_SQUZ can gate on it */
 	if ((youdef && u.ustuck == magr) || (youagr && u.ustuck == mdef))
 		add_subout(subout, SUBOUT_SQUZ_ALLOW);
+	boolean mantis_blocked = FALSE;
 	/* Now perform all attacks. */
 	do {
 		boolean dopassive_local = FALSE;
@@ -675,6 +681,17 @@ xattacky(struct monst *magr, struct monst *mdef, int tarx, int tary, long modifi
 		/* set aatyp, adtyp */
 		aatyp = attk->aatyp;
 		adtyp = attk->adtyp;
+		/* praying mantis: wreck the limb behind the blow instead of taking it */
+		if (u.upray_mantis && youdef && !youagr && !mantis_blocked && !is_null_attk(attk)
+			&& distmin(u.ux, u.uy, x(magr), y(magr)) == 1
+			&& attack_limb_injurable(magr, attk)
+			&& nerve_strike_vulnerable(pa) && !resist(magr, '\0', 0, NOTELL)
+		){
+			mantis_blocked = TRUE;
+			You("strike %s as %s moves to attack!", mon_nam(magr), mhe(magr));
+			injure_attack_limb(magr, attk, "by your nerve-strike");
+			continue;
+		}
 		/* maybe end attack loop early (mdef may have been forcibly moved!)*/
 		if (
 			(youdef
@@ -2145,6 +2162,15 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			attk->damn = 1;	// unused
 			attk->damd = 4;	// unused
 		}
+		if(activeFightingForm(FFORM_MNK_KIRIN) && !nokicks(youracedata)){
+			if(attk->aatyp == AT_WEAP){
+				attk->aatyp = AT_KICK;
+				attk->polywep = TRUE;
+			}
+			else if(attk->aatyp == AT_XWEP){
+				attk->aatyp = AT_KICK;
+			}
+		}
 		if (attk->aatyp == AT_WEAP && check_mutation(TT_ATTRACTIVE_1) && !uwep && !(u.twoweap && uswapwep) && !check_subout(subout, SUBOUT_T_SEDUCE_STEAL)){
 			/* replace first unarmed weapon attack with a seduction steal attack */
 			if(mdef && mdef->minvent){
@@ -2616,10 +2642,6 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	}
 	/* Tettigon touch attack is magical and can be cancelled */
 	if(magr->mtyp == PM_TETTIGON_LEGATUS && magr->mcan &&attk->aatyp == AT_TUCH){
-		GETNEXT
-	}
-	/* Skip kicks with wounded legs */
-	if(!youagr && magr->mwounded_legs && attk->aatyp == AT_KICK){
 		GETNEXT
 	}
 	/* Skip attacks if stunned */
@@ -3547,8 +3569,13 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		) {
 		attk->adtyp = AD_STUN;
 	}
+
 	/* Specific cases that prevent attacks */
 	if (!by_the_book && !is_null_attk(attk) && (
+		/* A body part this attack needs is unusable
+		 * Judged against magr's own body, not pa's -- a borrowed attack is
+		 * still made with the borrower's limbs.*/
+		injuries_block(magr, attk) ||
 		/* If player is the target and is engulfed, only targetable by engulf attacks */
 		(youdef && u.uswallow && (attk->aatyp != AT_ENGL && attk->aatyp != AT_ILUR)) ||
 		/* If player was using 'k' to kick, they are only performing kick attacks (onlykicks is a state variable defined in dokick.c) */
@@ -9719,7 +9746,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 				alt_attk.damd = 0;
 			}
 			else {
-				mdef->mwounded_legs = TRUE;
+				injure_random_legs(mdef, 1, "");
 			}
 			alt_attk.adtyp = AD_PHYS;
 
@@ -15537,6 +15564,115 @@ int dieroll;
 		-1);				/* calculate visibility */
 }
 
+static int
+damage_resist_mask(struct permonst *pd)
+{
+	int resistmask = 0;
+
+	if (resist_blunt(pd))
+		resistmask |= WHACK;
+	if (resist_pierce(pd))
+		resistmask |= PIERCE;
+	if (resist_slash(pd))
+		resistmask |= SLASH;
+
+	return resistmask;
+}
+
+/* *otmp_p is set to the object that shaped the mask -- the weapon, or the
+ * gloves/boots/wings the blow was made with, or NULL. */
+static int
+strike_attack_mask(struct monst *magr, struct attack *attk, struct attack *originalattk,
+	struct obj *weapon, boolean weapon_attack, boolean unarmed_punch,
+	boolean unarmed_kick, boolean unarmed_wing, unsigned long modifier_flags,
+	int eurynome_shape, boolean eurynome_thin, struct obj **otmp_p)
+{
+	boolean youagr = (magr == &youmonst);
+	struct obj *otmp;
+	int attackmask;
+
+	if (weapon && weapon_attack) {
+		attackmask = attack_mask(weapon, 0, 0, magr);
+		otmp = weapon;
+	}
+	else if (unarmed_punch) {
+		//Can always whack someone
+		attackmask = WHACK;
+		/* gloves */
+		otmp = (youagr ? uarmg : which_armor(magr, W_ARMG));
+		if(otmp)
+			attackmask = attack_mask(otmp, 0, 0, magr);
+
+		if (/* claw attacks are slashing (even while wearing gloves?) */
+			(attk && attk->aatyp == AT_CLAW) ||
+			/* and so are the player's punches, as a half-dragon or chiropteran */
+			(youagr && (Race_if(PM_HALF_DRAGON) || (!Upolyd && Race_if(PM_CHIROPTERAN))))
+			)
+			attackmask |= SLASH;
+
+		if (youagr) {
+			if (check_mutation(SHUB_CLAWS))
+				attackmask |= SLASH|PIERCE;
+			if (check_mutation(TT_RAZOR_CLAWS))
+				attackmask |= SLASH;
+			if (check_mutation(TT_HOOKED_CLAWS))
+				attackmask = SLASH|PIERCE;
+			if (check_mutation(TT_TALONS))
+				attackmask |= PIERCE;
+			if (flags.aasimar_type == AASIMAR_TYPE_CLOUDFACE && !Upolyd && !uarmg)
+				attackmask = SLASH|PIERCE|WHACK;
+		}
+
+		attackmask |= eurynome_shape;
+		//Less often, the limb is thin and non-whacky.
+		if(eurynome_thin && attackmask&(PIERCE|SLASH))
+			attackmask &= ~WHACK;
+	}
+	else if (unarmed_kick) {
+		//Can always whack someone
+		attackmask = WHACK;
+
+		otmp = (youagr ? uarmf : which_armor(magr, W_ARMF));
+		if(otmp)
+			attackmask = attack_mask(otmp, 0, 0, magr);
+	}
+	else if (unarmed_wing) {
+		//Can always whack someone
+		attackmask = (originalattk && originalattk->aatyp == AT_STNG) ? PIERCE : WHACK;
+
+		otmp = (youagr ? uarmw : which_armor(magr, W_ARMW));
+		if(otmp)
+			attackmask = attack_mask(otmp, 0, 0, magr);
+
+		if (youagr && check_mutation(TT_WINGS_6)) {
+			int subattackmask = (u.ulevel >= 30) ? SLASH
+				: (u.ulevel >= 14) ? (SLASH|PIERCE)
+				: PIERCE;
+			if(otmp)
+				attackmask |= subattackmask;
+			else
+				attackmask = subattackmask;
+		}
+	}
+	else {
+		/* something odd -- maybe it was a weapon attack and the weapon was destroyed earlier than usual? */
+		otmp = (struct obj *)0;
+		/* lets just ignore resistances */
+		attackmask = (WHACK | SLASH | PIERCE);
+	}
+
+	if(modifier_flags&MELEEHURT_SHOVE){
+		attackmask = WHACK;
+	}
+
+	if(modifier_flags&MELEEHURT_FORCE_CHECK_JOUST){
+		attackmask = PIERCE;
+	}
+
+	*otmp_p = otmp;
+	return attackmask;
+}
+
 /* hmon_general
  * 
  * Like as it was in uhitm.c, this is a wrapper so that ghod_hitsu() and angry_guards()
@@ -15627,6 +15763,9 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 	struct obj * weapon = weapon_p ? *(weapon_p) : (struct obj *)0;
 
 	boolean staggering_strike = FALSE;
+	boolean monk_staggering_strike = FALSE;
+	boolean nerve_strike = FALSE;
+	boolean bleeding_strike = FALSE;
 	boolean shattering_strike = FALSE;
 	boolean disarming_strike = FALSE;
 	boolean stunning_strike = FALSE;
@@ -15665,6 +15804,9 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 	boolean partly_resisted_thick_skin = FALSE;
 	boolean misotheistic_major = FALSE;
 	int attackmask = 0;
+	struct obj * strike_obj = (struct obj *)0;	/* the object that shaped attackmask */
+	int eurynome_shape = 0;		/* SEAL_EURYNOME's limb reshaping, rolled once per blow */
+	boolean eurynome_thin = FALSE;
 	static int warnedotyp = -1;
 	static struct permonst *warnedptr = 0;
 
@@ -15679,6 +15821,7 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 	boolean unarmed_kick = FALSE;
 	boolean unarmed_butt = FALSE;
 	boolean unarmed_wing = FALSE;
+	boolean unarmed_touch = FALSE;
 	boolean natural_strike = FALSE;
 	boolean ulightsaberhit = FALSE;
 
@@ -15950,6 +16093,16 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 			unarmed_butt = TRUE;
 			natural_strike = TRUE;
 		}
+		/* the slot switch below sets unarmed_punch for these, but not until
+		   after the strike rolls */
+		else if (attk->aatyp == AT_TUCH && melee) {
+			unarmed_touch = TRUE;
+			natural_strike = TRUE;
+		}
+		else if (attk->aatyp == AT_WING && melee) {
+			unarmed_wing = TRUE;
+			natural_strike = TRUE;
+		}
 		/* mercurial blades aren't spiritual rapiers */
 		else if (attk->adtyp == AD_MERC && melee)
 			fake_valid_weapon_attack = TRUE;
@@ -15962,6 +16115,20 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 		else
 			natural_strike = TRUE;
 	}
+	if (youagr && u.sealsActive&SEAL_EURYNOME) {
+		if (rn2(2))
+			eurynome_shape |= SLASH;
+		if (rn2(2))
+			eurynome_shape |= PIERCE;
+		eurynome_thin = !rn2(3);
+	}
+	/* Preliminary mask, for the attack riders below: they read the narrow
+	 * aatyp-based reading of the unarmed_ flags, before attk_equip_slot()
+	 * widens it. Recomputed once those have their final values. */
+	attackmask = strike_attack_mask(magr, attk, originalattk, weapon,
+		(valid_weapon_attack || invalid_weapon_attack), unarmed_punch,
+		unarmed_kick, unarmed_wing, modifier_flags,
+		eurynome_shape, eurynome_thin, &strike_obj);
 	/* if the player is attacking with a wielded weapon, increment conduct */
 	if (youagr && valid_weapon_attack && (melee || thrust)) {
 		u.uconduct.weaphit++;
@@ -16256,14 +16423,53 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 		)
 			stunning_strike = TRUE;
 	}
-
+	/* monk special */
+	if (youagr && (melee || thrust) && !recursed && !Upolyd) {
+		// 100%
+		if(activeFightingForm(FFORM_MNK_MANTIS)){
+			if(unarmed_punch || unarmed_touch){
+				if(nerve_strike_vulnerable(pd) && !resist(mdef, '\0', 0, NOTELL)) nerve_strike = TRUE;
+			}
+		}
+		else if(activeFightingForm(FFORM_MNK_SNAKE)){
+			// No special move
+		}
+		else if(activeFightingForm(FFORM_MNK_CRANE)){
+			if(unarmed_punch || unarmed_touch){
+				if(disorienting_strike_vulnerable(pd) && !resist(mdef, '\0', 0, NOTELL)) mdef->mfell++;
+			}
+		}
+		// roll randomly
+		else if (
+			(dieroll < P_SKILL(P_BARE_HANDED_COMBAT)) &&
+			((uarmg && uarmg->oartifact == ART_PREMIUM_HEART) || !rn2(5))	// (odds reduced by 80% when not wearing Premium Heart)
+		) {
+			if(activeFightingForm(FFORM_MNK_KIRIN)){
+				if(unarmed_kick || unarmed_butt){
+					if(!bigmonst(pd)) monk_staggering_strike = TRUE;
+				}
+			}
+			//Tiger
+			else if(Role_if(PM_MONK) ){
+				if(unarmed_punch || unarmed_kick){
+					if(attackmask == WHACK){
+						if(!bigmonst(pd)) monk_staggering_strike = TRUE;
+					}
+					else {
+						if(!thick_skinned(pd) && has_blood_mon(mdef)) bleeding_strike = TRUE;
+						else if(!bigmonst(pd)) monk_staggering_strike = TRUE;
+					}
+				}
+			}
+			// unarmed_punch (not two-weaponing)
+			else if(unarmed_punch && !bigmonst(pd) && !thick_skinned(pd) && !(u.twoweap)){
+				staggering_strike = TRUE;
+			}
+		}
+	}
 	/* staggering strike */
 	if (youagr && (melee || thrust) && !recursed) {
 		if (
-			// unarmed_punch (not two-weaponing)
-			(unarmed_punch && !Upolyd && !bigmonst(pd) && !thick_skinned(pd) && !(u.twoweap) && 
-			(dieroll < P_SKILL(P_BARE_HANDED_COMBAT)) &&
-			((uarmg && uarmg->oartifact == ART_PREMIUM_HEART) || !rn2(5))) ||	// (odds reduced by 80% when not wearing Premium Heart)
 			// Green Dragon Crescent Blade
 			(weapon && weapon == uwep && uwep->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD &&
 			(dieroll < P_SKILL(weapon_type(uwep)))) ||
@@ -16368,6 +16574,10 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 		otmp = (struct obj *)0;
 		break;
 	}
+	attackmask = strike_attack_mask(magr, attk, originalattk, weapon,
+		(valid_weapon_attack || invalid_weapon_attack), unarmed_punch,
+		unarmed_kick, unarmed_wing, modifier_flags,
+		eurynome_shape, eurynome_thin, &strike_obj);
 	/* fake weapons */
 	if (attk && (
 		attk->adtyp == AD_GLSS
@@ -17406,6 +17616,10 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 		else
 			unarmed_dice.oc_damd = 2 * unarmedMult;
 
+		//Reduced damage from forms
+		if (youagr && !Upolyd && activeFightingForm(FFORM_MNK_MANTIS))
+			unarmed_dice.oc_damd = max(1, unarmed_dice.oc_damd - 2);
+
 		if(youagr && u.umaniac && weapon_dam_bonus((struct obj *) 0, P_BARE_HANDED_COMBAT) > 0)
 			unarmed_dice.oc_damd += weapon_dam_bonus((struct obj *) 0, P_BARE_HANDED_COMBAT)*2;
 		/* Eurynome causes exploding dice, sometimes larger dice */
@@ -17932,9 +18146,8 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 					int felldie = 20;
 					if(youagr && ZFOCUS(weapon))
 						felldie = ROLL_ETRAIT(weapon, magr, 4, 10);
-					if(!mdef->mwounded_legs && !rn2(felldie)){
-						mdef->mwounded_legs = 1;
-						pline("%s %s is injured in the fighting!", s_suffix(Monnam(mdef)), mbodypart(mdef, LEG));
+					if(!all_visible_legs_wounded(mdef) && !rn2(felldie)){
+						injure_random_legs(mdef, 1, "in the fighting");
 						struct weapon_dice wdice;
 						/* grab the weapon dice from dmgval_core */
 						dmgval_core(&wdice, bigmonst(pd), weapon, weapon->otyp, magr);
@@ -17944,6 +18157,8 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 							tratdmg += weapon_dam_bonus(weapon, weapon_type(weapon));
 					}
 				}
+				if(youagr)
+					morehungry(1*get_uhungersizemod());
 			}
 			int lhs = 5;
 			int s = 10;
@@ -18158,6 +18373,21 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 					if(youagr)
 						tratdmg += weapon_dam_bonus(weapon, weapon_type(weapon));
 				}
+			}
+		}
+	}
+	/* monk special: bonus damage */
+	if (monk_staggering_strike || bleeding_strike) {
+		if (wizard && (iflags.wizcombatdebug & WIZCOMBATDEBUG_DMG) && WIZCOMBATDEBUG_APPLIES(magr, mdef))
+			pline("Monk strike bonus damage!");
+		if (monk_staggering_strike && has_head_mon(mdef))
+			tratdmg += basedmg + d(2, 10);
+		if (bleeding_strike) {
+			tratdmg += basedmg;
+			if (!youdef) {
+				mdef->mbleed = max(basedmg, mdef->mbleed + 1);
+				if (youagr)
+					mdef->mubled = TRUE;
 			}
 		}
 	}
@@ -18537,127 +18767,29 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 	}
 	/* other creatures resist specific types of attacks */
 	else if (unarmed_punch || unarmed_kick || valid_weapon_attack || invalid_weapon_attack) {
-		/* attackmask has a larger scope so it can be referenced in the resist message later */
-		int resistmask = 0;
-
-		/* get attackmask */
-		if (weapon && (valid_weapon_attack || invalid_weapon_attack)) {
-			attackmask = attack_mask(weapon, 0, 0, magr);
-			otmp = weapon;
-		}
-		else if (unarmed_punch) {
-			//Can always whack someone
-			attackmask = WHACK;
-			/* gloves */
-			otmp = (youagr ? uarmg : which_armor(magr, W_ARMG));
-			if(otmp)
-				attackmask = attack_mask(otmp, 0, 0, magr);
-
-			if (/* claw attacks are slashing (even while wearing gloves?) */
-				(attk && attk->aatyp == AT_CLAW) ||
-				/* and so are the player's punches, as a half-dragon or chiropteran */
-				(youagr && (Race_if(PM_HALF_DRAGON) || (!Upolyd && Race_if(PM_CHIROPTERAN))))
-				)
-				attackmask |= SLASH;
-
-			if (youagr) {
-				if (check_mutation(SHUB_CLAWS))
-					attackmask |= SLASH|PIERCE;
-				if (check_mutation(TT_RAZOR_CLAWS))
-					attackmask |= SLASH;
-				if (check_mutation(TT_HOOKED_CLAWS))
-					attackmask = SLASH|PIERCE;
-				if (check_mutation(TT_TALONS))
-					attackmask |= PIERCE;
-				if (flags.aasimar_type == AASIMAR_TYPE_CLOUDFACE && !Upolyd && !uarmg)
-					attackmask = SLASH|PIERCE|WHACK;
-			}
-
-			if (/* claw attacks are slashing (even while wearing gloves?) */
-				(youagr && u.sealsActive&SEAL_EURYNOME)
-			){
-				if(rn2(2))
-					attackmask |= SLASH;
-				if(rn2(2))
-					attackmask |= PIERCE;
-				//Less often, the limb is thin and non-whacky.
-				if(attackmask&(PIERCE|SLASH) && !rn2(3))
-					attackmask &= ~WHACK;
-			}
-		}
-		else if (unarmed_kick) {
-			//Can always whack someone
-			attackmask = WHACK;
-
-			otmp = (youagr ? uarmf : which_armor(magr, W_ARMF));
-			if(otmp)
-				attackmask = attack_mask(otmp, 0, 0, magr);
-		}
-		else if (unarmed_wing) {
-			//Can always whack someone
-			attackmask = (originalattk && originalattk->aatyp == AT_STNG) ? PIERCE : WHACK;
-
-			otmp = (youagr ? uarmw : which_armor(magr, W_ARMW));
-			if(otmp)
-				attackmask = attack_mask(otmp, 0, 0, magr);
-
-			if (youagr && check_mutation(TT_WINGS_6)) {
-				int subattackmask = (u.ulevel >= 30) ? SLASH
-					: (u.ulevel >= 14) ? (SLASH|PIERCE)
-					: PIERCE;
-				if(otmp)
-					attackmask |= subattackmask;
-				else
-					attackmask = subattackmask;
-			}
-		}
-		else {
-			/* something odd -- maybe it was a weapon attack and the weapon was destroyed earlier than usual? */
-			otmp = (struct obj *)0;
-			/* lets just ignore resistances */
-			attackmask |= (WHACK | SLASH | PIERCE);
-		}
-
-		if(modifier_flags&MELEEHURT_SHOVE){
-			attackmask = WHACK;
-		}
-
-		if(modifier_flags&MELEEHURT_FORCE_CHECK_JOUST){
-			attackmask = PIERCE;
-		}
-
-		/* get resistmask */
-		if (resist_blunt(pd)){
-			resistmask |= WHACK;
-		}
-		if (resist_pierce(pd)){
-			resistmask |= PIERCE;
-		}
-		if (resist_slash(pd)){
-			resistmask |= SLASH;
-		}
+		int resistmask = damage_resist_mask(pd);
 
 		if ((thick_skinned(pd) || (youdef && u.sealsActive&SEAL_ECHIDNA)) && (
-			(unarmed_kick && !(youagr && !Upolyd && Race_if(PM_CLOCKWORK_AUTOMATON)) && !(otmp && (
-				otmp->otyp == STILETTOS || otmp->otyp == WIND_AND_FIRE_WHEELS || otmp->otyp == HEELED_BOOTS || otmp->otyp == KICKING_BOOTS 
-				|| is_metallic(otmp) || (otmp->otyp == IMPERIAL_ELVEN_BOOTS && check_imp_mod(otmp, IEA_KICKING))))
-			) || (otmp && (valid_weapon_attack || invalid_weapon_attack) && (otmp->obj_material <= LEATHER) && !litsaber(otmp))
+			(unarmed_kick && !(youagr && !Upolyd && Race_if(PM_CLOCKWORK_AUTOMATON)) && !(strike_obj && (
+				strike_obj->otyp == STILETTOS || strike_obj->otyp == WIND_AND_FIRE_WHEELS || strike_obj->otyp == HEELED_BOOTS || strike_obj->otyp == KICKING_BOOTS 
+				|| is_metallic(strike_obj) || (strike_obj->otyp == IMPERIAL_ELVEN_BOOTS && check_imp_mod(strike_obj, IEA_KICKING))))
+			) || (strike_obj && (valid_weapon_attack || invalid_weapon_attack) && (strike_obj->obj_material <= LEATHER) && !litsaber(strike_obj))
 			))
 		{
-			if(otmp && otmp->oartifact == ART_IBITE_ARM){
-				if(otmp->otyp == CLAWED_HAND); /*Ghost hand doesn't notice it's too soft to harm the target*/
+			if(strike_obj && strike_obj->oartifact == ART_IBITE_ARM){
+				if(strike_obj->otyp == CLAWED_HAND); /*Ghost hand doesn't notice it's too soft to harm the target*/
 				else {
 					/* Ghost elbow not so much: damage entirely mitigated */
 					subtotl = 1;
 					resisted_thick_skin = TRUE;
 				}
 			}
-			else if(otmp && (otmp->oartifact || check_oprop(otmp, OPROP_FLAYW))){
+			else if(strike_obj && (strike_obj->oartifact || check_oprop(strike_obj, OPROP_FLAYW))){
 				/* damage partly mitigated */
 				subtotl /= 4;
 				partly_resisted_thick_skin = TRUE;
 			}
-			else if(otmp && check_oprop(otmp, OPROP_LESSER_FLAYW)){
+			else if(strike_obj && check_oprop(strike_obj, OPROP_LESSER_FLAYW)){
 				/* damage partly mitigated */
 				subtotl /= 6;
 				partly_resisted_thick_skin = TRUE;
@@ -18668,7 +18800,7 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 				resisted_thick_skin = TRUE;
 			}
 		}
-		if ((attackmask & ~(resistmask)) == 0L && !(otmp && spec_applies(otmp, mdef, TRUE)) && (subtotl > 0)) {
+		if ((attackmask & ~(resistmask)) == 0L && !(strike_obj && spec_applies(strike_obj, mdef, TRUE)) && (subtotl > 0)) {
 			/* damage reduced by 75% */
 			subtotl /= 4;
 			resisted_attack_type = TRUE;
@@ -18888,6 +19020,7 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 				!jousting &&
 				!(modifier_flags&MELEEHURT_SHOVE) &&
 				!staggering_strike &&
+				!monk_staggering_strike &&
 				!stunning_strike &&
 				!(youagr && lethaldamage) &&
 				!(youagr && snekdmg))
@@ -19033,7 +19166,7 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 		}
 	}
 	/* staggering strike */
-	if (staggering_strike && !lethaldamage) {
+	if ((staggering_strike || monk_staggering_strike) && !lethaldamage) {
 		if (youagr) {
 			if (canspotmon(mdef)) {
 				pline("%s %s from your powerful %s%s!",
@@ -19070,6 +19203,10 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 				(snekdmg && (sneak_attack & SNEAK_JUYO) ? "s" : "")
 				);
 		}
+	}
+	if (bleeding_strike && !lethaldamage) {
+		if (vis)
+			pline("%s sustained a bleeding wound in the fighting!", youdef ? "You" : Monnam(mdef));
 	}
 	if(weapon && (weapon->obj_material == HEMARGYOS || check_oprop(weapon, OPROP_HAEM))){
 		if(youagr && !youdef){
@@ -19889,7 +20026,7 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 	}
 
 	/* hurtle mdef */
-	if (staggering_strike || jousting
+	if (staggering_strike || monk_staggering_strike || jousting
 		|| (modifier_flags&MELEEHURT_SHOVE)
 		|| (fired && weapon && is_boulder(weapon))
 		|| pd->mtyp == PM_KHAAMNUN_TANNIN
@@ -19931,7 +20068,7 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 			hurtle(dx, dy, evading ? 4 : 1, FALSE, FALSE);
 			if(evading)
 				You("%s away.", (pd->mtyp == PM_KHAAMNUN_TANNIN) ? "jet" : "swing");
-			if (staggering_strike)
+			if (staggering_strike || monk_staggering_strike)
 				make_stunned(HStun + rnd(10), TRUE);
 			nomul(0, "being knocked back");
 		}
@@ -19943,7 +20080,7 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 				return MM_DEF_DIED;
 			if(MIGRATINGMONSTER(mdef))
 				return MM_AGR_STOP;
-			if (staggering_strike)
+			if (staggering_strike || monk_staggering_strike)
 				mdef->mstun = TRUE;
 			pd = mdef->data; /* in case of a polymorph trap */
 		}
@@ -19956,6 +20093,9 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 			mdef->mstun = TRUE;
 			mdef->mconf = TRUE;
 		}
+	}
+	if(nerve_strike && !youdef){
+		injure_random_limbs(mdef, 1, "by the nerve-strike");
 	}
 
 	/* pudding division */
@@ -22050,6 +22190,13 @@ pole_move_target(boolean arm)
 	return (struct monst *)0;
 }
 
+/* Holy aura's target isn't a monster: it's a condition to cure. */
+boolean
+cure_monk_target(void)
+{
+	return (unihorn_troubles((int *)0) > 0);
+}
+
 boolean
 circle_monk_target(boolean armored)
 {
@@ -22446,7 +22593,7 @@ void
 monk_aura_bolt()
 {
 	struct zapdata zapdat = { 0 };
-	basiczap(&zapdat, u.ualign.record < -3 ? AD_UNHY : AD_HOLY, ZAP_SPELL, (u.ulevel+2) / 3 );
+	basiczap(&zapdat, u_fallen() ? AD_UNHY : AD_HOLY, ZAP_SPELL, (u.ulevel+2) / 3 );
 	zapdat.damd = 4;
 	zapdat.affects_floor = FALSE;
 	zapdat.phase_armor = TRUE;
@@ -22484,7 +22631,7 @@ monk_aura_bolt()
 				zapdat.affects_floor = TRUE;
 			}
 			if(uwep->oartifact == ART_KISHIN_MIRROR){
-				if(!(u.ualign.record < -3 || u.ualign.record > 3))
+				if(!(u_fallen() || u_blessed()))
 					zapdat.adtyp = AD_ELEC;
 				if(zapdat.adtyp != AD_UNHY)
 					zapdat.blinding = TRUE;
@@ -22903,12 +23050,12 @@ void
 incant_kishin_sparks()
 {
 	struct zapdata zapdat = { 0 };
-	basiczap(&zapdat, u.ualign.record < -3 ? AD_UNHY : AD_HOLY, ZAP_SPELL, (u.ulevel+2) / 3 );
+	basiczap(&zapdat, u_fallen() ? AD_UNHY : AD_HOLY, ZAP_SPELL, (u.ulevel+2) / 3 );
 	zapdat.damd = 3;
 	zapdat.affects_floor = FALSE;
 	zapdat.phase_armor = TRUE;
 	int range = 2;
-	if(!(u.ualign.record < -3 || u.ualign.record > 3))
+	if(!(u_fallen() || u_blessed()))
 		zapdat.adtyp = AD_ELEC;
 	if(zapdat.adtyp != AD_UNHY)
 		zapdat.blinding = TRUE;
@@ -23660,10 +23807,19 @@ move_name(int moveid)
 {
 	switch(moveid){
 		case 0: return "None";
-		case DIVE_KICK: return "Dive kick";
+		case DIVE_KICK: return Race_if(PM_CHIROPTERAN) ? "Swoop" : "Dive kick";
 		case AURA_BOLT: return (Role_if(PM_KENSEI) && uwep && is_kensei_weapon(uwep)) ? (uwep->oartifact == ART_SKY_RENDER ? "Dragon flash" : "Aura slash") : "Aura bolt";
-		case BIRD_KICK: return "Bird kick";
-		case STRONG_P: return uwep ? "Roundhouse strike" : "Roundhouse punch";
+		case BIRD_KICK: return Race_if(PM_CHIROPTERAN) ? "Wing storm" : "Bird kick";
+		case TAP: return "Tap";
+		case CHI_SEVER: return "Chi sever";
+		case CLAP: return "Clap";
+		case FLY_KICKS: return Race_if(PM_CHIROPTERAN) ? "Divine banishment" : "Flying kicks";
+		case HOLY_A: return "Holy aura";
+		case PIERCE_C: return "Piercing curse";
+		case SNAKE_S: return "Striking snake";
+		case SPIN_CRANE: return "Spinning crane";
+		case PRAY_MANTIS: return "Praying mantis";
+		case STRONG_P: return activeFightingForm(FFORM_MNK_SNAKE) ? "Whipping snake" : uwep ? "Roundhouse strike" : "Roundhouse punch";
 		case METODRIVE: return "Meteor drive";
 		case PUMMEL: return uwep ? "Flurry" : "Pummel";
 		case AVALANCHE: return "Avalanche";
@@ -24141,7 +24297,7 @@ perform_monk_move(int moveID, int *move_cost)
 		case DIVE_KICK:
 		if(Race_if(PM_CHIROPTERAN)){
 			if((mdef = adjacent_move_target(uarmg || (uwep && is_monk_weapon(uswapwep)) || (uwep && is_monk_weapon(uswapwep)) ))){
-				pline("Swoop!");
+				pline("%s!", move_name(moveID));
 				boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
 				if((!uwep || is_monk_weapon(uwep)) && (mdef = adjacent_move_target(uarmg || uwep)))
 					xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE, 0);
@@ -24156,6 +24312,56 @@ perform_monk_move(int moveID, int *move_cost)
 			if(!EWounded_legs && (mdef = adjacent_move_target(!!uarmf)) && near_capacity() <= SLT_ENCUMBER){
 				pline("%s!", move_name(moveID));
 				dive_kick_monster(mdef);
+				return TRUE;
+			}
+		}
+		break;
+		case TAP:
+		{
+			struct attack taphit = { AT_TUCH, AD_PHYS, 1, 1, .bodypart = ATKBP(ARM_DOMINANT) };
+			struct attack offtaphit = { AT_TUCH, AD_PHYS, 1, 1, .bodypart = ATKBP(ARM_OFFHAND) };
+			if((mdef = adjacent_move_target(!!uarmg))){
+				pline("%s!", move_name(moveID));
+				boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+				xmeleehity(&youmonst, mdef, &taphit, (struct obj **)0, vis, 0, FALSE, 0);
+				if(u.twoweap && (mdef = adjacent_move_target(!!uarmg)))
+					xmeleehity(&youmonst, mdef, &offtaphit, (struct obj **)0, vis, 0, FALSE, 0);
+				return TRUE;
+			}
+		}
+		break;
+		case CHI_SEVER:
+		{
+			struct attack chihit = { AT_TUCH, AD_PHYS, 1, 1, .bodypart = ATKBP(ARM_DOMINANT) };
+			if((mdef = adjacent_move_target(!!uarmg))){
+				pline("%s!", move_name(moveID));
+				boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+				int res = xmeleehity(&youmonst, mdef, &chihit, (struct obj **)0, vis, 0, FALSE, 0);
+				if((res&MM_HIT) && !(res&(MM_AGR_STOP|MM_DEF_DIED)) && !Is_spire(&u.uz)){
+					if(!DEADMONSTER(mdef) && !MIGRATINGMONSTER(mdef) && !resist(mdef, 0, 0, TELL))
+						set_mcan(mdef, TRUE);
+				}
+				return TRUE;
+			}
+		}
+		break;
+		case CLAP:
+		{
+			struct attack claphit = { AT_CLAW, AD_PHYS, 0, 0,
+				.bodypart = atkbp_union(ATKBP(ARM_DOMINANT), ATKBP(ARM_OFFHAND)) };
+			if((mdef = adjacent_move_target(!!uarmg))){
+				pline("%s!", move_name(moveID));
+				boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+				int res = xmeleehity(&youmonst, mdef, &claphit, (struct obj **)0, vis, 0, FALSE, 0);
+				if((res&MM_HIT) && !(res&(MM_AGR_STOP|MM_DEF_DIED))
+					&& !DEADMONSTER(mdef) && !MIGRATINGMONSTER(mdef)
+					&& disorienting_strike_vulnerable(mdef->data)
+				){
+					if (canspotmon(mdef))
+						pline("%s is left reeling and disoriented!", Monnam(mdef));
+					mdef->mstun = TRUE;
+					mdef->mconf = TRUE;
+				}
 				return TRUE;
 			}
 		}
@@ -24249,7 +24455,7 @@ perform_monk_move(int moveID, int *move_cost)
 		case AURA_BOLT:
 		if((!uwep || is_monk_weapon(uwep)) 
 			&& (!(uswapwep && u.twoweap) || is_monk_weapon(uswapwep)) 
-			&& (u.ualign.record < -3 || u.ualign.record > 3
+			&& (u_fallen() || u_blessed()
 				|| (Role_if(PM_KENSEI) && uwep && is_kensei_weapon(uwep) && 
 					( uwep->oartifact == ART_KISHIN_MIRROR
 					|| uwep->oartifact == ART_MALICE
@@ -24447,19 +24653,69 @@ perform_monk_move(int moveID, int *move_cost)
 		break;
 		case BIRD_KICK:
 			if(!EWounded_legs && circle_monk_target(!!uarmf) && near_capacity() <= SLT_ENCUMBER){
-				if(Race_if(PM_CHIROPTERAN)){
-					pline("Wing storm!");
+				pline("%s!", move_name(moveID));
+				if(Race_if(PM_CHIROPTERAN))
 					wing_storm_monsters();
-				}
-				else {
-					pline("%s!", move_name(moveID));
+				else
 					bird_kick_monsters();
+				return TRUE;
+			}
+		break;
+		case FLY_KICKS:
+			if(Race_if(PM_CHIROPTERAN))
+				return divine_banishment();
+			if(!EWounded_legs && near_capacity() <= SLT_ENCUMBER)
+				return flying_kick_monsters();
+		break;
+		case SPIN_CRANE:
+			if(circle_monk_target(TRUE)){
+				pline("%s!", move_name(moveID));
+				u.uspin_crane = 1;
+				return TRUE;
+			}
+		break;
+		case PRAY_MANTIS:
+			if(circle_monk_target(TRUE)){
+				pline("%s!", move_name(moveID));
+				u.upray_mantis = 1;
+				return TRUE;
+			}
+		break;
+		case PIERCE_C:
+			if((mdef = adjacent_move_target(!!uarmh)) && !Is_spire(&u.uz)){
+				struct attack cursehit = { AT_BUTT, AD_CHRN, (u.ulevel+2) / 3,
+					hates_unholy_mon(mdef) ? 8 : 3,
+					.bodypart = has_horns_mon(&youmonst) ? ATKBP(HORN) : ATKBP(HEAD) };
+				boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+				pline("%s!", move_name(moveID));
+				int res = xmeleehity(&youmonst, mdef, &cursehit, (struct obj **)0, vis, 0, FALSE, 0);
+				if((res&MM_HIT) && !(res&(MM_AGR_STOP|MM_DEF_DIED))
+					&& !DEADMONSTER(mdef) && !MIGRATINGMONSTER(mdef)
+				){
+					if (mrndcurse(mdef, FALSE) && canseemon(mdef))
+						You_feel("as though %s needs some help.", mon_nam(mdef));
 				}
+				return TRUE;
+			}
+		break;
+		case HOLY_A:
+			if(cure_monk_target() && !Is_spire(&u.uz)){
+				pline("%s!", move_name(moveID));
+				cure_one_unihorn_trouble();
 				return TRUE;
 			}
 		break;
 		case STRONG_P:
 			if((mdef = adjacent_move_target(!!uarmg))){
+				pline("%s!", move_name(moveID));
+				boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+				xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE, ATTKFLAG_DOUBLE_DAMAGE);
+				return TRUE;
+			}
+		break;
+		case SNAKE_S:
+			/* only lands off a step */
+			if(u.umoved && (mdef = adjacent_move_target(!!uarmg))){
 				pline("%s!", move_name(moveID));
 				boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
 				xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE, ATTKFLAG_DOUBLE_DAMAGE);
@@ -24893,6 +25149,12 @@ forward_move()
 		}
 		return THROW;
 	}
+	if(activeFightingForm(FFORM_MNK_CRANE))
+		return FLOURISH;
+	if(activeFightingForm(FFORM_MNK_MANTIS))
+		return TAP;
+	if(activeFightingForm(FFORM_MNK_SNAKE))
+		return SNAKE_S;
 	return DIVE_KICK;
 }
 
@@ -24986,6 +25248,12 @@ hook_move()
 			return MORTAL_D;
 		return CYCLONE;
 	}
+	if(activeFightingForm(FFORM_MNK_CRANE))
+		return SPIN_CRANE;
+	if(activeFightingForm(FFORM_MNK_MANTIS))
+		return PRAY_MANTIS;
+	if(activeFightingForm(FFORM_MNK_SNAKE))
+		return PUMMEL;
 	return BIRD_KICK;
 }
 
@@ -25031,6 +25299,14 @@ uturn_move()
 		//Default (No metodrive)
 		return BREAKER;
 	}
+	if(activeFightingForm(FFORM_MNK_MANTIS))
+		return CHI_SEVER;
+	if(activeFightingForm(FFORM_MNK_CRANE))
+		return CLAP;
+	if(activeFightingForm(FFORM_MNK_SNAKE))
+		return STRONG_P;
+	if(activeFightingForm(FFORM_MNK_KIRIN))
+		return u_blessed() ? HOLY_A : u_fallen() ? PIERCE_C : 0;
 	return METODRIVE;
 }
 
@@ -25070,6 +25346,8 @@ alternated_move()
 		}
 		return PUMMEL;
 	}
+	if(activeFightingForm(FFORM_MNK_KIRIN))
+		return FLY_KICKS;
 	return PUMMEL;
 }
 

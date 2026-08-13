@@ -1722,6 +1722,18 @@ int delta;
 	if(discover || wizard)
 		pline("= %d", u.uinsight);
 
+	/* insight-gated limbs just became perceptible (or stopped being) */
+	{
+		struct monst *mtmp;
+
+		for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
+			if (DEADMONSTER(mtmp))
+				continue;
+			mon_refresh_visible_bodyparts(mtmp);
+		}
+		mon_refresh_visible_bodyparts(&youmonst);
+	}
+
 	/* possibly (de)activate glyphs */
 	long int thought;
 	for (thought = 1L; thought <= u.thoughts; thought = thought << 1) {
@@ -2386,7 +2398,7 @@ int fform;
 {
 	int i, first, last;
 	if(fform > LAST_FFORM || fform < 0)
-		impossible("Attempting to set fighting form number %d?", fform);
+		impossible("Attempting to unset fighting form number %d?", fform);
 	
 	if (fform >= FIRST_LS_FFORM && fform <= LAST_LS_FFORM){
 		first = FIRST_LS_FFORM;
@@ -2397,13 +2409,18 @@ int fform;
 	} else if (fform >= FIRST_ADV_KNI_FFORM && fform <= LAST_ADV_KNI_FFORM){
 		first = FIRST_ADV_KNI_FFORM;
 		last = LAST_ADV_KNI_FFORM;
+	} else if (fform >= FIRST_MNK_FFORM && fform <= LAST_MNK_FFORM){
+		first = FIRST_MNK_FFORM;
+		last = LAST_MNK_FFORM;
 	} else {
+		/* overbroad, but the only safe default for a batch with no range arm */
+		if (wizard)
+			impossible("No unSetFightingForm() range covers form %d; clearing ALL fighting forms.", fform);
 		first = 0;
-		last = FFORM_LISTSIZE*16;
+		last = FFORM_LISTSIZE*FFORM_BATCH_SIZE;
 	}
 
-	/* this code assumes that each batch of 16 fighting forms are mutually exclusive, but not with other batches of 16 */
-	for(i=first/16; i <= last/16; i++)
+	for(i=FFORM_WORD(first); i <= FFORM_WORD(last); i++)
 		u.fightingForm[i] = 0L;
 
 }
@@ -2412,9 +2429,9 @@ void
 setFightingForm(fform)
 int fform;
 {
-	/* this code assumes that each batch of 16 fighting forms are mutually exclusive, but not with other batches of 16 */
+	/* clearing the batch first is what makes forms within it mutually exclusive */
 	unSetFightingForm(fform);
-	u.fightingForm[(fform-1)/16] |= (0x1L << ((fform-1)%16));
+	u.fightingForm[FFORM_WORD(fform)] |= FFORM_BIT(fform);
 }
 
 boolean
@@ -2461,7 +2478,7 @@ int fform;
 		return TRUE; //Found no fighting forms, return TRUE
 	}
 	
-	return !!(u.fightingForm[(fform-1)/16] & (0x1L << ((fform-1)%16)));
+	return !!(u.fightingForm[FFORM_WORD(fform)] & FFORM_BIT(fform));
 }
 
 int
@@ -2514,6 +2531,12 @@ int fform;
 		case FFORM_KNI_ELDRITCH:
 			return P_KNI_ELDRITCH;
 		break;
+		case FFORM_MNK_KIRIN:
+		case FFORM_MNK_CRANE:
+		case FFORM_MNK_SNAKE:
+		case FFORM_MNK_MANTIS:
+			return P_MARTIAL_ARTS;
+		break;
 		default:
 			impossible("Attempting to get skill of fighting form number %d?", fform);
 			return P_NONE;
@@ -2543,6 +2566,10 @@ int fform;
 		case FFORM_KNI_SACRED:	return "Sacred style";
 		case FFORM_KNI_RUNIC:	return "Runic style";
 		case FFORM_KNI_ELDRITCH:return "Eldritch style";
+		case FFORM_MNK_KIRIN:	return "Ki-rin style";
+		case FFORM_MNK_CRANE:	return "Crane style";
+		case FFORM_MNK_SNAKE:	return "Snake style";
+		case FFORM_MNK_MANTIS:	return "Mantis style";
 		default:
 			impossible("bad fform %d", fform);
 	}
@@ -2608,6 +2635,52 @@ validateLightsaberForm()
 	else setFightingForm(FFORM_SHII_CHO);
 }
 
+void
+init_martial_forms(void)
+{
+	int i, j, tmp;
+
+	for(i = 0; i < MNK_FFORM_COUNT; i++)
+		u.umartial_form_order[i] = FIRST_MNK_FFORM + i;
+
+	for(i = MNK_FFORM_COUNT - 1; i > 0; i--){
+		j = rn2(i + 1);
+		tmp = u.umartial_form_order[i];
+		u.umartial_form_order[i] = u.umartial_form_order[j];
+		u.umartial_form_order[j] = tmp;
+	}
+
+	u.umartial_forms_known = 0L;
+}
+
+boolean
+knownMartialForm(int fform)
+{
+	if(fform < FIRST_MNK_FFORM || fform > LAST_MNK_FFORM)
+		return FALSE;
+
+	return !!(u.umartial_forms_known & FFORM_BIT(fform));
+}
+
+/* one form per martial arts advance past basic, in the order rolled at game start */
+void
+unlock_martial_forms(void)
+{
+	int i, fform, learned;
+
+	if(!Role_if(PM_MONK))
+		return;
+
+	learned = min(OLD_P_SKILL(P_MARTIAL_ARTS) - P_BASIC, MNK_FFORM_COUNT);
+	for(i = 0; i < learned; i++){
+		fform = u.umartial_form_order[i];
+		if(!knownMartialForm(fform)){
+			u.umartial_forms_known |= FFORM_BIT(fform);
+			You("have mastered %s martial arts!", nameOfFightingForm(fform));
+		}
+	}
+}
+
 /* returns TRUE if fform is blocked by currently worn armor */
 boolean
 blockedFightingForm(fform)
@@ -2616,6 +2689,10 @@ int fform;
 	switch (fform) {
 		/* always available */
 		case NO_FFORM:
+		case FFORM_MNK_KIRIN:
+		case FFORM_MNK_CRANE:
+		case FFORM_MNK_SNAKE:
+		case FFORM_MNK_MANTIS:
 			return FALSE;
 		case FFORM_SHII_CHO:
 		case FFORM_KNI_SACRED:

@@ -151,7 +151,7 @@ register int x, y, n;
 		if(x == 0 && y == 0) {
 			int tryct = 0;	/* careful with bigrooms */
 			struct monst fakemon = {0};
-			set_mon_data_core(&fakemon, mtmp->data); /* set up for goodpos */
+			set_mon_data_core(&fakemon, mtmp->data, FALSE); /* set up for goodpos */
 			do {
 				mm.x = rn1(COLNO-3,2);
 				mm.y = rn2(ROWNO);
@@ -14828,7 +14828,7 @@ int faction;
 				ptr = rn2(10) ? &mons[PM_AETHER_WOLF] : &mons[PM_FOETID_ANGEL];
 			}
 			out_template = makemon_set_template(&ptr, template, randmonst);
-			set_mon_data_core(&fakemon, ptr); /* set up for goodpos */
+			set_mon_data_core(&fakemon, ptr, FALSE); /* set up for goodpos */
 			gpflags = (mmflags & MM_IGNOREWATER) ? MM_IGNOREWATER : 0;
 		} while((!goodpos(x, y, &fakemon, gpflags) 
 				|| (tryct < 50 && !in_mklev && couldsee(x, y)) 
@@ -14847,7 +14847,7 @@ int faction;
 		int tryct = 0;	/* careful with bigrooms */
 		struct monst fakemon = {0};
 		if(ptr) out_template = makemon_set_template(&ptr, template, randmonst);
-		if(ptr) set_mon_data_core(&fakemon, ptr); /* set up for goodpos */
+		if(ptr) set_mon_data_core(&fakemon, ptr, FALSE); /* set up for goodpos */
 		do {
 			x = rn1(COLNO-3,2);
 			y = rn2(ROWNO);
@@ -14877,7 +14877,7 @@ int faction;
 		/* need to check that the given position is safe */
 		struct monst fakemon = { 0 };
 		out_template = makemon_set_template(&ptr, template, randmonst);
-		set_mon_data_core(&fakemon, ptr); /* set up for goodpos */
+		set_mon_data_core(&fakemon, ptr, FALSE); /* set up for goodpos */
 		if (!goodpos(x, y, &fakemon, gpflags)){
 			if ((mmflags & MM_ADJACENTOK) != 0) {
 				coord bypos;
@@ -14944,7 +14944,7 @@ int faction;
 			    return((struct monst *) 0);	/* no more monsters! */
 			}
 			out_template = makemon_set_template(&ptr, template, randmonst);
-			set_mon_data_core(&fakemon, ptr); /* set up for goodpos */
+			set_mon_data_core(&fakemon, ptr, FALSE); /* set up for goodpos */
 		} while(!goodpos(x, y, &fakemon, gpflags) && tryct++ < 150);
 		if(tryct >= 150){
 			return((struct monst *) 0);	/* no more monsters! */
@@ -16195,6 +16195,11 @@ int faction;
 
 	if (u.silverknight_mire)
 		mtmp->mmired = TRUE;
+
+	/* set_mon_data() ran while m_lev was still 0, and several species
+	 * overwrite it after it is first assigned -- applied once here rather
+	 * than at any of those points. */
+	mon_relevel_bodyparts(mtmp, 0, mtmp->m_lev);
 
 	return(mtmp);
 }
@@ -17952,7 +17957,12 @@ struct monst *mtmp, *victim;
 	if (mtmp->mhpmax <= hp_threshold)
 	    return ptr;		/* doesn't gain a level */
 		
-	if ((int)++mtmp->m_lev >= mons[newtype].mlevel && newtype != oldtype) {
+	mtmp->m_lev++;
+	/* a body part can be gated on level; not in the branch below, which is
+	 * only taken when growing into a different type entirely */
+	mon_relevel_bodyparts(mtmp, mtmp->m_lev - 1, mtmp->m_lev);
+
+	if ((int)mtmp->m_lev >= mons[newtype].mlevel && newtype != oldtype) {
 	    ptr = &mons[newtype];
 	    if (mvitals[newtype].mvflags & G_GENOD && !In_quest(&u.uz)) {	/* allow G_EXTINCT */
 		if (sensemon(mtmp))

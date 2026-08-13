@@ -2158,6 +2158,25 @@ stargate()
 	return MOVE_INSTANT;
 }
 
+/* mhurtle() can drop a monster through a hole to another level, so nothing may
+ * touch it again without checking. */
+static void
+exhalation_blast(struct monst *mon, int range, boolean inline_target, int dsize)
+{
+	mhurtle(mon, u.dx, u.dy, range, inline_target);
+	if (DEADMONSTER(mon) || MIGRATINGMONSTER(mon))
+		return;
+
+	mon->mhp -= inline_target ? d(5, dsize) : d(rnd(5), dsize);
+	if (mon->mhp <= 0) {
+		mon->mhp = 0;
+		xkilled(mon, 1);
+	} else {
+		pline("%s is flung back by the wind.", Monnam(mon));
+		setmangry(mon);
+	}
+}
+
 int
 spiriteffects(power, atme)
 	int power;
@@ -3440,103 +3459,41 @@ spiriteffects(power, atme)
 					i++;
 					mon = m_at(sx, sy);
 					if(mon){
-						mhurtle(mon, u.dx, u.dy, range+i, TRUE);
-						mon->mhp -= d(5,dsize);
 						setmangry(mon);
-						if (mon->mhp <= 0){
-							mon->mhp = 0;
-							xkilled(mon, 1);
-						} else {
-							pline("%s is flung back by the wind.",Monnam(mon));
-							setmangry(mon);
-						}
+						exhalation_blast(mon, range+i, TRUE, dsize);
 					}
 					if(!u.dx){
 						if(isok(sx+1,sy)){
 							mon = m_at(sx+1, sy);
-							if(mon){
-								mhurtle(mon, u.dx, u.dy, range+i, FALSE);
-								mon->mhp -= d(rnd(5),dsize);
-								if (mon->mhp <= 0){
-									mon->mhp = 0;
-									xkilled(mon, 1);
-								} else {
-									pline("%s is flung back by the wind.",Monnam(mon));
-									setmangry(mon);
-								}
-							}
+							if(mon)
+								exhalation_blast(mon, range+i, FALSE, dsize);
 						}
 						if(isok(sx-1,sy)){
 							mon = m_at(sx-1, sy);
-							if(mon){
-								mhurtle(mon, u.dx, u.dy, range+i, FALSE);
-								mon->mhp -= d(rnd(5),dsize);
-								if (mon->mhp <= 0){
-									mon->mhp = 0;
-									xkilled(mon, 1);
-								} else {
-									pline("%s is flung back by the wind.",Monnam(mon));
-									setmangry(mon);
-								}
-							}
+							if(mon)
+								exhalation_blast(mon, range+i, FALSE, dsize);
 						}
 					} else if(!u.dy){
 						if(isok(sx,sy+1)){
 							mon = m_at(sx, sy+1);
-							if(mon){
-								mhurtle(mon, u.dx, u.dy, range+i, FALSE);
-								mon->mhp -= d(rnd(5),dsize);
-								if (mon->mhp <= 0){
-									mon->mhp = 0;
-									xkilled(mon, 1);
-								} else {
-									pline("%s is flung back by the wind.",Monnam(mon));
-									setmangry(mon);
-								}
-							}
+							if(mon)
+								exhalation_blast(mon, range+i, FALSE, dsize);
 						}
 						if(isok(sx,sy-1)){
 							mon = m_at(sx, sy-1);
-							if(mon){
-								mhurtle(mon, u.dx, u.dy, range+i, FALSE);
-								mon->mhp -= d(rnd(5),dsize);
-								if (mon->mhp <= 0){
-									mon->mhp = 0;
-									xkilled(mon, 1);
-								} else {
-									pline("%s is flung back by the wind.",Monnam(mon));
-									setmangry(mon);
-								}
-							}
+							if(mon)
+								exhalation_blast(mon, range+i, FALSE, dsize);
 						}
 					} else {
 						if(isok(sx,sy-u.dy)){
 							mon = m_at(sx, sy-u.dy);
-							if(mon){
-								mhurtle(mon, u.dx, u.dy, range+i, FALSE);
-								mon->mhp -= d(rnd(5),dsize);
-								if (mon->mhp <= 0){
-									mon->mhp = 0;
-									xkilled(mon, 1);
-								} else {
-									pline("%s is flung back by the wind.",Monnam(mon));
-									setmangry(mon);
-								}
-							}
+							if(mon)
+								exhalation_blast(mon, range+i, FALSE, dsize);
 						}
 						if(isok(sx-u.dx,sy)){
 							mon = m_at(sx-u.dx, sy);
-							if(mon){
-								mhurtle(mon, u.dx, u.dy, range+i, FALSE);
-								mon->mhp -= d(rnd(5),dsize);
-								if (mon->mhp <= 0){
-									mon->mhp = 0;
-									xkilled(mon, 1);
-								} else {
-									pline("%s is flung back by the wind.",Monnam(mon));
-									setmangry(mon);
-								}
-							}
+							if(mon)
+								exhalation_blast(mon, range+i, FALSE, dsize);
 						}
 					}
 					sx -= u.dx;

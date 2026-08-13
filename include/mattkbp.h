@@ -12,7 +12,13 @@
 extern struct atkbp_set FDECL(atkbp_lit, (int,long));
 extern struct atkbp_set FDECL(atkbp_or, (const struct atkbp_set *));
 extern boolean FDECL(atkbp_intersects, (struct atkbp_set,struct atkbp_set));
+extern struct atkbp_set FDECL(atkbp_and, (struct atkbp_set,struct atkbp_set));
+extern struct atkbp_set FDECL(atkbp_union, (struct atkbp_set,struct atkbp_set));
+extern struct atkbp_set FDECL(atkbp_diff, (struct atkbp_set,struct atkbp_set));
 extern boolean FDECL(atkbp_is_none, (struct atkbp_set));
+extern int FDECL(atkbp_bit_count, (struct atkbp_set));
+extern struct atkbp_set FDECL(atkbp_nth_bit, (struct atkbp_set,int));
+extern struct atkbp_set FDECL(leg_ordinal_bit, (int));
 
 #define ATKBP_ARM_ORDINALS_MASK() \
 	atkbp_or((struct atkbp_set[]){ \
@@ -29,6 +35,11 @@ extern boolean FDECL(atkbp_is_none, (struct atkbp_set));
 	atkbp_or((struct atkbp_set[]){ \
 	    ATKBP(LEG_DOMINANT), ATKBP(LEG_OFFHAND), \
 	    ATKBP(LEG_3RD), ATKBP(LEG_4TH), ATKBP(LEG_5TH), ATKBP(LEG_6TH), ATKBP(LEG_7TH), ATKBP(LEG_8TH), \
+	    ATKBP(NONE) })
+#define ATKBP_TENTACLE_ARM_ORDINALS_MASK() \
+	atkbp_or((struct atkbp_set[]){ \
+	    ATKBP(TENTACLE_ARM_DOMINANT), ATKBP(TENTACLE_ARM_OFFHAND), \
+	    ATKBP(TENTACLE_ARM_3RD), ATKBP(TENTACLE_ARM_4TH), ATKBP(TENTACLE_ARM_5TH), ATKBP(TENTACLE_ARM_6TH), \
 	    ATKBP(NONE) })
 #define ATKBP_HORN_ORDINALS_MASK() \
 	atkbp_or((struct atkbp_set[]){ \
@@ -50,22 +61,42 @@ extern boolean FDECL(atkbp_is_none, (struct atkbp_set));
 #define ATKBP_LOWER_ARM_MASK() \
 	atkbp_or((struct atkbp_set[]){ ATKBP_ARM_LOWER_ORDINALS_MASK(), ATKBP(ARM_LOWER), ATKBP(NONE) })
 
+/* Every part that counts as one of a monster's limbs: concrete ordinals only,
+ * so the generic termini (LIMB_GENERIC, TENTACLE_GENERIC, OTHER_APPENDAGE) and
+ * the vague family bits are all excluded.
+ */
+#define ATKBP_LIMB_MASK() \
+	atkbp_or((struct atkbp_set[]){ \
+	    ATKBP_CONCRETE_ARM_MASK(), ATKBP_TENTACLE_ARM_ORDINALS_MASK(), ATKBP_LEG_ORDINALS_MASK(), \
+	    ATKBP(ALIEN_LIMB_1ST), ATKBP(ALIEN_LIMB_2ND), ATKBP(WING), ATKBP(TAIL), \
+	    ATKBP(NONE) })
+
 extern struct atkbp_set FDECL(atkbp_spellcast_arm_mask, (struct permonst *));
 
 extern int FDECL(mon_leg_count, (struct permonst *));
 
 extern int FDECL(mon_rear_leg_count, (struct permonst *));
 
+extern int FDECL(atkbp_leg_count, (struct atkbp_set));
+
 extern int FDECL(mon_horn_count, (struct permonst *));
 
 extern struct atkbp_set FDECL(mon_flag_bodyparts, (struct permonst *));
 
+/* mon_bodyparts() insight argument: no gating, i.e. the whole potential body plan. */
+#define INSIGHT_ALL	(-1)
+
+extern struct atkbp_set FDECL(mon_bodyparts, (struct permonst *,int));
+
+extern struct atkbp_set FDECL(mon_insight_veil, (struct permonst *,int));
+
+extern boolean FDECL(injuries_would_block_attk, (struct permonst *,struct attack *,struct atkbp_set));
+
 /* struct mon_atkbp: one entry per monster (indexed the same way mons[] is).
  * `attacks[]` mirrors ptr->mattk[] -- same order, same per-attack meaning
- * attkbp[][NATTK] always had. `bodyparts` is the union of every entry in
- * `attacks[]` up to this monster's real attack count -- every body part
- * this monster's attacks are known to use, without a caller needing to
- * scan the per-attack array and OR them together itself.
+ * attkbp[][NATTK] always had. `bodyparts` is this monster's whole body
+ * plan as mon_bodyparts() computes it, precomputed so callers don't have
+ * to; attkbp_init() copies it into mons[]'s own permonst field.
  */
 struct mon_atkbp {
     struct atkbp_set attacks[NATTK];

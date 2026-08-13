@@ -3536,8 +3536,15 @@ int tary;
 		((youagr || magr->mtame) ? MM_EDOG : 0) |
 		((!youagr && !magr->mpeaceful) ? MM_ANGRY : 0));
 
+	int dmn;
 	/* calculate default damage -- many spells ignore or override this amount */
-	int dmn = min(MAX_BONUS_DICE, mlev(magr) / 3 + 1);
+	if(attk->adtyp == AD_PSON) //Psion dice are usually d15s (like mind blasts), so there needs to be fewer of them.
+		dmn = max(mlev(magr) / 4, 1);
+	else
+		dmn = mlev(magr) / 3 + 1;
+	/* cap level contribution to ndice to MAX_BONUS_DICE */
+	if (dmn > MAX_BONUS_DICE)
+		dmn = MAX_BONUS_DICE;
 	if (attk && attk->damn)
 		dmn += attk->damn;
 	int dmd = (attk && attk->damd) ? attk->damd : 6;
@@ -7252,22 +7259,22 @@ int tary;
 					)
 				{
 					dmg = d(dmn, dmd);
-					if (Half_spel(mdef))
+					if (Half_spel(cmon))
 						dmg = (dmg + 1) / 2;
-					if (Magic_res(mdef))
+					if (Magic_res(cmon))
 						dmg = (dmg + 1) / 2;
 					/* study */
 					cmon->mstdy = min(dmg, cmon->mstdy + dmg);
 				}
 			}
 			/* include player, if hostile */
-			if (!(youagr || magr->mtame)
+			if (!(youagr || magr->mpeaceful)
 				&& dist2(tarx, tary, u.ux, u.uy) <= 3 * 3 + 1)
 			{
 				dmg = d(dmn, dmd);
-				if (Half_spel(mdef))
+				if (Half_spel(&youmonst))
 					dmg = (dmg + 1) / 2;
-				if (Magic_res(mdef))
+				if (Magic_res(&youmonst))
 					dmg = (dmg + 1) / 2;
 
 				u.ustdy = min(dmg, u.ustdy + dmg);

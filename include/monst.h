@@ -7,6 +7,7 @@
 
 #include "prop.h"
 #include "attrib.h"
+#include "atkbpnames.h"
 
 /* The weapon_check flag is used two ways:
  * 1) When calling mon_wield_item, is 2-6 depending on what is desired.
@@ -205,22 +206,25 @@ struct monst {
 	Bitfield(brainblooms,1);/* should rise as brainblossom */ /*128*/
 	Bitfield(mibitemarked,1); /* monster was damaged by the ibite arm and will be sacced if they die */ /*129*/
 	Bitfield(mpassive,1); /* if tame, won't attack monsters ever */ /*130*/
-	Bitfield(mwounded_legs,1);/* wounded legs */ /*131*/
-	Bitfield(mopen,2);/* open to sneak attacks */ /*133*/
-	
-	Bitfield(mequipping,7); /*140*/
+	Bitfield(mopen,2);/* open to sneak attacks */
 
-	Bitfield(mironmarked,1);/* recently hit by an iron weapon (elves/fey/rage-walker) */ /*141*/
-	Bitfield(mcaterpillars,1); /* monster is covered in rot scorpions */ /*142*/
-	Bitfield(momud,1); /* monster is covered in orc-mud */ /*143*/
-	Bitfield(mubled,1); /* You inflicted bleed damage on this monster and will be blamed if it dies */ /*144*/
-	Bitfield(mtecpatlmarked,1); /* the Tecpatl of Huehueteotl can sacrifice low-enough-health monsters */ /*145*/
-	Bitfield(mpunctured,4); /* This monster may take double damage from puncture attacks */ /*149*/
-	Bitfield(mprobed,1); /* monster has been probed by Magicbane et al, will display at end of attack if it lives */ /*150*/
-	Bitfield(mmired,1); /* monster was created in the mire */ /*151*/
-	Bitfield(mnopickup,1); /* pet will leave items on the ground */ /*152*/
-	Bitfield(mcombat,1); /* pet is currently engaged in combat */ /*153*/
-	Bitfield(mgroup_summoned,1); /* monster has used its group summon ability */ /*154*/
+	Bitfield(mequipping,7);
+	/*139*/
+
+	Bitfield(mironmarked,1);/* recently hit by an iron weapon (elves/fey/rage-walker) */
+	/*140*/
+	Bitfield(mcaterpillars,1); /* monster is covered in rot scorpions */
+	Bitfield(momud,1); /* monster is covered in orc-mud */
+	Bitfield(mubled,1); /* You inflicted bleed damage on this monster and will be blamed if it dies */
+	Bitfield(mtecpatlmarked,1); /* the Tecpatl of Huehueteotl can sacrifice low-enough-health monsters */
+	Bitfield(mpunctured,4); /* This monster may take double damage from puncture attacks */
+	/*148*/
+	Bitfield(mprobed,1); /* monster has been probed by Magicbane et al, will display at end of attack if it lives */
+	Bitfield(mmired,1); /* monster was created in the mire */
+	/*150*/
+	Bitfield(mnopickup,1); /* pet will leave items on the ground */
+	Bitfield(mcombat,1); /* pet is currently engaged in combat */
+	Bitfield(mgroup_summoned,1); /* monster has used its group summon ability */
 
 	unsigned long long int 	seenmadnesses;	/* monster has seen these madnesses */
 	
@@ -419,6 +423,14 @@ struct monst {
 #define	mvar_lifesigns	mvar3
 #define	mvar_spellweaver_last_cast	mvar3
 #define has_lifesigns(mon)	(mon->mtyp != PM_SPELLWEAVER && mon->mtyp != PM_SPELLWEAVER_GODDESS_MOCKER && mon->mtyp != PM_CHAOS && mon->mvar_lifesigns)
+
+	/* seeded from data->bodyparts, but tracked per-monster: an individual
+	 * can have parts others of its form do not, and a few monsters can
+	 * only be partially perceived by the PC */
+	struct atkbp_set mbodyparts_full;	/* every body part it has */
+	struct atkbp_set mbodyparts;		/* those the PC can perceive */
+	struct atkbp_set minjuries;			/* those that have been injured */
+#define HEAL_ALL_INJURIES	(-1)	/* mon_heal_injuries() count: mend everything */
 
 	struct ls_t * light;
 

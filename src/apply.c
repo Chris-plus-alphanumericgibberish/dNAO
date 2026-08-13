@@ -5329,11 +5329,63 @@ use_smithing_hammer(struct obj *obj)
 	return MOVE_DEFAULT;
 }
 
+#define UNIHORN_TROUBLE_COUNT 6
+
+/* The hero's troubles a unicorn horn could fix. Returns how many there are,
+ * filling `troubles` with their property ids when it is non-NULL. */
+int
+unihorn_troubles(int *troubles)
+{
+	int n = 0;
+#define trbl(X)	do { if (troubles) troubles[n] = (X); n++; } while (0)
+	if (Sick) trbl(SICK);
+	if (Blinded > (long)u.ucreamed) trbl(BLINDED);
+	if (HHallucination) trbl(HALLUC);
+	if (Vomiting) trbl(VOMITING);
+	if (HConfusion) trbl(CONFUSION);
+	if (HStun) trbl(STUNNED);
+#undef trbl
+	return n;
+}
+
+boolean
+cure_one_unihorn_trouble(void)
+{
+	int troubles[UNIHORN_TROUBLE_COUNT];
+	int n = unihorn_troubles(troubles);
+
+	if (!n)
+		return FALSE;
+
+	switch (troubles[rn2(n)]) {
+	case SICK:
+		make_sick(0L, (char *) 0, TRUE, SICK_ALL);
+		break;
+	case BLINDED:
+		make_blinded((long)u.ucreamed, TRUE);
+		break;
+	case HALLUC:
+		(void) make_hallucinated(0L, TRUE, 0L);
+		break;
+	case VOMITING:
+		make_vomiting(0L, TRUE);
+		break;
+	case CONFUSION:
+		make_confused(0L, TRUE);
+		break;
+	case STUNNED:
+		make_stunned(0L, TRUE);
+		break;
+	}
+	flags.botl = TRUE;
+	return TRUE;
+}
+
 void
 use_unicorn_horn(obj)
 struct obj *obj;
 {
-#define PROP_COUNT 6		/* number of properties we're dealing with */
+#define PROP_COUNT UNIHORN_TROUBLE_COUNT	/* number of properties we're dealing with */
 #define ATTR_COUNT (A_MAX*3)	/* number of attribute points we might fix */
 	int idx, val, val_limit,
 	    trouble_count, unfixable_trbl, did_prop, did_attr;
@@ -5374,12 +5426,9 @@ struct obj *obj;
 	trouble_count = unfixable_trbl = did_prop = did_attr = 0;
 
 	/* collect property troubles */
-	if (Sick) prop_trouble(SICK);
-	if (Blinded > (long)u.ucreamed) prop_trouble(BLINDED);
-	if (HHallucination) prop_trouble(HALLUC);
-	if (Vomiting) prop_trouble(VOMITING);
-	if (HConfusion) prop_trouble(CONFUSION);
-	if (HStun) prop_trouble(STUNNED);
+	trouble_count = unihorn_troubles(trouble_list);
+	for (idx = 0; idx < trouble_count; idx++)
+		trouble_list[idx] = prop2trbl(trouble_list[idx]);
 
 	unfixable_trbl = unfixable_trouble_count(TRUE);
 

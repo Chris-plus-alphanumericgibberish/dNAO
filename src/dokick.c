@@ -213,6 +213,68 @@ struct monst *mon;
 		kickdmg(mon, clumsy);
 }
 
+/* one kick to the square ahead and one to the square behind */
+boolean
+flying_kick_monsters(void)
+{
+	struct monst *mon;
+	int i = -inv_weight();
+	int j = weight_cap();
+	boolean clumsy = FALSE;
+	boolean messaged = FALSE;
+	int sdx = u.dx;
+	int sdy = u.dy;
+	int ix, iy, k;
+
+	if(Fumbling) clumsy = TRUE;
+	else if(i < (j*3)/10) {
+		if(!rn2((i < j/10) ? 2 : (i < j/5) ? 3 : 4)) {
+			clumsy = TRUE;
+		}
+		else if(i < j/10) clumsy = TRUE;
+		else if(!rn2((i < j/5) ? 2 : 3)) clumsy = TRUE;
+	}
+	else if(uarm && !is_light_armor(uarm) && !is_medium_armor(uarm) && ACURR(A_DEX) < rnd(25))
+		clumsy = TRUE;
+
+	for(k = 0; k < (!clumsy ? 4 : 2); k++){
+		//Necessary so that the kicking functions can knock the monster in the right direction.
+		u.dx = (k%2 ? -sdx : sdx);
+		u.dy = (k%2 ? -sdy : sdy);
+		ix = u.ux + u.dx;
+		iy = u.uy + u.dy;
+		if(!isok(ix, iy))
+			continue;
+		mon = m_at(ix, iy);
+		if(!mon || DEADMONSTER(mon) || !peace_check_move(mon))
+			continue;
+		if((touch_petrifies(mon->data)
+			|| mon->mtyp == PM_MEDUSA)
+		 && !(Stone_resistance || uarmf))
+			continue;
+		if(!messaged){
+			pline("%s!", move_name(FLY_KICKS));
+			messaged = TRUE;
+		}
+		if(!is_blind(mon) && !(mon->mtrapped || mon->entangled_oid) && !thick_skinned(mon->data) &&
+		   mon->data->mlet != S_EEL && haseyes(mon->data) && mon->mcanmove &&
+		   !mon->mstun && !mon->mconf && !mon->msleeping && !mindless_mon(mon) &&
+		   mon->data->mmove >= 12) {
+			if(!nohands(mon->data) && !rn2(martial() ? 5 : 3) && mon->movement >= 0) {
+				pline("%s blocks your %skick.", Monnam(mon),
+					clumsy ? "clumsy " : "");
+				xpassivey(&youmonst, mon, &basickick, (struct obj *)0, -1, MM_MISS, mon->data, TRUE);
+				mon->movement -= 6; //Note, may end up with up to -6 move points
+				continue;
+			}
+		}
+		kickdmg(mon, clumsy);
+	}
+	u.dx = sdx;
+	u.dy = sdy;
+	return messaged;
+}
+
 void
 bird_kick_monsters()
 {
@@ -348,6 +410,65 @@ wing_storm_monsters()
 	}
 	u.dx = sdx;
 	u.dy = sdy;
+}
+
+/* A chiropteran's flying kicks are a gust instead. */
+boolean
+divine_banishment(void)
+{
+	struct monst *mon;
+	int i, range = BOLT_LIM;
+	int sx, sy;
+	boolean messaged = FALSE;
+	boolean holy = u_blessed();
+
+	if(u.uswallow){
+		if(u.ustuck && is_whirly(u.ustuck->data)){
+			mon = u.ustuck;
+			pline("%s blows apart in the wind.",Monnam(mon));
+			xdamagey(&youmonst, mon, (struct attack *)0, u.ulevel*10);
+			if(DEADMONSTER(mon)) expels(mon, mon->data, TRUE);
+			return TRUE;
+		}
+		return FALSE;
+	}
+
+	/* find the far end of the gust */
+	sx = u.ux;
+	sy = u.uy;
+	for(i = range; i > 0; i--){
+		sx += u.dx;
+		sy += u.dy;
+		if(!isok(sx, sy) || !ZAP_POS(levl[sx][sy].typ)){
+			sx -= u.dx;
+			sy -= u.dy;
+			break;
+		}
+	}
+	/* work back toward yourself, so each target has somewhere to be flung */
+	while(sx != u.ux || sy != u.uy){
+		i++;
+		mon = m_at(sx, sy);
+		if(mon && !DEADMONSTER(mon) && peace_check_move(mon)){
+			if(!messaged){
+				pline("%s!", move_name(FLY_KICKS));
+				messaged = TRUE;
+			}
+			if(is_whirly(mon->data) || (holy && banish_kill_mon(mon)))
+				xdamagey(&youmonst, mon, (struct attack *)0, u.ulevel*10);
+			if(holy && hates_holy_mon(mon) && !DEADMONSTER(mon)
+				&& !resist(mon, '\0', 0, TELL)
+			)
+				set_mcan(mon, TRUE);
+			if(!DEADMONSTER(mon) && !MIGRATINGMONSTER(mon)){
+				mhurtle(mon, u.dx, u.dy, range+i, TRUE);
+				setmangry(mon);
+			}
+		}
+		sx -= u.dx;
+		sy -= u.dy;
+	}
+	return messaged;
 }
 
 void
@@ -770,7 +891,7 @@ int dx, dy;
 	boolean no_kick = FALSE;
 	char buf[BUFSZ];
 
-	if ((nolimbs(youracedata) || slithy(youracedata)) && !humanoid_feet(youracedata)) {
+	if (nokicks(youracedata)) {
 		You("have no legs to kick with.");
 		no_kick = TRUE;
 	} else if (verysmall(youracedata)) {

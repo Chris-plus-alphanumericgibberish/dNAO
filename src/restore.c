@@ -311,7 +311,7 @@ boolean ghostly;
 			mtmp->m_id = nid;
 		}
 		if (mtmp->data) {
-			set_mon_data(mtmp, mtmp->mtyp);
+			restore_mon_data(mtmp, mtmp->mtyp);
 		}
 		if (ghostly) {
 			int mndx = monsndx(mtmp->data);
@@ -443,7 +443,20 @@ restgamestate(int fd, unsigned int *stuckid, unsigned int *steedid, unsigned int
 	mread(fd, (genericptr_t) &youmonst, sizeof(struct monst));
 	if (youmonst.light)
 		rest_lightsource(LS_MONSTER, &youmonst, youmonst.light, fd, FALSE);
-	init_uasmon();
+	/* init_uasmon() treats this as taking on a new form, so hold the
+	 * restored body plan and injuries across it. Can't use
+	 * restore_mon_data() instead: the player reaches set_mon_data() through
+	 * set_uasmon(), which several live-play callers share. */
+	{
+		struct atkbp_set restored_full = youmonst.mbodyparts_full;
+		struct atkbp_set restored_bodyparts = youmonst.mbodyparts;
+		struct atkbp_set restored_injuries = youmonst.minjuries;
+
+		init_uasmon();
+		youmonst.mbodyparts_full = restored_full;
+		youmonst.mbodyparts = restored_bodyparts;
+		youmonst.minjuries = restored_injuries;
+	}
 	role_edit();		/* after u is read so that role_variant is set */
 #ifdef CLIPPING
 	cliparound(u.ux, u.uy);

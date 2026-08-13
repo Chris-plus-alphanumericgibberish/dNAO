@@ -566,10 +566,39 @@ struct attack *mattk;
  *
  * Monster is attacking something. Use xattacky().
  */
-int
-mattacku(mtmp)
-register struct monst *mtmp;
+/* A hostile magr could hit instead of you, standing next to both of you. */
+static struct monst *
+crane_redirect_target(struct monst *magr)
 {
+	struct monst *mtmp, *found = (struct monst *)0;
+	int count = 0;
+
+	for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
+		if (DEADMONSTER(mtmp) || mtmp == magr)
+			continue;
+		if (mtmp->mpeaceful || mtmp->mtame)
+			continue;
+		if (distmin(u.ux, u.uy, mtmp->mx, mtmp->my) != 1)
+			continue;
+		if (distmin(x(magr), y(magr), mtmp->mx, mtmp->my) != 1)
+			continue;
+		/* pick uniformly among the candidates */
+		if (!rn2(++count))
+			found = mtmp;
+	}
+	return found;
+}
+
+int
+mattacku(struct monst *mtmp)
+{
+	struct monst *redirect;
+
+	if (u.uspin_crane && (redirect = crane_redirect_target(mtmp))) {
+		if (canseemon(mtmp) || canseemon(redirect))
+			You("spin aside, and %s strikes %s!", mon_nam(mtmp), mon_nam(redirect));
+		return xattacky(mtmp, redirect, x(redirect), y(redirect), 0L);
+	}
 	return xattacky(mtmp, &youmonst, mtmp->mux, mtmp->muy, 0L);
 }
 
@@ -3615,6 +3644,33 @@ struct attack * attk;
 	return result;
 }
 
+/* Follow-up to a spear-wall hit: the thrust can injure the target's legs. */
+static void
+holyspear_trip(struct monst *magr, struct monst *mdef2, struct obj *otmp)
+{
+	if(!ROLL_ETRAIT(otmp, magr, TRUE, !rn2(10)))
+		return;
+	if(mdef2 == &youmonst){
+		if(!Wounded_legs){
+			long side = rn2(2) ? RIGHT_SIDE : LEFT_SIDE;
+			const char *sidestr = (side == RIGHT_SIDE) ? "right" : "left";
+			if(u.usteed)
+				Your("steed's %s is injured by the spears!", mbodypart(u.usteed, LEG));
+			else
+				Your("%s %s is injured by the spears!", sidestr, body_part(LEG));
+			set_wounded_legs(side, rnd(60 - ACURR(A_DEX)));
+		}
+	}
+	else {
+		mdef2->mfell += 1;
+		mdef2->movement -= min_ints(6, mdef2->movement/(mdef2->mfell+1));
+		/*the thicket of spears may wound anywhere from 1 to all of a target's legs*/
+		if(!all_visible_legs_wounded(mdef2) && !rn2(20-mdef2->data->msize))
+			injure_random_legs(mdef2, rnd(mon_visible_leg_count(mdef2)), "by the spears");
+	}
+	return;
+}
+
 /////////////////////////////////////////////////
 /* Silverknight spears hit additional targets */
 ///////////////////////////////////////////////
@@ -3713,28 +3769,8 @@ hit_with_holyspear(struct monst *magr, struct obj *otmp, int tarx, int tary, int
 			}
 			subresult = xmeleehity(magr, mdef2, &spears, (struct obj **)0, FALSE, tohitmod, TRUE, 0);
 			if((subresult & MM_HIT) && !DEADMONSTER(mdef2)){
-				if(ROLL_ETRAIT(otmp, magr, TRUE, !rn2(10))){
-					if(mdef2 == &youmonst){
-						if(!Wounded_legs){
-							long side = rn2(2) ? RIGHT_SIDE : LEFT_SIDE;
-							const char *sidestr = (side == RIGHT_SIDE) ? "right" : "left";
-							if(u.usteed)
-								Your("steed's %s is injured by the spears!", mbodypart(u.usteed, LEG));
-							else
-								Your("%s %s is injured by the spears!", sidestr, body_part(LEG));
-							set_wounded_legs(side, rnd(60 - ACURR(A_DEX)));
-						}
-					}
-					else {
-						mdef2->mfell += 1;
-						mdef2->movement -= min_ints(6, mdef2->movement/(mdef2->mfell+1));
-						if(!mdef2->mwounded_legs && !rn2(20-mdef2->data->msize)){
-							mdef2->mwounded_legs = 1;
-							pline("%s %s is injured by the spears!", s_suffix(Monnam(mdef2)), mbodypart(mdef2, LEG));
-						}
-					}
-				}
-			} 
+				holyspear_trip(magr, mdef2, otmp);
+			}
 			/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
 			result |= subresult&(MM_HIT|MM_AGR_DIED|MM_AGR_STOP);
 		}
@@ -3796,27 +3832,7 @@ hit_with_holyspear(struct monst *magr, struct obj *otmp, int tarx, int tary, int
 				}
 				subresult = xmeleehity(magr, mdef2, &spears, (struct obj **)0, FALSE, tohitmod, TRUE, 0);
 				if((subresult & MM_HIT) && !DEADMONSTER(mdef2)){
-					if(ROLL_ETRAIT(otmp, magr, TRUE, !rn2(10))){
-						if(mdef2 == &youmonst){
-							if(!Wounded_legs){
-								long side = rn2(2) ? RIGHT_SIDE : LEFT_SIDE;
-								const char *sidestr = (side == RIGHT_SIDE) ? "right" : "left";
-								if(u.usteed)
-									Your("steed's %s is injured by the spears!", mbodypart(u.usteed, LEG));
-								else
-									Your("%s %s is injured by the spears!", sidestr, body_part(LEG));
-								set_wounded_legs(side, rnd(60 - ACURR(A_DEX)));
-							}
-						}
-						else {
-							mdef2->mfell += 1;
-							mdef2->movement -= min_ints(6, mdef2->movement/(mdef2->mfell+1));
-							if(!mdef2->mwounded_legs && !rn2(20-mdef2->data->msize)){
-								mdef2->mwounded_legs = 1;
-								pline("%s %s is injured by the spears!", s_suffix(Monnam(mdef2)), mbodypart(mdef2, LEG));
-							}
-						}
-					}
+					holyspear_trip(magr, mdef2, otmp);
 				}
 				/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
 				result |= subresult&(MM_HIT|MM_AGR_DIED|MM_AGR_STOP);
