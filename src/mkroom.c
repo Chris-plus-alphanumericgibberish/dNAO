@@ -8879,6 +8879,7 @@ mksgardenstatueat(x,y)
 				t = maketrap(x, y, MAGIC_TRAP);
 				if(t){
 					t->ttyp = STATUE_TRAP;
+					t->statueid = otmp->o_id;
 				}
 			}
 		}
