@@ -1273,7 +1273,7 @@ int portal;
 		pline("A mysterious force prevents you from descending.");
 		return;
 	}
-	if(u.silverknight_mire && u.uz.dnum == oracle_level.dnum && newdungeon){
+	if(u.silverknight_mire && In_dungeons_of_doom(&u.uz) && newdungeon){
 		if (newlevel->dnum != qstart_level.dnum) {
 			pline("A mysterious force prevents you from %s.", portal ? "leaving" : up ? "climbing" : "descending");
 			return;

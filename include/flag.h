@@ -515,6 +515,7 @@ struct instance_flags {
 	boolean  lootabc;	/* use "a/b/c" rather than "o/i/b" when looting */
 	boolean  showrace;	/* show hero glyph by race rather than by role */
 	boolean  travelcmd;	/* allow travel command */
+	boolean  cut_level_gen_test;	/* end the current level generation test */
 	int  travelplus;/* how far travel command should attempt to path through the unknown */
 	int	 runmode;	/* update screen display during run moves */
 	int delay_length;	/* length of delay for delay_output */
