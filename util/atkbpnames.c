@@ -51,6 +51,17 @@ struct atkbp_name_entry atkbp_name_list[] = {
      */
     { "HITS_INSUBSTANTIAL" },
 
+    /* orthogonal modifier, OR'd onto another bit above: this attack is
+     * delivered by a shell worn over the whole body rather than by the
+     * wearer's own flesh -- a tomb herd piloting a statue. Unlike
+     * ARMOR_ARM (a limb made out of the body armor, mapped to W_ARM
+     * outright), the shell sits under anything else the monster is
+     * wearing, so attk_protection()/attk_equip_slot() resolve the
+     * ordinary slot for the underlying identity bit first and only fall
+     * back to W_SKIN when that slot is actually empty.
+     */
+    { "ARMOR_SKIN" },
+
     /* generic claw/grasp/touch/reach, NOT confirmed to be a true arm/hand
      * (AT_CLAW/AT_HUGS/AT_TUCH/AT_LRCH baseline, unconfirmed)
      */

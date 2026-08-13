@@ -135,18 +135,18 @@ extend_spine(locale, wall_there, dx, dy)
 
 
 /*
- * Wall cleanup.  This function has two purposes: (1) remove walls that
+ * Wall cleanup.  This function has three purposes: (1) remove walls that
  * are totally surrounded by stone - they are redundant.  (2) correct
- * the types so that they extend and connect to each other.
+ * the types so that they extend and connect to each other.  (3) point
+ * each wall's and door's .horizontal bit along the run it sits in.
  */
 void
-wallification(x1, y1, x2, y2)
-int x1, y1, x2, y2;
+wallification(int x1, int y1, int x2, int y2)
 {
 	uchar type;
 	register int x,y;
 	struct rm *lev;
-	int bits;
+	int bits, nhoriz, nvert;
 	int locale[3][3];	/* rock or wall status surrounding positions */
 	/*
 	 * Value 0 represents a free-standing wall.  It could be anything,
@@ -186,12 +186,17 @@ int x1, y1, x2, y2;
 	 * Step 2: set the correct wall type.  We can't combine steps
 	 * 1 and 2 into a single sweep because we depend on knowing if
 	 * the surrounding positions are stone.
+	 *
+	 * Doors/secret doors take part too, oriented via .horizontal.
+	 * DBWALL stays excluded - create_drawbridge() deliberately sets
+	 * its two ends to opposite orientations.
 	 */
 	for(x = x1; x <= x2; x++)
 	    for(y = y1; y <= y2; y++) {
 		lev = &levl[x][y];
 		type = lev->typ;
-		if ( !(IS_WALL(type) && type != DBWALL)) continue;
+		if ( !((IS_WALL(type) && type != DBWALL) ||
+		       type == SDOOR || IS_DOOR(type))) continue;
 
 		/* set the locations TRUE if rock or wall or out of bounds */
 		locale[0][0] = iswall_or_stone(x-1,y-1);
@@ -211,8 +216,18 @@ int x1, y1, x2, y2;
 			| (extend_spine(locale, iswall(x+1,y),  1,  0) << 1)
 			|  extend_spine(locale, iswall(x-1,y), -1,  0);
 
-		/* don't change typ if wall is free-standing */
-		if (bits) lev->typ = spine_array[bits];
+		/* don't change typ or orientation if free-standing */
+		if (!bits) continue;
+
+		if (IS_WALL(type)) lev->typ = spine_array[bits];
+
+		/* orient along whichever axis the spines favor; a tie
+		   (corner, crosswall) has no honest answer, so leave the
+		   existing bit alone */
+		nhoriz = (bits & 1) + ((bits >> 1) & 1);
+		nvert = ((bits >> 2) & 1) + ((bits >> 3) & 1);
+		if (nhoriz != nvert)
+		    lev->horizontal = (nhoriz > nvert);
 	    }
 }
 
@@ -1738,10 +1753,6 @@ maze_fixup_doors()
 			levl[sdx][sdy].typ = walltyp;
 			levl[sdx][sdy].flags = 0;
 			dosdoor(sdx, sdy, r, SDOOR);
-			/* SDOOR rendering picks H-vs-V from .horizontal, which
-			   this cell has no wall history to inherit, so set it
-			   explicitly */
-			levl[sdx][sdy].horizontal = horiz_wall;
 			if (ibw > 0 && ibh > 0) {
 				/* flank the secret corridor with plain rock, not wall
 				   texture -- a corridor-shaped tube of walls around

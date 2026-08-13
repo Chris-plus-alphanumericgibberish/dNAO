@@ -1180,6 +1180,8 @@ int template;
 		ptr->nac += 6;
 		/* resists: */
 		ptr->mresists |= (MR_FIRE | MR_COLD | MR_SLEEP | MR_POISON | MR_STONE | MR_DRAIN | MR_SICK | MR_MAGIC);
+		/* misc: */
+		ptr->msound = MS_SILENT;
 		break;
 	case YITH:
 		/*Yith are lawful*/
@@ -2277,6 +2279,13 @@ int template;
 		/* Mistweavers cast with their tentacles, not their arms */
 		if (template == MISTWEAVER && attk->aatyp == AT_MMGC && attk->adtyp == AD_CLRC)
 			attk->bodypart = ATKBP(TENTACLE_GENERIC);
+
+		/* A tomb herd strikes with the statue it is piloting, not with a
+		 * body of its own -- every attack keeps its ordinary identity, but
+		 * the limb making contact is the statue's */
+		if (template == TOMB_HERD)
+			attk->bodypart = atkbp_or((struct atkbp_set[]){
+				attk->bodypart, ATKBP(ARMOR_SKIN), ATKBP(NONE) });
 	}
 #undef insert_okay
 #undef end_insert_okay

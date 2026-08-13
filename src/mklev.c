@@ -4,6 +4,7 @@
 
 #include "hack.h"
 /* #define DEBUG */	/* uncomment to enable code debugging */
+extern const int monstr[];
 
 #ifdef DEBUG
 # ifdef WIZARD
@@ -17,6 +18,37 @@
 /* croom->lx etc are schar (width <= int), so % arith ensures that */
 /* conversion of result to int is reasonable */
 
+/* a cell's classification for fallback-corridor purposes (see
+   hallway_fallback_attempt()) */
+#define FB_CELL_OPEN  0 /* STONE or SCORR -- open rock, walkable by our own corridor */
+#define FB_CELL_CORR  1 /* a primary hallway's own floor */
+#define FB_CELL_OTHER 2 /* anything else (room floor, wall, door, off-map...) */
+
+/* per-endpoint escalation-level outcomes */
+#define FB_STOP     0
+#define FB_ESCALATE 1
+#define FB_KEEP     2
+#define FB_CONTINUE 3
+
+/* fb_try_direct_hit() outcomes */
+#define FB_HIT_NONE   0 /* not a hit at all -- fall through to normal escalation */
+#define FB_HIT_DONE   1 /* connected successfully, terrain committed */
+#define FB_HIT_CORNER 2 /* touching otherroom at a corner -- abort the whole candidate (deferred) */
+
+/* one endpoint's fallback-corridor placement state as it escalates through
+   levels 1-3 (see hallway_fallback_attempt()) */
+struct fb_endpoint {
+	int room;
+	int level;              /* 1, 2, or 3 */
+	xchar doorx, doory;      /* current door (mutates as level increases) */
+	xchar goalx, goaly;      /* current line endpoint (mutates) */
+	xchar odoorx, odoory;    /* the ORIGINAL level-1 door -- fixed once set, needed by level 2's look-back */
+	schar odx, ody;          /* room's own outward wall normal; also level-3's walk direction */
+	schar tdx, tdy;          /* perpendicular "away from the hallway" direction; set at level 2 */
+	xchar wallx, wally;      /* W: the room-wall connector tile; set at level 2 */
+	boolean need_door;       /* does W need a new dosdoor() at commit, or does one already exist? */
+};
+
 STATIC_DCL void NDECL(makevtele);
 STATIC_DCL void NDECL(clear_level_structures);
 STATIC_DCL void NDECL(makelevel);
@@ -29,11 +61,48 @@ STATIC_DCL void NDECL(make_niches);
 
 STATIC_PTR int FDECL( CFDECLSPEC do_comp,(const genericptr,const genericptr));
 
+STATIC_DCL int FDECL(smeq_root,(int));
+STATIC_DCL void FDECL(smeq_union,(int,int));
 STATIC_DCL void FDECL(join,(int,int,BOOLEAN_P));
 STATIC_DCL void FDECL(do_room_or_subroom, (struct mkroom *,int,int,int,int,
 				       BOOLEAN_P,SCHAR_P,BOOLEAN_P,BOOLEAN_P));
 STATIC_DCL void NDECL(makerooms);
 STATIC_DCL void FDECL(finddpos,(coord *,XCHAR_P,XCHAR_P,XCHAR_P,XCHAR_P));
+STATIC_DCL boolean FDECL(wall_slot_range,(struct mkroom *,int,xchar *,xchar *,xchar *));
+STATIC_DCL boolean FDECL(door_slot_range,(struct mkroom *,int,xchar *,xchar *,xchar *));
+STATIC_DCL boolean FDECL(hallway_swath_ok,(XCHAR_P,XCHAR_P,XCHAR_P,XCHAR_P,BOOLEAN_P,BOOLEAN_P));
+STATIC_DCL boolean FDECL(hallway_cross_overlaps,(XCHAR_P,XCHAR_P,BOOLEAN_P));
+STATIC_DCL void FDECL(hallway_cross_carve,(XCHAR_P,XCHAR_P,BOOLEAN_P,SCHAR_P));
+STATIC_DCL void FDECL(hallway_connector_carve,(XCHAR_P,XCHAR_P,BOOLEAN_P,SCHAR_P,XCHAR_P,XCHAR_P,SCHAR_P));
+STATIC_DCL void FDECL(hallway_swath_carve,(XCHAR_P,XCHAR_P,XCHAR_P,XCHAR_P,BOOLEAN_P,BOOLEAN_P,BOOLEAN_P,SCHAR_P));
+STATIC_DCL void FDECL(hallway_endpoint,(int,XCHAR_P,XCHAR_P,xchar *,xchar *,schar *,schar *));
+STATIC_DCL boolean FDECL(find_hallway,(int,int,xchar *,xchar *));
+STATIC_DCL boolean FDECL(dohalldoor,(XCHAR_P,XCHAR_P,struct mkroom *));
+STATIC_DCL void FDECL(carve_hallway,(int,int,XCHAR_P,XCHAR_P));
+STATIC_DCL void NDECL(wallify_mithardir_corridors);
+STATIC_DCL void NDECL(wallify_hallway_corridors);
+STATIC_DCL int FDECL(hallway_legs,(int,int,int,int,xchar *,xchar *,xchar *,boolean *));
+STATIC_DCL boolean FDECL(hallway_legs_overlap,(int,int,int,int,int,int,int,int));
+STATIC_DCL boolean FDECL(hallway_wall_square_stat,(int,int,int,int,boolean *));
+STATIC_DCL void FDECL(hallway_paint_floor,(int,xchar *,xchar *,xchar *,boolean *,int));
+STATIC_DCL boolean NDECL(all_rooms_connected);
+STATIC_DCL int FDECL(room_gap,(struct mkroom *,struct mkroom *,int *,int *));
+STATIC_DCL int FDECL(room_wall_pairs,(struct mkroom *,struct mkroom *,int *,int *,int *));
+STATIC_DCL int FDECL(hallway_cell_class,(int,int));
+STATIC_DCL boolean FDECL(hallway_corr_adjacent,(int,int));
+STATIC_DCL boolean FDECL(hallway_valid_door_wall,(int,int));
+STATIC_DCL boolean FDECL(line_path_clear,(int,int,int,int,xchar *,xchar *,int *));
+STATIC_DCL int FDECL(fb_level1,(struct fb_endpoint *));
+STATIC_DCL int FDECL(fb_level2,(struct fb_endpoint *));
+STATIC_DCL int FDECL(fb_level3_step,(struct fb_endpoint *,struct fb_endpoint *));
+STATIC_DCL void FDECL(fb_commit_endpoint,(struct fb_endpoint *));
+STATIC_DCL int FDECL(fb_try_direct_hit,(struct fb_endpoint *,int));
+STATIC_DCL boolean FDECL(hallway_fallback_attempt,(int,int,int,int,int,int));
+STATIC_DCL boolean FDECL(hallway_fallback,(int));
+STATIC_DCL void FDECL(greenway,(int,xchar *,xchar *,xchar *,boolean *,xchar,xchar));
+STATIC_DCL void FDECL(tree_lined,(int,int,int,boolean));
+STATIC_DCL void FDECL(statue_lined,(int,int,int,boolean));
+STATIC_DCL void NDECL(makehallways);
 STATIC_DCL void FDECL(mkinvpos, (XCHAR_P,XCHAR_P,int));
 STATIC_DCL void FDECL(mk_knox_portal, (XCHAR_P,XCHAR_P));
 
@@ -260,6 +329,37 @@ makerooms()
 		}
 	}
 	return;
+}
+
+/* follow smeq[]'s merge chain to its current root.  smeq[] is only ever
+   updated by copying one room's current tag into another room's slot (see
+   smeq_union()) -- the room whose slot gets overwritten is never revisited
+   if something else merges into what it pointed to, so a non-root room's
+   own value can go stale.  Only the root (smeq[r]==r) is always current;
+   smeq_union() always attaches the larger-index root under the smaller,
+   so this chain is a valid forest with strictly decreasing values and is
+   guaranteed to terminate. */
+STATIC_OVL int
+smeq_root(int r)
+{
+	while (smeq[r] != r)
+		r = smeq[r];
+	return r;
+}
+
+/* merge rooms a and b's connected components, resolving both to their
+   current root first so repeated calls in any order stay globally
+   consistent -- plain union, no path compression (nroom is tiny enough
+   that it doesn't matter) */
+STATIC_OVL void
+smeq_union(int a, int b)
+{
+	int ra = smeq_root(a), rb = smeq_root(b);
+
+	if (ra < rb)
+		smeq[rb] = ra;
+	else
+		smeq[ra] = rb;
 }
 
 STATIC_OVL void
@@ -499,10 +599,7 @@ merge_adj_rooms()
 				}
 			}
 			// I now pronounce you... one room for pathing purposes.
-			if (smeq[i] < smeq[j])
-				smeq[j] = smeq[i];
-			else
-				smeq[i] = smeq[j];
+			smeq_union(i, j);
 			// make the lighting consistent in the rooms
 			t->rlit = u->rlit;
 			for (f = t->lx - 1; f <= t->hx + 1; f++) {
@@ -572,8 +669,1509 @@ makecorridors()
 	return;
 }
 
+enum halldir { HALL_E = 0, HALL_W, HALL_N, HALL_S };
+static const schar halldx[4] = { 1, -1, 0, 0 };
+static const schar halldy[4] = { 0, 0, -1, 1 };
 
-/* 
+/* find room r's valid 3-wide attachment slot range on one wall; returns
+   FALSE (empty range) if the room is too small on that wall */
+STATIC_OVL boolean
+wall_slot_range(struct mkroom *r, int wall, xchar *fixed, xchar *lo, xchar *hi)
+{
+	switch (wall) {
+	case HALL_E: *fixed = r->hx + 1; *lo = r->ly + 1; *hi = r->hy - 1; break;
+	case HALL_W: *fixed = r->lx - 1; *lo = r->ly + 1; *hi = r->hy - 1; break;
+	case HALL_N: *fixed = r->ly - 1; *lo = r->lx + 1; *hi = r->hx - 1; break;
+	case HALL_S: *fixed = r->hy + 1; *lo = r->lx + 1; *hi = r->hx - 1; break;
+	default:     *fixed = *lo = *hi = 0; return FALSE;
+	}
+	return (*hi >= *lo);
+}
+
+/* find room r's valid single-wide door slot range on one wall; returns
+   FALSE (empty range) if the room is too small on that wall.  Covers the
+   full wall including corner rows/columns -- okdoor() (flat wall, no
+   adjacent door) is the only real constraint on a single door. */
+STATIC_OVL boolean
+door_slot_range(struct mkroom *r, int wall, xchar *fixed, xchar *lo, xchar *hi)
+{
+	switch (wall) {
+	case HALL_E: *fixed = r->hx + 1; *lo = r->ly; *hi = r->hy; break;
+	case HALL_W: *fixed = r->lx - 1; *lo = r->ly; *hi = r->hy; break;
+	case HALL_N: *fixed = r->ly - 1; *lo = r->lx; *hi = r->hx; break;
+	case HALL_S: *fixed = r->hy + 1; *lo = r->lx; *hi = r->hx; break;
+	default:     *fixed = *lo = *hi = 0; return FALSE;
+	}
+	return (*hi >= *lo);
+}
+
+/* is a straight 3-wide run from (x1,y1) to (x2,y2) clear?  horiz TRUE
+   means the run travels along x (y1 must equal y2, the fixed row);
+   horiz FALSE means it travels along y (x1 must equal x2, the fixed
+   column).  STONE only during pass 1; also allows already-carved hallway
+   terrain during pass 2 (allow_existing), same as dig_corridor()'s own
+   passthrough of previously-dug corridor tiles. */
+STATIC_OVL boolean
+hallway_swath_ok(int x1, int y1, int x2, int y2, int horiz, int allow_existing)
+{
+	xchar x, y, w, lo, hi;
+	int typ;
+
+	if (horiz) {
+		lo = min(x1, x2); hi = max(x1, x2);
+		for (x = lo; x <= hi; x++)
+			for (w = -1; w <= 1; w++) {
+				y = y1 + w;
+				if (!isok(x, y)) return FALSE;
+				typ = levl[x][y].typ;
+				if (typ == STONE) continue;
+				if (allow_existing && (typ == CORR || typ == SCORR ||
+						(level.flags.arboreal && typ == ROOM)))
+					continue;
+				return FALSE;
+			}
+	} else {
+		lo = min(y1, y2); hi = max(y1, y2);
+		for (y = lo; y <= hi; y++)
+			for (w = -1; w <= 1; w++) {
+				x = x1 + w;
+				if (!isok(x, y)) return FALSE;
+				typ = levl[x][y].typ;
+				if (typ == STONE) continue;
+				if (allow_existing && (typ == CORR || typ == SCORR ||
+						(level.flags.arboreal && typ == ROOM)))
+					continue;
+				return FALSE;
+			}
+	}
+	return TRUE;
+}
+
+/* does the 3-wide cross-section at travel position `pos` (fixed
+   perpendicular coordinate `fixed`) already contain corridor floor from
+   an earlier join this same pass? */
+STATIC_OVL boolean
+hallway_cross_overlaps(int pos, int fixed, int horiz)
+{
+	int w, x, y, typ;
+
+	for (w = -1; w <= 1; w++) {
+		if (horiz) { x = pos; y = fixed + w; }
+		else       { x = fixed + w; y = pos; }
+		if (!isok(x, y)) continue;
+		typ = levl[x][y].typ;
+		if (typ == CORR || typ == SCORR ||
+				(level.flags.arboreal && typ == ROOM))
+			return TRUE;
+	}
+	return FALSE;
+}
+
+/* carve one 3-wide cross-section at travel position `pos`; only
+   converts cells that are currently STONE */
+STATIC_OVL void
+hallway_cross_carve(int pos, int fixed, int horiz, int ftyp)
+{
+	int w, x, y;
+
+	for (w = -1; w <= 1; w++) {
+		if (horiz) { x = pos; y = fixed + w; }
+		else       { x = fixed + w; y = pos; }
+		if (isok(x, y) && levl[x][y].typ == STONE)
+			levl[x][y].typ = ftyp;
+	}
+}
+
+/* carve a 3-cross-section-long connector anchored at `pos`: dir=1
+   reaches forward (pos,pos+1,pos+2) to bridge into an existing corridor
+   just encountered; dir=-1 reaches backward (pos,pos-2,pos-1) to
+   backfill the under-width tail of a coasting stretch that just ended.
+   Never reaches outside [lo,hi] -- pass 1 only validated cells inside
+   the leg's own range, so anything past either end is unvalidated rock
+   with no guaranteed connection to anything, and carving into it would
+   just leave an orphaned stub. */
+STATIC_OVL void
+hallway_connector_carve(int pos, int fixed, int horiz, int dir, int lo, int hi, int ftyp)
+{
+	int i, q;
+
+	for (i = 0; i < 3; i++) {
+		q = pos + i * dir;
+		if (q < lo || q > hi) continue;
+		hallway_cross_carve(q, fixed, horiz, ftyp);
+	}
+}
+
+/* carve a validated straight 3-wide run (see hallway_swath_ok() for the
+   horiz convention), stepping from (x1,y1) to (x2,y2) one cross-section
+   at a time.  (x1,y1) is always the room's own outward step, which may
+   land on either side of (x2,y2) depending on the leg's travel
+   direction.  Wherever the path runs into corridor floor an earlier
+   join this same pass already carved, stop digging our own width and
+   coast through the existing corridor instead, bridging the transition
+   with a connector rather than letting the two corridors' swaths
+   overlap and locally widen the passage.
+
+   ends_at_elbow is TRUE when (x2,y2) is an elbow leg's own endpoint, one
+   step past the shared corner (see carve_hallway()), rather than a
+   room's own wall.  In that case, once coasting, don't re-emerge within
+   the last 3 steps -- that span is exactly the corner's own extent,
+   which the *other* leg's own matching extension independently reaches
+   too.  This does not apply to a straight hallway's own room-side
+   endpoint, which has no such backup.
+
+   start_coasting is TRUE when the door at (x1,y1)'s room end failed to
+   place (see dohalldoor()), typically because another hallway's door
+   already sits right there.  The room end is then already effectively
+   merged with whatever's adjacent, so the walk begins already coasting
+   instead of digging its own redundant width there.  It can still
+   emerge normally later, same as any other coasting stretch, once
+   overlap genuinely ends. */
+STATIC_OVL void
+hallway_swath_carve(int x1, int y1, int x2, int y2, int horiz, int ends_at_elbow, int start_coasting, int ftyp)
+{
+	int fixed = horiz ? y1 : x1;
+	int start = horiz ? x1 : y1;
+	int end = horiz ? x2 : y2;
+	int lo = min(start, end), hi = max(start, end);
+	int step = (end >= start) ? 1 : -1;
+	int p, i, n = hi - lo + 1;
+	boolean coasting = start_coasting;
+
+	for (i = 0, p = start; i < n; i++, p += step) {
+		boolean overlap = hallway_cross_overlaps(p, fixed, horiz);
+
+		if (overlap && !coasting) {
+			hallway_connector_carve(p, fixed, horiz, step, lo, hi, ftyp);
+			coasting = TRUE;
+			continue;
+		}
+		if (!overlap && coasting) {
+			if (ends_at_elbow) {
+				int dist = (end > p) ? end - p : p - end;
+				if (dist < 3)
+					continue; /* the other leg's own extension covers this */
+			}
+			hallway_connector_carve(p, fixed, horiz, -step, lo, hi, ftyp);
+			coasting = FALSE;
+			continue;
+		}
+		if (!coasting)
+			hallway_cross_carve(p, fixed, horiz, ftyp);
+	}
+}
+
+/* recover room r's wall attachment point and outward normal from a
+   hallelbow[][] coordinate -- exactly one of the horizontal/vertical
+   tests holds by construction (see find_hallway()) */
+STATIC_OVL void
+hallway_endpoint(int r, int ex, int ey, xchar *px, xchar *py, schar *pdx, schar *pdy)
+{
+	struct mkroom *room = &rooms[r];
+	boolean horiz = (room->ly <= ey && ey <= room->hy) &&
+			(ex < room->lx || ex > room->hx);
+	boolean vert  = (room->lx <= ex && ex <= room->hx) &&
+			(ey < room->ly || ey > room->hy);
+
+	if (horiz) {
+		*py = ey;
+		*pdy = 0;
+		if (ex > room->hx) { *px = room->hx + 1; *pdx = 1; }
+		else                { *px = room->lx - 1; *pdx = -1; }
+	} else if (vert) {
+		*px = ex;
+		*pdx = 0;
+		if (ey > room->hy) { *py = room->hy + 1; *pdy = 1; }
+		else                { *py = room->ly - 1; *pdy = -1; }
+	} else {
+		impossible("hallway_endpoint: room %d has no wall facing (%d,%d)",
+				r, (int)ex, (int)ey);
+		*px = ex; *py = ey; *pdx = 0; *pdy = 0;
+	}
+}
+
+/* pass 1: search every 3-wide, <=1-turn hallway between rooms a and b
+   against the pristine map, reservoir-sampling uniformly among every
+   valid candidate found (straight and elbow alike).  Returns FALSE if no
+   candidate exists. */
+STATIC_OVL boolean
+find_hallway(int a, int b, xchar *elbx, xchar *elby)
+{
+	struct mkroom *ra = &rooms[a], *rb = &rooms[b];
+	static const int opp[4]     = { HALL_W, HALL_E, HALL_S, HALL_N };
+	static const int perp[4][2] = {
+		{ HALL_N, HALL_S },	/* HALL_E */
+		{ HALL_N, HALL_S },	/* HALL_W */
+		{ HALL_E, HALL_W },	/* HALL_N */
+		{ HALL_E, HALL_W }	/* HALL_S */
+	};
+	int wa, wb, k, chcnt = 0;
+	xchar fa, loa, hia, fb, lob, hib;
+	xchar bestx = 0, besty = 0;
+
+	/* straight (0-turn): opposite-facing wall pairs */
+	for (wa = 0; wa < 4; wa++) {
+		xchar lo, hi, s;
+		boolean horiz;
+
+		wb = opp[wa];
+		if (!wall_slot_range(ra, wa, &fa, &loa, &hia)) continue;
+		if (!wall_slot_range(rb, wb, &fb, &lob, &hib)) continue;
+		horiz = (wa == HALL_E || wa == HALL_W);
+		lo = max(loa, lob);
+		hi = min(hia, hib);
+		for (s = lo; s <= hi; s++) {
+			xchar x1, y1, x2, y2;
+
+			if (horiz) { x1 = fa + halldx[wa]; y1 = s; x2 = fb + halldx[wb]; y2 = s; }
+			else       { x1 = s; y1 = fa + halldy[wa]; x2 = s; y2 = fb + halldy[wb]; }
+			if (x1 > x2 || y1 > y2) continue; /* rooms face the wrong way */
+			if (hallway_swath_ok(x1, y1, x2, y2, horiz, FALSE)) {
+				chcnt++;
+				if (!rn2(chcnt)) {
+					if (horiz) { bestx = fb; besty = s; }
+					else       { bestx = s;  besty = fb; }
+				}
+			}
+		}
+	}
+
+	/* elbow (1-turn): perpendicular wall pairs, full cross-product of slots */
+	for (wa = 0; wa < 4; wa++) {
+		xchar sa;
+		boolean horiz_a;
+
+		if (!wall_slot_range(ra, wa, &fa, &loa, &hia)) continue;
+		horiz_a = (wa == HALL_E || wa == HALL_W);
+		for (k = 0; k < 2; k++) {
+			boolean horiz_b;
+
+			wb = perp[wa][k];
+			if (!wall_slot_range(rb, wb, &fb, &lob, &hib)) continue;
+			horiz_b = (wb == HALL_E || wb == HALL_W);
+			for (sa = loa; sa <= hia; sa++) {
+				xchar pax, pay, sb;
+
+				if (horiz_a) { pax = fa; pay = sa; }
+				else         { pax = sa; pay = fa; }
+				for (sb = lob; sb <= hib; sb++) {
+					xchar pbx, pby, ex, ey;
+
+					if (horiz_b) { pbx = fb; pby = sb; }
+					else         { pbx = sb; pby = fb; }
+
+					if (horiz_a) { ex = pbx; ey = pay; }
+					else         { ex = pax; ey = pby; }
+
+					if ((ex - pax) * halldx[wa] + (ey - pay) * halldy[wa] < 1)
+						continue;
+					if ((ex - pbx) * halldx[wb] + (ey - pby) * halldy[wb] < 1)
+						continue;
+
+					if (hallway_swath_ok(pax + halldx[wa], pay + halldy[wa], ex, ey,
+								horiz_a, FALSE) &&
+					    hallway_swath_ok(pbx + halldx[wb], pby + halldy[wb], ex, ey,
+								horiz_b, FALSE)) {
+						chcnt++;
+						if (!rn2(chcnt)) { bestx = ex; besty = ey; }
+					}
+				}
+			}
+		}
+	}
+
+	if (!chcnt) return FALSE;
+	*elbx = bestx;
+	*elby = besty;
+	return TRUE;
+}
+
+/* place a single door at a hallway's wall attachment point, same as
+   join() -- the flanking wall tiles are never touched.  Returns FALSE
+   if no door could be placed (doorindex exhausted, or another door --
+   typically from a different join reaching the same room nearby --
+   already sits on or next to this exact spot); callers use this to
+   tell whether the corridor here is starting genuinely fresh or is
+   effectively already merged with whatever's adjacent. */
+STATIC_OVL boolean
+dohalldoor(int cx, int cy, struct mkroom *aroom)
+{
+	if (!okdoor(cx, cy))
+		return FALSE;
+	dodoor(cx, cy, aroom);
+	return TRUE;
+}
+
+/* pass 2: carve one pass-1-approved hallway and merge the two rooms'
+   connected components.  By construction every cell along the path is
+   either still STONE or already-carved hallway floor from an earlier
+   join this same pass, so no backtracking is needed. */
+STATIC_OVL void
+carve_hallway(int a, int b, int ex, int ey)
+{
+	xchar pax, pay, pbx, pby;
+	schar dxa, dya, dxb, dyb;
+	boolean horiz_a, horiz_b, doored_a, doored_b;
+	schar ftyp = level.flags.arboreal ? ROOM : CORR;
+
+	hallway_endpoint(a, ex, ey, &pax, &pay, &dxa, &dya);
+	hallway_endpoint(b, ex, ey, &pbx, &pby, &dxb, &dyb);
+	horiz_a = (dya == 0);
+	horiz_b = (dyb == 0);
+
+	/* place both doors before carving -- if one fails (typically
+	   because a different join already put a door right there), that
+	   leg's walk starts already coasting instead of digging its own
+	   redundant width beside whatever caused the door to fail */
+	doored_a = dohalldoor(pax, pay, &rooms[a]);
+	doored_b = dohalldoor(pbx, pby, &rooms[b]);
+
+	if (horiz_a == horiz_b) {
+		/* straight: a single leg from A's outward step to B's */
+		hallway_swath_carve(pax + dxa, pay + dya, pbx + dxb, pby + dyb,
+					horiz_a, FALSE, !doored_a, ftyp);
+	} else {
+		/* elbow: each leg travels one step past the shared corner, in
+		   its own direction of travel, instead of stopping exactly at
+		   it.  Since a leg's normal cross-section carve always sweeps
+		   its full 3-wide perpendicular band, that extra step makes
+		   each leg's own sweep reach every cell of the corner's 3x3
+		   block on its own. */
+		hallway_swath_carve(pax + dxa, pay + dya, ex + dxa, ey + dya,
+					horiz_a, TRUE, !doored_a, ftyp);
+		hallway_swath_carve(pbx + dxb, pby + dyb, ex + dxb, ey + dyb,
+					horiz_b, TRUE, !doored_b, ftyp);
+	}
+
+	smeq_union(a, b);
+}
+
+/* convert every corridor (and secret corridor/door) cell on the level
+   into room floor with proper surrounding walls, giving a built,
+   walled-hallway appearance instead of a raw-rock tunnel look. */
+STATIC_OVL void
+wallify_mithardir_corridors(void)
+{
+	int x, y;
+
+	for (x = 0; x < COLNO; x++) {
+		for (y = 0; y < ROWNO; y++) {
+			levl[x][y].lit = FALSE;
+			if (levl[x][y].typ == CORR)
+				levl[x][y].typ = ROOM;
+			else if (levl[x][y].typ == SCORR)
+				levl[x][y].typ = ROOM;
+			else if (levl[x][y].typ == SDOOR) {
+				levl[x][y].typ = DOOR;
+				levl[x][y].doormask = D_LOCKED;
+			} else if (IS_ROCK(levl[x][y].typ))
+				levl[x][y].typ = VWALL;
+		}
+	}
+	wallification(1, 0, COLNO - 1, ROWNO - 1);
+}
+
+/* convert makehallways()'s own CORR/SCORR terrain into a walled
+   hallway.  SCORR cells caught by the neighbor scan become SDOOR
+   (fallback-corridor terrain bridging into a wallified primary
+   hallway).  Only walls the 3x3 neighborhood of each corridor cell,
+   rather than the whole map, so that SCORR elsewhere is preserved.
+   These will be reverted to plain CORR before wallification(). */
+STATIC_OVL void
+wallify_hallway_corridors(void)
+{
+	int x, y, i, j, ix, jy;
+
+	for (x = 0; x < COLNO; x++) {
+		for (y = 0; y < ROWNO; y++) {
+			if (levl[x][y].typ == CORR){
+				levl[x][y].typ = ROOM;
+			}
+			if(levl[x][y].typ != STONE && levl[x][y].typ != SCORR
+				 && levl[x][y].typ != SDOOR && levl[x][y].typ != DOOR
+				 && !IS_WALL(levl[x][y].typ)
+			){
+				for(i = -1; i <= 1; i++){
+					for(j = -1; j <= 1; j++){
+						ix = x + i;
+						jy = y + j;
+						if (isok(ix, jy)){
+							if(levl[ix][jy].typ == STONE)
+								levl[ix][jy].typ = VWALL;
+							else if(levl[ix][jy].typ == SCORR){
+								levl[ix][jy].typ = SDOOR;
+								levl[ix][jy].doormask = !rn2(5) ? D_LOCKED : D_CLOSED;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	for (x = 0; x < COLNO; x++) {
+		for (y = 0; y < ROWNO; y++) {
+			if (levl[x][y].typ == SCORR)
+				levl[x][y].typ = CORR;
+		}
+	}
+	wallification(1, 0, COLNO - 1, ROWNO - 1);
+}
+
+/* compute a placed pair's 1 or 2 leg rectangles -- the same straight-vs-
+   elbow, extend-one-step-past-the-corner geometry carve_hallway() already
+   uses to carve, just producing rectangle descriptions instead of
+   digging.  lo/hi/fixed/horiz are caller-supplied length-2 arrays; only
+   index 0 is meaningful when the return value is 1. */
+STATIC_OVL int
+hallway_legs(int a, int b, int ex, int ey, xchar *lo, xchar *hi, xchar *fixed, boolean *horiz)
+{
+	xchar pax, pay, pbx, pby;
+	schar dxa, dya, dxb, dyb;
+	boolean horiz_a, horiz_b;
+	int s1, s2;
+
+	hallway_endpoint(a, ex, ey, &pax, &pay, &dxa, &dya);
+	hallway_endpoint(b, ex, ey, &pbx, &pby, &dxb, &dyb);
+	horiz_a = (dya == 0);
+	horiz_b = (dyb == 0);
+
+	if (horiz_a == horiz_b) {
+		s1 = horiz_a ? pax + dxa : pay + dya;
+		s2 = horiz_a ? pbx + dxb : pby + dyb;
+		lo[0] = min(s1, s2);
+		hi[0] = max(s1, s2);
+		fixed[0] = horiz_a ? pay : pax;
+		horiz[0] = horiz_a;
+		return 1;
+	}
+
+	s1 = horiz_a ? pax + dxa : pay + dya;
+	s2 = horiz_a ? ex + dxa : ey + dya;
+	lo[0] = min(s1, s2);
+	hi[0] = max(s1, s2);
+	fixed[0] = horiz_a ? pay : pax;
+	horiz[0] = horiz_a;
+
+	s1 = horiz_b ? pbx + dxb : pby + dyb;
+	s2 = horiz_b ? ex + dxb : ey + dyb;
+	lo[1] = min(s1, s2);
+	hi[1] = max(s1, s2);
+	fixed[1] = horiz_b ? pby : pbx;
+	horiz[1] = horiz_b;
+	return 2;
+}
+
+/* do two hallway legs' rectangles overlap in coordinate space?  Because
+   the only non-STONE terrain any hallway's swath can ever run into is
+   another makehallways() hallway's own carved floor from this same pass
+   (see the coasting/merge design), two different hallways' legs
+   overlapping here is equivalent to an actual physical merge having
+   happened during carving. */
+STATIC_OVL boolean
+hallway_legs_overlap(int lo1, int hi1, int fixed1, int horiz1,
+			int lo2, int hi2, int fixed2, int horiz2)
+{
+	int xlo1, xhi1, ylo1, yhi1, xlo2, xhi2, ylo2, yhi2;
+
+	if (horiz1) { xlo1 = lo1; xhi1 = hi1; ylo1 = fixed1 - 1; yhi1 = fixed1 + 1; }
+	else        { xlo1 = fixed1 - 1; xhi1 = fixed1 + 1; ylo1 = lo1; yhi1 = hi1; }
+	if (horiz2) { xlo2 = lo2; xhi2 = hi2; ylo2 = fixed2 - 1; yhi2 = fixed2 + 1; }
+	else        { xlo2 = fixed2 - 1; xhi2 = fixed2 + 1; ylo2 = lo2; yhi2 = hi2; }
+
+	return (boolean) (xlo1 <= xhi2 && xlo2 <= xhi1 && ylo1 <= yhi2 && ylo2 <= yhi1);
+}
+
+/* is the candidate wall square at perpendicular offset side*2 from fixed
+   (side is -1 or +1), travel position p, actually a wall at all -- and if
+   so, is it padded by three STONE tiles (itself plus the two cells
+   further out)?  Returns FALSE (candidate not eligible, *padded
+   untouched) if the square is off the map or is itself corridor floor --
+   which means it's actually floor belonging to this hallway's other leg,
+   or a different hallway entirely, not a wall. */
+STATIC_OVL boolean
+hallway_wall_square_stat(int p, int fixed, int horiz, int side, boolean *padded)
+{
+	int i, x, y, off, typ;
+
+	off = side * 2;
+	x = horiz ? p : fixed + off;
+	y = horiz ? fixed + off : p;
+	if (!isok(x, y))
+		return FALSE;
+	typ = levl[x][y].typ;
+	if (typ == CORR || typ == SCORR || (level.flags.arboreal && typ == ROOM))
+		return FALSE;
+
+	*padded = TRUE;
+	for (i = 2; i <= 4; i++) {
+		off = side * i;
+		x = horiz ? p : fixed + off;
+		y = horiz ? fixed + off : p;
+		if (!isok(x, y) || levl[x][y].typ != STONE) {
+			*padded = FALSE;
+			break;
+		}
+	}
+	return TRUE;
+}
+
+/* replace an "interesting" hallway's corridor terrain with a distinctive
+   floor type -- only cells that are still CORR/SCORR are touched, so
+   doors and any terrain this leg merely coasted through (belonging to
+   some other hallway) are left alone.  Must run before
+   wallify_hallway_corridors(), which would otherwise have already
+   turned this hallway's own CORR cells into ordinary ROOM floor. */
+STATIC_OVL void
+hallway_paint_floor(int nlegs, xchar *lo, xchar *hi, xchar *fixed, boolean *horiz, int ftyp)
+{
+	int i, p, w, x, y;
+
+	for (i = 0; i < nlegs; i++)
+		for (p = lo[i]; p <= hi[i]; p++)
+			for (w = -1; w <= 1; w++) {
+				x = horiz[i] ? p : fixed[i] + w;
+				y = horiz[i] ? fixed[i] + w : p;
+				if (isok(x, y) &&
+						(levl[x][y].typ == CORR || levl[x][y].typ == SCORR))
+					levl[x][y].typ = ftyp;
+			}
+}
+
+STATIC_OVL boolean
+all_rooms_connected(void)
+{
+	int i;
+
+	for (i = 1; i < nroom; i++)
+		if (smeq_root(i) != smeq_root(0))
+			return FALSE;
+	return TRUE;
+}
+
+/* Manhattan gap between two rooms' bounding boxes (0 on an axis where
+   they already overlap); wall_from/wall_to give one facing-wall pair
+   (whichever axis has the larger gap).  See room_wall_pairs() for every
+   axis that actually separates the two rooms. */
+STATIC_OVL int
+room_gap(struct mkroom *from, struct mkroom *to, int *wall_from, int *wall_to)
+{
+	int dx = 0, dy = 0;
+
+	if (from->hx < to->lx)      dx = to->lx - from->hx;
+	else if (to->hx < from->lx) dx = from->lx - to->hx;
+	if (from->hy < to->ly)      dy = to->ly - from->hy;
+	else if (to->hy < from->ly) dy = from->ly - to->hy;
+
+	if (dx >= dy) {
+		*wall_from = (to->lx > from->hx) ? HALL_E : HALL_W;
+		*wall_to   = (to->lx > from->hx) ? HALL_W : HALL_E;
+	} else {
+		*wall_from = (to->ly > from->hy) ? HALL_S : HALL_N;
+		*wall_to   = (to->ly > from->hy) ? HALL_N : HALL_S;
+	}
+	return dx + dy;
+}
+
+/* enumerate every axis that actually separates two rooms (as opposed to
+   room_gap()'s single dominant pick) as a facing-wall pair to try a
+   fallback corridor on, shorter gap first.  A room pair offset diagonally
+   (both bounding-box axes non-overlapping, e.g. two rooms in different
+   corners) yields both same-axis pairs (from's W<->to's E, from's S<->to's
+   N) plus the two cross pairs (from's W<->to's N, from's S<->to's E) --
+   an irregularly-shaped room can easily have its "natural" axis-matched
+   wall blocked while a cross-facing wall is wide open, and
+   line_path_clear()'s Bresenham line has no trouble with a non-axis-
+   aligned path between them.  A pair that already shares a row or column
+   yields only the one axis that actually separates them (no cross pairs
+   make sense without a genuine diagonal gap).  Returns the count filled
+   into wall_from/wall_to/gap (length-4 caller-supplied arrays) -- 0, 1, or
+   4 (never 2 or 3: a diagonal offset always yields all 4 candidates in one
+   shot, since we don't know in advance which will find a clear path). */
+STATIC_OVL int
+room_wall_pairs(struct mkroom *from, struct mkroom *to,
+			int *wall_from, int *wall_to, int *gap)
+{
+	int dx = 0, dy = 0;
+	int wfx = -1, wtx = -1, wfy = -1, wty = -1, n = 0;
+
+	if (from->hx < to->lx)      { dx = to->lx - from->hx; wfx = HALL_E; wtx = HALL_W; }
+	else if (to->hx < from->lx) { dx = from->lx - to->hx; wfx = HALL_W; wtx = HALL_E; }
+	if (from->hy < to->ly)      { dy = to->ly - from->hy; wfy = HALL_S; wty = HALL_N; }
+	else if (to->hy < from->ly) { dy = from->ly - to->hy; wfy = HALL_N; wty = HALL_S; }
+
+	if (wfx != -1 && wfy != -1) {
+		if (dx <= dy) {
+			wall_from[0] = wfx; wall_to[0] = wtx; gap[0] = dx;
+			wall_from[1] = wfy; wall_to[1] = wty; gap[1] = dy;
+		} else {
+			wall_from[0] = wfy; wall_to[0] = wty; gap[0] = dy;
+			wall_from[1] = wfx; wall_to[1] = wtx; gap[1] = dx;
+		}
+		wall_from[2] = wfx; wall_to[2] = wty; gap[2] = dx + dy;
+		wall_from[3] = wfy; wall_to[3] = wtx; gap[3] = dx + dy;
+		n = 4;
+	} else if (wfx != -1) {
+		wall_from[0] = wfx; wall_to[0] = wtx; gap[0] = dx;
+		n = 1;
+	} else if (wfy != -1) {
+		wall_from[0] = wfy; wall_to[0] = wty; gap[0] = dy;
+		n = 1;
+	}
+	return n;
+}
+
+/* classify a single map cell for fallback-corridor purposes */
+STATIC_OVL int
+hallway_cell_class(int x, int y)
+{
+	int typ;
+
+	if (!isok(x, y)) return FB_CELL_OTHER;
+	typ = levl[x][y].typ;
+	if (typ == STONE || typ == SCORR) return FB_CELL_OPEN;
+	if (typ == CORR) return FB_CELL_CORR;
+	return FB_CELL_OTHER;
+}
+
+/* does any of (x,y)'s 8 neighbors belong to a primary hallway?  SCORR
+   neighbors don't count -- corridors already cross each other freely
+   in NetHack, only running parallel to a revealed hallway is the
+   problem (see hallway_fallback_attempt()'s doc comment). */
+STATIC_OVL boolean
+hallway_corr_adjacent(int x, int y)
+{
+	int i, j;
+
+	for (i = -1; i <= 1; i++)
+		for (j = -1; j <= 1; j++) {
+			if (!i && !j) continue;
+			if (hallway_cell_class(x + i, y + j) == FB_CELL_CORR)
+				return TRUE;
+		}
+	return FALSE;
+}
+
+/* is (x,y) a plain, unbroken room-wall tile -- i.e. exactly the terrain
+   type okdoor() itself requires, checked in isolation from doorindex/
+   bydoor() so a caller can tell "not a valid wall at all" (room corner,
+   or anything else) apart from "a valid wall but already doored" */
+STATIC_OVL boolean
+hallway_valid_door_wall(int x, int y)
+{
+	return (boolean) (isok(x, y) &&
+			(levl[x][y].typ == HWALL || levl[x][y].typ == VWALL));
+}
+
+/* does a straight, orthogonally-stepped line from (x1,y1) to (x2,y2) run
+   entirely through open rock (STONE/SCORR), with none of it running
+   alongside (orthogonally or diagonally adjacent to) a primary hallway's
+   own CORR floor?  Pure predicate, no map mutation -- a standard
+   Bresenham error accumulator, except whenever both axes would change in
+   the same step, that step is split into two sequential single-axis
+   steps instead of one diagonal step, so every two consecutive path
+   cells stay orthogonally adjacent.  On success, fills the caller-
+   supplied pathx/pathy (sized COLNO+ROWNO, comfortably above the
+   dx+dy+1-cell worst case) and *pathlen; returns FALSE (path arrays
+   untouched) the instant any cell fails, including the endpoints. */
+STATIC_OVL boolean
+line_path_clear(int x1, int y1, int x2, int y2, xchar *pathx, xchar *pathy, int *pathlen)
+{
+	int dx = abs(x2 - x1), dy = abs(y2 - y1);
+	int sx = (x2 > x1) ? 1 : -1;
+	int sy = (y2 > y1) ? 1 : -1;
+	int x = x1, y = y1, err = dx - dy, n = 0;
+
+	if (hallway_cell_class(x, y) != FB_CELL_OPEN || hallway_corr_adjacent(x, y)) return FALSE;
+	pathx[n] = x; pathy[n] = y; n++;
+
+	while (x != x2 || y != y2) {
+		int e2 = 2 * err;
+
+		if (e2 > -dy) {
+			err -= dy; x += sx;
+			if (hallway_cell_class(x, y) != FB_CELL_OPEN || hallway_corr_adjacent(x, y)) return FALSE;
+			pathx[n] = x; pathy[n] = y; n++;
+		}
+		if (e2 < dx) {
+			err += dx; y += sy;
+			if (hallway_cell_class(x, y) != FB_CELL_OPEN || hallway_corr_adjacent(x, y)) return FALSE;
+			pathx[n] = x; pathy[n] = y; n++;
+		}
+	}
+	*pathlen = n;
+	return TRUE;
+}
+
+/* level 1: does this endpoint's nominated door have a usable rock square
+   immediately outside it?  Sets e->goalx/goaly either way; e->doorx/doory,
+   e->odoorx/odoory, and e->odx/ody must already be filled in by the
+   caller. */
+STATIC_OVL int
+fb_level1(struct fb_endpoint *e)
+{
+	e->goalx = e->doorx + e->odx;
+	e->goaly = e->doory + e->ody;
+	if (hallway_cell_class(e->goalx, e->goaly) != FB_CELL_OPEN)
+		return FB_STOP;
+	if (hallway_corr_adjacent(e->goalx, e->goaly))
+		return FB_ESCALATE;
+	return FB_KEEP;
+}
+
+/* level 2: pivot away from the hallway that blocked level 1, and validate
+   (or establish) a physical connection from the room's own wall into
+   that hallway.  Only called when fb_level1() returned FB_ESCALATE, so
+   e->goalx/goaly is already known OPEN and CORR-adjacent -- the two
+   along-wall neighbors checked below can't both be non-CORR without
+   contradicting that, so at least one of corrA/corrB is always TRUE.
+   Never returns FB_KEEP: a successful pivot always hands off to level 3,
+   even where a single step already happens to be fully clear -- level
+   3's own step-0 evaluation covers that case uniformly. */
+STATIC_OVL int
+fb_level2(struct fb_endpoint *e)
+{
+	schar pAx, pAy, pBx, pBy;
+	boolean corrA, corrB;
+
+	if (e->odx) { pAx = 0; pAy = -1; pBx = 0; pBy = 1; }
+	else        { pAx = -1; pAy = 0; pBx = 1; pBy = 0; }
+
+	corrA = (hallway_cell_class(e->goalx + pAx, e->goaly + pAy) == FB_CELL_CORR);
+	corrB = (hallway_cell_class(e->goalx + pBx, e->goaly + pBy) == FB_CELL_CORR);
+	if (corrA == corrB)
+		return FB_STOP; /* both sides blocked, or (shouldn't happen) neither */
+
+	e->tdx = corrA ? pBx : pAx;
+	e->tdy = corrA ? pBy : pAy;
+
+	/* look back at the room's own wall, shifted one step along the wall
+	   toward the hallway (opposite of the pivot direction) -- guaranteed
+	   CORR-adjacent by the check above, no need to re-verify */
+	e->wallx = e->odoorx - e->tdx;
+	e->wally = e->odoory - e->tdy;
+
+	if (!hallway_valid_door_wall(e->wallx, e->wally))
+		return FB_STOP; /* room corner, or otherwise not a plain wall tile */
+	e->need_door = !bydoor(e->wallx, e->wally);
+	/* if need_door is TRUE but doorindex is exhausted, dosdoor()'s own
+	   existing impossible("DOORMAX exceeded?") reports that at commit
+	   time -- not this function's concern */
+
+	e->doorx = e->goalx; e->doory = e->goaly; /* old goal becomes new door */
+	e->goalx = e->doorx + e->tdx; e->goaly = e->doory + e->tdy;
+	e->level = 2;
+	return FB_ESCALATE;
+}
+
+/* level 3: walk door/goal together, one step at a time along e->odx/ody
+   (the room's own outward normal, which is also the blocking hallway's
+   own travel direction, since it runs perpendicular to the room's wall).
+   e->doorx/doory may legitimately land on literal CORR (that tile becomes
+   the room's bridge into the hallway's edge at commit time). e->goalx/
+   goaly is meant to stay open rock (it's handed to line_path_clear() as
+   the shared line's endpoint) -- but if the hallway itself turns to run
+   across our path, it can transiently become CORR too; "invalid" below
+   tracks that, recomputed fresh every call from the terrain itself so it
+   can never desync from the actual map state. */
+STATIC_OVL int
+fb_level3_step(struct fb_endpoint *e, struct fb_endpoint *other)
+{
+	xchar ngoalx, ngoaly, ndoorx, ndoory;
+	int goal_cls, door_cls;
+	boolean invalid = (hallway_cell_class(e->goalx, e->goaly) == FB_CELL_CORR);
+	boolean aligned;
+
+	if (e->odx) aligned = (e->goalx == other->goalx);
+	else        aligned = (e->goaly == other->goaly);
+	if (aligned)
+		return invalid ? FB_STOP : FB_KEEP; /* invalid: can't line-draw from here yet -- deferred */
+
+	ngoalx = e->goalx + e->odx; ngoaly = e->goaly + e->ody;
+	ndoorx = e->doorx + e->odx; ndoory = e->doory + e->ody;
+	goal_cls = hallway_cell_class(ngoalx, ngoaly);
+	door_cls = hallway_cell_class(ndoorx, ndoory);
+
+	if (goal_cls == FB_CELL_OTHER || door_cls == FB_CELL_OTHER)
+		return invalid ? FB_STOP : FB_KEEP; /* about to hit a third room */
+
+	if (goal_cls == FB_CELL_CORR && door_cls == FB_CELL_OPEN) {
+		/* the hallway is now on the door side instead of the goal side --
+		   we're still linked to the room via the CORR squares already
+		   crossed, so just swap roles and keep tracing */
+		xchar tx = ndoorx, ty = ndoory;
+		e->doorx = ngoalx; e->doory = ngoaly;
+		e->goalx = tx;      e->goaly = ty;
+		e->tdx = -e->tdx;   e->tdy = -e->tdy;
+		return FB_CONTINUE;
+	}
+
+	if (goal_cls == FB_CELL_OPEN && door_cls == FB_CELL_OPEN && invalid) {
+		/* emerged from crossing right at a corner: both sides open, but
+		   still adjacent to the hallway -- re-pivot away from it like
+		   level 2 did, then stop */
+		schar pAx, pAy, pBx, pBy;
+		boolean corrA, corrB;
+
+		e->doorx = ndoorx; e->doory = ndoory;
+		if (e->odx) { pAx = 0; pAy = -1; pBx = 0; pBy = 1; }
+		else        { pAx = -1; pAy = 0; pBx = 1; pBy = 0; }
+		corrA = (hallway_cell_class(e->doorx + pAx, e->doory + pAy) == FB_CELL_CORR);
+		corrB = (hallway_cell_class(e->doorx + pBx, e->doory + pBy) == FB_CELL_CORR);
+		if (corrA == corrB)
+			return FB_STOP; /* no unambiguous side to pivot toward */
+		e->tdx = corrA ? pBx : pAx;
+		e->tdy = corrA ? pBy : pAy;
+		e->goalx = e->doorx + e->tdx; e->goaly = e->doory + e->tdy;
+		return FB_KEEP;
+	}
+
+	if (door_cls == FB_CELL_CORR || goal_cls == FB_CELL_CORR) {
+		/* still tracing the hallway's flank -- or mid-crossing a junction
+		   that turned to run across our path */
+		e->goalx = ngoalx; e->goaly = ngoaly;
+		e->doorx = ndoorx; e->doory = ndoory;
+		return FB_CONTINUE;
+	}
+	return FB_KEEP; /* both sides open, never invalid: flank ended one step ahead */
+}
+
+/* commit one resolved endpoint: a level-1 endpoint gets its original
+   wall tile doored exactly as before; an escalated (level 2/3) endpoint
+   gets its room-wall connector doored only if one doesn't already exist
+   there, plus its final door square marked SCORR -- the single bridge
+   between the pre-existing hallway (walked via its own ordinary CORR
+   floor) and this endpoint's own dedicated corridor. */
+STATIC_OVL void
+fb_commit_endpoint(struct fb_endpoint *e)
+{
+	if (e->level == 1) {
+		dosdoor(e->doorx, e->doory, &rooms[e->room], SDOOR);
+	} else {
+		if (e->need_door)
+			dosdoor(e->wallx, e->wally, &rooms[e->room], SDOOR);
+		levl[e->doorx][e->doory].typ = SCORR;
+	}
+}
+
+/* if a level-2 pivot's goal square landed directly on a wall or door tile
+   belonging to the room we're trying to reach (otherroom), the two rooms
+   are already touching through open rock at this point -- connect them
+   directly with a single SCORR bridge, skipping levels 3/line_path_clear
+   entirely.  No terrain is written except on FB_HIT_DONE. */
+STATIC_OVL int
+fb_try_direct_hit(struct fb_endpoint *e, int otherroom)
+{
+	struct mkroom *r;
+	int typ;
+
+	if (!isok(e->goalx, e->goaly))
+		return FB_HIT_NONE;
+	typ = levl[e->goalx][e->goaly].typ;
+	if (!IS_WALL(typ) && !IS_DOOR(typ) && typ != SDOOR)
+		return FB_HIT_NONE;
+	r = pos_to_room(e->goalx, e->goaly);
+	if (!r || r != &rooms[otherroom])
+		return FB_HIT_NONE;
+
+	if (IS_WALL(typ) && typ != HWALL && typ != VWALL)
+		return FB_HIT_CORNER; /* deferred: could nudge to an adjacent
+			plain-wall tile instead of bailing outright */
+
+	fb_commit_endpoint(e); /* W (per fb_level2's own need_door) + doorx/doory -> SCORR */
+
+	if ((typ == HWALL || typ == VWALL) && okdoor(e->goalx, e->goaly))
+		dosdoor(e->goalx, e->goaly, &rooms[otherroom], SDOOR);
+	/* IS_DOOR/SDOOR, or okdoor() false because a door's already adjacent:
+	   entry is already provided right here, nothing more to place. */
+
+	smeq_union(e->room, otherroom);
+	return FB_HIT_DONE;
+}
+
+/* validate and, only if fully valid, commit one candidate fallback
+   corridor: a door slot pa on room a's wall_a and pb on room b's wall_b.
+   Each endpoint independently escalates through up to three levels if
+   its straight-line origin turns out to run alongside an existing
+   primary hallway (level 1: nominate the obvious point; level 2: pivot
+   away from the hallway and validate a connection back into it; level 3:
+   walk along the hallway's flank looking for a clear vantage).  No
+   terrain is written until the whole candidate is confirmed viable end
+   to end, so a failed attempt never leaves partial state. */
+STATIC_OVL boolean
+hallway_fallback_attempt(int a, int b, int wall_a, int wall_b, int pa, int pb)
+{
+	boolean horiz_a = (wall_a == HALL_E || wall_a == HALL_W);
+	boolean horiz_b = (wall_b == HALL_E || wall_b == HALL_W);
+	xchar fa, loa, hia, fbb, lob, hib;
+	xchar pathx[COLNO + ROWNO], pathy[COLNO + ROWNO];
+	int pathlen = 0, i;
+	struct fb_endpoint ea, eb;
+	int ra, rb;
+	boolean line_ok, any_continue;
+
+	(void) door_slot_range(&rooms[a], wall_a, &fa, &loa, &hia);
+	(void) door_slot_range(&rooms[b], wall_b, &fbb, &lob, &hib);
+
+	ea.room = a; ea.level = 1;
+	if (horiz_a) { ea.doorx = fa; ea.doory = pa; } else { ea.doorx = pa; ea.doory = fa; }
+	ea.odoorx = ea.doorx; ea.odoory = ea.doory;
+	ea.odx = halldx[wall_a]; ea.ody = halldy[wall_a];
+
+	eb.room = b; eb.level = 1;
+	if (horiz_b) { eb.doorx = fbb; eb.doory = pb; } else { eb.doorx = pb; eb.doory = fbb; }
+	eb.odoorx = eb.doorx; eb.odoory = eb.doory;
+	eb.odx = halldx[wall_b]; eb.ody = halldy[wall_b];
+
+	if (!okdoor(ea.doorx, ea.doory) || !okdoor(eb.doorx, eb.doory))
+		return FALSE;
+
+	ra = fb_level1(&ea);
+	rb = fb_level1(&eb);
+	if (ra == FB_STOP || rb == FB_STOP)
+		return FALSE;
+
+	if (ra == FB_ESCALATE) {
+		ra = fb_level2(&ea);
+		if (ra == FB_STOP) return FALSE;
+		switch (fb_try_direct_hit(&ea, b)) {
+		case FB_HIT_DONE:   return TRUE;
+		case FB_HIT_CORNER: return FALSE;
+		default: break; /* FB_HIT_NONE -- fall through to normal escalation */
+		}
+	}
+	if (rb == FB_ESCALATE) {
+		rb = fb_level2(&eb);
+		if (rb == FB_STOP) return FALSE;
+		switch (fb_try_direct_hit(&eb, a)) {
+		case FB_HIT_DONE:   return TRUE;
+		case FB_HIT_CORNER: return FALSE;
+		default: break;
+		}
+	}
+
+	line_ok = line_path_clear(ea.goalx, ea.goaly, eb.goalx, eb.goaly, pathx, pathy, &pathlen);
+
+	if (!line_ok && !(ea.level == 1 && eb.level == 1)) {
+		for (;;) {
+			any_continue = FALSE;
+			if (ea.level >= 2 && ra != FB_KEEP) {
+				ra = fb_level3_step(&ea, &eb);
+				if (ra == FB_STOP) return FALSE;
+				if (ra == FB_CONTINUE) any_continue = TRUE;
+			}
+			if (eb.level >= 2 && rb != FB_KEEP) {
+				rb = fb_level3_step(&eb, &ea);
+				if (rb == FB_STOP) return FALSE;
+				if (rb == FB_CONTINUE) any_continue = TRUE;
+			}
+			if (!any_continue) break;
+		}
+		line_ok = line_path_clear(ea.goalx, ea.goaly, eb.goalx, eb.goaly, pathx, pathy, &pathlen);
+	}
+	if (!line_ok)
+		return FALSE;
+
+	fb_commit_endpoint(&ea);
+	fb_commit_endpoint(&eb);
+	for (i = 0; i < pathlen; i++)
+		levl[pathx[i]][pathy[i]].typ = SCORR;
+
+	smeq_union(a, b);
+	return TRUE;
+}
+
+/* fallback for a room find_hallway()/carve_hallway() couldn't reach:
+   try, nearest-to-farthest, every other room in a different connected
+   component; for each, every axis that actually separates the two rooms
+   (room_wall_pairs(), shorter gap first -- a diagonally-offset pair
+   tries both), 100 random door-slot pairs on that pair of walls, then
+   (if none worked) one exhaustive, unrandomized scan of every slot pair
+   on those same two walls, before falling through to the other axis (if
+   any).  Returns FALSE only once every candidate room and axis has been
+   tried and failed. */
+STATIC_OVL boolean
+hallway_fallback(int a)
+{
+	int candidates[MAXNROFROOMS + 1][2]; /* [room b, distance] */
+	int ncand = 0, i, b;
+
+	for (b = 0; b < nroom; b++) {
+		int wa, wb;
+
+		if (b == a || smeq_root(a) == smeq_root(b)) continue;
+		candidates[ncand][0] = b;
+		candidates[ncand][1] = room_gap(&rooms[a], &rooms[b], &wa, &wb);
+		ncand++;
+	}
+
+	/* insertion sort ascending by distance -- ncand is tiny (< nroom <= MAXNROFROOMS) */
+	for (i = 1; i < ncand; i++) {
+		int keyb = candidates[i][0], keyd = candidates[i][1], j = i - 1;
+
+		while (j >= 0 && candidates[j][1] > keyd) {
+			candidates[j + 1][0] = candidates[j][0];
+			candidates[j + 1][1] = candidates[j][1];
+			j--;
+		}
+		candidates[j + 1][0] = keyb;
+		candidates[j + 1][1] = keyd;
+	}
+
+	for (i = 0; i < ncand; i++) {
+		int b2 = candidates[i][0];
+		int wall_from[4], wall_to[4], gap[4], npairs, wp;
+		boolean success = FALSE;
+
+		npairs = room_wall_pairs(&rooms[a], &rooms[b2], wall_from, wall_to, gap);
+
+		for (wp = 0; wp < npairs && !success; wp++) {
+			int wall_a = wall_from[wp], wall_b = wall_to[wp], t;
+			xchar fa, loa, hia, fb, lob, hib;
+
+			if (!door_slot_range(&rooms[a], wall_a, &fa, &loa, &hia)) continue;
+			if (!door_slot_range(&rooms[b2], wall_b, &fb, &lob, &hib)) continue;
+
+			for (t = 0; t < 100 && !success; t++) {
+				int pa = loa + rn2(hia - loa + 1);
+				int pb = lob + rn2(hib - lob + 1);
+
+				success = hallway_fallback_attempt(a, b2, wall_a, wall_b, pa, pb);
+			}
+			if (!success) {
+				int pa, pb;
+
+				for (pa = loa; pa <= hia && !success; pa++)
+					for (pb = lob; pb <= hib && !success; pb++)
+						success = hallway_fallback_attempt(a, b2, wall_a, wall_b, pa, pb);
+			}
+		}
+		if (success) return TRUE;
+	}
+	return FALSE;
+}
+
+/* replace a hallway's two flanking cells (the 3-wide cross-section's g-#-g
+   sides; the center lane is left as plain corridor floor) with greenway
+   terrain: rnd(50) of 1 -> FOUNTAIN (1/7 of those magic, per the same odds
+   normal fountain placement uses), 2-16 -> TREE, 17-20 -> POOL, 21-30 ->
+   PUDDLE, otherwise GRASS.  The whole 3-wide swath, center lane included,
+   is lit.  Two passes: first
+   paint the ENTIRE swath of every leg (center lane included, corner
+   block included), then walk each leg's center lane back over and
+   restore it to plain corridor floor.  ex/ey (the elbow's own pivot,
+   unused when nlegs == 1) are what make pass 2 possible: each leg's own
+   lo/hi was extended one step past the pivot purely so pass 1's
+   perpendicular sweep would reach the corner block's outer edge (see
+   hallway_legs()) -- that extended cell is real outer-edge flank, not
+   part of the true single-file walking path, which actually bends AT the
+   pivot.  So pass 2 must stop restoring each leg's center at ex (for the
+   horizontal leg) / ey (for the vertical leg), one short of that leg's
+   own extended endpoint, rather than walking its full lo..hi.  Same
+   CORR/SCORR-only guard as hallway_paint_floor() on what pass 1 touches
+   -- doors and any terrain this leg merely coasted through (belonging to
+   some other hallway) have their terrain left alone, though still get
+   lit; pass 2 only restores cells pass 1 actually painted
+   (TREE/GRASS/FOUNTAIN), so it can't clobber anything pass 1 skipped.
+   Must run before wallify_hallway_corridors() removes CORR/SCORR distinctions. */
+STATIC_OVL void
+greenway(int nlegs, xchar *lo, xchar *hi, xchar *fixed, boolean *horiz, xchar ex, xchar ey)
+{
+	int i, p, w, x, y, roll;
+
+	for (i = 0; i < nlegs; i++)
+		for (p = lo[i]; p <= hi[i]; p++)
+			for (w = -1; w <= 1; w++) {
+				x = horiz[i] ? p : fixed[i] + w;
+				y = horiz[i] ? fixed[i] + w : p;
+				if (!isok(x, y))
+					continue;
+				levl[x][y].lit = TRUE;
+				if (levl[x][y].typ != CORR && levl[x][y].typ != SCORR)
+					continue;
+
+				roll = rnd(50);
+				if (roll == 1) {
+					levl[x][y].typ = FOUNTAIN;
+					level.flags.nfountains++;
+					if (!rn2(7))
+						levl[x][y].blessedftn = 1;
+				} else if (roll <= 16) {
+					levl[x][y].typ = TREE;
+				} else if(roll <= 20) {
+					levl[x][y].typ = POOL;
+				} else if(roll <= 30) {
+					levl[x][y].typ = PUDDLE;
+				} else {
+					levl[x][y].typ = GRASS;
+				}
+			}
+
+	for (i = 0; i < nlegs; i++) {
+		int rlo = lo[i], rhi = hi[i];
+
+		if (nlegs == 2) {
+			int corner_p = horiz[i] ? ex : ey;
+
+			if (corner_p == hi[i] - 1)
+				rhi = corner_p;
+			else if (corner_p == lo[i] + 1)
+				rlo = corner_p;
+		}
+
+		for (p = rlo; p <= rhi; p++) {
+			x = horiz[i] ? p : fixed[i];
+			y = horiz[i] ? fixed[i] : p;
+			if (!isok(x, y))
+				continue;
+			if (levl[x][y].typ == FOUNTAIN) {
+				level.flags.nfountains--;
+				levl[x][y].blessedftn = 0;
+			}
+			if (levl[x][y].typ == FOUNTAIN || levl[x][y].typ == TREE ||
+					levl[x][y].typ == GRASS || levl[x][y].typ == POOL ||
+					levl[x][y].typ == PUDDLE)
+				levl[x][y].typ = CORR;
+		}
+	}
+}
+
+/* replace a straight, odd-length hallway's two flanking cells with an
+   alternating tree / "other" pattern along its length (the center lane is
+   left as plain corridor floor); both flanks at a given travel position
+   always match, and every "other" cell is the same terrain, decided once
+   for the whole hallway: rnd(100) of 1 -> FOUNTAIN, 2-50 -> GRASS, 51-100
+   -> CORR (left as corridor floor; wallify_hallway_corridors() upgrades it to
+   room floor later, same as any other corridor cell).  Position lo (the
+   near end) is always a tree, so a length-1 hallway is solid trees and a
+   length-3 hallway goes tree-other-tree.  The whole 3-wide swath, center
+   lane included, is lit.  Same CORR/SCORR-only guard on terrain
+   replacement as greenway()/hallway_paint_floor().  Caller is responsible
+   for confirming the hallway is actually straight and odd-length before
+   calling -- unlike greenway(), this doesn't take a leg array, since an
+   elbow wouldn't have a single well-defined alternation to run. */
+STATIC_OVL void
+tree_lined(int lo, int hi, int fixed, boolean horiz)
+{
+	int p, w, x, y, roll, other;
+
+	roll = rnd(100);
+	other = (roll == 1) ? FOUNTAIN : (roll < 51) ? GRASS : CORR;
+
+	for (p = lo; p <= hi; p++) {
+		boolean is_tree = !((p - lo) % 2);
+
+		for (w = -1; w <= 1; w++) {
+			x = horiz ? p : fixed + w;
+			y = horiz ? fixed + w : p;
+			if (!isok(x, y))
+				continue;
+			levl[x][y].lit = TRUE;
+			if (!w || (levl[x][y].typ != CORR && levl[x][y].typ != SCORR))
+				continue;
+			if (is_tree) {
+				levl[x][y].typ = TREE;
+			} else {
+				levl[x][y].typ = other;
+				if (other == FOUNTAIN) level.flags.nfountains++;
+			}
+		}
+	}
+}
+
+/* replace a straight, odd-length hallway's two flanking cells with an
+   alternating statue / plain-corridor pattern along its length (the
+   center lane is always left as plain corridor floor; unlike
+   tree_lined() there's no distinct "other" terrain, so the alternate
+   position is just left as plain corridor floor too).  Position lo (the
+   near end) always gets a statue, so a length-1 hallway is solid statues
+   and a length-3 hallway goes statue-none-statue.  Each statue's monster
+   is rndshape()'d the same way mksgardenstatueat()'s decorative statues
+   are, with a 5% chance to be gold (set_material_gm(), otherwise left the
+   default stone).  The whole 3-wide swath, center lane included, is lit.
+   Same CORR/SCORR-only guard as tree_lined()/greenway().  Caller is
+   responsible for confirming the hallway is actually straight and
+   odd-length before calling. */
+STATIC_OVL void
+statue_lined(int lo, int hi, int fixed, boolean horiz)
+{
+	int p, w, x, y;
+	struct obj *otmp;
+	boolean gold_statues = !rn2(20);
+	boolean alltraps = !rn2(100);
+	struct trap *t;
+
+	for (p = lo; p <= hi; p++) {
+		boolean is_statue = !((p - lo) % 2);
+
+		for (w = -1; w <= 1; w++) {
+			x = horiz ? p : fixed + w;
+			y = horiz ? fixed + w : p;
+			if (!isok(x, y))
+				continue;
+			levl[x][y].lit = TRUE;
+			if (!w || !is_statue ||
+					(levl[x][y].typ != CORR && levl[x][y].typ != SCORR))
+				continue;
+
+			otmp = mksobj_at(STATUE, x, y, MKOBJ_ARTIF);
+			if (otmp) {
+				t = t_at(x, y);
+				otmp->corpsenm = rndshape((void *) 0);
+				if (gold_statues)
+					set_material_gm(otmp, GOLD);
+				else if(!t && 
+					(alltraps || (depth(&u.uz) - monstr[otmp->corpsenm]) >= rn2(100))
+				) {
+					t = maketrap(x, y, MAGIC_TRAP);
+					if (t) {
+						t->ttyp = STATUE_TRAP;
+						t->statueid = otmp->o_id;
+					}
+				}
+				fix_object(otmp);
+			}
+		}
+	}
+}
+
+
+STATIC_OVL void
+hallway_of_the_damned(void)
+{
+	//Stub
+}
+
+/* alternate to makecorridors(): 3-tile-wide hallways, at most one turn.
+   Pass zero unions any room pair already touching or overlapping, so
+   smeq[] accounts for them before any hallway is placed.  Pass 1
+   records a valid path (if any) for every room pair; pass 2 joins rooms
+   using only those pre-cleared pairs, picking one random cross-
+   component partner per room per sweep, until a full sweep makes no
+   more merges.  Pass two and a half falls back to a secret, 1-wide
+   corridor for any room pair pass 1/2 couldn't connect.  Pass three
+   classifies each carved hallway's traits (straight/elbow, odd length,
+   padded walls, long run); pass four uses those traits to dress some
+   hallways with greenway/tree/statue terrain.  Wallifying the carved
+   corridors into a built-hallway look happens separately, in the
+   caller (see wallify_hallway_corridors()). */
+STATIC_OVL void
+makehallways(void)
+{
+	int a, b;
+	schar hallelbow[MAXNROFROOMS + 1][MAXNROFROOMS + 1][3] = { { { 0, 0, 0 } } }; /* x, y, placed */
+	xchar ex, ey;
+	boolean any;
+	int corridor_count = 0;
+
+	/* Pass zero: rooms placed already touching or overlapping (e.g. via
+	   flags.makelev_closerooms, true for most levels -- see mklev.c's
+	   makelevel()) share open floor with no corridor ever carved between
+	   them.  merge_adj_rooms() only catches an exact 3-tile gap, so
+	   smeq[] never learns about a pair placed this close any other way
+	   -- union them here so every smeq-based check below (and inside
+	   this function) sees them as already connected. */
+	for (a = 0; a < nroom; a++)
+		for (b = a + 1; b < nroom; b++) {
+			int wa, wb;
+
+			if (room_gap(&rooms[a], &rooms[b], &wa, &wb) == 0)
+				smeq_union(a, b);
+		}
+
+	/* Pass 1: find a valid hallway for every room pair, if any */
+	for (a = 0; a < nroom; a++)
+		for (b = a + 1; b < nroom; b++) {
+			if (find_hallway(a, b, &ex, &ey)) {
+				hallelbow[a][b][0] = hallelbow[b][a][0] = ex;
+				hallelbow[a][b][1] = hallelbow[b][a][1] = ey;
+			} else {
+				hallelbow[a][b][0] = hallelbow[b][a][0] = -1;
+			}
+		}
+
+	/* Pass 2: join rooms using the pre-cleared pairs */
+	do {
+		any = FALSE;
+		for (a = 0; a < nroom; a++) {
+			int chcnt = 0, bestb = -1;
+
+			for (b = 0; b < nroom; b++) {
+				if (a == b) continue;
+				if (hallelbow[a][b][0] == -1) continue;
+				if (smeq_root(a) == smeq_root(b)) continue;
+				if (!rn2(++chcnt)) bestb = b;
+			}
+			if (bestb != -1) {
+				carve_hallway(a, bestb, hallelbow[a][bestb][0], hallelbow[a][bestb][1]);
+				any = TRUE;
+				corridor_count++;
+				hallelbow[a][bestb][2] = hallelbow[bestb][a][2] = TRUE;
+			}
+		}
+	} while (any);
+	/* Pass two and a half: fall back to a secret straight corridor for any rooms still disconnected */
+	while (!all_rooms_connected()) {
+		boolean fb_any = FALSE;
+
+		for (a = 0; a < nroom; a++) {
+			if (all_rooms_connected()) break;
+			if (hallway_fallback(a))
+				fb_any = TRUE;
+		}
+		if (!fb_any && !all_rooms_connected()){
+			impossible("makehallways: could not connect all rooms");
+			iflags.cut_level_gen_test = TRUE;
+			break;
+		}
+	}
+	/* Pass three: pick out some special hallways */
+	int corridor_traits[corridor_count][5]; /* [x, y, traits, a, b] */
+	int ncorridor_traits = 0;
+	(void) memset((genericptr_t) corridor_traits, 0, sizeof(corridor_traits));
+#define INTERSECTED 0
+#define NINE_CLEAR 0x01
+#define STRAIGHT 0x02
+#define ELBOW 0x04
+#define ODD 0x08
+#define LONG_RUN 0x10
+	{
+		int c, d, i, j, n = 0;
+
+		for (a = 0; a < nroom; a++){
+			for (b = a + 1; b < nroom; b++) {
+				xchar pax, pay, pbx, pby;
+				schar dxa, dya, dxb, dyb;
+				boolean straight, intersected;
+				xchar lo[2], hi[2], fixed[2];
+				boolean horiz[2];
+				int nlegs, traits, eligible, padded_cnt;
+
+				if (!hallelbow[a][b][2]) continue;
+				ex = hallelbow[a][b][0];
+				ey = hallelbow[a][b][1];
+
+				hallway_endpoint(a, ex, ey, &pax, &pay, &dxa, &dya);
+				hallway_endpoint(b, ex, ey, &pbx, &pby, &dxb, &dyb);
+				straight = ((dya == 0) == (dyb == 0));
+				nlegs = hallway_legs(a, b, ex, ey, lo, hi, fixed, horiz);
+
+				/* did any OTHER placed hallway's carve physically merge
+				   with this one anywhere along its length?  Only
+				   answerable now that every hallway is carved -- skip
+				   examining every other trait if so, and give this
+				   hallway no output entry at all. */
+				intersected = FALSE;
+				for (c = 0; c < nroom && !intersected; c++)
+					for (d = c + 1; d < nroom && !intersected; d++) {
+						xchar olo[2], ohi[2], ofixed[2];
+						boolean ohoriz[2];
+						int onlegs;
+
+						if (c == a && d == b) continue;
+						if (!hallelbow[c][d][2]) continue;
+						onlegs = hallway_legs(c, d, hallelbow[c][d][0],
+									hallelbow[c][d][1],
+									olo, ohi, ofixed, ohoriz);
+						for (i = 0; i < nlegs && !intersected; i++)
+							for (j = 0; j < onlegs; j++)
+								if (hallway_legs_overlap(lo[i], hi[i], fixed[i], horiz[i],
+											olo[j], ohi[j], ofixed[j], ohoriz[j])) {
+									intersected = TRUE;
+									break;
+								}
+					}
+				if (intersected) continue;
+
+				traits = straight ? STRAIGHT : ELBOW;
+				{
+					int dist = abs(pax - pbx) + abs(pay - pby);
+
+					/* ODD means an odd number of squares BETWEEN the two
+					   doors, i.e. (Manhattan distance - 1) is odd, i.e.
+					   the distance itself is even */
+					if (!(dist & 1))
+						traits |= ODD;
+					if (dist >= 10)
+						traits |= LONG_RUN;
+				}
+
+				eligible = padded_cnt = 0;
+				for (i = 0; i < nlegs; i++) {
+					int p, side;
+
+					for (p = lo[i]; p <= hi[i]; p++)
+						for (side = -1; side <= 1; side += 2) {
+							boolean was_padded;
+
+							if (!hallway_wall_square_stat(p, fixed[i], horiz[i], side, &was_padded))
+								continue;
+							eligible++;
+							if (was_padded) padded_cnt++;
+						}
+				}
+				if (eligible > 0 && padded_cnt * 2 >= eligible)
+					traits |= NINE_CLEAR;
+
+				corridor_traits[n][0] = ex;
+				corridor_traits[n][1] = ey;
+				corridor_traits[n][2] = traits;
+				corridor_traits[n][3] = a;
+				corridor_traits[n][4] = b;
+				n++;
+
+			}
+		}
+		ncorridor_traits = n;
+	}
+
+	/* pass four: decide what, if anything, each surviving hallway (every
+	   row corridor_traits picked up above) becomes.  Kept separate from
+	   pass three above so a future dispatch can weigh one hallway's
+	   choice against every other hallway's already-computed traits, not
+	   just its own -- corridor_traits is fully populated by the time this
+	   runs.  Only ex/ey/traits/a/b need to survive from pass three;
+	   everything else (nlegs/lo/hi/fixed/horiz) is cheap to recompute
+	   from a/b/ex/ey via hallway_legs(). */
+	{
+		int k;
+
+		for (k = 0; k < ncorridor_traits; k++) {
+			xchar lo[2], hi[2], fixed[2];
+			boolean horiz[2];
+			int nlegs, traits, ca, cb;
+
+			ex = corridor_traits[k][0];
+			ey = corridor_traits[k][1];
+			traits = corridor_traits[k][2];
+			ca = corridor_traits[k][3];
+			cb = corridor_traits[k][4];
+			nlegs = hallway_legs(ca, cb, ex, ey, lo, hi, fixed, horiz);
+
+			if ((traits & (STRAIGHT | ODD)) == (STRAIGHT | ODD)){
+				if(!rn2(4)){
+					statue_lined(lo[0], hi[0], fixed[0], horiz[0]);
+				}
+				else if(!rn2(3)){
+					tree_lined(lo[0], hi[0], fixed[0], horiz[0]);
+				}
+				else if(!rn2(2)){
+					greenway(nlegs, lo, hi, fixed, horiz, ex, ey);
+				}
+			}
+			else {
+				if(!rn2(4)){
+					greenway(nlegs, lo, hi, fixed, horiz, ex, ey);
+				}
+				else if(!rn2(10)){
+					hallway_paint_floor(nlegs, lo, hi, fixed, horiz, ICE);
+				}
+			}
+		}
+	}
+}
+
+
+/*
 ALI - Artifact doors: Track doors in maze levels as well.  From Slash'em
 */
 
@@ -1074,6 +2672,7 @@ makelevel()
 	branch *branchp;
 	int room_threshold;
 	boolean magic_chest = FALSE;
+	boolean hallways = FALSE;
 
 	if(wiz1_level.dlevel == 0) init_dungeons();
 	oinit();	/* assign level dependent obj probabilities */
@@ -1210,8 +2809,14 @@ makelevel()
 #endif
 
 	merge_adj_rooms();
-	makecorridors();
-	make_niches();
+	if(!rn2(6) && In_dungeons_of_doom(&u.uz)){
+		makehallways();
+		hallways = TRUE;
+	}
+	else {
+		makecorridors();
+		make_niches();
+	}
 
 	/* fix up room walls, which may have been broken by having overlapping or joined rooms */
 	for (tryct = 0; tryct < nroom; tryct++)
@@ -1448,23 +3053,11 @@ skip0:
 	}
 mithardir_end:
 	if(In_mithardir_catacombs(&u.uz)){
-		for (x = 0; x<COLNO; x++){
-			for (y = 0; y<ROWNO; y++){
-				levl[x][y].lit = FALSE;
-				if(levl[x][y].typ == CORR)
-					levl[x][y].typ = ROOM;
-				else if(levl[x][y].typ == SCORR)
-					levl[x][y].typ = ROOM;
-				else if(levl[x][y].typ == SDOOR){
-					levl[x][y].typ = DOOR;
-					levl[x][y].doormask = D_LOCKED;
-				}
-				else if(IS_ROCK(levl[x][y].typ))
-					levl[x][y].typ = VWALL;
-			}
-		}
-		wallification(1, 0, COLNO - 1, ROWNO - 1);
+		wallify_mithardir_corridors();
 		if(In_mithardir_terminus(&u.uz)) mkroom(RIVER);
+	}
+	else if(hallways){
+		wallify_hallway_corridors();
 	}
 	if (flags.makelev_closerooms)			
 		flags.makelev_closerooms = FALSE;
@@ -2464,7 +4057,7 @@ xchar x, y;
 	/* Already set -> nope. */
 	if (source->dnum < n_dgns) return;
 
-	if (u.uz.dnum != oracle_level.dnum		// not in main dungeon
+	if (!In_dungeons_of_doom(&u.uz)		// not in main dungeon
 		|| (u_depth = depth(&u.uz)) < 10	// not beneath 10
 		|| u_depth > depth(&challenge_level)// not below medusa
 	)

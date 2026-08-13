@@ -720,6 +720,107 @@ int *fail_reason;
 }
 
 /*
+ * A member of the tomb herd takes up residence in the given statue.  Unlike
+ * animate_statue(), the statue is not consumed:  it is carried by the new
+ * monster in the W_SKIN slot, and anything the statue contained is emptied
+ * into the monster's inventory.  Returns the new monster, or null.
+ */
+struct monst *
+make_tomb_herd(struct obj *statue, xchar x, xchar y)
+{
+	struct permonst *mptr;
+	struct monst *mon;
+	struct obj *item;
+	int mndx;
+	boolean was_extinct;
+
+	if (statue->otyp != STATUE)
+		return (struct monst *)0;
+
+	mndx = statue->corpsenm;
+	mptr = &mons[mndx];
+
+	/* makemon() taints mvitals for a unique regardless of MM_NOCOUNTBIRTH,
+	 * which would keep the genuine article from ever being placed */
+	was_extinct = (mvitals[mndx].mvflags & G_EXTINCT) != 0;
+	mon = makemon(mptr, x, y, NO_MINVENT|MM_NOCOUNTBIRTH|MM_ADJACENTOK);
+	if (!was_extinct)
+		mvitals[mndx].mvflags &= ~G_EXTINCT;
+
+	if (!mon)
+		return (struct monst *)0;
+
+	set_template(mon, TOMB_HERD);
+	mon->m_lev += 4;
+	mon->mhpmax += d(4, hd_size(mon->data));
+	mon->mhp = mon->mhpmax;
+	mon->mpeaceful = 0;
+	set_malign(mon);
+
+	/* allow statues to be of a specific gender */
+	if (statue->spe & STATUE_MALE)
+		mon->female = FALSE;
+	else if (statue->spe & STATUE_FEMALE)
+		mon->female = TRUE;
+	/* the statue's contents become the monster's inventory */
+	while ((item = statue->cobj) != 0) {
+		obj_extract_self(item);
+		(void) add_to_minv(mon, item);
+	}
+	/* and the statue itself becomes the monster's shell */
+	obj_extract_self(statue);
+	if (add_to_minv(mon, statue))
+		return (struct monst *)0;	/* statue was destroyed, somehow */
+	statue->owornmask |= W_SKIN;
+	mon->misc_worn_check |= W_SKIN;
+
+	m_dowear(mon, TRUE);
+	init_mon_wield_item(mon);
+	m_level_up_intrinsic(mon);
+
+	if (mon->m_ap_type) seemimic(mon);
+	else mon->mundetected = FALSE;
+
+	return mon;
+}
+
+/* The statue a member of the tomb herd is piloting, if it still has one. */
+struct obj *
+tomb_herd_statue(struct monst *mtmp)
+{
+	struct obj *statue = which_armor(mtmp, W_SKIN);
+
+	return (statue && statue->otyp == STATUE) ? statue : (struct obj *)0;
+}
+
+/*
+ * The herd member is leaving its statue behind.  Everything else it was
+ * carrying is stuffed into the statue, so that the statue that drops is the
+ * whole of what it had.  Called before the inventory is released; harmless
+ * for monsters that are not piloting a statue.
+ */
+void
+tomb_herd_stow(struct monst *mtmp)
+{
+	struct obj *statue, *otmp, *nobj;
+
+	statue = tomb_herd_statue(mtmp);
+	if (!statue)
+		return;
+
+	statue->owornmask &= ~W_SKIN;
+	mtmp->misc_worn_check &= ~W_SKIN;
+	for (otmp = mtmp->minvent; otmp; otmp = nobj) {
+		nobj = otmp->nobj;
+		if (otmp == statue)
+			continue;
+		obj_extract_and_unequip_self(otmp);
+		(void) add_to_container(statue, otmp);
+	}
+	container_weight(statue);
+}
+
+/*
  * You've either stepped onto a statue trap's location or you've triggered a
  * statue trap by searching next to it or by trying to break it with a wand
  * or pick-axe.

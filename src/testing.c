@@ -167,7 +167,7 @@ test_readobjnam()
  *   excludes Ludios if the portal didn't generate
  */
 void
-test_levelgen()
+test_levelgen(void)
 {
 	int i, j;
 	struct d_level newlevel;
@@ -176,6 +176,7 @@ test_levelgen()
 	boolean inverted;
 	boolean savestate = quest_status.got_quest;
 	quest_status.got_quest = TRUE;
+	boolean breakout = FALSE;
 
 	extern int n_dgns;	// from dungeon.c
     for (i = 0; i < n_dgns; i++)
@@ -185,8 +186,14 @@ test_levelgen()
 		goto_level(&newlevel, FALSE, FALSE, FALSE);
 		inverted = (dungeons[u.uz.dnum].entry_lev == dungeons[u.uz.dnum].num_dunlevs);
 		do {
-			for (j=0; j<40; j++)
+			for (j=0; j<40; j++){
 				(void)wiz_makemap();
+				if(iflags.cut_level_gen_test) {
+					iflags.cut_level_gen_test = FALSE;
+					breakout = TRUE;
+					goto breakout;
+				}
+			}
 			if ((!inverted) ? !Is_botlevel(&u.uz) : u.uz.dlevel != 1) {
 				newlev = depth(&u.uz) + ((!inverted) ? 1 : -1);
 				get_level(&newlevel, newlev);
@@ -196,7 +203,9 @@ test_levelgen()
 				break;
 		}while(TRUE);
 	}
+breakout:
 	quest_status.got_quest = savestate;
 
-	goto_level(&curlevel, FALSE, FALSE, FALSE);
+	if(!breakout)
+		goto_level(&curlevel, FALSE, FALSE, FALSE);
 }

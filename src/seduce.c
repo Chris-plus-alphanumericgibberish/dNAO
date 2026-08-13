@@ -1261,6 +1261,8 @@ msteal_m(struct monst *magr, struct monst *mdef, struct attack *attk, int *resul
 		
 		if(seduce && (attk->adtyp == AD_SSEX || attk->adtyp == AD_LSEX)){
 			minvent_ptr = &mdef->minvent;
+			//Stealing everything
+			// Put armor last in inventory
 			while ((otmp = *minvent_ptr) != 0){
 				if (otmp->owornmask & (W_ARM|W_ARMU)){
 					if (stealoid){ /*Steal suit or undershirt*/
@@ -1281,12 +1283,18 @@ msteal_m(struct monst *magr, struct monst *mdef, struct attack *attk, int *resul
 		else {
 			/* select item from defender's inventory */
 			for (otmp = mdef->minvent; otmp; otmp = otmp->nobj)
-				if ((!magr->mtame || !otmp->cursed) && (seduce || !(otmp->owornmask&equipmentmask)))
+				if ((!magr->mtame || !otmp->cursed) 
+					&& (seduce || !(otmp->owornmask&equipmentmask))
+					&& !(otmp->owornmask&W_SKIN)
+				)
 					nitems++;
 			if(nitems){
 				nitems = rnd(nitems);
 				for (otmp = mdef->minvent; otmp; otmp = otmp->nobj)
-					if ((!magr->mtame || !otmp->cursed) && (seduce || !(otmp->owornmask&equipmentmask)))
+					if ((!magr->mtame || !otmp->cursed)
+					&& (seduce || !(otmp->owornmask&equipmentmask))
+					&& !(otmp->owornmask&W_SKIN)
+				)
 						if(--nitems <= 0)
 							break;
 			}
@@ -1295,24 +1303,15 @@ msteal_m(struct monst *magr, struct monst *mdef, struct attack *attk, int *resul
 			int delay = 0;
 			if(seduce && (otmp->owornmask&(W_ARM|W_ARMU))){
 				long unwornmask;
-				//Stealing everything
-				// minvent_ptr = &mdef->minvent;
-				// while ((otmp = *minvent_ptr) != 0)
-					// if (otmp->owornmask & (W_ARM|W_ARMU)){
-						// if (stealoid) /*Steal suit or undershirt*/
-							// continue;
-						// *minvent_ptr = otmp->nobj;	/* take armor out of minvent */
-						// stealoid = otmp;
-						// stealoid->nobj = (struct obj *)0;
-					// } else {
-						// minvent_ptr = &otmp->nobj;
-					// }
-				// *minvent_ptr = stealoid;	/* put armor back into minvent */
-				// otmp = stealoid;
+				struct obj *nobj;
 				if(vis)
 					pline("%s seduces %s and %s starts to take off %s clothes.",
 						Monnam(magr), mon_nam(mdef), mhe(mdef), mhis(mdef));
-				while ((otmp = mdef->minvent) != 0) {
+				nobj = mdef->minvent;
+				while ((otmp = nobj) != 0) {
+					nobj = otmp->nobj;
+					if(otmp->owornmask & (W_SKIN))
+						continue;
 					/* take the object away from the monster */
 					if(otmp->oclass == ARMOR_CLASS && objects[otmp->otyp].oc_delay)
 						delay = max(delay, objects[otmp->otyp].oc_delay);

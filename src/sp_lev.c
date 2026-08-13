@@ -1836,7 +1836,7 @@ default_case:
 			}
 		}
 	}
-	if(otmp->otyp == CHAIN && otmp->where == OBJ_FLOOR && u.uz.dlevel == dungeons[neutral_dnum].depth_start && u.uz.dnum == oracle_level.dnum){
+	if(otmp->otyp == CHAIN && otmp->where == OBJ_FLOOR && u.uz.dlevel == dungeons[neutral_dnum].depth_start && In_dungeons_of_doom(&u.uz)){
 		struct obj *tmpo;
 		struct monst *mon = 0;
 

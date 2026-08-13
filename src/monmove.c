@@ -672,6 +672,11 @@ boolean digest_meal;
 		m_losehp(mon, 1, FALSE, "light");
 		degenerating = TRUE;
 	}
+	/*The tomb herd degenerate without a statue to pilot*/
+	if(!DEADMONSTER(mon) && has_template(mon, TOMB_HERD) && !tomb_herd_statue(mon)){
+		m_losehp(mon, 1, FALSE, "dissipation");
+		degenerating = TRUE;
+	}
 	/*Bleeding out*/
 	if(!DEADMONSTER(mon) && mon->mbleed > 0){
 		m_losehp(mon, mon->mbleed, mon->mubled, "bleeding wound");
