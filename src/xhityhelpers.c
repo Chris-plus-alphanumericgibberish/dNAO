@@ -11,7 +11,8 @@
 #include "xhity.h"
 
 extern boolean notonhead;
-extern struct attack noattack;
+extern const struct attack noattack;
+extern const struct attack basicattack;
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -1147,8 +1148,11 @@ attk_protection(struct monst *magr, struct attack *attk)
 {
 	long slot = 0L;	/* no defense available */
 
-	if (atkbp_intersects(attk->bodypart, ATKBP(WORN_LIKE_WING))) {
+	if (atkbp_intersects(attk->bodypart, ATKBP(EQUIPPED_LIKE_WING))) {
 		slot = W_ARMW;
+	}
+	else if (atkbp_intersects(attk->bodypart, ATKBP(HIT_WITH_SHIELD))) {
+		slot = W_ARMS;
 	}
 	/* PHASED is a modifier on an otherwise-ordinary identity bit */
 	else if (atkbp_intersects(attk->bodypart, ATKBP(PHASED))) {
@@ -1221,8 +1225,10 @@ attk_equip_slot(struct monst *magr, struct attack *attk)
 	if (!attk)
 		return 0L;
 
-	if (atkbp_intersects(attk->bodypart, ATKBP(WORN_LIKE_WING)))
+	if (atkbp_intersects(attk->bodypart, ATKBP(EQUIPPED_LIKE_WING)))
 		slot = W_ARMW;
+	else if (atkbp_intersects(attk->bodypart, ATKBP(HIT_WITH_SHIELD)))
+		slot = W_ARMS;
 	/* AURA_ARM: use gauntlets offensively but unneeded for protection */
 	else if (atkbp_intersects(attk->bodypart, ATKBP(AURA_ARM)))
 		slot = W_ARMG;
@@ -1242,6 +1248,251 @@ attk_equip_slot(struct monst *magr, struct attack *attk)
 	return armor_skin_slot(magr, attk, slot);
 }
 
+/* find_freehand_set()
+ * Which of the PC's arms are free to make a bare-handed attack -- the set
+ * behind freehand()'s yes-or-no, so an attack it gates can be attributed to
+ * whichever arms actually answered.
+ */
+struct atkbp_set
+find_freehand_set(void)
+{
+	if (!Straitjacketed) {
+		/* silvermen have no shortage of hands */
+		if (youracedata->mtyp == PM_SILVERMAN)
+			return atkbp_or((struct atkbp_set[]){
+			    ATKBP(ARM), ATKBP(INNUMERABLE), ATKBP(NONE) });
+		if (!Hands_welded)
+			return ATKBP(ARM);
+	}
+	/* aura arms: free even when a straitjacket or welded weapon has the real ones */
+	if (!Upolyd && youracedata->mtyp == PM_AASIMAR
+		&& flags.aasimar_type == AASIMAR_TYPE_DEVA && u.ulevel >= 14)
+		return ATKBP(AURA_ARM);
+
+	return ATKBP(NONE);
+}
+
+boolean
+has_extra_arms(struct monst *mon)
+{
+	return mon && atkbp_intersects(mon->mbodyparts_full, ATKBP_EXTRA_ARM_MASK());
+}
+
+/* Everything that stops [magr] landing [attk] with [proposal]. */
+static boolean
+fallback_bodypart_usable(struct monst *magr, struct attack *attk,
+	struct atkbp_set proposal, struct atkbp_set members)
+{
+	boolean youagr = (magr == &youmonst);
+	struct attack trial = *attk;
+
+	if (!atkbp_intersects(magr->mbodyparts_full, members))
+		return FALSE;
+
+	trial.bodypart = proposal;
+	if (injuries_block(magr, &trial))
+		return FALSE;
+	if (youagr
+		? ((Straitjacketed || (uarmg && uarmg->otyp == SHACKLES && uarmg->cursed))
+		   && would_straitjacket_block(&trial))
+		: (straitjacketed_mon(magr) && would_straitjacket_block(&trial)))
+		return FALSE;
+	/* the arms a straitjacket pins, not the lower-arm pair below them */
+	if (youagr && Hands_welded
+		&& atkbp_intersects(trial.bodypart, ATKBP_UPPER_BODY_ARM_MASK()))
+		return FALSE;
+
+	return TRUE;
+}
+
+static struct atkbp_set
+whole_arm_family(void)
+{
+	return atkbp_or((struct atkbp_set[]){ ATKBP(ARM),
+	    ATKBP_ARM_ORDINALS_MASK(), ATKBP_MISKA_ARM_ORDINALS_MASK(), ATKBP(NONE) });
+}
+
+static struct atkbp_set
+whole_leg_family(void)
+{
+	return atkbp_or((struct atkbp_set[]){ ATKBP(LEG), ATKBP(LEG_FRONT),
+	    ATKBP(LEG_REAR), ATKBP_LEG_ORDINALS_MASK(), ATKBP(NONE) });
+}
+
+/* fallback_strike_bodypart()
+ * What [magr] lands a bare strike with when there is no real attack to take
+ * an attribution from -- the first part of its body, in descending order of
+ * how ordinary a way it is to hit something, that it has and can still use.
+ * Group bits throughout: this is "an arm", not any particular arm.
+ * LIMB_GENERIC terminates the walk by naming nothing that could be missing,
+ * hurt or pinned.
+ *
+ * Arms and legs are deliberately absent: a caller that could have used
+ * either has already offered it as a candidate of its own.
+ */
+struct atkbp_set
+fallback_strike_bodypart(struct monst *magr, struct attack *attk)
+{
+	if (!magr || !attk)
+		return ATKBP(LIMB_GENERIC);
+
+	if (fallback_bodypart_usable(magr, attk, ATKBP(ARM_LOWER), ATKBP_LOWER_ARM_MASK()))
+		return ATKBP(ARM_LOWER);
+
+	if (fallback_bodypart_usable(magr, attk, ATKBP(WING), ATKBP(WING)))
+		return ATKBP(WING);
+
+	if (fallback_bodypart_usable(magr, attk, ATKBP(HORN),
+		atkbp_or((struct atkbp_set[]){ ATKBP(HORN), ATKBP_HORN_ORDINALS_MASK(), ATKBP(NONE) })))
+		return ATKBP(HORN);
+
+	if (fallback_bodypart_usable(magr, attk, ATKBP(HEAD), ATKBP(HEAD)))
+		return ATKBP(HEAD);
+
+	return ATKBP(LIMB_GENERIC);
+}
+
+/* Attack types that make no sense as a counterattack. */
+static boolean
+counterattack_eligible(struct attack *attk)
+{
+	switch (attk->aatyp) {
+	case AT_NONE:
+	case AT_HUGS:
+	case AT_ENGL:
+	case AT_ILUR:
+	case AT_BREA:
+	case AT_BRSH:
+	case AT_EXPL:
+	case AT_BOOM:
+	case AT_GAZE:
+	case AT_WDGZ:
+	case AT_SPIT:
+	case AT_ARRW:
+	case AT_TNKR:
+	case AT_MAGC:
+	case AT_MMGC:
+	case AT_REND:
+	case AT_SQUZ:
+	case AT_BKGT:
+	case AT_BKG2:
+		return FALSE;
+	}
+	return TRUE;
+}
+
+/* pick_counterattack()
+ * One attack, chosen uniformly at random, that [magr] can counterattack
+ * [mdef] with right now.
+ *
+ * by_the_book off, so getattk() has already dropped everything [magr]'s
+ * injuries and equipment prevent.
+ */
+struct attack
+pick_counterattack(struct monst *magr, struct monst *mdef)
+{
+	struct attack buf = {0};
+	struct attack *attk;
+	struct attack chosen = basicattack;
+	struct attack synth;
+	int indexnum = 0, tohitmod = 0, seen = 0;
+	int subout[SUBOUT_ARRAY_SIZE] = {0};
+	int res[4];
+	boolean saw_kick = FALSE, saw_arm = FALSE;
+
+	if (!magr)
+		return chosen;
+
+	res[0] = res[1] = res[2] = res[3] = MM_MISS;
+
+	for (attk = getattk(magr, mdef, res, &indexnum, &buf, FALSE, subout, &tohitmod);
+		!is_null_attk(attk);
+		attk = getattk(magr, mdef, res, &indexnum, &buf, FALSE, subout, &tohitmod)
+	) {
+		if (!counterattack_eligible(attk))
+			continue;
+		if (attk->aatyp == AT_KICK)
+			saw_kick = TRUE;
+		if (atkbp_intersects(attk->bodypart, ATKBP_UPPER_BODY_ARM_MASK()))
+			saw_arm = TRUE;
+		if (!rn2(++seen))
+			chosen = *attk;
+	}
+
+	/* an unlisted punch or kick, for a body that plainly has one */
+	if (!saw_arm) {
+		synth = basicattack;
+		synth.bodypart = ATKBP(ARM);
+		if (fallback_bodypart_usable(magr, &synth, ATKBP(ARM), whole_arm_family())
+			&& !rn2(++seen))
+			chosen = synth;
+	}
+	if (!saw_kick) {
+		synth = basicattack;
+		synth.aatyp = AT_KICK;
+		/* a PC's basic kick is dice-less (hmoncore() reads 0 as exactly that),
+		 * unlike a monster's, which keeps the plain swing's dice */
+		if (magr == &youmonst) {
+			synth.damn = 0;
+			synth.damd = 0;
+		}
+		synth.bodypart = ATKBP(LEG);
+		if (fallback_bodypart_usable(magr, &synth, ATKBP(LEG), whole_leg_family())
+			&& !rn2(++seen))
+			chosen = synth;
+	}
+
+	if (!seen)
+		chosen.bodypart = fallback_strike_bodypart(magr, &chosen);
+
+	return chosen;
+}
+
+/* wielded_weapon_attack()
+ * The attack [magr] swings [weapon] with, for synthetic bonus strikes that
+ * have no mattk[] entry of their own. Prefers [magr]'s real weapon attack --
+ * as it currently resolves, so getattk()'s substitutions apply and a polyform
+ * wielding through a POLYWEP_ATTK limb answers with that limb -- then the one
+ * its permonst lists, and only composes a plain 1d4 swing if it has neither.
+ *
+ * A borrowed AT_DEVA/AT_JUGL contributes its attribution and dice, but what
+ * comes back is always a plain AT_WEAP or AT_XWEP swing.
+ *
+ * A NULL [weapon] is fine: it reads as the main hand, so the answer is AT_WEAP.
+ */
+struct attack
+wielded_weapon_attack(struct monst *magr, struct obj *weapon)
+{
+	static const int mainhand_types[] = { AT_WEAP, AT_DEVA, AT_JUGL };
+	boolean youagr = (magr == &youmonst);
+	boolean offhand = weapon
+		&& (youagr ? (weapon == uswapwep && u.twoweap)
+			   : (magr && weapon == MON_SWEP(magr)));
+	struct attack buf = {0};
+	struct attack *real = (struct attack *)0;
+	struct attack attk;
+	int i;
+
+	if (magr) {
+		struct permonst *pa = youagr ? youracedata : magr->data;
+
+		for (i = 0; !real && i < (offhand ? 1 : SIZE(mainhand_types)); i++) {
+			int candidate = offhand ? AT_XWEP : mainhand_types[i];
+
+			real = mon_get_attacktype(magr, candidate, &buf);
+			if (!real)
+				real = attacktype_fordmg(pa, candidate, AD_ANY);
+		}
+	}
+
+	attk = real ? *real : basicattack;
+	attk.aatyp = offhand ? AT_XWEP : AT_WEAP;
+	attk.offhand = offhand ? 1 : 0;
+	if (!real)
+		attk.bodypart = offhand ? ATKBP(ARM_OFFHAND) : ATKBP(ARM_DOMINANT);
+
+	return attk;
+}
 
 /* badtouch()
  * returns TRUE if [attk] will touch [mdef]
@@ -1960,6 +2211,12 @@ struct obj * weapon;
 			break;
 		case W_ARMH:
 			otmp = (youagr ? uarmh : which_armor(magr, slot));
+			break;
+		case W_ARM:
+			otmp = (youagr ? uarm : which_armor(magr, slot));
+			break;
+		case W_ARMS:
+			otmp = (youagr ? uarms : which_armor(magr, slot));
 			break;
 		default:
 			otmp = (struct obj *)0;
@@ -2937,7 +3194,8 @@ boolean vis;
 		break;
 	}
 	//needs a last thought fades away-type message?
-	newres = xdamagey(magr, mdef, &noattack, extra_damage);
+	struct attack noattk = noattack;
+	newres = xdamagey(magr, mdef, &noattk, extra_damage);
 	//Finally handle cockatrice corpses :(
 	if(!youdef){
 		if (unwornmask & W_ARMG) {	/* stole worn gloves */
@@ -3504,7 +3762,7 @@ struct attack * attk;
 	/* try to find direction (u.dx and u.dy may be incorrect) */
 	int dx = sgn(tarx - x(magr));
 	int dy = sgn(tary - y(magr));
-	struct attack blood = {AT_ESPR, AD_BLUD, 1, 12+otmp->spe*2};
+	struct attack blood = {AT_ESPR, AD_BLUD, 1, 12+otmp->spe*2, .bodypart = ATKBP(NONE)};
 	int result = 0;
 	if(!(isok(tarx - dx, tary - dy) &&
 		(dx || dy) &&
@@ -3563,7 +3821,7 @@ struct attack * attk;
 	/* try to find direction (u.dx and u.dy may be incorrect) */
 	int dx = sgn(tarx - x(magr));
 	int dy = sgn(tary - y(magr));
-	struct attack blood = {AT_ESPR, AD_BLUD, 1, 12};
+	struct attack blood = {AT_ESPR, AD_BLUD, 1, 12, .bodypart = ATKBP(NONE)};
 	int result = 0;
 	struct monst *mdef2;
 	if(youagr)
@@ -3654,7 +3912,7 @@ struct attack * attk;
 	/* try to find direction (u.dx and u.dy may be incorrect) */
 	int dx = sgn(tarx - x(magr));
 	int dy = sgn(tary - y(magr));
-	struct attack blood = {AT_WISP, AD_PSH3, 2, 6+otmp->spe*2};
+	struct attack blood = {AT_WISP, AD_PSH3, 2, 6+otmp->spe*2, .bodypart = ATKBP(NONE)};
 	int result = 0;
 	if(!(isok(tarx - dx, tary - dy) &&
 		(dx || dy) &&
@@ -3733,7 +3991,7 @@ hit_with_holyspear(struct monst *magr, struct obj *otmp, int tarx, int tary, int
 	int dy = dy0;
 	int nx, ny;
 	int dmod = 1;
-	struct attack spears = {AT_HITS, AD_HOLY, 1, 10+otmp->spe*2};
+	struct attack spears = {AT_HITS, AD_HOLY, 1, 10+otmp->spe*2, .bodypart = ATKBP(NONE)};
 	int result = 0;
 	boolean found_target = FALSE;
 	if(!(isok(tarx - dx, tary - dy) &&
@@ -4186,7 +4444,7 @@ hit_with_tonguesnake(struct monst *magr, int tarx, int tary, int tohitmod)
 		vis2 |= VIS_MDEF;
 	bhitpos.x = x(mdef2); bhitpos.y = y(mdef2);
 	notonhead = (bhitpos.x != x(mdef2) || bhitpos.y != y(mdef2));
-	struct attack snake = {AT_OBIT, AD_DRST, 1, 6};
+	struct attack snake = {AT_OBIT, AD_DRST, 1, 6, .bodypart = ATKBP(OTHER_APPENDAGE)};
 	subresult = xmeleehity(magr, mdef2, &snake, (struct obj **)0, vis2, tohitmod, TRUE, 0);
 	/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
 	return subresult&(MM_AGR_DIED|MM_AGR_STOP);

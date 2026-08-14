@@ -1,4 +1,5 @@
 #include "hack.h"
+#include "mattkbp.h"
 #include "xhity.h"
 
 STATIC_DCL void FDECL(do_digging_projectile, (struct monst *, struct obj *, int, int));
@@ -1513,7 +1514,7 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 
 	/* Determine if the projectile hits */
 	dieroll = rnd(20);
-	static struct attack dummy = { AT_WEAP, AD_PHYS, 0, 0 };
+	struct attack dummy = { AT_WEAP, AD_PHYS, 0, 0, .bodypart = ATKBP(NONE) };
 	struct attack * attkp = &dummy;
 	int shield_margin = -1;
 	if (magr && attacktype_fordmg(magr->data, AT_WEAP, AD_PHYS))

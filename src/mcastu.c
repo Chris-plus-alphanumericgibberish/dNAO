@@ -4042,7 +4042,7 @@ int tary;
 			if(youdef || cansee(mdef->mx, mdef->my))
 				pline("A disintegration beam shines down on %s from above!",
 					youdef ? "you" : mon_nam(mdef));
-			struct attack disintegrate = {AT_BEAM, AD_DISN, magr->mtyp == PM_BLESSED ? 7 : magr->mtyp == PM_PARASITIZED_EMBRACED_ALIDER ? 4 : 3, 1};
+			struct attack disintegrate = {AT_BEAM, AD_DISN, magr->mtyp == PM_BLESSED ? 7 : magr->mtyp == PM_PARASITIZED_EMBRACED_ALIDER ? 4 : 3, 1, .bodypart = ATKBP(NONE)};
 			//xmeleehurty(magr, mdef, attk, originalattk, weapon, dohitmsg, flatdmg, dieroll, vis, ranged)
 			(void)xmeleehurty(magr, mdef, &disintegrate, &disintegrate, (struct obj **)0, FALSE, -1, rn1(18, 2), canseemon(mdef), TRUE);
 		}
@@ -5135,7 +5135,7 @@ int tary;
 				verbalize(rn2(2) ? "Thou shalt quiver before me!" :
 				"Thy flesh shall be goo!");
 
-			static struct attack slimify = { AT_NONE, AD_SLIM, 0, 0 };
+			struct attack slimify = { AT_NONE, AD_SLIM, 0, 0, .bodypart = ATKBP(NONE) };
 			result = xmeleehurty(magr, mdef, &slimify, &slimify, (struct obj **)0, FALSE, 0, 0, -1, TRUE);
 		}
 		return result;
@@ -5744,7 +5744,7 @@ int tary;
 		return MM_HIT | ((mdef && DEADMONSTER(mdef)) ? MM_DEF_DIED : 0) | ((magr && DEADMONSTER(magr)) ? MM_AGR_DIED : 0);
 
 	case HYPNOTIC_COLORS:{
-		struct attack gaze = {AT_WDGZ, AD_PLYS, 2, 6};
+		struct attack gaze = {AT_WDGZ, AD_PLYS, 2, 6, .bodypart = ATKBP(NONE)};
 		int subresult = 0;
 		int result = 0;
 		struct monst *nmon;

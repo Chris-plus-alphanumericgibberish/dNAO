@@ -30,7 +30,15 @@ struct atkbp_name_entry atkbp_name_list[] = {
      * back-tentacle stingers and the TT_WING_CLAW_3 mutation's wing-tip
      * stinger.
      */
-    { "WORN_LIKE_WING" },
+    { "EQUIPPED_LIKE_WING" },
+
+    /* orthogonal modifier, OR'd onto another bit above: the blow is landed
+     * with the worn shield rather than with the limb itself, so armor-slot
+     * logic (attk_protection()/attk_equip_slot()) should treat it as the
+     * shield slot (W_ARMS) regardless of the limb's real family -- e.g. the
+     * Dragonhead Shield's AT_HITS bash, getattk().
+     */
+    { "HIT_WITH_SHIELD" },
 
     /* orthogonal modifier, OR'd onto another bit above: this attack, despite
      * coming from an otherwise-real/contactable body part, doesn't
@@ -258,6 +266,13 @@ struct atkbp_name_entry atkbp_name_list[] = {
 
     /* AT_TENT baseline (not mind-flayer) */
     { "TENTACLE_GENERIC" },
+
+    /* one or more of the tentacle-arms below without saying which -- the
+     * unordinaled group bit for that family, the way ARM is for the arm
+     * ordinals. Distinct from TENTACLE_GENERIC, which is a mass of
+     * tentacles with no identifiable individuals to defer to.
+     */
+    { "TENTACLE_ARM" },
 
     /** Specific tentacle-arms begin here: keep in sync with
      * tentacle_arm_ordinal_bit()

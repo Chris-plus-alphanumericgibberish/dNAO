@@ -966,6 +966,9 @@ attk_bodyparts(struct permonst *ptr, struct attack *attk)
 	if (ptr->mtyp == PM_STAR_SPAWN && attk->aatyp == AT_LNCK)
 	    return atkbp_or((struct atkbp_set[]){
 		ATKBP(MOUTH), ATKBP(TENTACLE_GENERIC), ATKBP(NONE) });
+	/* Biting snake head, not the angel's mouth. */
+	if (ptr->mtyp == PM_APOCALYPSE_ANGEL && attk->aatyp == AT_LNCK)
+	    return ATKBP(OTHER_APPENDAGE);
 	return ATKBP(MOUTH);
     case AT_BUTT:
 	/* juggernaut/id juggernaut: a giant headless rolling ram, not a
@@ -1084,13 +1087,13 @@ attk_bodyparts(struct permonst *ptr, struct attack *attk)
 	 * back-tentacles -- the reason ATKBP_TENTACLE_ARM_* goes up to 6TH.
 	 * attack_index() runs 2..7 for her six AT_STNG attacks, so -1 lines
 	 * that up with tentacle_arm_ordinal_bit()'s 1-based range.
-	 * WORN_LIKE_WING marks that they're positioned/armored like wings
+	 * EQUIPPED_LIKE_WING marks that they're positioned/armored like wings
 	 * despite their real TENTACLE_ARM_* family.
 	 */
 	if (ptr->mtyp == PM_LILITU)
 	    return atkbp_or((struct atkbp_set[]){
 		tentacle_arm_ordinal_bit(attack_index(ptr, attk) - 1),
-		ATKBP(WORN_LIKE_WING), ATKBP(NONE) });
+		ATKBP(EQUIPPED_LIKE_WING), ATKBP(NONE) });
 	/* Obox-ob's stings are a piercing proboscis, same reading as
 	 * xan/pisaca above.
 	 */
@@ -1677,9 +1680,10 @@ static struct atkbp_set
 mon_bodypart_bits(struct atkbp_set attk_bits)
 {
     struct atkbp_set vague_mask = atkbp_or((struct atkbp_set[]){
-	ATKBP(ARM), ATKBP(LEG), ATKBP(ARM_LOWER), ATKBP(LEG_REAR), ATKBP(LEG_FRONT), ATKBP(NONE) });
+	ATKBP(ARM), ATKBP(LEG), ATKBP(ARM_LOWER), ATKBP(LEG_REAR), ATKBP(LEG_FRONT),
+	ATKBP(HORN), ATKBP(TENTACLE_ARM), ATKBP(NONE) });
     struct atkbp_set always_drop = atkbp_or((struct atkbp_set[]){
-	ATKBP(WHOLE_BODY), ATKBP(MIND_NOLIMB), ATKBP(INNUMERABLE), ATKBP(NONE) });
+	ATKBP(WHOLE_BODY), ATKBP(MIND_NOLIMB), ATKBP_MODIFIER_MASK(), ATKBP(NONE) });
     struct atkbp_set result = attk_bits;
     int i;
 
@@ -1731,6 +1735,10 @@ vague_bit_members(struct permonst *ptr, struct atkbp_set vague)
 	return leg_ordinal_range(1, total - rear);
     if (atkbp_intersects(vague, ATKBP(LEG_REAR)))
 	return leg_ordinal_range(total - rear + 1, total);
+    if (atkbp_intersects(vague, ATKBP(HORN)))
+	return ATKBP_HORN_ORDINALS_MASK();
+    if (atkbp_intersects(vague, ATKBP(TENTACLE_ARM)))
+	return ATKBP_TENTACLE_ARM_ORDINALS_MASK();
     return ATKBP(NONE);
 }
 
@@ -1750,7 +1758,7 @@ vague_bit_members(struct permonst *ptr, struct atkbp_set vague)
 boolean
 injuries_would_block_attk(struct permonst *ptr, struct attack *attk, struct atkbp_set unusable)
 {
-    struct atkbp_set vague[5];
+    struct atkbp_set vague[7];
     int i;
 
     if (atkbp_intersects(attk->bodypart, ATKBP(INNUMERABLE)))
@@ -1763,7 +1771,9 @@ injuries_would_block_attk(struct permonst *ptr, struct attack *attk, struct atkb
     vague[2] = ATKBP(LEG);
     vague[3] = ATKBP(LEG_FRONT);
     vague[4] = ATKBP(LEG_REAR);
-    for (i = 0; i < 5; i++) {
+    vague[5] = ATKBP(HORN);
+    vague[6] = ATKBP(TENTACLE_ARM);
+    for (i = 0; i < SIZE(vague); i++) {
 	struct atkbp_set members;
 
 	if (!atkbp_intersects(attk->bodypart, vague[i]))

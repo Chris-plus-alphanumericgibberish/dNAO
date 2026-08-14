@@ -39,7 +39,7 @@ extern void NDECL(port_help);
 #endif
 
 extern const int monstr[];
-extern struct attack noattack;
+extern const struct attack noattack;
 
 
 /* Returns "true" for characters that could represent a monster's stomach. */

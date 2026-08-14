@@ -44,7 +44,7 @@ static const int Shien_counterattack[]  = {  5, 10, 20 };
 static const int Soresu_counterattack[] = { 10, 15, 25 };
 /* Misc attacks */
 const struct attack noattack = { 0, 0, 0, 0 };
-struct attack basicattack  = { AT_WEAP, AD_PHYS, 1, 4 };
+const struct attack basicattack  = { AT_WEAP, AD_PHYS, 1, 4 };
 struct attack grapple = { AT_HUGS, AD_PHYS, 0, 6 };	/* for grappler's grasp */
 
 int distance_2_rotation_dx[] = {-2,-1, 0, 1, 2, 2, 2, 2, 2, 1, 0,-1,-2,-2,-2,-2};
@@ -318,7 +318,8 @@ struct monst * mdef;
 			return FALSE;
 		/* assumes the bloodthirst is caused by your mainhand weapon */
 		Your("bloodthirsty weapon attacks!");
-		result = xmeleehity(&youmonst, mdef, &basicattack, &uwep, VIS_MAGR, 0, FALSE, 0);
+		struct attack bloodattk = wielded_weapon_attack(&youmonst, uwep);
+		result = xmeleehity(&youmonst, mdef, &bloodattk, &uwep, VIS_MAGR, 0, FALSE, 0);
 	}
 	else {
 		result = xattacky(&youmonst, mdef, bhitpos.x, bhitpos.y, 0L);
@@ -2130,12 +2131,15 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 					attk->adtyp = AD_PHYS;
 					attk->damn = 5;
 					attk->damd = 8;
+					attk->bodypart = atkbp_or((struct atkbp_set[]){
+					    ATKBP(ARM_OFFHAND), ATKBP(HIT_WITH_SHIELD), ATKBP(NONE) });
 				}
 				else {
 					attk->aatyp = AT_XWEP;
 					attk->adtyp = AD_PHYS;
 					attk->damn = 1;
 					attk->damd = 4;
+					attk->bodypart = ATKBP(ARM_OFFHAND);
 				}
 				add_subout(subout, SUBOUT_XWEP);
 			}
@@ -2149,6 +2153,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 				attk->adtyp = AD_PHYS;
 				attk->damn = 1;
 				attk->damd = 4;
+				attk->bodypart = ATKBP(ARM_OFFHAND);
 				add_subout(subout, SUBOUT_XWEP);
 			}
 		}
@@ -2166,9 +2171,11 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			if(attk->aatyp == AT_WEAP){
 				attk->aatyp = AT_KICK;
 				attk->polywep = TRUE;
+				attk->bodypart = ATKBP(LEG);
 			}
 			else if(attk->aatyp == AT_XWEP){
 				attk->aatyp = AT_KICK;
+				attk->bodypart = ATKBP(LEG);
 			}
 		}
 		if (attk->aatyp == AT_WEAP && check_mutation(TT_ATTRACTIVE_1) && !uwep && !(u.twoweap && uswapwep) && !check_subout(subout, SUBOUT_T_SEDUCE_STEAL)){
@@ -2179,6 +2186,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 				attk->damn = 0;
 				attk->damd = 0;
 				attk->polywep = TRUE;
+				attk->bodypart = ATKBP(ARM_DOMINANT);
 			}
 			add_subout(subout, SUBOUT_T_SEDUCE_STEAL);
 		}
@@ -2187,6 +2195,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			int oldtyp = attk->adtyp;
 			attk->aatyp = AT_CLAW;
 			attk->adtyp = AD_SSEX;
+			attk->bodypart = ATKBP(ARM_DOMINANT);
 			if(could_seduce(magr, mdef, attk) == 1){
 				attk->damn = 0;
 				attk->damd = 0;
@@ -3315,7 +3324,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		attk->damn = 1;
 		attk->damd = 12;
 		attk->bodypart = atkbp_or((struct atkbp_set[]){
-		    ATKBP(TENTACLE_ARM_DOMINANT), ATKBP(WORN_LIKE_WING), ATKBP(NONE) });
+		    ATKBP(TENTACLE_ARM_DOMINANT), ATKBP(EQUIPPED_LIKE_WING), ATKBP(NONE) });
 		fromlist = FALSE;
 		if(check_subout(subout, SUBOUT_T_WING_CLAW_3A_2))
 			add_subout(subout, SUBOUT_T_WING_CLAW_3A_3);
@@ -3333,7 +3342,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		attk->damn = 1;
 		attk->damd = 12;
 		attk->bodypart = atkbp_or((struct atkbp_set[]){
-		    ATKBP(TENTACLE_ARM_DOMINANT), ATKBP(WORN_LIKE_WING), ATKBP(NONE) });
+		    ATKBP(TENTACLE_ARM_DOMINANT), ATKBP(EQUIPPED_LIKE_WING), ATKBP(NONE) });
 		fromlist = FALSE;
 		add_subout(subout, SUBOUT_T_WING_CLAW_3B);
 	}
@@ -7970,7 +7979,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 						if(canseemon(mdef))
 							pline("%s looks doubtful.", Monnam(mdef));
 						if(rn2(10)){
-							struct attack fakespell = { AT_MAGC, AD_CLRC, 10, 7 };
+							struct attack fakespell = { AT_MAGC, AD_CLRC, 10, 7, .bodypart = ATKBP(NONE) };
 							cast_spell(magr, mdef, &fakespell, LIGHTNING, mdef->mx, mdef->my);
 							return MM_HIT;
 						}
@@ -7979,6 +7988,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 							alt_attk.adtyp = AD_DISN;
 							alt_attk.damn = 7;
 							alt_attk.damd = 1;
+							alt_attk.bodypart = ATKBP(NONE);
 							
 							return xmeleehurty(magr, mdef, &alt_attk, &alt_attk, (struct obj **) 0, FALSE, 7, 20, vis, TRUE);
 						}
@@ -15186,12 +15196,12 @@ int vis;
 		/* the player is more detailed */
 		if (!youdef){
 			if(rn2(10)){
-				struct attack fakespell = { AT_MAGC, AD_CLRC, 10, 7 };
+				struct attack fakespell = { AT_MAGC, AD_CLRC, 10, 7, .bodypart = ATKBP(NONE) };
 				cast_spell(magr, mdef, &fakespell, LIGHTNING, mdef->mx, mdef->my);
 				return MM_HIT;
 			}
 			else {
-				struct attack alt_attk = {AT_HITS, AD_DISN, 7, 1};
+				struct attack alt_attk = {AT_HITS, AD_DISN, 7, 1, .bodypart = ATKBP(NONE)};
 				
 				return xmeleehurty(magr, mdef, &alt_attk, &alt_attk, (struct obj **) 0, FALSE, 7, 20, vis, TRUE);
 			}
@@ -15539,6 +15549,9 @@ int dieroll;
 {
 	/* melee traps print their own messages, while ranged traps rely on hmon to print hitmessages */
 	boolean printmsg;
+	/* Trap: No monster and no body, so no attribution. */
+	struct attack trapattk = basicattack;
+	trapattk.bodypart = ATKBP(NONE);
 	if (type&HMON_PROJECTILE)
 		printmsg = TRUE;
 	else if (type&HMON_WHACK)
@@ -15551,8 +15564,8 @@ int dieroll;
 	return hmon_general(
 		(struct monst *)0,	/* no attacker */
 		mdef,				/* mdef is the defender */
-		&basicattack,		/* get attack-damage bonuses, etc. Does not use the 1d4. */
-		&basicattack,		/* get attack-damage bonuses, etc. Does not use the 1d4. */
+		&trapattk,			/* get attack-damage bonuses, etc. Does not use the 1d4. */
+		&trapattk,			/* get attack-damage bonuses, etc. Does not use the 1d4. */
 		obj_p,				/* hitting mdef with obj */
 		trap,				/* trap that did the hitting */
 		HMON_TRAP|type,		/* trap responsible, using given type */
@@ -16566,6 +16579,9 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 	case W_ARM:
 		otmp = (youagr ? uarm : which_armor(magr, slot));
 		unarmed_punch = TRUE;
+		break;
+	case W_ARMS:
+		otmp = (youagr ? uarms : which_armor(magr, slot));
 		break;
 	case W_WEP:
 		otmp = weapon;
@@ -19568,6 +19584,9 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 		case W_ARM:
 			otmp = (youagr ? uarm : which_armor(magr, slot));
 			break;
+		case W_ARMS:
+			otmp = (youagr ? uarms : which_armor(magr, slot));
+			break;
 		default:
 			otmp = (struct obj *)0;
 			break;
@@ -20221,7 +20240,7 @@ int
 shadow_strike(mdef)
 struct monst * mdef;
 {
-	static struct attack shadowblade = { AT_ESPR, AD_SHDW, 4, 8 };
+	struct attack shadowblade = { AT_ESPR, AD_SHDW, 4, 8, .bodypart = ATKBP(SHADOW) };
 	int tohitmod = 0;	/* necessary to call xmeleehity */
 
 	if (mdef && magr_can_attack_mdef(&youmonst, mdef, x(mdef), y(mdef), FALSE)){
@@ -20482,7 +20501,8 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 					if(activeFightingForm(FFORM_SORESU))
 						use_skill(P_SORESU, 1);
 
-					newres = xmeleehity(mdef, magr, &basicattack, &uwep, newvis, 0, FALSE, 0);
+					struct attack counterattk = wielded_weapon_attack(mdef, uwep);
+					newres = xmeleehity(mdef, magr, &counterattk, &uwep, newvis, 0, FALSE, 0);
 					if (newres&MM_DEF_DIED)
 						result |= MM_AGR_DIED;	/* attacker died */
 					if (newres&MM_DEF_LSVD)
@@ -20562,23 +20582,12 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 
 				/* maybe make the counterattack */
 				if (rn2(100) < chance) {
-					struct attack * counter;
+					struct attack counter = wielded_weapon_attack(mdef, otmp);
 					int newvis = vis&VIS_NONE;
 					if (vis&VIS_MAGR)
 						newvis |= VIS_MDEF;
 					if (vis&VIS_MDEF)
 						newvis |= VIS_MAGR;
-
-					/* get 1st weapon attack defender has */
-					int subout2[SUBOUT_ARRAY_SIZE] = {0};
-					int indexnum2 = 0;
-					/* grab the first weapon attack mdef has, or else use a basic 1d4 attack */
-					do {
-						/* we'll ignore res[], tohitmod, and prev_attk, resusing them from earlier */
-						counter = getattk(mdef, magr, res, &indexnum2, &prev_attk, FALSE, subout2, &tohitmod);
-					} while (counter->aatyp != AT_WEAP && !is_null_attk(counter));
-					if (is_null_attk(counter))
-						counter = &basicattack;
 
 					/* make the counterattack */
 					if (youdef) {
@@ -20592,7 +20601,7 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 						use_skill(P_SHIEN, 1);
 
 					/* make the attack */
-					newres = xmeleehity(mdef, magr, counter, &otmp, newvis, 0, FALSE, 0);
+					newres = xmeleehity(mdef, magr, &counter, &otmp, newvis, 0, FALSE, 0);
 					if (newres&MM_DEF_DIED)
 						result |= MM_AGR_DIED;	/* attacker died */
 					if (newres&MM_DEF_LSVD)
@@ -20620,7 +20629,8 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 
 					/* counterattack with two unarmed strikes, regardless of free-hand-ed-ness */
 					for (i = 0; i < 2; i++) {
-						newres = xmeleehity(mdef, magr, &basicattack, (struct obj **)0, newvis, 0, FALSE, 0);
+						struct attack counter = pick_counterattack(mdef, magr);
+						newres = xmeleehity(mdef, magr, &counter, (struct obj **)0, newvis, 0, FALSE, 0);
 						if (newres&MM_DEF_DIED)
 							result |= MM_AGR_DIED;	/* attacker died */
 						if (newres&MM_DEF_LSVD)
@@ -21233,7 +21243,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 					if (TRUE) {
 						/* AD_PLYS gaze has a special case for magr=Axus to pierce reflection */
 						/* use widegaze to avoid checking cooldown, failure chance */
-						struct attack plys_gaze = {AT_WDGZ, AD_PLYS, passive->damn, passive->damd};
+						struct attack plys_gaze = {AT_WDGZ, AD_PLYS, passive->damn, passive->damd, .bodypart = ATKBP(EYES)};
 						xgazey(mdef, magr, &plys_gaze, vis);
 					}
 					/* anger autons */
@@ -21262,7 +21272,7 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 						else {
 							/* perform a gaze paralysis attack */
 							/* use widegaze to avoid checking cooldown, failure chance */
-							struct attack plys_gaze = {AT_WDGZ, AD_PLYS, passive->damn, passive->damd};
+							struct attack plys_gaze = {AT_WDGZ, AD_PLYS, passive->damn, passive->damd, .bodypart = ATKBP(EYES)};
 							xgazey(mdef, magr, &plys_gaze, vis);
 						}
 					}
@@ -21549,6 +21559,9 @@ struct attack * passive;	/* specific passive attack being used */
 		case W_ARM:
 			otmp = (youagr ? uarm : which_armor(magr, slot));
 			break;
+		case W_ARMS:
+			otmp = (youagr ? uarms : which_armor(magr, slot));
+			break;
 		default:
 			otmp = (struct obj *)0;
 			break;
@@ -21641,9 +21654,10 @@ android_combo()
 		return MOVE_CANCELLED;
 	}
 
-	static struct attack weaponhit =	{ AT_WEAP, AD_PHYS, 0, 0 };
-	static struct attack kickattack =	{ AT_KICK, AD_PHYS, 1, 2 };
-	static struct attack finisher =		{ AT_CLAW, AD_PHYS,16, 8 };
+	struct attack weaponhit = wielded_weapon_attack(&youmonst, uwep);
+	struct attack kickattack = { AT_KICK, AD_PHYS, 1, 2, .bodypart = ATKBP(LEG) };
+	struct attack finisher = { AT_CLAW, AD_PHYS, 16, 8,
+	    .bodypart = atkbp_or((struct atkbp_set[]){ ATKBP(ARM_DOMINANT), ATKBP(ARM_OFFHAND), ATKBP(NONE) }) };
 
 	/* unarmed */
 	if (!uwep || (is_lightsaber(uwep) && !litsaber(uwep))){
@@ -22353,7 +22367,7 @@ mortal_draw_monsters()
 
 
 	rotate_fun1(&dx, &dy);
-	static struct attack weaponhit =	{ AT_WEAP, AD_PHYS, 0, 0 };
+	struct attack weaponhit = wielded_weapon_attack(&youmonst, uwep);
 
 	//Same rules as kicking. Whirly monsters allow moves, solid ones do not.
 	for(; n<3; n++){
@@ -23255,7 +23269,7 @@ struct monst *mdef;
 {
 	int tmp, weight = mdef->data->cwt;
 	struct trap *chasm;
-	static struct attack grab =	{ AT_TUCH, AD_PHYS, 1, 1 };
+	struct attack grab = { AT_TUCH, AD_PHYS, 1, 1, .bodypart = find_freehand_set() };
 	int res;
 	boolean dodig = FALSE;
 	
@@ -23355,7 +23369,7 @@ is_move_clumsy(void)
 static boolean
 yuki_onna_ice_touch(void)
 {
-	static struct attack icetouch = { AT_TUCH, AD_COLD, 1, 3 };
+	struct attack icetouch = { AT_TUCH, AD_COLD, 1, 3, .bodypart = find_freehand_set() };
 	struct monst *mdef;
 	
 	if((mdef = adjacent_move_target(!!uarmg)) && !Is_spire(&u.uz)){
@@ -23377,7 +23391,7 @@ yuki_onna_ice_touch(void)
 static boolean
 yuki_onna_snow_blood(void)
 {
-	static struct attack snowblood = { AT_BITE, AD_VAMP, 1, 6 };
+	struct attack snowblood = { AT_BITE, AD_VAMP, 1, 6, .bodypart = ATKBP(MOUTH) };
 	struct monst *mdef;
 	
 	if((mdef = adjacent_move_target(0))){
@@ -23397,7 +23411,7 @@ void
 triple_thrust_monsters()
 {
 	struct monst *mon = 0;
-	static struct attack weaponhit =	{ AT_WEAP, AD_PHYS, 0, 0 };
+	struct attack weaponhit = wielded_weapon_attack(&youmonst, uwep);
 	void (*rotate_fun1)(int *, int *) = rotate_minus45;
 	void (*rotate_fun2)(int *, int *) = rotate_plus45;
 	if(rn2(2)){
@@ -23489,7 +23503,7 @@ void
 bleed_slash_monsters()
 {
 	struct monst *mon = 0;
-	static struct attack weaponhit =	{ AT_WEAP, AD_PHYS, 0, 0 };
+	struct attack weaponhit = wielded_weapon_attack(&youmonst, uwep);
 	void (*rotate_fun1)(int *, int *) = rotate_minus45;
 	void (*rotate_fun2)(int *, int *) = rotate_plus45;
 	if(rn2(2)){
@@ -23530,8 +23544,11 @@ void
 sakura_slash_monsters()
 {
 	struct monst *mon = 0;
-	static struct attack weaponhit =	{ AT_WEAP, AD_PHYS, 0, 0 };
-	static struct attack lightning =	{ AT_WEAP, AD_EELC,10, 6 };
+	struct attack weaponhit = wielded_weapon_attack(&youmonst, uwep);
+	struct attack lightning = wielded_weapon_attack(&youmonst, uwep);
+	lightning.adtyp = AD_EELC;
+	lightning.damn = 10;
+	lightning.damd = 6;
 	void (*rotate_fun1)(int *, int *) = rotate_minus45;
 	void (*rotate_fun2)(int *, int *) = rotate_plus45;
 	if(rn2(2)){
@@ -23571,7 +23588,7 @@ void
 sweep_slash_monsters()
 {
 	struct monst *mon = 0;
-	static struct attack weaponhit =	{ AT_WEAP, AD_PHYS, 0, 0 };
+	struct attack weaponhit = wielded_weapon_attack(&youmonst, uwep);
 	void (*rotate_fun1)(int *, int *) = rotate_minus45;
 	if(rn2(2)){
 		rotate_fun1 = rotate_plus45;
@@ -23699,7 +23716,7 @@ get_whirlwind_position(int direction, int *nx, int *ny)
 static boolean
 kensei_elf_whirlwind(int *move_cost)
 {
-	static struct attack weaponhit = { AT_WEAP, AD_PHYS, 0, 0 };
+	struct attack weaponhit = wielded_weapon_attack(&youmonst, uwep);
 	struct monst *mdef;
 	int nx, ny;
 	boolean vis, messaged = FALSE;
@@ -23746,7 +23763,7 @@ get_millwheel_position(int direction, int *nx, int *ny)
 static boolean
 kensei_elf_millwheel(int *move_cost)
 {
-	static struct attack weaponhit = { AT_WEAP, AD_PHYS, 0, 0 };
+	struct attack weaponhit = wielded_weapon_attack(&youmonst, uwep);
 	struct monst *mdef;
 	int nx, ny;
 	boolean vis, messaged = FALSE;
@@ -23881,8 +23898,9 @@ boolean
 perform_expert_move()
 {
 	struct monst *mdef;
-	struct attack lungehit =	{ AT_WEAP, AD_PHYS, 0, 0 };
-	struct attack pushhit =	{ AT_WEAP, AD_PSH1, 0, 0 };
+	struct attack lungehit = wielded_weapon_attack(&youmonst, uwep);
+	struct attack pushhit = wielded_weapon_attack(&youmonst, uwep);
+	pushhit.adtyp = AD_PSH1;
 	boolean messaged = FALSE;
 	boolean used_move = FALSE;
 	if(!uwep)
@@ -24002,7 +24020,7 @@ pole_thrust()
 		return FALSE;
 	pline("Pole thrust!");
 	boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mon) ? VIS_MDEF : 0);
-	static struct attack polethrust = { AT_WEAP, AD_PHYS, 0, 0 };
+	struct attack polethrust = wielded_weapon_attack(&youmonst, uwep);
 	xmeleehity(&youmonst, mon, &polethrust, &uwep, vis, 0, TRUE, ATTKFLAG_FORCE_CHECK_JOUST);
 	return TRUE;
 }
@@ -24020,7 +24038,7 @@ pole_cyclone()
 		if(distance_2_rotation_dx[i] == 2*u.dx && distance_2_rotation_dy[i] == 2*u.dy)
 			break;
 	}
-	static struct attack polehit = { AT_WEAP, AD_PHYS, 0, 0 };
+	struct attack polehit = wielded_weapon_attack(&youmonst, uwep);
 	boolean vis;
 	for(int j = 0; j < SIZE(distance_2_rotation_dx); j++){
 		int nx = u.ux + distance_2_rotation_dx[(i+j)%SIZE(distance_2_rotation_dx)]/2;
@@ -24061,7 +24079,7 @@ pole_sweep()
 	//Advance one step to the right
 	i = (i+1)%SIZE(distance_2_rotation_dx);
 	int wedge = SIZE(distance_2_rotation_dx)-3;
-	struct attack polehit = { AT_WEAP, AD_PHYS, 0, 0 };
+	struct attack polehit = wielded_weapon_attack(&youmonst, uwep);
 	boolean vis;
 	for(int j = 0; j < wedge; j++){
 		int ix = u.ux + distance_2_rotation_dx[i];
@@ -24097,7 +24115,7 @@ pole_fall()
 		return FALSE;
 	pline("Falling strike!");
 	boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mon) ? VIS_MDEF : 0);
-	static struct attack polethrust = { AT_WEAP, AD_PHYS, 0, 0 };
+	struct attack polethrust = wielded_weapon_attack(&youmonst, uwep);
 	xmeleehity(&youmonst, mon, &polethrust, &uwep, vis, 0, TRUE, ATTKFLAG_DOUBLE_DAMAGE);
 	return TRUE;
 }
@@ -24111,7 +24129,7 @@ pole_flurry()
 		return FALSE;
 	pline("Pole flurry!");
 	boolean vis;
-	static struct attack polethrust = { AT_WEAP, AD_PHYS, 0, 0 };
+	struct attack polethrust = wielded_weapon_attack(&youmonst, uwep);
 	int i = 0;
 	do {
 		vis = (VIS_MAGR | VIS_NONE) | (canseemon(mon) ? VIS_MDEF : 0);
@@ -24137,7 +24155,7 @@ pole_backstab()
 				|| (mon->mflee && mon->mtyp != PM_BANDERSNATCH)
 				);
 	boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mon) ? VIS_MDEF : 0);
-	static struct attack polethrust = { AT_WEAP, AD_PHYS, 0, 0 };
+	struct attack polethrust = wielded_weapon_attack(&youmonst, uwep);
 	xmeleehity(&youmonst, mon, &polethrust, &uwep, vis, 0, TRUE, enhanced ? ATTKFLAG_SUPER_SNEAK|ATTKFLAG_DOUBLE_DAMAGE : 0);
 	return TRUE;
 }
@@ -24152,7 +24170,7 @@ pole_triple_thrust()
 			break;
 	}
 	struct monst *mon;
-	static struct attack polethrust = { AT_WEAP, AD_PHYS, 0, 0 };
+	struct attack polethrust = wielded_weapon_attack(&youmonst, uwep);
 	boolean vis;
 	boolean struck = FALSE;
 	for(int j = 0; j < 2; j++){
@@ -24221,15 +24239,13 @@ boolean
 perform_monk_move(int moveID, int *move_cost)
 {
 	struct monst *mdef;
-	static struct attack weaponhit =	{ AT_WEAP, AD_PHYS, 0, 0 };
-	static struct attack xweponhit =	{ AT_XWEP, AD_PHYS, 0, 0 };
-	static struct attack bitehit =	{ AT_BITE, AD_PHYS, 1, 6 };
-	static struct attack drainlife = { AT_TUCH, AD_DRLI, 1, 1 };
-	static struct attack avalanche = { AT_CLAW, AD_ECLD, 1, 6 };
-	static struct attack elemental = { AT_HITS, AD_COLD, 1, 3 };
-	static struct attack touchhit = { AT_TUCH, AD_PHYS, 1, 1 };
-	static struct attack repulsehit = { AT_HITS, AD_PSH1, 1, 8 };
-	static struct attack unholyicetouch = { AT_TUCH, AD_UHCD, 1, 3 };
+	struct attack weaponhit = wielded_weapon_attack(&youmonst, uwep);
+	struct attack xweponhit = wielded_weapon_attack(&youmonst, uswapwep);
+	struct attack bitehit = { AT_BITE, AD_PHYS, 1, 6, .bodypart = ATKBP(MOUTH) };
+	struct attack drainlife = { AT_TUCH, AD_DRLI, 1, 1, .bodypart = find_freehand_set() };
+	struct attack avalanche = { AT_CLAW, AD_ECLD, 1, 6, .bodypart = ATKBP(ARM) };
+	struct attack elemental = { AT_HITS, AD_COLD, 1, 3, .bodypart = ATKBP(NONE) };
+	struct attack touchhit = { AT_TUCH, AD_PHYS, 1, 1, .bodypart = find_freehand_set() };
 	if(!moveID)
 		return FALSE;
 	if(!monk_style_active(moveID)) return FALSE;
@@ -24247,7 +24263,10 @@ perform_monk_move(int moveID, int *move_cost)
 				int attacks = 3;
 				int result;
 				boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
-				
+				struct attack unholyicetouch = wielded_weapon_attack(&youmonst, uwep);
+				unholyicetouch.aatyp = AT_TUCH;
+				unholyicetouch.adtyp = AD_UHCD;
+				unholyicetouch.damd = 3;
 				unholyicetouch.damn = (u.ulevel+5)/6;
 				pline("%s!", move_name(moveID));
 				
@@ -24553,6 +24572,11 @@ perform_monk_move(int moveID, int *move_cost)
 				pline("%s!", move_name(moveID));
 				boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
 				long result = 0;
+				struct attack repulsehit = wielded_weapon_attack(&youmonst, uwep);
+				repulsehit.aatyp = AT_HITS;
+				repulsehit.adtyp = AD_PSH1;
+				repulsehit.damn = 1;
+				repulsehit.damd = 8;
 				if(u.role_variant == ART_SKY_REFLECTED && bimanual_mon(uwep, &youmonst)){
 					result = xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE, ATTKFLAG_SHOVE);
 				}
@@ -24996,7 +25020,7 @@ perform_monk_move(int moveID, int *move_cost)
 			}
 		break;
 		case METODRIVE:
-			if(!uwep && !(uswapwep && u.twoweap) && inv_weight() < 0 && !u.uswallow && (mdef = adjacent_move_target(!!uarmg))){
+			if(freehand() && !uwep && !(uswapwep && u.twoweap) && inv_weight() < 0 && !u.uswallow && (mdef = adjacent_move_target(!!uarmg))){
 				pline("%s!", move_name(moveID));
 				monk_meteor_drive(mdef);
 				return TRUE;
@@ -25476,10 +25500,11 @@ struct monst * mdef;
 {
 	int vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
 	int res;
+	struct attack poleattk = wielded_weapon_attack(&youmonst, uwep);
 	notonhead = (bhitpos.x != x(mdef) || bhitpos.y != y(mdef));
 	if(check_oprop(uwep, OPROP_CCLAW))
 		uwep->otyp = CLAWED_HAND;
-	res = xmeleehity(&youmonst, mdef, &basicattack, &uwep, vis, 0, TRUE, 0);
+	res = xmeleehity(&youmonst, mdef, &poleattk, &uwep, vis, 0, TRUE, 0);
 	if((res&MM_DEF_DIED)
 		&& CHECK_ETRAIT(uwep, &youmonst, ETRAIT_CLEAVE)
 		&& !(uwep->o_e_trait == ETRAIT_HEW && CHECK_ETRAIT(uwep, &youmonst, ETRAIT_HEW))
@@ -25514,7 +25539,7 @@ struct monst * mdef;
 				continue;
 			mdef = m_at(nx, ny);
 			if(mdef && !DEADMONSTER(mdef) && !nonthreat_ful(mdef) && couldsee(mdef->mx, mdef->my)){
-				subres = xmeleehity(&youmonst, mdef, &basicattack, &uwep, vis, 0, TRUE, 0);
+				subres = xmeleehity(&youmonst, mdef, &poleattk, &uwep, vis, 0, TRUE, 0);
 				res |= subres&(MM_AGR_DIED|MM_AGR_STOP);
 				break;
 			}
@@ -26050,7 +26075,7 @@ blacklight_tentacles_suck_x(struct monst *magr, struct monst *mdef, int dmg, int
 {
 	struct obj *otmp;
 	boolean youdef = (mdef == &youmonst);
-	struct attack tent_attk = {AT_TENT, AD_DRIN, 0, 0}; /* tentacle attack for slips_free() */
+	struct attack tent_attk = {AT_TENT, AD_DRIN, 0, 0, .bodypart = ATKBP(TENTACLE_GENERIC)}; /* tentacle attack for slips_free() */
 	if(youdef){
 		if(!Blind)
 			pline("The %s resolves into fanged tentacles!", description);

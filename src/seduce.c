@@ -1,6 +1,7 @@
 #include "hack.h"
 #include "xhity.h"
 #include "seduce.h"
+#include "mattkbp.h"
 
 # ifdef SEDUCE
 STATIC_DCL void FDECL(mayberem, (struct obj *, const char *, BOOLEAN_P));
@@ -164,7 +165,7 @@ struct monst * mon;
 		}
 	}
 	else if(mon->mtyp == PM_VLAD_THE_IMPALER || mon->mtyp == PM_CARMILLA){
-		struct attack vampire_bite = {AT_BITE, AD_VAMP, 1, 6, 0};
+		struct attack vampire_bite = {AT_BITE, AD_VAMP, 1, 6, 0, .bodypart = ATKBP(MOUTH)};
 		xmeleehity(mon, &youmonst, &vampire_bite, (struct obj **)0, -1, 0, FALSE, 0);
 	}
 	else {
@@ -293,10 +294,10 @@ int dmg;
 	int i; //multipurpose local variable
 	int n, ln, trycount; //loop control variables for attacks;
 	int allreadydone = 0; //don't repeat the same special case;
-	struct attack bodyblow = {AT_TENT, AD_WRAP, 2, 10};
-	struct attack headshot = {AT_TENT, AD_DRIN, 2, 10};
-	struct attack handshit = {AT_TENT, AD_DRDX, 2, 10};
-	struct attack legblast = {AT_TENT, AD_LEGS, 2, 10};
+	struct attack bodyblow = {AT_TENT, AD_WRAP, 2, 10, .bodypart = ATKBP(TENTACLE_GENERIC)};
+	struct attack headshot = {AT_TENT, AD_DRIN, 2, 10, .bodypart = ATKBP(TENTACLE_GENERIC)};
+	struct attack handshit = {AT_TENT, AD_DRDX, 2, 10, .bodypart = ATKBP(TENTACLE_GENERIC)};
+	struct attack legblast = {AT_TENT, AD_LEGS, 2, 10, .bodypart = ATKBP(TENTACLE_GENERIC)};
 
 	n = 4; //4 actions
 	ln = n;

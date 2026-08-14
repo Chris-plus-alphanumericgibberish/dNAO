@@ -8,7 +8,7 @@
 #include "xhity.h"
 
 extern boolean notonhead;
-extern struct attack noattack;
+extern const struct attack noattack;
 
 #ifdef OVL0
 

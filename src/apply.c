@@ -7081,7 +7081,7 @@ struct obj *obj;
 			if (bigmonst(mtmp->data)) {
 				wrapped_what = strcpy(buf, mon_nam(mtmp));
 			} else if (proficient) {
-				struct attack attk = {AT_WEAP, AD_PHYS, 0, 0};
+				struct attack attk = wielded_weapon_attack(&youmonst, otmp);
 				if (ranged ? (xmeleehity(&youmonst, mtmp, &attk, &otmp, -1, 0, TRUE, 0) != MM_AGR_DIED) : attack2(mtmp)) return MOVE_ATTACKED;
 				else pline("%s", msg_snap);
 			}
@@ -7194,7 +7194,7 @@ struct obj *obj;
 			stumble_onto_mimic(mtmp);
 			else You("flick your whip towards %s.", mon_nam(mtmp));
 			if (proficient) {
-				struct attack attk = {AT_WEAP, AD_PHYS, 0, 0};
+				struct attack attk = wielded_weapon_attack(&youmonst, otmp);
 				if (ranged ? (xmeleehity(&youmonst, mtmp, &attk, &otmp, -1, 0, TRUE, 0) != MM_AGR_DIED) : attack2(mtmp)) return MOVE_ATTACKED;
 				else pline("%s", msg_snap);
 			}

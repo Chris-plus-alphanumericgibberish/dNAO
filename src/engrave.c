@@ -3,6 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include	"hack.h"
+#include	"mattkbp.h"
 #include	"lev.h"
 #include	"artifact.h"
 #include <ctype.h>
@@ -1853,16 +1854,9 @@ int x, y;
  *	freehand - returns true if player has a free hand
  */
 int
-freehand()
+freehand(void)
 {
-	if(youracedata->mtyp == PM_AASIMAR && !Upolyd && flags.aasimar_type == AASIMAR_TYPE_DEVA && u.ulevel >= 14)
-		return TRUE;
-	if(Straitjacketed)
-		return FALSE;
-	if(youracedata->mtyp == PM_SILVERMAN)
-		return TRUE;
-	return((!uwep || !welded(uwep) ||
-	   (!bimanual_mon(uwep,&youmonst) && (!uarms || !uarms->cursed))));
+	return !atkbp_is_none(find_freehand_set());
 }
 
 static NEARDATA const char styluses[] =

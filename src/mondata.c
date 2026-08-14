@@ -1558,7 +1558,7 @@ int template;
 #undef MT_ITEMS
 
 	/* adjust attacks in the permonst */
-	extern struct attack noattack;
+	extern const struct attack noattack;
 	boolean special = FALSE;
 	boolean special_2 = FALSE;
 	boolean special_3 = FALSE;
@@ -2523,7 +2523,7 @@ int level_bonus;
 
 		/* attacks...?  */
 		horrorattacks = 0;
-		extern struct attack noattack;
+		extern const struct attack noattack;
 		for (i = 0; i < NATTK; i++) {
 			horror->mattk[i] = noattack;
 		}

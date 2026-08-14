@@ -47,6 +47,21 @@ extern struct atkbp_set FDECL(leg_ordinal_bit, (int));
 	    ATKBP(HORN_3RD), ATKBP(HORN_4TH), ATKBP(HORN_5TH), ATKBP(HORN_6TH), \
 	    ATKBP(NONE) })
 
+/* Bits that qualify a body part rather than naming one. */
+#define ATKBP_MODIFIER_MASK() \
+	atkbp_or((struct atkbp_set[]){ \
+	    ATKBP(INNUMERABLE), ATKBP(EQUIPPED_LIKE_WING), ATKBP(HIT_WITH_SHIELD), \
+	    ATKBP(PHASED), ATKBP(HITS_INSUBSTANTIAL), ATKBP(ARMOR_SKIN), ATKBP(NONE) })
+
+/* Arms past the dominant/offhand pair -- vague ARM counts, since it only
+ * survives into a body plan under INNUMERABLE.
+ */
+#define ATKBP_EXTRA_ARM_MASK() \
+	atkbp_or((struct atkbp_set[]){ \
+	    ATKBP(ARM_3RD), ATKBP(ARM_4TH), ATKBP(ARM_5TH), \
+	    ATKBP(ARM_6TH), ATKBP(ARM_7TH), ATKBP(ARM_8TH), \
+	    ATKBP_MISKA_ARM_ORDINALS_MASK(), ATKBP(ARM), ATKBP(NONE) })
+
 #define ATKBP_UPPER_BODY_ARM_MASK() \
 	atkbp_or((struct atkbp_set[]){ \
 	    ATKBP_ARM_ORDINALS_MASK(), ATKBP_MISKA_ARM_ORDINALS_MASK(), ATKBP(ARM), ATKBP(NONE) })

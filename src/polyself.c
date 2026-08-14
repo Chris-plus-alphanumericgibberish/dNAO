@@ -1156,7 +1156,7 @@ dospit()
 		return MOVE_CANCELLED;
 	else {
 		if(check_mutation(TT_BLINDING_VENOM)){
-			struct attack spt = { AT_SPIT, AD_BLND, 0, 0 };
+			struct attack spt = { AT_SPIT, AD_BLND, 0, 0, .bodypart = ATKBP(MOUTH) };
 			xspity(&youmonst, &spt, 0, 0);
 		}
 		else {
@@ -1465,28 +1465,28 @@ dogaze(struct monst *mtmp)
 				}
 			}
 			if(attack_gazes && !Upolyd && check_vampire(VAMPIRE_GAZE)){
-				struct attack gaze = {AT_GAZE, AD_PLYS, 1, 4};
+				struct attack gaze = {AT_GAZE, AD_PLYS, 1, 4, .bodypart = ATKBP(EYES)};
 				result |= xgazey(&youmonst, mtmp, &gaze, -1);
 			}
 			if(DEADMONSTER(mtmp)){
 				return MOVE_STANDARD;
 			}
 			if(hates_unholy_mon(mtmp) && check_mutation(TT_HATEFUL_VISION)){
-				struct attack gaze = {AT_GAZE, AD_STDY, 1, 9};
+				struct attack gaze = {AT_GAZE, AD_STDY, 1, 9, .bodypart = ATKBP(EYES)};
 				result |= xgazey(&youmonst, mtmp, &gaze, -1);
 			}
 			if(DEADMONSTER(mtmp)){
 				return MOVE_STANDARD;
 			}
 			if(check_mutation(TT_CANCEL_GAZE)){
-				struct attack gaze = {AT_GAZE, AD_CNCL, 2, 6};
+				struct attack gaze = {AT_GAZE, AD_CNCL, 2, 6, .bodypart = ATKBP(EYES)};
 				result |= xgazey(&youmonst, mtmp, &gaze, -1);
 			}
 			if(DEADMONSTER(mtmp)){
 				return MOVE_STANDARD;
 			}
 			if(attack_gazes && check_mutation(TT_BEHOLDER)){
-				struct attack gaze = {AT_GAZE, AD_RGAZ, 4, 6};
+				struct attack gaze = {AT_GAZE, AD_RGAZ, 4, 6, .bodypart = ATKBP(EYES)};
 				for(int i = 0; i < 3; i++){
 					result |= xgazey(&youmonst, mtmp, &gaze, -1);
 					if(DEADMONSTER(mtmp)){
@@ -2754,7 +2754,7 @@ atkbp_bodypart_name(struct atkbp_set bp, struct permonst *ptr)
 	    ATKBP(HORN), ATKBP(HORN_1ST), ATKBP(HORN_2ND), ATKBP(HORN_3RD),
 	    ATKBP(HORN_4TH), ATKBP(HORN_5TH), ATKBP(HORN_6TH), ATKBP(NONE) });
 	struct atkbp_set tentacle_words = atkbp_or((struct atkbp_set[]){
-	    ATKBP(TENTACLE_GENERIC), ATKBP(TENTACLE_ARM_DOMINANT),
+	    ATKBP(TENTACLE_GENERIC), ATKBP(TENTACLE_ARM), ATKBP(TENTACLE_ARM_DOMINANT),
 	    ATKBP(TENTACLE_ARM_OFFHAND), ATKBP(TENTACLE_ARM_3RD),
 	    ATKBP(TENTACLE_ARM_4TH), ATKBP(TENTACLE_ARM_5TH),
 	    ATKBP(TENTACLE_ARM_6TH), ATKBP(NONE) });

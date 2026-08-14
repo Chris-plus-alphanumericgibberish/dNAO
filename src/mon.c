@@ -11,6 +11,7 @@
 #include <math.h>
 
 #include "hack.h"
+#include "mattkbp.h"
 #include "mfndpos.h"
 
 #include "artifact.h"
@@ -9559,7 +9560,7 @@ struct monst *mtmp;
 		}
 		/** Exhale: Cause misfortune (wounds) in line of sight **/
 		if(damage){
-			struct attack fakespell = { AT_MAGC, AD_CLRC, 0, 7 };
+			struct attack fakespell = { AT_MAGC, AD_CLRC, 0, 7, .bodypart = ATKBP(HALO) };
 			if(canseemon(mtmp))
 				pline("%s halo flares and casts blades of light in all directions!", s_suffix(Monnam(mtmp)));
 			for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){

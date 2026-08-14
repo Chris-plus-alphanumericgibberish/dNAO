@@ -772,6 +772,11 @@
 
 #define Straitjacketed	(u.uentangled_oid || (uarm && uarm->otyp == STRAITJACKET && uarm->cursed))
 
+/* Every hand stuck to the wielded weapon, extra arms included. */
+#define Hands_welded	(uwep && welded(uwep) \
+							&& (bimanual_mon(uwep, &youmonst) || (uarms && uarms->cursed)) \
+							&& !has_extra_arms(&youmonst))
+
 #define ELBERETH_HIGH_POWER	(Race_if(PM_ELF) \
 								|| (u.ugodbase[UGOD_CURRENT] >= GOD_OROME && u.ugodbase[UGOD_CURRENT] <= GOD_LORIEN) \
 								|| u.ugodbase[UGOD_CURRENT] == GOD_PEN_A \

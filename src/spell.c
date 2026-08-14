@@ -6,6 +6,7 @@
 #include <math.h>
 
 #include "hack.h"
+#include "mattkbp.h"
 #include "artifact.h"
 
 static NEARDATA schar delay;		/* moves left for this spell */
@@ -2495,7 +2496,7 @@ spiriteffects(power, atme)
 					You("need a free hand to make a touch attack!");
 					return MOVE_CANCELLED;
 				}
-				struct attack basictouch = { AT_TUCH, AD_PHYS, 0, 0 };
+				struct attack basictouch = { AT_TUCH, AD_PHYS, 0, 0, .bodypart = find_freehand_set() };
 				int dieroll = rnd(20);
 				if (tohitval(&youmonst, mon, &basictouch, (struct obj *)0, (void *)0, HMON_WHACK, 0, (int *) 0) <= dieroll && dieroll != 1){
 					You("miss.");
@@ -2851,7 +2852,7 @@ spiriteffects(power, atme)
 				if(mon){
 					struct obj* boots;
 					boots = which_armor(mon, W_ARMF);
-					struct attack basichit = { AT_CLAW, AD_PHYS, 0, 0 };
+					struct attack basichit = { AT_CLAW, AD_PHYS, 0, 0, .bodypart = ATKBP(NONE) };
 					int dieroll = rnd(20);
 					if (tohitval(&youmonst, mon, &basichit, (struct obj *)0, (void *)0, HMON_WHACK, 0, (int *) 0) <= dieroll && dieroll != 1){
 						if(boots && boots->otyp == WATER_WALKING_BOOTS){
@@ -3550,7 +3551,7 @@ spiriteffects(power, atme)
 				} 
 				struct attack basicattack = {
 					((uarmg && arti_phasing(uarmg)) || u.sealsActive&SEAL_CHUPOCLOPS) ? AT_TUCH : AT_CLAW,
-					AD_PHYS, 0, 0 };
+					AD_PHYS, 0, 0, .bodypart = ATKBP(ARM) };
 				
 				int dieroll = rnd(20);
 				if (tohitval(&youmonst, mon, &basicattack, (struct obj *)0, (void *)0, HMON_WHACK, 0, (int *) 0) <= dieroll && dieroll != 1){
@@ -3712,7 +3713,7 @@ spiriteffects(power, atme)
 				You("need a free hand to make a touch attack!");
 				return MOVE_CANCELLED;
 			}
-			struct attack basictouch = { AT_TUCH, AD_PHYS, 0, 0 };
+			struct attack basictouch = { AT_TUCH, AD_PHYS, 0, 0, .bodypart = find_freehand_set() };
 			int dieroll = rnd(20);
 			if (tohitval(&youmonst, mon, &basictouch, (struct obj *)0, (void *)0, HMON_WHACK, 0, (int *) 0) <= dieroll && dieroll != 1){
 				You("miss.");
@@ -6806,7 +6807,7 @@ dopseudonatural()
 {
 	struct monst *mon, *nmon;
 	int tmp, weptmp, tchtmp;
-	struct attack symbiote = { AT_TENT, AD_PHYS, 5, spiritDsize() };
+	struct attack symbiote = { AT_TENT, AD_PHYS, 5, spiritDsize(), .bodypart = ATKBP(TENTACLE_GENERIC) };
 	for(mon = fmon;mon;mon = nmon){
 		nmon = mon->nmon;
 		if(!mon || mon->mtame || !rn2(5))
@@ -6833,7 +6834,7 @@ dodestruction()
 	extern const int clockwisex[8];
 	extern const int clockwisey[8];
 	int i = rnd(8),j, lim=0;
-	struct attack destruction = { AT_NONE, AD_FIRE, 6, 6 };
+	struct attack destruction = { AT_NONE, AD_FIRE, 6, 6, .bodypart = ATKBP(WHOLE_BODY) };
 	if(!rn2(3))
 		destruction.adtyp = AD_COLD;
 	else if(!rn2(4))

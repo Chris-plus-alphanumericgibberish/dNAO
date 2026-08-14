@@ -18823,3 +18823,4 @@ default_strongmonst_strength(struct permonst *pm)
 	else /* pm->msize == MZ_GIGANTIC */
 		return STR19(18);
 }
+/*makemon.c*/

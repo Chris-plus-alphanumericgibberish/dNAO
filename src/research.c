@@ -1,5 +1,6 @@
 
 #include "hack.h"
+#include "mattkbp.h"
 
 
 STATIC_OVL int
@@ -20,7 +21,7 @@ dorotvomit()
 	}
 	if(!mtmp)
 		return MOVE_CANCELLED;
-	struct attack theattk = { AT_VOMT, AD_DISE, 1, 1 };
+	struct attack theattk = { AT_VOMT, AD_DISE, 1, 1, .bodypart = ATKBP(MOUTH) };
 	xmeleehity(&youmonst, mtmp, &theattk, (struct obj **)0, -1, 0, FALSE, 0);
 	make_sick(0L, (char *) 0, TRUE, SICK_VOMITABLE);
 	if(!umechanoid) morehungry(20*get_uhungersizemod());

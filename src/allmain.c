@@ -6957,6 +6957,7 @@ struct monst *magr;
 	}
 }
 
+/* Used both for the MAD_HOST madness and for shalosh tannah monsters. */
 void
 dohost_mon(magr)
 struct monst *magr;
@@ -6968,7 +6969,7 @@ struct monst *magr;
 	int dist;
 	boolean peace = 0;
 	boolean youagr = &youmonst == magr;
-	struct attack symbiote = { 0, 0, 6, 6 };
+	struct attack symbiote = { 0, 0, 6, 6, .bodypart = ATKBP(NONE) };
 	// if(&youmonst == magr || magr->mpeaceful)
 	if(youagr)
 		peace = 1;
@@ -7099,6 +7100,8 @@ struct monst *magr;
 			count_close = rn2(count_close);
 			symbiote.aatyp = AT_LRCH;
 			symbiote.adtyp = AD_HOOK;
+			if(magr->mtyp == PM_SHALOSH_TANNAH)
+				symbiote.bodypart = ATKBP(ARM);
 		break;
 		//Vampiric
 		case 3:
@@ -7108,6 +7111,10 @@ struct monst *magr;
 			count_close = rn2(count_close);
 			symbiote.aatyp = AT_BITE;
 			symbiote.adtyp = AD_VAMP;
+			if(magr->mtyp == PM_SHALOSH_TANNAH){
+				symbiote.aatyp = AT_STNG;
+				symbiote.bodypart = ATKBP(ARM);
+			}
 		break;
 		//Brain
 		case 4:
@@ -7117,6 +7124,10 @@ struct monst *magr;
 			count_close = rn2(count_close);
 			symbiote.aatyp = AT_TENT;
 			symbiote.adtyp = AD_DRIN;
+			if(magr->mtyp == PM_SHALOSH_TANNAH){
+				symbiote.aatyp = AT_STNG;
+				symbiote.bodypart = ATKBP(ARM);
+			}
 		break;
 		//Acid slash
 		case 5:
@@ -7981,7 +7992,7 @@ struct monst *magr;
 {
 	struct monst *mdef;
 	boolean youagr = (magr == &youmonst);
-	struct attack attkbuff = {AT_MAGC, AD_CLRC, 0, 6};
+	struct attack attkbuff = {AT_MAGC, AD_CLRC, 0, 6, .bodypart = ATKBP(HALO)};
 	struct permonst *pa;
 	int spellnum = 0;
 	int range = magr->mtyp == PM_DAO_LAO_GUI_MONK ? 2 : BOLT_LIM;
@@ -8104,7 +8115,7 @@ struct monst *magr;
 {
 	struct monst *mdef = 0, *mtmp;
 	boolean youagr = (magr == &youmonst);
-	struct attack attkbuff = {AT_MAGC, AD_CLRC, 0, 6};
+	struct attack attkbuff = {AT_MAGC, AD_CLRC, 0, 6, .bodypart = ATKBP(LIMB_GENERIC)};
 	int range = BOLT_LIM;
 	int best_dist = range + 1;
 
@@ -8132,7 +8143,7 @@ struct monst *magr;
 	struct monst *mdef;
 	extern const int clockwisex[8];
 	extern const int clockwisey[8];
-	struct attack attkbuff = {AT_WEAP, AD_ELEC, 3, 6};
+	struct attack attkbuff = {AT_WEAP, AD_ELEC, 3, 6, .bodypart = ATKBP(LIMB_GENERIC)};
 	int i = rnd(8),j;
 	int ax, ay, n;
 	int chain_count = 0;

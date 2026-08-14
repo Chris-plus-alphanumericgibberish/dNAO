@@ -8,6 +8,7 @@
 /*	       - generalized for 3.1 (mike@bullns.on01.bull.ca) */
 
 #include "hack.h"
+#include "mattkbp.h"
 #include "qtext.h"
 #include "xhity.h"
 
@@ -956,7 +957,7 @@ yellow_smite()
 {
 	int dmg;
 	struct monst *magr;
-	struct attack attkbuff = {AT_MAGC, AD_CLRC, 0, 6};
+	struct attack attkbuff = {AT_MAGC, AD_CLRC, 0, 6, .bodypart = ATKBP(NONE)};
 	for(magr = fmon; magr; magr = magr->nmon){
 		if(magr->mpeaceful
 			|| nonthreat(magr)

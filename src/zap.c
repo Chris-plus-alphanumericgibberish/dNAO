@@ -3,6 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
+#include "mattkbp.h"
 #include "artifact.h"
 
 #include "xhity.h"
@@ -4524,7 +4525,7 @@ struct zapdata * zapdata;
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
 	boolean sho_shieldeff = FALSE;
-	struct attack attk = { AT_NONE, zapdata->adtyp, 0, 0 };
+	struct attack attk = { AT_NONE, zapdata->adtyp, 0, 0, .bodypart = ATKBP(NONE) };
 	int dmg = zapdamage(magr, mdef, zapdata);
 	int svddmg = dmg;	/* saved damage for golemeffects() */
 

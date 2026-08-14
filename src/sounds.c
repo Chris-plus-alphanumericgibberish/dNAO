@@ -3,6 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
+#include "mattkbp.h"
 
 #ifdef USER_SOUNDS
 # ifdef USER_SOUNDS_REGEX
@@ -1134,7 +1135,7 @@ asGuardian:
 			}
 			if(!mtmp->mpeaceful && mtmp->mux != 0){
 				make_stunned(HStun + mtmp->mhp/10, TRUE);
-				struct attack fakesummonspell = { AT_MAGC, AD_CLRC, 0, 6 };
+				struct attack fakesummonspell = { AT_MAGC, AD_CLRC, 0, 6, .bodypart = ATKBP(NONE) };
 				cast_spell(mtmp, (struct monst *)0, &fakesummonspell, !rn2(4) ? SUMMON_ANGEL : SUMMON_MONS, 0, 0);
 			}
 			if(uwep && uwep->oartifact == ART_SINGING_SWORD){

@@ -3,6 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
+#include "mattkbp.h"
 #include "lev.h"
 
 #define newseg()		(struct wseg *) alloc(sizeof(struct wseg))
@@ -305,7 +306,7 @@ wormhitu(worm)
 {
     register int wnum = worm->wormno;
     register struct wseg *seg;
-	struct attack mattk = {AT_CLAW, AD_PHYS, 2, 4};
+	struct attack mattk = {AT_CLAW, AD_PHYS, 2, 4, .bodypart = ATKBP(TAIL)};
 	boolean dangerous_tail = (worm->mtyp == PM_CHORISTER_JELLY || worm->mtyp == PM_HUNTING_HORROR);
 
     if (!wnum) return; /* bullet proofing */
@@ -319,6 +320,7 @@ wormhitu(worm)
 		mattk.adtyp = AD_PAIN;
 		mattk.damn = 3;
 		mattk.damd = 6;
+		mattk.bodypart = ATKBP(TENTACLE_GENERIC);
 	}
 
 /*  This does not work right now because mattacku() thinks that the head is

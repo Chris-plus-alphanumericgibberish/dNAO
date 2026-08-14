@@ -5226,7 +5226,7 @@ struct obj *wep;
 	extern const int clockwisex[8];
 	extern const int clockwisey[8];
 	int i = rnd(8),j;
-	struct attack symbiote = { AT_HITS, AD_PHYS, 5, 8 };
+	struct attack symbiote = { AT_HITS, AD_PHYS, 5, 8, .bodypart = ATKBP(NONE) };
 	boolean youagr = (magr == &youmonst);
 	boolean youdef;
 	
@@ -6021,7 +6021,7 @@ struct monst *magr;
 	int i, j;
 	struct monst *mdef;
 	int	targets = 0;
-	struct attack symbiote = { AT_MAGC, AD_SPEL, 6, 6 };
+	struct attack symbiote = { AT_MAGC, AD_SPEL, 6, 6, .bodypart = ATKBP(TENTACLE_GENERIC) };
 	boolean youdef, youagr = (magr == &youmonst);
 	boolean peaceSafe = youagr || magr->mpeaceful;
 	int range = 3;
@@ -6688,7 +6688,7 @@ struct obj *wep;
 	extern const int clockwisex[8];
 	extern const int clockwisey[8];
 	int i = rnd(8),j;
-	struct attack symbiote = { AT_WEAP, AD_PHYS, 4, 4 };
+	struct attack symbiote = { AT_WEAP, AD_PHYS, 4, 4, .bodypart = ATKBP(NONE) };
 	boolean youagr = (magr == &youmonst);
 	boolean youdef;
 

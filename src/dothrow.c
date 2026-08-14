@@ -549,7 +549,7 @@ hurtle_step(arg, x, y)
 				int gx = x + u.dx;
 				int gy = y + u.dy;
 				if(isok(gx, gy) && teleok(gx,gy,FALSE) && !m_at(gx,gy)){
-					static struct attack weaponhit =	{ AT_WEAP, AD_PHYS, 0, 0 };
+					struct attack weaponhit = wielded_weapon_attack(&youmonst, uwep);
 					boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mon) ? VIS_MDEF : 0);
 					pline("Nightjar abduction!");
 					exercise(A_CHA, TRUE);
