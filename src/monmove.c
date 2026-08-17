@@ -1561,20 +1561,22 @@ register struct monst *mtmp;
 
 	/* Monsters that want to acquire things */
 	/* may teleport, so do it before inrange is set */
-	if(is_covetous(mdat) && (mdat->mtyp!=PM_DEMOGORGON || !rn2(3)) 
-		&& mdat->mtyp!=PM_ELDER_PRIEST /*&& mdat->mtyp!=PM_SHAMI_AMOURAE*/
-		&& mdat->mtyp!=PM_LEGION /*&& mdat->mtyp!=PM_SHAMI_AMOURAE*/
-		&& !(noactions(mtmp))
-		&& !(mtmp->mpeaceful && !mtmp->mtame) /*Don't telespam the player if peaceful*/
+	if(!(noactions(mtmp))
 		&& !(mtmp == u.usteed) /*Steeds can't use tactics*/
 		&& !(mtmp == u.urider)
-	) (void) tactics(mtmp);
-	
+	){
+		if(covetous_warping(mdat)
+			&& !(mtmp->mpeaceful && !mtmp->mtame) /*Don't telespam the player if peaceful, but do find your target*/
+		) (void) tactics(mtmp);
+		else if(is_covetous(mdat))
+			find_goal(mtmp);
+	}
+
 	if(mdat->mtyp == PM_GREAT_CTHULHU && !rn2(20)){
 		if(tactics(mtmp))
 			return 0;
 	}
-	
+
 	/* check distance and scariness of attacks */
 	distfleeck(mtmp,&inrange,&nearby,&scared);
 	/* summoned monster was abjured as a result of wards etc. */
@@ -2676,7 +2678,7 @@ register int after;
 	}
 
 	/* and the acquisitive monsters get special treatment */
-	if(is_covetous(ptr)) {
+	if(covetous_warping(ptr)) {
 	    xchar tx = STRAT_GOALX(mtmp->mstrategy),
 		  ty = STRAT_GOALY(mtmp->mstrategy);
 	    struct monst *intruder = m_at(tx, ty);
@@ -2691,12 +2693,6 @@ register int after;
 			if(mattackm(mtmp, intruder)&(MM_AGR_DIED)) return(2);
 			mmoved = 1;
 			goto postmov;
-		} else if(mtmp->mtyp != PM_DEMOGORGON 
-			   && mtmp->mtyp!=PM_ELDER_PRIEST
-			   /*&& mtmp->mtyp!=PM_SHAMI_AMOURAE*/
-			   ){
-			mmoved = 0;
-		    goto postmov;
 		}
 //	    goto postmov;
 	}
@@ -2786,6 +2782,15 @@ not_special:
 			}
 		}
 	}
+
+	/* MT_WANTS* monsters without MM_COVETOUS still steer toward
+	 * find_goal()'s square via ordinary movement */
+	if (appr == 1 && is_covetous(ptr) && !covetous_warping(ptr) &&
+		(mtmp->mstrategy & STRAT_STRATMASK) != STRAT_NONE) {
+		gx = STRAT_GOALX(mtmp->mstrategy);
+		gy = STRAT_GOALY(mtmp->mstrategy);
+	}
+
 	/* if monster has no idea where you could be, set appr to 0 */
 	if (gx == 0 && gy == 0)
 		appr = 0;

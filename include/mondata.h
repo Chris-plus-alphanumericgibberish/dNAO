@@ -1045,6 +1045,9 @@
 #define wants_qart(ptr)	((ptr->mflagst & MT_WANTSARTI))
 #define wants_amul(ptr)	((ptr->mflagst & MT_COVETOUS))
 #define is_covetous(ptr)	((ptr->mflagst & MT_COVETOUS))
+/* uses the covetous movement AI (teleport/heal/camp), independent of
+ * actually wanting a tracked item */
+#define covetous_warping(ptr)	(((ptr)->mflagsm & MM_COVETOUS) != 0L)
 
 #define quest_faction(mon)	((mon)->mfaction == QUEST_FACTION || (Race_if(PM_DROW) && (mon)->mfaction == u.uhouse))
 

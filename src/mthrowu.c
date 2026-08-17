@@ -45,8 +45,7 @@ struct obj *obj;
 #ifdef OVL1
 
 boolean
-mtarget_adjacent(magr)
-struct monst *magr;
+mtarget_adjacent(struct monst *magr)
 {
 	int i,j, ix, jy;
 	int x = magr->mx, y = magr->my;
@@ -60,18 +59,19 @@ struct monst *magr;
 			jy = y + j;
 			if(!isok(ix,jy))
 				continue;
-			if(!(mtmp = m_u_at(ix, jy)))
+			if(!(mtmp = m_at(ix, jy)))
 				continue;
-			if(mtmp == &youmonst){
-				if(magr->mpeaceful)
-					continue;
-				else return TRUE;
-			}
 			if(!mm_aggression(magr, mtmp))
 				continue;
 			if(magr->mtame && !acceptable_pet_target(magr, mtmp, FALSE))
 				continue;
 			return TRUE;
+		}
+	}
+	if(!magr->mpeaceful){
+		if(magr->mux != 0 && magr->muy != 0){
+			if(distmin(magr->mx, magr->my, magr->mux, magr->muy) <= 1)
+				return TRUE;
 		}
 	}
 	return FALSE;

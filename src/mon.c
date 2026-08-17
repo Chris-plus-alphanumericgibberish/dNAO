@@ -3993,7 +3993,18 @@ boolean actual;			/* actual attack or faction check? */
 		if(mdef->mpeaceful==TRUE && magr->mpeaceful==FALSE && rn2(2)) return ALLOW_M|ALLOW_TM;
 		if(mdef->mpeaceful==TRUE && magr->mtame==TRUE) return FALSE;
 	}
-	
+
+	/* grudge on whoever holds a tracked STRAT_MONSTR item, tame pairs
+	 * excepted */
+	if((((magr->mstrategy & STRAT_STRATMASK) == STRAT_MONSTR &&
+		 STRAT_GOALX(magr->mstrategy) == mdef->mx && STRAT_GOALY(magr->mstrategy) == mdef->my) ||
+		((mdef->mstrategy & STRAT_STRATMASK) == STRAT_MONSTR &&
+		 STRAT_GOALX(mdef->mstrategy) == magr->mx && STRAT_GOALY(mdef->mstrategy) == magr->my)) &&
+		!(magr->mtame && mdef->mtame)
+	){
+		return ALLOW_M|ALLOW_TM;
+	}
+
 	/* Various factions don't attack faction-mates */
 	if(magr->mfaction == mdef->mfaction && mdef->mfaction == YENDORIAN_FACTION)
 		return 0L;

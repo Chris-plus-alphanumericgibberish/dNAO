@@ -27,6 +27,7 @@ STATIC_DCL boolean FDECL(dog_hunger,(struct monst *,struct edog *));
 STATIC_DCL int FDECL(dog_invent,(struct monst *,struct edog *,int));
 STATIC_DCL void FDECL(dog_find_item_goal,(struct monst *,struct edog *,boolean,boolean,int));
 STATIC_DCL boolean FDECL(dog_find_combat_target,(struct monst *,int *,int));
+STATIC_DCL boolean FDECL(pet_covetous_goal,(struct monst *,int *));
 STATIC_DCL void FDECL(dog_find_track_goal,(struct monst *,struct edog *,boolean));
 STATIC_DCL int FDECL(leashed_goal,(struct monst *,struct edog *));
 STATIC_DCL int FDECL(dog_goal,(struct monst *,struct edog *,int,int,int));
@@ -1047,6 +1048,41 @@ dog_find_combat_target(struct monst *mtmp, int *appr, int search_radius)
 	return FALSE;
 }
 
+#define PET_COVET_RADIUS 18	/* wider than the normal 9-square follow leash */
+
+/* if mtmp has a live covetous goal within range, steer toward it
+ * (gx/gy/*appr) and return TRUE; a STRAT_MONSTR goal additionally
+ * requires mm_grudge() against the holder */
+STATIC_OVL boolean
+pet_covetous_goal(struct monst *mtmp, int *appr)
+{
+	long strat = mtmp->mstrategy & STRAT_STRATMASK;
+	xchar tx, ty;
+
+	if (!is_covetous(mtmp->data) || strat == STRAT_NONE || strat == STRAT_PLAYER)
+		return FALSE;
+
+	tx = STRAT_GOALX(mtmp->mstrategy);
+	ty = STRAT_GOALY(mtmp->mstrategy);
+	if (distmin(mtmp->mx, mtmp->my, tx, ty) > PET_COVET_RADIUS)
+		return FALSE;
+
+	if (strat == STRAT_MONSTR) {
+		struct monst *holder = m_at(tx, ty);
+
+		/* movement goal only here -- mfndpos()'s mm_aggression() check
+		 * is what actually lets dog_move() attack the holder */
+		if (!holder || !mm_grudge(mtmp, holder, FALSE))
+			return FALSE;
+	}
+
+	gx = tx;
+	gy = ty;
+	*appr = 1;
+	mtmp->mcombat = (strat == STRAT_MONSTR);
+	return TRUE;
+}
+
 /* when master is out of sight and the goal is the master's position,
  * find a better intermediate goal via footprints, previous goal, or nearest door
  * sets gx/gy as side effects
@@ -1136,49 +1172,51 @@ dog_goal(struct monst *mtmp, struct edog *edog, int after, int udist, int whappr
 	in_masters_sight = couldsee(omx, omy);
 	dog_has_minvent = (DROPPABLES(mtmp) != 0);
 
-	if(distu(mtmp->mx,mtmp->my) > 5 || (!in_masters_sight && distu(mtmp->mx,mtmp->my) > 2) ){
-	    gtyp = UNDEF;
-	} else if(edog) {
-		dog_find_item_goal(mtmp, edog, in_masters_sight, dog_has_minvent, SQSRCHRADIUS);
-		// May have set gtyp and gx/gy as a side effect
-	}
+	if (!pet_covetous_goal(mtmp, &appr)) {
+		if(distu(mtmp->mx,mtmp->my) > 5 || (!in_masters_sight && distu(mtmp->mx,mtmp->my) > 2) ){
+			gtyp = UNDEF;
+		} else if(edog) {
+			dog_find_item_goal(mtmp, edog, in_masters_sight, dog_has_minvent, SQSRCHRADIUS);
+			// May have set gtyp and gx/gy as a side effect
+		}
 
-	/* follow player if appropriate, or move to attack nearby enemies */
-	if (gtyp == UNDEF ||
-	    (gtyp != DOGFOOD && gtyp != APPORT && (!edog || monstermoves < edog->hungrytime))) {
-		gx = u.ux;
-		gy = u.uy;
-		if (after && udist <= 4 && gx == u.ux && gy == u.uy)
-			return(-2);
-		appr = (udist >= 9) ? 1 : (mtmp->mflee) ? -1 : 0;
-		if (udist > 1) {
-			if (!IS_ROOM(levl[u.ux][u.uy].typ) || !rn2(4) ||
-			   whappr ||
-			   (edog && dog_has_minvent && rn2(edog->apport)))
-				appr = 1;
-		}
-		if(appr == 0 && u.sealsActive&SEAL_ECHIDNA && !mindless_mon(mtmp) && (is_animal(mtmp->data) || slithy(mtmp->data) || nohands(mtmp->data))){
-			appr = 1;
-		}
-		if(appr == 0 && Race_if(PM_DROW) && is_spider(mtmp->data)){
-			appr = 1;
-		}
-		
-		if (!mtmp->mpassive)
-			(void) dog_find_combat_target(mtmp, &appr, SQSRCHRADIUS);
-		/* if you have dog food it'll follow you more closely */
-		if (appr == 0) {
-			obj = invent;
-			while (obj) {
-				if(dogfood(mtmp, obj) == DOGFOOD) {
+		/* follow player if appropriate, or move to attack nearby enemies */
+		if (gtyp == UNDEF ||
+			(gtyp != DOGFOOD && gtyp != APPORT && (!edog || monstermoves < edog->hungrytime))) {
+			gx = u.ux;
+			gy = u.uy;
+			if (after && udist <= 4 && gx == u.ux && gy == u.uy)
+				return(-2);
+			appr = (udist >= 9) ? 1 : (mtmp->mflee) ? -1 : 0;
+			if (udist > 1) {
+				if (!IS_ROOM(levl[u.ux][u.uy].typ) || !rn2(4) ||
+				whappr ||
+				(edog && dog_has_minvent && rn2(edog->apport)))
 					appr = 1;
-					break;
-				}
-				obj = obj->nobj;
 			}
-		}
-	} else
-	    appr = 1;	/* gtyp != UNDEF */
+			if(appr == 0 && u.sealsActive&SEAL_ECHIDNA && !mindless_mon(mtmp) && (is_animal(mtmp->data) || slithy(mtmp->data) || nohands(mtmp->data))){
+				appr = 1;
+			}
+			if(appr == 0 && Race_if(PM_DROW) && is_spider(mtmp->data)){
+				appr = 1;
+			}
+
+			if (!mtmp->mpassive)
+				(void) dog_find_combat_target(mtmp, &appr, SQSRCHRADIUS);
+			/* if you have dog food it'll follow you more closely */
+			if (appr == 0) {
+				obj = invent;
+				while (obj) {
+					if(dogfood(mtmp, obj) == DOGFOOD) {
+						appr = 1;
+						break;
+					}
+					obj = obj->nobj;
+				}
+			}
+		} else
+			appr = 1;	/* gtyp != UNDEF */
+	}
 	if(mtmp->mconf)
 	    appr = 0;
 
@@ -1313,51 +1351,54 @@ intelligent_goal(struct monst *mtmp, struct edog *edog, int after, int udist, in
 	gtyp = UNDEF;
 	gx = gy = 0;
 
-	if (!mtmp->mpassive && dog_find_combat_target(mtmp, &appr, BOLT_LIM)) {
-		mtmp->mcombat = TRUE;
-		return appr;
-	}
-	if(mtmp->mpassive || !rn2(3))
-		mtmp->mcombat = FALSE;
-
 	omx = mtmp->mx;
 	omy = mtmp->my;
 
 	in_masters_sight = couldsee(omx, omy);
 	dog_has_minvent = (DROPPABLES(mtmp) != 0);
 
-	if(distu(mtmp->mx,mtmp->my) > 5 || (!in_masters_sight && distu(mtmp->mx,mtmp->my) > 2) ){
-	    gtyp = UNDEF;
-	} else if(!mtmp->mcombat && edog) {
-		dog_find_item_goal(mtmp, edog, in_masters_sight, dog_has_minvent, SQSRCHRADIUS);
-	}
+	if (pet_covetous_goal(mtmp, &appr)) {
+		/* mcombat already set appropriately by pet_covetous_goal() */
+	} else if (!mtmp->mpassive && dog_find_combat_target(mtmp, &appr, BOLT_LIM)) {
+		mtmp->mcombat = TRUE;
+		return appr;
+	} else {
+		if(mtmp->mpassive || !rn2(3))
+			mtmp->mcombat = FALSE;
 
-	if (gtyp == UNDEF ||
-	    (gtyp != DOGFOOD && gtyp != APPORT && (!edog || monstermoves < edog->hungrytime))) {
-		gx = u.ux;
-		gy = u.uy;
-		if (after && udist <= 4 && gx == u.ux && gy == u.uy)
-			return(-2);
-		appr = (udist >= 9) ? 1 : (mtmp->mflee) ? -1 : 0;
-		if (udist > 1) {
-			if (!IS_ROOM(levl[u.ux][u.uy].typ) || !rn2(4) ||
-			   whappr ||
-			   (edog && dog_has_minvent && rn2(edog->apport)))
-				appr = 1;
+		if(distu(mtmp->mx,mtmp->my) > 5 || (!in_masters_sight && distu(mtmp->mx,mtmp->my) > 2) ){
+			gtyp = UNDEF;
+		} else if(!mtmp->mcombat && edog) {
+			dog_find_item_goal(mtmp, edog, in_masters_sight, dog_has_minvent, SQSRCHRADIUS);
 		}
-		if (appr == 0) {
-			if(!mtmp->mcombat && distu(mtmp->mx, mtmp->my) > P_SKILL(P_BEAST_MASTERY)){
-				struct trap *ttmp = t_at(u.ux,u.uy);
-				if(On_stairs(u.ux,u.uy) || levl[u.ux][u.uy].typ == STAIRS || (ttmp && ttmp->ttyp == MAGIC_PORTAL)){
+
+		if (gtyp == UNDEF ||
+			(gtyp != DOGFOOD && gtyp != APPORT && (!edog || monstermoves < edog->hungrytime))) {
+			gx = u.ux;
+			gy = u.uy;
+			if (after && udist <= 4 && gx == u.ux && gy == u.uy)
+				return(-2);
+			appr = (udist >= 9) ? 1 : (mtmp->mflee) ? -1 : 0;
+			if (udist > 1) {
+				if (!IS_ROOM(levl[u.ux][u.uy].typ) || !rn2(4) ||
+				whappr ||
+				(edog && dog_has_minvent && rn2(edog->apport)))
 					appr = 1;
-				}
-				else if(P_SKILL(P_BEAST_MASTERY) > 0){
-					appr = 1;
+			}
+			if (appr == 0) {
+				if(!mtmp->mcombat && distu(mtmp->mx, mtmp->my) > P_SKILL(P_BEAST_MASTERY)){
+					struct trap *ttmp = t_at(u.ux,u.uy);
+					if(On_stairs(u.ux,u.uy) || levl[u.ux][u.uy].typ == STAIRS || (ttmp && ttmp->ttyp == MAGIC_PORTAL)){
+						appr = 1;
+					}
+					else if(P_SKILL(P_BEAST_MASTERY) > 0){
+						appr = 1;
+					}
 				}
 			}
-		}
-	} else
-	    appr = 1;	/* gtyp != UNDEF */
+		} else
+			appr = 1;	/* gtyp != UNDEF */
+	}
 	if(mtmp->mconf)
 	    appr = 0;
 

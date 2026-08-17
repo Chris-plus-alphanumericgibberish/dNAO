@@ -7652,9 +7652,9 @@ boolean printmessages; /* print generic elemental damage messages */
 			}
 		}
 	}
-	if (youagr && is_covetous(pd) && oartifact == ART_TROLLSBANE)
+	if (oartifact == ART_TROLLSBANE && (is_covetous(pd) || covetous_warping(pd) || mteleport(pd) || taxes_sanity(pd) || pd->msound == MS_BRIBE))
 	{
-		if (Hallucination) You("flame the nasty troll!");  //trollsbane hits monsters that pop in to ruin your day.
+		if (Hallucination && youagr) You("flame the nasty troll!");  //trollsbane hits monsters that pop in to ruin your day.
 		*truedmgptr += d(2, 20) + 2 * otmp->spe; //boosts power better than demonbane hitting silver hating.
 	}
 	
