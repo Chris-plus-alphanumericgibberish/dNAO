@@ -26,6 +26,7 @@ STATIC_DCL int FDECL(scent_callback,(genericptr_t, int, int));
 STATIC_DCL void FDECL(dead_familiar,(long));
 STATIC_DCL boolean FDECL(clothes_bite_mon,(struct monst *));
 STATIC_DCL void FDECL(emit_healing, (struct monst *));
+STATIC_DCL boolean NDECL(player_sees_nearby_threat);
 int scentgoalx, scentgoaly;
 
 #ifdef OVL2
@@ -10867,17 +10868,33 @@ switch_stance(struct monst *mon, boolean reaction)
 		if (mon->mcan) {
 			mon->mstance = MSTANCE_MELEE;
 			changed = TRUE;
-			pline("%s snorts in anger and readies %s claws!", Monnam(mon), mhis(mon));
+			if(canseemon(mon)){
+				pline("%s snorts in anger and readies %s claws!", Monnam(mon), mhis(mon));
+			}
 		}
 		/* PC closing to melee range is a tactical choice, not a stance
 		   impossibility; only fire when not in reaction mode */
 		else if (!reaction &&
-			!mon->mpeaceful && !mon->mflee && !mon->mconf && !mon->mstun &&
-			monnear(mon, mon->mux, mon->muy) && !rn2(4)
+			!mon->mflee && !mon->mconf && !mon->mstun &&
+			mtarget_adjacent(mon) && !rn2(4)
 		) {
 			mon->mstance = MSTANCE_MELEE;
 			changed = TRUE;
-			pline("%s readies %s claws and bares %s fangs!", Monnam(mon), mhis(mon), mhis(mon));
+			if(canseemon(mon)){
+				pline("%s readies %s claws and bares %s fangs!", Monnam(mon), mhis(mon), mhis(mon));
+			}
+		}
+	}
+	else if (mon->mstance == MSTANCE_MELEE) {
+		if (!mon->mcan && !reaction &&
+			!mon->mflee && !mon->mconf && !mon->mstun &&
+			!mon->mcombat && !rn2(4)
+		) {
+			mon->mstance = MSTANCE_MAGIC;
+			changed = TRUE;
+			if(canseemon(mon)){
+				pline("%s hisses and prepares to cast spells!", Monnam(mon));
+			}
 		}
 	}
 
@@ -10886,6 +10903,134 @@ switch_stance(struct monst *mon, boolean reaction)
 		mark_glyph_dirty(mon->mx, mon->my);
 	}
 	// return changed;
+}
+
+/* pre-rolls the SUBOUT_* attacks that should telegraph themselves a turn
+   ahead of time, giving the player a chance to react before they land */
+void
+subout_stance(struct monst *mon)
+{
+	uchar starting = mon->mstance;
+	if (mon->mtyp == PM_SILVERKNIGHT) {
+		mon->mstance = MSTANCE_DEFAULT;
+		if (!rn2(10)) {
+			mon->mstance = MSTANCE_VOMIT;
+			if (canseemon(mon)){
+				if(starting == mon->mstance)
+					pline("%s is still retching!", Monnam(mon));
+				else
+					pline("%s begins to retch!", Monnam(mon));
+			}
+		}
+		else if (!mon->mpeaceful && mon->mhp < mon->mhpmax/2 && mtarget_adjacent(mon)) {
+			struct obj *weap = MON_WEP(mon);
+			boolean both = FALSE;
+			mon->mstance = MSTANCE_PUSH;
+			if(weap && MON_SWEP(mon)) both = TRUE;
+			else if(MON_SWEP(mon)) weap = MON_SWEP(mon);
+			if (canseemon(mon)){
+				if(starting != mon->mstance){
+					if(both) pline("%s crosses %s weapons!", Monnam(mon), mhis(mon));
+					else if(weap) pline("%s crosses %s arm over %s weapon!", Monnam(mon), mhis(mon), mhis(mon));
+					else pline("%s crosses %s arms!", Monnam(mon), mhis(mon));
+				}
+			}
+		}
+		else {
+			if(starting == MSTANCE_PUSH){
+				struct obj *weap = MON_WEP(mon);
+				boolean both = FALSE;
+				if(weap && MON_SWEP(mon)) both = TRUE;
+				else if(MON_SWEP(mon)) weap = MON_SWEP(mon);
+				if (canseemon(mon)){
+					if(both) pline("%s uncrosses %s weapons!", Monnam(mon), mhis(mon));
+					else if(weap) pline("%s uncrosses %s arm from %s weapon!", Monnam(mon), mhis(mon), mhis(mon));
+					else pline("%s uncrosses %s arms!", Monnam(mon), mhis(mon));
+				}
+			}
+		}
+	}
+	else if (mon->mtyp == PM_BAEL) {
+		if(starting != MSTANCE_MAGIC){
+			mon->mstance = MSTANCE_MELEE;
+			if (!rn2(7)) {
+				mon->mstance = MSTANCE_BAEL1;
+				if (canseemon(mon)){
+					if(starting == mon->mstance)
+						pline("%s collection of severed hands continues to dance!", s_suffix(Monnam(mon)), mhis(mon));
+					else
+						pline("%s collection of severed hands begins to dance!", s_suffix(Monnam(mon)), mhis(mon));
+				}
+			}
+			else if (!rn2(6)) {
+				mon->mstance = MSTANCE_BAEL2;
+				if (canseemon(mon)){
+					if(starting == mon->mstance)
+						pline("%s severed arms continue to flail around!", s_suffix(Monnam(mon)), mhis(mon));
+					else
+						pline("%s pair of severed arms begins to twitch and shake!", s_suffix(Monnam(mon)), mhis(mon));
+				}
+			}
+		}
+	}
+
+	if (starting != mon->mstance && canspotmon(mon)) {
+		newsym(mon->mx, mon->my);
+		mark_glyph_dirty(mon->mx, mon->my);
+	}
+}
+
+/* is there a hostile monster within distmin 2 that the player can
+   actually spot -- won't leak an undetected monster's presence */
+STATIC_OVL boolean
+player_sees_nearby_threat(void)
+{
+	struct monst *mtmp;
+
+	for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
+		if (DEADMONSTER(mtmp) || mtmp->mpeaceful)
+			continue;
+		if (distmin(u.ux, u.uy, mtmp->mx, mtmp->my) > 2)
+			continue;
+		if (canspotmon(mtmp))
+			return TRUE;
+	}
+	return FALSE;
+}
+
+/* like subout_stance(), but for the player -- only natural abilities
+   should be included */
+void
+player_subout_stance(void)
+{
+	uchar starting = youmonst.mstance;
+
+	//Stance failsafe (stance is player-only; polymorph clears but if there another path somewhere this will catch it)
+	if (starting != MSTANCE_DEFAULT && starting != MSTANCE_VOMIT) {
+		impossible("Stale player stance %d (fixed)", starting);
+		youmonst.mstance = starting = MSTANCE_DEFAULT;
+	}
+
+	if (!Race_if(PM_SILVERKNIGHT))
+		return;
+	if (starting == MSTANCE_DEFAULT && !player_sees_nearby_threat())
+		return;
+
+	if (!rn2(10)) {
+		youmonst.mstance = MSTANCE_VOMIT;
+		if (starting == youmonst.mstance)
+			You("are still retching!");
+		else
+			You("begin to retch!");
+	}
+	else {
+		youmonst.mstance = MSTANCE_DEFAULT;
+	}
+
+	if (starting != youmonst.mstance) {
+		newsym(u.ux, u.uy);
+		mark_glyph_dirty(u.ux, u.uy);
+	}
 }
 
 void

@@ -560,6 +560,30 @@ print_glyph(window, x, y, glyph)
                    port wants (symbol, font, color, attributes, ...there's
                    a 1-1 map between glyphs and distinct things on the map).
 */
+static int
+glyphattr_to_curses_attr(int choice)
+{
+	switch (choice) {
+	case GLYPHATTR_INVERT: return A_REVERSE;
+	case GLYPHATTR_BOLD:   return A_BOLD;
+	case GLYPHATTR_BLINK:  return A_BLINK;
+	/* no ncurses attr_t bit exists for double/curly underline; fall back
+	   to plain underline so the choice is distinct from GLYPHATTR_NONE */
+	case GLYPHATTR_ULINE:
+	case GLYPHATTR_DOUBLEULINE:
+	case GLYPHATTR_CURLYULINE:
+		return A_UNDERLINE;
+#ifdef A_ITALIC
+	case GLYPHATTR_ITALIC: return A_ITALIC;
+#endif
+#ifdef A_STRIKEOUT
+	case GLYPHATTR_STRIKE: return A_STRIKEOUT;
+#endif
+	case GLYPHATTR_NONE:
+	default: return 0;
+	}
+}
+
 void
 curses_print_glyph(winid wid, XCHAR_P x, XCHAR_P y, int glyph)
 {
@@ -574,18 +598,22 @@ curses_print_glyph(winid wid, XCHAR_P x, XCHAR_P y, int glyph)
 	if (bgcolor != NO_COLOR) {
 		attr = curses_color_attr(color, bgcolor);
 	}
-	if (oattr & GLYPH_ATR_ULINE) {
-		if (attr == -1)
-			attr = curses_color_attr(color, NO_COLOR);
-		attr |= A_UNDERLINE;
+	if (oattr & GLYPH_ATR_1) {
+		int a1 = glyphattr_to_curses_attr((int)flags.glyphattr1);
+		if (a1) {
+			if (attr == -1)
+				attr = curses_color_attr(color, NO_COLOR);
+			attr |= a1;
+		}
 	}
-#ifdef A_ITALIC
-	if (oattr & GLYPH_ATR_ITALIC) {
-		if (attr == -1)
-			attr = curses_color_attr(color, NO_COLOR);
-		attr |= A_ITALIC;
+	if (oattr & GLYPH_ATR_2) {
+		int a2 = glyphattr_to_curses_attr((int)flags.glyphattr2);
+		if (a2) {
+			if (attr == -1)
+				attr = curses_color_attr(color, NO_COLOR);
+			attr |= a2;
+		}
 	}
-#endif
 
     if (iflags.cursesgraphics)
         ch = curses_convert_glyph(ch, glyph);

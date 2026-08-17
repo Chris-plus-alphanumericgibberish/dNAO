@@ -373,6 +373,10 @@ static struct Comp_Opt
 						PL_FSIZ, SET_IN_GAME },
 	{ "gender",   "your starting gender (male or female)",
 						8, DISP_IN_GAME },
+	{ "glyphattr1", "rendering for monster-stance highlight 1",
+						GLYPHATTRLEN, SET_IN_GAME },
+	{ "glyphattr2", "rendering for monster-stance highlight 2",
+						GLYPHATTRLEN, SET_IN_GAME },
 	{ "horsename", "the name of your (first) horse (e.g., horsename:Silver)",
 						PL_PSIZ, DISP_IN_GAME },
 	{ "inherited",  "the name of your chosen inherited artifact (e.g., inherited:Dirge)",
@@ -760,6 +764,8 @@ initoptions()
 	switch_graphics(MAC_GRAPHICS);
 #endif /* MAC_GRAPHICS_ENV */
 	flags.menu_style = MENU_FULL;
+	flags.glyphattr1 = GLYPHATTR_ULINE;
+	flags.glyphattr2 = GLYPHATTR_ITALIC;
 
 	/* since this is done before init_objects(), do partial init here */
 	objects[SLIME_MOLD].oc_name_idx = SLIME_MOLD;
@@ -1963,6 +1969,21 @@ const char *str;
 	}
 
 	return FALSE;
+}
+
+
+static NEARDATA const char *glyphattrtype[NUM_GLYPHATTRS] = {
+	"none", "invert", "bold", "italic", "underline",
+	"double-underline", "slow blink", "curly underline", "strikethrough"
+};
+
+static int
+glyphattr_from_name(const char *name)
+{
+	int i;
+	for (i = 0; i < NUM_GLYPHATTRS; i++)
+		if (!strcmpi(name, glyphattrtype[i])) return i;
+	return -1;
 }
 
 
@@ -3455,6 +3476,40 @@ goodfruit:
 		return;
 	}
 
+	fullname = "glyphattr1";
+	if (match_optname(opts, fullname, (int)strlen(fullname), TRUE)) {
+		int c;
+		if (negated) {
+			bad_negation(fullname, FALSE);
+			return;
+		}
+		else if (!(opts = string_for_env_opt(fullname, opts, FALSE))) {
+			return;
+		}
+		if ((c = glyphattr_from_name(opts)) < 0)
+			badoption(opts);
+		else
+			flags.glyphattr1 = (uchar) c;
+		return;
+	}
+
+	fullname = "glyphattr2";
+	if (match_optname(opts, fullname, (int)strlen(fullname), TRUE)) {
+		int c;
+		if (negated) {
+			bad_negation(fullname, FALSE);
+			return;
+		}
+		else if (!(opts = string_for_env_opt(fullname, opts, FALSE))) {
+			return;
+		}
+		if ((c = glyphattr_from_name(opts)) < 0)
+			badoption(opts);
+		else
+			flags.glyphattr2 = (uchar) c;
+		return;
+	}
+
 	/* check for menu command mapping */
 	for (i = 0; i < NUM_MENU_CMDS; i++) {
 	    fullname = default_menu_cmd_info[i].name;
@@ -3943,6 +3998,27 @@ doset()
 	return MOVE_CANCELLED;
 }
 
+static void
+glyphattr_menu(winid tmpwin, const char *title, uchar *curval)
+{
+	int i;
+	anything any;
+	menu_item *ga_pick = (menu_item *)0;
+
+	start_menu(tmpwin);
+	for (i = 0; i < NUM_GLYPHATTRS; i++) {
+		any = zeroany;
+		any.a_int = i + 1;
+		add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE,
+			 glyphattrtype[i], MENU_UNSELECTED);
+	}
+	end_menu(tmpwin, title);
+	if (select_menu(tmpwin, PICK_ONE, &ga_pick) > 0) {
+		*curval = (uchar)(ga_pick->item.a_int - 1);
+		free((genericptr_t) ga_pick);
+	}
+}
+
 STATIC_OVL boolean
 special_handling(optname, setinitial, setfromfile)
 const char *optname;
@@ -4021,6 +4097,16 @@ boolean setinitial,setfromfile;
 			flags.pickup_burden = burden_pick->item.a_int - 1;
 			free((genericptr_t)burden_pick);
 		}
+		destroy_nhwindow(tmpwin);
+		retval = TRUE;
+    } else if (!strcmp("glyphattr1", optname)) {
+		tmpwin = create_nhwindow(NHW_MENU);
+		glyphattr_menu(tmpwin, "Select glyphattr1 rendering:", &flags.glyphattr1);
+		destroy_nhwindow(tmpwin);
+		retval = TRUE;
+    } else if (!strcmp("glyphattr2", optname)) {
+		tmpwin = create_nhwindow(NHW_MENU);
+		glyphattr_menu(tmpwin, "Select glyphattr2 rendering:", &flags.glyphattr2);
 		destroy_nhwindow(tmpwin);
 		retval = TRUE;
     } else if (!strcmp("pickup_types", optname)) {
@@ -4668,8 +4754,12 @@ char *buf;
 			iflags.wc_map_mode == MAP_MODE_ASCII10x18 ? "ascii10x18" :
 			iflags.wc_map_mode == MAP_MODE_ASCII_FIT_TO_SCREEN ?
 			"fit_to_screen" : defopt);
-	else if (!strcmp(optname, "menustyle")) 
+	else if (!strcmp(optname, "menustyle"))
 		Sprintf(buf, "%s", menutype[(int)flags.menu_style] );
+	else if (!strcmp(optname, "glyphattr1"))
+		Sprintf(buf, "%s", glyphattrtype[(int)flags.glyphattr1]);
+	else if (!strcmp(optname, "glyphattr2"))
+		Sprintf(buf, "%s", glyphattrtype[(int)flags.glyphattr2]);
 	else if (!strcmp(optname, "menu_deselect_all"))
 		Sprintf(buf, "%s", to_be_done);
 	else if (!strcmp(optname, "menu_deselect_page"))

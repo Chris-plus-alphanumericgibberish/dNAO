@@ -2049,6 +2049,8 @@ E boolean FDECL(phantom_scorpions_sting, (struct monst *));
 E boolean FDECL(rot_caterpillars_bite, (struct monst *));
 E boolean FDECL(orc_mud_stabs, (struct monst *));
 E void FDECL(switch_stance, (struct monst *, boolean));
+E void FDECL(subout_stance, (struct monst *));
+E void NDECL(player_subout_stance);
 E void FDECL(adjust_etrait_stance, (struct monst *));
 
 /* ### monst.c ### */

@@ -123,6 +123,8 @@ dochugw(mtmp)
 	}
 #endif /* 0 */
 
+	if(mtmp->mcombat)
+		subout_stance(mtmp);
 	if(mtmp->mtyp == PM_CHORISTER_JELLY && mtmp->m_insight_level == 0){
 		mtmp->m_insight_level = 33 + rnd(11);
 	}
@@ -2653,6 +2655,10 @@ register int after;
 	    goto postmov;
 	}
 
+	/* Combat AI may be left on for a few turns. */
+	if (!rn2(3))
+		mtmp->mcombat = FALSE;
+
 	/* likewise for shopkeeper */
 	if(mtmp->isshk) {
 	    mmoved = shk_move(mtmp);
@@ -2681,6 +2687,7 @@ register int after;
 	    if((dist2(mtmp->mx, mtmp->my, tx, ty) < 2) &&
 	       intruder && (intruder != mtmp)) {
 			notonhead = (intruder->mx != tx || intruder->my != ty);
+			mtmp->mcombat = TRUE;
 			if(mattackm(mtmp, intruder)&(MM_AGR_DIED)) return(2);
 			mmoved = 1;
 			goto postmov;
@@ -2782,6 +2789,9 @@ not_special:
 	/* if monster has no idea where you could be, set appr to 0 */
 	if (gx == 0 && gy == 0)
 		appr = 0;
+
+	if (!mtmp->mpeaceful && appr != 0 && gx == mtmp->mux && gy == mtmp->muy)
+		mtmp->mcombat = TRUE;
 
 	if (( !mtmp->mpeaceful || mtmp->mtyp == PM_MAID || !rn2(10) )
 #ifdef REINCARNATION
@@ -3003,6 +3013,7 @@ not_special:
 					leader_target = FALSE;
 					gx = m2->mx;
 					gy = m2->my;
+					mtmp->mcombat = TRUE;
 					if(standoff(mtmp->data) && distminbest <= 4 && distminbest > 1)
 						; /* already at standoff range; wander rather than close in */
 					else {

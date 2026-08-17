@@ -48,10 +48,25 @@ typedef struct mi {
 #define ATR_BLINK   5
 #define ATR_INVERSE 7
 
-/* bitmask flags for mapglyph() oattr; powers of two, distinct from ATR_* */
+/* bitmask flags for mapglyph() oattr; distinct from ATR_*. Deliberately
+   vague -- the player decides what each bit should render as. */
 #define GLYPH_ATR_NONE     0x00
-#define GLYPH_ATR_ULINE    0x01
-#define GLYPH_ATR_ITALIC   0x02
+#define GLYPH_ATR_1        0x01
+#define GLYPH_ATR_2        0x02
+
+/* user-selectable rendering choices for GLYPH_ATR_1/2, set via the
+   glyphattr1/glyphattr2 options; not all are renderable everywhere
+   (see termcap.c/cursmain.c). */
+#define GLYPHATTR_NONE        0
+#define GLYPHATTR_INVERT      1
+#define GLYPHATTR_BOLD        2
+#define GLYPHATTR_ITALIC      3
+#define GLYPHATTR_ULINE       4
+#define GLYPHATTR_DOUBLEULINE 5
+#define GLYPHATTR_BLINK       6
+#define GLYPHATTR_CURLYULINE  7
+#define GLYPHATTR_STRIKE      8
+#define NUM_GLYPHATTRS        9
 
 /* nh_poskey() modifier types */
 #define CLICK_1     1

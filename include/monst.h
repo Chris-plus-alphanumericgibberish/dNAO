@@ -235,6 +235,10 @@ struct monst {
 #define MSTANCE_DEFAULT	0	/* normal behavior */
 #define MSTANCE_MELEE	1	/* prefer to close; actively approaches */
 #define MSTANCE_MAGIC	2	/* prefer distance; use spellcasting when adjacent */
+#define MSTANCE_VOMIT	3	/* silverknight: committed to a vomit attack */
+#define MSTANCE_PUSH	4	/* silverknight: committed to a push attack */
+#define MSTANCE_BAEL1	5	/* Bael: committed to the sword archon attack chain */
+#define MSTANCE_BAEL2	6	/* Bael: committed to the marilith-hands attack chain */
 #define non_weapon_stance(mon)	((mon)->mstance != MSTANCE_DEFAULT && (mon)->mstance != MSTANCE_MELEE)
 	long mwait;/* if tame, won't follow between levels (turn last ordered to wait on) */
 	int encouraged;	/* affected by Encourage song */

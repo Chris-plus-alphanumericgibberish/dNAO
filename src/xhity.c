@@ -2528,10 +2528,10 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 				add_subout(subout, SUBOUT_SPELLS);
 			}
 			else if(pa->mtyp == PM_SILVERKNIGHT){
-				if(!rn2(10)){
+				if(magr->mstance == MSTANCE_VOMIT){
 					add_subout(subout, SUBOUT_VOMIT);
 				}
-				else if(mdef && !youagr && magr->mhp < magr->mhpmax/2 && distmin(x(magr),y(magr),x(mdef),y(mdef)) <= 1){
+				else if(magr->mstance == MSTANCE_PUSH){
 					add_subout(subout, SUBOUT_PUSH);
 				}
 			}
@@ -2819,13 +2819,13 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		};
 		// first index -- determine which attack form
 		if (*indexnum == 0){
-			if (!rn2(7)){		// 1/7 of sword archon
+			if (magr->mstance == MSTANCE_BAEL1){
 				add_subout(subout, SUBOUT_BAEL1);
 			}
-			else if (!rn2(6)){	// 1/7 of marilith-hands
+			else if (magr->mstance == MSTANCE_BAEL2){
 				add_subout(subout, SUBOUT_BAEL2);
 			}
-			//else;				// 5/7 of normal
+			//else;				// normal
 		}
 		// If using marilith-hands or sword archon, sub out entire attack chain
 		if (check_subout(subout, SUBOUT_BAEL1)){

@@ -2271,6 +2271,32 @@ moveloop()
 					impossible("Re-trapping mon %s in vivi trap",noit_mon_nam(mtmp));
 					mtmp->mtrapped = TRUE;
 				}
+				//Stance failsafe (stances are per-species; polymorph clears but if there another path somewhere this will catch it)
+				switch(mtmp->mstance){
+					case MSTANCE_MAGIC:
+					case MSTANCE_MELEE:
+						if(mtmp->mtyp != PM_PIT_FIEND && mtmp->mtyp != PM_NESSIAN_PIT_FIEND && mtmp->mtyp != PM_BAEL){
+							impossible("Stale magic/melee stance on %s (fixed)", noit_mon_nam(mtmp));
+							mtmp->mstance = MSTANCE_DEFAULT;
+						}
+					break;
+					case MSTANCE_VOMIT:
+					case MSTANCE_PUSH:
+						if(mtmp->mtyp != PM_SILVERKNIGHT){
+							impossible("Stale vomit/push stance on %s (fixed)", noit_mon_nam(mtmp));
+							mtmp->mstance = MSTANCE_DEFAULT;
+						}
+					break;
+					case MSTANCE_BAEL1:
+					case MSTANCE_BAEL2:
+						if(mtmp->mtyp != PM_BAEL){
+							impossible("Stale Bael-form stance on %s (fixed)", noit_mon_nam(mtmp));
+							mtmp->mstance = MSTANCE_DEFAULT;
+						}
+					break;
+					default:
+					break;
+				}
 				/* Spot the monster for sanity purposes */
 				spot_monster(mtmp);
 				/* Loyal monsters slowly recover tameness */
@@ -3734,7 +3760,9 @@ karemade:
 		if(youmonst.mpunctured > 0 && rn2(2)) youmonst.mpunctured--;
 		
 		if(youmonst.mopen) youmonst.mopen--;
-		
+
+		player_subout_stance();
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 		if (flags.run_timers){
 			run_timers();

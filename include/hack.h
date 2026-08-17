@@ -336,6 +336,7 @@ NEARDATA extern coord bhitpos;	/* place where throw or zap hits or stops */
 
 /* Flags to control menus */
 #define MENUTYPELEN sizeof("traditional ")
+#define GLYPHATTRLEN sizeof("double-underline ")
 #define MENU_TRADITIONAL 0
 #define MENU_COMBINATION 1
 #define MENU_PARTIAL	 2

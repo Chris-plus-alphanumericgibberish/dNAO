@@ -2709,7 +2709,8 @@ tty_print_glyph(window, x, y, glyph)
 		reverse_on = TRUE;
     }
 
-    if (oattr & GLYPH_ATR_ULINE) term_start_attr(ATR_ULINE);
+    if (oattr & GLYPH_ATR_1) term_start_glyphattr((int)flags.glyphattr1);
+    if (oattr & GLYPH_ATR_2) term_start_glyphattr((int)flags.glyphattr2);
 #if defined(USE_TILES) && defined(MSDOS)
     if (iflags.grmode && iflags.tile_view)
       xputg(glyph,ch,special);
@@ -2724,7 +2725,8 @@ tty_print_glyph(window, x, y, glyph)
 #else
 	g_putch(ch);		/* print the character */
 #endif
-    if (oattr & GLYPH_ATR_ULINE) term_end_attr(ATR_ULINE);
+    if (oattr & GLYPH_ATR_2) term_end_glyphattr((int)flags.glyphattr2);
+    if (oattr & GLYPH_ATR_1) term_end_glyphattr((int)flags.glyphattr1);
 
     if (reverse_on) {
     	term_end_attr(ATR_INVERSE);

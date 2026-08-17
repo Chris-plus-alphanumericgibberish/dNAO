@@ -147,6 +147,8 @@ struct flag {
 	char	 end_disclose[NUM_DISCLOSURE_OPTIONS + 1];  /* disclose various info
 								upon exit */
 	char	 menu_style;	/* User interface style setting */
+	uchar	 glyphattr1;	/* rendering choice for GLYPH_ATR_1 (see wintype.h) */
+	uchar	 glyphattr2;	/* rendering choice for GLYPH_ATR_2 (see wintype.h) */
 #ifdef AMII_GRAPHICS
 	int numcols;
 	unsigned short amii_dripens[ 20 ]; /* DrawInfo Pens currently there are 13 in v39 */

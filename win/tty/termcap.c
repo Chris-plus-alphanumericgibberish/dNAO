@@ -1247,6 +1247,47 @@ term_end_raw_bold()
 }
 
 
+/* GLYPHATTR_* choices with no termcap capability (italic, double/curly-
+   underline, strikethrough, blink) go straight to raw ANSI SGR escapes
+   rather than s_atr2str()/e_atr2str(), which has no backing for them
+   (note: its ATR_BLINK path is dead code -- MB/MH are fetched inside
+   #if 0 above). */
+void
+term_start_glyphattr(int choice)
+{
+	switch (choice) {
+	case GLYPHATTR_INVERT: term_start_attr(ATR_INVERSE); break;
+	case GLYPHATTR_BOLD:   term_start_attr(ATR_BOLD);    break;
+	case GLYPHATTR_ULINE:  term_start_attr(ATR_ULINE);   break;
+	case GLYPHATTR_ITALIC:       xputs("\033[3m");   break;
+	case GLYPHATTR_DOUBLEULINE:  xputs("\033[21m");  break; /* best-effort; some terminals treat SGR21 as "bold off" */
+	case GLYPHATTR_CURLYULINE:   xputs("\033[4:3m"); break; /* non-standard extension; kitty/iTerm2/newer VTE only */
+	case GLYPHATTR_STRIKE:       xputs("\033[9m");   break;
+	case GLYPHATTR_BLINK:        xputs("\033[5m");   break;
+	case GLYPHATTR_NONE:
+	default: break;
+	}
+}
+
+
+void
+term_end_glyphattr(int choice)
+{
+	switch (choice) {
+	case GLYPHATTR_INVERT: term_end_attr(ATR_INVERSE); break;
+	case GLYPHATTR_BOLD:   term_end_attr(ATR_BOLD);    break;
+	case GLYPHATTR_ULINE:  term_end_attr(ATR_ULINE);   break;
+	case GLYPHATTR_ITALIC:       xputs("\033[23m"); break;
+	case GLYPHATTR_DOUBLEULINE:  xputs("\033[24m"); break;
+	case GLYPHATTR_CURLYULINE:   xputs("\033[4:0m"); break;
+	case GLYPHATTR_STRIKE:       xputs("\033[29m"); break;
+	case GLYPHATTR_BLINK:        xputs("\033[25m"); break;
+	case GLYPHATTR_NONE:
+	default: break;
+	}
+}
+
+
 #ifdef TEXTCOLOR
 
 void

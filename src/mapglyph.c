@@ -789,9 +789,24 @@ mapglyph(int glyph, glyph_t *ochar, int *ocolor, unsigned int *obgcolor, int *oa
 #endif
 
     if (is_monster_glyph) {
-		struct monst *mtmp = m_at(x, y);
-		if (mtmp && mtmp->mstance == MSTANCE_MAGIC)
-			attr |= GLYPH_ATR_ULINE;
+		struct monst *mtmp = m_u_at(x, y);
+		if (mtmp) {
+			switch (mtmp->mstance) {
+			case MSTANCE_MAGIC:
+			case MSTANCE_PUSH:
+				attr |= GLYPH_ATR_1;
+				break;
+			case MSTANCE_VOMIT:
+			case MSTANCE_BAEL1:
+				attr |= GLYPH_ATR_2;
+				break;
+			case MSTANCE_BAEL2:
+				attr |= GLYPH_ATR_1 | GLYPH_ATR_2;
+				break;
+			default:
+				break;
+			}
+		}
 	}
     *ochar = ch;
     *obgcolor = bgcolor;

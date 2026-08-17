@@ -912,6 +912,10 @@ struct monst *mon;
 		if(mon->mtyp == PM_CENTER_OF_ALL && Insight < 32)
 			base -= (32-Insight)/2;
 	}
+	if(mon->mstance == MSTANCE_PUSH && mon->mtyp == PM_SILVERKNIGHT){
+		/* arms crossed in front, not holding a weapon, brace the push */
+		base -= 2 - !!MON_WEP(mon) - !!MON_SWEP(mon);
+	}
 	if(mon->mtyp == PM_VERMIURGE && mon->mvar_vermiurge > 0)
 		base -= min(mon->mvar_vermiurge/10, 20);
 
@@ -1117,6 +1121,23 @@ struct monst *mon;
 				armac += arm_ac_bonus(obj);
 		}
 	}
+	//Weapon Stance AC
+	if(mon->mstance == MSTANCE_PUSH && mon->mtyp == PM_SILVERKNIGHT){
+		struct obj *monwep = MON_WEP(mon);
+		struct obj *monswapwep = MON_SWEP(mon);
+		if(monwep){
+			if(monwep->otyp == SILVERKNIGHT_SPEAR){
+				armac += 2;
+			}
+			else armac += 1 + monwep->spe/2;
+		}
+		if(monswapwep){
+			if(monswapwep->otyp == SILVERKNIGHT_SPEAR){
+				armac += 2;
+			}
+			else armac += 1 + monswapwep->spe/2;
+		}
+	}
 	//Weapon AC (primary only)
 	struct obj *monwep = MON_WEP(mon);
 	if(monwep){
@@ -1182,6 +1203,10 @@ struct monst *mon;
 		base -= mon->data->pac;
 		if(mon->mtyp == PM_CENTER_OF_ALL && Insight < 32)
 			base -= (32-Insight)/2;
+	}
+	if(mon->mstance == MSTANCE_PUSH && mon->mtyp == PM_SILVERKNIGHT){
+		/* arms crossed in front, not holding a weapon, brace the push */
+		base -= 2 - !!MON_WEP(mon) - !!MON_SWEP(mon);
 	}
 	if(mon->mtyp == PM_VERMIURGE && mon->mvar_vermiurge > 0)
 		base -= min(mon->mvar_vermiurge/10, 20);
@@ -1280,6 +1305,23 @@ struct monst *mon;
 				armac += shield_ac_mon(mon, obj);
 			else
 				armac += arm_ac_bonus(obj);
+		}
+	}
+	//Weapon Stance AC
+	if(mon->mstance == MSTANCE_PUSH && mon->mtyp == PM_SILVERKNIGHT){
+		struct obj *monwep = MON_WEP(mon);
+		struct obj *monswapwep = MON_SWEP(mon);
+		if(monwep){
+			if(monwep->otyp == SILVERKNIGHT_SPEAR){
+				armac += 2;
+			}
+			else armac += 1 + monwep->spe/2;
+		}
+		if(monswapwep){
+			if(monswapwep->otyp == SILVERKNIGHT_SPEAR){
+				armac += 2;
+			}
+			else armac += 1 + monswapwep->spe/2;
 		}
 	}
 	//Weapon AC (primary only)

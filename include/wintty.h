@@ -141,6 +141,8 @@ E void FDECL(term_start_attr,(int attr));
 E void FDECL(term_end_attr,(int attr));
 E void NDECL(term_start_raw_bold);
 E void NDECL(term_end_raw_bold);
+E void FDECL(term_start_glyphattr,(int choice));
+E void FDECL(term_end_glyphattr,(int choice));
 
 #ifdef TEXTCOLOR
 E void FDECL(term_start_bgcolor,(int color));

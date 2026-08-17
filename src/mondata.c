@@ -627,6 +627,9 @@ int newpm;
 	// mvar_spellweaver_last_cast = 0
 
 	mon->mvar3 = 0;
+
+	/* a stance is species-scoped; a form change invalidates the old one */
+	mon->mstance = MSTANCE_DEFAULT;
 }
 
 /*
