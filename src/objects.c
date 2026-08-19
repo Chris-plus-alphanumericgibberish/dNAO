@@ -2035,10 +2035,10 @@ ROCK(("eye"),		1,  0,   1, 0, 1, 1, 0, 0, 10, 5.5, GLASS, HI_GLASS, O_MATSPEC(ID
 GEM(("antimagic rift", "black-flawed white"),  0,  1, 4500, 15, 10, GEMSTONE, CLR_BLACK),
 GEM(("catapsi vortex",  "gray-flawed white"),  0,  1, 4500, 15, 10, GEMSTONE, CLR_GRAY),
 
-GEM(("sanctified ember", "glowing orange"),  0,  1,				777, 15,  9, GEMSTONE, CLR_ORANGE),
-GEM(("sanctified spark", "glowing white"),  0,  1, 				777, 15,  9, GEMSTONE, CLR_WHITE),
-GEM(("sanctified ice crystal", "hexagonal prism"),  0,  1, 		777, 15,  1, GEMSTONE, HI_GLASS),
-GEM(("sanctified calcite crystal", "hexagonal prism"),  0,  1, 	777, 15,  3, GEMSTONE, CLR_WHITE), 
+GEM(("sanctified ember", "glowing orange"),  0,  1,				777, 15,  9, GEMSTONE, CLR_ORANGE, O_NOWISH(1)),
+GEM(("sanctified spark", "glowing white"),  0,  1, 				777, 15,  9, GEMSTONE, CLR_WHITE, O_NOWISH(1)),
+GEM(("sanctified ice crystal", "hexagonal prism"),  0,  1, 		777, 15,  1, GEMSTONE, HI_GLASS, O_NOWISH(1)),
+GEM(("sanctified calcite crystal", "hexagonal prism"),  0,  1, 	777, 15,  3, GEMSTONE, CLR_WHITE, O_NOWISH(1)), 
 
 #undef GEM
 #undef ROCK
