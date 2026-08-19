@@ -910,7 +910,10 @@ pet_sphere_goal(struct monst *mtmp, struct edog *edog, int after, int udist, int
 	int distminbest = BOLT_LIM;
 	gtyp = UNDEF;
 	for(m2=fmon; m2; m2 = m2->nmon){
-		if(!m2->mtame && !m2->mpeaceful && distmin(mtmp->mx,mtmp->my,m2->mx,m2->my) < distminbest){
+		if(!m2->mtame && !m2->mpeaceful
+			&& distmin(mtmp->mx,mtmp->my,m2->mx,m2->my) < distminbest
+			&& clear_path(mtmp->mx, mtmp->my, m2->mx, m2->my)
+		){
 			distminbest = distmin(mtmp->mx,mtmp->my,m2->mx,m2->my);
 			gx = m2->mx;
 			gy = m2->my;
@@ -942,6 +945,7 @@ pet_sphere_goal(struct monst *mtmp, struct edog *edog, int after, int udist, int
 				gy += sdy;
 			}
 		}
+		appr = 1;
 	}
 	return appr;
 }
@@ -1419,8 +1423,9 @@ pet_goal(struct monst *mtmp, struct edog *edog, int after, int udist, int whappr
 #endif
 	if (mtmp->mleashed)
 		return leashed_goal(mtmp, edog);
-	if (mon_attacktype(mtmp, AT_EXPL))
+	if (mon_attacktype(mtmp, AT_EXPL)) {
 		return pet_sphere_goal(mtmp, edog, after, udist, whappr);
+	}
 	if (intelligent_mon(mtmp))
 		return intelligent_goal(mtmp, edog, after, udist, whappr);
 	return dog_goal(mtmp, edog, after, udist, whappr);
