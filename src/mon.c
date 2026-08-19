@@ -10968,18 +10968,18 @@ subout_stance(struct monst *mon)
 				mon->mstance = MSTANCE_BAEL1;
 				if (canseemon(mon)){
 					if(starting == mon->mstance)
-						pline("%s collection of severed hands continues to dance!", s_suffix(Monnam(mon)), mhis(mon));
+						pline("%s collection of severed hands continues to dance!", s_suffix(Monnam(mon)));
 					else
-						pline("%s collection of severed hands begins to dance!", s_suffix(Monnam(mon)), mhis(mon));
+						pline("%s collection of severed hands begins to dance!", s_suffix(Monnam(mon)));
 				}
 			}
 			else if (!rn2(6)) {
 				mon->mstance = MSTANCE_BAEL2;
 				if (canseemon(mon)){
 					if(starting == mon->mstance)
-						pline("%s severed arms continue to flail around!", s_suffix(Monnam(mon)), mhis(mon));
+						pline("%s severed arms continue to flail around!", s_suffix(Monnam(mon)));
 					else
-						pline("%s pair of severed arms begins to twitch and shake!", s_suffix(Monnam(mon)), mhis(mon));
+						pline("%s pair of severed arms begins to twitch and shake!", s_suffix(Monnam(mon)));
 				}
 			}
 		}
