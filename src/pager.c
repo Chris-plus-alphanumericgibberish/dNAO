@@ -1532,8 +1532,9 @@ do_look(quick)
 			sym = monsyms[(int)mons[glyph_to_mon(glyph)].mlet];
 			if(iflags.pokedex & POKEDEX_SHOW_ENCYC){
 				struct monst *mtmp = m_at(cc.x,cc.y);
-				if(!Hallucination && mtmp)
-					Sprintf(name, "%s", mtmp->data->mname);
+				if(!Hallucination && mtmp && !Delusion(mtmp))
+					Sprintf(name, "%s", (mtmp->m_ap_type == M_AP_MONSTER) ?
+							mons[mtmp->mappearance].mname : mtmp->data->mname);
 				else
 					Sprintf(name, "%s", mons[glyph_to_mon(glyph)].mname);
 			}
