@@ -6404,7 +6404,7 @@ int p_skill;
 boolean inc_penalties;
 {
 	int curskill = OLD_P_SKILL(p_skill),
-		maxskill = P_MAX_SKILL(p_skill);
+		maxskill = P_MAX_SKILL_CORE(p_skill, inc_penalties);
 	
 	/* Fine motor control drops to 0 while panicking */
 	if(inc_penalties && p_skill == P_WAND_POWER && Panicking){
