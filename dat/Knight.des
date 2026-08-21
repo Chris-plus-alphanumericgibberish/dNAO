@@ -602,6 +602,7 @@ NOMAP
 STAIR: random, up
 STAIR: random, down
 #
+OBJECT:'+', random, random
 OBJECT: random, random, random
 OBJECT: random, random, random
 OBJECT: random, random, random
