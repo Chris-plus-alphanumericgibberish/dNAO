@@ -3042,14 +3042,17 @@ mutations_enlightenment(boolean dumping)
 {
 	int i;
 	extern const struct mutationtype mutationtypes[];
+	boolean any_shown = FALSE;
 	if (!dumping)
 		en_win = create_nhwindow(NHW_MENU);
 	if(flags.aasimar_type){
 		aasimar_enlightenment_subroutine(dumping);
+		any_shown = TRUE;
 	}
 	for(i= 0; mutationtypes[i].mutation; i++){
 		if(u.next_tiefling_mutation == mutationtypes[i].mutation){
 			put_or_dump(mutationtypes[i].start_forming, dumping);
+			any_shown = TRUE;
 			break;
 		}
 	}
@@ -3062,7 +3065,16 @@ mutations_enlightenment(boolean dumping)
 			&& (mutationtypes[i].mutation != TWIN_SAVE || mtyp_on_level(PM_TWIN_SIBLING))
 		){
 			put_or_dump(mutationtypes[i].description, dumping);
+			any_shown = TRUE;
 		}
+	}
+	if(!any_shown){
+		if(Upolyd)
+			put_or_dump(dumping ? "Your mutations were suppressed while polymorphed."
+			                    : "Your mutations are suppressed while polymorphed.", dumping);
+		else
+			put_or_dump(dumping ? "Your mutations were suppressed."
+			                    : "Your mutations are suppressed.", dumping);
 	}
 	if (!dumping) {
 		display_nhwindow(en_win, TRUE);
