@@ -506,7 +506,7 @@ extern char ttycolors[CLR_MAX];	  /* in sys/msdos/video.c */
 
 static char def_inv_order[MAXOCLASSES] = {
 	COIN_CLASS, AMULET_CLASS, WEAPON_CLASS, ARMOR_CLASS, BELT_CLASS, FOOD_CLASS,
-	SCROLL_CLASS, TILE_CLASS, SPBOOK_CLASS, POTION_CLASS, RING_CLASS, WAND_CLASS,
+	SCROLL_CLASS, SANCTION_CLASS, TILE_CLASS, SPBOOK_CLASS, POTION_CLASS, RING_CLASS, WAND_CLASS,
 	TOOL_CLASS, GEM_CLASS, ROCK_CLASS, BALL_CLASS, CHAIN_CLASS, BED_CLASS, SCOIN_CLASS, 0,
 };
 
@@ -1045,21 +1045,32 @@ char *op;
 
     for (sp = op; *sp; sp++) {
 	oc_sym = def_char_to_objclass(*sp);
-	/* reject bad or duplicate entries */
+	/* reject bad or duplicate entries; validate against every class
+	   that's ever orderable (def_inv_order), not just whatever
+	   flags.inv_order happens to already contain -- flags.inv_order
+	   can be missing a class it hasn't been told about yet, e.g. one
+	   added to the game after it was last populated */
 	if (oc_sym == MAXOCLASSES ||
 		oc_sym == RANDOM_CLASS || oc_sym == ILLOBJ_CLASS ||
-		!index(flags.inv_order, oc_sym) || index(sp+1, *sp))
+		!index(def_inv_order, oc_sym) || index(sp+1, *sp))
 	    return 0;
 	/* retain good ones */
 	buf[num++] = (char) oc_sym;
     }
     buf[num] = '\0';
 
-    /* fill in any omitted classes, using previous ordering */
+    /* fill in any omitted classes: prefer the existing ordering, then
+       fall back to the compiled-in default for any class missing from
+       both the input and the existing ordering */
     for (sp = flags.inv_order; *sp; sp++)
 	if (!index(buf, *sp)) {
 	    buf[num++] = *sp;
 	    buf[num] = '\0';	/* explicitly terminate for next index() */
+	}
+    for (sp = def_inv_order; *sp; sp++)
+	if (!index(buf, *sp)) {
+	    buf[num++] = *sp;
+	    buf[num] = '\0';
 	}
 
     Strcpy(flags.inv_order, buf);
@@ -4019,6 +4030,76 @@ glyphattr_menu(winid tmpwin, const char *title, uchar *curval)
 	}
 }
 
+/*
+ * Interactively rebuild flags.inv_order one class at a time: each round
+ * offers the not-yet-placed classes by menu (accelerator + objexplain[]
+ * description), and the picked class becomes the next one down.  Choosing
+ * by menu entry keeps this immune to classes that share a display symbol
+ * (eg. ARMOR_CLASS/BELT_CLASS both use '[', SCROLL_CLASS/SANCTION_CLASS
+ * both use '?'), which a symbol-typing prompt can't tell apart.
+ *
+ * The candidate list is seeded from flags.inv_order and then topped up
+ * with any class in def_inv_order that isn't already present, so a
+ * class added to the game after flags.inv_order was last populated (the
+ * SANCTION_CLASS case that prompted this rewrite) still shows up instead
+ * of being silently unreachable.  Escaping out of a round keeps whatever
+ * classes are still unplaced in their prior relative order.
+ */
+static void
+packorder_menu(void)
+{
+	char remaining[MAXOCLASSES + 1], new_order[MAXOCLASSES + 1];
+	int n_remaining, n_new, i, idx;
+	winid tmpwin;
+	anything any;
+	menu_item *pick;
+	char buf[BUFSZ];
+
+	n_remaining = 0;
+	for (i = 0; flags.inv_order[i]; i++)
+		remaining[n_remaining++] = flags.inv_order[i];
+	remaining[n_remaining] = '\0';
+	for (i = 0; def_inv_order[i]; i++)
+		if (!index(remaining, def_inv_order[i])) {
+			remaining[n_remaining++] = def_inv_order[i];
+			remaining[n_remaining] = '\0';
+		}
+
+	n_new = 0;
+	while (n_remaining > 0) {
+		pick = (menu_item *)0;
+		tmpwin = create_nhwindow(NHW_MENU);
+		start_menu(tmpwin);
+		for (i = 0; i < n_remaining; i++) {
+			int oclass = (int) remaining[i];
+			any = zeroany;
+			any.a_int = i + 1;
+			Sprintf(buf, "%c  %s", def_oc_syms[oclass],
+				objexplain[oclass]);
+			add_menu(tmpwin, NO_GLYPH, &any, (char)('a' + i), 0,
+				 ATR_NONE, buf, MENU_UNSELECTED);
+		}
+		Sprintf(buf,
+		    "Pick the next class to list (%d placed; Esc keeps the rest as-is)",
+			n_new);
+		end_menu(tmpwin, buf);
+		idx = (select_menu(tmpwin, PICK_ONE, &pick) > 0) ?
+			pick->item.a_int - 1 : -1;
+		destroy_nhwindow(tmpwin);
+		if (pick) free((genericptr_t) pick);
+		if (idx < 0) break;
+
+		new_order[n_new++] = remaining[idx];
+		for (i = idx; i < n_remaining - 1; i++)
+			remaining[i] = remaining[i + 1];
+		n_remaining--;
+	}
+	for (i = 0; i < n_remaining; i++)
+		new_order[n_new++] = remaining[i];
+	new_order[n_new] = '\0';
+	Strcpy(flags.inv_order, new_order);
+}
+
 STATIC_OVL boolean
 special_handling(optname, setinitial, setfromfile)
 const char *optname;
@@ -4376,6 +4457,9 @@ boolean setinitial,setfromfile;
 			free((genericptr_t)mode_pick);
 		}
 		destroy_nhwindow(tmpwin);
+		retval = TRUE;
+	} else if (!strcmp("packorder", optname)) {
+		packorder_menu();
 		retval = TRUE;
 	} else if (!strcmp("runmode", optname)) {
 		const char *mode_name;

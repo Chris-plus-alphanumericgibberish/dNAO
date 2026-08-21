@@ -6273,7 +6273,7 @@ STATIC_VAR NEARDATA const char *names[] = { 0,
 	"Tools", "Comestibles", "Potions", "Scrolls", "Spellbooks",
 	"Wands", "Coins", "Gems", "Boulders/Statues", "Iron balls",
 	"Scrap", "Venoms", "Tiles", "Furnature", "Strange coins",
-	"Belts"
+	"Belts", "Sanctions"
 };
 
 STATIC_VAR NEARDATA const char *bogusclasses[] = {

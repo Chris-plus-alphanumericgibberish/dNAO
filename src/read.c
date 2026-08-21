@@ -840,9 +840,9 @@ do_read_sanction(struct obj *sanction)
 		impossible("Unknown sanction type in do_read_sanction.");
 		break;
 	}
+	makeknown(sanction->otyp);
 	if (!sanction->dknown) {
 		sanction->dknown = 1;
-		makeknown(sanction->otyp);
 	}
 	u.uconduct.literate++;
 	return MOVE_READ;

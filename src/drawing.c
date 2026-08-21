@@ -53,6 +53,7 @@ const char def_oc_syms[MAXOCLASSES] = {
 	BED_SYM,
 	SCOIN_SYM,
 	BELT_SYM,
+	SANCTION_SYM,
 };
 
 const char invisexplain[] = "remembered, unseen, creature";
@@ -80,7 +81,8 @@ const char * const objexplain[] = {	/* these match def_oc_syms, above */
 	"broken tile or slab",
 	"bed or chair",
 	"strange coin",
-	"belt"
+	"belt",
+	"hellish sanction",
 };
 
 /* Object class names.  Used in object_detect(). */
@@ -105,7 +107,8 @@ const char * const oclass_names[] = {
 	"venoms",
 	"tiles",
 	"furnature",
-	"strange coins"
+	"strange coins",
+	"foil talismans",
 };
 
 /* Default monster class symbols.  See monsym.h. */
@@ -1166,7 +1169,8 @@ static const glyph_t r_oc_syms[MAXOCLASSES] = {
 	VENOM_SYM,
 	TILE_SYM,
 	BED_SYM,
-	SCOIN_SYM
+	SCOIN_SYM,
+	SANCTION_SYM,
 };
 
 # ifdef ASCIIGRAPH
@@ -1214,6 +1218,7 @@ static const uchar IBM_r_oc_syms[MAXOCLASSES] = {	/* a la EPYX Rogue */
 	BED_SYM,
 	SCOIN_SYM,
 	BELT_SYM,
+	SANCTION_SYM,
 };
 # endif /* ASCIIGRAPH */
 
