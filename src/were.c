@@ -418,6 +418,12 @@ struct monst *mon;
 	}
 
 	were_transform(mon, pm);
+
+	/* were_transform()/set_mon_data() already reset mstance to
+	   MSTANCE_DEFAULT on any form change; give the new form a stance
+	   to start from if it's one that uses MSTANCE_MAGIC/MSTANCE_MELEE */
+	if (is_magic_melee_stance_mon(mon->data))
+		mon->mstance = mtarget_adjacent(mon) ? MSTANCE_MELEE : MSTANCE_MAGIC;
 }
 
 int

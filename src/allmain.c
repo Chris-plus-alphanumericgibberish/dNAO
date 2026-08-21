@@ -39,6 +39,7 @@ STATIC_DCL void FDECL(spot_monster, (struct monst *));
 STATIC_DCL void NDECL(sense_nearby_monsters);
 STATIC_DCL void NDECL(cthulhu_mind_blast);
 STATIC_DCL void FDECL(unseen_actions, (struct monst *));
+STATIC_DCL void FDECL(mammon_dive_progress, (struct monst *));
 STATIC_DCL void FDECL(blessed_spawn, (struct monst *));
 STATIC_DCL void FDECL(alkilith_spawn, (struct monst *));
 STATIC_DCL void FDECL(incarnator_action, (struct monst *));
@@ -2275,7 +2276,7 @@ moveloop()
 				switch(mtmp->mstance){
 					case MSTANCE_MAGIC:
 					case MSTANCE_MELEE:
-						if(mtmp->mtyp != PM_PIT_FIEND && mtmp->mtyp != PM_NESSIAN_PIT_FIEND && mtmp->mtyp != PM_BAEL){
+						if(!is_magic_melee_stance_mon(mtmp->data)){
 							impossible("Stale magic/melee stance on %s (fixed)", noit_mon_nam(mtmp));
 							mtmp->mstance = MSTANCE_DEFAULT;
 						}
@@ -5712,6 +5713,48 @@ struct monst *mon;
 		sib_follow(mon);
 	else if(mon->mtyp == PM_TWIN_SIBLING)
 		invisible_twin_act(mon);
+	else if(mon->mux == u.uz.dnum && mon->muy == u.uz.dlevel && mon->mtyp == PM_MAMMON
+			&& mon->mvar_mammon_dive_x)
+		mammon_dive_progress(mon);
+}
+
+/* Steps toward a freshly-recomputed goal, one square per elapsed turn
+ * (catching up all at once after a gap using the PC's current
+ * position). */
+STATIC_OVL void
+mammon_dive_progress(struct monst *mon)
+{
+	coord cc;
+	xchar cx, cy;
+	long nsteps = moves - mon->mvar_mammon_dive_turn;
+
+	if (nsteps < 1)
+		nsteps = 1;
+	mon->mvar_mammon_dive_turn = moves;
+
+	while (nsteps-- > 0) {
+		cx = mon->mvar_mammon_dive_x;
+		cy = mon->mvar_mammon_dive_y;
+
+		if (!mammon_swim_target(&cc, mon, cx, cy)) {
+			cc.x = cx; cc.y = cy;
+		}
+		if (cc.x == cx && cc.y == cy) {
+			mon->mtrack[1].x = cx;
+			mon->mtrack[1].y = cy;
+			mon_arrive_on_level(mon);
+			if (canspotmon(mon))
+				pline("%s bursts %s the %s!",
+					Monnam(mon),
+					!is_pool(mon->mx, mon->my, FALSE) ? "through" : "from",
+					surface(mon->mx, mon->my));
+			mammon_moat_here(mon->mx, mon->my, mon);
+			mon->mvar_mammon_dive_x = mon->mvar_mammon_dive_y = 0;
+			return;
+		}
+		mon->mvar_mammon_dive_x += sgn(cc.x - cx);
+		mon->mvar_mammon_dive_y += sgn(cc.y - cy);
+	}
 }
 
 static int goatkids[] = {PM_SMALL_GOAT_SPAWN, PM_GOAT_SPAWN, PM_GIANT_GOAT_SPAWN, 

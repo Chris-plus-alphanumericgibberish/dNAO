@@ -1852,6 +1852,9 @@ E void FDECL(mon_to_stone, (struct monst*));
 E void FDECL(mon_to_gold, (struct monst*));
 E void FDECL(mnexto, (struct monst *));
 E void FDECL(monline, (struct monst *));
+E boolean FDECL(mammon_swim_target, (coord *, struct monst *, int, int));
+E void FDECL(mammon_moat_here, (xchar, xchar, struct monst *));
+E void FDECL(mammon_dive, (struct monst *));
 E void FDECL(mofflin, (struct monst *));
 E void FDECL(mofflin_close, (struct monst *));
 E boolean FDECL(mnearto, (struct monst *,XCHAR_P,XCHAR_P,BOOLEAN_P));
@@ -3145,6 +3148,8 @@ E long FDECL(somegold, (long));
 E long NDECL(somegold);
 #endif
 E void FDECL(stealgold, (struct monst *));
+E void FDECL(steal_mongold_you, (struct monst *));
+E int FDECL(steal_mongold_mon, (struct monst *, struct monst *, BOOLEAN_P));
 E void FDECL(remove_worn_item, (struct obj *,BOOLEAN_P));
 E int FDECL(steal, (struct monst *, char *,int,int));
 E int FDECL(mpickobj, (struct monst *,struct obj *));

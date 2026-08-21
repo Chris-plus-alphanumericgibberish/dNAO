@@ -477,9 +477,11 @@
 #define DISPEL_MAGIC           MOON_BEAM+1
 #define METEOR_SWARM           DISPEL_MAGIC+1
 #define GREATER_DRAIN_ENERGY   METEOR_SWARM+1
+//115
+#define BURNING_COINS          GREATER_DRAIN_ENERGY+1
 
 
-#define MON_LASTSPELL          GREATER_DRAIN_ENERGY
+#define MON_LASTSPELL          BURNING_COINS
 //Not yet implemented
 // #define MON_FIRE               STRANGLE+1
 // #define MON_BLIZZARD           MON_FIRAGA+1

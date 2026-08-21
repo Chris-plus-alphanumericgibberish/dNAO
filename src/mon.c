@@ -1828,6 +1828,9 @@ struct monst *mtmp;
 	if (mtmp->cham && !rn2(6))
 	    (void) newcham(mtmp, NON_PM, FALSE, FALSE);
 	were_change(mtmp);
+	if(mtmp->mtyp == PM_MAMMON && Is_mammon_level(&u.uz) && !noactions(mtmp)
+			&& mtarget_adjacent(mtmp) && !rn2(3))
+		mammon_dive(mtmp);
 	if(mtmp->mtyp == PM_WARDEN_ARIANNA && Role_if(PM_CONVICT) && quest_status.time_doing_quest/CON_QUEST_INCREMENT >= 7){
 		if(canspotmon(mtmp)){
 			pline("%s is torn apart from within by rending chains!", Monnam(mtmp));
@@ -7130,6 +7133,76 @@ monline(mtmp)	/* Make monster mtmp next to you (if possible) */
 	return;
 }
 
+/* mtmp's current best swim-toward square: nearest open square for
+ * peaceful/tame, else the closest of 8 compass rays from the player
+ * beyond BOLT_LIM/2. Recomputed fresh every call. */
+boolean
+mammon_swim_target(coord *cc, struct monst *mtmp, int cx, int cy)
+{
+	static const int dx[8] = {0, 1,  0, -1, 1,  1, -1, -1};
+	static const int dy[8] = {1, 0, -1,  0, 1, -1, -1,  1};
+	int j, x, y, i, bx = -1, by = -1, bestdist = -1;
+
+	if (mtmp->mpeaceful || mtmp->mtame)
+		return enexto(cc, cx, cy, mtmp->data);
+
+	for (j = 0; j < 8; j++) {
+		x = u.ux; y = u.uy;
+		for (i = 1; i < BOLT_LIM; i++) {
+			int nx = x + dx[j], ny = y + dy[j];
+			if (!isok(nx, ny) || !goodpos(nx, ny, mtmp, 0) || IS_STWALL(levl[nx][ny].typ))
+				break;
+			x = nx; y = ny;
+		}
+		if (i <= BOLT_LIM/2 + 1)
+			continue;	/* ray doesn't reach a valid standoff distance */
+		{
+			int d = dist2(cx, cy, x, y);
+			if (bestdist < 0 || d < bestdist) { bestdist = d; bx = x; by = y; }
+		}
+	}
+	if (bx < 0) return FALSE;
+	cc->x = bx; cc->y = by;
+	return TRUE;
+}
+
+/* carve a moat at (x,y) on Mammon's behalf, if the terrain there is
+ * eligible -- used both where he dives under and where he bursts back
+ * out */
+void
+mammon_moat_here(xchar x, xchar y, struct monst *mtmp)
+{
+	if (ACCESSIBLE(levl[x][y].typ) && !IS_POOL(levl[x][y].typ)
+			&& levl[x][y].typ != STAIRS && levl[x][y].typ != LADDER
+			&& levl[x][y].typ != ALTAR && levl[x][y].typ != FOUNTAIN
+			&& levl[x][y].typ != SINK && levl[x][y].typ != THRONE
+			&& levl[x][y].typ != GRAVE) {
+		levl[x][y].typ = MOAT;
+		del_engr_ward_at(x, y);
+		water_damage(level.objects[x][y], FALSE, TRUE, level.flags.lethe, mtmp);
+		newsym(x, y);
+		if (m_at(x, y)) minliquid(m_at(x, y));
+	}
+}
+
+/* Mammon submerges at an adjacent target, leaving a moat behind, and
+ * begins swimming toward a target re-picked every turn. */
+void
+mammon_dive(struct monst *mtmp)
+{
+	xchar ox = mtmp->mx, oy = mtmp->my;
+
+	if (canseemon(mtmp))
+		pline("%s dives through the %s!", Monnam(mtmp), surface(ox, oy));
+
+	mammon_moat_here(ox, oy, mtmp);
+
+	mtmp->mvar_mammon_dive_x = ox;
+	mtmp->mvar_mammon_dive_y = oy;
+	mtmp->mvar_mammon_dive_turn = moves;
+	migrate_to_level(mtmp, ledger_no(&u.uz), MIGR_EXACT_XY, (coord *)0);
+}
+
 void
 mofflin(mtmp)	/* Make monster mtmp near to you (if possible) */
 	struct monst *mtmp;
@@ -10887,7 +10960,7 @@ switch_stance(struct monst *mon, boolean reaction)
 		   impossibility; only fire when not in reaction mode */
 		else if (!reaction &&
 			!mon->mflee && !mon->mconf && !mon->mstun &&
-			mtarget_adjacent(mon) && !rn2(4)
+			mtarget_adjacent(mon) && (mon->mtyp == PM_BAEL || !rn2(4))
 		) {
 			mon->mstance = MSTANCE_MELEE;
 			changed = TRUE;

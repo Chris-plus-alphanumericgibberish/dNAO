@@ -415,6 +415,7 @@ struct monst {
 #define	mvar1_afreet_lastsaw	mvar1
 #define mvar1_halo_sec_element	mvar1
 #define	mvar1_summon_ID			mvar1
+#define	mvar_mammon_dive_x	mvar1
 	long mvar2;
 #define	mvar_dracaePregTimer	mvar2
 #define	mvar_spList_2	mvar2
@@ -422,9 +423,11 @@ struct monst {
 #define	mvar_attack_pm	mvar2
 #define	mvar_elfwraith_spell	mvar2
 #define	mvar_spellweaver_seed	mvar2
+#define	mvar_mammon_dive_y	mvar2
 	long mvar3;
 #define	mvar_conversationTracker	mvar3
 #define	mvar_lifesigns	mvar3
+#define	mvar_mammon_dive_turn	mvar3
 #define	mvar_spellweaver_last_cast	mvar3
 #define has_lifesigns(mon)	(mon->mtyp != PM_SPELLWEAVER && mon->mtyp != PM_SPELLWEAVER_GODDESS_MOCKER && mon->mtyp != PM_CHAOS && mon->mvar_lifesigns)
 

@@ -2168,6 +2168,70 @@ choose_magic_special(struct monst *mtmp, unsigned int type, int i)
 			break;
 		}
 	break;
+	case PM_BAEL:
+		switch(rn2(9)){
+			case 0:
+				return choose_magic_spell(wzrd_spell_power, mtmp->m_id,!(mtmp->mpeaceful));
+			break;
+			case 1:
+				// return BLASPHEMY;
+			break;
+			case 2:
+				return GREATER_DRAIN_ENERGY;
+			break;
+			case 3:
+				return DISPEL_MAGIC;
+			break;
+			case 4:
+				//Summon indwelling devil
+				return PSI_BOLT;
+			break;
+			case 5:
+				return PAIN_BOLT;
+			break;
+			case 6:
+				return METEOR_SWARM;
+			break;
+			case 7:
+				return MON_FIRAGA;
+			break;
+			case 8:
+				return (mtmp->permspeed == MFAST) ? METEOR_SWARM : HASTE_SELF;
+			break;
+		}
+	break;
+	case PM_GREEN_PIT_FIEND:
+		switch(rn2(9)){
+			case 0:
+				return choose_magic_spell(wzrd_spell_power, mtmp->m_id,!(mtmp->mpeaceful));
+			break;
+			case 1:
+				// return BLASPHEMY;
+			break;
+			case 2:
+				return GREATER_DRAIN_ENERGY;
+			break;
+			case 3:
+				return DISPEL_MAGIC;
+			break;
+			case 4:
+				//Summon indwelling devil
+				return PSI_BOLT;
+			break;
+			case 5:
+				return BARF_BOLT;
+			break;
+			case 6:
+				return BURNING_COINS;
+			break;
+			case 7:
+				return MON_POISON_GAS;
+			break;
+			case 8:
+				return (mtmp->permspeed == MFAST) ? ACID_BLAST :  HASTE_SELF;
+			break;
+		}
+	break;
 	case PM_ANCIENT_OF_THE_BURNING_WASTES:
 		switch(rn2(2)){
 			case 0:
@@ -2530,6 +2594,7 @@ const char * spellname[] =
 	"DISPEL_MAGIC",
 	"METEOR_SWARM",
 	"GREATER_DRAIN_ENERGY",
+	"BURNING_COINS",
 	//115
 };
 
@@ -3175,6 +3240,7 @@ int tary;
 			if (!UseInvShock_res(mdef)){
 				destroy_item(mdef, WAND_CLASS, AD_ELEC);
 			}
+			dmg = elemental_dmg_resistance(mdef, magr, dmg, AD_ELEC);
 			return xdamagey(magr, mdef, attk, dmg);
 
 		case AD_FIRE:
@@ -3205,6 +3271,7 @@ int tary;
 				burn_away_slime();
 				melt_frozen_air();
 			}
+			dmg = elemental_dmg_resistance(mdef, magr, dmg, AD_FIRE);
 			return xdamagey(magr, mdef, attk, dmg);
 
 		case AD_MADF:
@@ -3287,6 +3354,7 @@ int tary;
 			if (youdef) {
 				roll_frigophobia();
 			}
+			dmg = elemental_dmg_resistance(mdef, magr, dmg, AD_COLD);
 			return xdamagey(magr, mdef, attk, dmg);
 
 		case AD_MAGM:
@@ -4081,6 +4149,7 @@ int tary;
 			else {
 				dmg = d(8, 6);
 				dmg = reduce_dmg(mdef,dmg,FALSE,TRUE);
+				dmg = elemental_dmg_resistance(mdef, magr, dmg, AD_ELEC);
 				if(youdef){
 					IMPURITY_UP(u.uimp_disaster)
 				}
@@ -4133,6 +4202,7 @@ int tary;
 				shieldeff(mdef->mx, mdef->my);
 			} else {
 				dmg = d(min(10, Insight/11*2),6);
+				dmg = elemental_dmg_resistance(mdef, magr, dmg, AD_ELEC);
 			}
 		}
 		return xdamagey(magr, mdef, attk, dmg);
@@ -4159,6 +4229,7 @@ int tary;
 			else {
 				dmg = d(8, 6);
 				dmg = reduce_dmg(mdef,dmg,FALSE,TRUE);
+				dmg = elemental_dmg_resistance(mdef, magr, dmg, AD_FIRE);
 			}
 			if(youdef){
 				IMPURITY_UP(u.uimp_disaster)
@@ -4257,10 +4328,8 @@ int tary;
 			}
 			if(spell == STEAM_GEYSER && dunked){
 				if(!Fire_res(mdef)){
-					if(dunked == TOTAL_DUNK)
-						dmg += d(3,6);
-					else
-						dmg += d(1,10);
+					int steamdmg = (dunked == TOTAL_DUNK) ? d(3,6) : d(1,10);
+					dmg += elemental_dmg_resistance(mdef, magr, steamdmg, AD_FIRE);
 				}
 				//Boiling water just boils potions
 				if(dunked == TOTAL_DUNK && !UseInvFire_res(mdef)){
@@ -4297,6 +4366,7 @@ int tary;
 				/* check resistance and override damage */
 				dmg = d(8, 6);
 				dmg = reduce_dmg(mdef,dmg,FALSE,TRUE);
+				dmg = elemental_dmg_resistance(mdef, magr, dmg, AD_ACID);
 				if(youdef){
 					IMPURITY_UP(u.uimp_disaster)
 				}
@@ -4444,6 +4514,7 @@ int tary;
 			}
 			else {
 				cdmg = reduce_dmg(mdef,cdmg,FALSE,TRUE);
+				cdmg = elemental_dmg_resistance(mdef, magr, cdmg, AD_COLD);
 			}
 			if (!UseInvCold_res(mdef)) {
 				destroy_item(mdef, POTION_CLASS, AD_COLD);
@@ -4487,6 +4558,7 @@ int tary;
 			}
 			else {
 				cdmg = reduce_dmg(mdef,cdmg,FALSE,TRUE);
+				cdmg = elemental_dmg_resistance(mdef, magr, cdmg, AD_FIRE);
 			}
 			if (!UseInvFire_res(mdef)) {
 				destroy_item(mdef, POTION_CLASS, AD_FIRE);
@@ -4494,6 +4566,74 @@ int tary;
 
 			/* sum damage components to override dmg */
 			dmg = pdmg + cdmg;
+		}
+		return xdamagey(magr, mdef, attk, dmg);
+
+	case BURNING_COINS:
+		if (!foundem) {
+			impossible("burning coins with no mdef?");
+			return MM_MISS;
+		}
+		else {
+			/* attributes are rolled fresh each cast */
+			boolean slashing = !rn2(2);
+			boolean acid = !rn2(2);
+			int pdmg = ((dmg + 1)/2);	/* physical */
+			int edmg = ((dmg + 1)/2);	/* fire or acid */
+			const char *burntype = youdef ? "burning" : (acid ? "sizzling" : "white-hot");
+			/* message */
+			if (youagr || youdef || canseemon(mdef)) {
+				pline("A hail of %s coins %s %s from all sides!",
+					burntype,
+					slashing ? "shreds" : "batters",
+					youdef ? "you" : mon_nam(mdef));
+			}
+			if(youdef){
+				IMPURITY_UP(u.uimp_disaster)
+			}
+
+			/* cursed gold sears unholy-haters */
+			if (hates_unholy_mon(mdef)) {
+				if (youagr || youdef || canseemon(mdef))
+					pline("The cursed gold sears %s!",
+						youdef ? "you" : mon_nam(mdef));
+				pdmg += d((dmg+2)/3, 20);
+			}
+
+			/* acid coins can leave the target ill, echoing FILTH */
+			if (acid && !rn2(2)) {
+				if (youdef) {
+					if (!Sick && !umechanoid) make_sick((long)rn1(ACURR(A_CON), 20),
+						magr->data->mname, TRUE, SICK_NONVOMITABLE);
+				}
+				else if (!Sick_res(mdef)) {
+					/* mirrors OPOISON_FILTH's weapon damage instead of an instakill: major effect 1/10 of the time */
+					pdmg += !rn2(10) ? 100 : rnd(12);
+				}
+			}
+
+			/* calculate physical damage */
+			pdmg = reduce_dmg(mdef,pdmg,TRUE,FALSE);
+			/* apply average DR */
+			pdmg -= max(0, (youdef ? u.udr : avg_mdr(mdef)));
+			if (pdmg < 1)
+				pdmg = 1;
+
+			/* calculate fire/acid damage */
+			if (acid ? Acid_res(mdef) : Fire_res(mdef)) {
+				shieldeff(x(mdef), y(mdef));
+				edmg = 0;
+			}
+			else {
+				edmg = reduce_dmg(mdef,edmg,FALSE,TRUE);
+				edmg = elemental_dmg_resistance(mdef, magr, edmg, acid ? AD_ACID : AD_FIRE);
+			}
+			if (acid ? !UseInvAcid_res(mdef) : !UseInvFire_res(mdef)) {
+				destroy_item(mdef, POTION_CLASS, AD_FIRE);
+			}
+
+			/* sum damage components to override dmg */
+			dmg = pdmg + edmg;
 		}
 		return xdamagey(magr, mdef, attk, dmg);
 
@@ -4548,6 +4688,7 @@ int tary;
 			}
 			else {
 				cdmg = reduce_dmg(mdef,cdmg,FALSE,TRUE);
+				cdmg = elemental_dmg_resistance(mdef, magr, cdmg, AD_COLD);
 			}
 			if (!UseInvCold_res(mdef)) {
 				destroy_item(mdef, POTION_CLASS, AD_COLD);
@@ -4589,6 +4730,7 @@ int tary;
 			}
 			else {
 				fdmg = reduce_dmg(mdef,fdmg,FALSE,TRUE);
+				fdmg = elemental_dmg_resistance(mdef, magr, fdmg, AD_FIRE);
 			}
 			if (!UseInvFire_res(mdef)) {
 				destroy_item(mdef, POTION_CLASS, AD_FIRE);
@@ -4710,6 +4852,7 @@ int tary;
 			}
 			else {
 				ldmg = reduce_dmg(mdef,ldmg,FALSE,TRUE);
+				ldmg = elemental_dmg_resistance(mdef, magr, ldmg, AD_ELEC);
 			}
 			if (!UseInvShock_res(mdef)) {
 				destroy_item(mdef, WAND_CLASS, AD_ELEC);
@@ -4756,6 +4899,7 @@ int tary;
 			}
 			else {
 				cdmg = reduce_dmg(mdef,cdmg,FALSE,TRUE);
+				cdmg = elemental_dmg_resistance(mdef, magr, cdmg, AD_COLD);
 			}
 			if (!UseInvCold_res(mdef)) {
 				destroy_item(mdef, POTION_CLASS, AD_COLD);
@@ -5077,23 +5221,19 @@ int tary;
 				}
 			}
 
+			/* piddling physical damage, regardless of sickness resistance */
+			dmg = rnd(10);
+
 			/* apply sickness to defender (player-only) */
 			if (youdef) {
 				if (!Sick && !umechanoid) make_sick((long)rn1(ACURR(A_CON), 20), /* Don't make the PC more sick */
 					magr->data->mname, TRUE, SICK_NONVOMITABLE);
 			}
 			else if (!Sick_res(mdef)) {
-				/* 1/10 chance of instakill */
-				if (!rn2(10)){
-					if (youagr) killed(mdef);
-					else monkilled(mdef, "", AD_SPEL);
-					/* instakill */
-					return ((*hp(mdef) > 0 ? MM_DEF_LSVD : MM_DEF_DIED) | MM_HIT);
-				}
+				/* mirrors OPOISON_FILTH's weapon damage instead of an instakill: major effect 1/10 of the time */
+				dmg += !rn2(10) ? 100 : rnd(12);
 			}
 
-			/* piddling physical damage, regardless of sickness resistance */
-			dmg = rnd(10);
 			dmg = reduce_dmg(mdef,dmg,TRUE,FALSE);
 		}
 		return xdamagey(magr, mdef, attk, dmg);
@@ -5219,6 +5359,7 @@ int tary;
 					pline("%s %s shocked by %s of silver light!",
 					youdef ? "You" : Monnam(mdef), youdef ? "are" : "is", rays);
 				dmg = d(n*2, 20);
+				dmg = elemental_dmg_resistance(mdef, magr, dmg, AD_ELEC);
 				if (!UseInvShock_res(mdef)) {
 					destroy_item(mdef, WAND_CLASS, AD_ELEC);
 					destroy_item(mdef, RING_CLASS, AD_ELEC);
@@ -5229,6 +5370,7 @@ int tary;
 					pline("%s %s burned by %s of silver light!",
 					youdef ? "You" : Monnam(mdef), youdef ? "are" : "is", rays);
 				dmg = d(n*2, 20);
+				dmg = elemental_dmg_resistance(mdef, magr, dmg, AD_ACID);
 				if (!UseInvAcid_res(mdef)) {
 					destroy_item(mdef, POTION_CLASS, AD_FIRE);
 				}
@@ -5238,6 +5380,7 @@ int tary;
 					pline("%s %s burned by %s of silver light!",
 					youdef ? "You" : Monnam(mdef), youdef ? "are" : "is", rays);
 				dmg = (d(n, 20) * 3 + 1) / 2;
+				dmg = elemental_dmg_resistance(mdef, magr, dmg, AD_FIRE);
 				if (!UseInvFire_res(mdef)) {
 					destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
 					destroy_item(mdef, POTION_CLASS, AD_FIRE);
@@ -5249,6 +5392,7 @@ int tary;
 					pline("%s %s frozen by %s of silver light!",
 					youdef ? "You" : Monnam(mdef), youdef ? "are" : "is", rays);
 				dmg = (d(n, 20) * 3 + 1) / 2;
+				dmg = elemental_dmg_resistance(mdef, magr, dmg, AD_COLD);
 				if (!UseInvCold_res(mdef)) {
 					destroy_item(mdef, POTION_CLASS, AD_COLD);
 				}
@@ -5276,6 +5420,7 @@ int tary;
 					pline("%s %s burned by %s of silver light!",
 					youdef ? "You" : Monnam(mdef), youdef ? "are" : "is", rays);
 				dmg = d(n, 20);
+				dmg = elemental_dmg_resistance(mdef, magr, dmg, AD_FIRE);
 				if (!UseInvFire_res(mdef)) {
 					destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
 					destroy_item(mdef, POTION_CLASS, AD_FIRE);
@@ -5287,6 +5432,7 @@ int tary;
 					pline("%s %s shocked by %s of silver light!",
 					youdef ? "You" : Monnam(mdef), youdef ? "are" : "is", rays);
 				dmg = d(n, 20);
+				dmg = elemental_dmg_resistance(mdef, magr, dmg, AD_ELEC);
 				if (!UseInvShock_res(mdef)) {
 					destroy_item(mdef, WAND_CLASS, AD_ELEC);
 					destroy_item(mdef, RING_CLASS, AD_ELEC);
@@ -5297,6 +5443,7 @@ int tary;
 					pline("%s %s frozen by %s of silver light!",
 					youdef ? "You" : Monnam(mdef), youdef ? "are" : "is", rays);
 				dmg = d(n, 20);
+				dmg = elemental_dmg_resistance(mdef, magr, dmg, AD_COLD);
 				if (!UseInvCold_res(mdef)) {
 					destroy_item(mdef, POTION_CLASS, AD_COLD);
 				}
@@ -5306,6 +5453,7 @@ int tary;
 					pline("%s %s burned by %s of silver light!",
 					youdef ? "You" : Monnam(mdef), youdef ? "are" : "is", rays);
 				dmg = d(n, 20);
+				dmg = elemental_dmg_resistance(mdef, magr, dmg, AD_ACID);
 				if (!UseInvAcid_res(mdef)) {
 					destroy_item(mdef, POTION_CLASS, AD_FIRE);
 				}
@@ -5335,7 +5483,8 @@ int tary;
 					pline("%s %s shocked by golden light!",
 					youdef ? "You" : Monnam(mdef), youdef ? "are" : "is");
 				dmg = d(4, 12);
-				if (!UseInvFire_res(mdef)) {
+				dmg = elemental_dmg_resistance(mdef, magr, dmg, AD_ELEC);
+				if (!UseInvShock_res(mdef)) {
 					destroy_item(mdef, WAND_CLASS, AD_ELEC);
 					destroy_item(mdef, RING_CLASS, AD_ELEC);
 				}
@@ -5345,6 +5494,7 @@ int tary;
 					pline("%s %s burned by golden light!",
 					youdef ? "You" : Monnam(mdef), youdef ? "are" : "is");
 				dmg = d(4, 12);
+				dmg = elemental_dmg_resistance(mdef, magr, dmg, AD_ACID);
 				if (!UseInvAcid_res(mdef)) {
 					destroy_item(mdef, POTION_CLASS, AD_FIRE);
 				}
@@ -5354,6 +5504,7 @@ int tary;
 					pline("%s %s burned by golden light!",
 					youdef ? "You" : Monnam(mdef), youdef ? "are" : "is");
 				dmg = (d(2, 12) * 3 + 1) / 2;
+				dmg = elemental_dmg_resistance(mdef, magr, dmg, AD_FIRE);
 				if (!UseInvFire_res(mdef)) {
 					destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
 					destroy_item(mdef, POTION_CLASS, AD_FIRE);
@@ -5365,6 +5516,7 @@ int tary;
 					pline("%s %s frozen by golden light!",
 					youdef ? "You" : Monnam(mdef), youdef ? "are" : "is");
 				dmg = (d(2, 12) * 3 + 1) / 2;
+				dmg = elemental_dmg_resistance(mdef, magr, dmg, AD_COLD);
 				if (!UseInvCold_res(mdef)) {
 					destroy_item(mdef, POTION_CLASS, AD_COLD);
 				}
@@ -5398,6 +5550,7 @@ int tary;
 					pline("%s %s burned by golden light!",
 					youdef ? "You" : Monnam(mdef), youdef ? "are" : "is");
 				dmg = d(2, 12);
+				dmg = elemental_dmg_resistance(mdef, magr, dmg, AD_FIRE);
 				if (!UseInvFire_res(mdef)) {
 					destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
 					destroy_item(mdef, POTION_CLASS, AD_FIRE);
@@ -5409,6 +5562,7 @@ int tary;
 					pline("%s %s shocked by golden light!",
 					youdef ? "You" : Monnam(mdef), youdef ? "are" : "is");
 				dmg = d(2, 12);
+				dmg = elemental_dmg_resistance(mdef, magr, dmg, AD_ELEC);
 				if (!UseInvShock_res(mdef)) {
 					destroy_item(mdef, WAND_CLASS, AD_ELEC);
 					destroy_item(mdef, RING_CLASS, AD_ELEC);
@@ -5419,6 +5573,7 @@ int tary;
 					pline("%s %s frozen by golden light!",
 					youdef ? "You" : Monnam(mdef), youdef ? "are" : "is");
 				dmg = d(2, 12);
+				dmg = elemental_dmg_resistance(mdef, magr, dmg, AD_COLD);
 				if (!UseInvCold_res(mdef)) {
 					destroy_item(mdef, POTION_CLASS, AD_COLD);
 				}
@@ -5428,6 +5583,7 @@ int tary;
 					pline("%s %s burned by golden light!",
 					youdef ? "You" : Monnam(mdef), youdef ? "are" : "is");
 				dmg = d(2, 12);
+				dmg = elemental_dmg_resistance(mdef, magr, dmg, AD_ACID);
 				if (!UseInvAcid_res(mdef)) {
 					destroy_item(mdef, POTION_CLASS, AD_FIRE);
 				}
@@ -7587,6 +7743,7 @@ int spellnum;
 	case HAIL_FLURY:
 	case ICE_STORM:
 	case METEOR_SWARM:
+	case BURNING_COINS:
 	case PYRO_STORM:
 	case SANDSTORM:
 	case GOD_RAY:

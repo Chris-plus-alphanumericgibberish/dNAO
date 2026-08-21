@@ -9452,66 +9452,11 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 			}
 		}
 		else if (youagr) {
-#ifndef GOLDOBJ
-			if (mdef->mgold) {
-				u.ugold += mdef->mgold;
-				mdef->mgold = 0;
-				Your("purse feels heavier.");
-				IMPURITY_UP(u.uimp_theft)
-			}
-#else
-			/* This you as a leprechaun, so steal
-			real gold only, no lesser coins */
-			{
-				struct obj *mongold = findgold(mdef->minvent);
-				if (mongold) {
-					obj_extract_self(mongold);
-					if (merge_choice(invent, mongold) || inv_cnt() < 52) {
-						addinv(mongold);
-						Your("purse feels heavier.");
-						IMPURITY_UP(u.uimp_theft)
-					}
-					else {
-						You("grab %s's gold, but find no room in your knapsack.", mon_nam(mdef));
-						dropy(mongold);
-					}
-				}
-			}
-#endif
-			exercise(A_DEX, TRUE);
+			steal_mongold_you(mdef);
 		}
 		else {
-			if (notmcan) {
-#ifndef GOLDOBJ
-				if (mdef->mgold) {
-					/* technically incorrect; no check for stealing gold from
-					 * between mdef's feet...
-					 */
-					magr->mgold += mdef->mgold;
-					mdef->mgold = 0;
-#else
-					/* technically incorrect; no check for stealing gold from
-					* between mdef's feet...
-					*/
-					struct obj *gold = findgold(mdef->minvent);
-					if (gold) {
-						obj_extract_self(gold);
-						add_to_minv(magr, gold);
-					}
-#endif
-					mdef->mstrategy &= ~STRAT_WAITFORU;
-					if (vis) {
-						Strcpy(buf, Monnam(magr));
-						pline("%s steals some gold from %s.", buf, mon_nam(mdef));
-					}
-					if (!tele_restrict(magr)) {
-						(void)rloc(magr, TRUE);
-						result |= MM_AGR_STOP;
-						if (vis && !canspotmon(magr))
-							pline("%s suddenly disappears!", Monnam(magr));
-					}
-				}
-			}
+			if (notmcan)
+				result |= steal_mongold_mon(magr, mdef, vis);
 		}
 		return result;
 

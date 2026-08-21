@@ -1087,6 +1087,19 @@ mvm_widegaze(struct monst *gazemon, struct monst *mtmp)
 	return 0;
 }
 
+/* peaceful monster that whispers Demonic Blackmail (see dochug()) rather
+ * than just standing there -- prison guards use MS_BRIBE for their own
+ * unrelated extortion and are excluded */
+STATIC_OVL boolean
+bribe_seeking_peaceful(struct monst *mtmp)
+{
+	return mtmp->data->msound == MS_BRIBE
+#ifdef CONVICT
+		&& monsndx(mtmp->data) != PM_PRISON_GUARD
+#endif
+		&& mtmp->mpeaceful && !mtmp->mtame;
+}
+
 /* returns 1 if monster died moving, 0 otherwise */
 /* The whole dochugw/m_move/distfleeck/mfndpos section is serious spaghetti
  * code. --KAA
@@ -1807,12 +1820,8 @@ register struct monst *mtmp;
 	}
 
 	/* Demonic Blackmail! */
-	if(nearby && mdat->msound == MS_BRIBE &&
-#ifdef CONVICT
-       (monsndx(mdat) != PM_PRISON_GUARD) &&
-#endif /* CONVICT */
-       !no_upos(mtmp) &&
-	   mtmp->mpeaceful && !mtmp->mtame && !u.uswallow) {
+	if(nearby && bribe_seeking_peaceful(mtmp) &&
+       !no_upos(mtmp) && !u.uswallow) {
 		if (mtmp->mux != u.ux || mtmp->muy != u.uy) {
 			pline("%s whispers at thin air.", Monnam(mtmp));
 
@@ -2754,7 +2763,7 @@ not_special:
 		
 		if ((youmonst.m_ap_type == M_AP_OBJECT && youmonst.mappearance == STRANGE_OBJECT) || u.uundetected ||
 		    (youmonst.m_ap_type == M_AP_OBJECT && youmonst.mappearance == GOLD_PIECE && !likes_gold(ptr)) ||
-		    (mtmp->mpeaceful && !mtmp->isshk) ||  /* allow shks to follow */
+		    (mtmp->mpeaceful && !mtmp->isshk && !bribe_seeking_peaceful(mtmp)) ||  /* allow shks to follow, and MS_BRIBE demons to close in for blackmail */
 		    ((monsndx(ptr) == PM_STALKER || is_bat(ptr) || monsndx(ptr) == PM_HUNTING_HORROR ||
 		      ptr->mlet == S_LIGHT) && !rn2(3)))
 			appr = 0;

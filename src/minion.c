@@ -292,7 +292,7 @@ struct monst *
 msummon_vortex(int dtype, int x, int y, struct monst *summoner, int base_duration)
 {
 	struct monst *vortex = makemon(&mons[PM_SUMMONING_VORTEX], x, y,
-	                               MM_ESUM|MM_ADJACENTSTRICT);
+	                               MM_ESUM|MM_ADJACENTOK|MM_ADJACENTSTRICT);
 	if (vortex) {
 		vortex->mvar1_summon_ID = dtype;
 		mark_mon_as_summoned(vortex, summoner, base_duration +

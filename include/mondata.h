@@ -444,6 +444,11 @@
 							 (ptr)->mtyp == PM_DUERGAR_ANNIHILATOR)
 #define is_kuo_toa(ptr)		((ptr)->mtyp == PM_KUO_TOA ||\
 							 (ptr)->mtyp == PM_KUO_TOA_WHIP)
+/* valid holders of MSTANCE_MAGIC/MSTANCE_MELEE (see monst.h) */
+#define is_magic_melee_stance_mon(ptr)		((ptr)->mtyp == PM_PIT_FIEND ||\
+							 (ptr)->mtyp == PM_NESSIAN_PIT_FIEND ||\
+							 (ptr)->mtyp == PM_GREEN_PIT_FIEND ||\
+							 (ptr)->mtyp == PM_BAEL)
 #define is_vampire(ptr)		(((ptr)->mflagsa & MA_VAMPIRE) != 0L)
 #define is_half_dragon(ptr)		attacktype_fordmg(ptr, AT_BREA, AD_HDRG)
 #define is_boreal_dragoon(ptr)		(attacktype_fordmg(ptr, AT_WEAP, AD_HDRG) || attacktype_fordmg(ptr, AT_XWEP, AD_HDRG))

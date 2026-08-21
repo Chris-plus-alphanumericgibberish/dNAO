@@ -37,34 +37,36 @@ somegold()
 #endif
 }
 
-void
-stealgold(mtmp)
-register struct monst *mtmp;
+/* floor gold at the hero's feet, or 0 if none */
+STATIC_OVL struct obj *
+steal_floorgold(void)
 {
-	register struct obj *gold = g_at(u.ux, u.uy);
-	register long tmp;
+	return g_at(u.ux, u.uy);
+}
 
-	if (gold && ( !u.ugold || gold->quan > u.ugold || !rn2(5))) {
-	    mtmp->mgold += gold->quan;
-	    delobj(gold);
-	    newsym(u.ux, u.uy);
-	    pline("%s quickly snatches some gold from between your %s!",
-		    Monnam(mtmp), makeplural(body_part(FOOT)));
-	    if(!u.ugold || !rn2(5)) {
-		if (!tele_restrict(mtmp)) (void) rloc(mtmp, TRUE);
-		/* do not set mtmp->mavenge here; gold on the floor is fair game */
-		monflee(mtmp, 0, FALSE, FALSE);
-	    }
-	} else if(u.ugold) {
-	    u.ugold -= (tmp = somegold());
-	    Your("purse feels lighter.");
-		IMPURITY_UP(u.uimp_theft)
-	    mtmp->mgold += tmp;
-	if (!tele_restrict(mtmp)) (void) rloc(mtmp, TRUE);
-	    mtmp->mavenge = 1;
-	    monflee(mtmp, 0, FALSE, FALSE);
-	    flags.botl = 1;
-	}
+/* how much gold the hero is carrying, in the pre-GOLDOBJ representation */
+STATIC_OVL long
+steal_pursegold_avail(void)
+{
+	return u.ugold;
+}
+
+/* give the hero's floor gold to mtmp */
+STATIC_OVL void
+steal_take_floorgold(struct monst *mtmp, struct obj *gold)
+{
+	mtmp->mgold += gold->quan;
+	delobj(gold);
+}
+
+/* pick the hero's pocket, giving some of u.ugold to mtmp */
+STATIC_OVL void
+steal_take_pursegold(struct monst *mtmp)
+{
+	long tmp = somegold();
+
+	u.ugold -= tmp;
+	mtmp->mgold += tmp;
 }
 
 #else /* !GOLDOBJ */
@@ -97,47 +99,211 @@ register struct obj *chain;
         return chain;
 }
 
-/* 
-Steal gold coins only.  Leprechauns don't care for lesser coins.
-*/
-void
-stealgold(mtmp)
-register struct monst *mtmp;
+/* floor gold at the hero's feet, or 0 if none; skips lesser coins */
+STATIC_OVL struct obj *
+steal_floorgold(void)
 {
-	register struct obj *fgold = g_at(u.ux, u.uy);
-	register struct obj *ygold;
-	register long tmp;
+	struct obj *fgold = g_at(u.ux, u.uy);
 
-        /* skip lesser coins on the floor */        
-        while (fgold && fgold->otyp != GOLD_PIECE) fgold = fgold->nexthere; 
+	while (fgold && fgold->otyp != GOLD_PIECE) fgold = fgold->nexthere;
+	return fgold;
+}
 
-        /* Do you have real gold? */
-        ygold = findgold(invent);
+/* how much real gold the hero is carrying; leprechauns don't want lesser coins */
+STATIC_OVL long
+steal_pursegold_avail(void)
+{
+	struct obj *ygold = findgold(invent);
 
-	if (fgold && ( !ygold || fgold->quan > ygold->quan || !rn2(5))) {
-            obj_extract_self(fgold);
-	    add_to_minv(mtmp, fgold);
+	return ygold ? ygold->quan : 0;
+}
+
+/* give the hero's floor gold to mtmp */
+STATIC_OVL void
+steal_take_floorgold(struct monst *mtmp, struct obj *fgold)
+{
+	obj_extract_self(fgold);
+	add_to_minv(mtmp, fgold);
+}
+
+/* pick the hero's pocket, giving some of their gold to mtmp */
+STATIC_OVL void
+steal_take_pursegold(struct monst *mtmp)
+{
+	struct obj *ygold = findgold(invent);
+	const int gold_price = objects[GOLD_PIECE].oc_cost;
+	long tmp = (somegold(money_cnt(invent)) + gold_price - 1) / gold_price;
+
+	tmp = min(tmp, ygold->quan);
+	if (tmp < ygold->quan) ygold = splitobj(ygold, tmp);
+	freeinv(ygold);
+	add_to_minv(mtmp, ygold);
+}
+#endif /* GOLDOBJ */
+
+/* Steal gold from the hero: prefers floor gold when eligible, else the purse. */
+void
+stealgold(struct monst *mtmp)
+{
+	struct obj *gold = steal_floorgold();
+	long ugold = steal_pursegold_avail();
+	boolean stole_gold = FALSE;
+	boolean flee = FALSE;
+
+	if (gold && (!ugold || gold->quan > ugold || !rn2(5))) {
+	    steal_take_floorgold(mtmp, gold);
 	    newsym(u.ux, u.uy);
 	    pline("%s quickly snatches some gold from between your %s!",
 		    Monnam(mtmp), makeplural(body_part(FOOT)));
-	    if(!ygold || !rn2(5)) {
+	    /* do not set mtmp->mavenge here; gold on the floor is fair game */
+		stole_gold = TRUE;
+	    if (!ugold || !rn2(5)) {
+			flee = TRUE;
+	    }
+	} else if (ugold) {
+	    steal_take_pursegold(mtmp);
+	    Your("purse feels lighter.");
+	    IMPURITY_UP(u.uimp_theft)
+	    mtmp->mavenge = 1;
+	    flags.botl = 1;
+		flee = TRUE;
+		stole_gold = TRUE;
+	}
+	if(!stole_gold && mtmp->mtyp == PM_MAMMON){
+		int count = 0;
+		struct obj *otmp;
+		struct obj *stealitm = (struct obj *)0;
+		for(otmp = invent; otmp; otmp = otmp->nobj){
+			if(otmp->obj_material == GOLD){
+				count++;
+				if(!rn2(count)){
+					stealitm = otmp;
+				}
+			}
+		}
+		if(stealitm){
+			obj_extract_and_unequip_self(stealitm);
+			pline("%s has confiscated %s!", Monnam(mtmp), doname(stealitm));
+			(void) mpickobj(mtmp, stealitm);
+			// flee = TRUE;
+		}
+	}
+	if(flee && mtmp->mtyp != PM_MAMMON) {
 		if (!tele_restrict(mtmp)) (void) rloc(mtmp, TRUE);
 		monflee(mtmp, 0, FALSE, FALSE);
-	    }
-	} else if(ygold) {
-            const int gold_price = objects[GOLD_PIECE].oc_cost;
-	    tmp = (somegold(money_cnt(invent)) + gold_price - 1) / gold_price;
-	    tmp = min(tmp, ygold->quan);
-            if (tmp < ygold->quan) ygold = splitobj(ygold, tmp);
-            freeinv(ygold);
-            add_to_minv(mtmp, ygold);
-	    Your("purse feels lighter.");
-	    if (!tele_restrict(mtmp)) (void) rloc(mtmp, TRUE);
-	    monflee(mtmp, 0, FALSE, FALSE);
-	    flags.botl = 1;
 	}
 }
+
+/* AD_SGLD, hero-as-thief case: give mdef's gold to the hero;
+   returns TRUE if any was taken */
+#ifndef GOLDOBJ
+STATIC_OVL boolean
+steal_take_mongold_you(struct monst *mdef)
+{
+	if (!mdef->mgold) return FALSE;
+	u.ugold += mdef->mgold;
+	mdef->mgold = 0;
+	return TRUE;
+}
+#else
+STATIC_OVL boolean
+steal_take_mongold_you(struct monst *mdef)
+{
+	struct obj *mongold = findgold(mdef->minvent);
+
+	if (!mongold) return FALSE;
+	obj_extract_self(mongold);
+	if (merge_choice(invent, mongold) || inv_cnt() < 52) {
+	    addinv(mongold);
+	    return TRUE;
+	}
+	You("grab %s's gold, but find no room in your knapsack.", mon_nam(mdef));
+	dropy(mongold);
+	return FALSE;
+}
 #endif /* GOLDOBJ */
+
+/* AD_SGLD, monster-as-thief case: give mdef's gold to magr;
+   returns TRUE if any was taken.
+   technically incorrect; no check for stealing gold from between
+   mdef's feet... */
+#ifndef GOLDOBJ
+STATIC_OVL boolean
+steal_take_mongold_mon(struct monst *magr, struct monst *mdef)
+{
+	if (!mdef->mgold) return FALSE;
+	magr->mgold += mdef->mgold;
+	mdef->mgold = 0;
+	return TRUE;
+}
+#else
+STATIC_OVL boolean
+steal_take_mongold_mon(struct monst *magr, struct monst *mdef)
+{
+	struct obj *gold = findgold(mdef->minvent);
+
+	if (!gold) return FALSE;
+	obj_extract_self(gold);
+	add_to_minv(magr, gold);
+	return TRUE;
+}
+#endif /* GOLDOBJ */
+
+/* AD_SGLD: the hero, polymorphed into a gold-stealing monster, steals
+   mdef's gold */
+void
+steal_mongold_you(struct monst *mdef)
+{
+	if (steal_take_mongold_you(mdef)) {
+	    Your("purse feels heavier.");
+	    IMPURITY_UP(u.uimp_theft)
+	}
+	exercise(A_DEX, TRUE);
+}
+
+/* AD_SGLD: magr steals mdef's gold, or confiscates a gold item if
+   magr is Mammon and mdef has none. */
+int
+steal_mongold_mon(struct monst *magr, struct monst *mdef, BOOLEAN_P vis)
+{
+	boolean stole_gold = steal_take_mongold_mon(magr, mdef);
+	boolean flee = FALSE;
+
+	if (stole_gold) {
+	    mdef->mstrategy &= ~STRAT_WAITFORU;
+	    if (vis)
+		pline("%s steals some gold from %s.", Monnam(magr), mon_nam(mdef));
+	    flee = TRUE;
+	}
+	if (!stole_gold && magr->mtyp == PM_MAMMON) {
+	    int count = 0;
+	    struct obj *otmp, *stealitm = (struct obj *)0;
+
+	    for (otmp = mdef->minvent; otmp; otmp = otmp->nobj) {
+		if (otmp->obj_material == GOLD) {
+		    count++;
+		    if (!rn2(count)) stealitm = otmp;
+		}
+	    }
+	    if (stealitm) {
+		obj_extract_and_unequip_self(stealitm);
+		if (vis)
+		    pline("%s confiscates %s from %s!",
+			    Monnam(magr), doname(stealitm), mon_nam(mdef));
+		(void) mpickobj(magr, stealitm);
+		mdef->mstrategy &= ~STRAT_WAITFORU;
+	    }
+	}
+	if (flee && magr->mtyp != PM_MAMMON) {
+	    if (!tele_restrict(magr)) {
+		(void) rloc(magr, TRUE);
+		if (vis && !canspotmon(magr))
+		    pline("%s suddenly disappears!", Monnam(magr));
+		return MM_AGR_STOP;
+	    }
+	}
+	return 0;
+}
 
 /* steal armor after you finish taking it off */
 unsigned int stealoid;		/* object to be stolen */

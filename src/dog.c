@@ -427,6 +427,7 @@ losedogs()
 		    && !(mtmp->mtyp == PM_STRANGER && !quest_status.touched_artifact)
 		    && !((mtmp->mtyp == PM_PUPPET_EMPEROR_XELETH || mtmp->mtyp == PM_PUPPET_EMPRESS_XEDALLI) && mtmp->mvar_yellow_lifesaved)
 		    && !(mtmp->mtyp == PM_TWIN_SIBLING && (mtmp->mvar_twin_lifesaved || !(u.specialSealsActive&SEAL_YOG_SOTHOTH)))
+		    && !(mtmp->mtyp == PM_MAMMON && mtmp->mvar_mammon_dive_x)
 		) {
 			mon_extract_from_list(mtmp, &migrating_mons);
 		    mon_arrive(mtmp, FALSE);
