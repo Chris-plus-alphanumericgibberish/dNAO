@@ -149,7 +149,6 @@ enum {
 
 #define add_omod(obj,flag)    ((obj)->omodifications[((flag)-1)/32] |= (1L << (((flag)-1)%32)))
 #define remove_omod(obj,flag) ((obj)->omodifications[((flag)-1)/32] &= ~(1L << (((flag)-1)%32)))
-#define check_omod(obj,flag)  (((obj)->omodifications[((flag)-1)/32] & (1L << (((flag)-1)%32))) != 0L)
 
 struct obj {
 	struct obj *nobj;

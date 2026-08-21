@@ -146,6 +146,7 @@ E boolean FDECL(oprops_match, (struct obj *, struct obj *));
 E void FDECL(copy_oprop_list, (struct obj *, unsigned long int *));
 E void FDECL(add_omod_list, (unsigned long int *, int));
 E void FDECL(copy_omod_list, (struct obj *, unsigned long int *));
+E boolean FDECL(check_omod, (struct obj *, int));
 E const char *FDECL(artifact_name, (const char *,short *, int *));
 E boolean FDECL(art_already_exists, (int));
 E boolean FDECL(art_already_exists_byname, (int,const char *));

@@ -1103,6 +1103,32 @@ unsigned long int *omod_list;
 		obj->omodifications[i] |= omod_list[i];
 }
 
+boolean
+check_omod(obj, omod)
+struct obj *obj;
+int omod;
+{
+	if(!obj)
+		return FALSE;
+
+	if(!omod){
+		//Check if there are ANY omods on this item at all
+		int i;
+		for(i=0;i < OMOD_LISTSIZE; i++){
+			if(obj->omodifications[i])
+				return FALSE; //Found (at least one) omod, return FALSE
+		}
+		return TRUE; //Found no omods, return TRUE
+	}
+
+	if(omod >= MAX_OMOD || omod < 0){
+		impossible("Attempting to check omod number %d on %s?", omod, doname(obj));
+		return FALSE;
+	}
+
+	return !!(obj->omodifications[(omod-1)/32] & (0x1L << ((omod-1)%32)));
+}
+
 /*
  * Make a special-but-non-artifact weapon based on otmp
  */

@@ -11862,6 +11862,25 @@ carrying_silverknight_weapon()
 	return FALSE;
 }
 
+STATIC_OVL boolean
+silverknightRuneMergeRedundant(obj, upitm)
+struct obj *obj;
+struct obj *upitm;
+{
+	int i;
+	if(obj->ovar1_silverknight_otyp != upitm->otyp)
+		return FALSE;
+	if(upitm->spe > obj->spe)
+		return FALSE;
+	for(i = 0; i < OPROP_LISTSIZE; i++)
+		if(upitm->oproperties[i] & ~obj->oproperties[i])
+			return FALSE;
+	for(i = 0; i < OMOD_LISTSIZE; i++)
+		if(upitm->omodifications[i] & ~obj->omodifications[i])
+			return FALSE;
+	return TRUE;
+}
+
 STATIC_OVL int
 mergeSilverknightRunes()
 {
@@ -11883,7 +11902,8 @@ mergeSilverknightRunes()
 			pline("That would be an interesting metaphysical experiment.");
 			return MOVE_CANCELLED;
 		}
-		if(!objects[upitm->otyp].oc_oprop[0] && upitm->otyp != HELM_OF_BRILLIANCE){
+		if(!objects[upitm->otyp].oc_oprop[0] && upitm->otyp != HELM_OF_BRILLIANCE
+		   && check_oprop(upitm, OPROP_NONE) && check_omod(upitm, OMOD_NONE)){
 			pline("That doesn't have any runes to be extracted.");
 			return MOVE_CANCELLED;
 		}
@@ -11899,7 +11919,7 @@ mergeSilverknightRunes()
 			pline("It resists the attempt!");
 			return MOVE_CANCELLED;
 		}
-		if(obj->ovar1_silverknight_otyp == upitm->otyp){
+		if(silverknightRuneMergeRedundant(obj, upitm)){
 			pline("The runes on that item are identical to the ones on the armor.");
 			return MOVE_CANCELLED;
 		}
@@ -11913,6 +11933,9 @@ mergeSilverknightRunes()
 		}
 		if(yn(buf) == 'y'){
 			obj->ovar1_silverknight_otyp = upitm->otyp;
+			copy_oprop_list(obj, upitm->oproperties);
+			copy_omod_list(obj, upitm->omodifications);
+			obj->spe = max(obj->spe, upitm->spe);
 			useup(upitm);
 			return MOVE_STANDARD;
 		}
