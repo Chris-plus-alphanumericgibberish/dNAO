@@ -333,10 +333,6 @@ mcall_group(struct monst *mon, int x, int y, int scatter)
 	int greater_devils[] = {PM_BONE_DEVIL, PM_ICE_DEVIL, PM_PIT_FIEND};
 	int seen_cnt = 0, sensed_cnt = 0;
 	mon->mgroup_summoned = TRUE;
-	if(uwep && uwep->oartifact && arti_worn_prop(uwep, ARTP_NOCALL) && is_demon(mon->data))
-		return;
-	if(DimensionalLock)
-		return;
 	switch(mon->mtyp){
 		//Nuncio
 		//case PM_AFREET: None
@@ -722,8 +718,6 @@ mcall_group(struct monst *mon, int x, int y, int scatter)
 void
 mcall_pit_fiend(struct monst *mon, int x, int y, int scatter)
 {
-	if(DimensionalLock)
-		return;
 	int lesser_devils[] = {PM_HORNED_DEVIL, PM_ERINYS, PM_BARBED_DEVIL};
 	int greater_devils[] = {PM_BONE_DEVIL, PM_ICE_DEVIL, PM_PIT_FIEND};
 	int mod = mon->mtyp == PM_NESSIAN_PIT_FIEND ? 2 : 1;
@@ -758,8 +752,6 @@ void
 mcall_alkilith(struct monst *mon, int x, int y, int scatter)
 {
 	int seen_cnt = 0, sensed_cnt = 0;
-	if(DimensionalLock)
-		return;
 	if (!rn2(66)) {
 		struct permonst *ptr = mkclass(rn2(2) ? S_DEMON : S_IMP, G_HELL);
 		if (ptr) {
