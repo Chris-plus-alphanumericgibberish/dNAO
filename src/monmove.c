@@ -1487,6 +1487,7 @@ register struct monst *mtmp;
 		mtmp->mgroup_summoned = FALSE;
 	}
 	if(is_greater_demon(mtmp->data) && spotted && !mtmp->mpeaceful && !mtmp->mgroup_summoned && !mtmp->mcan
+		&& distmin(mtmp->mx, mtmp->my, u.ux, u.uy) <= BOLT_LIM
 		&& !DimensionalLock
 	){
 		mcall_group(mtmp, u.ux, u.uy, 3);
@@ -1495,6 +1496,7 @@ register struct monst *mtmp;
 	//Pit fiend per round
 	if(Inhell && (mtmp->mtyp == PM_PIT_FIEND || mtmp->mtyp == PM_NESSIAN_PIT_FIEND) && spotted && !mtmp->mpeaceful && !mtmp->mcan
 		&& !(uwep && uwep->oartifact && arti_worn_prop(uwep, ARTP_NOCALL))
+		&& distmin(mtmp->mx, mtmp->my, u.ux, u.uy) <= 9
 		&& !DimensionalLock
 	)
 		mcall_pit_fiend(mtmp, u.ux, u.uy, 3);
