@@ -5814,7 +5814,7 @@ alkilith_spawn(struct monst *mon)
 				}
 			}
 		}
-		if(!mon->mpeaceful && !rn2(66)){
+		if(!mon->mpeaceful && !rn2(66) && !DimensionalLock){
 			struct permonst *ptr = mkclass(rn2(2) ? S_DEMON : S_IMP, G_HELL);
 			if(ptr){
 				mtmp = makemon(ptr, xlocale, ylocale, MM_ADJACENTOK|MM_NOCOUNTBIRTH);

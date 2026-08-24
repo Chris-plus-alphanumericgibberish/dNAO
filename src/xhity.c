@@ -509,6 +509,7 @@ xattacky(struct monst *magr, struct monst *mdef, int tarx, int tary, long modifi
 	if (youdef && !magr->cham && gates_in_help(pa) && !template_blocks_gate(magr)
 		&& !ranged && !missedyou && (magr->summonpwr < magr->data->mlevel)
 		&& !(uwep && uwep->oartifact && arti_worn_prop(uwep, ARTP_NOCALL) && is_demon(magr->data))
+		&& !DimensionalLock
 	) {
 		
 		if (!magr->mcan && !rn2(13)) {
