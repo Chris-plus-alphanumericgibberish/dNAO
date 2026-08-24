@@ -93,6 +93,20 @@ const struct icp hellprobs[] = {
 { 1, SANCTION_CLASS}
 };
 
+const struct icp hellboxiprobs[] = {
+{23, GEM_CLASS},
+{ 5, BELT_CLASS},
+{ 5, FOOD_CLASS},
+{ 1, POTION_CLASS},
+{14, SCROLL_CLASS},
+{ 9, SANCTION_CLASS},
+{ 2, SPBOOK_CLASS},
+{12, COIN_CLASS},
+{11, WAND_CLASS},
+{10, RING_CLASS},
+{ 8, AMULET_CLASS}
+};
+
 /* Object material probabilities.*/
 /* for objects which are normally iron or metal */
 static const struct icp metal_materials[] = {
@@ -469,7 +483,7 @@ struct obj *box;
 			}
 	    } else {
 		register int tprob;
-		const struct icp *iprobs = boxiprobs;
+		const struct icp *iprobs = Inhell ? hellboxiprobs : boxiprobs;
 
 		for (tprob = rnd(100); (tprob -= iprobs->iprob) > 0; iprobs++)
 		    ;
@@ -492,9 +506,9 @@ struct obj *box;
 		}
 		if (box->otyp == BAG_OF_HOLDING) {
 		    if (Is_mbag(otmp)) {
-			otmp->otyp = SACK;
-			otmp->spe = 0;
-			otmp->owt = weight(otmp);
+				otmp->otyp = SACK;
+				otmp->spe = 0;
+				otmp->owt = weight(otmp);
 		    } else while (otmp->otyp == WAN_CANCELLATION)
 			    otmp->otyp = rnd_class(WAN_LIGHT, WAN_LIGHTNING);
 		}
