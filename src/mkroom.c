@@ -6478,7 +6478,7 @@ place_law_features()
 	int n;
 	if(Is_path(&u.uz)){
 		int cutoff = (on_level(&path3_level,&u.uz) && is_june()) ? min_ints(3, rn2(9)): rn2(9);
-		if(on_level(&path1_level,&u.uz)){
+		if(on_level(&path1_level,&u.uz) && !rn2(10)){
 			mklawfossil(STONE, PM_VERMIURGE);
 		}
 		for(n = 4; n > 0; n--)

@@ -8961,6 +8961,10 @@ boolean printmessages; /* print generic elemental damage messages */
 	}
 	
 	if(otmp->oartifact == ART_GOLDEN_SWORD_OF_Y_HA_TALLA){
+		boolean psychic = FALSE;
+		boolean scmad = FALSE;
+		int whips = 0;
+
 		if(Insight > 8){
 			extern const int clockwisex[8];
 			extern const int clockwisey[8];
@@ -8968,36 +8972,60 @@ boolean printmessages; /* print generic elemental damage messages */
 			if(otmp->otyp != BULLWHIP || !rn2(4)){
 				if(youdef && !Tele_blind && (Blind_telepat || !rn2(5))){
 					*truedmgptr += d(2,2)+d(1,4);
-				}
-				else if(!youdef && !mindless_mon(mdef) && (mon_resistance(mdef,TELEPAT) || !rn2(5))){
+					psychic = TRUE;
+				} else if(!youdef && !mindless_mon(mdef) && (mon_resistance(mdef,TELEPAT) || !rn2(5))){
 					*truedmgptr += d(2,2)+d(1,4);
+					psychic = TRUE;
 				}
 			}
 			for(int i = 0, j = rn2(8); i<8; i++,j++){
 				nx = x(mdef) + clockwisex[j%8];
 				ny = y(mdef) + clockwisey[j%8];
-				if(!isok(nx,ny))
+				if(!isok(nx,ny) || arti_phasing(otmp)) // if you figure out how to make this phasing, you deserve it
 					continue;
-				if(m_u_at(nx,ny) != 0)
+				// if YOU'RE phasing, i guess you deserve it. unsolid monsters, no dice
+				if(m_at(nx, ny) != 0 || (youdef && nx == u.ux && ny == u.uy && !Passes_walls))
 					continue;
 				//The world around the target warps into giant stinging scorpion tails
 				if(Insight > 64 || Insight > rnd(64)){
-					*plusdmgptr += d(1,8);
+					*truedmgptr += d(1,8);
 					if(!Poison_res(mdef)){
-						if(!rn2(10))
-							*truedmgptr += 80;
+						if(!rn2(10)) *truedmgptr += 80;
 						else *truedmgptr += rnd(6);
-						
 					}
+					whips++;
 				}
 			}
 		}
 		if(Insight > 64 && (otmp->otyp == BULLWHIP || !rn2(4))){
-			if(youdef){
-				u.umadness |= MAD_SCORPIONS;
-			}
-			else {
-				mdef->mscorpions = TRUE;
+			if(youdef) u.umadness |= MAD_SCORPIONS;
+			else mdef->mscorpions = TRUE;
+			scmad = TRUE;
+		}
+
+		if (youdef || canseemon(mdef)) {
+			if (whips > 0) {
+				pline("%s scorpion stinger%s erupt%s from the ground around %s!",
+					(whips == 1) ? "An illusory" : "Illusory",
+					(whips == 1) ? "" : "s",
+					(whips == 1) ? "s" : "",
+					(youdef) ? "you" : mon_nam(mdef));
+
+				if (scmad) {
+					if (youdef) You("are covered in spectral scorpions!");
+					else pline("%s is covered in spectral scorpions!", Monnam(mdef));
+				} else if (psychic) {
+					if (youdef) pline("%s stab straight into your mind!", (whips == 1) ? "It" : "They");
+					else pline("%s stab straight into %s's mind!", (whips == 1) ? "It" : "They", mon_nam(mdef));
+				}
+			} else {
+				if (scmad) {
+					if (youdef) You("are covered in spectral scorpions!");
+					else pline("%s is covered in spectral scorpions!", Monnam(mdef));
+				} else if (psychic) {
+					if (youdef) pline("An illusory scorpion stinger stabs straight into your mind!");
+					else pline("An illusory scorpion stinger stabs straight into %s's mind!", mon_nam(mdef));
+				}
 			}
 		}
 	}
