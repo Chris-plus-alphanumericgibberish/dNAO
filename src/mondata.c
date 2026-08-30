@@ -197,6 +197,14 @@ mon_injured_leg_count(struct monst *mon)
 	return atkbp_leg_count(atkbp_union(mon->minjuries, missing));
 }
 
+boolean
+mon_enough_legs_to_stand(struct monst *mon)
+{
+	int full = mon_body_leg_count(mon);
+
+	return full > 0 && 2 * (full - mon_injured_leg_count(mon)) > full;
+}
+
 /* Injuries are dealt against this set, not mbodyparts_full: hurting a limb
  * must never be what reveals it. */
 int
@@ -279,6 +287,12 @@ injure_random_parts(struct monst *mon, struct atkbp_set family, int count,
 		mon_drop_wielded(mon, MON_WEP(mon));
 	if (atkbp_intersects(hurt, ATKBP(ARM_OFFHAND)))
 		mon_drop_wielded(mon, MON_SWEP(mon));
+	if (!mon_enough_legs_to_stand(mon)) {
+		if (mon == &youmonst)
+			make_prone(TRUE);
+		else
+			make_mon_prone(mon, TRUE);
+	}
 	return n;
 }
 

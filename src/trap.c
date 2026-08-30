@@ -2179,8 +2179,7 @@ schar dx,dy;
 #ifdef OVL1
 
 int
-mintrap(mtmp)
-struct monst *mtmp;
+mintrap_core(struct monst *mtmp, boolean forcebungle)
 {
 	register struct trap *trap = t_at(mtmp->mx, mtmp->my);
 	boolean trapkilled = FALSE;
@@ -2249,7 +2248,7 @@ struct monst *mtmp;
 		    ((mtmp->mtrapseen & (1 << (tt-1))) != 0 ||
 			(tt == HOLE && !mindless_mon(mtmp)))) {
 		/* it has been in such a trap - perhaps it escapes */
-		if(rn2(4)) return(0);
+		if (!forcebungle && rn2(4)) return(0);
 	    } else {
 		mtmp->mtrapseen |= (1 << (tt-1));
 	    }
@@ -2804,6 +2803,20 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 	return mtmp->mtrapped;
 }
 
+int
+mintrap(struct monst *mtmp)
+{
+	return mintrap_core(mtmp, FALSE);
+}
+
+/* like mintrap(), but skips the chance to shrug off a previously-seen
+ * trap without triggering it */
+int
+mintrap_forcebungle(struct monst *mtmp)
+{
+	return mintrap_core(mtmp, TRUE);
+}
+
 #endif /* OVL1 */
 #ifdef OVLB
 
@@ -2930,6 +2943,87 @@ boolean byplayer;
 	}
 }
 
+/* Knock the player prone. trigger_traps controls whether landing on a trap
+ * triggers it here -- pass FALSE if the trap on this fall has already been
+ * resolved, to avoid a double trigger. No-op if the player isn't currently
+ * eligible to be knocked prone at all. */
+void
+make_prone(boolean trigger_traps)
+{
+	struct trap *trap;
+
+	if (youmonst.mprone || !could_stand_in_square(&youmonst) ||
+			!is_trippable(&youmonst))
+		return;
+
+	if (u.usteed)
+		dismount_steed(DISMOUNT_FELL);
+	if (u.urider)
+		rider_dismounts_you(DISMOUNT_FELL);
+	youmonst.mprone = 1;
+	flags.botl = 1;
+	You("are knocked to the %s!", surface(u.ux, u.uy));
+	selftouch("Falling, you");
+	if (trigger_traps && !u.utrap && (trap = t_at(u.ux, u.uy)) != 0)
+		dotrap(trap, FORCEBUNGLE);
+}
+
+/* Knock a monster prone. trigger_traps controls whether landing on a trap
+ * triggers it here -- pass FALSE if the trap on this fall has already been
+ * resolved, to avoid a double trigger. No-op if mdef isn't currently
+ * eligible to be knocked prone at all. */
+void
+make_mon_prone(struct monst *mdef, boolean trigger_traps)
+{
+	if (DEADMONSTER(mdef) || mdef->mprone || !could_stand_in_square(mdef) ||
+			!is_trippable(mdef))
+		return;
+
+	if (mdef == u.usteed)
+		dismount_steed(DISMOUNT_FELL);
+	if (mdef == u.urider)
+		rider_dismounts_you(DISMOUNT_FELL);
+	mdef->mprone = 1;
+	newsym(mdef->mx, mdef->my);
+	if (canseemon(mdef))
+		pline("%s is knocked to the %s!",
+		      Monnam(mdef), surface(mdef->mx, mdef->my));
+	mselftouch(mdef, "Falling, ", TRUE);
+	if (trigger_traps && !DEADMONSTER(mdef))
+		(void) mintrap_forcebungle(mdef);
+}
+
+/* Recheck mon's proneness after it has moved to a new square: stand it back
+ * up if it now has enough legs, or if the square it's on can no longer
+ * support lying prone at all; knock it down if it isn't prone yet
+ * but the square would support standing but it currently can't. */
+void
+update_proneness(struct monst *mon)
+{
+	if (!mon->mprone) {
+		if (!mon_enough_legs_to_stand(mon)) {
+			if (mon == &youmonst)
+				make_prone(FALSE);
+			else
+				make_mon_prone(mon, FALSE);
+		}
+		return;
+	}
+
+	if (mon_enough_legs_to_stand(mon)) {
+		mon->mprone = 0;
+		if (mon == &youmonst) {
+			You("get to your %s.", makeplural(body_part(FOOT)));
+			flags.botl = 1;
+		} else if (canseemon(mon))
+			pline("%s regains %s footing.", Monnam(mon), mhis(mon));
+	} else if (!could_stand_in_square(mon)) {
+		mon->mprone = 0;
+		if (mon == &youmonst)
+			flags.botl = 1;
+	}
+}
+
 void
 float_up()
 {
@@ -2975,6 +3069,10 @@ float_up()
 	    }
 	}
 #endif
+	if(youmonst.mprone) {
+		youmonst.mprone = 0;
+		flags.botl = 1;
+	}
 	return;
 }
 
@@ -3000,6 +3098,8 @@ boolean silently;
 	}
 	else if (seen && !silently)
 		pline("%s starts to float in the air!", Monnam(mon));
+	if (mon->mprone)
+		mon->mprone = 0;
 	return;
 }
 
@@ -3113,7 +3213,7 @@ long hmask, emask;     /* might cancel timeout */
 		 * Use knowledge of the two routines as a hack -- this
 		 * should really be handled differently -dlc
 		 */
-		if(is_pool(u.ux,u.uy, FALSE) && !Wwalking && !Swimming && !u.uinwater)
+		if(is_pool(u.ux,u.uy, FALSE) && !Wwalking && !u.uinwater)
 			no_msg = drown();
 
 		if(is_lava(u.ux,u.uy)) {
@@ -3187,6 +3287,9 @@ long hmask, emask;     /* might cancel timeout */
 		   and goto_level does its own pickup() call */
 		on_level(&u.uz, &current_dungeon_level))
 	    (void) pickup(1);
+
+	if (!mon_enough_legs_to_stand(&youmonst))
+		make_prone(FALSE);
 	return 1;
 }
 
@@ -3238,7 +3341,7 @@ crash_down(long hmask, long emask)
 	}
 
 	/* check for falling into pool/lava, same as float_down() */
-	if (is_pool(u.ux, u.uy, FALSE) && !Wwalking && !Swimming && !u.uinwater)
+	if (is_pool(u.ux, u.uy, FALSE) && !Wwalking && !u.uinwater)
 		no_msg = drown();
 
 	if (is_lava(u.ux, u.uy)) {
@@ -3293,6 +3396,9 @@ crash_down(long hmask, long emask)
 		   and goto_level does its own pickup() call */
 		on_level(&u.uz, &current_dungeon_level))
 	    (void) pickup(1);
+
+	if (!mon_enough_legs_to_stand(&youmonst))
+		make_prone(FALSE);
 	return 1;
 }
 
@@ -3331,6 +3437,9 @@ boolean silently;
 		mintrap(mon);
 	}
 
+	if (!mon_enough_legs_to_stand(mon))
+		make_mon_prone(mon, FALSE);
+
 	return;
 }
 
@@ -3362,6 +3471,9 @@ m_crash_down(struct monst *mon, boolean silently)
 	if (trap) {
 		mintrap(mon);
 	}
+
+	if (!mon_enough_legs_to_stand(mon))
+		make_mon_prone(mon, FALSE);
 
 	return;
 }

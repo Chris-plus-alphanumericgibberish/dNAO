@@ -2992,6 +2992,19 @@ long wp_mask;
 			else if (on) *mask |= wp_mask;
 			else *mask &= ~wp_mask;
 			break;
+		case FLYING:
+			{
+				boolean was_flying = Flying;
+				if (on) *mask |= wp_mask;
+				else *mask &= ~wp_mask;
+				if (!restoring) {
+					if (on && !was_flying && !Levitation)
+						float_up();
+					else if (!on && was_flying && !Flying && !Levitation)
+						(void) float_down(0L, 0L);
+				}
+			}
+			break;
 		/* everything else (that are in uprops) */
 		default:
 			if (on) *mask |= wp_mask;

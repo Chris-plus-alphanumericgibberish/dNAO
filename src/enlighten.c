@@ -887,6 +887,7 @@ boolean dumping;
 	/*** More Troubles ***/
 	if (final) {
 		if (Hallucination) you_are("hallucinating");
+		if (youmonst.mprone) you_are("prone");
 		if (Stunned) you_are("stunned");
 		if (Confusion) you_are("confused");
 		if (Blinded) you_are("blinded");

@@ -242,8 +242,17 @@ rider_mounts_you(struct monst *mtmp)
 		You("are stuck here for now.");
 		return FALSE;
 	}
+	if (youmonst.mprone) {
+	    You_cant("be ridden while lying down.");
+	    return FALSE;
+	}
+
 	if(!mtmp){
 		pline("You're already being ridden by a patch of empty %s.", Underwater ? "water" : "air");
+		return FALSE;
+	}
+	if(mtmp->mprone){
+		pline("%s is lying down and can't mount you.", Monnam(mtmp));
 		return FALSE;
 	}
 	if(!humanoid(mtmp->data) || verysmall(mtmp->data) || mtmp->data->msize > youracedata->msize || slithy(mtmp->data)){
@@ -335,6 +344,11 @@ mount_steed(mtmp, force)
 		return rider_mounts_you(mtmp);
 	}
 
+	if (youmonst.mprone) {
+	    You_cant("mount up while lying down.");
+	    return (FALSE);
+	}
+
 	/* Is the player in the right form? */
 	if (Hallucination && !force) {
 	    pline("Maybe you should find a designated driver.");
@@ -362,6 +376,11 @@ mount_steed(mtmp, force)
 
 	if (!mtmp) {
 	    pline("I see nobody there.");
+	    return (FALSE);
+	}
+
+	if (mtmp->mprone) {
+	    pline("%s is lying down and can't be mounted.", Monnam(mtmp));
 	    return (FALSE);
 	}
 

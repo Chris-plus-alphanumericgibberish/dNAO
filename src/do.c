@@ -1058,6 +1058,12 @@ doup()
 			obfree(pseudo, (struct obj *)0);	/* now, get rid of it */
 			artinstance[ART_ROD_OF_SEVEN_PARTS].RoSPflights--;
 		}
+		else if (youmonst.mprone && mon_enough_legs_to_stand(&youmonst)) {
+			You("climb to your %s.", makeplural(body_part(FOOT)));
+			youmonst.mprone = 0;
+			flags.botl = 1;
+			return MOVE_STANDARD;
+		}
 		else{
 			if(levl[u.ux][u.uy].typ == STAIRS){
 				if(levl[u.ux][u.uy].ladder != LA_UP){
@@ -1570,8 +1576,9 @@ remake:
 					u_on_dnstairs();
 				}
 			}
+			update_proneness(&youmonst);
 			/* Remove bug which crashes with levitation/punishment  KAA */
-			if (Punished && uball->oartifact != ART_IRON_BALL_OF_LEVITATION && !Levitation) {
+			if (((Punished && uball->oartifact != ART_IRON_BALL_OF_LEVITATION) || youmonst.mprone) && !Levitation) {
 				pline("With great effort you climb the %s.",
 				at_ladder ? "ladder" : "stairs");
 			} else if (at_ladder)
@@ -1597,9 +1604,9 @@ remake:
 				(near_capacity() > UNENCUMBERED || (Punished && uball->oartifact != ART_IRON_BALL_OF_LEVITATION &&
 				((uwep != uball) || ((P_SKILL(P_FLAIL) < P_BASIC))
 				|| !Role_if(PM_CONVICT)))
-				 || Fumbling)
+				 || Fumbling || youmonst.mprone)
 	#else
-				(near_capacity() > UNENCUMBERED || Punished || Fumbling)
+				(near_capacity() > UNENCUMBERED || Punished || Fumbling || youmonst.mprone)
 	#endif /* CONVICT */
 			) {
 				You("fall down the %s.", at_ladder ? "ladder" : "stairs");

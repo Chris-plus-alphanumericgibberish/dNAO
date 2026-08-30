@@ -614,6 +614,8 @@ lookat(x, y, buf, monbuf, shapebuff)
 			", being held" : ", holding you");
 	    if (mtmp->mleashed)
 		Strcat(buf, ", leashed to you");
+		if (mtmp->mprone)
+			Strcat(buf, ", prone");
 
 	    if (mtmp->mtrapped && cansee(mtmp->mx, mtmp->my)) {
 		struct trap *t = t_at(mtmp->mx, mtmp->my);

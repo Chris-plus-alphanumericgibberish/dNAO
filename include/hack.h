@@ -184,6 +184,29 @@ NEARDATA extern coord bhitpos;	/* place where throw or zap hits or stops */
 			|| (Role_if(PM_MADMAN) && In_quest(&u.uz) && (levl[u.ux][u.uy].typ == CLOUD)) \
 			|| (!In_endgame(&u.uz) && levl[u.ux][u.uy].typ == AIR))
 
+#define mon_weightless(mon)	(Is_airlevel(&u.uz) || \
+			(Is_lolth_level(&u.uz) && levl[(mon)->mx][(mon)->my].typ == CLOUD) \
+			|| (Role_if(PM_MADMAN) && In_quest(&u.uz) && (levl[(mon)->mx][(mon)->my].typ == CLOUD)) \
+			|| (!In_endgame(&u.uz) && levl[(mon)->mx][(mon)->my].typ == AIR))
+
+/* standing/walking on the bottom of a body of water, as opposed to floating
+   or swimming through it; subject to normal (non-water) movement rules */
+#define On_seafloor	(u.usubwater && !Swimming && !Is_waterlevel(&u.uz))
+
+/* monster equivalent of u.uinwater: true if mon is submerged/wading in a body
+   of water rather than standing above its surface */
+#define mon_in_water(mon)	(is_pool((mon)->mx, (mon)->my, FALSE) && \
+				!mon_resistance((mon), WWALKING) && \
+				!mon_resistance((mon), FLYING) && \
+				!mon_resistance((mon), LEVITATION))
+
+/* monster equivalent of On_seafloor */
+#define mon_on_seafloor(mon)	(mon_in_water(mon) && !mon_resistance((mon), SWIMMING) \
+				&& !Is_waterlevel(&u.uz))
+
+#define could_stand_in_square(mon)	((mon) == &youmonst \
+					? !(Weightless || (u.uinwater && !On_seafloor)) \
+					: !(mon_weightless(mon) || (mon_in_water(mon) && !mon_on_seafloor(mon))))
 #include "trap.h"
 #include "flag.h"
 #include "rm.h"

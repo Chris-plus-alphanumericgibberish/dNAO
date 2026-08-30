@@ -4816,6 +4816,8 @@ int *shield_margin;
 	}
 	/* other attacker-related accuracy bonuses */
 	if (magr) {
+		if (magr->mprone)
+			bons_acc -= 3;
 		/* Small monsters are more accurate */
 		switch(pa->msize){
 			case MZ_TINY:

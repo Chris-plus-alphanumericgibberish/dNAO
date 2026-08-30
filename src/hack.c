@@ -2008,6 +2008,8 @@ domove()
 	    invocation_message();
 	}
 
+	update_proneness(&youmonst);
+
 	if (Punished){				/* put back ball and chain */
 	    move_bc(0,bc_control,ballx,bally,chainx,chainy);
 	}

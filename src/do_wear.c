@@ -3032,13 +3032,19 @@ base_uac()
 		
 		if(dexbonus < -5)
 			dexbonus = -5;
-		
+
+		if(youmonst.mprone && dexbonus > 0)
+			dexbonus = (int)(dexbonus/2);
+
 		if(dexbonus > 0 && uarm && !is_light_armor(uarm)){
 			if(is_medium_armor(uarm))
 				dexbonus = (int)(dexbonus/2);
 			else
 				dexbonus = 0;
 		}
+
+		if(youmonst.mprone)
+			uac += 3;
 	}
 	uac -= dexbonus;
 	if(u.ufirst_sky)

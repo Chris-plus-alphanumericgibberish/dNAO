@@ -121,6 +121,9 @@
 #define species_flies(ptr)		(((ptr)->mflagsm & MM_FLY) != 0L)
 #define species_displaces(ptr)	(((ptr)->mflagsg & MG_DISPLACEMENT) != 0L)
 #define species_floats(ptr)		(((ptr)->mflagsm & MM_FLOAT) != 0L)
+#define grounded(mon)			((mon) == &youmonst ? !(Flying || Levitation) \
+								 : !(mon_resistance((mon), FLYING) || mon_resistance((mon), LEVITATION)))
+#define is_trippable(mon)		(mon_body_leg_count(mon) > 0 && grounded(mon))
 #define species_swims(ptr)		(((ptr)->mflagsm & MM_SWIM) != 0L)
 #define species_tears_webs(ptr)		(((ptr)->mflagsm & MM_WEBRIP) != 0L)
 #define species_busts_doors(ptr)		(((ptr)->mflagsm & MM_DOORBUST) != 0L)

@@ -1785,6 +1785,7 @@ newdogpos:
 		for (j=MTSZ-1; j>0; j--) mtmp->mtrack[j] = mtmp->mtrack[j-1];
 		mtmp->mtrack[0].x = omx;
 		mtmp->mtrack[0].y = omy;
+		update_proneness(mtmp);
 		/* We have to know if the pet's gonna do a combined eat and
 		 * move before moving it, but it can't eat until after being
 		 * moved.  Thus the do_eat flag.

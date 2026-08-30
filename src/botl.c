@@ -120,6 +120,8 @@ long long get_status_mask() {
 		mask |= BL_MASK_FLY;
 	if(u.usteed)
 		mask |= BL_MASK_RIDE;
+	if(youmonst.mprone)
+		mask |= BL_MASK_PRONE;
 	if(TimeStop)
 		mask |= BL_MASK_TIMESTOP;
 	if(BlowingWinds)

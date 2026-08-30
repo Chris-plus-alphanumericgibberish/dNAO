@@ -34,7 +34,8 @@
 #define BL_MASK_CATAPSI  (BL_MASK_MISO << 1)
 #define BL_MASK_DIMLOCK  (BL_MASK_CATAPSI << 1)
 #define BL_MASK_GMOLD    (BL_MASK_DIMLOCK << 1)
-//Note:30
+#define BL_MASK_PRONE    (BL_MASK_GMOLD << 1)
+//Note:31
 
 struct status_effect {
 	long long mask;
@@ -74,6 +75,7 @@ static const struct status_effect status_effects[] = {
 	{ BL_MASK_LEV,      "Lev",      "Lev",   "Lv"  },
 	{ BL_MASK_FLY,      "Fly",      "Fly",   "Fl"  },
 	{ BL_MASK_RIDE,     "Ride",     "Rid",   "Rd"  },
+	{ BL_MASK_PRONE,    "Prone",    "Prne",  "Pr"  },
 	/* Temporary effects with known duration */
 	{ BL_MASK_TIMESTOP, "TimeStop", "TStop", "TS"  },
 	{ BL_MASK_LUST,     "Lust",     "Lust",  "Lst" },

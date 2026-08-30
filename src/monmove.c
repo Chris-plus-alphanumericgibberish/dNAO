@@ -3279,7 +3279,9 @@ not_special:
 		}
 	    /* Place a segment at the old position. */
 	    if (mtmp->wormno) worm_move(mtmp);
-		
+
+	    update_proneness(mtmp);
+
 	} else {
 	    if(is_unicorn(ptr) && rn2(2) && !tele_restrict(mtmp) && !noactions(mtmp))
 		{
