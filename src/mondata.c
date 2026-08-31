@@ -205,6 +205,25 @@ mon_enough_legs_to_stand(struct monst *mon)
 	return full > 0 && 2 * (full - mon_injured_leg_count(mon)) > full;
 }
 
+/* True if magr could theoretically trip mdef with a tripping attack. */
+boolean
+could_trip(struct monst *magr, struct monst *mdef)
+{
+	// mdef must be trippable at all
+	if (mdef->mprone || !is_trippable(mdef) || !could_stand_in_square(mdef))
+		return FALSE;
+	// mdef must not have a stance too stable to upset 
+	//  (many-legged arachnids/insects/lizards: splayed-out legs and low center of gravity)
+	if (mon_body_leg_count(mdef) > 2
+			&& (is_arachnid(mdef->data) || is_insectoid(mdef->data)
+			    || mdef->data->mlet == S_LIZARD))
+		return FALSE;
+	// mdef must not tower too far above magr in size
+	if (wielder_size(mdef) - wielder_size(magr) > 2)
+		return FALSE;
+	return TRUE;
+}
+
 /* Injuries are dealt against this set, not mbodyparts_full: hurting a limb
  * must never be what reveals it. */
 int

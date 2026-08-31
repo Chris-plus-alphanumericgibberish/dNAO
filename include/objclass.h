@@ -239,7 +239,8 @@ struct objclass {
 #define ETRAIT_BLADEDANCE		0x00040000L
 #define ETRAIT_PUNCTURE			0x00080000L //Escalating chance for a double-damage hit
 #define ETRAIT_STRIKING			0x00100000L
-#define MAX_ETRAIT				ETRAIT_STRIKING
+#define ETRAIT_WHIP_TRICKS		0x00200000L
+#define MAX_ETRAIT				ETRAIT_WHIP_TRICKS
 //
 
 #define wielder_size(mon) ((mon) == &youmonst ? youracedata->msize : (mon)->data->msize)

@@ -5779,71 +5779,88 @@ struct obj *otmp;
 	if (proficient > 3) proficient = 3;
 
 	if (youagr && !youdef) {
-		/* player attacks monster: try to disarm it */
+		/* player attacks monster: try to disarm or trip it */
+		boolean trippable = could_trip(magr, mdef);
 		struct obj *mwep = rn2(3) ? MON_WEP(mdef) : MON_SWEP(mdef);
-		if (!mwep) return;
+		boolean trip = (mwep && trippable) ? (boolean) rn2(2) : trippable;
 
-		char onambuf[BUFSZ];
-		const char *mon_hand = mbodypart(mdef, HAND);
-		boolean gotit = proficient && (!Fumbling || !rn2(10));
+		if (!mwep && !trip) return;
 
-		if (bimanual_mon(mwep, mdef)) mon_hand = makeplural(mon_hand);
-		Strcpy(onambuf, cxname(mwep));
+		if (trip) {
+			You("lash the glaive's %s around %s %s!",
+			    pg_appendage_name(otmp, PGD_SNAGGING),
+			    s_suffix(mon_nam(mdef)), mbodypart(mdef, LEG));
+			if (trip_attempt(magr, mdef, proficient) == TRIP_FAIL)
+				pline("But the %s slip free!", pg_appendage_name(otmp, PGD_SNAGGING));
+			wakeup(mdef, TRUE);
+		} else {
+			char onambuf[BUFSZ];
+			const char *mon_hand = mbodypart(mdef, HAND);
+			boolean gotit = proficient && (!Fumbling || !rn2(10));
 
-		You("wrap the glaive's %s around %s %s.",
-		    pg_appendage_name(otmp, PGD_SNAGGING),
-		    s_suffix(mon_nam(mdef)), onambuf);
+			if (bimanual_mon(mwep, mdef)) mon_hand = makeplural(mon_hand);
+			Strcpy(onambuf, cxname(mwep));
 
-		if (gotit && mwep->cursed && !is_weldproof_mon(mdef)) {
-			pline("%s welded to %s %s%c",
-			    (mwep->quan == 1L) ? "It is" : "They are",
-			    mhis(mdef), mon_hand,
-			    !mwep->bknown ? '!' : '.');
-			mwep->bknown = 1;
-			gotit = FALSE;
-		}
-		if (gotit) {
-			obj_extract_self(mwep);
-			possibly_unwield(mdef, FALSE);
-			setmnotwielded(mdef, mwep);
-			IMPURITY_UP(u.uimp_theft)
-			switch (rn2(proficient + 1)) {
-			case 3:
-				if(!u.uavoid_theft){
+			You("wrap the glaive's %s around %s %s.",
+			    pg_appendage_name(otmp, PGD_SNAGGING),
+			    s_suffix(mon_nam(mdef)), onambuf);
+
+			if (gotit) {
+				int roll = rn2(proficient + 1);
+				int where_to = (roll == 3) ? WHIPDISARM_ATTACKERINV
+						: (roll == 2) ? WHIPDISARM_ATTACKERFEET
+						: WHIPDISARM_DEFENDERFEET;
+				int result = whip_disarm(magr, mdef, mwep, where_to);
+
+				if (result > 0) IMPURITY_UP(u.uimp_theft)
+				switch (result) {
+				case WHIPDISARM_WELD:
+					pline("%s welded to %s %s%c",
+					    (mwep->quan == 1L) ? "It is" : "They are",
+					    mhis(mdef), mon_hand,
+					    !mwep->bknown ? '!' : '.');
+					break;
+				case WHIPDISARM_GLAMDRING:
+					pline("Glamdring resists being ripped out of %s %s!",
+					    s_suffix(mon_nam(mdef)), mon_hand);
+					break;
+				case WHIPDISARM_ATTACKERINV:
 					You("snatch %s %s!", s_suffix(mon_nam(mdef)), onambuf);
-					mwep = hold_another_object(mwep, "You drop %s!",
-						doname(mwep), (const char *)0);
+					break;
+				case WHIPDISARM_ATTACKERFEET:
+					You("yank %s %s to the %s!",
+					    s_suffix(mon_nam(mdef)), onambuf,
+					    surface(u.ux, u.uy));
+					break;
+				case WHIPDISARM_DEFENDERFEET:
+					You("yank %s from %s %s!",
+					    the(onambuf), s_suffix(mon_nam(mdef)), mon_hand);
 					break;
 				}
-			case 2:
-				You("yank %s %s to the %s!",
-				    s_suffix(mon_nam(mdef)), onambuf,
-				    surface(u.ux, u.uy));
-				place_object(mwep, u.ux, u.uy);
-				stackobj(mwep);
-				break;
-			default:
-				You("yank %s from %s %s!",
-				    the(onambuf), s_suffix(mon_nam(mdef)), mon_hand);
-				obj_no_longer_held(mwep);
-				place_object(mwep, mdef->mx, mdef->my);
-				stackobj(mwep);
-				break;
+			} else {
+				pline("The %s slip free.", pg_appendage_name(otmp, PGD_SNAGGING));
+				wakeup(mdef, TRUE);
 			}
-		} else {
-			pline("The %s slip free.", pg_appendage_name(otmp, PGD_SNAGGING));
 		}
-		wakeup(mdef, TRUE);
 
 	} else if (!youagr && youdef) {
-		/* monster attacks player: MUSE_BULLWHIP-style disarm */
+		/* monster attacks player: MUSE_BULLWHIP-style disarm/trip */
 		boolean gotit = proficient && !rn2(5 - proficient);
-		if (!gotit) return;
-		if (!uwep) return;
-
-		struct obj *obj = uwep;
-		const char *appname = pg_appendage_name(otmp, PGD_SNAGGING);
+		boolean trippable;
+		struct obj *obj;
+		boolean trip;
+		const char *appname;
 		char The_antennae[BUFSZ], the_antennae[BUFSZ];
+
+		if (!gotit) return;
+
+		trippable = could_trip(magr, mdef);
+		obj = uwep;
+		trip = (obj && trippable) ? (boolean) rn2(2) : trippable;
+
+		if (!obj && !trip) return;
+
+		appname = pg_appendage_name(otmp, PGD_SNAGGING);
 		if (vismagr) {
 			Sprintf(The_antennae, "The glaive's %s", appname);
 			Sprintf(the_antennae, "the glaive's %s", appname);
@@ -5852,96 +5869,90 @@ struct obj *otmp;
 			Sprintf(The_antennae, "%s", appname);
 			The_antennae[0] = highc(The_antennae[0]);
 		}
-		const char *hand = body_part(HAND);
-		char the_weapon[BUFSZ];
-		int where_to;
 
-		if (bimanual_mon(obj, &youmonst)) hand = makeplural(hand);
-		Strcpy(the_weapon, the(xname(obj)));
+		if (trip) {
+			if (vismagr)
+				pline("%s lashes %s towards your %s!", Monnam(magr),
+				    the_antennae, body_part(LEG));
+			if (trip_attempt(magr, mdef, proficient) == TRIP_FAIL)
+				pline("But %s slip%s free!", the_antennae, vismagr ? "" : "s");
+		} else {
+			const char *hand = body_part(HAND);
+			char the_weapon[BUFSZ];
+			int where_to;
 
-		if (vismagr)
-			pline("%s lashes %s towards your %s!", Monnam(magr), the_antennae, hand);
+			if (bimanual_mon(obj, &youmonst)) hand = makeplural(hand);
+			Strcpy(the_weapon, the(xname(obj)));
 
-		if (obj->otyp == BALL) {
-			pline("%s fail%s to wrap around %s.", The_antennae,
-			    vismagr ? "" : "s", the_weapon);
-			return;
-		}
+			if (vismagr)
+				pline("%s lashes %s towards your %s!", Monnam(magr), the_antennae, hand);
 
-		if (obj->oartifact)
-			pline("%s wrap%s around your wielded %s!", The_antennae,
-			    vismagr ? "" : "s", the_weapon);
-		else
-			pline("%s wrap%s around %s you're wielding!", The_antennae,
-			    vismagr ? "" : "s", the_weapon);
+			if (obj->otyp == BALL) {
+				pline("%s fail%s to wrap around %s.", The_antennae,
+				    vismagr ? "" : "s", the_weapon);
+				return;
+			}
 
-		where_to = rn2(proficient + 2);	/* 0 = slip; 1..3 = outcomes */
-		if (where_to > 3) where_to = 3;
+			if (obj->oartifact)
+				pline("%s wrap%s around your wielded %s!", The_antennae,
+				    vismagr ? "" : "s", the_weapon);
+			else
+				pline("%s wrap%s around %s you're wielding!", The_antennae,
+				    vismagr ? "" : "s", the_weapon);
 
-		if (welded(obj)) {
-			pline("%s welded to your %s%c",
-			    !is_plural(obj) ? "It is" : "They are",
-			    hand, !obj->bknown ? '!' : '.');
-			where_to = 0;
-		}
-		if (obj->oartifact == ART_GLAMDRING) {
-			pline("Glamdring resists being ripped out of your hands!");
-			where_to = 0;
-		}
-		if (obj->oartifact == ART_DIRGE && check_mutation(TENDRIL_HAIR)) {
-			pline("Dirge holds onto your hands!");
-			where_to = 0;
-		}
-		if (!where_to) {
-			pline("The %s slip free.", appname);
-			return;
-		}
-		/* material aversions redirect to floor under player */
-		if (where_to == 3) {
-			if (hates_silver(magr->data) && obj_is_material(obj, SILVER))
-				where_to = 2;
-			else if (hates_iron(magr->data) && is_iron_obj(obj))
-				where_to = 2;
-			else if (hates_unholy_mon(magr) && obj_is_material(obj, GREEN_STEEL))
-				where_to = 2;
-			else if (hates_unholy_mon(magr) && is_unholy(obj))
-				where_to = 2;
-			else if (hates_unblessed_mon(magr) && is_unblessed(obj))
-				where_to = 2;
-			else if (hates_holy_mon(magr) && is_holy(obj))
-				where_to = 2;
-		}
-		freeinv(obj);
-		uwepgone();
-		switch (where_to) {
-		case 1:	/* floor under monster */
-			pline("%s yanks %s from your %s!", Monnam(magr), the_weapon, hand);
-			place_object(obj, magr->mx, magr->my);
-			break;
-		case 2:	/* floor under player */
-			pline("%s yanks %s to the %s!", Monnam(magr),
-			    the_weapon, surface(u.ux, u.uy));
-			dropy(obj);
-			break;
-		case 3:	/* into monster's inventory */
-			pline("%s snatches %s!", Monnam(magr), the_weapon);
-			(void) mpickobj(magr, obj);
-			break;
+			where_to = rn2(proficient + 2);	/* 0 = slip; 1..3 = outcomes */
+			if (where_to > 3) where_to = 3;
+
+			if (where_to) {
+				int result = whip_disarm(magr, mdef, obj, where_to);
+
+				switch (result) {
+				case WHIPDISARM_WELD:
+					pline("%s welded to your %s%c",
+					    !is_plural(obj) ? "It is" : "They are",
+					    hand, !obj->bknown ? '!' : '.');
+					break;
+				case WHIPDISARM_GLAMDRING:
+					pline("Glamdring resists being ripped out of your hands!");
+					break;
+				case WHIPDISARM_DIRGE:
+					pline("Dirge holds onto your hands!");
+					break;
+				case WHIPDISARM_ATTACKERFEET:
+					pline("%s yanks %s from your %s!", Monnam(magr), the_weapon, hand);
+					break;
+				case WHIPDISARM_DEFENDERFEET:
+					pline("%s yanks %s to the %s!", Monnam(magr),
+					    the_weapon, surface(u.ux, u.uy));
+					break;
+				case WHIPDISARM_ATTACKERINV:
+					pline("%s snatches %s!", Monnam(magr), the_weapon);
+					break;
+				}
+				if (result < 0) where_to = 0;
+			}
+
+			if (!where_to) {
+				pline("The %s slip free.", appname);
+			}
 		}
 
 	} else if (!youagr && !youdef) {
-		/* monster vs monster: simplified disarm */
+		/* monster vs monster: simplified disarm/trip */
+		boolean trippable = could_trip(magr, mdef);
 		struct obj *mwep = rn2(3) ? MON_WEP(mdef) : MON_SWEP(mdef);
-		if (!mwep) return;
-		if (proficient && !rn2(2)) {
-			obj_extract_self(mwep);
-			possibly_unwield(mdef, FALSE);
-			setmnotwielded(mdef, mwep);
-			obj_no_longer_held(mwep);
-			place_object(mwep, mdef->mx, mdef->my);
-			stackobj(mwep);
+		boolean trip = (mwep && trippable) ? (boolean) rn2(2) : trippable;
+
+		if (!mwep && !trip) return;
+
+		if (trip) {
+			(void) trip_attempt(magr, mdef, proficient);
+			wakeup(mdef, TRUE);
+		} else if (proficient && !rn2(2)) {
+			(void) whip_disarm(magr, mdef, mwep, WHIPDISARM_DEFENDERFEET);
+		} else {
+			wakeup(mdef, TRUE);
 		}
-		wakeup(mdef, TRUE);
 	}
 }
 

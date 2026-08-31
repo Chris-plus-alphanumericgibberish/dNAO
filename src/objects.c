@@ -671,7 +671,7 @@ WEAPON(("nunchaku", "set of chain-sticks"),
 /* misc */
 WEAPON(("bullwhip"),
 	DMG(D(2)), DMG(D(1)),
-	1, 0, MZ_MEDIUM,  5, 10,  4,  0, B,   P_WHIP, LEATHER, FALSE, CLR_BROWN),
+	1, 0, MZ_MEDIUM,  5, 10,  4,  0, B,   P_WHIP, LEATHER, FALSE, CLR_BROWN, O_TRAITS(ETRAIT_WHIP_TRICKS)),
 WEAPON(("viperwhip"), /*Needs encyc entry*/
 	DMG(D(4)), DMG(D(3)),
 	1, 0, MZ_MEDIUM,  2, 30, 40,  2, P,   P_WHIP, SILVER, IDED|UNIDED, HI_SILVER),

@@ -4846,6 +4846,7 @@ printEtraits()
 			{ETRAIT_BLADEDANCE, "Bladedance"},
 			{ETRAIT_PUNCTURE, "Puncture"},
 			{ETRAIT_STRIKING, "Striking"},
+			{ETRAIT_WHIP_TRICKS, "Whip Tricks"},
 			{0,0}
 		};
 		for(i=0;i<NUM_OBJECTS;i++){

@@ -63,6 +63,19 @@
 #define DISMOUNT_VANISHED	7
 #endif
 
+/* Outcomes from whip_disarm(): negative values mean the defender resisted
+ * (nothing was moved); positive values say where the disarmed item ended up. */
+#define WHIPDISARM_WELD		(-1)
+#define WHIPDISARM_GLAMDRING	(-2)
+#define WHIPDISARM_DIRGE	(-3)
+#define WHIPDISARM_ATTACKERFEET	1
+#define WHIPDISARM_DEFENDERFEET	2
+#define WHIPDISARM_ATTACKERINV	3
+
+/* Outcomes from trip_attempt() */
+#define TRIP_FAIL	0
+#define TRIP_SUCCESS	1
+
 /* Special returns from mapglyph() (note: type is unsigned int) */
 #define MG_CORPSE	0x001
 #define MG_INVIS	0x002

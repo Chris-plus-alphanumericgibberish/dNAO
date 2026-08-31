@@ -2830,6 +2830,9 @@ etrait_description(long flag, long context_traits, boolean past)
 	case ETRAIT_BLADEDANCE:
 		return past ? "delivered powerful blows when moving and striking erratically"
 		            : "delivers powerful blows when moving and striking erratically";
+	case ETRAIT_WHIP_TRICKS:
+		return past ? "performed whip tricks when attacking"
+		            : "can perform whip tricks when attacking";
 	default:
 		return (const char *)0;
 	}
@@ -3885,6 +3888,7 @@ winid *datawin;
 		EXPERTTRAITS(ETRAIT_BRACED, "delivers powerful counterattacks");
 		EXPERTTRAITS(ETRAIT_BLADESONG, "delivers powerful blows when combined with songs or spells");
 		EXPERTTRAITS(ETRAIT_BLADEDANCE, "delivers powerful blows when moving and striking erratically");
+		EXPERTTRAITS(ETRAIT_WHIP_TRICKS, "can perform whip tricks when attacking");
 		if(buf[0] != '\0')
 			Sprintf(buf2, "Expert traits: %s.", buf);
 		else

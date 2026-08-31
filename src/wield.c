@@ -987,6 +987,211 @@ register struct obj *obj;
 	return 0;
 }
 
+/* Strips otmp (wielded by mdef) on behalf of magr, at the already-rolled
+ * where_to (a WHIPDISARM_ATTACKERFEET/DEFENDERFEET/ATTACKERINV constant).
+ * Applies defender-side resistances (weld, Glamdring, Dirge + tendril hair)
+ * and hated-material/avoid-theft downgrades, which can override where_to,
+ * then moves the item. Returns the outcome actually applied. */
+int
+whip_disarm(struct monst *magr, struct monst *mdef, struct obj *otmp, int where_to)
+{
+	int result;
+
+	if (mdef == &youmonst ? welded(otmp)
+			       : (otmp->cursed && !is_weldproof_mon(mdef))) {
+		result = WHIPDISARM_WELD;
+	} else if (otmp->oartifact == ART_GLAMDRING) {
+		result = WHIPDISARM_GLAMDRING;
+	} else if (otmp->oartifact == ART_DIRGE && mdef == &youmonst
+			&& check_mutation(TENDRIL_HAIR)) {
+		result = WHIPDISARM_DIRGE;
+	} else {
+		result = where_to;
+		if (result == WHIPDISARM_ATTACKERINV) {
+			if (magr == &youmonst) {
+				if (u.uavoid_theft)
+					result = WHIPDISARM_ATTACKERFEET;
+			} else if ((hates_silver(magr->data) && obj_is_material(otmp, SILVER))
+					|| (hates_iron(magr->data) && is_iron_obj(otmp))
+					|| (hates_unholy_mon(magr) && obj_is_material(otmp, GREEN_STEEL))
+					|| (hates_unholy_mon(magr) && is_unholy(otmp))
+					|| (hates_unblessed_mon(magr) && is_unblessed(otmp))
+					|| (hates_holy_mon(magr) && is_holy(otmp))) {
+				result = WHIPDISARM_DEFENDERFEET;
+			}
+		}
+
+		if (mdef == &youmonst) {
+			freeinv(otmp);
+			uwepgone();
+		} else {
+			obj_extract_self(otmp);
+			possibly_unwield(mdef, FALSE);
+			setmnotwielded(mdef, otmp);
+		}
+
+		switch (result) {
+		case WHIPDISARM_ATTACKERFEET:
+			if (magr == &youmonst) {
+				dropy(otmp);
+			} else {
+				place_object(otmp, magr->mx, magr->my);
+				stackobj(otmp);
+			}
+			break;
+		case WHIPDISARM_DEFENDERFEET:
+			if (mdef == &youmonst) {
+				dropy(otmp);
+			} else {
+				place_object(otmp, mdef->mx, mdef->my);
+				stackobj(otmp);
+			}
+			break;
+		case WHIPDISARM_ATTACKERINV:
+			if (magr == &youmonst) {
+				if (otmp->otyp == CORPSE
+						&& touch_petrifies(&mons[otmp->corpsenm])
+						&& !uarmg && !Stone_resistance
+						&& !(poly_when_stoned(youracedata)
+						     && polymon(PM_STONE_GOLEM))) {
+					char kbuf[BUFSZ];
+
+					Sprintf(kbuf, "%s corpse",
+						an(mons[otmp->corpsenm].mname));
+					pline("Snatching %s is a fatal mistake.", kbuf);
+					instapetrify(kbuf);
+				}
+				(void) hold_another_object(otmp, "You drop %s!",
+							   doname(otmp), (const char *)0);
+			} else {
+				(void) mpickobj(magr, otmp);
+			}
+			break;
+		}
+	}
+
+	if (mdef != &youmonst)
+		wakeup(mdef, TRUE);
+	return result;
+}
+
+/* Attempts to knock mdef prone on behalf of magr, using proficient.
+ * Returns a TRIP_ constant. */
+int
+trip_attempt(struct monst *magr, struct monst *mdef, int proficient)
+{
+	int size_diff = wielder_size(mdef) - wielder_size(magr);
+
+	if (size_diff > 0) {
+		proficient -= size_diff;
+		if (proficient < 0) proficient = 0;
+		if (!rn2(proficient + 2))
+			return TRIP_FAIL;
+	}
+
+	if (mdef == &youmonst)
+		make_prone(TRUE);
+	else
+		make_mon_prone(mdef, TRUE);
+	return TRIP_SUCCESS;
+}
+
+/* A monster (magr) attempts a whip trick -- disarm or trip -- against mdef,
+ * who may be the player or another monster. obj is whichever whip-like
+ * weapon mdef is currently wielding, or NULL if mdef isn't wielding one (in
+ * which case only tripping can apply). Returns 1 if magr made an attempt of
+ * some kind (whether or not it succeeded), 0 if nothing happened at all. */
+int
+mon_whip_tricks(struct monst *magr, struct monst *mdef, struct obj *obj)
+{
+	boolean youdef = (mdef == &youmonst);
+	boolean vismagr = canseemon(magr);
+	boolean trippable = could_trip(magr, mdef);
+	boolean disarm_possible = obj && !rn2(5);
+	boolean trip = (disarm_possible && trippable) ? (boolean) rn2(2) : trippable;
+	int proficient;
+
+	if (!disarm_possible && !trip)
+		return 0;
+
+	proficient = m_martial_skill(magr->data) - P_UNSKILLED;
+	if (proficient < 0) proficient = 0;
+	if (proficient > 3) proficient = 3;
+
+	if (trip) {
+		if (vismagr)
+			pline("%s flicks a whip towards %s %s!", Monnam(magr),
+			    youdef ? "your" : s_suffix(mon_nam(mdef)), mbodypart(mdef, LEG));
+		if (trip_attempt(magr, mdef, proficient) == TRIP_FAIL)
+			pline("But the whip slips free!");
+		return 1;
+	}
+
+	{
+	const char *The_whip = vismagr ? "The whip" : "A whip";
+	int where_to = rn2(4);
+	const char *hand = mbodypart(mdef, HAND);
+	char the_weapon[BUFSZ];
+
+	Strcpy(the_weapon, the(xname(obj)));
+	if (bimanual_mon(obj, mdef)) hand = makeplural(hand);
+
+	if (vismagr)
+		pline("%s flicks a whip towards %s %s!", Monnam(magr),
+		    youdef ? "your" : s_suffix(mon_nam(mdef)), hand);
+
+	if (obj->otyp == BALL) {
+		pline("%s fails to wrap around %s.", The_whip, the_weapon);
+		return 1;
+	}
+
+	if (youdef) {
+		if (obj->oartifact)
+			pline("%s wraps around your wielded %s!", The_whip, the_weapon);
+		else
+			pline("%s wraps around %s you're wielding!", The_whip, the_weapon);
+	} else {
+		pline("%s wraps around %s %s!", The_whip, s_suffix(mon_nam(mdef)), the_weapon);
+	}
+
+	if (where_to) {
+		int result = whip_disarm(magr, mdef, obj, where_to);
+
+		switch (result) {
+		case WHIPDISARM_WELD:
+			pline("%s welded to %s %s%c", !is_plural(obj) ? "It is" : "They are",
+			    youdef ? "your" : s_suffix(mon_nam(mdef)), hand,
+			    !obj->bknown ? '!' : '.');
+			break;
+		case WHIPDISARM_GLAMDRING:
+			pline("Glamdring resists being ripped out of %s %s!",
+			    youdef ? "your" : s_suffix(mon_nam(mdef)), hand);
+			break;
+		case WHIPDISARM_DIRGE:
+			pline("Dirge holds onto your hands!");
+			break;
+		case WHIPDISARM_ATTACKERFEET:
+			pline("%s yanks %s from %s %s!", Monnam(magr), the_weapon,
+			    youdef ? "your" : s_suffix(mon_nam(mdef)), hand);
+			break;
+		case WHIPDISARM_DEFENDERFEET:
+			pline("%s yanks %s to the %s!", Monnam(magr), the_weapon,
+			    surface(youdef ? u.ux : mdef->mx, youdef ? u.uy : mdef->my));
+			break;
+		case WHIPDISARM_ATTACKERINV:
+			pline("%s snatches %s!", Monnam(magr), the_weapon);
+			break;
+		}
+		if (result < 0) where_to = 0;
+	}
+
+	if (!where_to) {
+		pline_The("whip slips free.");  /* not `The_whip' */
+	}
+	}
+	return 1;
+}
+
 void
 weldmsg(obj)
 register struct obj *obj;

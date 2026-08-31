@@ -15730,6 +15730,7 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 	boolean shattering_strike = FALSE;
 	boolean disarming_strike = FALSE;
 	boolean stunning_strike = FALSE;
+	boolean whip_tricks = FALSE;
 	boolean braced_weapon = FALSE;
 	int jousting = 0;		/* can be 1 (joust), 0 (ordinary hit), -1 (joust and lance breaks) */
 	int sneak_dice = 0;
@@ -16383,6 +16384,16 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 		: ROLL_ETRAIT(weapon, magr, !rn2(2), !rn2(10))
 		)
 			stunning_strike = TRUE;
+	}
+	// Whip-tricks expert weapon trait
+	if(!recursed && weapon && valid_weapon_attack && 
+		 magr && CHECK_ETRAIT(weapon, magr, ETRAIT_WHIP_TRICKS)
+	){
+		if((youagr && ZFOCUS(weapon)) 
+		? ROLL_ETRAIT(weapon, magr, rn2(4), !rn2(3))
+		: ROLL_ETRAIT(weapon, magr, !rn2(2), !rn2(5))
+		)
+			whip_tricks = TRUE;
 	}
 	/* monk special */
 	if (youagr && (melee || thrust) && !recursed && !Upolyd) {
@@ -19966,6 +19977,18 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 	/* ALL EFFECTS AFTER THIS POINT REQUIRE THE DEFENDER TO SURVIVE THE ATTACK (not including lifesaving) */
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	if (whip_tricks) {
+		if(youagr){
+			use_whip(weapon, mdef);
+		}
+		else {
+			/* defwep: whatever weapon the defender is currently wielding,
+			 * if any; NULL is fine. */
+			struct obj *defwep = (mdef == &youmonst) ? uwep
+					: (rn2(3) ? MON_WEP(mdef) : MON_SWEP(mdef));
+			mon_whip_tricks(magr, mdef, defwep);
+		}
+	}
 	/* apply confuse monster (player only) */
 	if (youagr && u.umconf && !mdef->mconf) {
 		char *hands = makeplural(body_part(HAND));
@@ -21824,7 +21847,7 @@ android_combo()
 
 		if (uwep && P_SKILL(weapon_type(uwep)) >= P_SKILLED && u.uen > 0){
 			/* get direction AND do whip things */
-			if (!use_whip(uwep) || !uwep)
+			if (!use_whip(uwep, (struct monst *)0) || !uwep)
 				return MOVE_ATTACKED;
 			/* get defender */
 			if (u.ustuck && u.uswallow)
@@ -21845,7 +21868,7 @@ android_combo()
 
 		if (uwep && P_SKILL(weapon_type(uwep)) >= P_EXPERT && u.uen > 0){
 			/* get direction AND do whip things */
-			if (!use_whip(uwep) || !uwep)
+			if (!use_whip(uwep, (struct monst *)0) || !uwep)
 				return MOVE_ATTACKED;
 			if (uwep->otyp == FORCE_WHIP){
 				/* turn it into a sword */

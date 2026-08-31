@@ -1104,7 +1104,8 @@ struct obj {
 #define you_merc_chained(obj) ((!(artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_FORCE_MASK) && !you_merc_kinstealing(obj) && !you_merc_streaming(obj)) || (artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_FORCE_C))
 #define YOU_MERC_SPECIAL	(u.ualign.type == A_CHAOTIC || u.ualign.type == A_NONE || u.sealsActive&SEAL_OSE || u.specialSealsActive&SEAL_MISKA)
 #define is_whip_tricks_weapon(otmp)	((otmp)->otyp == BULLWHIP || (otmp)->otyp == VIPERWHIP || (otmp)->otyp == FORCE_WHIP || (otmp)->otyp == WHIP_SAW \
-						  				|| ((otmp)->otyp == PEST_GLAIVE && (otmp)->ovar1_pestglaive_props & PG_BULLWHIP) \
+										|| ((otmp)->otyp == PEST_GLAIVE && (otmp)->ovar1_pestglaive_props & PG_BULLWHIP) \
+											|| (otmp)->o_e_trait == ETRAIT_WHIP_TRICKS \
 									)
 #define is_stealing_weapon(otmp)	(is_whip_tricks_weapon(otmp))
 #define force_weapon(otmp) force_otyp((otmp)->otyp)
