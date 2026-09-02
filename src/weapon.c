@@ -5054,16 +5054,17 @@ process_etraits(unsigned long traits, int otyp, struct obj *obj, struct monst *m
 		if(is_makashi_saber(obj) && activeFightingForm(FFORM_MAKASHI)){
 			traits |= ETRAIT_LUNGE|ETRAIT_STOP_THRUST;
 		}
-		if(obj->otyp == SILVERKNIGHT_SWORD && !check_oprop(obj, OPROP_NONE)){
-			if((check_oprop(obj, OPROP_FIREW) || check_oprop(obj, OPROP_ACIDW)) && (obj->where != OBJ_INVENT || (!activeFightingForm(FFORM_POMMEL) && !activeFightingForm(FFORM_HALF_SWORD))))
-				traits |= ETRAIT_CLEAVE;
-			else if(check_oprop(obj, OPROP_ELECW) && (obj->where != OBJ_INVENT || !activeFightingForm(FFORM_HALF_SWORD)))
-				traits |= ETRAIT_HEW;
-			 else if(check_oprop(obj, OPROP_COLDW))
-				traits |= ETRAIT_FELL;
-			 else if(check_oprop(obj, OPROP_MAGCW) && (obj->where != OBJ_INVENT || !activeFightingForm(FFORM_POMMEL)))
-				traits |= ETRAIT_PUNCTURE;
-		}
+	}
+	if(obj->otyp == SILVERKNIGHT_SWORD && !check_oprop(obj, OPROP_NONE)){
+		if((check_oprop(obj, OPROP_FIREW) || check_oprop(obj, OPROP_ACIDW)) && (obj->where != OBJ_INVENT || (!activeFightingForm(FFORM_POMMEL) && !activeFightingForm(FFORM_HALF_SWORD))))
+			traits |= ETRAIT_CLEAVE;
+		else if(check_oprop(obj, OPROP_ELECW) && (obj->where != OBJ_INVENT || !activeFightingForm(FFORM_HALF_SWORD)))
+			traits |= ETRAIT_HEW;
+		else if(check_oprop(obj, OPROP_COLDW))
+			traits |= ETRAIT_FELL;
+		else if(check_oprop(obj, OPROP_MAGCW) && (obj->where != OBJ_INVENT || !activeFightingForm(FFORM_POMMEL)))
+			traits |= ETRAIT_PUNCTURE;
+	}
 	}
 	if(otyp == POLEAXE){
 		if(obj->o_e_trait & ETRAIT_FOCUS_FIRE)
