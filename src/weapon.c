@@ -4071,6 +4071,9 @@ struct obj *obj;
 			CHECK_ALTERNATE_SKILL(skl)
 		}
 	}
+	else if(obj->oartifact == ART_ROD_OF_SEVEN_PARTS){
+		CHECK_ALTERNATE_SKILL(P_LANCE)
+	}
 
 	if(obj->otyp == DOUBLE_LIGHTSABER){
 		if(!obj->altmode){
