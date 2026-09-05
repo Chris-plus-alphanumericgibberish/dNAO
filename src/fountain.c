@@ -1584,7 +1584,9 @@ reshape_brand(struct obj *obj)
 			|| objects[i].oc_class == RING_CLASS
 		))
 			continue;
-		if(objects[i].oc_class == WEAPON_CLASS || i == BALL || (objects[i].oc_class == TOOL_CLASS && objects[i].oc_skill != P_NONE)){
+		if(objects[i].oc_class == WEAPON_CLASS || i == BALL || i == CHURCH_SHEATH || i == CHURCH_BRICK
+			 || (objects[i].oc_class == TOOL_CLASS && objects[i].oc_skill != P_NONE)
+		){
 			if(P_SKILL(objects[i].oc_skill < 0 ? -1*objects[i].oc_skill : objects[i].oc_skill) < P_SKILLED && !has_object_type(invent, i))
 				continue;
 		}

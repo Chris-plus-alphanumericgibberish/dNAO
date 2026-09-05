@@ -2625,9 +2625,11 @@ use_church_weapon(struct obj *obj)
 	if(obj->otyp == CHURCH_BLADE){
 		You("draw the sword from the sheath-blade.");
 		obj->otyp = CHURCH_SHEATH;
+		obj->oclass = TOOL_CLASS;
 	} else {
 		You("draw the sword from the stone.");
 		obj->otyp = CHURCH_BRICK;
+		obj->oclass = TOOL_CLASS;
 	}
 	if(obj->cobj){
 		sword = obj->cobj;
@@ -2696,6 +2698,7 @@ use_church_sword(struct obj *obj)
 		else
 			You("sheath the sword in the stone.");
 	}
+	sheath->oclass = WEAPON_CLASS;
 	if(obj == uwep){
 		setuwep(sheath);
 	}
@@ -2745,6 +2748,7 @@ use_church_sheath(struct obj *obj)
 		else
 			You("sheath the sword in the stone.");
 	}
+	obj->oclass = WEAPON_CLASS;
 	if(sword == uwep){
 		setuwep(obj);
 	}
