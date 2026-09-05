@@ -2760,6 +2760,9 @@ atkbp_bodypart_name(struct atkbp_set bp, struct permonst *ptr)
 	    ATKBP(TENTACLE_ARM_6TH), ATKBP(NONE) });
 	struct atkbp_set alien_limb_words = atkbp_or((struct atkbp_set[]){
 	    ATKBP(ALIEN_LIMB_1ST), ATKBP(ALIEN_LIMB_2ND), ATKBP(NONE) });
+	struct atkbp_set secondary_arm_words = atkbp_or((struct atkbp_set[]){
+	    ATKBP(SECONDARY_ARM), ATKBP(1ST_SECONDARY_ARM), ATKBP(2ND_SECONDARY_ARM),
+	    ATKBP(3RD_SECONDARY_ARM), ATKBP(4TH_SECONDARY_ARM), ATKBP(5TH_SECONDARY_ARM), ATKBP(NONE) });
 	struct atkbp_set no_noun = atkbp_or((struct atkbp_set[]){
 	    ATKBP(NONE), ATKBP(INNUMERABLE), ATKBP(MIND_NOLIMB), ATKBP(NONE) });
 
@@ -2774,6 +2777,8 @@ atkbp_bodypart_name(struct atkbp_set bp, struct permonst *ptr)
 	    return ptrbodypart(ptr, HEAD, (struct monst *) 0);
 	if (atkbp_intersects(bp, ATKBP(EYES)))
 	    return ptrbodypart(ptr, EYE_BP, (struct monst *) 0);
+	if (atkbp_intersects(bp, ATKBP(LENS_ARRAY)))
+	    return "lens array";
 	if (atkbp_intersects(bp, ATKBP(TONGUE)))
 	    return ptrbodypart(ptr, TONGUE, (struct monst *) 0);
 	if (atkbp_intersects(bp, ATKBP(WING)))
@@ -2785,6 +2790,12 @@ atkbp_bodypart_name(struct atkbp_set bp, struct permonst *ptr)
 	    return "pincer";
 	if (atkbp_intersects(bp, arm_lower_words))
 	    return "lower arm";
+	if (atkbp_intersects(bp, secondary_arm_words)) {
+	    static char secondary_arm_buf[BUFSZ];
+
+	    Sprintf(secondary_arm_buf, "secondary %s", ptrbodypart(ptr, ARM, (struct monst *) 0));
+	    return secondary_arm_buf;
+	}
 
 	if (atkbp_intersects(bp, ATKBP(LIMB_GENERIC))) return "limb";
 	if (atkbp_intersects(bp, ATKBP(LAUNCHER_GENERIC))) return "launcher";

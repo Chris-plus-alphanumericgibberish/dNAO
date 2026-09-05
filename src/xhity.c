@@ -13698,7 +13698,20 @@ int vis;
 	int result = MM_MISS;
 	int adtyp = attk->adtyp;
 	int dmg = d((int)attk->damn, (int)attk->damd);
-	int fulldmg = dmg;			/* original unreduced damage */
+	int fulldmg;			/* original unreduced damage */
+
+	/* a lens array sharpens or blurs the gaze it focuses: undamaged, it
+	 * takes the better of two rolls; damaged, the worse of two.
+	 * 
+	 * Note: Quinon's have an invisible lens array that isn't listed in the body parts and so can't be damaged.
+	 */
+	if (atkbp_intersects(magr->mbodyparts_full, ATKBP(LENS_ARRAY)) || magr->mtyp == PM_QUINON) {
+		int dmg2 = d((int)attk->damn, (int)attk->damd);
+
+		dmg = atkbp_intersects(magr->minjuries, ATKBP(LENS_ARRAY))
+		      ? min(dmg, dmg2) : max(dmg, dmg2);
+	}
+	fulldmg = dmg;
 
 	if (vis == -1)
 		vis = getvis(magr, mdef, 0, 0);

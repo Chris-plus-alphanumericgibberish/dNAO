@@ -275,6 +275,22 @@ tentacle_arm_ordinal_bit(int tentacle_number)
     return ATKBP(NONE);
 }
 
+/* secondary_arm_ordinal_bit(): the ATKBP_*_SECONDARY_ARM bit for the
+ * `arm_number`th secondary arm (1..5 == 1ST_SECONDARY_ARM..5TH_SECONDARY_ARM).
+ */
+static struct atkbp_set
+secondary_arm_ordinal_bit(int arm_number)
+{
+    switch (arm_number) {
+    case 1: return ATKBP(1ST_SECONDARY_ARM);
+    case 2: return ATKBP(2ND_SECONDARY_ARM);
+    case 3: return ATKBP(3RD_SECONDARY_ARM);
+    case 4: return ATKBP(4TH_SECONDARY_ARM);
+    case 5: return ATKBP(5TH_SECONDARY_ARM);
+    }
+    return ATKBP(NONE);
+}
+
 /* butt_count()/butt_ordinal(): how many of ptr's attacks are AT_BUTT, and
  * which one (0-based) is `attk`? Used to split multiple AT_BUTT attacks
  * across a horned monster's individual horns -- see the AT_BUTT case below.
@@ -374,6 +390,12 @@ attk_bodyparts(struct permonst *ptr, struct attack *attk)
      */
     if (ptr->mtyp == PM_MOON_FLEA && attk->aatyp == AT_LRCH)
 	return ATKBP(TONGUE);
+
+    if (attk->aatyp == AT_CLAW
+	    && (ptr->mtyp == PM_DUTON || ptr->mtyp == PM_TRITON || ptr->mtyp == PM_QUATON))
+	return ATKBP(ARM);
+    if (attk->aatyp == AT_CLAW && ptr->mtyp == PM_QUINON)
+	return ATKBP(MIND_NOLIMB);
 
     /* polywep ("wielding while polymorphed") only applies to hand-delivered
      * attacks -- a bite/rend/hug/tentacle stays what it is regardless. A
@@ -931,6 +953,15 @@ attk_bodyparts(struct permonst *ptr, struct attack *attk)
 	/* "blessed" (PM_BLESSED) casts through her horned light, not an arm. */
 	if (ptr->mtyp == PM_BLESSED)
 	    return ATKBP(HORNED_LIGHT);
+	if (ptr->mtyp == PM_QUINON)
+	    return ATKBP(MIND_NOLIMB);
+	/* quaton casts with its 4 secondary arms, a separate pool from the
+	 * 4 claw-bearing arms its AT_CLAW resolves to.
+	 */
+	if (ptr->mtyp == PM_QUATON)
+	    return atkbp_or((struct atkbp_set[]){
+		secondary_arm_ordinal_bit(1), secondary_arm_ordinal_bit(2),
+		secondary_arm_ordinal_bit(3), secondary_arm_ordinal_bit(4), ATKBP(NONE) });
 	/* AD_PSON is purely mental regardless of aatyp; nohands(ptr) can't
 	 * gesture to cast either -- both collapse to limbless. Otherwise
 	 * this is category-only (like AT_MARI/AT_MSPR below); the generator
@@ -1041,6 +1072,8 @@ attk_bodyparts(struct permonst *ptr, struct attack *attk)
 	 */
 	if (ptr->mtyp == PM_BLESSED)
 	    return atkbp_or((struct atkbp_set[]){ ATKBP(LEG), ATKBP(INNUMERABLE), ATKBP(NONE) });
+	if (ptr->mtyp == PM_QUINON)
+	    return ATKBP(MIND_NOLIMB);
 	/* animal_bodied(ptr) monsters kick with a hind leg -- narrower than
 	 * the fully generic LEG a non-animal kicker (e.g. a monk) gets. 2+
 	 * AT_KICK attacks split the rear legs round-robin (a quadruped's
@@ -1541,23 +1574,42 @@ atkbp_spellcast_arm_mask(struct permonst *ptr)
     return ATKBP_CONCRETE_ARM_MASK();
 }
 
-/* mon_leg_count(): how many legs this monster is assumed to have --
- * guessed from body-plan flags, not tracked per-species. Order matters:
- * humanoid_feet(ptr) (bipedal) overrides everything below, so silverman
- * and Demogorgon (both MB_SLITHY but MB_HAS_FEET) get 2 rather than the
- * 0 a snake tail would otherwise imply. snakemanoid(ptr) is checked
- * instead of a raw MB_SLITHY test so a "legged snake" (MB_ANIMAL|
- * MB_SLITHY) still falls through to animal_bodied(ptr) below.
- * animal_bodied(ptr), not the stricter animaloid(), gates the
- * is_arachnid()/is_insectoid() leg-count bump, so a centauroid
- * arachnid/insectoid (e.g. a drider) still gets it.
- *
- * Obox-ob is canonically 108 legs, but nothing needs that precision, so
- * he isn't special-cased and gets the ordinary MB_ANIMAL default.
+/* auton_limb_count(): arm/leg count for the lower auton castes --
+ * -1 means "not one of these castes."
+ */
+static int
+auton_limb_count(struct permonst *ptr)
+{
+    switch (ptr->mtyp) {
+    case PM_MONOTON: return 0;
+    case PM_DUTON:   return 2;
+    case PM_TRITON:  return 3;
+    case PM_QUATON:  return 4;
+    case PM_QUINON:  return 0;
+    }
+    return -1;
+}
+
+/* auton_secondary_arm_count(): how many secondary (spellcasting) arms this
+ * auton caste has, beyond its ordinary claw-bearing arms -- 0 for castes
+ * without a secondary set.
+ */
+static int
+auton_secondary_arm_count(struct permonst *ptr)
+{
+    return (ptr->mtyp == PM_QUATON) ? 4 : 0;
+}
+
+/* mon_leg_count(): the number of legs this monster is assumed to have,
+ * guessed from body-plan data rather than tracked per-species.
  */
 int
 mon_leg_count(struct permonst *ptr)
 {
+    int auton = auton_limb_count(ptr);
+
+    if (auton >= 0)
+	return auton;
     if (humanoid_feet(ptr))
 	return 2;
     if (nolimbs(ptr) || nofeet(ptr) || snakemanoid(ptr))
@@ -1639,6 +1691,8 @@ mon_flag_bodyparts(struct permonst *ptr)
     struct atkbp_set parts[24];
     int n = 0;
     int nlegs, leg, nhorns, horn;
+    int auton_arms = auton_limb_count(ptr);
+    int auton_secondary_arms = auton_secondary_arm_count(ptr);
 
     if (haseyes(ptr))
 	parts[n++] = ATKBP(EYES);
@@ -1646,7 +1700,14 @@ mon_flag_bodyparts(struct permonst *ptr)
 	parts[n++] = ATKBP(HEAD);
     if (has_wings(ptr))
 	parts[n++] = ATKBP(WING);
-    if (!nohands(ptr)) {
+    if (ptr->mtyp == PM_TRITON || ptr->mtyp == PM_QUATON)
+	parts[n++] = ATKBP(LENS_ARRAY);
+    if (auton_arms >= 0) {
+	int arm;
+
+	for (arm = 1; arm <= auton_arms; arm++)
+	    parts[n++] = arm_ordinal_bit(arm);
+    } else if (!nohands(ptr)) {
 	parts[n++] = ATKBP(ARM_DOMINANT);
 	/* the one confirmed exception to "no monster has exactly one hand"
 	 * -- carcosan courtier has a single dominant arm and no offhand
@@ -1659,6 +1720,12 @@ mon_flag_bodyparts(struct permonst *ptr)
     nlegs = mon_leg_count(ptr);
     for (leg = 1; leg <= nlegs; leg++)
 	parts[n++] = leg_ordinal_bit(leg);
+    if (auton_secondary_arms > 0) {
+	int sarm;
+
+	for (sarm = 1; sarm <= auton_secondary_arms; sarm++)
+	    parts[n++] = secondary_arm_ordinal_bit(sarm);
+    }
     /* a horned monster's horns are known body parts even if it has no
      * AT_BUTT attack at all (e.g. Fierna, Graz'zt) -- see mon_horn_count().
      */
@@ -1739,6 +1806,8 @@ vague_bit_members(struct permonst *ptr, struct atkbp_set vague)
 	return ATKBP_HORN_ORDINALS_MASK();
     if (atkbp_intersects(vague, ATKBP(TENTACLE_ARM)))
 	return ATKBP_TENTACLE_ARM_ORDINALS_MASK();
+    if (atkbp_intersects(vague, ATKBP(SECONDARY_ARM)))
+	return ATKBP_SECONDARY_ARM_ORDINALS_MASK();
     return ATKBP(NONE);
 }
 

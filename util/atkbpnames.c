@@ -373,6 +373,18 @@ struct atkbp_name_entry atkbp_name_list[] = {
     { "LEG_8TH" },
     /** Specific forelegs end here: keep in sync with leg_ordinal_bit() and ATKBP_LEG_ORDINALS_MASK */
 
+    /** Specific bodypart reprensenting a complex array of lenses */
+    { "LENS_ARRAY" },
+
+    /** Nonspecific attrbution for secondary arms */
+    { "SECONDARY_ARM" },
+    /** Specific ordinal secondary arms begin here */
+    { "1ST_SECONDARY_ARM" },
+    { "2ND_SECONDARY_ARM" },
+    { "3RD_SECONDARY_ARM" },
+    { "4TH_SECONDARY_ARM" },
+    { "5TH_SECONDARY_ARM" },
+    /** Specific ordinal secondary arms end here */
     { NULL }
 };
 

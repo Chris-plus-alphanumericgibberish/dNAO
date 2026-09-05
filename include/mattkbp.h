@@ -46,6 +46,11 @@ extern struct atkbp_set FDECL(leg_ordinal_bit, (int));
 	    ATKBP(HORN_1ST), ATKBP(HORN_2ND), \
 	    ATKBP(HORN_3RD), ATKBP(HORN_4TH), ATKBP(HORN_5TH), ATKBP(HORN_6TH), \
 	    ATKBP(NONE) })
+#define ATKBP_SECONDARY_ARM_ORDINALS_MASK() \
+	atkbp_or((struct atkbp_set[]){ \
+	    ATKBP(1ST_SECONDARY_ARM), ATKBP(2ND_SECONDARY_ARM), ATKBP(3RD_SECONDARY_ARM), \
+	    ATKBP(4TH_SECONDARY_ARM), ATKBP(5TH_SECONDARY_ARM), \
+	    ATKBP(NONE) })
 
 /* Bits that qualify a body part rather than naming one. */
 #define ATKBP_MODIFIER_MASK() \
@@ -64,7 +69,8 @@ extern struct atkbp_set FDECL(leg_ordinal_bit, (int));
 
 #define ATKBP_UPPER_BODY_ARM_MASK() \
 	atkbp_or((struct atkbp_set[]){ \
-	    ATKBP_ARM_ORDINALS_MASK(), ATKBP_MISKA_ARM_ORDINALS_MASK(), ATKBP(ARM), ATKBP(NONE) })
+	    ATKBP_ARM_ORDINALS_MASK(), ATKBP_MISKA_ARM_ORDINALS_MASK(), ATKBP(ARM), \
+	    ATKBP_SECONDARY_ARM_ORDINALS_MASK(), ATKBP(SECONDARY_ARM), ATKBP(NONE) })
 
 #define would_straitjacket_block(attk) \
 	atkbp_intersects((attk)->bodypart, ATKBP_UPPER_BODY_ARM_MASK())
@@ -82,8 +88,9 @@ extern struct atkbp_set FDECL(leg_ordinal_bit, (int));
  */
 #define ATKBP_LIMB_MASK() \
 	atkbp_or((struct atkbp_set[]){ \
-	    ATKBP_CONCRETE_ARM_MASK(), ATKBP_TENTACLE_ARM_ORDINALS_MASK(), ATKBP_LEG_ORDINALS_MASK(), \
-	    ATKBP(ALIEN_LIMB_1ST), ATKBP(ALIEN_LIMB_2ND), ATKBP(WING), ATKBP(TAIL), \
+	    ATKBP_CONCRETE_ARM_MASK(), ATKBP_TENTACLE_ARM_ORDINALS_MASK(), ATKBP_SECONDARY_ARM_ORDINALS_MASK(), \
+	    ATKBP_LEG_ORDINALS_MASK(), \
+	    ATKBP(ALIEN_LIMB_1ST), ATKBP(ALIEN_LIMB_2ND), ATKBP(WING), ATKBP(TAIL), ATKBP(LENS_ARRAY), \
 	    ATKBP(NONE) })
 
 extern struct atkbp_set FDECL(atkbp_spellcast_arm_mask, (struct permonst *));
