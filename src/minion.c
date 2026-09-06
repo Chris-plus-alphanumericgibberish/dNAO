@@ -749,6 +749,36 @@ mcall_pit_fiend(struct monst *mon, int x, int y, int scatter)
 }
 
 void
+mcall_bael(struct monst *mon, int x, int y, int scatter)
+{
+	int lesser_devils[] = {PM_LEGION_DEVIL_SOLDIER, PM_LEGION_DEVIL_SERGEANT, PM_HORNED_DEVIL, PM_BARBED_DEVIL};
+	int greater_devils[] = {PM_LEGION_DEVIL_CAPTAIN, PM_BONE_DEVIL, PM_PIT_FIEND};
+	int seen_cnt = 0, sensed_cnt = 0;
+	if(rn2(2)) {
+		int dtype = ROLL_FROM(lesser_devils);
+		for(int i = 3; i > 0; i--) {
+			int vx, vy;
+			scatter_coord(x, y, scatter, &vx, &vy);
+			count_vortex(msummon_vortex(dtype, vx, vy, mon, 1), &seen_cnt, &sensed_cnt);
+		}
+	}
+	else {
+		int dtype = ROLL_FROM(greater_devils);
+		int vx, vy;
+		scatter_coord(x, y, scatter, &vx, &vy);
+		count_vortex(msummon_vortex(dtype, vx, vy, mon, 1), &seen_cnt, &sensed_cnt);
+	}
+	{
+		int total = seen_cnt + sensed_cnt;
+		if (total)
+			pline("You %s %s summoning %s form.",
+			      seen_cnt ? "see" : "sense",
+			      total == 1 ? "a" : "some",
+			      total == 1 ? "vortex" : "vortices");
+	}
+}
+
+void
 mcall_alkilith(struct monst *mon, int x, int y, int scatter)
 {
 	int seen_cnt = 0, sensed_cnt = 0;

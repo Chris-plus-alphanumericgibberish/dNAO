@@ -1618,6 +1618,7 @@ E struct monst * FDECL(msummon_create_at, (struct monst *, int, int));
 E struct monst * FDECL(msummon_vortex, (int, int, int, struct monst *, int));
 E void FDECL(mcall_group, (struct monst *, int, int, int));
 E void FDECL(mcall_pit_fiend, (struct monst *, int, int, int));
+E void FDECL(mcall_bael, (struct monst *, int, int, int));
 E void FDECL(mcall_alkilith, (struct monst *, int, int, int));
 E struct monst * FDECL(summon_god_minion, (int,BOOLEAN_P));
 E struct monst * FDECL(summon_minion, (ALIGNTYP_P,BOOLEAN_P,BOOLEAN_P,BOOLEAN_P));
