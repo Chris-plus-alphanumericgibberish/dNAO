@@ -202,6 +202,7 @@ E boolean FDECL(undiscovered_artifact, (int));
 E int FDECL(disp_artifact_discoveries, (winid));
 E void FDECL(otyp_hit, (struct monst *,struct monst *,
 				struct obj *,int, int *,int*, int, boolean *, boolean, boolean));
+E int FDECL(silver_flame_disn_armor, (struct monst *,int,boolean,struct obj *,boolean *));
 E int FDECL(special_weapon_hit, (struct monst *,struct monst *,
 				struct obj *,struct obj*,int,int*,int*,int,boolean*,boolean));
 E int NDECL(doinvoke);
@@ -3833,6 +3834,7 @@ E int NDECL(mountedCombat);
 E int NDECL(def_mountedCombat);
 E boolean FDECL(obj_silver_searing, (struct obj *));
 E boolean FDECL(obj_jade_searing, (struct obj *));
+E int FDECL(platinum_diesize, (struct monst *));
 E int FDECL(hatesobjdmg, (struct monst *, struct obj *, struct monst *));
 E int FDECL(hits_insubstantial, (struct monst *, struct monst *, struct attack *, struct obj *));
 E boolean FDECL(miss_via_insubstantial, (struct monst *, struct monst *, struct attack *, struct obj *, int));

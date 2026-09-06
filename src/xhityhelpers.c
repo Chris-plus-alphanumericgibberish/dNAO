@@ -1771,12 +1771,29 @@ struct obj * obj;
 	return FALSE;
 }
 
+/* die size for platinum/lawful-hating damage against [mdef] */
+int
+platinum_diesize(struct monst *mdef)
+{
+	boolean youdef = (mdef == &youmonst);
+	int diesize = 5;
+
+	/* spiritual beings are hurt more */
+	if (is_minion(mdef->data) || is_demon(mdef->data))
+		diesize *= 2;
+	/* strongly chaotic beings are hurt more */
+	if (youdef ? u.ualign.record >= 100 : (mdef->mtyp == PM_ANGEL || mdef->data->maligntyp <= -10))
+		diesize *= 2;
+
+	return diesize;
+}
+
 /* hatesobjdmg()
- * 
+ *
  * Calculates a damage roll from [mdef] being seared by [otmp]
  * Counts silver, jade, iron, holy, unholy
  * Does not print messages
- * 
+ *
  */
 int
 hatesobjdmg(mdef, otmp, magr)
@@ -2096,13 +2113,7 @@ struct monst * magr;
 	) {
 		/* default: 1d5 */
 		ndice = 1;
-		diesize = 5;
-		/* spiritual beings are hurt more */
-		if(is_minion(mdef->data) || is_demon(mdef->data))
-			diesize *= 2;
-		/* strongly chaotic beings are hurt more */
-		if(youdef ? u.ualign.record >= 100 : ( mdef->mtyp == PM_ANGEL || mdef->data->maligntyp <= -10))
-			diesize *= 2;
+		diesize = platinum_diesize(mdef);
 
 		/* special cases */
 		
@@ -2584,6 +2595,7 @@ int dmgtyp;
 			break;
 			/* Fire boils potions, burns scrolls, burns spellbooks */
 		case AD_FIRE:
+		case AD_SFLM:
 			xresist = (Fire_res(mtmp) && obj->oclass != POTION_CLASS);
 
 			if (obj->oerodeproof && is_flammable(obj))	/* fireproof */

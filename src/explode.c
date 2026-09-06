@@ -354,6 +354,8 @@ do_explode(int x, int y, ExplodeRegion *area, int adtyp, int olet, int dam, int 
 			else
 				str = "fireball";
 			break;
+		case AD_SFLM: str = "spike of silver flame";
+			break;
 		case AD_ECLD:
 		case AD_COLD:
 			if(special_flags&GOAT_SPELL)
@@ -428,6 +430,23 @@ do_explode(int x, int y, ExplodeRegion *area, int adtyp, int olet, int dam, int 
 			case AD_FIRE:
 				explmask = !!Fire_resistance;
 				break;
+			case AD_SFLM: {
+				boolean resisted = !!Fire_resistance;
+				if (SilverInvokeMortal && Mortal_race && !Drain_resistance)
+					resisted = FALSE;
+				if (SilverInvokeUndeath && is_undead(youracedata))
+					resisted = FALSE;
+				if (SilverInvokeSpirit && (is_minion(youracedata) || is_demon(youracedata) || (Drain_resistance && Mortal_race))) {
+					int budget = (dam + 1) / 2;
+					budget = silver_flame_disn_armor(&youmonst, budget, (!silent && cansee(xi, yi)), (struct obj *)0, (boolean *)0);
+					if (budget > 0)
+						resisted = FALSE;
+				}
+				if (SilverInvokeIllusion && (Displaced || is_shapechanger(youracedata) || u.ualign.type == A_CHAOTIC))
+					resisted = FALSE;
+				explmask = resisted;
+				break;
+			}
 			case AD_MADF:
 				explmask = (Fire_resistance && Antimagic);
 				break;
@@ -509,6 +528,23 @@ do_explode(int x, int y, ExplodeRegion *area, int adtyp, int olet, int dam, int 
 				case AD_FIRE:
 					explmask |= resists_fire(mtmp);
 					break;
+				case AD_SFLM: {
+					boolean resisted = resists_fire(mtmp);
+					if (SilverInvokeMortal && mortal_race(mtmp) && !Drain_res(mtmp))
+						resisted = FALSE;
+					if (SilverInvokeUndeath && is_undead(mtmp->data))
+						resisted = FALSE;
+					if (SilverInvokeSpirit && (is_minion(mtmp->data) || is_demon(mtmp->data) || (Drain_res(mtmp) && mortal_race(mtmp)))) {
+						int budget = (dam + 1) / 2;
+						budget = silver_flame_disn_armor(mtmp, budget, (!silent && cansee(xi, yi)), (struct obj *)0, (boolean *)0);
+						if (budget > 0)
+							resisted = FALSE;
+					}
+					if (SilverInvokeIllusion && (mon_resistance(mtmp, DISPLACED) || is_shapechanger(mtmp->data) || is_chaotic_mon(mtmp)))
+						resisted = FALSE;
+					explmask |= resisted;
+					break;
+				}
 				case AD_MADF:
 					explmask |= (resists_fire(mtmp) && resists_magm(mtmp));
 					break;
@@ -559,6 +595,12 @@ do_explode(int x, int y, ExplodeRegion *area, int adtyp, int olet, int dam, int 
 				}
 				if(special_flags&GOAT_SPELL){
 					mtmp->mgoatmarked = TRUE;
+					if(yours){
+						mtmp->myoumarked = TRUE;
+					}
+				}
+				if(adtyp == AD_SFLM && sflm_target(mtmp)){
+					mtmp->mflamemarked = TRUE;
 					if(yours){
 						mtmp->myoumarked = TRUE;
 					}
@@ -657,6 +699,7 @@ do_explode(int x, int y, ExplodeRegion *area, int adtyp, int olet, int dam, int 
 				      Monnam(u.ustuck),
 				      (adtyp == AD_EFIR) ? "heartburn" :
 				      (adtyp == AD_FIRE) ? "heartburn" :
+				      (adtyp == AD_SFLM) ? "heartburn" :
 				      (adtyp == AD_MADF) ? "heartburn" :
 				      (adtyp == AD_ECLD) ? "chilly" :
 				      (adtyp == AD_COLD) ? "chilly" :
@@ -680,6 +723,7 @@ do_explode(int x, int y, ExplodeRegion *area, int adtyp, int olet, int dam, int 
 				      Monnam(u.ustuck),
 				      (adtyp == AD_EFIR) ? "toasted" :
 				      (adtyp == AD_FIRE) ? "toasted" :
+				      (adtyp == AD_SFLM) ? "toasted" :
 				      (adtyp == AD_MADF) ? "toasted" :
 				      (adtyp == AD_ECLD) ? "chilly" :
 				      (adtyp == AD_COLD) ? "chilly" :
@@ -810,7 +854,7 @@ do_explode(int x, int y, ExplodeRegion *area, int adtyp, int olet, int dam, int 
 				}
 				mdam *= mod;
 			}
-			else if (fire_vulnerable(mtmp) && (adtyp == AD_FIRE || adtyp == AD_EFIR))
+			else if (fire_vulnerable(mtmp) && (adtyp == AD_FIRE || adtyp == AD_EFIR || adtyp == AD_SFLM))
 				mdam *= 2;
 			else if (cold_vulnerable(mtmp) && (adtyp == AD_COLD || adtyp == AD_ECLD))
 				mdam *= 2;
@@ -856,6 +900,42 @@ do_explode(int x, int y, ExplodeRegion *area, int adtyp, int olet, int dam, int 
 				mtmp->mhp -= idamnonres;
 			}
 		}
+
+		if (adtyp == AD_SFLM) {
+			int sflmdam = 0;
+			if (hates_silver(mtmp->data)) {
+				if (!silent && cansee(xi, yi))
+					pline("The Silver Flame sears %s!", mon_nam(mtmp));
+				sflmdam += d(2, 20);
+			}
+			if (hates_lawful_mon(mtmp)) {
+				sflmdam += d(2, platinum_diesize(mtmp));
+			}
+			if (SilverInvokeMortal && mortal_race(mtmp) && !Drain_res(mtmp)) {
+				int i = d(2, 2);
+				int dlife = *hpmax(mtmp);
+				if (!silent && cansee(xi, yi))
+					pline("The Silver Flame reveals %s frailty!", s_suffix(mon_nam(mtmp)));
+				*hpmax(mtmp) -= min_ints(d(i, hd_size(mtmp->data)), *hpmax(mtmp));
+				if (*hpmax(mtmp) == 0 || mlev(mtmp) == 0) {
+					*hp(mtmp) = 1;
+					*hpmax(mtmp) = 1;
+				}
+				if (mtmp->m_lev == 0)
+					sflmdam += *hpmax(mtmp);
+				else if (mtmp->m_lev >= i)
+					mtmp->m_lev -= i;
+				else
+					mtmp->m_lev = 0;
+				dlife -= *hpmax(mtmp);
+				sflmdam += dlife;
+			}
+			if (SilverInvokeUndeath && is_undead(mtmp->data)) {
+				sflmdam += d(2, 7);
+			}
+			mtmp->mhp -= sflmdam;
+		}
+
 		if (mtmp->mhp <= 0) {
 			/* KMH -- Don't blame the player for pets killing gas spores */
 			if (yours) xkilled(mtmp, (silent ? 0 : 1));
@@ -895,7 +975,7 @@ do_explode(int x, int y, ExplodeRegion *area, int adtyp, int olet, int dam, int 
 			damu += u.ulevel;
 		}
 		/* do property damage first, in case we end up leaving bones */
-		if (adtyp == AD_FIRE || adtyp == AD_EFIR || adtyp == AD_MADF){
+		if (adtyp == AD_FIRE || adtyp == AD_EFIR || adtyp == AD_MADF || adtyp == AD_SFLM){
 			burn_away_slime();
 			melt_frozen_air();
 		}
@@ -905,7 +985,7 @@ do_explode(int x, int y, ExplodeRegion *area, int adtyp, int olet, int dam, int 
 		} else {
 			damu = reduce_dmg(&youmonst,damu,TRUE,FALSE);
 		}
-		if (adtyp == AD_FIRE || adtyp == AD_EFIR || adtyp == AD_MADF) (void) burnarmor(&youmonst, FALSE);
+		if (adtyp == AD_FIRE || adtyp == AD_EFIR || adtyp == AD_MADF || adtyp == AD_SFLM) (void) burnarmor(&youmonst, FALSE);
 		if(uhurt == 2){
 			destroy_item(&youmonst, SCROLL_CLASS, (int) adtyp);
 			destroy_item(&youmonst, SPBOOK_CLASS, (int) adtyp);
@@ -977,14 +1057,59 @@ do_explode(int x, int y, ExplodeRegion *area, int adtyp, int olet, int dam, int 
 				IMPURITY_UP(u.uimp_murder)
 				IMPURITY_UP(u.uimp_bloodlust)
 			}
-			done((adtyp == AD_FIRE || adtyp == AD_EFIR || adtyp == AD_MADF) ? BURNING : DIED);
+			done((adtyp == AD_FIRE || adtyp == AD_EFIR || adtyp == AD_MADF || adtyp == AD_SFLM) ? BURNING : DIED);
 		    }
 		}
 		if(uhurt == 2) exercise(A_STR, FALSE);
 	}
 
+	if (adtyp == AD_SFLM && SilverInvokeUndeath) {
+		for (i = 0; i < area->nlocations; i++) {
+			xi = area->locations[i].x;
+			yi = area->locations[i].y;
+			boolean stoneterrain = (levl[xi][yi].typ == STONE);
+			if ((stoneterrain || IS_WALL(levl[xi][yi].typ) || IS_DOOR(levl[xi][yi].typ)) &&
+					dig_check(&youmonst, FALSE, xi, yi)) {
+				watch_dig((struct monst *)0, xi, yi, TRUE);
+				if (*in_rooms(xi, yi, SHOPBASE))
+					shopdamage = TRUE;
+				levl[xi][yi].doormask = 0;
+				if (stoneterrain) {
+					/* plain rock always crumbles to corridor, same as digging (dig.c) */
+					levl[xi][yi].typ = CORR;
+				} else {
+					levl[xi][yi].typ = level.flags.is_maze_lev ? ROOM :
+							level.flags.is_cavernous_lev ? CORR : DOOR;
+					if (levl[xi][yi].typ == DOOR)
+						levl[xi][yi].doormask = D_NODOOR;
+				}
+				if (!does_block(xi, yi, &levl[xi][yi]))
+					unblock_point(xi, yi);
+				newsym(xi, yi);
+			}
+		}
+	}
+
+	if (adtyp == AD_SFLM && SilverInvokeIllusion) {
+		struct monst *mon;
+		if (Invis && couldsee(x, y)) {
+			HInvis &= ~INTRINSIC;
+			You_feel("paranoid.");
+			stop_occupation();
+		}
+		for (mon = fmon; mon; mon = mon->nmon) {
+			if (DEADMONSTER(mon) || !mon->minvis || !clear_path(mon->mx, mon->my, x, y))
+				continue;
+			mon->perminvis = 0;
+			if (!mon_extrinsic(mon, INVIS)) {
+				mon->minvis = 0;
+				newsym(mon->mx, mon->my);
+			}
+		}
+	}
+
 	if (shopdamage) {
-		pay_for_damage((adtyp == AD_FIRE || adtyp == AD_EFIR || adtyp == AD_MADF) ? "burn away" :
+		pay_for_damage((adtyp == AD_FIRE || adtyp == AD_EFIR || adtyp == AD_MADF || adtyp == AD_SFLM) ? "burn away" :
 			       (adtyp == AD_COLD || adtyp == AD_ECLD || adtyp == AD_UHCD) ? "shatter" :
 			       adtyp == AD_DISN ? "disintegrate" : "destroy",
 			       FALSE);
@@ -1500,6 +1625,8 @@ int adtyp;
 		case AD_EFIR:
 		case AD_FIRE:
 			return EXPL_FIERY;
+		case AD_SFLM:
+			return EXPL_FROSTY;
 		case AD_ECLD:
 		case AD_COLD:
 		case AD_UHCD:

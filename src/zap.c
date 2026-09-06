@@ -90,6 +90,7 @@ int adtyp, ztyp;
 		case AD_MAGM: return "magic missile";
 		case AD_PHYS: return "sothothic missile";
 		case AD_FIRE: return "fireball";
+		case AD_SFLM: return "spark of silver flame";
 		case AD_COLD: return "cone of cold";
 		case AD_UHCD: return "cone of ice";
 		case AD_GMLD: return "cone of gray spores";
@@ -216,6 +217,7 @@ int adtyp;
 	case AD_HOLY:
 	case AD_SMOK:
 	case AD_SLWC:
+	case AD_SFLM:
 		return CLR_WHITE;
 	case AD_DRLI:
 		return CLR_MAGENTA;
@@ -3632,6 +3634,11 @@ register struct	obj	*obj;
 				zapdat.no_hit_wall = TRUE;
 				zapdat.damn *= 1.5;
 				zapdat.damn = max(zapdat.damn, 6);
+				if(SilverInvoke && !FLAME_BAD){
+					zapdat.adtyp = AD_SFLM;
+					if(SilverInvokeWrath)
+						zapdat.damn *= 2;
+				}
 				break;
 			case SPE_ACID_SPLASH:
 				range = 1;
@@ -5611,7 +5618,7 @@ boolean *shopdamage;
 	struct rm *lev = &levl[x][y];
 	int rangemod = 0;
 
-	if(adtyp == AD_FIRE || adtyp == AD_MADF) {
+	if(adtyp == AD_FIRE || adtyp == AD_MADF || adtyp == AD_SFLM) {
 	    struct trap *t = t_at(x, y);
 
 	    if (t && t->ttyp == WEB && !Is_lolth_level(&u.uz) && !(u.specialSealsActive&SEAL_BLACK_WEB)) {
@@ -5624,6 +5631,13 @@ boolean *shopdamage;
 		lev->typ = SOIL;
 		if(cansee(x,y)) {
 			pline("The grass burns away!");
+			newsym(x,y);
+		}
+	    }
+	    if(adtyp == AD_SFLM && SilverInvokeMortal && lev->typ == TREE) {
+		lev->typ = DEADTREE;
+		if(cansee(x,y)) {
+			pline("The tree burns and dies!");
 			newsym(x,y);
 		}
 	    }
@@ -5759,6 +5773,7 @@ boolean *shopdamage;
 		case AD_FIRE:
 		case AD_EFIR:
 		case AD_MADF:
+		case AD_SFLM:
 		    new_doormask = D_NODOOR;
 		    see_txt = "The door is consumed in flames!";
 		    sense_txt = "smell smoke.";

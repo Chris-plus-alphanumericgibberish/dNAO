@@ -1606,6 +1606,7 @@ int atype;
 	case AD_STAR:
 	case AD_HLUH:
 	case AD_MADF:
+	case AD_SFLM:
 		return P_ATTACK_SPELL;
 	case AD_DRST:
 	case AD_ACID:

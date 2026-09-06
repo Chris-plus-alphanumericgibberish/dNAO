@@ -4121,6 +4121,12 @@ commune_with_goat()
 #define FLAMEBOON_SHARE_BURDENS	12
 #define FLAMEBOON_RIGHTEOUS_WRATH	13
 #define FLAMEBOON_PRESERVE_LIFE	14
+#define FLAMEBOON_SILVER_FLAME	15
+#define FLAMEBOON_SILVER_FLAME_MORTALITY	16
+#define FLAMEBOON_SILVER_FLAME_UNDEATH	17
+#define FLAMEBOON_SILVER_FLAME_SPIRIT	18
+#define FLAMEBOON_SILVER_FLAME_WRATH	19
+#define FLAMEBOON_SILVER_FLAME_ILLUSION	20
 int
 dosflm_menu(greater_boon)
 boolean greater_boon;	/* you have shown devotion enough to ask for a greater boon */
@@ -4220,8 +4226,67 @@ boolean greater_boon;	/* you have shown devotion enough to ask for a greater boo
 		add_menu(tmpwin, NO_GLYPH, &any,
 			inclet++, 0, ATR_NONE, buf,
 			MENU_UNSELECTED);
+
+		if (!SilverInvoke) {
+			boolean fireball_knower = FALSE;
+
+			update_externally_granted_spells();
+			for (int j = 0; j < MAXSPELL; j++)
+				if (spellid(j) == SPE_FIREBALL && (spellknow(j) > 0 || spellext(j))){
+					fireball_knower = TRUE;
+					break;
+				}
+
+			if (fireball_knower) {
+				Sprintf(buf, "Learn to invoke the Silver Flame");
+				any.a_int = FLAMEBOON_SILVER_FLAME;
+				add_menu(tmpwin, NO_GLYPH, &any,
+					inclet++, 0, ATR_NONE, buf,
+					MENU_UNSELECTED);
+			}
+		}
+
+		if (SilverInvoke && !SilverInvokeMortal) {
+			Sprintf(buf, "Burn the living in the Silver Flame");
+			any.a_int = FLAMEBOON_SILVER_FLAME_MORTALITY;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				inclet++, 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+		}
+
+		if (SilverInvoke && !SilverInvokeUndeath) {
+			Sprintf(buf, "Burn the undead in the Silver Flame");
+			any.a_int = FLAMEBOON_SILVER_FLAME_UNDEATH;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				inclet++, 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+		}
+
+		if (SilverInvoke && !SilverInvokeSpirit) {
+			Sprintf(buf, "Burn the unworthy in the Silver Flame");
+			any.a_int = FLAMEBOON_SILVER_FLAME_SPIRIT;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				inclet++, 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+		}
+
+		if (SilverInvoke && !SilverInvokeWrath) {
+			Sprintf(buf, "Wield the wrath of the Silver Flame");
+			any.a_int = FLAMEBOON_SILVER_FLAME_WRATH;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				inclet++, 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+		}
+
+		if (SilverInvoke && !SilverInvokeIllusion) {
+			Sprintf(buf, "Burn away illusions in the Silver Flame");
+			any.a_int = FLAMEBOON_SILVER_FLAME_ILLUSION;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				inclet++, 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+		}
 	}
-	
+
 	end_menu(tmpwin, "You stare into the silver flame...");
 
 	how = PICK_ONE;
@@ -4469,6 +4534,55 @@ commune_with_silver_flame()
 				else pline("Nothing happens.");
 			}
 			break;
+
+		case FLAMEBOON_SILVER_FLAME:
+			cost = 50;
+			HSilverInvoke |= W_UPGRADE;
+			pline("Your %s burn with silver flames.", makeplural(body_part(FINGER)));
+			u.ugifts++;
+			u.ucultsval += TIER_F; /*Theory: This is almost-purely a prerequisite for later silver flame boons. */
+			break;
+
+		case FLAMEBOON_SILVER_FLAME_MORTALITY:
+			cost = 50;
+			HSilverInvokeMortal |= W_UPGRADE;
+			pline("Your %s look thin and frail in the light of the silver flame.", makeplural(body_part(FINGER)));
+			u.ugifts++;
+			u.ucultsval += TIER_B; /*Theory: Adds life drain and makes the fire damage harder to resist, but ultimately does the same damage as a regular fireball. */
+			break;
+
+		case FLAMEBOON_SILVER_FLAME_UNDEATH:
+			cost = 50;
+			HSilverInvokeUndeath |= W_UPGRADE;
+			pline("Your %s look cracked and ruined in the light of the silver flame.", makeplural(body_part(FINGER)));
+			u.ugifts++;
+			u.ucultsval += TIER_D; /*Theory: Nasty stuff like liches and pharaohs are affected, but many are *already* affected by fireball and this adds little extra damage. */
+			break;
+
+		case FLAMEBOON_SILVER_FLAME_SPIRIT:
+			cost = 50;
+			HSilverInvokeSpirit |= W_UPGRADE;
+			pline("The silver flames around your %s burn straight and clear.", makeplural(body_part(FINGER)));
+			u.ugifts++;
+			u.ucultsval += TIER_B; /*Theory: Affects the nastiest late game enemies, but deals standard fire damage *if* it succeeds in destroying the target's armor. */
+			break;
+
+		case FLAMEBOON_SILVER_FLAME_WRATH:
+			cost = 50;
+			HSilverInvokeWrath |= W_UPGRADE;
+			pline("The silver flames around your %s burn hot with wrath.", makeplural(body_part(FINGER)));
+			u.ugifts++;
+			u.ucultsval += TIER_A; /*Theory: Unlike the gloves version, this straight-up doubles damage. Most useful in combination with the other silverflame spells so it's tiered at A instead of S */
+			break;
+
+		case FLAMEBOON_SILVER_FLAME_ILLUSION:
+			cost = 50;
+			HSilverInvokeIllusion |= W_UPGRADE;
+			pline("The silver flames around your %s burn in perfect rhythm.", makeplural(body_part(FINGER)));
+			u.ugifts++;
+			u.ucultsval += TIER_D; /*Theory: Most targets here are either already affected by fireball or are already covered by other silver flame upgrades. */
+			break;
+		/* If you were to add all the silver flame invocation boons, the total tier would be two S tiers and an C tier */
 	}
 	
 	if(!cost)

@@ -6736,6 +6736,47 @@ boolean direct_weapon;
 		pg_bullwhip_hit(magr, mdef, otmp);
 }
 
+/* disintegrates/damages up to [i] pieces of mdef's worn armor; returns the remaining budget */
+int
+silver_flame_disn_armor(struct monst *mdef, int i, boolean vis, struct obj *msgr, boolean *messaged)
+{
+	struct obj *obj;
+	boolean youdef = (mdef == &youmonst);
+	boolean printed = FALSE;
+
+	while ((obj = some_armor(mdef)) && i > 0) {
+		i -= 1;
+		if (oresist_disintegration(obj))
+			continue;//May possibly sellect a different item next time.
+
+		if (!((youdef && Preservation)
+			|| (!youdef && mon_resistance(mdef, PRESERVATION))
+		)) {
+			if (vis && !printed) {
+				if (msgr)
+					pline("%s disintegrates %s armor!",
+						The(xname(msgr)),
+						(youdef ? "your" : s_suffix(mon_nam(mdef)))
+						);
+				else
+					pline("The silverfire disintegrates %s armor!",
+						(youdef ? "your" : s_suffix(mon_nam(mdef)))
+						);
+				if (messaged)
+					*messaged = TRUE;
+				printed = TRUE;
+			}
+			if (obj->spe > -1 * objects[(obj)->otyp].a_ac) {
+				damage_item(obj);
+			}
+			else if (!obj->oartifact) {
+				destroy_marm(mdef, obj);
+			}
+		}
+	}
+	return i;
+}
+
 /* returns MM_style hitdata now, and is used for both artifacts and weapon properties */
 int
 special_weapon_hit(magr, mdef, otmp, msgr, basedmg, plusdmgptr, truedmgptr, dieroll, messaged, printmessages)
@@ -8680,33 +8721,8 @@ boolean printmessages; /* print generic elemental damage messages */
 
 	/* Reveal unworthy */
 	if (check_oprop(otmp, OPROP_SFUWW) && !(youagr && FLAME_BAD) && (is_minion(pd) || is_demon(pd) || (Drain_res(mdef) && (youdef ? Mortal_race : mortal_race(mdef))))){
-		struct obj *obj;
 		int i = (basedmg+1)/2;
-		boolean printed = FALSE;
-		while((obj = some_armor(mdef)) && i > 0){
-			i-=1;
-			if(oresist_disintegration(obj))
-				continue;//May possibly sellect a different item next time.
-
-			if(!((youdef && Preservation)
-				|| (!youdef && mon_resistance(mdef, PRESERVATION))
-			)){
-				if (vis && !printed) {
-					pline("%s disintegrates %s armor!",
-						The(xname(msgr)),
-						(youdef ? "your" : s_suffix(mon_nam(mdef)))
-						);
-					*messaged = TRUE;
-					printed = TRUE;
-				}
-				if (obj->spe > -1 * objects[(obj)->otyp].a_ac){
-					damage_item(obj);
-				}
-				else if (!obj->oartifact){
-					destroy_marm(mdef, obj);
-				}
-			}
-		}
+		i = silver_flame_disn_armor(mdef, i, vis, msgr, messaged);
 		//Note: i may be as low as -2.
 		if(i > 0){
 			if(2*i >= basedmg)

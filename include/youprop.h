@@ -214,6 +214,30 @@
 #define EYogSpell		u.uprops[YOG_SPELLS].extrinsic
 #define YogSpell		(HYogSpell || EYogSpell)
 
+#define HSilverInvoke		u.uprops[SFLM_SPELLS].intrinsic
+#define ESilverInvoke		u.uprops[SFLM_SPELLS].extrinsic
+#define SilverInvoke		(HSilverInvoke || ESilverInvoke)
+
+#define HSilverInvokeMortal	u.uprops[SFLM_MORTAL_SPELLS].intrinsic
+#define ESilverInvokeMortal	u.uprops[SFLM_MORTAL_SPELLS].extrinsic
+#define SilverInvokeMortal	(HSilverInvokeMortal || ESilverInvokeMortal)
+
+#define HSilverInvokeUndeath	u.uprops[SFLM_UNDEATH_SPELLS].intrinsic
+#define ESilverInvokeUndeath	u.uprops[SFLM_UNDEATH_SPELLS].extrinsic
+#define SilverInvokeUndeath	(HSilverInvokeUndeath || ESilverInvokeUndeath)
+
+#define HSilverInvokeSpirit	u.uprops[SFLM_SPIRIT_SPELLS].intrinsic
+#define ESilverInvokeSpirit	u.uprops[SFLM_SPIRIT_SPELLS].extrinsic
+#define SilverInvokeSpirit	(HSilverInvokeSpirit || ESilverInvokeSpirit)
+
+#define HSilverInvokeWrath	u.uprops[SFLM_WRATH_SPELLS].intrinsic
+#define ESilverInvokeWrath	u.uprops[SFLM_WRATH_SPELLS].extrinsic
+#define SilverInvokeWrath	(HSilverInvokeWrath || ESilverInvokeWrath)
+
+#define HSilverInvokeIllusion	u.uprops[SFLM_ILLUSION_SPELLS].intrinsic
+#define ESilverInvokeIllusion	u.uprops[SFLM_ILLUSION_SPELLS].extrinsic
+#define SilverInvokeIllusion	(HSilverInvokeIllusion || ESilverInvokeIllusion)
+
 #define HFocusAura		u.uprops[FOCUS_AURA].intrinsic
 #define EFocusAura		u.uprops[FOCUS_AURA].extrinsic
 #define FocusAura		(HFocusAura || EFocusAura)

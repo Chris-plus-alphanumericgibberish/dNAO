@@ -2882,7 +2882,8 @@ int damtype, dam;
 				heal = dam / 6; /* Approx 1 per die */
 			break;
 		case AD_EFIR:
-		case AD_FIRE: if (u.umonnum == PM_IRON_GOLEM || u.umonnum == PM_GREEN_STEEL_GOLEM || u.umonnum == PM_CHAIN_GOLEM || u.umonnum == PM_ARGENTUM_GOLEM)
+		case AD_FIRE:
+		case AD_SFLM: if (u.umonnum == PM_IRON_GOLEM || u.umonnum == PM_GREEN_STEEL_GOLEM || u.umonnum == PM_CHAIN_GOLEM || u.umonnum == PM_ARGENTUM_GOLEM)
 				heal = dam;
 			break;
 	}

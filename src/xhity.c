@@ -25989,6 +25989,7 @@ elemental_dmg_resistance(struct monst *mdef, struct monst *magr, int dmg, int da
 	if(mdef == &youmonst) {
 		switch(damtype) {
 		case AD_FIRE:
+		case AD_SFLM:
 			has_base = u.uprops[FIRE_RES].intrinsic || u.uprops[FIRE_RES].extrinsic ||
 			           (species_resists_fire(&youmonst) && !(Race_if(PM_ANDROID) && !Upolyd));
 			has_hell  = u.uprops[HELL_FIRE_RES].intrinsic || u.uprops[HELL_FIRE_RES].extrinsic;
@@ -26026,6 +26027,7 @@ elemental_dmg_resistance(struct monst *mdef, struct monst *magr, int dmg, int da
 	} else {
 		switch(damtype) {
 		case AD_FIRE:
+		case AD_SFLM:
 			has_base = species_resists_fire(mdef) || mon_resistance(mdef, FIRE_RES);
 			has_hell  = mon_resistance(mdef, HELL_FIRE_RES);
 			has_base_both = (species_resists_fire(mdef) || mon_intrinsic(mdef, FIRE_RES)) && mon_extrinsic(mdef, FIRE_RES);
