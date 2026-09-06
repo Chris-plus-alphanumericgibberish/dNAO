@@ -3637,11 +3637,20 @@ nexttry:
 				if (mtmp2 && !(nx == x && ny == y)) {
 					long mmflag = flag | mm_aggression(mon, mtmp2);
 
-					if (!(mmflag & ALLOW_M)) continue;
-					info[cnt] |= ALLOW_M;
-					if (mtmp2->mtame) {
-						if (!(mmflag & ALLOW_TM)) continue;
-						info[cnt] |= ALLOW_TM;
+					/* a mover with a blanket ALLOW_M (tame monsters
+					   always have one) is still not allowed to attack
+					   a tame defender without ALLOW_TM -- fall through
+					   to the displacement check below in that case
+					   instead of just rejecting the square outright */
+					if ((mmflag & ALLOW_M)
+						&& !(mtmp2->mtame && !(mmflag & ALLOW_TM))) {
+						info[cnt] |= ALLOW_M;
+						if (mtmp2->mtame) info[cnt] |= ALLOW_TM;
+					} else {
+						flag &= ~ALLOW_MDISP; /* depends upon defender */
+						mmflag = flag | mm_displacement(mon, mtmp2);
+						if (!(mmflag & ALLOW_MDISP)) continue;
+						info[cnt] |= ALLOW_MDISP;
 					}
 				}
 			}
@@ -3775,6 +3784,29 @@ struct monst * mdef;	/* another monster which is next to it */
 	if(res && mon_can_see_mon(magr, mdef)){
 		return res;
 	}
+	return 0L;
+}
+
+/* Monster displacing another monster out of the way */
+long
+mm_displacement(struct monst *magr, struct monst *mdef)
+{
+	struct permonst *pa = magr->data, *pd = mdef->data;
+
+	/* if attacker can't barge through, there's nothing to do;
+	   or if defender can barge through too and has a level at least
+	   as high as the attacker, don't let attacker do so, otherwise
+	   they might just end up swapping places again when defender
+	   gets its chance to move */
+	if (is_displacer(pa) && (!is_displacer(pd) || magr->m_lev > mdef->m_lev)
+		/* no displacing grid bugs/bebeliths diagonally */
+		&& !(magr->mx != mdef->mx && magr->my != mdef->my
+			 && (pd->mtyp == PM_GRID_BUG || pd->mtyp == PM_BEBELITH))
+		/* no displacing trapped monsters or multi-segment long worms */
+		&& !mdef->mtrapped && (!mdef->wormno || !count_wsegs(mdef))
+		/* riders can displace anything; others, same size or smaller only */
+		&& (is_rider(pa) || pa->msize >= pd->msize))
+		return ALLOW_MDISP;
 	return 0L;
 }
 

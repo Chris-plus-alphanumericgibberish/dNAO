@@ -1431,6 +1431,20 @@ pet_goal(struct monst *mtmp, struct edog *edog, int after, int udist, int whappr
 	return dog_goal(mtmp, edog, after, udist, whappr);
 }
 
+/* mon-to-mon displacement is a deliberate "get out of my way" act; a pet
+   is cautious about where it barges another monster to. */
+STATIC_OVL boolean
+undesirable_disp(struct monst *mtmp, xchar x, xchar y)
+{
+	struct trap *trap = t_at(x, y);
+
+	if (trap && trap->tseen && rn2(40))
+		return TRUE;
+	if (!is_weldproof_mon(mtmp) && cursed_object_at(x, y))
+		return TRUE;
+	return FALSE;
+}
+
 /* return 0 (no move), 1 (move) or 2 (dead) */
 int
 dog_move(mtmp, after)
@@ -1449,6 +1463,7 @@ register int after;	/* this is extra fast monster movement */
 	int chi = -1, nidist, ndist;
 	coord poss[9];
 	long info[9], allowflags;
+	boolean better_with_displacing;
 #define GDIST(x,y) (dist2(x,y,gx,gy))
 
 	/*
@@ -1625,10 +1640,12 @@ register int after;	/* this is extra fast monster movement */
 	uncursedcnt = 0;
 	for (i = 0; i < cnt; i++) {
 		nx = poss[i].x; ny = poss[i].y;
-		if (MON_AT(nx,ny) && !(info[i] & ALLOW_M)) continue;
+		if (MON_AT(nx,ny) && !((info[i] & ALLOW_M) || (info[i] & ALLOW_MDISP))) continue;
 		if (!is_weldproof_mon(mtmp) && cursed_object_at(nx, ny)) continue;
 		uncursedcnt++;
 	}
+
+	better_with_displacing = should_displace(mtmp, poss, info, cnt, gx, gy);
 
 	chcnt = 0;
 	chi = -1;
@@ -1638,6 +1655,9 @@ register int after;	/* this is extra fast monster movement */
 		nx = poss[i].x;
 		ny = poss[i].y;
 		cursemsg[i] = FALSE;
+
+		if (MON_AT(nx, ny) && (info[i] & ALLOW_MDISP)
+			&& !(info[i] & ALLOW_M) && !better_with_displacing) continue;
 
 		/* if leashed, we drag him along. */
 		if (mtmp->mleashed && distu(nx, ny) > 4) continue;
@@ -1671,6 +1691,17 @@ register int after;	/* this is extra fast monster movement */
 			if (mstatus & MM_DEF_DIED) return 2;
 		    }
 
+		    return 0;
+		}
+
+		if ((info[i] & ALLOW_MDISP) && MON_AT(nx, ny)
+			&& better_with_displacing && !undesirable_disp(mtmp, nx, ny)) {
+		    int mstatus;
+		    struct monst *mtmp2 = m_at(nx, ny);
+
+		    mstatus = mdisplacem(mtmp, mtmp2, FALSE); /* displace monster */
+		    if (mstatus & MM_AGR_DIED) return 2;
+		    if (mstatus & MM_HIT) return 1;
 		    return 0;
 		}
 

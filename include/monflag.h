@@ -106,6 +106,7 @@
 #define MM_AQUATIC		0x00040000L	/* Can ONLY survive underwater */
 #define MM_STANDOFF		0x00080000L	/* Will not approach player beyond a certain range, may back up if player approaches */
 #define MM_COVETOUS		0x00100000L	/* Uses the covetous movement rules */
+#define MM_DISPLACES	0x00200000L	/* moves other monsters out of its way */
 
 //Monster Thoughts and behavior
 #define MT_WANTSAMUL	0x00000001L	/* would like to steal the amulet */

@@ -127,6 +127,9 @@
 #define species_swims(ptr)		(((ptr)->mflagsm & MM_SWIM) != 0L)
 #define species_tears_webs(ptr)		(((ptr)->mflagsm & MM_WEBRIP) != 0L)
 #define species_busts_doors(ptr)		(((ptr)->mflagsm & MM_DOORBUST) != 0L)
+/* barges past a smaller/weaker monster in its way rather than attacking it;
+   unrelated to species_displaces()/MG_DISPLACEMENT (Cloak of Displacement) */
+#define is_displacer(ptr)		(((ptr)->mflagsm & MM_DISPLACES) != 0L)
 #define is_suicidal(ptr)		(is_fern_spore(ptr) || \
 					(ptr)->mtyp == PM_SPHERE_OF_FORCE || \
 					(ptr)->mtyp == PM_FREEZING_SPHERE || \

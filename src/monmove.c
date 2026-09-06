@@ -2602,6 +2602,37 @@ register struct monst *smith;
 	return(move_special(smith,FALSE,TRUE,FALSE,avoid,omx,omy,gx,gy));
 }
 
+/* Displacement of another monster is a last resort, used only when it's
+ * on the way to the goal; if there's a route that avoids the monster
+ * entirely, that is preferred instead. */
+boolean
+should_displace(struct monst *mtmp, coord *poss, long *info, int cnt, xchar ggx, xchar ggy)
+{
+	int shortest_with_displacing = -1;
+	int shortest_without_displacing = -1;
+	int count_without_displacing = 0;
+	int i, nx, ny, ndist;
+
+	for (i = 0; i < cnt; i++) {
+		nx = poss[i].x;
+		ny = poss[i].y;
+		ndist = dist2(nx, ny, ggx, ggy);
+		if (MON_AT(nx, ny) && (info[i] & ALLOW_MDISP) && !(info[i] & ALLOW_M)) {
+			if (shortest_with_displacing == -1 || ndist < shortest_with_displacing)
+				shortest_with_displacing = ndist;
+		} else {
+			if (shortest_without_displacing == -1 || ndist < shortest_without_displacing)
+				shortest_without_displacing = ndist;
+			count_without_displacing++;
+		}
+	}
+	if (shortest_with_displacing > -1
+		&& (shortest_with_displacing < shortest_without_displacing
+			|| !count_without_displacing))
+		return TRUE;
+	return FALSE;
+}
+
 /* Return values:
  * 0: did not move, but can still attack and do other stuff.
  * 1: moved, possibly can attack.
@@ -2621,6 +2652,7 @@ register int after;
 	boolean can_open=0, can_unlock=0, doorbuster=0;
 	boolean uses_items=0, setlikes=0;
 	boolean avoid=FALSE;
+	boolean better_with_displacing;
 	struct permonst *ptr;
 	struct monst *mtoo;
 	schar mmoved = 0;	/* not strictly nec.: chi >= 0 will do */
@@ -3140,10 +3172,15 @@ not_special:
 			}
 		}
 		
+	    better_with_displacing = should_displace(mtmp, poss, info, cnt, gx, gy);
+
 	    for(i=0; i < cnt; i++) {
 			if (avoid && (info[i] & NOTONL)) continue;
 			nx = poss[i].x;
 			ny = poss[i].y;
+
+			if (MON_AT(nx, ny) && (info[i] & ALLOW_MDISP)
+				&& !(info[i] & ALLOW_M) && !better_with_displacing) continue;
 
 			if (appr != 0) {
 				mtrk = &mtmp->mtrack[0];
@@ -3246,6 +3283,19 @@ not_special:
 		    if (mstatus & MM_DEF_DIED)
 			return 2;
 		}
+		return 3;
+	    }
+
+	    if ((info[chi] & ALLOW_MDISP) != 0) {
+		struct monst *mtmp2;
+		int mstatus;
+
+		mtmp2 = m_at(nix, niy); /* ALLOW_MDISP implies m_at() is !Null */
+		mstatus = mdisplacem(mtmp, mtmp2, FALSE);
+		if (mstatus & MM_AGR_DIED)
+		    return 2;
+		if (mstatus & MM_HIT)
+		    return 1;
 		return 3;
 	    }
 
