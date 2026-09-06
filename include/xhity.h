@@ -125,7 +125,9 @@
 #define SUBOUT_T_WING_CLAW_3A_2 57	/* Tiefling doubt wing-sting attack */
 #define SUBOUT_T_WING_CLAW_3A_3 58	/* Tiefling doubt wing-sting attack */
 #define SUBOUT_T_WING_CLAW_3B 59	/* Tiefling doubt wing-sting attack */
-#define MAX_SUBOUT		59
+#define SUBOUT_KICKING_BOOTS 60	/* kicking boots attack */
+#define SUBOUT_KICK	61	/* set whenever ANY finalized attack in the chain is AT_KICK, from any source */
+#define MAX_SUBOUT		SUBOUT_KICK
 #define SUBOUT_ARRAY_SIZE (MAX_SUBOUT/(sizeof(int)*8)+1)
 
 #define ATTKFLAG_FORCE_BLEED		0x00000001L

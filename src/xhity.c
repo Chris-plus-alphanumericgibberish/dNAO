@@ -3040,6 +3040,23 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 				add_subout(subout, SUBOUT_V_CLAWS1);
 		}
 	}
+	{
+		struct obj * otmp;
+		if (!youagr && is_null_attk(attk)
+			&& !check_subout(subout, SUBOUT_KICKING_BOOTS)
+			&& !check_subout(subout, SUBOUT_KICK)
+			&& (otmp = which_armor(magr, W_ARMF))
+			&& otmp->otyp == KICKING_BOOTS
+		){
+			attk->aatyp = AT_KICK;
+			attk->adtyp = AD_PHYS;
+			attk->damn = 1;
+			attk->damd = 2*magr->data->msize;
+			attk->bodypart = ATKBP(LEG);
+			fromlist = FALSE;
+			add_subout(subout, SUBOUT_KICKING_BOOTS);
+		}
+	}
 
 	/*Weapon user, not as good without*/
 	if (pa->mtyp == PM_DAO_LAO_GUI_MONK && attk->aatyp == AT_WEAP && (
@@ -3644,11 +3661,13 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		return getattk(magr, mdef, prev_res, indexnum, prev_and_buf, by_the_book, subout, tohitmod);
 	}
 
-	/* possibly increment indexnum, if we want to move on in the monster's attack list 
+	/* possibly increment indexnum, if we want to move on in the monster's attack list
 	 * this is most of the time, except for when we have inserted attacks into [magr]'s chain */
 	if (fromlist) {
 		*indexnum += 1;
 	}
+	if (attk->aatyp == AT_KICK)
+		add_subout(subout, SUBOUT_KICK);
 	return attk;
 }
 #undef GETNEXT
