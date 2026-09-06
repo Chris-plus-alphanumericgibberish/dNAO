@@ -3604,7 +3604,7 @@ E int NDECL(aeshbon);
 E boolean FDECL(ok_mariwep, (struct obj *, struct monst *, struct permonst *, boolean));
 E struct obj * FDECL(get_mariwep, (struct monst *, struct permonst *, int));
 E unsigned long FDECL(process_etraits, (unsigned long, int, struct obj *, struct monst *, struct permonst *));
-E boolean FDECL(check_etrait, (struct obj *, struct monst *, unsigned long));
+E boolean FDECL(check_etrait, (struct obj *, struct monst *, unsigned long, boolean));
 
 /* ### were.c ### */
 

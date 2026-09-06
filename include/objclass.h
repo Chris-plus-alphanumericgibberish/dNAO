@@ -244,7 +244,10 @@ struct objclass {
 //
 
 #define wielder_size(mon) ((mon) == &youmonst ? youracedata->msize : (mon)->data->msize)
-#define CHECK_ETRAIT(obj, mon, trait) (check_etrait((obj), (mon), (trait)))
+#define CHECK_ETRAIT(obj, mon, trait) (check_etrait((obj), (mon), (trait), TRUE))
+/* like CHECK_ETRAIT, but ignores the wielder's weapon skill: reports whether the
+   item bears the trait at all, even if the wielder isn't skilled enough to use it */
+#define HAS_ETRAIT(obj, mon, trait) (check_etrait((obj), (mon), (trait), FALSE))
 #define ROLL_ETRAIT(obj, mon, echance, schance) (((mon) == &youmonst ? (P_SKILL(weapon_type(obj)) > P_SKILLED) : ((mon)->data->mflagsf&MF_MARTIAL_E)) ? echance : schance)
 #define FFORM_ETRAIT(obj, mon) (obj->expert_traits&FFORM_ETRAITS && ((mon) == &youmonst ? (P_SKILL(weapon_type(obj)) > P_BASIC ) : (((mon)->data->mflagsf&MF_MARTIAL_E) || ((mon)->data->mflagsf&MF_MARTIAL_S))))
 

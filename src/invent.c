@@ -33,6 +33,7 @@ STATIC_DCL void NDECL(dounpaid);
 STATIC_DCL struct obj *FDECL(find_unpaid,(struct obj *,struct obj **));
 STATIC_DCL void FDECL(menu_identify, (int));
 STATIC_DCL boolean FDECL(tool_in_use, (struct obj *));
+STATIC_DCL void FDECL(describe_expert_traits, (struct obj *, winid *));
 #endif /* OVLB */
 STATIC_DCL char FDECL(obj_to_let,(struct obj *));
 STATIC_PTR int FDECL(u_material_next_to_skin,(int));
@@ -2533,11 +2534,9 @@ struct obj *obj;
 			obj->oclass == GEM_CLASS || obj->oclass == RING_CLASS)
 		add_menu(win, NO_GLYPH, &any, 'E', 0, ATR_NONE,
 				"Write on the floor with this object", MENU_UNSELECTED);
-	/* I: describe item, works on any items whose actual name is known */
 	any.a_void = (genericptr_t)dotypeinv;
-	if (objects[obj->otyp].oc_name_known)
-		add_menu(win, NO_GLYPH, &any, 'I', 0, ATR_NONE,
-				"Describe this item", MENU_UNSELECTED);
+	add_menu(win, NO_GLYPH, &any, 'I', 0, ATR_NONE,
+			"Describe this item", MENU_UNSELECTED);
 	/* p: pay for unpaid items */
 	any.a_void = (genericptr_t)dopay;
 	if ((mtmp = shop_keeper(*in_rooms(u.ux, u.uy, SHOPBASE))) &&
@@ -2839,6 +2838,79 @@ etrait_description(long flag, long context_traits, boolean past)
 }
 
 /*
+ * describe_expert_traits()
+ *
+ * Prints the expert-traits section of an item's description to the passed
+ * nhwindow.
+ *
+ * A trait is listed as "active" when the wielder can currently make use of it
+ * (CHECK_ETRAIT) -- this is shown whether or not the item type is identified,
+ * so that a sufficiently skilled character can sense the capabilities of an
+ * unidentified weapon.  Traits the item bears but that the wielder isn't yet
+ * skilled enough to use are listed separately as "inactive", but only when the
+ * item type is identified (otherwise it would leak information about an
+ * unidentified item).
+ */
+STATIC_OVL void
+describe_expert_traits(struct obj *obj, winid *datawin)
+{
+	char buf[BUFSZ], inactivebuf[BUFSZ], buf2[BUFSZ];
+	boolean type_known = objects[obj->otyp].oc_name_known;
+
+	buf[0] = '\0';
+	inactivebuf[0] = '\0';
+#define EXPERTTRAITS(trait, string)                                       \
+	if (CHECK_ETRAIT(obj, &youmonst, (trait))) {                          \
+		if (buf[0]) { Strcat(buf, ", "); }                                \
+		Strcat(buf, (string));                                            \
+	} else if (type_known && HAS_ETRAIT(obj, &youmonst, (trait))) {       \
+		if (inactivebuf[0]) { Strcat(inactivebuf, ", "); }                \
+		Strcat(inactivebuf, (string));                                    \
+	}
+	if (obj->expert_traits) {
+		EXPERTTRAITS(ETRAIT_HEW, "can deliver powerful-but-strenuous overhead blows");
+		EXPERTTRAITS(ETRAIT_FELL, "can disrupt enemy movement");
+		EXPERTTRAITS(ETRAIT_KNOCK_BACK, (obj->expert_traits&ETRAIT_KNOCK_BACK_CHARGE) ? "can charge and knock enemies back" : "can knock enemies back");
+		EXPERTTRAITS(ETRAIT_FOCUS_FIRE, "can target gaps in enemy armor");
+		EXPERTTRAITS(ETRAIT_STUNNING_STRIKE, "can deliver powerful stunning blows");
+		EXPERTTRAITS(ETRAIT_GRAZE, "may graze foes on a near miss");
+		EXPERTTRAITS(ETRAIT_STRIKING, "skilled users can strike more accurately");
+		EXPERTTRAITS(ETRAIT_STOP_THRUST, "can harness enemy momentum to deliver powerful blows");
+		EXPERTTRAITS(ETRAIT_PENETRATE_ARMOR, "penetrates enemy armor");
+		EXPERTTRAITS(ETRAIT_LONG_SLASH, "deals extra damage against lightly-armored enemies");
+		EXPERTTRAITS(ETRAIT_BLEED, "may deliver bleeding wounds");
+		EXPERTTRAITS(ETRAIT_CLEAVE, (CHECK_ETRAIT(obj, &youmonst, ETRAIT_HEW) ? "cleaves through slain enemies when not using hewing strikes" : "cleaves through slain enemies"));
+		EXPERTTRAITS(ETRAIT_PUNCTURE, "successive hits may deal increased damage");
+		EXPERTTRAITS(ETRAIT_LUNGE, "can be used for lunging attacks");
+		EXPERTTRAITS(ETRAIT_QUICK, "strikes quickly");
+		EXPERTTRAITS(ETRAIT_SECOND, "when wielded in the off-hand strikes a second foe after killing the first");
+		EXPERTTRAITS(ETRAIT_CREATE_OPENING, "creates openings for sneak attacks");
+		EXPERTTRAITS(ETRAIT_BRACED, "delivers powerful counterattacks");
+		EXPERTTRAITS(ETRAIT_BLADESONG, "delivers powerful blows when combined with songs or spells");
+		EXPERTTRAITS(ETRAIT_BLADEDANCE, "delivers powerful blows when moving and striking erratically");
+		EXPERTTRAITS(ETRAIT_WHIP_TRICKS, "can perform whip tricks when attacking");
+	}
+#undef EXPERTTRAITS
+
+	if (buf[0] != '\0') {
+		Sprintf(buf2, "Expert traits: %s.", buf);
+		putstr(*datawin, ATR_NONE, buf2);
+	}
+	if (inactivebuf[0] != '\0') {
+		Sprintf(buf2, "Inactive expert traits: %s.", inactivebuf);
+		putstr(*datawin, ATR_NONE, buf2);
+	}
+	/* Summary lines only make sense once the item type is identified; for an
+	   unidentified item we stay silent unless the wielder senses active traits. */
+	if (type_known && buf[0] == '\0' && inactivebuf[0] == '\0') {
+		if (obj->expert_traits)
+			putstr(*datawin, ATR_NONE, "No expert traits unlocked.");
+		else
+			putstr(*datawin, ATR_NONE, "No expert traits.");
+	}
+}
+
+/*
  * describe_item()
  *
  * Prints lines describing the given object to the passed nhwindow reference
@@ -2892,6 +2964,10 @@ winid *datawin;
 	if (obj && !oc.oc_name_known)
 	{
 		OBJPUTSTR("You don't know much about this item yet.");
+		/* a sufficiently skilled wielder can still sense the item's active
+		   expert traits even without identifying the item type */
+		if (obj->expert_traits)
+			describe_expert_traits(obj, datawin);
 		return;
 	}
 
@@ -3864,36 +3940,8 @@ winid *datawin;
 			}
 		}
 	}
-	if(obj && obj->expert_traits){
-		buf[0] = '\0';
-#define	EXPERTTRAITS(trait, string)	\
-	ADDCLASSPROP(CHECK_ETRAIT(obj, &youmonst, trait), string);
-		EXPERTTRAITS(ETRAIT_HEW, "can deliver powerful-but-strenuous overhead blows");
-		EXPERTTRAITS(ETRAIT_FELL, "can disrupt enemy movement");
-		EXPERTTRAITS(ETRAIT_KNOCK_BACK, (obj->expert_traits&ETRAIT_KNOCK_BACK_CHARGE) ? "can charge and knock enemies back" : "can knock enemies back");
-		EXPERTTRAITS(ETRAIT_FOCUS_FIRE, "can target gaps in enemy armor");
-		EXPERTTRAITS(ETRAIT_STUNNING_STRIKE, "can deliver powerful stunning blows");
-		EXPERTTRAITS(ETRAIT_GRAZE, "may graze foes on a near miss");
-		EXPERTTRAITS(ETRAIT_STRIKING, "skilled users can strike more accurately");
-		EXPERTTRAITS(ETRAIT_STOP_THRUST, "can harness enemy momentum to deliver powerful blows");
-		EXPERTTRAITS(ETRAIT_PENETRATE_ARMOR, "penetrates enemy armor");
-		EXPERTTRAITS(ETRAIT_LONG_SLASH, "deals extra damage against lightly-armored enemies");
-		EXPERTTRAITS(ETRAIT_BLEED, "may deliver bleeding wounds");
-		EXPERTTRAITS(ETRAIT_CLEAVE, (CHECK_ETRAIT(obj, &youmonst, ETRAIT_HEW) ? "cleaves through slain enemies when not using hewing strikes" : "cleaves through slain enemies"));
-		EXPERTTRAITS(ETRAIT_PUNCTURE, "successive hits may deal increased damage");
-		EXPERTTRAITS(ETRAIT_LUNGE, "can be used for lunging attacks");
-		EXPERTTRAITS(ETRAIT_QUICK, "strikes quickly");
-		EXPERTTRAITS(ETRAIT_SECOND, "when wielded in the off-hand strikes a second foe after killing the first");
-		EXPERTTRAITS(ETRAIT_CREATE_OPENING, "creates openings for sneak attacks");
-		EXPERTTRAITS(ETRAIT_BRACED, "delivers powerful counterattacks");
-		EXPERTTRAITS(ETRAIT_BLADESONG, "delivers powerful blows when combined with songs or spells");
-		EXPERTTRAITS(ETRAIT_BLADEDANCE, "delivers powerful blows when moving and striking erratically");
-		EXPERTTRAITS(ETRAIT_WHIP_TRICKS, "can perform whip tricks when attacking");
-		if(buf[0] != '\0')
-			Sprintf(buf2, "Expert traits: %s.", buf);
-		else
-			Sprintf(buf2, "No expert traits unlocked.");
-		OBJPUTSTR(buf2);
+	if (obj) {
+		describe_expert_traits(obj, datawin);
 	}
 	else {
 		Sprintf(buf2, "No expert traits.");

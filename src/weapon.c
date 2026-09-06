@@ -5149,12 +5149,12 @@ process_etraits(unsigned long traits, int otyp, struct obj *obj, struct monst *m
 }
 
 boolean
-check_etrait(struct obj *obj, struct monst *mon, unsigned long trait)
+check_etrait(struct obj *obj, struct monst *mon, unsigned long trait, boolean skillgate)
 {
 	boolean youagr = (mon == &youmonst);
 	struct permonst *pa = youagr ? youracedata : mon->data;
 
-	if(youagr && P_SKILL(weapon_type(obj)) < P_SKILLED)
+	if(skillgate && youagr && P_SKILL(weapon_type(obj)) < P_SKILLED)
 		return FALSE;
 	else if(is_lightsaber(obj) && !litsaber(obj))
 		return FALSE;
