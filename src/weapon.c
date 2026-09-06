@@ -5065,7 +5065,6 @@ process_etraits(unsigned long traits, int otyp, struct obj *obj, struct monst *m
 		else if(check_oprop(obj, OPROP_MAGCW) && (obj->where != OBJ_INVENT || !activeFightingForm(FFORM_POMMEL)))
 			traits |= ETRAIT_PUNCTURE;
 	}
-	}
 	if(otyp == POLEAXE){
 		if(obj->o_e_trait & ETRAIT_FOCUS_FIRE)
 			traits |= ETRAIT_STOP_THRUST;
