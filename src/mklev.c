@@ -2893,6 +2893,9 @@ makelevel()
 	}
 	
 	/* Part two: special rooms */
+	/* Gray mold room */
+	if(In_dungeons_of_doom(&u.uz) && !rn2(40))
+		mkgrymldroom(&magic_chest);
 	/* Shops */
 	if (u_depth > 1 &&
 	    u_depth < depth(&challenge_level) &&
@@ -3730,7 +3733,8 @@ struct mkroom *croom;
 		else
 		if (!somexy(croom, &m))
 			return FALSE;
-	} while (occupied(m.x, m.y) || bydoor(m.x, m.y));
+	} while (occupied(m.x, m.y) || bydoor(m.x, m.y) ||
+		 (!ACCESSIBLE(typ) && MON_AT(m.x, m.y)));
 
 	switch (typ)
 	{

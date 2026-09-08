@@ -1871,26 +1871,8 @@ moveloop()
 			nxtmon = mtmp->nmon;
 			if(DEADMONSTER(mtmp))
 				continue;
-			if(mtmp->m_insight_level > Insight && !mtmp->mcan && mtmp->mtyp == PM_TRANSCENDENT_TETTIGON){
-				set_mon_data(mtmp, PM_UNMASKED_TETTIGON);
-				mtmp->m_insight_level -= 35;
-				newsym(x(mtmp), y(mtmp));
-			}
-			if(mtmp->m_insight_level > Insight
-			  || (mtmp->mtyp == PM_WALKING_DELIRIUM && BlockableClearThoughts)
-			  || (mtmp->mtyp == PM_STRANGER && !quest_status.touched_artifact)
-			  || ((mtmp->mtyp == PM_PUPPET_EMPEROR_XELETH || mtmp->mtyp == PM_PUPPET_EMPRESS_XEDALLI) && mtmp->mvar_yellow_lifesaved)
-			  || (mtmp->mtyp == PM_TWIN_SIBLING && (mtmp->mvar_twin_lifesaved || !(u.specialSealsActive&SEAL_YOG_SOTHOTH)))
-			){
-				if(!(mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP)){
-					if(mtmp->mtyp == PM_TRANSCENDENT_TETTIGON && mtmp->mvar1_tettigon_uncancel){
-						mtmp->mvar1_tettigon_uncancel = FALSE;
-						set_mcan(mtmp, FALSE);
-					}
-					insight_vanish(mtmp);
-					continue;
-				}
-			}
+			if(maybe_vanish(mtmp))
+				continue;
 			if(has_template(mtmp, DELOUSED)){
 				delouse_tame(mtmp);
 				continue;
@@ -1987,22 +1969,8 @@ moveloop()
 						newsym(mtmp->mx,mtmp->my);
 					}
 				}
-				if(mtmp->m_insight_level > Insight && !mtmp->mcan && mtmp->mtyp == PM_TRANSCENDENT_TETTIGON){
-					set_mon_data(mtmp, PM_UNMASKED_TETTIGON);
-					mtmp->m_insight_level -= 35;
-					newsym(x(mtmp), y(mtmp));
-				}
-				if(mtmp->m_insight_level > Insight
-				  || (mtmp->mtyp == PM_WALKING_DELIRIUM && BlockableClearThoughts)
-				  || (mtmp->mtyp == PM_STRANGER && !quest_status.touched_artifact)
-				  || ((mtmp->mtyp == PM_PUPPET_EMPEROR_XELETH || mtmp->mtyp == PM_PUPPET_EMPRESS_XEDALLI) && mtmp->mvar_yellow_lifesaved)
-				  || (mtmp->mtyp == PM_TWIN_SIBLING && (mtmp->mvar_twin_lifesaved || !(u.specialSealsActive&SEAL_YOG_SOTHOTH)))
-				){
-					if(!(mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP)){
-						insight_vanish(mtmp);
-						continue;
-					}
-				}
+				if(maybe_vanish(mtmp))
+					continue;
 				if(has_template(mtmp, DELOUSED)){
 					delouse_tame(mtmp);
 					continue;
@@ -3886,22 +3854,8 @@ karemade:
 			mtmp->mappearance = 0;
 			newsym(mtmp->mx, mtmp->my);
 		}
-		if(mtmp->m_insight_level > Insight && !mtmp->mcan && mtmp->mtyp == PM_TRANSCENDENT_TETTIGON){
-			set_mon_data(mtmp, PM_UNMASKED_TETTIGON);
-			mtmp->m_insight_level -= 35;
-			newsym(x(mtmp), y(mtmp));
-		}
-		if(mtmp->m_insight_level > Insight
-		  || (mtmp->mtyp == PM_WALKING_DELIRIUM && BlockableClearThoughts)
-		  || (mtmp->mtyp == PM_STRANGER && !quest_status.touched_artifact)
-		  || ((mtmp->mtyp == PM_PUPPET_EMPEROR_XELETH || mtmp->mtyp == PM_PUPPET_EMPRESS_XEDALLI) && mtmp->mvar_yellow_lifesaved)
-		  || (mtmp->mtyp == PM_TWIN_SIBLING && (mtmp->mvar_twin_lifesaved || !(u.specialSealsActive&SEAL_YOG_SOTHOTH)))
-		){
-			if(!(mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP)){
-				insight_vanish(mtmp);
-				continue;
-			}
-		}
+		if(maybe_vanish(mtmp))
+			continue;
 		if(has_template(mtmp, DELOUSED)){
 			delouse_tame(mtmp);
 			continue;

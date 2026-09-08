@@ -6574,6 +6574,7 @@ int	roomtype;
 	case SLABROOM:	mkslabroom(); break;
 	case ELSHAROOM:	mkzoo(ELSHAROOM); break;
 	case HELL_VAULT:	mkhellvaultroom(); break;
+	case GRYMLDROOM:	mkgrymldroom((boolean *)0); break;
 	default:	impossible("Tried to make a room of type %d.", roomtype);
     }
 }
@@ -6751,6 +6752,41 @@ register boolean nostairs, fullwalls;
 	return (struct mkroom *)0;
 }
 
+struct mkroom *
+pick_room_grymld(boolean nostairs, boolean fullwalls)
+/* pick_room(), but restricted to rooms with a 3 or 5 tile dimension */
+{
+	register struct mkroom *sroom;
+	register int i;
+	int width, height;
+	int minroom = level.flags.sp_lev_nroom;
+	int nrange = nroom - minroom;
+	int start;
+
+	if (nrange <= 0)
+		return (struct mkroom *)0;
+
+	start = rn2(nrange);
+	for (i = nroom; i > 0; i--, start++) {
+		sroom = &rooms[minroom + (start % nrange)];
+		/* if full walls are required, it must be an OROOM and not a JOINEDROOM */
+		if(!(sroom->rtype == OROOM) && !(sroom->rtype == JOINEDROOM && !fullwalls))
+			continue;
+		/* must be 3 or 5 tiles in width or height (either dimension qualifies) */
+		width = sroom->hx - sroom->lx + 1;
+		height = sroom->hy - sroom->ly + 1;
+		if (width != 3 && width != 5 && height != 3 && height != 5)
+			continue;
+		/* if no stairs are required, it cannot have downstairs */
+		if (has_upstairs(sroom) ||
+			(has_dnstairs(sroom) && (nostairs || rn2(3)))) {
+			continue;
+		}
+		return sroom;
+	}
+	return (struct mkroom *)0;
+}
+
 /*
  * Some special rooms can be made in places that don't have full walls.
  */
@@ -6785,6 +6821,183 @@ int type;
 		sroom->rtype = type;
 		fill_zoo(sroom);
 	}
+}
+
+void
+mkgrymldroom(boolean *magic_chest)
+{
+	register struct mkroom *sroom;
+
+	if ((sroom = pick_room_grymld(FALSE, TRUE)) != 0) {
+		sroom->rtype = GRYMLDROOM;
+		fill_grymldroom(sroom, magic_chest);
+	}
+}
+
+void
+fill_grymldroom(struct mkroom *sroom, boolean *magic_chest)
+{
+	int width = sroom->hx - sroom->lx + 1;
+	int height = sroom->hy - sroom->ly + 1;
+	boolean primary_is_x;
+	int center;
+	int i;
+	int nmold, tried;
+	coord pos;
+	int sx, sy;
+	struct monst *mtmp;
+
+	/* the dimension that is 3 (or, failing that, 5) tiles is the
+	 * secondary axis; the primary axis is the other one */
+	if (width == 3)
+		primary_is_x = FALSE;
+	else if (height == 3)
+		primary_is_x = TRUE;
+	else if (width == 5)
+		primary_is_x = FALSE;
+	else
+		primary_is_x = TRUE;
+
+	/* the secondary axis is 3 or 5 tiles wide, so it has a single center
+	 * row/column; primary_is_x means y is secondary (a center row),
+	 * otherwise x is secondary (a center column) */
+	if (primary_is_x)
+		center = sroom->ly + height / 2;
+	else
+		center = sroom->lx + width / 2;
+
+	if (primary_is_x) {
+		for (i = sroom->lx; i <= sroom->hx; i += 2) {
+			makemon(&mons[PM_GRAY_FUNGAL_TOWER], i, center - 1, NO_MM_FLAGS);
+			makemon(&mons[PM_GRAY_FUNGAL_TOWER], i, center + 1, NO_MM_FLAGS);
+		}
+	} else {
+		for (i = sroom->ly; i <= sroom->hy; i += 2) {
+			makemon(&mons[PM_GRAY_FUNGAL_TOWER], center - 1, i, NO_MM_FLAGS);
+			makemon(&mons[PM_GRAY_FUNGAL_TOWER], center + 1, i, NO_MM_FLAGS);
+		}
+	}
+
+	makemon(&mons[PM_RUSTY_GRAY_MOLD], sroom->lx + width / 2, sroom->ly + height / 2, NO_MM_FLAGS);
+
+	nmold = (width * height) / (6 + rn2(3));
+	tried = 0;
+	while (nmold > 0 && tried++ < 100) {
+		if (somexy(sroom, &pos) && !MON_AT(pos.x, pos.y)) {
+			makemon(&mons[PM_RUSTY_GRAY_MOLD], pos.x, pos.y, NO_MM_FLAGS);
+			nmold--;
+		}
+	}
+
+	/* trigger the insight pass now, so any rusty gray mold that shouldn't
+	 * be here yet (per the insight system) vanishes before the room is
+	 * otherwise finished; the towers wait until after the terrain/treasure
+	 * fill below, so their squares stay protected from tree placement
+	 * until then */
+	for (sx = sroom->lx; sx <= sroom->hx; sx++)
+		for (sy = sroom->ly; sy <= sroom->hy; sy++) {
+			mtmp = m_at(sx, sy);
+			if (mtmp && mtmp->mtyp == PM_RUSTY_GRAY_MOLD)
+				(void) maybe_vanish(mtmp);
+		}
+
+	/* mirrors the ordinary room fill in mklev.c; trap generation is
+	 * intentionally omitted so a returning insight monster can't land
+	 * on one */
+	{
+		int x, y, tryct;
+		struct monst *tmonst;
+
+		if (u.uhave.amulet || !rn2(3)) {
+			x = somex(sroom); y = somey(sroom);
+			tmonst = makemon((struct permonst *) 0, x, y, NO_MM_FLAGS);
+			if (tmonst && tmonst->mtyp == PM_GIANT_SPIDER && !occupied(x, y))
+				(void) maketrap(x, y, WEB);
+		}
+
+		/* gold pile is guaranteed */
+		(void) mkgold(0L, somex(sroom), somey(sroom));
+
+		/* greater chance of puddles if a water source is nearby */
+		x = 40;
+		if (!rn2(10)) {
+			if (mkfeature(FOUNTAIN, FALSE, sroom))
+				x -= 20;
+		}
+#ifdef SINKS
+		if (!rn2(60)) {
+			if (mkfeature(SINK, FALSE, sroom))
+				x -= 20;
+		}
+		if (!rn2(40)) {
+			mkfeature(FORGE, FALSE, sroom);
+		}
+
+		if (!rn2(280)) {
+			mkfeature(TREE, FALSE, sroom);
+		}
+
+		if (x < 2) x = 2;
+#endif
+		if (!rn2(x))
+			mkfeature(PUDDLE, FALSE, sroom);
+
+		if (!rn2(60))
+			mkfeature(ALTAR, FALSE, sroom);
+
+		x = 80 - (depth(&u.uz) * 2);
+		if (x < 2) x = 2;
+		if (!rn2(x))
+			mkfeature(GRAVE, FALSE, sroom);
+
+		if (!rn2(20))
+			(void) mkcorpstat(STATUE, (struct monst *)0,
+					  (struct permonst *)0,
+					  somex(sroom), somey(sroom), TRUE);
+
+		if (!rn2(nroom * 5 / 2))
+			(void) mksobj_at((rn2(3)) ? BOX : CHEST, somex(sroom), somey(sroom), NO_MKOBJ_FLAGS);
+
+		/* about a 10% chance of a magic chest per level; skipped
+		 * entirely if magic_chest is NULL */
+		if (magic_chest && !*magic_chest && !rn2(nroom * 10)) {
+			(void) mksobj_at(MAGIC_CHEST, somex(sroom), somey(sroom), NO_MKOBJ_FLAGS);
+			*magic_chest = TRUE;
+		}
+
+		if (!rn2(27 + 3 * abs(depth(&u.uz)))) {
+			char buf[BUFSZ];
+			const char *mesg = random_engraving(buf);
+			if (mesg) {
+				do {
+					x = somex(sroom); y = somey(sroom);
+				} while (levl[x][y].typ != ROOM && !rn2(40));
+				if (!(IS_POOL(levl[x][y].typ) ||
+				      IS_FURNITURE(levl[x][y].typ)))
+					make_engr_at(x, y, mesg, 0L, MARK);
+			}
+		}
+
+		/* always place at least one random object here */
+		(void) mkobj_at(0, somex(sroom), somey(sroom), MKOBJ_ARTIF);
+		tryct = 0;
+		while (!rn2(5)) {
+			if (++tryct > 100) {
+				impossible("tryct overflow4");
+				break;
+			}
+			(void) mkobj_at(0, somex(sroom), somey(sroom), MKOBJ_ARTIF);
+		}
+	}
+
+	/* the towers get their own insight check now that terrain/treasure
+	 * placement (which needed them to stay put) is done */
+	for (sx = sroom->lx; sx <= sroom->hx; sx++)
+		for (sy = sroom->ly; sy <= sroom->hy; sy++) {
+			mtmp = m_at(sx, sy);
+			if (mtmp && mtmp->mtyp == PM_GRAY_FUNGAL_TOWER)
+				(void) maybe_vanish(mtmp);
+		}
 }
 
 STATIC_OVL boolean

@@ -2106,22 +2106,8 @@ movemon()
 	}
 	if(u.specialSealsActive&SEAL_LIVING_CRYSTAL)
 		average_dogs();
-	if(mtmp->m_insight_level > Insight && !mtmp->mcan && mtmp->mtyp == PM_TRANSCENDENT_TETTIGON){
-		set_mon_data(mtmp, PM_UNMASKED_TETTIGON);
-		mtmp->m_insight_level -= 35;
-		newsym(x(mtmp), y(mtmp));
-	}
-	if(mtmp->m_insight_level > Insight
-	  || (mtmp->mtyp == PM_WALKING_DELIRIUM && BlockableClearThoughts)
-	  || (mtmp->mtyp == PM_STRANGER && !quest_status.touched_artifact)
-	  || ((mtmp->mtyp == PM_PUPPET_EMPEROR_XELETH || mtmp->mtyp == PM_PUPPET_EMPRESS_XEDALLI) && mtmp->mvar_yellow_lifesaved)
-	  || (mtmp->mtyp == PM_TWIN_SIBLING && (mtmp->mvar_twin_lifesaved || !(u.specialSealsActive&SEAL_YOG_SOTHOTH)))
-	){
-		if(!(mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP)){
-			insight_vanish(mtmp);
-			continue;
-		}
-	}
+	if(maybe_vanish(mtmp))
+		continue;
     if(In_quest(&u.uz) && urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH && levl[mtmp->mx][mtmp->my].typ == AIR
 		&& !mon_resistance(mtmp,FLYING)
 		&& !mon_resistance(mtmp,LEVITATION)
@@ -8784,6 +8770,35 @@ struct monst *mtmp;
 	} else {
 		migrate_to_level(mtmp, ledger_no(&u.uz), MIGR_EXACT_XY, (coord *)0);
 	}
+}
+
+/* check whether mtmp's insight/plot-armor state means it should vanish
+ * (via insight_vanish()) this turn; returns TRUE if it did, in which case
+ * the caller should treat mtmp as gone (e.g. "continue" a monster loop) */
+boolean
+maybe_vanish(struct monst *mtmp)
+{
+	if(mtmp->m_insight_level > Insight && !mtmp->mcan && mtmp->mtyp == PM_TRANSCENDENT_TETTIGON){
+		set_mon_data(mtmp, PM_UNMASKED_TETTIGON);
+		mtmp->m_insight_level -= 35;
+		newsym(x(mtmp), y(mtmp));
+	}
+	if(mtmp->m_insight_level > Insight
+	  || (mtmp->mtyp == PM_WALKING_DELIRIUM && BlockableClearThoughts)
+	  || (mtmp->mtyp == PM_STRANGER && !quest_status.touched_artifact)
+	  || ((mtmp->mtyp == PM_PUPPET_EMPEROR_XELETH || mtmp->mtyp == PM_PUPPET_EMPRESS_XEDALLI) && mtmp->mvar_yellow_lifesaved)
+	  || (mtmp->mtyp == PM_TWIN_SIBLING && (mtmp->mvar_twin_lifesaved || !(u.specialSealsActive&SEAL_YOG_SOTHOTH)))
+	){
+		if(!(mtmp->mtrapped && t_at(mtmp->mx, mtmp->my) && t_at(mtmp->mx, mtmp->my)->ttyp == VIVI_TRAP)){
+			if(mtmp->mtyp == PM_TRANSCENDENT_TETTIGON && mtmp->mvar1_tettigon_uncancel){
+				mtmp->mvar1_tettigon_uncancel = FALSE;
+				set_mcan(mtmp, FALSE);
+			}
+			insight_vanish(mtmp);
+			return TRUE;
+		}
+	}
+	return FALSE;
 }
 
 STATIC_OVL void

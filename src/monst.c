@@ -3981,7 +3981,7 @@ then fill new spaces with our spawn!
 	MB_NOEYES|MB_NOLIMBS|MB_NOHEAD|MB_NEUTER /*MB*/, MC_HALUC  /*MC*/, 0 /*MG*/,
 	MA_PLANT /*MA*/,  MV_SCENT /*MV*/, MW_ELDER_EYE_ELEM /*MW*/, 0 /*light radius*/, CLR_MAGENTA),
     MON("rusty-gray mold", S_FUNGUS,//7
-	LVL(6, 0, 0, 0), (G_S_INST(11)|1),
+	LVL(6, 0, 0, 0), (G_S_INST(11)|G_NOGEN),
 	DEF(NAT_AC(2), NAT_DR(10)),
 	A(ATTK(AT_NONE, AD_GMLD, 2, 2)),
 	SIZ(50, 400, MS_SILENT, MZ_SMALL),
@@ -4042,7 +4042,7 @@ then fill new spaces with our spawn!
 	MB_NOEYES|MB_NOLIMBS /*MB*/, 0  /*MC*/, MG_SANLOSS|MG_INSIGHT|MG_NOSPELLCOOLDOWN|MG_REGEN /*MG*/,
 	MA_PLANT|MA_HUMAN /*MA*/,  MV_TELEPATHIC|MV_OMNI /*MV*/, MW_ELDER_SIGN|MW_ELDER_EYE_ELEM /*MW*/, 0 /*light radius*/, HI_ZAP),
     MON("gray fungal tower", S_FUNGUS,//21
-	LVL(18, 12, 0, 0), (G_S_INST(22)|1),
+	LVL(18, 12, 0, 0), (G_S_INST(22)|G_NOGEN),
 	DEF(NAT_AC(1)),
 	A(ATTK(AT_MAGC, AD_SPEL, 0, 8), ATTK(AT_NONE, AD_GMLD, 10, 10)),
 	SIZ(WT_GIGANTIC, CN_GIGANTIC, MS_SILENT, MZ_GIGANTIC),
