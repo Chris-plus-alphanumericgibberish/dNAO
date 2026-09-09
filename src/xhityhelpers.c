@@ -1967,6 +1967,15 @@ struct monst * magr;
 			((otmp->otyp != CHURCH_SHORTSWORD && (!amalg_otyp || amalg_otyp != CHURCH_SHORTSWORD)) || !(resist_pierce(pd) && !resist_slash(pd)))
 		)
 			diesize *= otmp->otyp == CHURCH_SHORTSWORD && Insight >= 40 ? 5 : 2.5;
+
+		//Late adjustments (increase dice and double previous damage)
+		if(magr && is_undead(mdef->data) && CHECK_ETRAIT(otmp, magr, ETRAIT_ANTI_UNDEAD)
+			&& ROLL_ETRAIT(otmp, magr, TRUE, (youagr && ZFOCUS(otmp)) ? rn2(4) : rn2(2))
+		) {
+			holydmg *= 2;
+			ndice *= 2;
+		}
+
 		/* calculate dice */
 		holydmg += vd(ndice, diesize);
 		if(youagr && active_glyph(ROTTED_RUNE) && u.uevent.uhand_of_elbereth){
@@ -1975,7 +1984,9 @@ struct monst * magr;
 		dmg += holydmg;
 	}
 	if (hates_unholy_mon(mdef) &&
-		is_unholy(otmp)) {
+		is_unholy(otmp)
+	) {
+		int unholydmg = 0;
 		/* default: 1d9 */
 		ndice = 1;
 		diesize = 9;
@@ -2063,6 +2074,15 @@ struct monst * magr;
 			((otmp->otyp != CHURCH_SHORTSWORD && (!amalg_otyp || amalg_otyp != CHURCH_SHORTSWORD)) || !(resist_pierce(pd) && !resist_slash(pd)))
 		)
 			diesize *= otmp->otyp == CHURCH_SHORTSWORD && Insight >= 40 ? 5 : 2.5;
+
+		//Late adjustments (increase dice and double previous damage)
+		if(magr && is_undead(mdef->data) && CHECK_ETRAIT(otmp, magr, ETRAIT_ANTI_UNDEAD)
+			&& ROLL_ETRAIT(otmp, magr, TRUE, (youagr && ZFOCUS(otmp)) ? rn2(4) : rn2(2))
+		) {
+			unholydmg *= 2;
+			ndice *= 2;
+		}
+
 		/* calculate */
 		if (ndice)
 			dmg += vd(ndice, diesize);

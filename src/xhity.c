@@ -10,8 +10,6 @@ extern int monstr[];
 
 #define STILLVALID(mdef) (!DEADMONSTER(mdef) && !MIGRATINGMONSTER(mdef) && mdef == m_at(u.ux + u.dx, u.uy + u.dy))
 
-#define ZFOCUS(otmp) (otmp && (otmp->obj_material == MERCURIAL) && (artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_FOCUS) && (BlockableClearThoughts || (u.usanity-80) > rnd(10)))
-
 STATIC_DCL void FDECL(wildmiss, (struct monst *, struct attack *, struct obj *, boolean));
 STATIC_DCL boolean FDECL(u_surprise, (struct monst *, boolean));
 STATIC_DCL struct attack * FDECL(getnextspiritattack, (boolean));
@@ -15764,6 +15762,7 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 	boolean stunning_strike = FALSE;
 	boolean whip_tricks = FALSE;
 	boolean braced_weapon = FALSE;
+	boolean anti_undead_strike = FALSE;
 	int jousting = 0;		/* can be 1 (joust), 0 (ordinary hit), -1 (joust and lance breaks) */
 	int sneak_dice = 0;
 	int sneak_attack = 0;
@@ -16413,7 +16412,7 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 	){
 		if((youagr && ZFOCUS(weapon)) 
 		? ROLL_ETRAIT(weapon, magr, rn2(4), !rn2(5))
-		: ROLL_ETRAIT(weapon, magr, !rn2(2), !rn2(10))
+		: ROLL_ETRAIT(weapon, magr, rn2(2), !rn2(10))
 		)
 			stunning_strike = TRUE;
 	}
@@ -16423,9 +16422,19 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 	){
 		if((youagr && ZFOCUS(weapon)) 
 		? ROLL_ETRAIT(weapon, magr, rn2(4), !rn2(3))
-		: ROLL_ETRAIT(weapon, magr, !rn2(2), !rn2(5))
+		: ROLL_ETRAIT(weapon, magr, rn2(2), !rn2(5))
 		)
 			whip_tricks = TRUE;
+	}
+	// Stun expert weapon trait
+	if(!recursed && weapon && valid_weapon_attack &&
+		 magr && CHECK_ETRAIT(weapon, magr, ETRAIT_ANTI_UNDEAD)
+	){
+		if((youagr && ZFOCUS(weapon)) 
+		? ROLL_ETRAIT(weapon, magr, rn2(4), !rn2(5))
+		: ROLL_ETRAIT(weapon, magr, rn2(2), !rn2(10))
+		)
+			anti_undead_strike = TRUE;
 	}
 	/* monk special */
 	if (youagr && (melee || thrust) && !recursed && !Upolyd) {
@@ -18381,6 +18390,17 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 						tratdmg += weapon_dam_bonus(weapon, weapon_type(weapon));
 				}
 			}
+			if(anti_undead_strike && is_undead(mdef->data)){
+				struct weapon_dice wdice;
+				if (wizard && (iflags.wizcombatdebug & WIZCOMBATDEBUG_DMG) && WIZCOMBATDEBUG_APPLIES(magr, mdef))
+					pline("Anti-undead strike bonus damage!");
+				/* grab the weapon dice from dmgval_core */
+				dmgval_core(&wdice, bigmonst(pd), weapon, weapon->otyp, magr);
+				/* add to the tratdmg counter */
+				tratdmg += weapon_dmg_roll(&wdice, youdef);
+				if(youagr)
+					tratdmg += weapon_dam_bonus(weapon, weapon_type(weapon));
+			}
 		}
 	}
 	/* monk special: bonus damage */
@@ -18807,7 +18827,11 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 				resisted_thick_skin = TRUE;
 			}
 		}
-		if ((attackmask & ~(resistmask)) == 0L && !(strike_obj && spec_applies(strike_obj, mdef, TRUE)) && (subtotl > 0)) {
+		if ((attackmask & ~(resistmask)) == 0L
+			&& (subtotl > 0)
+			&& !(strike_obj && spec_applies(strike_obj, mdef, TRUE))
+			&& !(strike_obj && CHECK_ETRAIT(strike_obj, magr, ETRAIT_ANTI_UNDEAD) && is_undead(mdef->data))
+		) {
 			/* damage reduced by 75% */
 			subtotl /= 4;
 			resisted_attack_type = TRUE;
@@ -19029,6 +19053,7 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 				!staggering_strike &&
 				!monk_staggering_strike &&
 				!stunning_strike &&
+				!anti_undead_strike &&
 				!(youagr && lethaldamage) &&
 				!(youagr && snekdmg))
 			{
@@ -19214,6 +19239,14 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 	if (bleeding_strike && !lethaldamage) {
 		if (vis)
 			pline("%s sustained a bleeding wound in the fighting!", youdef ? "You" : Monnam(mdef));
+	}
+	if(anti_undead_strike && !lethaldamage){
+		if(vis){
+			if(skeletal(pd))
+				pline("%s brittle %s are pulverized by the blow!", youdef ? "Your" : s_suffix(Monnam(mdef)), mbodypart(mdef, BONES));
+			else
+				pline("%s rotted %s is pulverized by the blow!", youdef ? "Your" : s_suffix(Monnam(mdef)), mbodypart(mdef, BODY_FLESH));
+		}
 	}
 	if(weapon && (weapon->obj_material == HEMARGYOS || check_oprop(weapon, OPROP_HAEM))){
 		if(youagr && !youdef){

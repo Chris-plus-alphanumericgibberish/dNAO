@@ -2832,6 +2832,9 @@ etrait_description(long flag, long context_traits, boolean past)
 	case ETRAIT_WHIP_TRICKS:
 		return past ? "performed whip tricks when attacking"
 		            : "can perform whip tricks when attacking";
+	case ETRAIT_ANTI_UNDEAD:
+		return past ? "was particularly effective against the rotted flesh and bones of the undead"
+		            : "is particularly effective against the rotted flesh and bones of the undead";
 	default:
 		return (const char *)0;
 	}
@@ -2889,6 +2892,7 @@ describe_expert_traits(struct obj *obj, winid *datawin)
 		EXPERTTRAITS(ETRAIT_BLADESONG, "delivers powerful blows when combined with songs or spells");
 		EXPERTTRAITS(ETRAIT_BLADEDANCE, "delivers powerful blows when moving and striking erratically");
 		EXPERTTRAITS(ETRAIT_WHIP_TRICKS, "can perform whip tricks when attacking");
+		EXPERTTRAITS(ETRAIT_ANTI_UNDEAD, "particularly effective against the rotted flesh and bones of the undead");
 	}
 #undef EXPERTTRAITS
 

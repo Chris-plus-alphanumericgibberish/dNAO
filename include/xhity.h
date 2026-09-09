@@ -138,4 +138,6 @@
 #define ATTKFLAG_SHOCKWAVE			0x00000020L
 
 #define XYATKFLAG_MIRROR_ATK		0x00000001L
+
+#define ZFOCUS(otmp) (otmp && (otmp->obj_material == MERCURIAL) && (artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_FOCUS) && (BlockableClearThoughts || (u.usanity-80) > rnd(10)))
 #endif

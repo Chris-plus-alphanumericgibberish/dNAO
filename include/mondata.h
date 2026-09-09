@@ -273,6 +273,7 @@
 						 ((ptr)->mtyp == PM_PHARAOH) \
 						)
 #define skeleton_innards(ptr)	(((ptr)->mflagsc&MC_SKELETAL) != 0)
+#define skeletal(ptr)		((ptr)->mflagsc&MC_SKELETAL)
 #define no_innards(ptr)	((ptr)->mlet == S_VORTEX || \
 						 (ptr)->mlet == S_LIGHT || \
 						 (ptr)->mlet == S_ELEMENTAL || \

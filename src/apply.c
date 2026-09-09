@@ -7708,7 +7708,7 @@ use_pest_glaive(struct obj *obj)
 				ETRAIT_BLEED, ETRAIT_CLEAVE, ETRAIT_LUNGE,
 				ETRAIT_SECOND, ETRAIT_CREATE_OPENING, ETRAIT_BRACED,
 				ETRAIT_BLADESONG, ETRAIT_BLADEDANCE, ETRAIT_PUNCTURE,
-				ETRAIT_STRIKING, 0L
+				ETRAIT_STRIKING, ETRAIT_ANTI_UNDEAD, 0L
 			};
 			//Note, not ETRAIT_QUICK, not ETRAIT_WHIP_TRICKS. Balance and handled a different way, respectively.
 			if (!is_organic(consumed) &&

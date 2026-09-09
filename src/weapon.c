@@ -5100,9 +5100,9 @@ process_etraits(unsigned long traits, int otyp, struct obj *obj, struct monst *m
 		if(obj->o_e_trait & ETRAIT_FOCUS_FIRE)
 			traits |= ETRAIT_STOP_THRUST|ETRAIT_BRACED|ETRAIT_PUNCTURE;
 		else if(obj->o_e_trait & ETRAIT_HEW)
-			traits |= ETRAIT_PENETRATE_ARMOR;
+			traits |= ETRAIT_PENETRATE_ARMOR|ETRAIT_ANTI_UNDEAD;
 		else if(obj->o_e_trait & ETRAIT_STUNNING_STRIKE)
-			traits |= ETRAIT_CLEAVE|ETRAIT_PENETRATE_ARMOR;
+			traits |= ETRAIT_CLEAVE|ETRAIT_PENETRATE_ARMOR|ETRAIT_ANTI_UNDEAD;
 		else
 			traits |= ETRAIT_STOP_THRUST|ETRAIT_LUNGE|ETRAIT_PUNCTURE;
 	}
