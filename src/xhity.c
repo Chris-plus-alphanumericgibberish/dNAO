@@ -240,6 +240,10 @@ struct monst * mdef;
 	}
 	//If the player can't attack and is wearing a straitjacket, redirect to the kick function
 	if(Straitjacketed && !at_least_one_attack(&youmonst)){
+		if(u.uentangled_oid){
+			You("struggle against your bindings!");
+			return TRUE;
+		}
 		dokick_core(u.dx, u.dy);
 		//Dokick can't move you
 		return TRUE;
