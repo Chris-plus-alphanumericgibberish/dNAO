@@ -6448,7 +6448,7 @@ int spell;
 			}
 		}
 		chance = min(100, chance);
-		if(dist < 100) chance -= 100-dist;
+		if(dist > 0 && dist < 100) chance -= 100-dist;
 	}
 	
 	//Panic can be overcome by Naen
