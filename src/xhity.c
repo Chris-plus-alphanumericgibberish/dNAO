@@ -11470,7 +11470,10 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 						dmg *= 1.5;
 					}
 					else if(magr->mtyp == PM_RHOMBOHEDROID){
-						pline("The black light fills your mind with surreal images of your crimes!");
+						if(tentacles)
+							pline("The fanged tentacles inject strange liquids, and your mind fills with surreal images of your crimes!");
+						else
+							pline("The black light fills your mind with surreal images of your crimes!");
 						dmg *= 1.5;
 						dmg += u.hod + u.ualign.sins;
 					}
