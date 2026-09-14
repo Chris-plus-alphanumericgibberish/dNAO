@@ -248,6 +248,7 @@ struct monst {
 	int mbleed; /* bleed damage per round */
 	int mgmld_skin; /* mold spores in skin */
 	int mgmld_throat; /* mold spores in throat */
+	unsigned char owrk, ruh, shey, luahv, nean, nooh; /* active anti-syllable counters */
 	coord mprev_dir;		/* previous movement direction (stop thrust etc) */
 	coord mprev_attk;	/* previous attack direction (braced etc) */
 	long mlast_movement;/* turn on which it most recently moved (clear stop thrust) */
@@ -417,15 +418,17 @@ struct monst {
 #define	mvar1_afreet_lastsaw	mvar1
 #define mvar1_halo_sec_element	mvar1
 #define	mvar1_summon_ID			mvar1
-#define	mvar_mammon_dive_x	mvar1
+#define	mvar_mammon_dive_x		mvar1
+#define mvar1_bereft_syllable	mvar1
 	long mvar2;
 #define	mvar_dracaePregTimer	mvar2
 #define	mvar_spList_2	mvar2
 #define	mvar_dreadPrayer_progress	mvar2
-#define	mvar_attack_pm	mvar2
+#define	mvar_attack_pm			mvar2
 #define	mvar_elfwraith_spell	mvar2
 #define	mvar_spellweaver_seed	mvar2
-#define	mvar_mammon_dive_y	mvar2
+#define	mvar_mammon_dive_y		mvar2
+#define	mvar2_bereft_target		mvar2
 	long mvar3;
 #define	mvar_conversationTracker	mvar3
 #define	mvar_lifesigns	mvar3

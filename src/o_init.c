@@ -186,6 +186,56 @@ register char oclass;
 #endif
 }
 
+static const char *syllable_glyph_text[] = {
+	"bipartite glyph",	/* SYLLABLE_OF_STRENGTH__AESH's default text */
+	"xed glyph",	/* SYLLABLE_OF_POWER__KRAU: crossed glyph */
+	"knotted glyph",	/* SYLLABLE_OF_LIFE__HOON's default text */
+	"multilinear glyph",	/* SYLLABLE_OF_GRACE__UUR's default text */
+	"dotted glyph",		/* SYLLABLE_OF_THOUGHT__NAEN's default text */
+	"rising glyph",	/* SYLLABLE_OF_SPIRIT__VAUL: hanging glyph */
+};
+char anti_syllable_buffer[BUFSZ];
+
+const char *
+anti_syllable_appearance(spellnum)
+int spellnum;
+{
+	int otyp, home;
+
+	switch (spellnum) {
+	case OWRK:	otyp = SYLLABLE_OF_POWER__KRAU;		break;
+	case RUH:	otyp = SYLLABLE_OF_GRACE__UUR;			break;
+	case SHEY:	otyp = SYLLABLE_OF_STRENGTH__AESH;		break;
+	case LUAHV:	otyp = SYLLABLE_OF_SPIRIT__VAUL;		break;
+	case NEAN:	otyp = SYLLABLE_OF_THOUGHT__NAEN;		break;
+	case NOOH:	otyp = SYLLABLE_OF_LIFE__HOON;			break;
+	default:
+		impossible("anti_syllable_appearance: spell %d is not a standard anti-syllable", spellnum);
+		return "glyph";
+	}
+
+	home = objects[otyp].oc_descr_idx;
+	switch (home) {
+	case SYLLABLE_OF_STRENGTH__AESH:
+		Sprintf(anti_syllable_buffer, "%s%s", objects[otyp].oc_name_known ? "inverted " : "", syllable_glyph_text[0]);
+		return anti_syllable_buffer;
+	case SYLLABLE_OF_POWER__KRAU:		return syllable_glyph_text[1];
+	case SYLLABLE_OF_LIFE__HOON:		
+		Sprintf(anti_syllable_buffer, "%s%s", objects[otyp].oc_name_known ? "inverted " : "", syllable_glyph_text[2]);
+		return anti_syllable_buffer;
+	case SYLLABLE_OF_GRACE__UUR:
+		Sprintf(anti_syllable_buffer, "%s%s", objects[otyp].oc_name_known ? "inverted " : "", syllable_glyph_text[3]);
+		return anti_syllable_buffer;
+	case SYLLABLE_OF_THOUGHT__NAEN:	
+		Sprintf(anti_syllable_buffer, "%s%s", objects[otyp].oc_name_known ? "inverted " : "", syllable_glyph_text[4]);
+		return anti_syllable_buffer;
+	case SYLLABLE_OF_SPIRIT__VAUL:		return syllable_glyph_text[5];
+	default:
+		impossible("anti_syllable_appearance: unexpected descr_idx %d for syllable %d", home, otyp);
+		return "glyph";
+	}
+}
+
 STATIC_OVL void
 shuffle_all()
 {

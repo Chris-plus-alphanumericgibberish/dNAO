@@ -578,7 +578,8 @@ int newpm;
 				mon->mvar_huskID = 0;
 		break;
 		case PM_ALABASTER_MUMMY:
-			if(oldpm != PM_ALABASTER_MUMMY){
+		case PM_SHRIEKING_SHADOW:
+			if(!has_syllable(&mons[oldpm])){
 				switch(rnd(6)){
 					case 1:
 						mon->mvar_syllable = SYLLABLE_OF_STRENGTH__AESH;

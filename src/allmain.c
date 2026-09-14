@@ -1012,6 +1012,7 @@ you_regen_hp()
 	boolean bleeding = FALSE;
 	boolean air_drowning = FALSE;
 	boolean disintegrating = FALSE;
+	boolean unmaking = FALSE;
 
 	// set hp, maxhp pointers
 	hp    = (Upolyd) ? (&u.mh)    : (&u.uhp);
@@ -1129,6 +1130,13 @@ you_regen_hp()
 		bleeding = TRUE;
 		perX -= youmonst.mbleed*HEALCYCLE;
 		blockRegen = TRUE;
+	}
+
+	/*Anti-syllable degeneration*/
+	if(youmonst.nooh){
+		blockRegen = TRUE;
+		unmaking = TRUE;
+		perX -= 10*HEALCYCLE;
 	}
 
 	if (check_mutation(TT_LIZARD_TAIL) && !blockRegen){
@@ -1346,6 +1354,8 @@ you_regen_hp()
 					killer="air-drowning";
 				else if(disintegrating)
 					killer="disintegrating in bright light";
+				else if(unmaking)
+					killer="unmaking";
 				else
 					killer="poor health, apparently";
 				done(DIED);
@@ -1458,6 +1468,10 @@ you_regen_pw()
 	if(check_mutation(SHUB_RADIANCE)){
 		perX += Insight/3;
 		perX += max(2*Insight/3, Insanity);
+	}
+	/*Anti-syllable degeneration*/
+	if(youmonst.nean){
+		perX -= 10*HEALCYCLE;
 	}
 	// power drain from maintained spells
 	if (u.maintained_en_debt > 0)
@@ -5955,6 +5969,8 @@ struct monst *mon;
 				mtmp->mtrapped = 0;
 				mtmp->entangled_otyp = 0;
 				mtmp->entangled_oid = 0;
+				mtmp->owrk = 0; mtmp->ruh = 0; mtmp->shey = 0;
+				mtmp->luahv = 0; mtmp->nean = 0; mtmp->nooh = 0;
 			}
 		}
 		xlocale += rn2(3) - 1;
@@ -6032,7 +6048,9 @@ struct monst *mon;
 			mtmp->mtrapped = 0;
 			mtmp->entangled_otyp = 0;
 			mtmp->entangled_oid = 0;
-			
+			mtmp->owrk = 0; mtmp->ruh = 0; mtmp->shey = 0;
+			mtmp->luahv = 0; mtmp->nean = 0; mtmp->nooh = 0;
+
 			break; //ends the loop
 		}
 	}
@@ -6105,6 +6123,8 @@ struct monst *mon;
 					mtmp->mtrapped = 0;
 					mtmp->entangled_otyp = 0;
 					mtmp->entangled_oid = 0;
+					mtmp->owrk = 0; mtmp->ruh = 0; mtmp->shey = 0;
+					mtmp->luahv = 0; mtmp->nean = 0; mtmp->nooh = 0;
 				}
 			}
 		}
@@ -6237,6 +6257,8 @@ struct monst *mon;
 				mtmp->mtrapped = 0;
 				mtmp->entangled_otyp = 0;
 				mtmp->entangled_oid = 0;
+				mtmp->owrk = 0; mtmp->ruh = 0; mtmp->shey = 0;
+				mtmp->luahv = 0; mtmp->nean = 0; mtmp->nooh = 0;
 			}
 		}
 	}

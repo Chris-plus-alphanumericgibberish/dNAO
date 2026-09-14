@@ -425,6 +425,7 @@ struct obj *otmp;
 			if (otyp == SPE_FORCE_BOLT){
 				if(u.ukrau_duration) dmg *= 1.5;
 			    dmg += spell_damage_bonus();
+				if(youmonst.owrk) dmg = (dmg+1)/2;
 			}
 			
 			hit(zap_type_text, mtmp, exclam(dmg));
@@ -468,6 +469,7 @@ struct obj *otmp;
 			if (otyp == SPE_TURN_UNDEAD){
 				if(u.ukrau_duration) dmg *= 1.5;
 				dmg += spell_damage_bonus();
+				if(youmonst.owrk) dmg = (dmg+1)/2;
 			}
 			flags.bypasses = TRUE;	/* for make_corpse() */
 			if (!resist(mtmp, otmp->oclass, dmg, TELL)) {
@@ -625,6 +627,7 @@ struct obj *otmp;
 				levlost *= 1.5;
 			}
 			dmg += spell_damage_bonus();
+			if(youmonst.owrk) dmg = (dmg+1)/2;
 		}
 		if (resists_drli(mtmp)){
 		    shieldeff(mtmp->mx, mtmp->my);
@@ -4084,6 +4087,7 @@ struct zapdata * zapdata;
 		if (youagr ? Spellboost : mon_resistance(magr, SPELLBOOST)) {
 			dmg *= 2;
 		}
+		if(magr->owrk) dmg = (dmg+1)/2;
 	}
 	/* general resistance */
 	if (mdef && Half_spel(mdef))

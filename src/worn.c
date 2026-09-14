@@ -899,6 +899,10 @@ struct monst *mon;
 	else{
 		base -= mon->data->nac;
 	}
+
+	if(mon->ruh)
+		base += 10;
+
 	if(mon->mtyp == PM_CARCOSAN_COURTIER){
 		if(Insight < 25){
 			base -= Insight/5;
@@ -945,7 +949,7 @@ struct monst *mon;
 		base -= 6;
 	}
 
-	if(is_alabaster_mummy(mon->data) && mon->mvar_syllable == SYLLABLE_OF_GRACE__UUR)
+	if(has_syllable(mon->data) && mon->mvar_syllable == SYLLABLE_OF_GRACE__UUR)
 		base -= 10;
 	
 	if (mon->mtame){
@@ -1251,7 +1255,7 @@ struct monst *mon;
 		base -= 6;
 	}
 	
-	if(is_alabaster_mummy(mon->data) && mon->mvar_syllable == SYLLABLE_OF_GRACE__UUR)
+	if(has_syllable(mon->data) && mon->mvar_syllable == SYLLABLE_OF_GRACE__UUR)
 		base -= 10;
 	
 	if(mon->mtame){
@@ -1494,7 +1498,7 @@ struct monst *mon;
 			}
 		}
 	}
-	if(is_alabaster_mummy(mon->data) && mon->mvar_syllable == SYLLABLE_OF_SPIRIT__VAUL)
+	if(has_syllable(mon->data) && mon->mvar_syllable == SYLLABLE_OF_SPIRIT__VAUL)
 		base += 10;
 	
 	return base;
@@ -1531,7 +1535,7 @@ struct monst *mon;
 		if(uring_art(ART_LOMYA))
 			base += def_lomya();
 	}
-	if(is_alabaster_mummy(mon->data) && mon->mvar_syllable == SYLLABLE_OF_SPIRIT__VAUL)
+	if(has_syllable(mon->data) && mon->mvar_syllable == SYLLABLE_OF_SPIRIT__VAUL)
 		base += 10;
 	
 

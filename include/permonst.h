@@ -49,6 +49,7 @@ struct attack {
 #define WT_ELF		1200
 #define WT_HUMAN	1450
 #define WT_MEDIUM	1500
+#define WT_LRG_ELF	2400
 #define WT_LARGE   	3000
 #define WT_HUGE		4500
 #define WT_DRAGON 	4500

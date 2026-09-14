@@ -304,7 +304,8 @@ struct monst *mtmp;
 	}
 	if(mtmp->mtyp == PM_OONA){
 		boolean recover = FALSE;
-		if(!mtmp->mnotlaugh || !mtmp->mcansee || mtmp->mberserk || !mtmp->mcanmove || mtmp->mstdy > 20 || mtmp->mstun || mtmp->mconf || mtmp->msleeping || mtmp->mbleed || mtmp->mgmld_throat || mtmp->mgmld_skin)
+		if(!mtmp->mnotlaugh || !mtmp->mcansee || mtmp->mberserk || !mtmp->mcanmove || mtmp->mstdy > 20 || mtmp->mstun || mtmp->mconf || mtmp->msleeping || mtmp->mbleed || mtmp->mgmld_throat || mtmp->mgmld_skin
+			|| mtmp->owrk || mtmp->ruh || mtmp->shey || mtmp->luahv || mtmp->nean || mtmp->nooh)
 			recover = TRUE;
 		else {
 			register struct obj *otmp;
@@ -1039,6 +1040,12 @@ mon_tele:
 		mtmp->mbleed = 0;
 		mtmp->mgmld_throat = 0;
 		mtmp->mgmld_skin = 0;
+		mtmp->owrk = 0;
+		mtmp->ruh = 0;
+		mtmp->shey = 0;
+		mtmp->luahv = 0;
+		mtmp->nean = 0;
+		mtmp->nooh = 0;
 		boolean blessed = mlev(mtmp) > 13;
 		for (struct obj *obj = mtmp->minvent; obj; obj = obj->nobj)
 		{

@@ -20,6 +20,10 @@ STATIC_DCL boolean FDECL(is_summon_spell		 ,(int));
 STATIC_DCL boolean FDECL(is_debuff_spell		 ,(int));
 STATIC_DCL boolean FDECL(spell_would_be_useless, (struct monst *, struct monst *, int, int, int));
 STATIC_DCL int FDECL(lich_spell, (struct monst *, struct monst *, struct attack *, int, int));
+STATIC_DCL void FDECL(anti_syllable_miss_msg, (struct monst *, struct monst *, int, int, boolean, const char *));
+STATIC_DCL void FDECL(anti_syllable_hit_msg, (struct monst *, struct monst *, boolean, boolean, boolean, const char *));
+STATIC_DCL void FDECL(unmk_miss_msg, (struct monst *, struct monst *, int, int, boolean));
+STATIC_DCL void FDECL(unmk_hit_msg, (struct monst *, struct monst *, boolean, boolean, boolean));
 
 #ifdef OVL0
 
@@ -353,7 +357,7 @@ boolean hostile;
 
 /* ...but first, check for monster-specific spells */
 STATIC_OVL int
-choose_magic_special(struct monst *mtmp, unsigned int type, int i)
+choose_magic_special(struct monst *mtmp, struct monst *mdef, unsigned int type, int i)
 {
 	int clrc_spell_power;
 	int wzrd_spell_power;
@@ -1694,6 +1698,55 @@ choose_magic_special(struct monst *mtmp, unsigned int type, int i)
 				break;
 			}
 	   break;
+	   case PM_ANCIENT_ELF:
+			switch (rnd(8)) {
+				case 8:
+				return CURE_SELF;
+				break;
+				case 7:
+				return MASS_CURE_FAR;
+				break;
+				case 6:
+				return MASS_CURE_CLOSE;
+				break;
+				case 5:
+				return AGGRAVATION;
+				break;
+				case 4:
+				return SLEEP;
+				break;
+				case 3:
+				return BLIND_YOU;
+				break;
+				case 2:
+				return CONFUSE_YOU;
+				break;
+				case 1:
+				return DISAPPEAR;
+				break;
+			}
+	   break;
+	   case PM_BEREFT:
+			switch (mtmp->mvar1_bereft_syllable%7) {
+				case 0:
+					return OWRK;
+				case 1:
+					return RUH;
+				case 2:
+					return SHEY;
+				case 3:
+					return LUAHV;
+				case 4:
+					return NEAN;
+				case 5:
+					return NOOH;
+				case 6:
+					if(mdef && mdef->owrk && mdef->ruh && mdef->shey && mdef->luahv && mdef->nean && mdef->nooh)
+						return UNMK;
+					mtmp->mvar1_bereft_syllable = 0;
+					return OWRK;
+			}
+	   break;
 	   case PM_DROW_ALIENIST:
 			switch (rnd(8)) {
 				case 8:
@@ -2594,8 +2647,16 @@ const char * spellname[] =
 	"DISPEL_MAGIC",
 	"METEOR_SWARM",
 	"GREATER_DRAIN_ENERGY",
-	"BURNING_COINS",
 	//115
+	"BURNING_COINS",
+	"OWRK",
+	"RUH",
+	"SHEY",
+	"LUAHV",
+	//120
+	"NEAN",
+	"NOOH",
+	"UNMK"
 };
 
 /* Returns the word the monster uses when casting a psionic spell */
@@ -2720,7 +2781,7 @@ xcasty(struct monst *magr, struct monst *mdef, struct attack *attk, int tarx, in
 
 		do {
 			/* get spell */
-			spellnum = choose_magic_special(magr, attk->adtyp, i);
+			spellnum = choose_magic_special(magr, mdef, attk->adtyp, i);
 			/* check that the spell selection code did not abort the cast */
 			if (!spellnum)
 				return 0;
@@ -2790,6 +2851,7 @@ xcasty(struct monst *magr, struct monst *mdef, struct attack *attk, int tarx, in
 	if (spellnum && !notarget && !foundem &&
 		!is_buff_spell(spellnum) &&
 		!is_summon_spell(spellnum) &&
+		!is_anti_syllable_spell(spellnum) &&
 		!is_aoe_attack_spell(spellnum)) {
 		/* message */
 		if ((youagr || canspotmon(magr)) && magr->mtyp != PM_HOUND_OF_TINDALOS)	{
@@ -2819,13 +2881,27 @@ xcasty(struct monst *magr, struct monst *mdef, struct attack *attk, int tarx, in
 		return MM_MISS;
 	}
 
+	/* the bereft advances to the next syllable in the word of unmaking as soon as it
+	 * commits to casting one, regardless of whether the attempt then succeeds,
+	 * and (re-)registers its target (m_id 0 means the player) so that
+	 * later syllables can keep going after the same target, since the final
+	 * syllable can only be cast on a target under the effects of all previous syllables.
+	 */
+	if (is_anti_syllable_spell(spellnum) && monsndx(magr->data) == PM_BEREFT) {
+		magr->mvar1_bereft_syllable++;
+		if(magr->mvar1_bereft_syllable >= 7)
+			magr->mvar1_bereft_syllable = 0;
+		if (mdef)
+			magr->mvar2_bereft_target = youdef ? 0 : mdef->m_id;
+	}
+
 	/* interrupt the player if the player is being targeted (comes after filtering out spells that miss and fizzle entirely) */
 	if (youdef && canspotmon(magr))
 		nomul(0, (const char *)0);
 
 	/* calculate success rate of spell */
-	chance = 2;
-	if (!youagr && is_alabaster_mummy(magr->data) && magr->mvar_syllable == SYLLABLE_OF_THOUGHT__NAEN)
+	chance = is_anti_syllable_spell(spellnum) ? -6 : 2;
+	if (!youagr && has_syllable(magr->data) && magr->mvar_syllable == SYLLABLE_OF_THOUGHT__NAEN)
 		chance -= 2;
 	if (youagr ? Confusion : magr->mconf)
 		chance += 8;
@@ -2936,6 +3012,7 @@ xcasty(struct monst *magr, struct monst *mdef, struct attack *attk, int tarx, in
 			&& spellnum != MOTHER_S_GAZE
 			&& spellnum != MON_RED_WORD
 			&& spellnum != HYPNOTIC_COLORS
+			&& !is_anti_syllable_spell(spellnum)
 		) {
 			if(magr->mtyp == PM_GRAY_FUNGAL_TOWER){
 				if(canspotmon(magr))
@@ -2999,6 +3076,10 @@ xcasty(struct monst *magr, struct monst *mdef, struct attack *attk, int tarx, in
 		/* the player can be prompted to cast in a direction; otherwise, we need a target */
 		result = elemspell(magr, mdef, attk, tarx, tary);
 	}
+	/* if one of these spells actually killed its target, the bereft's sequence starts over */
+	if ((result & MM_DEF_DIED) && !(result & MM_AGR_DIED)
+		&& is_anti_syllable_spell(spellnum) && monsndx(magr->data) == PM_BEREFT)
+		magr->mvar1_bereft_syllable = 0;
 	if (result) {
 		/* if attacking a displacement, monsters figure out you weren't there */
 		if (magr && youdef && (tarx != u.ux || tary != u.uy)) {
@@ -3077,6 +3158,18 @@ int tary;
 		dmn += (int)(attk->damn);
 	/* floor dmn */
 	if (dmn < 1) dmn = 1;
+	int dmd = 6;
+	/* possibly override die size */
+	if (attk->damd)
+		dmd = (int)(attk->damd);
+	/* increase die size */
+	if (!youagr && has_syllable(magr->data) && magr->mvar_syllable == SYLLABLE_OF_POWER__KRAU)
+		dmd *= 1.5;
+	if(adtyp == AD_MADF && (youagr || magr->mtyp == PM_TWIN_SIBLING)){
+		dmn = 6 + P_SKILL(P_ATTACK_SPELL);
+		dmd = spiritDsize();
+		// zapdata.bonus += Insanity/10;
+	}
 
 	/* is it a ranged spell? */
 	if (!tarx && !tary) {
@@ -3111,7 +3204,6 @@ int tary;
 	/* hand to hand magic */
 	if (!rangedspell)
 	{
-		int dmd = 6;
 		int dmg;
 
 		/* if there's no target where we're casting, fail */
@@ -3153,19 +3245,10 @@ int tary;
 			}
 		}
 
-		/* possibly override die size */
-		if (attk->damd)
-			dmd = (int)(attk->damd);
-		/* increase die size */
-		if (!youagr && is_alabaster_mummy(magr->data) && magr->mvar_syllable == SYLLABLE_OF_POWER__KRAU)
-			dmd *= 1.5;
-		if(adtyp == AD_MADF && (youagr || magr->mtyp == PM_TWIN_SIBLING)){
-			dmn = 6 + P_SKILL(P_ATTACK_SPELL);
-			dmd = spiritDsize();
-			// zapdata.bonus += Insanity/10;
-		}
 		/* calculate damage */
 		dmg = d(dmn, dmd);
+		if(magr->owrk)
+			dmg = (dmg+1)/2;
 
 		if(adtyp == AD_MADF && (youagr || magr->mtyp == PM_TWIN_SIBLING)){
 			dmg += Insanity/10;
@@ -3486,8 +3569,17 @@ int tary;
 				/* Oona */
 				adtyp = u.oonaenergy;
 			}
+			//Hack owrk reduction (halve largest value)
+			if(magr->owrk) {
+				if(dmn > dmd) {
+					dmn = (dmn + 1) / 2;
+				} else {
+					dmd = (dmd + 1) / 2;
+				}
+			}
 			/* now that we have finallized adtyp, do basic setup of zapdata structure */
 			basiczap(&zapdata, adtyp, ZAP_SPELL, dmn);
+			zapdata.damd = dmd;
 
 			/* message */
 			if (youdef && foundem) {
@@ -3561,6 +3653,139 @@ int tary;
 	return MM_MISS;
 }
 
+/* anti-syllable spell missed (no target, or target out of sight): magr clutches its own head.
+ * syllable is the word shouted (e.g. "Owrk"). */
+STATIC_OVL void
+anti_syllable_miss_msg(struct monst *magr, struct monst *mdef, int tarx, int tary, boolean youagr, const char *syllable)
+{
+	if (!canspotmon(magr))
+		return;
+	if (mdef) {
+		if (canseemon(magr) || (canspotmon(magr) && couldsee(magr->mx, magr->my))) {
+			pline("%s points at %s and shouts \"%s!\", then clutches %s %s!",
+				youagr ? "You" : Monnam(magr),
+				levl[tarx][tary].typ == WATER
+				? "empty water" : "thin air",
+				syllable,
+				mhis(magr),
+				mbodypart(magr, HEAD)
+			);
+		}
+		else if (couldsee(magr->mx, magr->my)) {
+			pline("You hear a voice shout \"%s!\"", syllable);
+		}
+		else if (canspotmon(magr)) {
+			pline("%s points at %s and shouts, then clutches %s %s!",
+				youagr ? "You" : Monnam(magr),
+				levl[tarx][tary].typ == WATER
+				? "empty water" : "thin air",
+				mhis(magr),
+				mbodypart(magr, HEAD)
+			);
+		}
+	}
+	else pline("%s clutches %s %s!", Monnam(magr), mhis(magr), mbodypart(magr, HEAD));
+}
+
+/* anti-syllable spell hit its target. syllable is the word shouted (e.g. "Owrk").
+ * foundem is FALSE when magr targeted mdef's displaced image rather than its true location. */
+STATIC_OVL void
+anti_syllable_hit_msg(struct monst *magr, struct monst *mdef, boolean youagr, boolean youdef, boolean foundem, const char *syllable)
+{
+	char subjbuf[BUFSZ];
+
+	if (foundem)
+		Strcpy(subjbuf, youdef ? "you" : mon_nam(mdef));
+	else
+		Sprintf(subjbuf, "%s displaced image", youdef ? "your" : s_suffix(mon_nam(mdef)));
+
+	if (canseemon(magr) || (canspotmon(magr) && couldsee(magr->mx, magr->my))) {
+		pline("%s points at %s and shouts \"%s!\"",
+			youagr ? "You" : Monnam(magr),
+			subjbuf,
+			syllable
+		);
+	}
+	else if (couldsee(magr->mx, magr->my)) {
+		pline("You hear a voice shout \"%s!\"", syllable);
+	}
+	else if (canspotmon(magr)) {
+		pline("%s points at %s and shouts!",
+			youagr ? "You" : Monnam(magr),
+			subjbuf
+		);
+	}
+}
+
+/* Unmk missed (no target, or target out of sight) */
+STATIC_OVL void
+unmk_miss_msg(struct monst *magr, struct monst *mdef, int tarx, int tary, boolean youagr)
+{
+	if (!canspotmon(magr))
+		return;
+	if (mdef) {
+		if (canseemon(magr) || (canspotmon(magr) && couldsee(magr->mx, magr->my))) {
+			pline("%s points at %s. %s %s opens as though to shout, then clutches %s %s!",
+				youagr ? "You" : Monnam(magr),
+				levl[tarx][tary].typ == WATER
+				? "empty water" : "thin air",
+				youagr ? "Your" : HisHerIts(magr),
+				"mouth",
+				mhis(magr),
+				mbodypart(magr, HEAD)
+			);
+		}
+		else if (couldsee(magr->mx, magr->my)) {
+			pline("You thought you heard something!");
+		}
+		else if (canspotmon(magr)) {
+			pline("%s points at %s, then clutches %s %s!",
+				youagr ? "You" : Monnam(magr),
+				levl[tarx][tary].typ == WATER
+				? "empty water" : "thin air",
+				mhis(magr),
+				mbodypart(magr, HEAD)
+			);
+		}
+	}
+	else pline("%s %s opens as though to shout, then clutches %s %s!",
+		s_suffix(Monnam(magr)),
+		"mouth",
+		mhis(magr),
+		mbodypart(magr, HEAD)
+	);
+}
+
+/* Unmk hit its target. */
+STATIC_OVL void
+unmk_hit_msg(struct monst *magr, struct monst *mdef, boolean youagr, boolean youdef, boolean foundem)
+{
+	char subjbuf[BUFSZ];
+
+	if (foundem)
+		Strcpy(subjbuf, youdef ? "you" : mon_nam(mdef));
+	else
+		Sprintf(subjbuf, "%s displaced image", youdef ? "your" : s_suffix(mon_nam(mdef)));
+
+	if (canseemon(magr) || (canspotmon(magr) && couldsee(magr->mx, magr->my))) {
+		pline("%s points at %s. %s %s opens as though to shout, but makes no sound you can hear!",
+			youagr ? "You" : Monnam(magr),
+			subjbuf,
+			youagr ? "Your" : youdef ? HisHerIts(magr) : s_suffix(Monnam(magr)),
+			"mouth"
+		);
+	}
+	else if (couldsee(magr->mx, magr->my)) {
+		pline("You thought you heard something!");
+	}
+	else if (canspotmon(magr)) {
+		pline("%s points at %s!",
+			youagr ? "You" : Monnam(magr),
+			subjbuf
+		);
+	}
+}
+
 /* cast_spell
  * 
  * magr is casting a spell, possibly at mdef (who may or may not exist)
@@ -3617,6 +3842,9 @@ int tary;
 		dmn += attk->damn;
 	int dmd = (attk && attk->damd) ? attk->damd : 6;
 	int dmg = d(dmn, dmd);
+
+	if(magr && magr->owrk)
+		dmg = (dmg+1)/2;
 
 	switch (spell)
 	{
@@ -7682,6 +7910,276 @@ int tary;
 			}
 		}
 		return MM_HIT;
+
+	case OWRK:{
+		boolean foundem = (mdef && (tarx == x(mdef) && tary == y(mdef)));
+		//Misfire
+		if(!mdef || (!foundem && !mon_can_see_mon(magr, mdef))){
+			anti_syllable_miss_msg(magr, mdef, tarx, tary, youagr, "Owrk");
+			magr->owrk = min(255, magr->owrk + 10);
+			xdamagey(magr, magr, attk, dmg);
+			return MM_MISS;
+		}
+		//else:
+		anti_syllable_hit_msg(magr, mdef, youagr, youdef, foundem, "Owrk");
+		if(youdef){
+			exercise(A_CHA, FALSE);
+			//Reduce tameness of one pet
+			int pets = 0;
+			struct monst *mtmp;
+			for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
+				if(!DEADMONSTER(mtmp) && mtmp->mtame) pets++;
+			}
+			if(pets > 0){
+				pets = rn2(pets);
+				for(mtmp = fmon; mtmp; mtmp = mtmp->nmon){
+					if(!DEADMONSTER(mtmp) && mtmp->mtame){
+						if(!pets){
+							mtmp->mtame--;
+							if (!mtmp->mtame) untame(mtmp, 1);
+							else betrayed(mtmp); //Check for betrayal
+							break;
+						}
+						pets--;
+					}
+				}
+			}
+		}
+		else if(mdef->mtame){
+			mdef->mtame--;
+			if (!mdef->mtame) untame(mdef, 1);
+			else betrayed(mdef); //Check for betrayal
+		}
+		mdef->owrk = min(255, mdef->owrk + 10);
+		return MM_HIT;
+	}
+
+	case RUH:{
+		boolean foundem = (mdef && (tarx == x(mdef) && tary == y(mdef)));
+		//Misfire
+		if(!mdef || (!foundem && !mon_can_see_mon(magr, mdef))){
+			anti_syllable_miss_msg(magr, mdef, tarx, tary, youagr, "Ruh");
+			magr->ruh = min(255, magr->ruh + 10);
+			xdamagey(magr, magr, attk, dmg);
+			return MM_MISS;
+		}
+		//else:
+		anti_syllable_hit_msg(magr, mdef, youagr, youdef, foundem, "Ruh");
+		if(youdef){
+			exercise(A_DEX, FALSE);
+			make_stunned(HStun + 10, TRUE);
+		}
+		else{
+			mdef->mconf = 1;
+		}
+		mdef->ruh = min(255, mdef->ruh + 10);
+		return MM_HIT;
+	}
+
+	case SHEY:{
+		boolean foundem = (mdef && (tarx == x(mdef) && tary == y(mdef)));
+		//Misfire
+		if(!mdef || (!foundem && !mon_can_see_mon(magr, mdef))){
+			anti_syllable_miss_msg(magr, mdef, tarx, tary, youagr, "Shey");
+			magr->shey = min(255, magr->shey + 10);
+			xdamagey(magr, magr, attk, dmg);
+			return MM_MISS;
+		}
+		//else:
+		anti_syllable_hit_msg(magr, mdef, youagr, youdef, foundem, "Shey");
+		if(youdef){
+			exercise(A_STR, FALSE);
+			u.uencouraged -= 10;
+		}
+		else{
+			mdef->encouraged -= 10;
+		}
+		cancel_monst(mdef, (struct obj *)0, youagr, FALSE, FALSE, 0);
+		mdef->shey = min(255, mdef->shey + 10);
+		return MM_HIT;
+	}
+
+	case LUAHV:{
+		boolean foundem = (mdef && (tarx == x(mdef) && tary == y(mdef)));
+		//Misfire
+		if(!mdef || (!foundem && !mon_can_see_mon(magr, mdef))){
+			anti_syllable_miss_msg(magr, mdef, tarx, tary, youagr, "Luahv");
+			magr->luahv = min(255, magr->luahv + 10);
+			xdamagey(magr, magr, attk, dmg);
+			return MM_MISS;
+		}
+		//else:
+		anti_syllable_hit_msg(magr, mdef, youagr, youdef, foundem, "Luahv");
+		if(youdef){
+			exercise(A_WIS, FALSE);
+			if(Blind && (HTelepat & TIMEOUT)){
+				HTelepat &= ~TIMEOUT;
+				if(!Blind_telepat) see_monsters();	/* Can't sense mons anymore! */
+			}
+			make_blinded(Blinded + 10, TRUE);
+		}
+		else{
+			if(haseyes(mdef->data)){
+				mdef->mcansee = 0;
+				mdef->mblinded = min(127, (int)mdef->mblinded + 10);
+			}
+		}
+		mdef->luahv = min(255, mdef->luahv + 10);
+		return MM_HIT;
+	}
+
+	case NEAN:{
+		boolean foundem = (mdef && (tarx == x(mdef) && tary == y(mdef)));
+		//Misfire
+		if(!mdef || (!foundem && !mon_can_see_mon(magr, mdef))){
+			anti_syllable_miss_msg(magr, mdef, tarx, tary, youagr, "Nean");
+			magr->nean = min(255, magr->nean + 10);
+			xdamagey(magr, magr, attk, dmg);
+			return MM_MISS;
+		}
+		//else:
+		anti_syllable_hit_msg(magr, mdef, youagr, youdef, foundem, "Nean");
+		if(youdef){
+			exercise(A_INT, FALSE);
+			make_confused(HConfusion + 10, TRUE);
+		}
+		else{
+			mdef->mstun = 1;
+		}
+		mdef->nean = min(255, mdef->nean + 10);
+		return MM_HIT;
+	}
+
+	case NOOH:{
+		boolean foundem = (mdef && (tarx == x(mdef) && tary == y(mdef)));
+		//Misfire
+		if(!mdef || (!foundem && !mon_can_see_mon(magr, mdef))){
+			anti_syllable_miss_msg(magr, mdef, tarx, tary, youagr, "Nooh");
+			magr->nooh = min(255, magr->nooh + 10);
+			xdamagey(magr, magr, attk, dmg);
+			return MM_MISS;
+		}
+		//else:
+		anti_syllable_hit_msg(magr, mdef, youagr, youdef, foundem, "Nooh");
+		if(youdef){
+			exercise(A_CON, FALSE);
+		}
+		mdef->nooh = min(255, mdef->nooh + 10);
+		{
+			struct attack disintegrate = {AT_BEAM, AD_DISN, dmn, 1, .bodypart = ATKBP(NONE)};
+			int disn_result = xmeleehurty(magr, mdef, &disintegrate, &disintegrate, (struct obj **)0, FALSE, dmn, rn1(18, 2), canseemon(mdef), TRUE);
+			if(disn_result & MM_DEF_DIED)
+				return disn_result;
+			return xdamagey(magr, mdef, attk, dmg);
+		}
+	}
+
+	case UNMK:{
+		boolean foundem = (mdef && (tarx == x(mdef) && tary == y(mdef)));
+		//Misfire
+		if(!mdef || (!foundem && !mon_can_see_mon(magr, mdef))){
+			unmk_miss_msg(magr, mdef, tarx, tary, youagr);
+			xdamagey(magr, magr, attk, dmg);
+			return MM_MISS;
+		}
+		//else:
+		unmk_hit_msg(magr, mdef, youagr, youdef, foundem);
+		if(youdef){
+			exercise(A_STR, FALSE);
+			exercise(A_DEX, FALSE);
+			exercise(A_CON, FALSE);
+			exercise(A_INT, FALSE);
+			exercise(A_WIS, FALSE);
+			exercise(A_CHA, FALSE);
+			u.ustdy += dmg;
+
+			/* crushing pain */
+			You("feel your soul imploding!");
+			if(!HScreaming){
+				if (!is_silent(youracedata)){
+					You("%s from the pain!", humanoid_torso(youracedata) ? "scream" : "shriek");
+				}
+				else {
+					You("writhe in pain!");
+				}
+				change_usanity(-dmn, TRUE);
+				HScreaming += dmn;
+			}
+			else {
+				int bump = max(dmn - (int)(HScreaming & TIMEOUT), 2);
+				HScreaming += bump;
+				change_usanity(-bump, FALSE);
+			}
+			stop_occupation();
+			{
+				int paindmg = reduce_dmg(mdef, dmg, TRUE, TRUE);
+				int pain_result = xdamagey(magr, mdef, attk, paindmg);
+				if(pain_result & (MM_DEF_DIED|MM_DEF_LSVD))
+					return pain_result;
+			}
+
+			if(Drain_resistance){
+				nightmare_mold_lose_experience();
+			}
+			else{
+				losexp("the word of unmaking", FALSE, FALSE, FALSE);
+				losexp("the word of unmaking", TRUE, FALSE, FALSE);
+			}
+		}
+		else{
+			mdef->mstdy += dmg;
+
+			/* crushing pain */
+			boolean pain_immune = (nonliving(mdef->data) && !is_android(mdef->data))
+				|| has_template(mdef, TOMB_HERD)
+				|| is_primordial(mdef->data)
+				|| is_alienist(mdef->data)
+				|| is_great_old_one(mdef->data);
+
+			if(!pain_immune){
+				if(mdef->movement > 0 && mdef->mcanmove){
+					if (!is_silent_mon(mdef)){
+						if (canseemon(mdef))
+							pline("%s %s in pain!", Monnam(mdef), humanoid_torso(mdef->data) ? "screams" : "shrieks");
+						else
+							You_hear("%s %s in pain!", mdef->mtame ? noit_mon_nam(mdef) : mon_nam(mdef), humanoid_torso(mdef->data) ? "screaming" : "shrieking");
+					}
+					else {
+						if (canseemon(mdef))
+							pline("%s writhes in pain!", Monnam(mdef));
+					}
+				}
+				mdef->movement = max(mdef->movement - 1*dmn, -6);
+				{
+					int paindmg = reduce_dmg(mdef, dmg, TRUE, TRUE);
+					int pain_result = xdamagey(magr, mdef, attk, paindmg);
+					if(pain_result & (MM_DEF_DIED|MM_DEF_LSVD))
+						return pain_result;
+				}
+			}
+
+			if(!is_great_old_one(mdef->data)){
+				int levels = Drain_res(mdef) ? 1 : 2;
+				if(canseemon(mdef))
+					pline("%s suddenly seems weaker!", Monnam(mdef));
+				while(levels-- > 0){
+					int ptmp = min(*hp(mdef), d(1, hd_size(mdef->data)));
+					if(mlev(mdef) == 0 || *hpmax(mdef) <= ptmp){
+						if(youagr) killed(mdef);
+						else monkilled(mdef, "", AD_DRLI);
+						if(mdef->mhp > 0)
+							return (MM_HIT | MM_DEF_LSVD);
+						else
+							return (MM_HIT | MM_DEF_DIED | ((youagr || grow_up(magr, mdef)) ? 0 : MM_AGR_DIED));
+					}
+					mdef->m_lev--;
+					mdef->mhpmax -= ptmp;
+					mdef->mhp = min(mdef->mhpmax, mdef->mhp);
+				}
+			}
+		}
+		return MM_HIT;
+	}
 	}
 	impossible("end of cast_spell reached");
 	return MM_MISS;
@@ -7760,6 +8258,13 @@ int spellnum;
 	case STARFALL:
 	case MON_AURA_BOLT:
 	case PEST_THREADS:
+	case OWRK:
+	case RUH:
+	case SHEY:
+	case LUAHV:
+	case NEAN:
+	case NOOH:
+	case UNMK:
 		return TRUE;
 	default:
 		break;
@@ -7911,6 +8416,12 @@ int tary;
 	boolean youdef = (mdef == &youmonst);
 	int wardAt = ward_at(tarx, tary);
 	struct monst *tmpm;
+
+	/* the bereft is committed once it casts Owrk: every syllable after that
+	 * is forced, whether or not it would otherwise do anything useful */
+	if (monsndx(magr->data) == PM_BEREFT && is_anti_syllable_spell(spellnum) && spellnum != OWRK)
+		return FALSE;
+
 	/* Most spells need a target */
 	boolean notarget = (!mdef || (!tarx && !tary));
 	if (notarget) {
@@ -7939,8 +8450,10 @@ int tary;
 		return TRUE;
 
 	/* Don't cast directed attack or debuff spells at warded spaces */
+	/* (anti-syllable spells are exempt: the word of unmaking doesn't respect wards) */
 	if (!youagr
 		&& (is_directed_attack_spell(spellnum) || is_debuff_spell(spellnum))
+		&& !is_anti_syllable_spell(spellnum)
 		&& onscary(tarx, tary, magr))
 		return TRUE;
 
@@ -7948,6 +8461,7 @@ int tary;
 	if (!youagr
 		&& is_drow(magr->data)
 		&& (is_directed_attack_spell(spellnum) || is_debuff_spell(spellnum))	/* only affects directed and debuff spells */
+		&& !is_anti_syllable_spell(spellnum)
 		&& !Infuture) /* does not work in Ana quest */
 	{
 		if ((sengr_at("Elbereth", tarx, tary) && (!Race_if(PM_DROW) || ELBERETH_HIGH_POWER))

@@ -1150,7 +1150,8 @@ struct obj {
 						  (otyp) == PEST_GLAIVE || \
 						  (otyp) == TONITRUS || \
 						  (otyp) == STAKE || \
-						  (otyp) == BREAKING_WHEEL)
+						  (otyp) == BREAKING_WHEEL || \
+						  (otyp) == HAMMER_OF_ETERNITY)
 #define spec_prop_material(otmp)	(otmp->obj_material == MERCURIAL)
 #define is_multigen(otmp)	((otmp->oclass == WEAPON_CLASS && \
 			 objects[otmp->otyp].oc_skill >= -P_SHURIKEN && \

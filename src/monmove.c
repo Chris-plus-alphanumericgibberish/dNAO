@@ -533,7 +533,7 @@ boolean digest_meal;
 		mon->munburn--;
 	}
 
-	if(is_alabaster_mummy(mon->data) 
+	if(has_syllable(mon->data)
 		&& mon->mvar_syllable == SYLLABLE_OF_LIFE__HOON
 	){
 		mon->mhp += 10;
@@ -542,6 +542,12 @@ boolean digest_meal;
 	}
 	
 	if (mon->mspec_used) mon->mspec_used--;
+
+	/* Anti-syllable cooldown interference: can increment
+	 * the cooldown and prevent special ability use even if
+	 * if it started the turn at 0. 
+	 */
+	if (mon->nean) mon->mspec_used += rn2(2);
 
 	if(mon->mspec_used && uring_art(ART_LOMYA)){
 		mon->mspec_used--;
@@ -672,6 +678,11 @@ boolean digest_meal;
 	/*Invidiaks degenerate due to light*/
 	if(!DEADMONSTER(mon) && mon->mtyp == PM_INVIDIAK && !isdark(mon->mx, mon->my)){
 		m_losehp(mon, 1, FALSE, "light");
+		degenerating = TRUE;
+	}
+	/*Anti-syllable degeneration*/
+	if(!DEADMONSTER(mon) && mon->nooh){
+		m_losehp(mon, 10, FALSE, "unmaking");
 		degenerating = TRUE;
 	}
 	/*The tomb herd degenerate without a statue to pilot*/
@@ -1271,7 +1282,15 @@ register struct monst *mtmp;
 	mon_heal_injuries_natural(mtmp);
 	if (mtmp->mscorpions && !rn2(20)) mtmp->mscorpions = 0;
 	if (mtmp->mcaterpillars && !rn2(20)) mtmp->mcaterpillars = 0;
-	
+
+	/* anti-syllable curses count down */
+	if (mtmp->owrk) mtmp->owrk--;
+	if (mtmp->ruh) mtmp->ruh--;
+	if (mtmp->shey) mtmp->shey--;
+	if (mtmp->luahv) mtmp->luahv--;
+	if (mtmp->nean) mtmp->nean--;
+	if (mtmp->nooh) mtmp->nooh--;
+
 	if(mtmp->msleeping && (mtmp->mformication || mtmp->mscorpions || mtmp->mcaterpillars) && rn2(mtmp->m_lev)){
 		//Awakens from the bugs. High level is good for it here.
 		mtmp->msleeping = 0;

@@ -4848,6 +4848,9 @@ int *shield_margin;
 				bons_acc += 2;
 			break;
 		}
+		/* ruh anti-syllable */
+		if (magr->ruh)
+			bons_acc -= 10;
 		/* player-only accuracy bonuses */
 		if (youagr) {
 			/* base +1/-1 for no reason */
@@ -16433,8 +16436,8 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 		)
 			whip_tricks = TRUE;
 	}
-	// Stun expert weapon trait
-	if(!recursed && weapon && valid_weapon_attack &&
+	// Anti-undead expert weapon trait
+	if(!recursed && weapon && valid_weapon_attack && is_undead(pd) &&
 		 magr && CHECK_ETRAIT(weapon, magr, ETRAIT_ANTI_UNDEAD)
 	){
 		if((youagr && ZFOCUS(weapon)) 
@@ -17895,6 +17898,11 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 		/* general damage bonus */
 		if(real_attack){
 			if (magr && (valid_weapon_attack || fake_valid_weapon_attack || unarmed_punch || unarmed_kick || natural_strike)) {
+				/* Anti-syllable damage penalty */
+				if(magr && magr->shey)
+					bonsdmg -= 10;
+				if(!youagr && has_syllable(magr->data) && magr->mvar_syllable == SYLLABLE_OF_STRENGTH__AESH)
+					bonsdmg += 5;
 				/* player-specific bonuses */
 				if (youagr) {
 					bonsdmg += u.udaminc;
@@ -18397,7 +18405,7 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 						tratdmg += weapon_dam_bonus(weapon, weapon_type(weapon));
 				}
 			}
-			if(anti_undead_strike && is_undead(mdef->data)){
+			if(anti_undead_strike){
 				struct weapon_dice wdice;
 				if (wizard && (iflags.wizcombatdebug & WIZCOMBATDEBUG_DMG) && WIZCOMBATDEBUG_APPLIES(magr, mdef))
 					pline("Anti-undead strike bonus damage!");
@@ -25652,6 +25660,10 @@ struct monst * mdef;
 		case PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH:
 			cnum = 10;
 		break;
+		case PM_LEADEN_ANCESTOR:{
+			int roll = rnd(100);
+			cnum = (roll <= 70) ? 11 : (roll <= 90) ? 12 : 13;
+		}break;
 		default:
 			cnum = 0;
 		break;
@@ -25981,6 +25993,76 @@ struct monst * mdef;
 			else
 				m_losehp(mdef, dmg, youagr, "liquid lightning");
 		}break;
+		//Mind scream
+		case 11:
+			if(youdef){
+				boolean m_sen = tp_sensemon(magr);
+				if(m_sen || (Blind_telepat && rn2(2)) || !rn2(10)){
+					int dmg = d(min(max((mlev(magr))/3, 1), MAX_BONUS_DICE), 7);
+					pline("%s screams into your mind%s!", Monnam(magr), m_sen ? " through your telepathy" : Blind_telepat ? " through your latent telepathy" : "");
+					dmg = reduce_dmg(mdef,dmg,FALSE,TRUE);
+					losehp(dmg, "psychic scream", KILLED_BY_AN);
+				}
+			}
+			else {
+				boolean m_sen = species_is_telepathic(mdef->data) ||
+					(mon_resistance(mdef,TELEPAT) && mdef->mblinded);
+				boolean latent_sen = !m_sen && (mon_resistance(mdef,TELEPAT) && rn2(2));
+				if (m_sen || latent_sen || !rn2(10)) {
+					int dmg = d(min(max((mlev(magr))/3, 1), MAX_BONUS_DICE), 7);
+					dmg = reduce_dmg(mdef,dmg,FALSE,TRUE);
+					m_losehp(mdef, dmg, youagr, "a psychic scream");
+				}
+			}
+		break;
+		//Scuttling spider
+		case 12:{
+			struct obj *arm;
+			if(Sick_res(mdef))
+				break;
+			arm = youdef ? uarm : which_armor(mdef, W_ARM);
+			if(youdef){
+				if (!umechanoid) {
+					if(arm)
+						pline("A hand-sized spider leaps onto your %s and swiftly scuttles into your %s!", body_part(ARM), xname(arm));
+					else
+						pline("A hand-sized spider leaps onto your %s and swiftly sinks its fangs into your %s!", body_part(ARM), body_part(BODY_FLESH));
+					make_sick(Sick ? Sick / 3L + 1L : (long)rn1(ACURR(A_CON), 20),
+						pa->mname, TRUE, SICK_NONVOMITABLE);
+				}
+			}
+			else {
+				if(canseemon(mdef)){
+					if(arm)
+						pline("A hand-sized spider leaps onto %s %s and swiftly scuttles into %s %s!",
+							s_suffix(mon_nam(mdef)), mbodypart(mdef, ARM),
+							s_suffix(mon_nam(mdef)), xname(arm));
+					else
+						pline("A hand-sized spider leaps onto %s %s and swiftly sinks its fangs into its %s!",
+							s_suffix(mon_nam(mdef)), mbodypart(mdef, ARM), mbodypart(mdef, BODY_FLESH));
+				}
+				/* 1/10 chance of instakill */
+				if (!rn2(10)){
+					if (youagr) killed(mdef);
+					else monkilled(mdef, "", AD_SPEL);
+					/* instakill */
+					return ((*hp(mdef) > 0 ? MM_DEF_LSVD : MM_DEF_DIED) | MM_HIT);
+				}
+				else {
+					return xdamagey(magr, mdef, (struct attack *)0, rnd(12));
+				}
+			}
+		}break;
+		//Death scream (mimics AD_MAND)
+		case 13:{
+			boolean magr_vis = canseemon(magr);
+			if(magr->mcan){
+				break;
+			}
+			else if(magr_vis)
+				pline("%s lets out a terrible shriek!", Monnam(magr));
+			mandrake_shriek(magr, youagr, "the once-contained scream of a leaden ancestor");
+		}break;
 	}
 	return MM_MISS;
 }
@@ -25992,6 +26074,9 @@ int dmg;
 boolean physical;
 boolean magical;
 {
+	/** Anti-syllable damage multiplier **/
+	if (mdef->luahv)
+		dmg *= 2;
 	if (physical && Half_phys(mdef))
 		dmg = (dmg + 1) / 2;
 	if (magical && Half_spel(mdef))

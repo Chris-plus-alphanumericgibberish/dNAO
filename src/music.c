@@ -1184,6 +1184,14 @@ int distance;
 				mtmp->mdisrobe = 0;
 				mtmp->mgmld_throat = 0;
 				mtmp->mgmld_skin = 0;
+				/* anti-syllable curses have no monster equivalent of the PC's
+				 * counteracting-syllable cure, so an expert rally can lift them */
+				mtmp->owrk = 0;
+				mtmp->ruh = 0;
+				mtmp->shey = 0;
+				mtmp->luahv = 0;
+				mtmp->nean = 0;
+				mtmp->nooh = 0;
 				if(get_mx(mtmp, MX_EDOG) && EDOG(mtmp)->apport < 10) EDOG(mtmp)->apport++;
 				if(mtmp->permspeed == 0) mon_adjust_speed(mtmp, 1, (struct obj *) 0, TRUE);
 			case P_SKILLED:

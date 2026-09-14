@@ -2966,6 +2966,8 @@ base_uac()
 	uac -= u.spiritAC;
 	if(u.uuur_duration)
 		uac -= 10;
+	if(youmonst.ruh)
+		uac += 10;
 	uac -= u.uuur/2;
 	if(mvitals[PM_MOON_S_CHOSEN].died){
 		uac += 12;

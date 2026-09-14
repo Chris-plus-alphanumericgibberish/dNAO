@@ -1183,6 +1183,8 @@ asGuardian:
 				mtmp->msleeping = 0;
 				mtmp->mstun = 0; mtmp->mconf = 0;
 				mtmp->mpunctured = 0;
+				mtmp->owrk = 0; mtmp->ruh = 0; mtmp->shey = 0;
+				mtmp->luahv = 0; mtmp->nean = 0; mtmp->nooh = 0;
 				untame(mtmp, 0);
 				
 				u.ustdy = mtmp->m_lev;
@@ -1379,7 +1381,8 @@ asGuardian:
 		struct monst *tmpm;
 		struct trap *ttmp;
 		int ix, iy, i;
-		boolean inrange = FALSE;
+		/* restless voices sing regardless of whether anyone's around to hear it */
+		boolean inrange = (mtmp->mtyp == PM_RESTLESS_VOICE);
 		if(noactions(mtmp)) break;
 		if((ptr->mtyp == PM_INTONER && !rn2(5)) || ptr->mtyp == PM_BLACK_FLOWER){
 			if (!canspotmon(mtmp))

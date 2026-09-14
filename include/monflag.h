@@ -480,9 +480,18 @@
 #define GREATER_DRAIN_ENERGY   METEOR_SWARM+1
 //115
 #define BURNING_COINS          GREATER_DRAIN_ENERGY+1
+#define OWRK                   BURNING_COINS+1
+#define RUH                    OWRK+1
+#define SHEY                   RUH+1
+#define LUAHV                  SHEY+1
+//120
+#define NEAN                   LUAHV+1
+#define NOOH                   NEAN+1
+#define UNMK                   NOOH+1
 
+#define is_anti_syllable_spell(spell)	((spell) >= OWRK && (spell) <= UNMK)
 
-#define MON_LASTSPELL          BURNING_COINS
+#define MON_LASTSPELL          UNMK
 //Not yet implemented
 // #define MON_FIRE               STRANGLE+1
 // #define MON_BLIZZARD           MON_FIRAGA+1
