@@ -3057,7 +3057,44 @@ skip0:
 mithardir_end:
 	if(In_mithardir_catacombs(&u.uz)){
 		wallify_mithardir_corridors();
-		if(In_mithardir_terminus(&u.uz)) mkroom(RIVER);
+		if(In_mithardir_terminus(&u.uz)){
+			int i;
+			mkroom(RIVER);
+			for(i = 0; i < 5; i++)
+				makemon(&mons[PM_SHRIEKING_SHADOW], 0, 0, NO_MM_FLAGS);
+			if(rn2(10))
+				makemon(&mons[PM_SHRIEKING_SHADOW], 0, 0, NO_MM_FLAGS);
+			for(i = 0; i < 2; i++)
+				if(rn2(4))
+					makemon(&mons[PM_SHRIEKING_SHADOW], 0, 0, NO_MM_FLAGS);
+			for(i = 0; i < 2; i++)
+				if(!rn2(2))
+					makemon(&mons[PM_SHRIEKING_SHADOW], 0, 0, NO_MM_FLAGS);
+			for(i = 0; i < 4; i++)
+				if(!rn2(4))
+					makemon(&mons[PM_SHRIEKING_SHADOW], 0, 0, NO_MM_FLAGS);
+			for(i = 0; i < 2; i++)
+				if(!rn2(10))
+					makemon(&mons[PM_SHRIEKING_SHADOW], 0, 0, NO_MM_FLAGS);
+		}
+		else {
+			int i;
+			//Voices
+			if(!rn2(2))
+				makemon(&mons[PM_RESTLESS_VOICE], 0, 0, NO_MM_FLAGS);
+			if(!rn2(4))
+				makemon(&mons[PM_RESTLESS_VOICE], 0, 0, NO_MM_FLAGS);
+			
+			//Shadows
+			for(i = 0; i < 4; i++)
+				if(rn2(4))
+					makemon(&mons[PM_SHRIEKING_SHADOW], 0, 0, NO_MM_FLAGS);
+			if(!rn2(2))
+				makemon(&mons[PM_SHRIEKING_SHADOW], 0, 0, NO_MM_FLAGS);
+			for(i = 0; i < 2; i++)
+				if(!rn2(4))
+					makemon(&mons[PM_SHRIEKING_SHADOW], 0, 0, NO_MM_FLAGS);
+		}
 	}
 	else if(hallways){
 		wallify_hallway_corridors();

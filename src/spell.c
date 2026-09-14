@@ -4850,6 +4850,7 @@ dothrowspell:
 							break;
 						}
 					}
+					if(youmonst.owrk) dam = (dam+1)/2;
 					explode_spell(u.dx, u.dy, adtype, 0, dam, color, rad, spell_flags);
 				}
 			}
@@ -6095,6 +6096,16 @@ int spell;
 			 || u.upriest
 			 || Role_if(PM_MONK)
 			 || Role_if(PM_HEALER)
+			) cast_bon += 2;
+			if (uwep->oartifact)
+				cast_bon *= 2;
+			splcaster -= urole.spelarmr * cast_bon / 3;
+		}
+
+		if(uwep->otyp == HAMMER_OF_ETERNITY) {
+			cast_bon = 0;
+			if(spell_skilltype(spellid(spell)) == P_CLERIC_SPELL
+			 || spell_skilltype(spellid(spell)) == P_MATTER_SPELL
 			) cast_bon += 2;
 			if (uwep->oartifact)
 				cast_bon *= 2;

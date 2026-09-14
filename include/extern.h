@@ -1840,6 +1840,7 @@ E void NDECL(mcalcdistress);
 E void FDECL(replmon, (struct monst *,struct monst *));
 E void FDECL(relmon, (struct monst *));
 E struct obj *FDECL(mlifesaver, (struct monst *));
+E void FDECL(mandrake_shriek,(struct monst *,BOOLEAN_P,const char *));
 E boolean FDECL(corpse_chance,(struct monst *,struct monst *,BOOLEAN_P));
 E void FDECL(mondead, (struct monst *));
 E void FDECL(spore_dies, (struct monst *));
@@ -2254,6 +2255,7 @@ E void NDECL(synch_cursor);
 /* ### o_init.c ### */
 
 E void NDECL(init_objects);
+E const char *FDECL(anti_syllable_appearance, (int));
 E void NDECL(hack_objects);
 E int NDECL(find_sawant);
 E int NDECL(find_gawant);

@@ -531,6 +531,12 @@ nh_timeout()
 	if(u.unaen_duration) u.unaen_duration--;
 	if(u.uuur_duration) u.uuur_duration--;
 	if(u.uvaul_duration) u.uvaul_duration--;
+	if(youmonst.owrk) youmonst.owrk--;
+	if(youmonst.ruh) youmonst.ruh--;
+	if(youmonst.shey) youmonst.shey--;
+	if(youmonst.luahv) youmonst.luahv--;
+	if(youmonst.nean) youmonst.nean--;
+	if(youmonst.nooh) youmonst.nooh--;
 	
 	if (u.uluck != baseluck) {
 	    int timeout = 600;

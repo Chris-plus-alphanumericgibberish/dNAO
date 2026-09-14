@@ -882,6 +882,7 @@ struct obj *scroll;
 			duration = 10;
 		}
 		u.uaesh_duration += duration;
+		youmonst.shey = 0;
 		if(!scroll->cursed) u.uaesh++;
 	} else if(scroll->otyp == SYLLABLE_OF_POWER__KRAU){
 		if(scroll->cursed){
@@ -896,6 +897,7 @@ struct obj *scroll;
 			duration = 10;
 		}
 		u.ukrau_duration += duration;
+		youmonst.owrk = 0;
 		if(!scroll->cursed) u.ukrau++;
 	} else if(scroll->otyp == SYLLABLE_OF_LIFE__HOON){
 		if(scroll->cursed){
@@ -910,6 +912,7 @@ struct obj *scroll;
 			duration = 10;
 		}
 		u.uhoon_duration += duration;
+		youmonst.nooh = 0;
 		if(!scroll->cursed) u.uhoon++;
 	} else if(scroll->otyp == SYLLABLE_OF_GRACE__UUR){
 		if(scroll->cursed){
@@ -924,6 +927,7 @@ struct obj *scroll;
 			duration = 10;
 		}
 		u.uuur_duration += duration;
+		youmonst.ruh = 0;
 		if(!scroll->cursed) u.uuur++;
 	} else if(scroll->otyp == SYLLABLE_OF_THOUGHT__NAEN){
 		if(scroll->cursed){
@@ -938,6 +942,7 @@ struct obj *scroll;
 			duration = 10;
 		}
 		u.unaen_duration += duration;
+		youmonst.nean = 0;
 		if(!scroll->cursed) u.unaen++;
 	} else if(scroll->otyp == SYLLABLE_OF_SPIRIT__VAUL){
 		if(scroll->cursed){
@@ -952,6 +957,7 @@ struct obj *scroll;
 			duration = 10;
 		}
 		u.uvaul_duration += duration;
+		youmonst.luahv = 0;
 		if(!scroll->cursed) u.uvaul++;
 	} else if(scroll->otyp == APHANACTONAN_RECORD){
 		if(Blind){
@@ -1965,6 +1971,7 @@ struct obj *sobj;
 				role_skill++;
 			if(u.ukrau_duration)
 				role_skill += (role_skill+1)/2;
+			if(youmonst.owrk) role_skill = (role_skill+1)/2;
 			
 			for(; role_skill; role_skill--)
 				if(!resist(mtmp, sobj->oclass, 0, NOTELL)){

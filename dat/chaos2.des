@@ -185,6 +185,8 @@ MONSTER[75%]:'{', "alabaster cactoid", random
 MONSTER[50%]:'{', "alabaster cactoid", random
 MONSTER[25%]:'{', "alabaster cactoid", random
 
+MONSTER[10%]:'.', "restless voice", random
+
 OBJECT:'-',random,random
 OBJECT:'-',random,random
 OBJECT:'-',random,random
@@ -226,6 +228,8 @@ MONSTER[90%]:'{', "alabaster cactoid", random
 MONSTER[75%]:'{', "alabaster cactoid", random
 MONSTER[50%]:'{', "alabaster cactoid", random
 MONSTER[25%]:'{', "alabaster cactoid", random
+
+MONSTER[10%]:'.', "restless voice", random
 
 OBJECT:'-',random,random
 OBJECT:'-',random,random
@@ -274,6 +278,10 @@ MONSTER[25%]:'{', "alabaster cactoid", random
 MONSTER[25%]:'{', "alabaster cactoid", random
 MONSTER[10%]:'{', "alabaster cactoid", random
 MONSTER[10%]:'{', "alabaster cactoid", random
+
+MONSTER[10%]:'.', "restless voice", random
+MONSTER[10%]:'.', "restless voice", random
+MONSTER[10%]:'.', "restless voice", random
 
 MONSTER:'@', "Alabaster elf", random
 MONSTER:'@', "Alabaster elf", random
@@ -415,6 +423,8 @@ MONSTER:'S',"first wraithworm",(07,06) [skipcheck]
 PORTAL:(07,00,12,12),(00,00,00,00),"cat3"
 
 OBJECT: '(',"magic chest", random
+
+MONSTER[25%]:'.', "restless voice", random
 
 MAZE: "cat3",' '
 FLAGS: shortsighted,hardfloor

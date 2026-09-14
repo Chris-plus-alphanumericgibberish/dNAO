@@ -6436,6 +6436,16 @@ boolean direct_weapon;
 	if((otmp->otyp == CHURCH_HAMMER || amalg_otyp == CHURCH_HAMMER) && !youdef && mdef && get_mx(mdef, MX_ESUM)){
 		*truedmgptr += 10*Insight;
 	}
+	//Discourage mortals
+	if((otmp->otyp == HAMMER_OF_ETERNITY || amalg_otyp == HAMMER_OF_ETERNITY) && mdef && (youdef || mortal_race(mdef))){
+		int skill_bonus = youagr ? weapon_dam_bonus(otmp, weapon_type(otmp))
+					  : mon_weapon_dam_bonus(magr->data, otmp, weapon_type(otmp));
+		if(skill_bonus < 0); //Do nothing
+		else if(youdef)
+			u.uencouraged = min(max(u.uencouraged-skill_bonus, -skill_bonus), u.uencouraged);
+		else 
+			mdef->encouraged = min(max(mdef->encouraged-skill_bonus, -skill_bonus), mdef->encouraged);
+	}
 
 	//Flogging raises sanity (note: this is "backwards" on purpose)
 	if(((otmp->otyp == CANE || amalg_otyp == CANE) && !youdef && mdef && is_serration_vulnerable(mdef) && Insight >= rnd(100))
@@ -11213,6 +11223,7 @@ arti_invoke(obj)
 						dmg = d(u.ulevel+obj->spe,12);
 						if(u.ukrau_duration) dmg *= 1.5;
 						dmg += spell_damage_bonus()*3;
+						if(youmonst.owrk) dmg = (dmg+1)/2;
 //						pline("mon found at %d, %d", bhitpos.x, bhitpos.y);
 					    if (cansee(bhitpos.x,bhitpos.y) && !canspotmon(mtmp)) {
 						    map_invisible(bhitpos.x, bhitpos.y);
@@ -11269,6 +11280,7 @@ arti_invoke(obj)
 					if(u.ukrau_duration) dmg *= 1.5;
 					dmg += spell_damage_bonus();
 					dmg *= 3;
+					if(youmonst.owrk) dmg = (dmg+1)/2;
 					pline("Some no mai, Tsukishiro!");
 					artinstance[obj->oartifact].SnSd1 = monstermoves + (long)(rnz(100)*(u.upriest||Role_if(PM_SAMURAI) ? .9 : 1));
 						explode(u.dx, u.dy,
@@ -11542,22 +11554,23 @@ arti_invoke(obj)
 			dmg = u.ulevel + 10;
 			if(u.ukrau_duration) dmg *= 1.5;
 			dmg += spell_damage_bonus();
-					exercise(A_WIS, TRUE);
-					cc.x=u.dx;cc.y=u.dy;
-					n=3;
-					while(n--) {
-						explode(u.dx, u.dy,
-							AD_FIRE, 0,
-							dmg,
-							EXPL_FIERY, 1);
-						u.dx = cc.x+rnd(3)-2; u.dy = cc.y+rnd(3)-2;
-						if (!isok(u.dx,u.dy) || !cansee(u.dx,u.dy) ||
-							IS_STWALL(levl[u.dx][u.dy].typ) || u.uswallow) {
-							/* Spell is reflected back to center */
-								u.dx = cc.x;
-								u.dy = cc.y;
-						}
-					}
+			if(youmonst.owrk) dmg = (dmg+1)/2;
+			exercise(A_WIS, TRUE);
+			cc.x=u.dx;cc.y=u.dy;
+			n=3;
+			while(n--) {
+				explode(u.dx, u.dy,
+					AD_FIRE, 0,
+					dmg,
+					EXPL_FIERY, 1);
+				u.dx = cc.x+rnd(3)-2; u.dy = cc.y+rnd(3)-2;
+				if (!isok(u.dx,u.dy) || !cansee(u.dx,u.dy) ||
+					IS_STWALL(levl[u.dx][u.dy].typ) || u.uswallow) {
+					/* Spell is reflected back to center */
+						u.dx = cc.x;
+						u.dy = cc.y;
+				}
+			}
 		} else obj->age = 0;
 	break;
 	case BLIZAGA:
@@ -11566,22 +11579,23 @@ arti_invoke(obj)
 			dmg = u.ulevel + 10;
 			if(u.ukrau_duration) dmg *= 1.5;
 			dmg += spell_damage_bonus();
-					exercise(A_WIS, TRUE);
-					cc.x=u.dx;cc.y=u.dy;
-					n=3;
-					while(n--) {
-						explode(u.dx, u.dy,
-							AD_COLD, 0,
-					dmg,
-							EXPL_FROSTY, 1);
-						u.dx = cc.x+rnd(3)-2; u.dy = cc.y+rnd(3)-2;
-						if (!isok(u.dx,u.dy) || !cansee(u.dx,u.dy) ||
-							IS_STWALL(levl[u.dx][u.dy].typ) || u.uswallow) {
-							/* Spell is reflected back to center */
-								u.dx = cc.x;
-								u.dy = cc.y;
-						}
-					}
+			if(youmonst.owrk) dmg = (dmg+1)/2;
+			exercise(A_WIS, TRUE);
+			cc.x=u.dx;cc.y=u.dy;
+			n=3;
+			while(n--) {
+				explode(u.dx, u.dy,
+					AD_COLD, 0,
+			dmg,
+					EXPL_FROSTY, 1);
+				u.dx = cc.x+rnd(3)-2; u.dy = cc.y+rnd(3)-2;
+				if (!isok(u.dx,u.dy) || !cansee(u.dx,u.dy) ||
+					IS_STWALL(levl[u.dx][u.dy].typ) || u.uswallow) {
+					/* Spell is reflected back to center */
+						u.dx = cc.x;
+						u.dy = cc.y;
+				}
+			}
 		} else obj->age = 0;
 	break;
 	case THUNDAGA:
@@ -11590,22 +11604,23 @@ arti_invoke(obj)
 			dmg = u.ulevel + 10;
 			if(u.ukrau_duration) dmg *= 1.5;
 			dmg += spell_damage_bonus();
-					exercise(A_WIS, TRUE);
-					cc.x=u.dx;cc.y=u.dy;
-					n=3;
-					while(n--) {
-						explode(u.dx, u.dy,
-							AD_ELEC, 0,
-					dmg,
-							EXPL_MAGICAL, 1);
-						u.dx = cc.x+rnd(3)-2; u.dy = cc.y+rnd(3)-2;
-						if (!isok(u.dx,u.dy) || !cansee(u.dx,u.dy) ||
-							IS_STWALL(levl[u.dx][u.dy].typ) || u.uswallow) {
-							/* Spell is reflected back to center */
-								u.dx = cc.x;
-								u.dy = cc.y;
-						}
-					}
+			if(youmonst.owrk) dmg = (dmg+1)/2;
+			exercise(A_WIS, TRUE);
+			cc.x=u.dx;cc.y=u.dy;
+			n=3;
+			while(n--) {
+				explode(u.dx, u.dy,
+					AD_ELEC, 0,
+			dmg,
+			EXPL_MAGICAL, 1);
+				u.dx = cc.x+rnd(3)-2; u.dy = cc.y+rnd(3)-2;
+				if (!isok(u.dx,u.dy) || !cansee(u.dx,u.dy) ||
+					IS_STWALL(levl[u.dx][u.dy].typ) || u.uswallow) {
+					/* Spell is reflected back to center */
+						u.dx = cc.x;
+						u.dy = cc.y;
+				}
+			}
 		} else obj->age = 0;
 	break;
 	case QUAKE:{
@@ -11684,6 +11699,7 @@ arti_invoke(obj)
 			dmg = u.ulevel + 10;
 			if(u.ukrau_duration) dmg *= 1.5;
 			dmg += spell_damage_bonus();
+			if(youmonst.owrk) dmg = (dmg+1)/2;
 			exercise(A_WIS, TRUE);
 			cc.x=u.dx;cc.y=u.dy;
 			n=3;
@@ -11934,6 +11950,7 @@ arti_invoke(obj)
 					dmg = u.ulevel/2 + 1;
 					if(u.ukrau_duration) dmg *= 1.5;
 					dmg += spell_damage_bonus();
+					if(youmonst.owrk) dmg = (dmg+1)/2;
 					exercise(A_WIS, TRUE);
 					cc.x=u.dx;cc.y=u.dy;
 					n=u.ulevel/5 + 1;
@@ -12023,6 +12040,12 @@ arti_invoke(obj)
 						pline_The("gray mold disappears!");
 						youmonst.mgmld_skin = 0;
 					}
+					youmonst.owrk = 0;
+					youmonst.ruh = 0;
+					youmonst.shey = 0;
+					youmonst.luahv = 0;
+					youmonst.nean = 0;
+					youmonst.nooh = 0;
 					healup(u.ulevel, 0, TRUE, TRUE);
 					obfree(pseudo, (struct obj *)0);	/* now, get rid of it */
 					obj->spe--; obj->spe--; obj->spe--; // lose three charge
@@ -12095,6 +12118,12 @@ arti_invoke(obj)
 						pline_The("gray mold disappears!");
 						youmonst.mgmld_skin = 0;
 					}
+					youmonst.owrk = 0;
+					youmonst.ruh = 0;
+					youmonst.shey = 0;
+					youmonst.luahv = 0;
+					youmonst.nean = 0;
+					youmonst.nooh = 0;
 					healup(maybe_polyd(u.mhmax - u.mh, u.uhpmax - u.uhp), 0, TRUE, TRUE); //heal spell
 					if(!DimensionalLock) while(n--) {
 						pm = &mons[summons[d(1,6)+3]];

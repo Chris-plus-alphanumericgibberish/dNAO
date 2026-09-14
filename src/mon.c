@@ -174,6 +174,8 @@ int mndx;
 	case PM_DARK_FEY_RI_MUMMY:	mndx = PM_DARK_FEY_RI;  break;
 	case PM_DOKKIMAR_MUMMY:		mndx = PM_DOKKIMAR;  break;
 	case PM_ALABASTER_MUMMY: mndx = PM_ALABASTER_ELF_ELDER;  break;
+	case PM_LEADEN_ANCESTOR:
+	case PM_MANIACAL_ANCESTOR: mndx = PM_ANCIENT_ELF;  break;
 	default:  break;
 	}
 	return mndx;
@@ -600,6 +602,7 @@ register struct monst *mtmp;
 	    // case PM_GIANT_ZOMBIE:
 	    // case PM_ETTIN_ZOMBIE:
 	    case PM_ALABASTER_MUMMY:
+	    case PM_MANIACAL_ANCESTOR:
 		if(is_alabaster_mummy(mtmp->data) && mtmp->mvar_syllable >= SYLLABLE_OF_STRENGTH__AESH && mtmp->mvar_syllable <= SYLLABLE_OF_SPIRIT__VAUL){
 			mksobj_at(mtmp->mvar_syllable, x, y, NO_MKOBJ_FLAGS);
 			if(mtmp->mvar_syllable == SYLLABLE_OF_SPIRIT__VAUL)
@@ -613,6 +616,34 @@ register struct monst *mtmp;
 			break;
 		num = undead_to_corpse(mndx);
 		obj = mkcorpstat(CORPSE, mtmp, &mons[num], x, y, TRUE);
+		break;
+	    case PM_LEADEN_ANCESTOR:
+		if(mtmp->mpetitioner
+			&& !is_rider(mtmp->data)
+			&& !(uwep && uwep->oartifact == ART_SINGING_SWORD && uwep->osinging == OSING_LIFE && mtmp->mtame)
+		) //u.uevent.invoked ||
+			break;
+		/* its leaden shell breaks away in death, revealing what it truly is */
+		set_mon_data(mtmp, PM_MANIACAL_ANCESTOR);
+		num = undead_to_corpse(PM_MANIACAL_ANCESTOR);
+		obj = mkcorpstat(CORPSE, mtmp, &mons[num], x, y, TRUE);
+		obj = mksobj_at(ROCK, x, y, NO_MKOBJ_FLAGS);
+		set_material_gm(obj, LEAD);
+		set_obj_quan(obj, 6);
+		break;
+	    case PM_RESTLESS_VOICE:
+		num = 6;
+		while(num--)
+			obj = mksobj_at(SYLLABLE_OF_STRENGTH__AESH + rn2(6), x, y, NO_MKOBJ_FLAGS);
+		break;
+	    case PM_SHRIEKING_SHADOW:
+		if(mtmp->mvar_syllable >= SYLLABLE_OF_STRENGTH__AESH && mtmp->mvar_syllable <= SYLLABLE_OF_SPIRIT__VAUL){
+			obj = mksobj_at(mtmp->mvar_syllable, x, y, NO_MKOBJ_FLAGS);
+			curse(obj);
+			if(mtmp->mvar_syllable == SYLLABLE_OF_SPIRIT__VAUL)
+				remove_mintrinsic(mtmp, DISPLACED);
+			mtmp->mvar_syllable = 0; //Lose the bonus if resurrected
+		}
 		break;
 	    case PM_ALABASTER_CACTOID:
 			obj = mkobj_at(TILE_CLASS, x, y, NO_MKOBJ_FLAGS);
@@ -1694,7 +1725,7 @@ struct monst *mon;
 	}
     }
 #endif
-	if(is_alabaster_mummy(mon->data) && mon->mvar_syllable == SYLLABLE_OF_GRACE__UUR)
+	if(has_syllable(mon->data) && mon->mvar_syllable == SYLLABLE_OF_GRACE__UUR)
 		mmove += 6;
 	
 	if(u.sealsActive&SEAL_CHUPOCLOPS && distmin(mon->mx, mon->my, u.ux, u.uy) <= u.ulevel/5+1){
@@ -3568,11 +3599,7 @@ nexttry:
 			&& (IS_ROCK(levl[mon->mx][mon->my].typ) && space_adjacent(mon->mx,mon->my))
 			&& !(IS_ROCK(levl[nx][ny].typ) && space_adjacent(nx,ny))
 		) continue;
-		if(mdat->mtyp == PM_PARASITIC_WALL_HUGGER && 
-			wall_adjacent(mon->mx, mon->my) &&
-			!wall_adjacent(nx, ny)
-		) continue;
-		if(mdat->mtyp == PM_PARASITIC_WALL_HUGGER && 
+		if(hugs_walls(mdat) &&
 			wall_adjacent(mon->mx, mon->my) &&
 			!wall_adjacent(nx, ny)
 		) continue;
@@ -4664,6 +4691,9 @@ struct monst *mtmp;
 		lifesavers |= LSVD_OBJ;
 	if ((!rn2(20) && (mtmp->mtyp == PM_ALABASTER_ELF
 		|| mtmp->mtyp == PM_ALABASTER_ELF_ELDER
+		|| mtmp->mtyp == PM_BEREFT
+		|| mtmp->mtyp == PM_LEADEN_ANCESTOR
+		|| mtmp->mtyp == PM_MANIACAL_ANCESTOR
 		|| is_alabaster_mummy(mtmp->data)
 		)))
 		lifesavers |= LSVD_ALA;
@@ -5571,6 +5601,47 @@ int adtyp;
 	return adtyp_expl_color(adtyp);
 }
 
+/* mandrake_shriek()
+ *
+ * Effects of a mandrake's dying shriek and similar: kills off weak genocidable
+ * life on the level, then makes a finger-of-death style attempt on the player.
+ */
+void
+mandrake_shriek(source, self_inflicted, killer_str)
+struct monst *source;
+boolean self_inflicted;
+const char *killer_str;
+{
+	struct monst *mtmp, *mtmp2;
+
+	for (mtmp = fmon; mtmp; mtmp = mtmp2){
+		mtmp2 = mtmp->nmon;
+		if (DEADMONSTER(mtmp)) continue;
+		if (mtmp == source) continue;
+		if(mtmp->data->geno & G_GENO && !nonliving(source->data) && !is_demon(source->data) && !is_keter(source->data) && mtmp->mhp <= 100){
+			mtmp->mhp = -10;
+			monkilled(mtmp,"",AD_DRLI);
+		}
+	}
+	/* And a finger of death type attack on you */
+	if (nonliving(youracedata) || is_demon(youracedata)) {
+		You("seem no deader than before.");
+	} else if ((Upolyd ? u.mh : u.uhp) <= 100 && !(u.sealsActive&SEAL_OSE)) {
+		if (Hallucination) {
+			You("have an out of body experience.");
+		} else {
+			killer_format = KILLED_BY_AN;
+			killer = killer_str;
+			if (!u.uconduct.killer && !self_inflicted){
+				//Pcifist PCs aren't combatants so if something kills them up "killed peaceful" type impurities
+				IMPURITY_UP(u.uimp_murder)
+				IMPURITY_UP(u.uimp_bloodlust)
+			}
+			done(DIED);
+		}
+	} else shieldeff(u.ux,u.uy);
+}
+
 /* TRUE if corpse might be dropped, magr may die if mon was swallowed */
 boolean
 corpse_chance(mon, magr, was_swallowed)
@@ -5740,7 +5811,6 @@ boolean was_swallowed;			/* digestion */
 					levi_spawn_items(mon->mx, mon->my, levi);
 			}
 			else if(adtyp == AD_MAND){
-				struct monst *mtmp, *mtmp2;
 				if(mon->mcan){
 					char buf[BUFSZ];
 					Sprintf(buf, "%s croaks out a hoarse shriek.", Monnam(mon)); //Monnam and mon_nam share a buffer and can't be used on the same line.
@@ -5748,31 +5818,7 @@ boolean was_swallowed;			/* digestion */
 					return FALSE;
 				}
 				else pline("%s lets out a terrible shriek!", Monnam(mon));
-				for (mtmp = fmon; mtmp; mtmp = mtmp2){
-					mtmp2 = mtmp->nmon;
-					if(mtmp->data->geno & G_GENO && !nonliving(mon->data) && !is_demon(mon->data) && !is_keter(mon->data) && mtmp->mhp <= 100){
-						if (DEADMONSTER(mtmp)) continue;
-						mtmp->mhp = -10;
-						monkilled(mtmp,"",AD_DRLI);
-					}
-				}
-				/* And a finger of death type attack on you */
-				if (nonliving(youracedata) || is_demon(youracedata)) {
-					You("seem no deader than before.");
-				} else if ((Upolyd ? u.mh : u.uhp) <= 100 && !(u.sealsActive&SEAL_OSE)) {
-					if (Hallucination) {
-					You("have an out of body experience.");
-					} else {
-					killer_format = KILLED_BY_AN;
-					killer = "mandrake's dying shriek";
-					if (!u.uconduct.killer){
-						//Pcifist PCs aren't combatants so if something kills them up "killed peaceful" type impurities
-						IMPURITY_UP(u.uimp_murder)
-						IMPURITY_UP(u.uimp_bloodlust)
-					}
-					done(DIED);
-					}
-				} else shieldeff(u.ux,u.uy);
+				mandrake_shriek(mon, FALSE, "mandrake's dying shriek");
 			}
 			else {
 				explode_pa(mon->mx, mon->my, 
@@ -5960,7 +6006,10 @@ boolean was_swallowed;			/* digestion */
 		   || mon->m_id == quest_status.leader_m_id
 		   || mon->data->msound == MS_NEMESIS
 		   || (mdat->geno & G_UNIQ)
-		   || is_alabaster_mummy(mon->data)
+		   || has_syllable(mon->data)
+		   || mdat->mtyp == PM_LEADEN_ANCESTOR
+		   || mdat->mtyp == PM_MANIACAL_ANCESTOR
+		   || mdat->mtyp == PM_RESTLESS_VOICE
 		   || (uwep && uwep->oartifact == ART_SINGING_SWORD && uwep->osinging == OSING_LIFE && mon->mtame)
 		   || mdat->mtyp == PM_APHANACTONAN_AUDIENT
 		   || mdat->mtyp == PM_APHANACTONAN_ASSESSOR

@@ -2190,6 +2190,82 @@ signs_appearance(boolean dumping, boolean mirror)
 	}
 #undef PUNCTUTATION
 
+#define PUNCTUTATION	if(count > 0){if(count == 1) Sprintf(eos(msgbuf), "%s and ", comma); else Sprintf(eos(msgbuf), "%s ", comma);}
+	//Active anti-syllables
+	if(show_visual && (youmonst.owrk || youmonst.ruh || youmonst.shey || youmonst.luahv || youmonst.nean || youmonst.nooh)){
+		boolean no_active_syllables = !(u.uaesh_duration || u.ukrau_duration || u.uhoon_duration || u.uuur_duration || u.unaen_duration || u.uvaul_duration);
+		int num, total = 0;
+		count = 0;
+		if(youmonst.owrk)   { count++; total += (youmonst.owrk+9)/10; }
+		if(youmonst.ruh)    { count++; total += (youmonst.ruh+9)/10; }
+		if(youmonst.shey)   { count++; total += (youmonst.shey+9)/10; }
+		if(youmonst.luahv)  { count++; total += (youmonst.luahv+9)/10; }
+		if(youmonst.nean)   { count++; total += (youmonst.nean+9)/10; }
+		if(youmonst.nooh)   { count++; total += (youmonst.nooh+9)/10; }
+
+		if(total == 1 && no_active_syllables){
+			const char *appearance;
+			if(youmonst.owrk)       appearance = anti_syllable_appearance(OWRK);
+			else if(youmonst.ruh)   appearance = anti_syllable_appearance(RUH);
+			else if(youmonst.shey)  appearance = anti_syllable_appearance(SHEY);
+			else if(youmonst.luahv) appearance = anti_syllable_appearance(LUAHV);
+			else if(youmonst.nean)  appearance = anti_syllable_appearance(NEAN);
+			else                    appearance = anti_syllable_appearance(NOOH);
+			Sprintf(msgbuf, "A black %s %s above your brow.", appearance, dumping ? "floated" : "floats");
+			p(msgbuf);
+		} else {
+			if(count > 2) comma = ",";
+			else comma = "";
+			msgbuf[0] = 0;
+			if(youmonst.owrk){
+				num = (youmonst.owrk+9)/10;
+				if(num == 1) Sprintf(eos(msgbuf), "a black %s", anti_syllable_appearance(OWRK));
+				else         Sprintf(eos(msgbuf), "%d black %ss", num, anti_syllable_appearance(OWRK));
+				count--;
+				PUNCTUTATION
+			}
+			if(youmonst.ruh){
+				num = (youmonst.ruh+9)/10;
+				if(num == 1) Sprintf(eos(msgbuf), "a black %s", anti_syllable_appearance(RUH));
+				else         Sprintf(eos(msgbuf), "%d black %ss", num, anti_syllable_appearance(RUH));
+				count--;
+				PUNCTUTATION
+			}
+			if(youmonst.shey){
+				num = (youmonst.shey+9)/10;
+				if(num == 1) Sprintf(eos(msgbuf), "a black %s", anti_syllable_appearance(SHEY));
+				else         Sprintf(eos(msgbuf), "%d black %ss", num, anti_syllable_appearance(SHEY));
+				count--;
+				PUNCTUTATION
+			}
+			if(youmonst.luahv){
+				num = (youmonst.luahv+9)/10;
+				if(num == 1) Sprintf(eos(msgbuf), "a black %s", anti_syllable_appearance(LUAHV));
+				else         Sprintf(eos(msgbuf), "%d black %ss", num, anti_syllable_appearance(LUAHV));
+				count--;
+				PUNCTUTATION
+			}
+			if(youmonst.nean){
+				num = (youmonst.nean+9)/10;
+				if(num == 1) Sprintf(eos(msgbuf), "a black %s", anti_syllable_appearance(NEAN));
+				else         Sprintf(eos(msgbuf), "%d black %ss", num, anti_syllable_appearance(NEAN));
+				count--;
+				PUNCTUTATION
+			}
+			if(youmonst.nooh){
+				num = (youmonst.nooh+9)/10;
+				if(num == 1) Sprintf(eos(msgbuf), "a black %s", anti_syllable_appearance(NOOH));
+				else         Sprintf(eos(msgbuf), "%d black %ss", num, anti_syllable_appearance(NOOH));
+				count--;
+				PUNCTUTATION
+			}
+			Sprintf(eos(msgbuf), dumping ? " drifted around your head." : (total == 1 ? " drifts around your head." : " drift around your head."));
+			msgbuf[0] = highc(msgbuf[0]);
+			if(msgbuf[0]) p(msgbuf);
+		}
+	}
+#undef PUNCTUTATION
+
 	//Inactive syllables
 	if(show_visual){
 #define STRIPGLYPH		;

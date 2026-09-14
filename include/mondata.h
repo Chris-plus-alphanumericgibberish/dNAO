@@ -105,7 +105,11 @@
 
 #define is_alabaster_mummy(ptr)	((ptr)->mtyp == PM_ALABASTER_MUMMY)
 
+#define has_syllable(ptr)	((ptr)->mtyp == PM_ALABASTER_MUMMY || (ptr)->mtyp == PM_SHRIEKING_SHADOW)
+
 #define is_alabaster_elf(ptr)	((ptr)->mtyp == PM_ALABASTER_ELF || (ptr)->mtyp == PM_ALABASTER_ELF_ELDER || (ptr)->mtyp == PM_DESERT_SEER)
+
+#define hugs_walls(ptr)		((ptr)->mtyp == PM_PARASITIC_WALL_HUGGER || (ptr)->mtyp == PM_SHRIEKING_SHADOW)
 
 #define is_lminion(mon)		(is_minion((mon)->data) && is_lawful_mon(mon))
 
@@ -1010,7 +1014,7 @@
 #define is_thief(ptr)		( dmgtype(ptr, AD_SGLD)  || dmgtype(ptr, AD_SITM) || dmgtype(ptr, AD_SEDU) )
 #define is_magical(ptr)		( attacktype(ptr, AT_MMGC) || attacktype(ptr, AT_MAGC) )
 #define nospellcooldowns(ptr)	((((ptr)->mflagsg & MG_NOSPELLCOOLDOWN) != 0L) || ((ptr)->mtyp == PM_TWIN_SIBLING && check_mutation(SHUB_RADIANCE)))
-#define nospellcooldowns_mon(mtmp)	(nospellcooldowns((mtmp)->data) || (is_alabaster_mummy((mtmp)->data) && (mtmp)->mvar_syllable == SYLLABLE_OF_THOUGHT__NAEN) || (mtmp)->mstance == MSTANCE_MAGIC)
+#define nospellcooldowns_mon(mtmp)	(nospellcooldowns((mtmp)->data) || (has_syllable((mtmp)->data) && (mtmp)->mvar_syllable == SYLLABLE_OF_THOUGHT__NAEN) || (mtmp)->mstance == MSTANCE_MAGIC)
 #define is_lord(ptr)		(((ptr)->mflagsg & MG_LORD) != 0L)
 #define is_prince(ptr)		(((ptr)->mflagsg & MG_PRINCE) != 0L)
 #define is_normal_demon(ptr)		(is_demon(ptr) && \

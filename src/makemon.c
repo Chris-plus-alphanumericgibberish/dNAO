@@ -4061,6 +4061,48 @@ boolean greatequip;
 				}
 				break;
 			}
+		} else if(mm == PM_BEREFT){
+			mongets(mtmp, CHUNK_OF_FOSSIL_DARK, mkobjflags);
+			otmp = mongets(mtmp, QUARTERSTAFF, mkobjflags);
+			if(otmp){
+				curse(otmp);
+				set_material_gm(otmp, OBSIDIAN_MT);
+				add_omod(otmp, rn2(2) ? OMOD_SPIKED : OMOD_BLADED);
+				add_oprop(otmp, rn2(3) ? OPROP_LESSER_UNHYW : OPROP_UNHYW);
+				otmp->obj_color = CLR_BLACK;
+			}
+			
+			otmp = mongets(mtmp, SHEMAGH, mkobjflags);
+			if(otmp){
+				curse(otmp);
+				otmp->oeroded3 = 1;
+				otmp->opoisoned = OPOISON_FILTH;
+				otmp->obj_color = CLR_BLACK;
+			}
+			
+			otmp = mongets(mtmp, ELVEN_TOGA, mkobjflags);
+			if(otmp){
+				curse(otmp);
+				otmp->oeroded3 = 1;
+				otmp->opoisoned = OPOISON_FILTH;
+				otmp->obj_color = CLR_BLACK;
+			}
+			otmp = mongets(mtmp, ELVEN_BOOTS, mkobjflags);
+			if(otmp){
+				curse(otmp);
+			}
+			otmp = mongets(mtmp, MASK, mkobjflags);
+			if(otmp){
+				curse(otmp);
+				otmp->corpsenm = PM_BLACK_PUDDING;
+				set_material_gm(otmp, OBSIDIAN_MT);
+			}
+			otmp = mongets(mtmp, SOUL_LENS, MKOBJ_NOINIT);
+			if(otmp){
+				m_dowear(mtmp, TRUE);
+				set_material_gm(otmp, GEMSTONE);
+				set_submat(otmp, EMERALD);
+			}
 		} else if(mm == PM_MYRKALFR){
 			mtmp->m_lev = 4;
 			mtmp->mhp = mtmp->mhpmax = 6*mtmp->m_lev;
@@ -12975,6 +13017,31 @@ boolean greatequip;
 			(void) mpickobj(mtmp, otmp);
 		} else if(ptr->mtyp == PM_PHARAOH || ptr->mtyp == PM_PRIEST_MUMMY){
 			(void)mongets(mtmp, PRAYER_WARDED_WRAPPING, mkobjflags);
+		} else if(ptr->mtyp == PM_LEADEN_ANCESTOR){
+#define LEADEN_ITEM(item)	\
+			otmp = mongets(mtmp, item, mkobjflags);\
+			if(otmp){\
+				curse(otmp);\
+				set_material_gm(otmp, LEAD);\
+				otmp->obj_color = CLR_BLACK;\
+			}
+			LEADEN_ITEM(ARMORED_BOOTS)
+			LEADEN_ITEM(HIGH_ELVEN_GAUNTLETS)
+			LEADEN_ITEM(HIGH_ELVEN_PLATE)
+			LEADEN_ITEM(FACELESS_HELM)
+			if(rn2(2)){
+				LEADEN_ITEM(GREAT_MACE)
+			}
+			else {
+				LEADEN_ITEM(HAMMER_OF_ETERNITY)
+			}
+			otmp = mongets(mtmp, ROBE, mkobjflags);
+			if(otmp){
+				curse(otmp);
+				set_material_gm(otmp, CLOTH);
+				add_oprop(otmp, OPROP_BRIL);
+				otmp->obj_color = CLR_BLACK;
+			}
 		} else if(ptr->mtyp == PM_ROTTING_MONK){
 			otmp = mksobj(ROBE, mkobjflags);
 			if(otmp){
@@ -13122,6 +13189,31 @@ boolean greatequip;
 				break;
 			}
 		}
+		break;
+		case S_SHADE:
+			if(ptr->mtyp == PM_SHRIEKING_SHADOW){
+				switch(rnd(6)){
+					case 1:
+						mtmp->mvar_syllable = SYLLABLE_OF_STRENGTH__AESH;
+					break;
+					case 2:
+						mtmp->mvar_syllable = SYLLABLE_OF_GRACE__UUR;
+					break;
+					case 3:
+						mtmp->mvar_syllable = SYLLABLE_OF_LIFE__HOON;
+					break;
+					case 4:
+						mtmp->mvar_syllable = SYLLABLE_OF_SPIRIT__VAUL;
+						give_mintrinsic(mtmp, DISPLACED);
+					break;
+					case 5:
+						mtmp->mvar_syllable = SYLLABLE_OF_POWER__KRAU;
+					break;
+					case 6:
+						mtmp->mvar_syllable = SYLLABLE_OF_THOUGHT__NAEN;
+					break;
+				}
+			}
 		break;
 		case S_ZOMBIE:
 			if(ptr->mtyp == PM_HEDROW_ZOMBIE && !rn2(10)){
