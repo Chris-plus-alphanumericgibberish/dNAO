@@ -419,6 +419,7 @@ struct monst {
 #define mvar1_halo_sec_element	mvar1
 #define	mvar1_summon_ID			mvar1
 #define	mvar_mammon_dive_x		mvar1
+#define	mvar1_seaParity			mvar1
 #define mvar1_bereft_syllable	mvar1
 	long mvar2;
 #define	mvar_dracaePregTimer	mvar2

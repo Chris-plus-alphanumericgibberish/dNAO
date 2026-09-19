@@ -4882,7 +4882,11 @@ char sym;
 	u.dx = xdir[dp-sdp];
 	u.dy = ydir[dp-sdp];
 	u.dz = zdir[dp-sdp];
-	if (u.dx && u.dy && (u.umonnum == PM_GRID_BUG || u.umonnum == PM_BEBELITH)) {
+	if (u.dx && u.dy && orthogonal_mover(&youmonst)) {
+		u.dx = u.dy = 0;
+		return 0;
+	}
+	if ((u.dx || u.dy) && (!u.dx || !u.dy) && diagonal_mover(&youmonst)) {
 		u.dx = u.dy = 0;
 		return 0;
 	}
@@ -5001,20 +5005,34 @@ const char *msg;
 		putstr(win, 0, "");
 	    }
 	}
-	if (iflags.num_pad && (u.umonnum == PM_GRID_BUG || u.umonnum == PM_BEBELITH)) {
+	if (iflags.num_pad && orthogonal_mover(&youmonst)) {
 	    putstr(win, 0, "Valid direction keys in your current form (with number_pad on) are:");
 	    putstr(win, 0, "             8   ");
 	    putstr(win, 0, "             |   ");
 	    putstr(win, 0, "          4- . -6");
 	    putstr(win, 0, "             |   ");
 	    putstr(win, 0, "             2   ");
-	} else if (u.umonnum == PM_GRID_BUG || u.umonnum == PM_BEBELITH) {
+	} else if (orthogonal_mover(&youmonst)) {
 	    putstr(win, 0, "Valid direction keys in your current form are:");
 	    putstr(win, 0, "             k   ");
 	    putstr(win, 0, "             |   ");
 	    putstr(win, 0, "          h- . -l");
 	    putstr(win, 0, "             |   ");
 	    putstr(win, 0, "             j   ");
+	} else if (iflags.num_pad && diagonal_mover(&youmonst)) {
+	    putstr(win, 0, "Valid direction keys in your current form (with number_pad on) are:");
+	    putstr(win, 0, "          7     9");
+	    putstr(win, 0, "           \\   / ");
+	    putstr(win, 0, "             .    ");
+	    putstr(win, 0, "           /   \\ ");
+	    putstr(win, 0, "          1     3");
+	} else if (diagonal_mover(&youmonst)) {
+	    putstr(win, 0, "Valid direction keys in your current form are:");
+	    putstr(win, 0, "          y     u");
+	    putstr(win, 0, "           \\   / ");
+	    putstr(win, 0, "             .    ");
+	    putstr(win, 0, "           /   \\ ");
+	    putstr(win, 0, "          b     n");
 	} else if (iflags.num_pad) {
 	    putstr(win, 0, "Valid direction keys (with number_pad on) are:");
 	    putstr(win, 0, "          7  8  9");
@@ -5050,7 +5068,8 @@ confdir()
 	register int x;
 	if(u.udrunken >= 3 && rn2(u.udrunken/3 + 1))
 		return;
-	x = (u.umonnum == PM_GRID_BUG || u.umonnum == PM_BEBELITH) ? 2*rn2(4) : rn2(8);
+	x = orthogonal_mover(&youmonst) ? 2*rn2(4) :
+	    diagonal_mover(&youmonst) ? 2*rn2(4)+1 : rn2(8);
 	u.dx = xdir[x];
 	u.dy = ydir[x];
 	return;

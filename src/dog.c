@@ -523,10 +523,13 @@ boolean with_you;
 	       goto_level(do.c) decides who ends up at your target spot
 	       when there is a monster there too. */
 	    if (!MON_AT(u.ux, u.uy) &&
+		    shared_world(mtmp, u.ux, u.uy) &&
 		    !rn2(mtmp->mtame ? 10 : mtmp->mpeaceful ? 5 : 2)
 		)
 			rloc_to(mtmp, u.ux, u.uy);
 	    else
+			/* mnexto()'s own goodpos() check keeps a diagonal_mover
+			 * on its own parity even when the stairway isn't */
 			mnexto(mtmp);
 		if(mtmp->mx == 0){
 			if(wizard) pline("no room for buddy! Arriving later.");
@@ -819,7 +822,8 @@ boolean portal;
 				follow_dist++;
 			}
 		}
-	    if (((monnear(mtmp, u.ux, u.uy) && levl_follower(mtmp)) || 
+	    if (((monnear(mtmp, u.ux, u.uy) && levl_follower(mtmp)
+			&& shared_world(mtmp, u.ux, u.uy)) ||
 			(mtmp->mtame && (all_pets ||
 							(distmin(mtmp->mx, mtmp->my, u.ux, u.uy) <= follow_dist)
 							|| (get_mx(mtmp, MX_EDOG) && EDOG(mtmp)->dominated) //Crystal skull monsters always follow

@@ -65,7 +65,7 @@ const char *msg;
 	    (is_rider(&mons[otmp->corpsenm]) ||
 	     otmp->corpsenm == PM_WIZARD_OF_YENDOR)) {
 	    /* move any living monster already at that location */
-	    if((mtmp = m_at(x,y)) && enexto(&cc, x, y, mtmp->data))
+	    if((mtmp = m_at(x,y)) && enexto_mon(&cc, x, y, mtmp))
 		rloc_to(mtmp, cc.x, cc.y);
 	    if(msg) Norep("%s", msg);
 	    revived = revive_corpse(otmp, REVIVE_MONSTER);
@@ -76,7 +76,7 @@ const char *msg;
     if (revived) {
 	mtmp = m_at(x,y);
 	if (mtmp && !goodpos(x, y, mtmp, 0) &&
-	    enexto(&cc, x, y, mtmp->data)) {
+	    enexto_mon(&cc, x, y, mtmp)) {
 	    rloc_to(mtmp, cc.x, cc.y);
 	}
 	/* else impossible? */
@@ -899,10 +899,11 @@ boolean guess;
 		int x = travelstepx[set][i];
 		int y = travelstepy[set][i];
 		static int ordered[] = { 0, 2, 4, 6, 1, 3, 5, 7 };
-		/* no diagonal movement for grid bugs */
-		int dirmax = (u.umonnum == PM_GRID_BUG || u.umonnum == PM_BEBELITH) ? 4 : 8;
+		/* no diagonal movement for grid bugs; no orthogonal movement for sea people */
+		int dirmin = diagonal_mover(&youmonst) ? 4 : 0;
+		int dirmax = orthogonal_mover(&youmonst) ? 4 : 8;
 
-		for (dir = 0; dir < dirmax; ++dir) {
+		for (dir = dirmin; dir < dirmax; ++dir) {
 		    int nx = x+xdir[ordered[dir]];
 		    int ny = y+ydir[ordered[dir]];
 
@@ -2676,7 +2677,14 @@ lookaround()
 
     /* Grid bugs stop if trying to move diagonal, even if blind.  Maybe */
     /* they polymorphed while in the middle of a long move. */
-    if ((u.umonnum == PM_GRID_BUG || u.umonnum == PM_BEBELITH) && u.dx && u.dy) {
+    if (orthogonal_mover(&youmonst) && u.dx && u.dy) {
+	nomul(0, NULL);
+	return;
+    }
+
+    /* Sea people stop if trying to move orthogonally, even if blind.  Maybe */
+    /* they polymorphed while in the middle of a long move. */
+    if (diagonal_mover(&youmonst) && (u.dx || u.dy) && (!u.dx || !u.dy)) {
 	nomul(0, NULL);
 	return;
     }
@@ -2685,7 +2693,9 @@ lookaround()
     for(x = u.ux-1; x <= u.ux+1; x++) for(y = u.uy-1; y <= u.uy+1; y++) {
 	if(!isok(x,y)) continue;
 
-	if((u.umonnum == PM_GRID_BUG || u.umonnum == PM_BEBELITH) && x != u.ux && y != u.uy) continue;
+	if(orthogonal_mover(&youmonst) && x != u.ux && y != u.uy) continue;
+
+	if(diagonal_mover(&youmonst) && (x == u.ux) != (y == u.uy)) continue;
 
 	if(x == u.ux && y == u.uy) continue;
 

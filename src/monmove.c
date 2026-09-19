@@ -1864,7 +1864,7 @@ register struct monst *mtmp;
 			    Snprintf(prompt, BUFSZ, "Tell %s your real location?", mon_nam(mtmp));
 			    if (yn(prompt) == 'y') {
 				coord cc;
-				enexto(&cc, u.ux, u.uy, mtmp->data);
+				enexto_mon(&cc, u.ux, u.uy, mtmp);
 			        rloc_to(mtmp, cc.x, cc.y);
 				mtmp->mux = u.ux;
 				mtmp->muy = u.uy;
@@ -3673,6 +3673,11 @@ register struct monst *mtmp;
 			/*x goes from 1 to colno-1, y goes from 0 to rowno-1*/
 			mtmp->mux = rnd(COLNO-1);
 			mtmp->muy = rn2(ROWNO);
+			/* sea people can't wander toward a goal in another world */
+			if(!shared_world(mtmp, mtmp->mux, mtmp->muy)){
+				if(mtmp->muy < ROWNO-1) mtmp->muy++;
+				else mtmp->muy--;
+			}
 		}
 		/* Otherwise, don't change the current */
 		return;
@@ -3704,7 +3709,8 @@ register struct monst *mtmp;
 		      !mon_resistance(mtmp,PASSES_WALLS) &&
 		      (!ACCESSIBLE(levl[mx][my].typ) ||
 		       (closed_door(mx, my) && !can_ooze(mtmp))))
-		  || !couldsee(mx, my));
+		  || !couldsee(mx, my)
+		  || !shared_world(mtmp, mx, my));
 	} else {
 found_you:
 	    mx = u.ux;

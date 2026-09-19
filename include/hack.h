@@ -265,6 +265,8 @@ NEARDATA extern coord bhitpos;	/* place where throw or zap hits or stops */
 #define MM_ENDGEQUIP        0x00002000    /* do generate endgame equipment */
 #define MM_MALE             0x00004000    /* make monster male */
 #define MM_FEMALE           0x00008000    /* make monster female */
+#define MM_EVEN_PARITY      0x00010000    /* force an unanchored diagonal_mover onto an even (x+y) square */
+#define MM_ODD_PARITY       0x00020000    /* force an unanchored diagonal_mover onto an odd (x+y) square */
 
 /* flags to control mksobj() et al */
 #define NO_MKOBJ_FLAGS	0x00	/* use this rather than plain 0 */

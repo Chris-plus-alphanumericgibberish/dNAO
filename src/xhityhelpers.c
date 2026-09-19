@@ -80,8 +80,13 @@ boolean active;
 
 	/* some creatures are limited in *where* they can attack */
 	/* Grid bugs and Bebeliths cannot attack at an angle. */
-	if ((pa->mtyp == PM_GRID_BUG || pa->mtyp == PM_BEBELITH)
+	if (orthogonal_mover(pa)
 		&& x(magr) != tarx && y(magr) != tary)
+		return FALSE;
+
+	/* Sea raiders and Sea priests can only attack at an angle. */
+	if (diagonal_mover(pa)
+		&& (x(magr) == tarx || y(magr) == tary))
 		return FALSE;
 
 	/* limited attack angles (monster-agressor only) */
@@ -635,8 +640,12 @@ mdisplacem(struct monst *magr, struct monst *mdef, boolean quietly)
 	if (!rn2(7))
 		return MM_MISS;
 
-	if ((pa->mtyp == PM_GRID_BUG || pa->mtyp == PM_BEBELITH)
+	if (orthogonal_mover(pa)
 		&& magr->mx != mdef->mx && magr->my != mdef->my)
+		return MM_MISS;
+
+	if (diagonal_mover(pa)
+		&& (magr->mx == mdef->mx || magr->my == mdef->my))
 		return MM_MISS;
 
 	mdef->mundetected = 0;

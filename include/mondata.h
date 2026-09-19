@@ -8,6 +8,18 @@
 #define verysmall(ptr)		((ptr)->msize < MZ_SMALL)
 #define bigmonst(ptr)		((ptr)->msize >= MZ_LARGE)
 
+#define orthogonal_mover(ptr)	((ptr)->mtyp == PM_GRID_BUG || (ptr)->mtyp == PM_BEBELITH)
+
+#define sea_person(ptr)		((ptr)->mtyp == PM_SEA_RAIDER || (ptr)->mtyp == PM_SEA_PRIEST)
+
+#define diagonal_mover(ptr)	sea_person(ptr)
+
+/* Diagonal movement never changes the parity of (x+y), so a diagonal_mover is
+   permanently confined to one parity of squares -- the other parity is, from
+   its perspective, a different universe entirely. Monsters without that
+   restriction share a world with every square. */
+#define shared_world(mon,x,y)	(!diagonal_mover(mon) || ((((mon)->mx+(mon)->my) % 2) == (((x)+(y)) % 2)))
+
 #define MON_BAB(mon)		((mon)->data->mflagsf&MF_BAB_FULL ? 1.0 : (mon)->data->mflagsf&MF_BAB_HALF ? .5 : .75)
 
 #define lev_limit_30(ptr)		((ptr)->mflagsf&MF_LEVEL_30)
@@ -1110,7 +1122,8 @@
    Maximum allowable lightsource radius is currently 10 (30 after 3x lowlight modifier) */
 #define emits_light(ptr)	((ptr)->light_radius)
 
-#define emits_light_mon(mon) (emits_light((mon)->data))
+/* light radius of a monster right now: 0 while its light-emitting cells are exhausted */
+#define emits_light_mon(mon) (get_timer((mon)->timed, LIGHT_EXHAUSTED) ? 0 : emits_light((mon)->data))
 
 /*	The Voice casts light */
 #define Is_darklight_monster(ptr)	((ptr)->mtyp == PM_EDDERKOP\

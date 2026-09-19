@@ -420,7 +420,7 @@ int dest, how;
 			done(how);
 			/* So, you didn't die */
 			if (!e_survives_at(etmp, etmp->ex, etmp->ey)) {
-			    if (enexto(&xy, etmp->ex, etmp->ey, etmp->edata)) {
+			    if (enexto_mon(&xy, etmp->ex, etmp->ey, etmp->emon)) {
 				pline("A %s force teleports you away...",
 				      Hallucination ? "normal" : "strange");
 				teleds(xy.x, xy.y, FALSE);

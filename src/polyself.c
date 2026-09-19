@@ -1681,6 +1681,12 @@ dogaze(struct monst *mtmp)
 		   	         dmg *= 2;
 				 }
 		   	 break;
+		   	 case AD_LGHT:
+		   	     dmg = d(damn,damd);
+		   	     You("attack %s with a searing stare!", mon_nam(mtmp));
+		   	     if (mon_reflects(mtmp, "The searing light is reflected by %s %s!"))
+		   	         dmg = 0;
+		   	 break;
 			 case AD_STDY:
 				You("study %s carefully.",mon_nam(mtmp));
 				mtmp->mstdy = max(d(damn,damd),mtmp->mstdy);

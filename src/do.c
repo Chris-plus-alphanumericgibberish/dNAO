@@ -1740,6 +1740,10 @@ misc_levelport:
 	    }
 	}
 
+	/* The PC can end up moving between parity worlds as a result of stairs etc. */
+	if(diagonal_mover(&youmonst))
+		youmonst.mvar1_seaParity = 1 + ((u.ux + u.uy) % 2);
+
 	/* initial movement of bubbles just before vision_recalc */
 	if (Is_waterlevel(&u.uz))
 		movebubbles();

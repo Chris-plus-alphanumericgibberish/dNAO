@@ -11527,6 +11527,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 	case AD_SPEL:
 		/* gaze only, AT_GAZE or AT_WDGZ */
 	case AD_SSUN:
+	case AD_LGHT:
 	case AD_SPOR:
 	case AD_BLNK:
 	case AD_WTCH:
@@ -13645,6 +13646,7 @@ getgazeinfo(int aatyp, int adtyp, struct permonst *pa, struct monst *magr, struc
 	case AD_COLD:
 	case AD_ELEC:
 	case AD_DARK:
+	case AD_LGHT:
 	case AD_DRLI:
 	case AD_CNCL:
 	case AD_ENCH:
@@ -13863,6 +13865,44 @@ int vis;
 		alt_attk.adtyp = adtyp;
 		result = xmeleehurty(magr, mdef, &alt_attk, attk, (struct obj **)0, FALSE, dmg, 0, vis, TRUE);
 		wakeup2(mdef, youagr);
+		break;
+
+	case AD_LGHT:
+		/* can't gaze while the light-emitting cells are exhausted */
+		if (get_timer(magr->timed, LIGHT_EXHAUSTED))
+			return MM_MISS;
+		/* 4/5 chance to succeed */
+		if (maybe_not && !rn2(5))
+			return MM_MISS;
+		/* message */
+		if (vis&VIS_MAGR) {
+			pline("%s attack%s %s with a lance of light.",
+				(youagr ? "You" : Monnam(magr)),
+				(youagr ? "" : "s"),
+				(youdef ? "you" : mon_nam(mdef))
+				);
+		}
+		/* using the gaze may exhaust the light-emitting cells, which stop glowing while they recover */
+		if (!youagr && !rn2(3)) {
+			start_timer(10 + rn2(20), TIMER_MONSTER, LIGHT_EXHAUSTED, (genericptr_t)magr);
+			del_light_source(magr->light);
+		}
+		/* only reflection protects against light */
+		if (youdef ? (Reflecting != 0) : mon_resistance(mdef, REFLECTING)) {
+			if (youdef)
+				(void)ureflects((vis&VIS_MAGR) ? "%s stare is reflected by your %s." : (char *)0,
+					s_suffix(Monnam(magr)));
+			else
+				(void)mon_reflects(mdef, (vis&VIS_MDEF) ? "The searing light is reflected by %s %s!" : (char *)0);
+			result = MM_HIT;
+		}
+		else {
+			if (youdef)
+				stop_occupation();
+			result = xdamagey(magr, mdef, attk, dmg);
+			if (*hp(mdef) > 0)
+				wakeup2(mdef, youagr);
+		}
 		break;
 
 	case AD_BDFN:

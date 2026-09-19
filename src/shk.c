@@ -3851,7 +3851,8 @@ register struct monst *shkp;
 	    remove_damage(shkp, FALSE);
 
 	if((udist = distu(omx,omy)) < 3 &&
-		((shkp->mtyp != PM_GRID_BUG && shkp->mtyp != PM_BEBELITH) || (omx==u.ux || omy==u.uy)) &&
+		(!orthogonal_mover(shkp) || (omx==u.ux || omy==u.uy)) &&
+		(!diagonal_mover(shkp) || (omx!=u.ux && omy!=u.uy)) &&
 		(!is_vectored_mtyp(shkp->mtyp) ||
 			(omx + xdir[(int)shkp->mvar_vector] == u.ux && 
 			   omy + ydir[(int)shkp->mvar_vector] == u.uy 

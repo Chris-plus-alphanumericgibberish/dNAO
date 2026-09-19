@@ -561,6 +561,13 @@ int newpm;
 			mon->mvar_flask_charges = MAX_FLASK_CHARGES(mon);
 		}
 	}
+	else if(diagonal_mover(&mons[newpm])){
+		/* a diagonal_mover is permanently confined to the parity it's on
+		 * when it becomes one; see shared_world() and goodpos(). Stored as
+		 * 1+parity so that 0 unambiguously means "never established". */
+		mon->mvar1_seaParity = 1 + ((mon == &youmonst) ? ((u.ux + u.uy) % 2)
+						: ((mon->mx + mon->my) % 2));
+	}
 	else switch(newpm){
 		case PM_PALE_NIGHT:
 			mon->mvar_paleWarning = 0;

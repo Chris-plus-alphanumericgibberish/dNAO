@@ -16,6 +16,7 @@ static NEARDATA const char *gate_str;
 
 extern boolean notonhead;	/* for long worms */
 
+STATIC_DCL boolean kick_lands(struct monst *, struct attack *, boolean, xchar, xchar, int);
 STATIC_DCL void FDECL(kick_monster, (XCHAR_P, XCHAR_P));
 STATIC_DCL int FDECL(kick_object, (XCHAR_P, XCHAR_P));
 STATIC_DCL char *FDECL(kickstr, (char *));
@@ -88,6 +89,62 @@ register boolean clumsy;
 	}
 }
 
+/*
+ * Whether a kick against mon, standing at (x,y), connects. evade_move_thresh
+ * is the mon->movement needed to attempt an evasive hop.
+ *
+ * Returns TRUE if the kick connects (caller should call kickdmg()); FALSE
+ * if it was blocked or evaded.
+ */
+STATIC_OVL boolean
+kick_lands(struct monst *mon, struct attack *kick, boolean clumsy, xchar x, xchar y, int evade_move_thresh)
+{
+	if(!(!is_blind(mon) && !(mon->mtrapped || mon->entangled_oid) && !thick_skinned(mon->data) &&
+	   mon->data->mlet != S_EEL && haseyes(mon->data) && mon->mcanmove &&
+	   !mon->mstun && !mon->mconf && !mon->msleeping && !mindless_mon(mon) &&
+	   mon->data->mmove >= 12))
+		return TRUE;
+
+	if(!nohands(mon->data) && !rn2(martial() ? 5 : 3) && mon->movement >= 0) {
+		pline("%s blocks your %skick.", Monnam(mon),
+			clumsy ? "clumsy " : "");
+		xpassivey(&youmonst, mon, kick, (struct obj *)0, -1, MM_MISS, mon->data, TRUE);
+		mon->movement -= 6; //Note, may end up with up to -6 move points
+		return FALSE;
+	}
+	if(!rn2(martial() ? 50 : clumsy ? 3 : 4) && (clumsy || !bigmonst(mon->data)) && mon->movement >= evade_move_thresh){
+		coord mm;
+		char buffnam[BUFSZ];
+		Sprintf(buffnam, "%s", Monnam(mon));
+		if(mon_resistance(mon,TELEPORT))
+			mnexto(mon);
+		else if(enexto_mon(&mm, mon->mx, mon->my, mon) && abs(mm.x - mon->mx) <= 1 && abs(mm.y - mon->my) <= 1
+			&& (!orthogonal_mover(mon) || !((mm.x - mon->mx) && (mm.y - mon->my)))
+			&& (!diagonal_mover(mon) || ((mm.x - mon->mx) && (mm.y - mon->my)))
+		)
+			rloc_to(mon, mm.x, mm.y);
+
+		if(mon->mx != x || mon->my != y) {
+			mon->movement -= 12; //Note, may end up with up to -12 move points
+			if(glyph_is_invisible(levl[x][y].glyph)) {
+				unmap_object(x, y);
+				newsym(x, y);
+			}
+			pline("%s %s, %s evading your %skick.", buffnam,
+				(mon_resistance(mon,TELEPORT) ? "teleports" :
+				 mon_resistance(mon,LEVITATION) ? "floats" :
+				 mon_resistance(mon,FLYING) ? "swoops" :
+				 (nolimbs(mon->data) || slithy(mon->data)) ?
+					"slides" : "jumps"),
+				clumsy ? "easily" : "nimbly",
+				clumsy ? "clumsy " : "");
+			xpassivey(&youmonst, mon, kick, (struct obj *)0, -1, MM_MISS, mon->data, TRUE);
+			return FALSE;
+		}
+	}
+	return TRUE;
+}
+
 STATIC_OVL void
 kick_monster(x, y)
 register xchar x, y;
@@ -147,46 +204,8 @@ register xchar x, y;
 		clumsy = TRUE;
 doit:
 	//You("kick %s.", mon_nam(mon));
-	if(!is_blind(mon) && !(mon->mtrapped || mon->entangled_oid) && !thick_skinned(mon->data) &&
-	   mon->data->mlet != S_EEL && haseyes(mon->data) && mon->mcanmove &&
-	   !mon->mstun && !mon->mconf && !mon->msleeping && !mindless_mon(mon) &&
-	   mon->data->mmove >= 12) {
-		if(!nohands(mon->data) && !rn2(martial() ? 5 : 3) && mon->movement >= 0) {
-		    pline("%s blocks your %skick.", Monnam(mon),
-				clumsy ? "clumsy " : "");
-			xpassivey(&youmonst, mon, &kick, (struct obj *)0, -1, MM_MISS, mon->data, TRUE);
-			mon->movement -= 6; //Note, may end up with up to -6 move points
-		    return;
-		} else if(!rn2(martial() ? 50 : clumsy ? 3 : 4) && (clumsy || !bigmonst(mon->data)) && mon->movement >= 6){
-			coord mm;
-			char buffnam[BUFSZ];
-			Sprintf(buffnam, "%s", Monnam(mon));
-			if(mon_resistance(mon,TELEPORT))
-				mnexto(mon);
-			else if(enexto(&mm, mon->mx, mon->my, mon->data) && abs(mm.x - mon->mx) <= 1 && abs(mm.y - mon->my) <= 1
-				&& (!(mon->mtyp == PM_GRID_BUG || mon->mtyp == PM_BEBELITH) || !((mm.x - mon->mx) && (mm.y - mon->my)))
-			)
-				rloc_to(mon, mm.x, mm.y);
-
-		    if(mon->mx != x || mon->my != y) {
-				mon->movement -= 12; //Note, may end up with up to -12 move points
-				if(glyph_is_invisible(levl[x][y].glyph)) {
-					unmap_object(x, y);
-					newsym(x, y);
-				}
-				pline("%s %s, %s evading your %skick.", buffnam,
-					(mon_resistance(mon,TELEPORT) ? "teleports" :
-					 mon_resistance(mon,LEVITATION) ? "floats" :
-					 mon_resistance(mon,FLYING) ? "swoops" :
-					 (nolimbs(mon->data) || slithy(mon->data)) ?
-						"slides" : "jumps"),
-					clumsy ? "easily" : "nimbly",
-					clumsy ? "clumsy " : "");
-				xpassivey(&youmonst, mon, &kick, (struct obj *)0, -1, MM_MISS, mon->data, TRUE);
-				return;
-		    }
-		}
-	}
+	if(!kick_lands(mon, &kick, clumsy, x, y, 6))
+		return;
 	kickdmg(mon, clumsy);
 }
 
@@ -340,42 +359,8 @@ bird_kick_monsters()
 			 && !(Stone_resistance || uarmf))
 				continue;
 			//You("kick %s.", mon_nam(mon));
-			if(!is_blind(mon) && !(mon->mtrapped || mon->entangled_oid) && !thick_skinned(mon->data) &&
-			   mon->data->mlet != S_EEL && haseyes(mon->data) && mon->mcanmove &&
-			   !mon->mstun && !mon->mconf && !mon->msleeping && !mindless_mon(mon) &&
-			   mon->data->mmove >= 12) {
-				if(!nohands(mon->data) && !rn2(martial() ? 5 : 3) && mon->movement >= 0) {
-					pline("%s blocks your %skick.", Monnam(mon),
-						clumsy ? "clumsy " : "");
-					xpassivey(&youmonst, mon, &kick, (struct obj *)0, -1, MM_MISS, mon->data, TRUE);
-					mon->movement -= 6; //Note, may end up with up to -6 move points
-					return;
-				} else if(!rn2(martial() ? 50 : clumsy ? 3 : 4) && (clumsy || !bigmonst(mon->data)) && mon->movement >= 0){
-					coord mm;
-					if(mon_resistance(mon,TELEPORT))
-						mnexto(mon);
-					else if(enexto(&mm, mon->mx, mon->my, mon->data))
-						rloc_to(mon, mm.x, mm.y);
-
-					if(mon->mx != ix || mon->my != iy) {
-						mon->movement -= 12; //Note, may end up with up to -12 move points
-						if(glyph_is_invisible(levl[ix][iy].glyph)) {
-							unmap_object(ix, iy);
-							newsym(ix, iy);
-						}
-						pline("%s %s, %s evading your %skick.", Monnam(mon),
-							(mon_resistance(mon,TELEPORT) ? "teleports" :
-							 mon_resistance(mon,LEVITATION) ? "floats" :
-							 mon_resistance(mon,FLYING) ? "swoops" :
-							 (nolimbs(mon->data) || slithy(mon->data)) ?
-								"slides" : "jumps"),
-							clumsy ? "easily" : "nimbly",
-							clumsy ? "clumsy " : "");
-						xpassivey(&youmonst, mon, &kick, (struct obj *)0, -1, MM_MISS, mon->data, TRUE);
-						return;
-					}
-				}
-			}
+			if(!kick_lands(mon, &kick, clumsy, ix, iy, 0))
+				return;
 			// You("kick %s", mon_nam(mon));
 			kickdmg(mon, clumsy);
 		}
