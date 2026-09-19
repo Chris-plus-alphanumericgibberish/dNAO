@@ -464,6 +464,7 @@ curses_choose_character()
     int count = 0;
     int cur_character = 0;
     const char **choices;
+    char *letters;
     int *pickmap;
     char *prompt;
     char pbuf[QBUFSZ];
@@ -603,14 +604,18 @@ curses_choose_character()
         for (n = 0; roles[n].name.m; n++)
             continue;
         choices = (const char **) alloc(sizeof (char *) * (n + 1));
+        letters = (char *) alloc(sizeof (char) * (n + 1));
         pickmap = (int *) alloc(sizeof (int) * (n + 1));
         for (;;) {
             for (n = 0, i = 0; roles[i].name.m; i++) {
                 if (ok_role(i, flags.initrace, flags.initgend, flags.initalign)) {
-                    if (flags.initgend >= 0 && flags.female && roles[i].name.f)
+                    if (flags.initgend >= 0 && flags.female && roles[i].name.f){
                         choices[n] = roles[i].name.f;
-                    else
+                        letters[n] = roles[i].name.f[0];
+                    } else {
                         choices[n] = roles[i].name.m;
+                        letters[n] = roles[i].name.m[0];
+                    }
                     pickmap[n++] = i;
                 }
             }
@@ -628,7 +633,7 @@ curses_choose_character()
         choices[n] = (const char *) 0;
         if (n > 1)
             sel =
-                curses_character_dialog(choices,
+                curses_character_dialog(choices, letters,
                                         "Choose one of the following roles:");
         else
             sel = 0;
@@ -678,18 +683,21 @@ curses_choose_character()
             }
 
             choices = (const char **) alloc(sizeof (char *) * (n + 1));
+            letters = (char *) alloc(sizeof (char) * (n + 1));
             pickmap = (int *) alloc(sizeof (int) * (n + 1));
             for (n = 0, i = 0; races[i].noun; i++) {
                 if (ok_race(flags.initrole, i, flags.initgend, flags.initalign)) {
                     choices[n] = races[i].noun;
+                    letters[n] = races[i].lettercode;
                     pickmap[n++] = i;
                 }
             }
             choices[n] = (const char *) 0;
+            letters[n] = '\0';
             /* Permit the user to pick, if there is more than one */
             if (n > 1)
                 sel =
-                    curses_character_dialog(choices,
+                    curses_character_dialog(choices, letters,
                                             "Choose one of the following races:");
             else
                 sel = 0;
@@ -737,18 +745,21 @@ curses_choose_character()
             }
 
             choices = (const char **) alloc(sizeof (char *) * (n + 1));
+            letters = (char *) alloc(sizeof (char) * (n + 1));
             pickmap = (int *) alloc(sizeof (int) * (n + 1));
             for (n = 0, i = 0; i < ROLE_GENDERS; i++) {
                 if (ok_gend(flags.initrole, flags.initrace, i, flags.initalign)) {
                     choices[n] = genders[i].adj;
+                    letters[n] = genders[i].adj[0];
                     pickmap[n++] = i;
                 }
             }
             choices[n] = (const char *) 0;
+            letters[n] = '\0';
             /* Permit the user to pick, if there is more than one */
             if (n > 1)
                 sel =
-                    curses_character_dialog(choices,
+                    curses_character_dialog(choices, letters,
                                             "Choose one of the following genders:");
             else
                 sel = 0;
@@ -796,19 +807,21 @@ curses_choose_character()
             }
 
             choices = (const char **) alloc(sizeof (char *) * (n + 1));
+            letters = (char *) alloc(sizeof (char) * (n + 1));
             pickmap = (int *) alloc(sizeof (int) * (n + 1));
             for (n = 0, i = 0; i < ROLE_ALIGNS; i++) {
                 if (ok_align(flags.initrole, flags.initrace, flags.initgend, i)) {
                     choices[n] = aligns[i].adj;
+                    letters[n] = aligns[i].adj[0];
                     pickmap[n++] = i;
                 }
             }
             choices[n] = (const char *) 0;
+            letters[n] = '\0';
             /* Permit the user to pick, if there is more than one */
             if (n > 1)
                 sel =
-                    curses_character_dialog(choices,
-                                            "Choose one of the following alignments:");
+                    curses_character_dialog(choices, letters, "Choose one of the following alignments:");
             else
                 sel = 0;
             if (sel >= 0)
@@ -837,17 +850,20 @@ curses_choose_character()
         } else {
             /* Always 2 options - yn */
             choices = (const char **) alloc(sizeof (char *) * (3));
+            letters = (char *) alloc(sizeof (char) * (3));
             pickmap = (int *) alloc(sizeof (int) * (3));
             char * terms[] = {"Inherit from a past adventurer (start with an heirloom artifact but low stats and dangerous foes)",
                                 "No past inheritance", (char *) 0};
 
             for (i = 0; i < 2; i++) {
                 choices[i] = terms[i];
+                letters[i] = terms[i][0];
                 pickmap[i] = i;
             }
             choices[i] = (const char *) 0;
+            letters[i] = '\0';
 
-            sel = curses_character_dialog(choices, "Choose one of the following inheritances:");
+            sel = curses_character_dialog(choices, letters, "Choose one of the following inheritances:");
             if (sel >= 0) sel = pickmap[sel];
             else if (sel == ROLE_NONE) {        /* Quit */
                 clearlocks();
@@ -870,7 +886,7 @@ curses_choose_character()
 /* Prompt user for character race, role, alignment, or gender */
 
 int
-curses_character_dialog(const char **choices, const char *prompt)
+curses_character_dialog(const char **choices, char *letters, const char *prompt)
 {
     int count, count2, ret, curletter;
     char used_letters[52];
@@ -882,7 +898,7 @@ curses_character_dialog(const char **choices, const char *prompt)
     curses_start_menu(wid);
 
     for (count = 0; choices[count]; count++) {
-        curletter = tolower(choices[count][0]);
+        curletter = tolower(letters[count]);
         for (count2 = 0; count2 < count; count2++) {
             if (curletter == used_letters[count2]) {
                 curletter = toupper(curletter);

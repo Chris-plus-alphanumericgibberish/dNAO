@@ -278,7 +278,7 @@ extern void curses_init_nhcolors(void);
 
 extern void curses_choose_character(void);
 
-extern int curses_character_dialog(const char** choices, const char *prompt);
+extern int curses_character_dialog(const char** choices, char* letters, const char *prompt);
 
 extern void curses_init_options(void);
 

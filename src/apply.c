@@ -14,6 +14,7 @@ static const char tools[] = { CHAIN_CLASS, SCOIN_CLASS, TOOL_CLASS, WEAPON_CLASS
 static const char tools_too[] = { ALL_CLASSES, SCOIN_CLASS, TOOL_CLASS, POTION_CLASS,
 				  WEAPON_CLASS, WAND_CLASS, GEM_CLASS, CHAIN_CLASS, 0 };
 static const char apply_armor[] = { ARMOR_CLASS, 0 };
+static const char merge_runes[] = { WEAPON_CLASS, ARMOR_CLASS, 0 };
 static const char imperial_repairs[] = { AMULET_CLASS, ARMOR_CLASS, RING_CLASS, WAND_CLASS, 0 };
 static const char apply_corpse[] = { FOOD_CLASS, 0 };
 static const char chain_class[] = { CHAIN_CLASS, 0 };
@@ -4667,7 +4668,7 @@ register struct obj *obj;
 
 	if(u.ublood_smithing && !check_parasitology(PARISITE_WINDOWS) && u.yog_sothoth_atten){
 		any.a_int = 6;
-		add_menu(tmpwin, NO_GLYPH, &any , 's', 0, ATR_NONE,
+		add_menu(tmpwin, NO_GLYPH, &any , 'v', 0, ATR_NONE,
 			 "Embrace the visions of Yog-Sothoth", MENU_UNSELECTED);
 	}
 
@@ -11672,7 +11673,7 @@ STATIC_OVL int
 mergeSilverknightRunes()
 {
 	struct obj *upitm;
-	struct obj *obj = getobj(apply_armor, "merge runes into");
+	struct obj *obj = getobj(merge_runes, "merge runes into");
 	if(!obj){
 		return MOVE_CANCELLED;
 	}
@@ -11689,7 +11690,7 @@ mergeSilverknightRunes()
 			pline("That would be an interesting metaphysical experiment.");
 			return MOVE_CANCELLED;
 		}
-		if(!objects[upitm->otyp].oc_oprop[0] && upitm->otyp != HELM_OF_BRILLIANCE){
+		if(!objects[upitm->otyp].oc_oprop[0] && upitm->otyp != HELM_OF_BRILLIANCE && upitm->otyp != GAUNTLETS_OF_POWER){
 			pline("That doesn't have any runes to be extracted.");
 			return MOVE_CANCELLED;
 		}
