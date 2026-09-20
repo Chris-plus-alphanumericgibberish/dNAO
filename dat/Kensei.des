@@ -2304,11 +2304,13 @@ MAP
 8,,T,,,,,,,,,,,,,,,,,,,,,,,T,,,TT,,,,,}},,,,T,T,,,TTT,,,,,,,,,,,,,,,,T,,,T,,,
 9,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,}},,,,,TT,,,,T,,,,,T,,,,,,,,,TT,,,,T,,,
 ENDMAP
+RANDOM_PLACES:(10,15),(65,15),(69,05),(54,02)
 # Dungeon Description
 REGION:(00,00,75,19),unlit,"morgue",unfilled
 # Altar
+OBJECT:'#',"blessed fixed +1 Sky Render",place[0]
 ALTAR:(54,02),noalign,altar
-OBJECT:'#',"katanakenseisword",(54,02)
+OBJECT:'#',"cursed fixed +1 Mortal Blade",(54,02)
 # Stairs
 STAIR:(00,17,75,19), (00,00,00,00),up
 STAIR:(10,00,63,12), (00,00,00,00),down
