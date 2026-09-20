@@ -106,8 +106,14 @@ AUTO_BIN += util/makedefs
 ATTKBPDEFS_O = util/attkbpdefs.o util/atkbpnames.o src/mattkbp.o src/monst.o	\
                util/panic.o
 src/mattkbp.o: include/pm.h include/atkbpbits.h
-src/xhity.o: include/atkbpbits.h
-util/attkbpdefs.o: include/atkbpbits.h
+
+MATTKBP_O = src/allmain.o src/attkbp.o src/do_wear.o src/dokick.o	\
+            src/engrave.o src/mcastu.o src/mon.o src/mondata.o	\
+            src/mutations.o src/polyself.o src/projectile.o		\
+            src/research.o src/seduce.o src/sounds.o src/spell.o	\
+            src/wizard.o src/worm.o src/xhity.o src/xhityhelpers.o	\
+            src/zap.o util/attkbpdefs.o
+$(MATTKBP_O): include/atkbpbits.h
 util/attkbpdefs: $(ATTKBPDEFS_O)
 	$(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@
 AUTO_BIN += util/attkbpdefs
