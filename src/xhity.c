@@ -18845,7 +18845,7 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 		if ((attackmask & ~(resistmask)) == 0L
 			&& (subtotl > 0)
 			&& !(strike_obj && spec_applies(strike_obj, mdef, TRUE))
-			&& !(strike_obj && CHECK_ETRAIT(strike_obj, magr, ETRAIT_ANTI_UNDEAD) && is_undead(mdef->data))
+			&& !(strike_obj && magr && CHECK_ETRAIT(strike_obj, magr, ETRAIT_ANTI_UNDEAD) && is_undead(mdef->data))
 		) {
 			/* damage reduced by 75% */
 			subtotl /= 4;
