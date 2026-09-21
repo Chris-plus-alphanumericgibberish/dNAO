@@ -113,6 +113,7 @@ int subout;
 {
 	if(subout > MAX_SUBOUT || subout < 1){
 		impossible("Attempting to set subout number %d?", subout);
+		return;
 	}
 	int size = sizeof(int)*8;
 	subout_list[(subout-1)/size] |= (0x1L << ((subout-1)%size));
@@ -124,9 +125,11 @@ int *subout_list;
 int subout;
 {
 	if(subout > MAX_SUBOUT || subout < 1){
-		impossible("Attempting to set subout number %d?", subout);
+		impossible("Attempting to remove subout number %d?", subout);
+		return;
 	}
-	subout_list[(subout-1)/16] &= ~(0x1L << ((subout-1)%16));
+	int size = sizeof(int)*8;
+	subout_list[(subout-1)/size] &= ~(0x1L << ((subout-1)%size));
 }
 
 void
