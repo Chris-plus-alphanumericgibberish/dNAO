@@ -2579,6 +2579,28 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 				attk->aatyp = AT_MARI;
 		}
 	}
+	/* Death Eye: each round uses only one of its bites, random gaze, or death gaze; the passive always applies */
+	if (!by_the_book && fromlist && pa->mtyp == PM_DEATH_BEHOLDER) {
+		if (*indexnum == 0) {
+			int roll = rn2(4);
+			if (roll == 0)
+				add_subout(subout, SUBOUT_DEATHEYE_BITES);
+			else if (roll == 3)
+				add_subout(subout, SUBOUT_DEATHEYE_DEATH);
+		}
+		if (attk->aatyp == AT_BITE || attk->aatyp == AT_TONG) {
+			if (!check_subout(subout, SUBOUT_DEATHEYE_BITES))
+				GETNEXT
+		}
+		else if (attk->aatyp == AT_GAZE && attk->adtyp == AD_RGAZ) {
+			if (check_subout(subout, SUBOUT_DEATHEYE_BITES) || check_subout(subout, SUBOUT_DEATHEYE_DEATH))
+				GETNEXT
+		}
+		else if (attk->aatyp == AT_GAZE && attk->adtyp == AD_DEAD) {
+			if (!check_subout(subout, SUBOUT_DEATHEYE_DEATH))
+				GETNEXT
+		}
+	}
 	/* monsters in magic stance restrict themselves to spellcasting attacks,
 	   but also keep squeeze, passive, and explosion attacks */
 	if (!youagr && magr->mstance == MSTANCE_MAGIC) {
@@ -13720,6 +13742,7 @@ int vis;
 	static const int randomgazeattacks[] = { AD_DEAD, AD_CNCL, AD_PLYS, AD_DRLI, AD_ENCH, AD_STON, AD_LUCK,
 		AD_CONF, AD_SLOW, AD_STUN, AD_BLND, AD_FIRE, AD_FIRE,
 		AD_COLD, AD_COLD, AD_ELEC, AD_ELEC, AD_HALU, AD_SLEE };
+	static const int deatheyegazeattacks[] = { AD_PLYS, AD_CNCL, AD_STON, AD_DEAD, AD_CONF, AD_SLOW };
 	static const int elementalgazeattacks[] = { AD_FIRE, AD_COLD, AD_ELEC };
 	struct obj *ahelm = youagr ? uarmh : which_armor(magr, W_ARMH);
 	struct obj *acloak = youagr ? uarmc : which_armor(magr, W_ARMC);
@@ -13761,7 +13784,10 @@ int vis;
 	switch (adtyp)
 	{
 	case AD_RGAZ:
-		adtyp = randomgazeattacks[rn2(SIZE(randomgazeattacks))];
+		if (pa->mtyp == PM_DEATH_BEHOLDER)
+			adtyp = ROLL_FROM(deatheyegazeattacks);
+		else
+			adtyp = ROLL_FROM(randomgazeattacks);
 		break;
 	case AD_RBRE:
 	case AD_RETR:

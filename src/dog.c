@@ -1104,6 +1104,7 @@ rock:
 						&& obj->corpsenm != PM_LARGE_CAVE_LIZARD
 						&& obj->corpsenm != PM_LICHEN
 						&& obj->corpsenm != PM_BEHOLDER
+						&& obj->corpsenm != PM_DEATH_BEHOLDER
 						&& mon->data->mlet != S_FUNGUS) ||
 			(mons[obj->corpsenm].mflagsa == mon->data->mflagsa && intel) ||
 			(polyfodder(obj) && !resists_poly(mon->data) && (intel || goodsmeller(mon->data))) ||
@@ -1264,6 +1265,7 @@ rock:
 				&& obj->corpsenm != PM_LARGE_CAVE_LIZARD
 				&& obj->corpsenm != PM_LICHEN
 				&& obj->corpsenm != PM_BEHOLDER
+				&& obj->corpsenm != PM_DEATH_BEHOLDER
 				&& mon->data->mlet != S_FUNGUS
 			)
 				return 0;

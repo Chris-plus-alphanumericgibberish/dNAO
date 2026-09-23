@@ -2537,7 +2537,7 @@ boolean devour;
 	if(obj->otyp == CORPSE){
 		mtyp = obj->corpsenm;
 		if (mtyp != PM_LIZARD && mtyp != PM_SMALL_CAVE_LIZARD && mtyp != PM_CAVE_LIZARD 
-			&& mtyp != PM_LARGE_CAVE_LIZARD && mtyp != PM_LICHEN && mtyp != PM_BEHOLDER
+			&& mtyp != PM_LARGE_CAVE_LIZARD && mtyp != PM_LICHEN && mtyp != PM_BEHOLDER && mtyp != PM_DEATH_BEHOLDER
 		) {
 			long age = peek_at_iced_corpse_age(obj);
 

@@ -1374,6 +1374,7 @@ BOOLEAN_P tin, nobadeffects, drained;
 			if (HConfusion > 2)  make_confused(2L,FALSE);
 		break;
 		case PM_BEHOLDER:
+		case PM_DEATH_BEHOLDER:
 			if(!drained || !rn2(5)) {
 				You(Hallucination ? "can see your own insides!"
 					: "feel as though you can see the world from a whole new angle!");
@@ -1532,7 +1533,7 @@ opentin()		/* called during each move whilst opening a tin */
 	    if (r == ROTTEN_TIN && (tin.tin->corpsenm == PM_LIZARD || tin.tin->corpsenm == PM_SMALL_CAVE_LIZARD ||
 			tin.tin->corpsenm == PM_CAVE_LIZARD || tin.tin->corpsenm == PM_BABY_CAVE_LIZARD || 
 			tin.tin->corpsenm == PM_LARGE_CAVE_LIZARD ||
-			tin.tin->corpsenm == PM_LICHEN || tin.tin->corpsenm == PM_BEHOLDER))
+			tin.tin->corpsenm == PM_LICHEN || tin.tin->corpsenm == PM_BEHOLDER || tin.tin->corpsenm == PM_DEATH_BEHOLDER))
 		r = DRIED_TIN;		/* lizards don't rot */
 	    else if (tin.tin->spe == -1 && !tin.tin->blessed && !rn2(7))
 		r = ROTTEN_TIN;			/* some homemade tins go bad */
@@ -1914,7 +1915,7 @@ eatcorpse(otmp)		/* called when a corpse is selected as food */
 	}
 
 	if (mtyp != PM_LIZARD && mtyp != PM_SMALL_CAVE_LIZARD && mtyp != PM_CAVE_LIZARD 
-		&& mtyp != PM_LARGE_CAVE_LIZARD && mtyp != PM_LICHEN && mtyp != PM_BEHOLDER
+		&& mtyp != PM_LARGE_CAVE_LIZARD && mtyp != PM_LICHEN && mtyp != PM_BEHOLDER && mtyp != PM_DEATH_BEHOLDER
 	) {
 		long age = peek_at_iced_corpse_age(otmp);
 
@@ -2044,7 +2045,7 @@ eatcorpse(otmp)		/* called when a corpse is selected as food */
 	if (otmp->odrained) victual.reqtime = (u.sealsActive&SEAL_AHAZU) ? 1 : rounddiv(victual.reqtime, 5);
 
 	if (!tp && mtyp != PM_LIZARD && mtyp != PM_SMALL_CAVE_LIZARD && mtyp != PM_CAVE_LIZARD 
-		&& mtyp != PM_LARGE_CAVE_LIZARD && mtyp != PM_LICHEN && mtyp != PM_BEHOLDER &&
+		&& mtyp != PM_LARGE_CAVE_LIZARD && mtyp != PM_LICHEN && mtyp != PM_BEHOLDER && mtyp != PM_DEATH_BEHOLDER &&
 			(otmp->orotten || !rn2(7))) {
 	    if ( (monstermoves - peek_at_iced_corpse_age(otmp)) > 5 && rottenfood(otmp)) {
 		otmp->orotten = TRUE;
@@ -2692,7 +2693,7 @@ struct obj *otmp;
 		    stoneorslime = !Slime_res(&youmonst);
 
 		if (cadaver && mtyp != PM_LIZARD && mtyp != PM_SMALL_CAVE_LIZARD && mtyp != PM_CAVE_LIZARD 
-		&& mtyp != PM_LARGE_CAVE_LIZARD && mtyp != PM_LICHEN && mtyp != PM_BEHOLDER ) {
+		&& mtyp != PM_LARGE_CAVE_LIZARD && mtyp != PM_LICHEN && mtyp != PM_BEHOLDER && mtyp != PM_DEATH_BEHOLDER ) {
 			long age = peek_at_iced_corpse_age(otmp);
 			/* worst case rather than random
 			   in this calculation to force prompt */

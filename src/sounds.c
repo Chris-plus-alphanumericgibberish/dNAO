@@ -5410,6 +5410,7 @@ int tx,ty;
 					otmp->corpsenm != PM_LICHEN && 
 					otmp->corpsenm != PM_LIZARD && 
 					otmp->corpsenm != PM_BEHOLDER && 
+					otmp->corpsenm != PM_DEATH_BEHOLDER &&
 					(monstermoves - peek_at_iced_corpse_age(otmp))/(10L) > 5L &&
 					poisonous(&mons[otmp->corpsenm])
 				){

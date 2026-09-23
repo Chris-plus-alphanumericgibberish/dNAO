@@ -1633,6 +1633,17 @@ A("Masamune",						NAGAMAKI,				(const char *)0,
 	NOINVOKE, NOFLAG
 	),
 
+/*Needs encyc entry*/
+A("Floating Stone",						LOADSTONE,				(const char *)0,
+	7500L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	A_NONE, NON_PM, NON_PM, TIER_S, (ARTG_NOGEN|ARTG_NOWISH),
+	NO_MONS(),
+	ATTK(AD_PHYS, 1, 1), NOFLAG,
+	PROPS(), NOFLAG,
+	PROPS(), NOFLAG,
+	LEVITATION, NOFLAG
+	),
+
 /*from Final Fantasy*/
 /*The crystals are generated together.  The Black Crystal "counts", and the others don't.*/
 A("The Black Crystal",				CRYSTAL_BALL,			(const char *)0,

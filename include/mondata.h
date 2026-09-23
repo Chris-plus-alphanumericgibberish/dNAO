@@ -1629,6 +1629,7 @@
 #define	hamWarded(data)	(is_auton(data) \
 			|| data->mtyp == PM_FLOATING_EYE \
 			|| data->mtyp == PM_BEHOLDER \
+			|| data->mtyp == PM_DEATH_BEHOLDER \
 			|| data->mtyp == PM_APHANACTONAN_ASSESSOR \
 			|| data->mtyp == PM_EYE_OF_DOOM \
 			|| data->mtyp == PM_MANY_EYED_SEEKER \

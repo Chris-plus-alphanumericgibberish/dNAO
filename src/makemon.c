@@ -14117,6 +14117,16 @@ boolean greatequip;
 				otmp->cursed = FALSE;
 				(void) mpickobj(mtmp,otmp);
 			}
+			else if(ptr->mtyp == PM_DEATH_BEHOLDER){
+				otmp = mksartifact(ART_FLOATING_STONE);
+				if(otmp->oartifact){
+					otmp->blessed = FALSE;
+					otmp->cursed = FALSE;
+					(void) mpickobj(mtmp, otmp);
+				} else {
+					obfree(otmp, (struct obj *) 0);
+				}
+			}
 		break;
 		case S_GOLEM:
 			golem_initinv(mtmp, mkobjflags, faction, goodequip);

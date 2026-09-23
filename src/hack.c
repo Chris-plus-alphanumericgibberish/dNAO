@@ -3207,7 +3207,11 @@ inv_weight()
 		//Correct artifact weights before adding them.  Because that code isn't being run.
 		if(otmp->oartifact) otmp->owt = weight(otmp);
 #ifndef GOLDOBJ
-		if (!is_boulder(otmp) || !(throws_rocks(youracedata) || u.sealsActive&SEAL_YMIR))
+		if(otmp->oartifact == ART_IRON_BALL_OF_LEVITATION)
+			wt -= otmp->owt;
+		else if(otmp->oartifact == ART_FLOATING_STONE)
+			wt -= 2*otmp->owt;
+		else if (!is_boulder(otmp) || !(throws_rocks(youracedata) || u.sealsActive&SEAL_YMIR))
 #else
 		if (otmp->oclass == COIN_CLASS){
 			objwt = (int)(((long)otmp->quan + 50L) / 100L);
@@ -3215,6 +3219,10 @@ inv_weight()
 				objwt = max(0, objwt - wtmod);
 			wt += objwt;
 		}
+		else if(otmp->oartifact == ART_IRON_BALL_OF_LEVITATION)
+			wt -= otmp->owt;
+		else if(otmp->oartifact == ART_FLOATING_STONE)
+			wt -= 2*otmp->owt;
 		else if (!is_boulder(otmp) || !(throws_rocks(youracedata) || u.sealsActive&SEAL_YMIR))
 #endif
 		{
@@ -3232,8 +3240,6 @@ inv_weight()
 			}
 		}
 
-		if(otmp->oartifact == ART_IRON_BALL_OF_LEVITATION)
-			wt -= 2*otmp->owt;
 		
 		if(u.uleadamulet && (otmp->otyp == AMULET_OF_YENDOR || otmp->otyp == FAKE_AMULET_OF_YENDOR))
 			wt += 24*otmp->owt; /* Same as loadstone by default. Only affects fake amulets in open inventory */

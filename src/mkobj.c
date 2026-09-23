@@ -1931,6 +1931,7 @@ start_corpse_timeout(body)
 		|| body->corpsenm == PM_LICHEN
 		|| body->corpsenm == PM_CROW_WINGED_HALF_DRAGON
 		|| body->corpsenm == PM_BEHOLDER
+		|| body->corpsenm == PM_DEATH_BEHOLDER
 		|| body->spe
 	) return;
 	
@@ -3172,6 +3173,7 @@ int x, y;
 				|| ((num) == PM_LICHEN)		\
 				|| ((num) == PM_CROW_WINGED_HALF_DRAGON)		\
 				|| ((num) == PM_BEHOLDER)		\
+				|| ((num) == PM_DEATH_BEHOLDER)		\
 				|| (is_rider(&mons[num]))	\
 				|| (mons[num].mlet == S_TROLL))
 
