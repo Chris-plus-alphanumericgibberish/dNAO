@@ -1013,8 +1013,9 @@ yellow_smite()
 				punish((struct obj *)0);
 			}
 			else {
-				Your("iron ball gets heavier!");
-				uball->owt += 160;
+				Your("%s ball gets heavier!", material_name(uball, TRUE));
+				uball->ovar1_heavy_ball += 160;
+				uball->owt = weight(uball);
 			}
 		break;
 		case 2:

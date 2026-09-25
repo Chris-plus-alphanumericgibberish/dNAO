@@ -1820,7 +1820,7 @@ add_material_words(obj, buf)
 struct obj *obj;
 char *buf;
 {
-	if (obj->otyp == BALL && (obj->owt > objects[BALL].oc_weight)) {
+	if (obj->otyp == BALL && obj->ovar1_heavy_ball) {
 		Strcat(buf, "very ");
 	}
 	if(obj->otyp == BALL){
@@ -6482,8 +6482,8 @@ typfnd:
 			consume_oeaten(otmp, -amt);
 		}
 	}
+	if (very && otmp->otyp == BALL) otmp->ovar1_heavy_ball += 160;
 	fix_object(otmp);
-	if (very && otmp->otyp == BALL) otmp->owt += 160;
 
 	*wishreturn = WISH_SUCCESS;
 	return(otmp);

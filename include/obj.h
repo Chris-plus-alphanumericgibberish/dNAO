@@ -423,6 +423,7 @@ struct obj {
 #define PGD_FEEDING	0
 #define PGD_SNAGGING	1
 #define ovar1_wheelspeed ovar1
+#define ovar1_heavy_ball ovar1
 
 /* True if obj has shepherd's crook traits */
 #define has_crook(obj) ((obj) && ((obj)->otyp == SHEPHERD_S_CROOK || \

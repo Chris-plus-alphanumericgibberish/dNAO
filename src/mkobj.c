@@ -3066,8 +3066,8 @@ register struct obj *obj;
 		return eaten_stat((int)obj->quan * wt, obj);
 	} else if (obj->oclass == COIN_CLASS)
 		return (int)((obj->quan + 50L) / 100L);
-	else if (obj->otyp == BALL && obj->owt != 0)
-		return((int)(obj->owt));	/* kludge for "very" heavy iron ball */
+	else if (obj->otyp == BALL)
+		return (int)(wt + obj->ovar1_heavy_ball);
 	return((wt || obj->oartifact) ? wt*(int)obj->quan : ((int)obj->quan + 1)>>1);
 }
 

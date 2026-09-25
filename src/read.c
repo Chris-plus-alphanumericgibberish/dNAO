@@ -3813,11 +3813,12 @@ register struct obj	*sobj;
 	}
 	You("are being punished for your misbehavior!");
 	if(Punished){
-		if(uball->owt < 1600){
-			Your("iron ball gets heavier.");
-			uball->owt += 160 * (1 + cursed);
+		if(weight(uball) < 1600){
+			Your("%s ball gets heavier.", material_name(uball, TRUE));
+			uball->ovar1_heavy_ball += 160 * (1 + cursed);
+			uball->owt = weight(uball);
 		} else {
-			Your("iron ball can grow no heavier.");
+			Your("%s ball can grow no heavier.", material_name(uball, TRUE));
 		}
 		return;
 	}

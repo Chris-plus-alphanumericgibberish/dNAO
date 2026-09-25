@@ -2073,6 +2073,9 @@ OBJECT(("gurney"), BITS(1,0,0,0,0,0,0,0,MZ_MEDIUM,1,0,0,0,P_NONE,METAL,0), {0},	
 OBJECT(("Bergonic chair", "strange chair"), BITS(0,0,0,0,0,0,0,0,MZ_LARGE,1,0,0,0,P_NONE,METAL,0), {0},		/*Needs encyc entry*/
 		BED_CLASS,     0, 0, 60,  100, DMG(D(4)), DMG(D(4)), 0, 0, 0, 2000, HI_ZAP),
 
+/*NOTE: Keep in sync with weapon.c Excess weight damage
+ * Current: base die d25, no bonus die, base weight is reasonable to view in incremets of 40
+ */
 #ifdef CONVICT
 OBJECT(("ball"), BITS(1,0,0,0,0,0,0,0,MZ_LARGE,0,0,0,WHACK,P_FLAIL,IRON,0), {0},
 #else

@@ -4301,7 +4301,10 @@ newgame()
 		setworn(mkobj(CHAIN_CLASS, NO_MKOBJ_FLAGS), W_CHAIN);
 		setworn(mkobj(BALL_CLASS, MKOBJ_ARTIF), W_BALL);
 		uball->spe = 1;
-		if (Race_if(PM_CHIROPTERAN)) uball->owt = 1600;
+		if (Race_if(PM_CHIROPTERAN)) {
+			uball->ovar1_heavy_ball = 1600 - objects[uball->otyp].oc_weight;
+			uball->owt = weight(uball);
+		}
 		placebc();
 		newsym(u.ux,u.uy);
 	}

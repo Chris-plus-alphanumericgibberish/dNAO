@@ -15,7 +15,7 @@ boolean showmsg;
 {
     if (carried(uball)) {
         if (showmsg)
-            pline("Startled, you drop the iron ball.");
+            pline("Startled, you drop the %s ball.", material_name(uball, TRUE));
         if (uwep == uball)
             setuwep((struct obj *) 0);
         if (uswapwep == uball)
@@ -39,8 +39,9 @@ ballfall()
 	ballrelease(TRUE);
 	if(gets_hit){
 		int dmg = rn1(7,25);
-		pline_The("iron ball falls on your %s.",
-			body_part(HEAD));
+		char buf[BUFSZ];
+		pline_The("%s ball falls on your %s.",
+			material_name(uball, TRUE), body_part(HEAD));
 		if (uarmh) {
 		    if(is_hard(uarmh)) {
 				pline("Fortunately, you are wearing a hard helmet.");
@@ -54,8 +55,9 @@ ballfall()
 		    } else if (flags.verbose)
 			Your("%s does not protect you.", xname(uarmh));
 		}
-		losehp(dmg, "crunched in the head by an iron ball",
-			NO_KILLER_PREFIX);
+		Sprintf(buf, "%s ball", material_name(uball, TRUE));
+		Sprintf(buf, "crunched in the head by %s", an(buf));
+		losehp(dmg, buf, NO_KILLER_PREFIX);
 	}
 }
 
@@ -577,8 +579,8 @@ boolean allow_drag;
 drag:
 
 	if (near_capacity() > SLT_ENCUMBER && dist2(x, y, u.ux, u.uy) <= 2) {
-	    You("cannot %sdrag the heavy iron ball.",
-			    invent ? "carry all that and also " : "");
+	    You("cannot %sdrag the heavy %s ball.",
+			    invent ? "carry all that and also " : "", material_name(uball, TRUE));
 	    nomul(0, NULL);
 	    return FALSE;
 	}
@@ -595,12 +597,12 @@ drag:
 			 t->ttyp == TRAPDOOR)) ) {
 
 	    if (Levitation) {
-		You_feel("a tug from the iron ball.");
+		You_feel("a tug from the %s ball.", material_name(uball, TRUE));
 		if (t) t->tseen = 1;
 	    } else {
 		struct monst *victim;
 
-		You("are jerked back by the iron ball!");
+		You("are jerked back by the %s ball!", material_name(uball, TRUE));
 		if ((victim = m_at(uchain->ox, uchain->oy)) != 0) {
 			int dieroll = rnd(20);
 			int hitvalu = tohitval((struct monst *)0, victim, (struct attack *)0, uball, (void *)0, HMON_PROJECTILE|HMON_FIRED, 0, (int *) 0);
@@ -793,6 +795,7 @@ drag_down()
 {
 	boolean forward;
 	uchar dragchance = 3;
+	char buf[BUFSZ];
 
 	/*
 	 *	Assume that the ball falls forward if:
@@ -806,26 +809,29 @@ drag_down()
 	forward = carried(uball) && (uwep == uball || !uwep || !rn2(3));
 
 	if (carried(uball))
-		You("lose your grip on the iron ball.");
+		You("lose your grip on the %s ball.", material_name(uball, TRUE));
 
 	if (forward) {
 		if(rn2(6)) {
-			pline_The("iron ball drags you downstairs!");
-			losehp(rnd(6), "dragged downstairs by an iron ball",
-				NO_KILLER_PREFIX);
+			pline_The("%s ball drags you downstairs!", material_name(uball, TRUE));
+			Sprintf(buf, "%s ball", material_name(uball, TRUE));
+			Sprintf(buf, "dragged downstairs by %s", an(buf));
+			losehp(rnd(6), buf, NO_KILLER_PREFIX);
 			litter();
 		}
 	} else {
 		if(rn2(2)) {
-			pline_The("iron ball smacks into you!");
-			losehp(rnd(20), "iron ball collision", KILLED_BY_AN);
+			pline_The("%s ball smacks into you!", material_name(uball, TRUE));
+			Sprintf(buf, "%s ball collision", material_name(uball, TRUE));
+			losehp(rnd(20), buf, KILLED_BY_AN);
 			exercise(A_STR, FALSE);
 			dragchance -= 2;
 		}
 		if( (int) dragchance >= rnd(6)) {
-			pline_The("iron ball drags you downstairs!");
-			losehp(rnd(3), "dragged downstairs by an iron ball",
-				NO_KILLER_PREFIX);
+			pline_The("%s ball drags you downstairs!", material_name(uball, TRUE));
+			Sprintf(buf, "%s ball", material_name(uball, TRUE));
+			Sprintf(buf, "dragged downstairs by %s", an(buf));
+			losehp(rnd(3), buf, NO_KILLER_PREFIX);
 			exercise(A_STR, FALSE);
 			litter();
 		}

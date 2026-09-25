@@ -7,6 +7,7 @@
  *	bonuses for any given weapon used, as well as weapons selection
  *	code for monsters.
  */
+#include <math.h>
 #include "hack.h"
 #include "artifact.h"
 #include "xhity.h"
@@ -785,12 +786,46 @@ struct monst *magr;
 		}
 
 		if (otyp == BALL) {
+			/*Excess weight damage, keep in sync with objects.c
+			 * Current: base die d25, no bonus die, base weight is reasonable to view in incremets of 40
+			 */
+#define BASE_BALL_DIE 25
+#define BALL_WEIGHT_INCREMENT 40
+#define BASE_BALL_DOUBLING_WEIGHT (BASE_BALL_DIE*BALL_WEIGHT_INCREMENT)
 			int wt = (int)objects[BALL].oc_weight;
 
 			if ((int)obj->owt > wt) {
-				wt = ((int)obj->owt - wt) / 40;
-				ocd += wt;
+				if((obj->owt - wt) <= BASE_BALL_DOUBLING_WEIGHT){
+					wt = ((int)obj->owt - wt) / BALL_WEIGHT_INCREMENT;
+					ocd += wt;
+				}
+				else {
+					double doublings = log2((double)(obj->owt - wt) / BASE_BALL_DOUBLING_WEIGHT + 1);
+					static boolean warning_given = FALSE;
+					if((bond != 0 || bonn != 0) && !warning_given){
+						warning_given = TRUE;
+						pline("Bug detected: bonus die already set in heavy ball code. Report to maintainer.");
+					}
+					if(doublings <= 3){
+						ocd += BASE_BALL_DIE*doublings;
+					}
+					else {
+						ocd = BASE_BALL_DIE*4;
+						doublings-=3;
+						while(doublings > 4){
+							ocn++;
+							doublings-=4;
+						}
+						bond = BASE_BALL_DIE*(doublings);
+						if(bond > 0){
+							bonn = 1;
+						}
+					}
+				}
 			}
+#undef BASE_BALL_DIE
+#undef BALL_WEIGHT_INCREMENT
+#undef BASE_BALL_DOUBLING_WEIGHT
 		}
 		if (check_omod(obj, OMOD_BLADED))
 			ocd = max(ocd, 2*(objects[obj->otyp].oc_size + 1));
@@ -1025,8 +1060,14 @@ struct monst *magr;
 		else if (obj->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD){
 			int wt = (int)objects[NAGINATA].oc_weight;
 			if ((int)obj->owt > wt) {
+				/* linear up through the first doubling of wt, then log2
+				 * growth beyond it for diminishing returns.
+				 */
+				double ratio = ((int)obj->owt <= 2 * wt)
+					? ((double)obj->owt - wt) / wt
+					: log2((double)obj->owt / wt);
 				bonn = 1;
-				bond = max(12 + 2 * dmod, 2) * ((int)obj->owt - wt) / wt;
+				bond = (int)(max(12 + 2 * dmod, 2) * ratio);
 			}
 		}
 		else if (obj->oartifact == ART_GOLDEN_SWORD_OF_Y_HA_TALLA && otyp == BULLWHIP)

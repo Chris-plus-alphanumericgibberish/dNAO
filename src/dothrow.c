@@ -666,7 +666,7 @@ hurtle(dx, dy, range, verbose, do_nomul)
      * for diagonal movement, give the player a message and return.
      */
     if(Punished && !carried(uball)) {
-	You_feel("a tug from the iron ball.");
+	You_feel("a tug from the %s ball.", material_name(uball, TRUE));
 	if(do_nomul) nomul(0, NULL);
 	return;
     } else if (u.utrap && u.utraptype == TT_SALIVA) {

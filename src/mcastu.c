@@ -5946,8 +5946,8 @@ int tary;
 				(In_endgame(&u.uz) && !Is_earthlevel(&u.uz)));
 			otmp = mksobj(iron ? BALL : BOULDER, MKOBJ_NOINIT);
 			otmp->quan = 1;
+			if (iron) otmp->ovar1_heavy_ball = 160 * rn2(2);
 			otmp->owt = weight(otmp);
-			if (iron) otmp->owt += 160 * rn2(2);
 
 			if (foundem) {
 				pline("%s drops out of %s and hits you!", An(xname(otmp)),
@@ -7744,12 +7744,15 @@ int tary;
 			if (magr->mtyp == PM_VOICE_IN_SCREAMS || u.ualign.record <= 1 || !rn2(min(u.ualign.record, 20))){
 				if (!Punished) {
 					punish((struct obj *)0);
-					if (is_prince(magr->data) && Punished) uball->owt += 160;
+					if (is_prince(magr->data) && Punished) {
+						uball->ovar1_heavy_ball += 160;
+						uball->owt = weight(uball);
+					}
 				}
 				else {
-					Your("iron ball gets heavier!");
-					if (is_prince(magr->data)) uball->owt += 240;
-					else uball->owt += 160;
+					Your("%s ball gets heavier!", material_name(uball, TRUE));
+					uball->ovar1_heavy_ball += is_prince(magr->data) ? 240 : 160;
+					uball->owt = weight(uball);
 				}
 			}
 			else Your("sins do not demand punishment.");
@@ -7829,12 +7832,15 @@ int tary;
 				case 2:
 					if (!Punished) {
 						punish((struct obj *)0);
-						if (is_prince(magr->data) && Punished) uball->owt += 160;
+						if (is_prince(magr->data) && Punished) {
+							uball->ovar1_heavy_ball += 160;
+							uball->owt = weight(uball);
+						}
 					}
 					else {
-						Your("iron ball gets heavier!");
-						if (is_prince(magr->data)) uball->owt += 240;
-						else uball->owt += 160;
+						Your("%s ball gets heavier!", material_name(uball, TRUE));
+						uball->ovar1_heavy_ball += is_prince(magr->data) ? 240 : 160;
+						uball->owt = weight(uball);
 					}
 					stop_occupation();
 				break;

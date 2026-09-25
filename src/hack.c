@@ -2024,7 +2024,10 @@ domove()
 	/* delay next move because of ball dragging */
 	/* must come after we finished picking up, in spoteffects() */
 	if (cause_delay) {
-	    nomul(-2, "dragging an iron ball");
+	    char buf[BUFSZ];
+	    Sprintf(buf, "%s ball", material_name(uball, TRUE));
+	    Sprintf(buf, "dragging %s", an(buf));
+	    nomul(-2, buf);
 	    nomovemsg = "";
 	}
 
