@@ -5231,11 +5231,6 @@ register struct monst *mtmp;
 	/* cease occupation if the monster was associated */
 	if(mtmp->moccupation) stop_occupation();
 	
-	if(mtmp->isgd) {
-		/* if we're going to abort the death, it *must* be before
-		 * the m_detach or there will be relmon problems later */
-		if(!grddead(mtmp)) return;
-	}
 	if (!DEADMONSTER(mtmp)) {
 		lifesaved_monster(mtmp);
 		if (mtmp->mhp > 0) return;
@@ -5588,6 +5583,7 @@ detach_only:
 	if(glyph_is_invisible(levl[mtmp->mx][mtmp->my].glyph))
 		unmap_object(mtmp->mx, mtmp->my);
 	m_detach(mtmp, mptr);
+	if(mtmp->isgd) grddead(mtmp);
 }
 
 STATIC_DCL int

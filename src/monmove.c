@@ -2421,8 +2421,7 @@ register struct monst *mtmp;
 		    case 3:	/* absolutely no movement */
 				/* for pets, case 0 and 3 are equivalent */
 			/* vault guard might have vanished */
-			if (mtmp->isgd && (mtmp->mhp < 1 ||
-					    (mtmp->mx == 0 && mtmp->my == 0)))
+			if (mtmp->isgd && mtmp->mx == 0 && mtmp->my == 0)
 			    return 1;	/* behave as if it died */
 			/* During hallucination, monster appearance should
 			 * still change - even if it doesn't move.

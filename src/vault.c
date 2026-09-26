@@ -13,50 +13,125 @@ STATIC_DCL struct monst *NDECL(findgd);
 #ifdef OVLB
 
 STATIC_DCL boolean FDECL(clear_fcorr, (struct monst *,BOOLEAN_P));
+STATIC_DCL boolean FDECL(enclosed_by_rock, (int,int));
+STATIC_DCL void FDECL(blackout, (int,int));
+STATIC_DCL void FDECL(restore_fcorr_loc, (struct fakecorridor *));
 STATIC_DCL void FDECL(restfakecorr,(struct monst *));
 STATIC_DCL boolean FDECL(in_fcorridor, (struct monst *,int,int));
+STATIC_DCL boolean FDECL(find_guard_dest, (xchar *,xchar *));
 STATIC_DCL void FDECL(move_gold,(struct obj *,int));
+STATIC_DCL struct obj *FDECL(rock_or_boulder_at, (int,int));
+STATIC_DCL int FDECL(destroy_rocks_at, (int,int));
 STATIC_DCL void FDECL(wallify_vault,(struct monst *));
+STATIC_DCL void FDECL(gd_mv_monaway, (struct monst *,int,int));
 
 STATIC_OVL boolean
-clear_fcorr(grd, forceshow)
-register struct monst *grd;
-register boolean forceshow;
+clear_fcorr(struct monst *grd, int forceshow)
 {
-	register int fcx, fcy, fcbeg;
-	register struct monst *mtmp;
+	int fcx, fcy, fcbeg;
+	struct monst *mtmp;
+	boolean sawcorridor = FALSE, encased = FALSE, submerged = FALSE,
+		cleared = TRUE;
 
 	if (!on_level(&(EVGD(grd)->gdlevel), &u.uz)) return TRUE;
 
 	while((fcbeg = EVGD(grd)->fcbeg) < EVGD(grd)->fcend) {
 		fcx = EVGD(grd)->fakecorr[fcbeg].fx;
 		fcy = EVGD(grd)->fakecorr[fcbeg].fy;
-		if((grd->mhp <= 0 || !in_fcorridor(grd, u.ux, u.uy)) &&
+		if((DEADMONSTER(grd) || !in_fcorridor(grd, u.ux, u.uy)) &&
 				   EVGD(grd)->gddone)
 			forceshow = TRUE;
-		if((u.ux == fcx && u.uy == fcy && grd->mhp > 0)
+		if((u.ux == fcx && u.uy == fcy && !DEADMONSTER(grd))
 			|| (!forceshow && couldsee(fcx,fcy))
 			|| (Punished && !carried(uball)
-				&& uball->ox == fcx && uball->oy == fcy))
-			return FALSE;
-
-		if ((mtmp = m_at(fcx,fcy)) != 0) {
-			if(mtmp->isgd) return(FALSE);
-			else if(!in_fcorridor(grd, u.ux, u.uy)) {
-			    if(mtmp->mtame) yelp(mtmp);
-			    (void) rloc(mtmp, FALSE);
-			}
+				&& ((uball->ox == fcx && uball->oy == fcy)
+				    || (uchain->ox == fcx && uchain->oy == fcy)))
+		) {
+			cleared = FALSE;
+			break;
 		}
-		levl[fcx][fcy].typ = EVGD(grd)->fakecorr[fcbeg].ftyp;
+
+		/* a monster on the hero's own spot is the hero's steed or rider */
+		if ((mtmp = m_at(fcx,fcy)) != 0 && (fcx != u.ux || fcy != u.uy)) {
+			if(mtmp->isgd) {
+				cleared = FALSE;
+				break;
+			}
+			if(mtmp->mtame) yelp(mtmp);
+			(void) rloc(mtmp, FALSE);
+		}
+		if (levl[fcx][fcy].typ == CORR && cansee(fcx, fcy))
+			sawcorridor = TRUE;
+		restore_fcorr_loc(&EVGD(grd)->fakecorr[fcbeg]);
 		map_location(fcx, fcy, 1);	/* bypass vision */
-		if(!ACCESSIBLE(levl[fcx][fcy].typ)) block_point(fcx,fcy);
+		if (fcx == u.ux && fcy == u.uy) {
+			if (IS_ROCK(levl[fcx][fcy].typ))
+				encased = TRUE;
+			else if (is_pool(fcx, fcy, FALSE) || is_lava(fcx, fcy))
+				submerged = TRUE;
+		}
 		EVGD(grd)->fcbeg++;
 	}
-	if(grd->mhp <= 0) {
+	if(DEADMONSTER(grd) && sawcorridor)
 	    pline_The("corridor disappears.");
-	    if(IS_ROCK(levl[u.ux][u.uy].typ)) You("are encased in rock.");
+	if(encased)
+	    You("are encased in rock.");
+	else if(submerged)
+	    spoteffects(FALSE);
+	return cleared;
+}
+
+/* TRUE if every location adjacent to (x,y) is off the map or rock-type
+ * terrain */
+STATIC_OVL boolean
+enclosed_by_rock(int x, int y)
+{
+	int i, j;
+
+	for (i = x - 1; i <= x + 1; i++)
+	    for (j = y - 1; j <= y + 1; j++) {
+		if (i == x && j == y) continue;
+		if (isok(i, j) && !IS_ROCK(levl[i][j].typ))
+		    return FALSE;
+	    }
+	return TRUE;
+}
+
+/* unlight rock at and around (x,y) that is enclosed by rock */
+STATIC_OVL void
+blackout(int x, int y)
+{
+	int i, j;
+
+	for (i = x - 1; i <= x + 1; i++)
+	    for (j = y - 1; j <= y + 1; j++)
+		if (isok(i, j) && IS_ROCK(levl[i][j].typ)
+			&& enclosed_by_rock(i, j)
+		) levl[i][j].lit = levl[i][j].waslit = 0;
+}
+
+/* return a fake corridor location to the terrain it had before the guard
+ * dug through it; the caller is responsible for updating the display */
+STATIC_OVL void
+restore_fcorr_loc(struct fakecorridor *fcp)
+{
+	int x = fcp->fx, y = fcp->fy;
+	struct rm *lev = &levl[x][y];
+	struct trap *trap;
+
+	lev->typ = fcp->ftyp;
+	lev->flags = fcp->fflags;
+	if (IS_STWALL(lev->typ)) {
+	    if ((trap = t_at(x, y)) != 0)
+		deltrap(trap);
+	    del_engr_at(x, y);
 	}
-	return(TRUE);
+	if (IS_ROCK(lev->typ))
+	    blackout(x, y);
+	if (does_block(x, y, lev))
+	    block_point(x, y);
+	else
+	    unblock_point(x, y);
 }
 
 STATIC_OVL void
@@ -67,22 +142,12 @@ register struct monst *grd;
 	if(clear_fcorr(grd, FALSE)) mongone(grd);
 }
 
-boolean
-grddead(grd)				/* called in mon.c */
-register struct monst *grd;
+/* remove as much of a dead guard's fake corridor as possible; grd must
+ * already be marked dead and detached from the map */
+void
+grddead(struct monst *grd)
 {
-	register boolean dispose = clear_fcorr(grd, TRUE);
-
-	if(!dispose) {
-		/* see comment by newpos in gd_move() */
-		remove_monster(grd->mx, grd->my);
-		newsym(grd->mx, grd->my);
-		place_monster(grd, 0, 0);
-		EVGD(grd)->ogx = grd->mx;
-		EVGD(grd)->ogy = grd->my;
-		dispose = clear_fcorr(grd, TRUE);
-	}
-	return(dispose);
+	(void) clear_fcorr(grd, TRUE);
 }
 
 STATIC_OVL boolean
@@ -111,6 +176,45 @@ findgd()
 	return((struct monst *)0);
 }
 
+/* find a location near the hero for a guard to lead the hero to: a
+ * corridor if there is one, otherwise any walkable location outside a vault;
+ * returns FALSE if no suitable location exists */
+STATIC_OVL boolean
+find_guard_dest(xchar *rx, xchar *ry)
+{
+	int x, y, dd, lx, ly, pass;
+
+	for(pass = 0; pass < 2; pass++)
+	for(dd = 2; (dd < ROWNO || dd < COLNO); dd++) {
+	  for(y = u.uy-dd; y <= u.uy+dd; y++) {
+	    if(y < 0 || y > ROWNO-1) continue;
+	    for(x = u.ux-dd; x <= u.ux+dd; x++) {
+	      if(y != u.uy-dd && y != u.uy+dd && x != u.ux-dd)
+		x = u.ux+dd;
+	      if(x < 1 || x > COLNO-1) continue;
+	      if(pass == 0) {
+		  if(levl[x][y].typ != CORR) continue;
+		  if(x < u.ux) lx = x + 1;
+		  else if(x > u.ux) lx = x - 1;
+		  else lx = x;
+		  if(y < u.uy) ly = y + 1;
+		  else if(y > u.uy) ly = y - 1;
+		  else ly = y;
+		  if(levl[lx][ly].typ != STONE && levl[lx][ly].typ != CORR)
+		      continue;
+	      } else {
+		  if(!ACCESSIBLE(levl[x][y].typ) || *in_rooms(x, y, VAULT))
+		      continue;
+	      }
+	      *rx = x;
+	      *ry = y;
+	      return TRUE;
+	    }
+	  }
+	}
+	return FALSE;
+}
+
 #endif /* OVLB */
 #ifdef OVL0
 
@@ -133,6 +237,7 @@ invault()
     int dummy;		/* hack to avoid schain botch */
 #endif
     struct monst *guard;
+    struct obj *otmp;
     int trycount, vaultroom = (int)vault_occupied(u.urooms);
 
     if(!vaultroom) {
@@ -145,39 +250,18 @@ invault()
     guard = findgd();
     if(++u.uinvault % 30 == 0 && !guard) { /* if time ok and no guard now. */
 	char buf[BUFSZ];
-	register int x, y, dd, gx, gy;
-	int lx = 0, ly = 0;
+	register int x, y, gx, gy;
+	xchar rx, ry;
 #ifdef GOLDOBJ
         long umoney;
 #endif
 	/* first find the goal for the guard */
-	for(dd = 2; (dd < ROWNO || dd < COLNO); dd++) {
-	  for(y = u.uy-dd; y <= u.uy+dd; ly = y, y++) {
-	    if(y < 0 || y > ROWNO-1) continue;
-	    for(x = u.ux-dd; x <= u.ux+dd; lx = x, x++) {
-	      if(y != u.uy-dd && y != u.uy+dd && x != u.ux-dd)
-		x = u.ux+dd;
-	      if(x < 1 || x > COLNO-1) continue;
-	      if(levl[x][y].typ == CORR) {
-		  if(x < u.ux) lx = x + 1;
-		  else if(x > u.ux) lx = x - 1;
-		  else lx = x;
-		  if(y < u.uy) ly = y + 1;
-		  else if(y > u.uy) ly = y - 1;
-		  else ly = y;
-		  if(levl[lx][ly].typ != STONE && levl[lx][ly].typ != CORR)
-		      goto incr_radius;
-		  goto fnd;
-	      }
-	    }
-	  }
-incr_radius: ;
+	if (!find_guard_dest(&rx, &ry)) {
+	    impossible("No destination for vault guard on this level??");
+	    tele();
+	    return;
 	}
-	impossible("Not a single corridor on this level??");
-	tele();
-	return;
-fnd:
-	gx = x; gy = y;
+	gx = rx; gy = ry;
 
 	/* next find a good place for a door in the wall */
 	x = u.ux; y = u.uy;
@@ -224,6 +308,21 @@ fnd:
 
 	/* make something interesting happen */
 	if(!(guard = makemon(&mons[PM_GUARD], x, y, NO_MM_FLAGS))) return;
+	/* shatter any boulders in the guard's entrance, which would otherwise
+	 * stop the hero from following the guard out */
+	if ((otmp = sobj_at(BOULDER, x, y)) != 0) {
+	    int bcnt = 0;
+
+	    do {
+		bcnt++;
+		fracture_rock(otmp);
+	    } while ((otmp = sobj_at(BOULDER, x, y)) != 0);
+	    newsym(x, y);
+	    if (cansee(x, y))
+		You("see %s shatter.", bcnt == 1 ? "a boulder" : "boulders");
+	    else
+		You_hear("%s shatter.", bcnt == 1 ? "a boulder" : "boulders");
+	}
 	guard->isgd = 1;
 	guard->mpeaceful = 1;
 	set_malign(guard);
@@ -330,9 +429,10 @@ fnd:
 	EVGD(guard)->fcbeg = 0;
 	EVGD(guard)->fakecorr[0].fx = x;
 	EVGD(guard)->fakecorr[0].fy = y;
-	if(IS_WALL(levl[x][y].typ))
+	if(IS_WALL(levl[x][y].typ)) {
 	    EVGD(guard)->fakecorr[0].ftyp = levl[x][y].typ;
-	else { /* the initial guard location is a dug door */
+	    EVGD(guard)->fakecorr[0].fflags = levl[x][y].flags;
+	} else { /* the initial guard location is a dug door */
 	    int vlt = EVGD(guard)->vroom;
 	    xchar lowx = rooms[vlt].lx, hix = rooms[vlt].hx;
 	    xchar lowy = rooms[vlt].ly, hiy = rooms[vlt].hy;
@@ -377,9 +477,35 @@ int vroom;
 	newsym(nx,ny);
 }
 
+/* first rock or boulder at (x,y), or null if there are none */
+STATIC_OVL struct obj *
+rock_or_boulder_at(int x, int y)
+{
+	struct obj *otmp;
+
+	for (otmp = level.objects[x][y]; otmp; otmp = otmp->nexthere)
+	    if (otmp->otyp == ROCK || otmp->otyp == BOULDER)
+		return otmp;
+	return (struct obj *)0;
+}
+
+/* destroy all rocks and boulders at (x,y); returns the number of objects
+ * destroyed */
+STATIC_OVL int
+destroy_rocks_at(int x, int y)
+{
+	struct obj *otmp;
+	int count = 0;
+
+	while ((otmp = rock_or_boulder_at(x, y)) != 0) {
+	    delobj(otmp);
+	    count++;
+	}
+	return count;
+}
+
 STATIC_OVL void
-wallify_vault(grd)
-struct monst *grd;
+wallify_vault(struct monst *grd)
 {
 	int x, y, typ;
 	int vlt = EVGD(grd)->vroom;
@@ -397,15 +523,24 @@ struct monst *grd;
 		/* if not on the room boundary, skip ahead */
 		if (x != lox && x != hix && y != loy && y != hiy) continue;
 
-		if (!IS_WALL(levl[x][y].typ) && !in_fcorridor(grd, x, y)) {
-		    if ((mon = m_at(x, y)) != 0 && mon != grd) {
-			if (mon->mtame) yelp(mon);
-			(void) rloc(mon, FALSE);
-		    }
-		    if ((gold = g_at(x, y)) != 0) {
-			move_gold(gold, EVGD(grd)->vroom);
-			movedgold = TRUE;
-		    }
+		if (in_fcorridor(grd, x, y)) continue;
+		if (IS_WALL(levl[x][y].typ) && !g_at(x, y)
+			&& !rock_or_boulder_at(x, y)
+		) continue;
+
+		if ((mon = m_at(x, y)) != 0 && mon != grd) {
+		    if (mon->mtame) yelp(mon);
+		    (void) rloc(mon, FALSE);
+		}
+		/* gold goes into the vault; rocks and boulders become part
+		 * of the wall; anything else stays embedded */
+		if ((gold = g_at(x, y)) != 0) {
+		    move_gold(gold, EVGD(grd)->vroom);
+		    movedgold = TRUE;
+		}
+		if (destroy_rocks_at(x, y))
+		    fixed = TRUE;
+		if (!IS_WALL(levl[x][y].typ)) {
 		    if ((trap = t_at(x, y)) != 0)
 			deltrap(trap);
 		    if (x == lox)
@@ -418,17 +553,17 @@ struct monst *grd;
 			typ = HWALL;
 		    levl[x][y].typ = typ;
 		    levl[x][y].doormask = 0;
-		    /*
-		     * hack: player knows walls are restored because of the
-		     * message, below, so show this on the screen.
-		     */
-		    tmp_viz = viz_array[y][x];
-		    viz_array[y][x] = IN_SIGHT|COULD_SEE;
-		    newsym(x,y);
-		    viz_array[y][x] = tmp_viz;
 		    block_point(x,y);
 		    fixed = TRUE;
 		}
+		/*
+		 * hack: player knows walls are restored because of the
+		 * message, below, so show this on the screen.
+		 */
+		tmp_viz = viz_array[y][x];
+		viz_array[y][x] = IN_SIGHT|COULD_SEE;
+		newsym(x,y);
+		viz_array[y][x] = tmp_viz;
 	    }
 
 	if(movedgold || fixed) {
@@ -442,16 +577,27 @@ struct monst *grd;
 	}
 }
 
+/* relocate any monster other than grd at (x,y) to make room for grd */
+STATIC_OVL void
+gd_mv_monaway(struct monst *grd, int x, int y)
+{
+	struct monst *mtmp = m_at(x, y);
+
+	if (mtmp && mtmp != grd) {
+	    verbalize("Out of my way, scum!");
+	    (void) rloc(mtmp, FALSE);
+	}
+}
+
 /*
  * return  1: guard moved,  0: guard didn't,  -1: let m_move do it,  -2: died
  */
 int
-gd_move(grd)
-register struct monst *grd;
+gd_move(struct monst *grd)
 {
 	int x, y, nx, ny, m, n;
-	int dx, dy, gx, gy, fci;
-	uchar typ;
+	int dx, dy, gx = 0, gy = 0, fci;
+	uchar typ, oflags = 0;
 	struct fakecorridor *fcp;
 	register struct evgd *egrd = EVGD(grd);
 	register struct rm *crm;
@@ -459,7 +605,7 @@ register struct monst *grd;
 			 u_in_vault = vault_occupied(u.urooms)? TRUE : FALSE,
 			 grd_in_vault = *in_rooms(grd->mx, grd->my, VAULT)?
 					TRUE : FALSE;
-	boolean disappear_msg_seen = FALSE, semi_dead = (grd->mhp <= 0);
+	boolean disappear_msg_seen = FALSE;
 #ifndef GOLDOBJ
 	register boolean u_carry_gold = ((u.ugold + hidden_gold()) > 0L);
 #else
@@ -473,10 +619,6 @@ register struct monst *grd;
 	if(!u_in_vault && !grd_in_vault)
 	    wallify_vault(grd);
 	if(!grd->mpeaceful) {
-	    if(semi_dead) {
-		egrd->gddone =1;
-		goto newpos;
-	    }
 	    if(!u_in_vault &&
 	       (grd_in_vault ||
 		(in_fcorridor(grd, grd->mx, grd->my) &&
@@ -509,13 +651,11 @@ register struct monst *grd;
 					  "drop that money and ") : "");
 #endif
 		if(egrd->warncnt == 7) {
-			m = grd->mx;
-			n = grd->my;
 			verbalize("You've been warned, knave!");
 			mnexto(grd);
-			levl[m][n].typ = egrd->fakecorr[0].ftyp;
+			restore_fcorr_loc(&egrd->fakecorr[0]);
 			grd->mpeaceful = 0;
-			newsym(m,n);
+			newsym(egrd->fakecorr[0].fx, egrd->fakecorr[0].fy);
 			return(-1);
 		}
 		/* not fair to get mad when (s)he's fainted or paralyzed */
@@ -525,11 +665,9 @@ register struct monst *grd;
 
 	    if (!u_in_vault) {
 		if (u_carry_gold) {	/* player teleported */
-		    m = grd->mx;
-		    n = grd->my;
 		    (void) rloc(grd, FALSE);
-		    levl[m][n].typ = egrd->fakecorr[0].ftyp;
-		    newsym(m,n);
+		    restore_fcorr_loc(&egrd->fakecorr[0]);
+		    newsym(egrd->fakecorr[0].fx, egrd->fakecorr[0].fy);
 		    grd->mpeaceful = 0;
 letknow:
 		    if (!cansee(grd->mx, grd->my) || !mon_visible(grd))
@@ -600,11 +738,7 @@ letknow:
 		} else if (m == x && n == y) {
 		    mpickgold(grd);	/* does a newsym */
 		} else {
-		    /* just for insurance... */
-		    if (MON_AT(m, n) && m != grd->mx && n != grd->my) {
-			verbalize("Out of my way, scum!");
-			(void) rloc(m_at(m, n), FALSE);
-		    }
+		    gd_mv_monaway(grd, m, n);
 		    remove_monster(grd->mx, grd->my);
 		    newsym(grd->mx, grd->my);
 		    place_monster(grd, m, n);
@@ -625,6 +759,18 @@ letknow:
 		    return(0);
 		}
 	}
+	/* the hero has found another way out */
+	if(!egrd->gddone && !u_in_vault && !in_fcorridor(grd, u.ux, u.uy)) {
+		if(u_carry_gold) {
+			grd->mpeaceful = 0;
+			(void) rloc(grd, FALSE);
+			wallify_vault(grd);
+			(void) clear_fcorr(grd, TRUE);
+			goto letknow;
+		}
+		egrd->gddone = 1;
+		goto cleanup;
+	}
 	if(um_dist(grd->mx, grd->my, 1) || egrd->gddone) {
 		if(!egrd->gddone && !rn2(10)) verbalize("Move along!");
 		restfakecorr(grd);
@@ -640,10 +786,12 @@ letknow:
 	  if((nx == x || ny == y) && (nx != x || ny != y) && isok(nx, ny)) {
 
 	    typ = (crm = &levl[nx][ny])->typ;
-	    if(!IS_STWALL(typ) && !IS_POOL(typ)) {
+	    oflags = crm->flags;
+	    /* walkable terrain, or a hidden passage that becomes walkable */
+	    if(ACCESSIBLE(typ) || typ == SDOOR || typ == SCORR) {
 
 		if(in_fcorridor(grd, nx, ny))
-			goto nextnxy;
+			continue;
 
 		if(*in_rooms(nx,ny,VAULT))
 			continue;
@@ -660,10 +808,10 @@ letknow:
 		crm->typ = (typ == SCORR) ? CORR : DOOR;
 #endif
 		if(crm->typ == DOOR) crm->doormask = D_NODOOR;
+		else crm->flags = 0;
 		goto proceed;
 	    }
 	  }
-nextnxy:	;
 	}
 nextpos:
 	nx = x;
@@ -677,6 +825,7 @@ nextpos:
 	while((typ = (crm = &levl[nx][ny])->typ) != 0) {
 	/* in view of the above we must have IS_WALL(typ) or typ == POOL */
 	/* must be a wall here */
+		oflags = crm->flags;
 		if(isok(nx+nx-x,ny+ny-y) && !IS_POOL(typ) &&
 		    IS_ROOM(levl[nx+nx-x][ny+ny-y].typ)){
 			crm->typ = DOOR;
@@ -699,17 +848,27 @@ nextpos:
 		}
 		break;
 	}
+	oflags = crm->flags;
 	crm->typ = CORR;
+	crm->flags = 0;
 proceed:
 	unblock_point(nx, ny);	/* doesn't block light */
 	if (cansee(nx,ny))
 	    newsym(nx,ny);
 
-	fcp = &(egrd->fakecorr[egrd->fcend]);
-	if(egrd->fcend++ == FCSIZ) panic("fakecorr overflow");
-	fcp->fx = nx;
-	fcp->fy = ny;
-	fcp->ftyp = typ;
+	if(nx != gx || ny != gy || x != gx || y != gy) {
+	    fcp = &(egrd->fakecorr[egrd->fcend]);
+	    if(egrd->fcend++ == FCSIZ) panic("fakecorr overflow");
+	    fcp->fx = nx;
+	    fcp->fy = ny;
+	    fcp->ftyp = typ;
+	    fcp->fflags = oflags;
+	} else if(!egrd->gddone) {
+	    /* guard is standing on its goal with nowhere to go; release the
+	     * hero here */
+	    egrd->gddone = 1;
+	    goto cleanup;
+	}
 newpos:
 	if(egrd->gddone) {
 		/* The following is a kludge.  We need to keep    */
@@ -732,14 +891,14 @@ cleanup:
 		egrd->ogx = grd->mx;
 		egrd->ogy = grd->my;
 		restfakecorr(grd);
-		if(!semi_dead && (in_fcorridor(grd, u.ux, u.uy) ||
-				     cansee(x, y))) {
+		if(in_fcorridor(grd, u.ux, u.uy) || cansee(x, y)) {
 		    if (!disappear_msg_seen && see_guard)
 			pline("Suddenly, the %s disappears.", g_monnam(grd));
 		    return(1);
 		}
 		return(-2);
 	}
+	gd_mv_monaway(grd, nx, ny);
 	egrd->ogx = grd->mx;	/* update old positions */
 	egrd->ogy = grd->my;
 	remove_monster(grd->mx, grd->my);

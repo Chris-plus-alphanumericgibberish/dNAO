@@ -3427,7 +3427,7 @@ E int FDECL(hide_privileges, (BOOLEAN_P));
 
 /* ### vault.c ### */
 
-E boolean FDECL(grddead, (struct monst *));
+E void FDECL(grddead, (struct monst *));
 E char FDECL(vault_occupied, (char *));
 E void NDECL(invault);
 E int FDECL(gd_move, (struct monst *));
