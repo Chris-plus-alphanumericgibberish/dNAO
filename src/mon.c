@@ -1763,7 +1763,7 @@ mcalcdistress()
 		You("are thrown by a blast of wind!");
 		hurtle(rn2(3)-1, rn2(3)-1, rnd(6), FALSE, TRUE);
 		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
-			if(tmpm != mtmp && !DEADMONSTER(tmpm) && distmin(tmpm->mx, tmpm->my, mtmp->mx, mtmp->my) < 6){
+			if(tmpm != mtmp && !DEADMONSTER(tmpm) && isok(tmpm->mx, tmpm->my) && distmin(tmpm->mx, tmpm->my, mtmp->mx, mtmp->my) < 6){
 				mhurtle(tmpm, rn2(3)-1, rn2(3)-1, rnd(6), FALSE);
 			}
 		}

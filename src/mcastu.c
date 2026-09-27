@@ -6138,7 +6138,7 @@ int tary;
 			pline("%s eye-studded tentacles flash with hypnotic colors!", s_suffix(Monnam(magr))); //Assumes mistweaver
 		for(mdef = fmon; mdef; mdef = nmon){
 			nmon = mdef->nmon;
-			if(DEADMONSTER(mdef))
+			if(DEADMONSTER(mdef) || !isok(x(mdef), y(mdef)))
 				continue;
 			if(!mm_aggression(magr, mdef) || !mon_can_see_mon(mdef, magr))
 				continue;

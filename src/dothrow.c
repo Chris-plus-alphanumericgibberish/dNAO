@@ -721,6 +721,9 @@ mhurtle(mon, dx, dy, range, huge)
 {
     coord mc, cc;
 
+	if (!isok(mon->mx, mon->my))
+	    return;
+
 	/* At the very least, debilitate the monster */
 //	mon->movement = 0;
 	mon->movement -= 10;

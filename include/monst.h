@@ -476,6 +476,10 @@ struct monst {
 #define MON_SWEP(mon)	((mon)->msw)
 #define MON_NOSWEP(mon)	((mon)->msw = (struct obj *)0)
 
-#define MIGRATINGMONSTER(mon)	((mon) != &youmonst && !(mon)->mx && !(mon)->my)
+/* a vault guard that has finished its job is parked at (0,0) until its
+ * fake corridor is removed; it is still on the level, not migrating */
+#define PARKEDGUARD(mon)	((mon)->isgd && get_mx(mon, MX_EVGD) && EVGD(mon)->gddone)
+#define MIGRATINGMONSTER(mon)	((mon) != &youmonst && !(mon)->mx && !(mon)->my \
+				 && !PARKEDGUARD(mon))
 
 #endif /* MONST_H */

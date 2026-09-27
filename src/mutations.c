@@ -511,6 +511,7 @@ domutation()
 				u.bladesong = monstermoves + (ACURR(A_CHA) - 10)/2 + 5;
 			int dx, dy;
 			for(struct monst *mtmp = fmon; mtmp; mtmp = mtmp->nmon){
+				if(!isok(mtmp->mx, mtmp->my)) continue;
 				if(distmin(u.ux, u.uy, mtmp->mx, mtmp->my) > BOLT_LIM) continue;
 				if(mtmp->mpeaceful) continue;
 				if(nonthreat(mtmp)) continue;

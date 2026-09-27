@@ -2552,7 +2552,7 @@ karemade:
 					}
 				}
 
-				if(BlowingWinds && !mtmp->mtame){
+				if(BlowingWinds && !mtmp->mtame && isok(mtmp->mx, mtmp->my)){
 					static long lastbwmessage = 0L;
 					if(lastbwmessage != monstermoves && canspotmon(mtmp)){
 						lastbwmessage = monstermoves;
