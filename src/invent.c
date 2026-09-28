@@ -3382,7 +3382,7 @@ winid *datawin;
 					OBJPUTSTR(buf2);
 				}
 				if (Insight >= 42){
-					Sprintf(buf2, "Randomly drops falling stars on a hit, causing up to %d physical & fiery explosions centered anywhere on the level.",
+					Sprintf(buf2, "Randomly drops falling stars on a hit, causing up to %d physical & fiery explosions centered anywhere in your line of sight.",
 						min(6, (Insight - 36)/6));
 					OBJPUTSTR(buf2);
 				}
