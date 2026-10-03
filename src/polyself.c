@@ -807,12 +807,20 @@ break_armor()
 			|| is_gaseous_noequip(youracedata)
 			|| noncorporeal(youracedata)
 		){
+            
 			if (donning(otmp)) cancel_don();
 			/* Drop weapon along with gloves */
+            if(otmp->oartifact != ART_OMNITRIX) {
 			You("drop your gloves%s!", uwep ? " and weapon" : "");
 			drop_weapon(0);
 			(void) Gloves_off();
-			dropx(otmp);
+			dropx(otmp);}
+
+            else {
+                otmp->objsize = youracedata->msize;
+                You("drop your weapon!");
+                drop_weapon(0);
+            }
 		}
 	}
 	if ((otmp = uarms) != 0) {

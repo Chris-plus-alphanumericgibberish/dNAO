@@ -1360,7 +1360,8 @@ register const char *let,*word;
 			  otyp != GNOMISH_POINTY_HAT &&
 			  otmp->oartifact != ART_AEGIS &&
 			  otmp->oartifact != ART_RED_CORDS_OF_ILMATER &&
-			  otmp->oartifact != ART_GREAT_CLAWS_OF_URDLEN
+			  otmp->oartifact != ART_GREAT_CLAWS_OF_URDLEN &&
+              otmp->oartifact != ART_OMNITRIX
 			  ) || 
 		     (otmp->oclass == GEM_CLASS && !is_graystone(otmp)
 				&& otyp != CATAPSI_VORTEX && otyp != ANTIMAGIC_RIFT
@@ -4686,6 +4687,7 @@ winid *datawin;
 		oartifact == ART_GREAT_CLAWS_OF_URDLEN ||
 		oartifact == ART_OGRESMASHER)			OBJPUTSTR("Greatly increases CON.");
 	if (oartifact == ART_GODHANDS)		OBJPUTSTR("Greatly increases DEX.");
+	if (oartifact == ART_OMNITRIX)		OBJPUTSTR("Allows you to take rare, useful alien forms.");
 	if (oartifact == ART_PREMIUM_HEART)		OBJPUTSTR("Increases DEX.");
 	if (otyp == KICKING_BOOTS)					OBJPUTSTR("Improves kicking.");
 	if (otyp == MUMMY_WRAPPING || otyp == PRAYER_WARDED_WRAPPING)	OBJPUTSTR("Prevents invisibility.");

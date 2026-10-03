@@ -8264,7 +8264,6 @@ is a red right hand
 	 * random monster selection code assumes everything beyond here
 	 * has the G_NOGEN and MG_NOPOLY attributes.
 	 */
-
 /* 
  * character classes
  */
@@ -11121,6 +11120,106 @@ is a red right hand
 	0 /*MM*/, MT_OMNIVORE|MT_PEACEFUL|MT_COLLECT|MT_MAGIC /*MT*/, MF_BAB_HALF|MF_LEVEL_30 /*MF*/,
 	MB_HUMANOID|MB_STRONG /*MB*/, 0  /*MC*/, MG_NOWISH|MG_NOPOLY|MG_INFRAVISIBLE /*MG*/,
 	MA_HUMAN /*MA*/,  MV_NORMAL /*MV*/, 0 /*MW*/, 0 /*light radius*/, HI_DOMESTIC),
+/*
+ * omnitrix aliens
+ */
+
+//#define MON(nam,sym,lvl,gen,def,atk,siz,mr1,mr2,flgm,flgt,flgf,flgb,flgc,flgg,flga,flgv,flgw,light, col) \
+//	   {nam,sym,lvl,gen,def,atk,siz,mr1,mr2,flgm,flgt,flgf,flgb,flgc,flgg,flga,flgv,flgw, light, C(col),-1}
+    MON("vulpimancer", S_QUADRUPED,//Wild Mutt
+	LVL(10, 16, 10, 0), G_NOGEN,
+	DEF(NAT_AC(2)),
+	A(ATTK(AT_CLAW, AD_PHYS, 1, 5), ATTK(AT_CLAW, AD_PHYS, 1, 5),
+    ATTK(AT_BITE, AD_PHYS, 2, 3)),
+	SIZ(WT_DWARF, CN_DWARF, MS_GROWL, MZ_LARGE), 0, 0,
+	0 /*MM*/, MT_CARNIVORE|MT_ANIMAL /*MT*/, MF_MARTIAL_B /*MF*/,
+	MB_ANIMAL|MB_NOEYES /*MB*/, 0  /*MC*/, MG_NASTY|MG_NOWISH|MG_NOPOLY|MG_INFRAVISIBLE /*MG*/,
+	MA_ET /*MA*/,  MV_EARTHSENSE|MV_SCENT|MV_BLOODSENSE|MV_ECHOLOCATE /*MV*/, 0 /*MW*/, 0 /*light radius*/, CLR_ORANGE),
+
+    MON("tetramand", S_GIANT,//FOUR ARMS
+	LVL(20, 12, 10, 0), G_NOGEN,
+	DEF(NAT_AC(10), NAT_DR(8)),
+	A(POLYWEP_ATTK(AT_WEAP, AD_PHYS, 2, 4), POLYWEP_ATTK(AT_XWEP, AD_PHYS, 2, 4),
+    ATTK_LEV(AT_HITS, AD_PHYS, 1, 5, 25), ATTK_LEV(AT_HITS, AD_PSH3, 1, 5, 30)),
+	SIZ(WT_LARGE, CN_LARGE, MS_ROAR, MZ_LARGE), 0, 0,
+	MM_WEBRIP|MM_DOORBUST /*MM*/, MT_OMNIVORE|MT_ROCKTHROW /*MT*/, MF_MARTIAL_S|MF_BAB_FULL /*MF*/,
+	MB_HUMANOID|MB_STRONG /*MB*/, MC_THICK_HIDE  /*MC*/, MG_NASTY|MG_NOWISH|MG_NOPOLY|MG_INFRAVISIBLE /*MG*/,
+	MA_ET /*MA*/,  MV_NORMAL /*MV*/, 0 /*MW*/, 0 /*light radius*/, CLR_RED),
+
+    MON("galvan", S_IMP,//Gray Matter
+	LVL(10, 8, 40, 0), G_NOGEN,
+	DEF(NAT_AC(-4)),
+	A(POLYWEP_ATTK(AT_WEAP, AD_PHYS, 1, 2)),
+	SIZ(WT_TINY, CN_TINY, MS_RIBBIT, MZ_TINY), MR_SLEEP|MR_MAGIC, MR_SLEEP|MR_MAGIC,
+	0 /*MM*/, MT_OMNIVORE|MT_HIDE /*MT*/, 0 /*MF*/,
+	MB_HUMANOID /*MB*/, 0  /*MC*/, MG_NASTY|MG_NOWISH|MG_NOPOLY|MG_INFRAVISIBLE /*MG*/,
+	MA_ET /*MA*/,  MV_EXTRAMISSION|MV_TELEPATHIC /*MV*/, 0 /*MW*/, 0 /*light radius*/, CLR_GRAY),
+
+    MON("kineceleran", S_HUMANOID,//XLR8
+	LVL(10, 50, 20, 0), G_NOGEN,
+	DEF(DEX_AC(6)),
+	A(POLYWEP_ATTK(AT_WEAP, AD_PHYS, 1, 10), ATTK(AT_KICK, AD_PHYS, 1, 12)),
+	SIZ(WT_HUMAN, CN_HUMAN, MS_HISS, MZ_HUMAN), 0, 0,
+	MM_AMPHIBIOUS /*MM*/, MT_OMNIVORE /*MT*/, 0 /*MF*/,
+	MB_HUMANOID /*MB*/, 0  /*MC*/, MG_NASTY|MG_NOWISH|MG_NOPOLY|MG_INFRAVISIBLE /*MG*/,
+	MA_ET /*MA*/,  MV_NORMAL|MV_LOWLIGHT2 /*MV*/, 0 /*MW*/, 0 /*light radius*/, CLR_BRIGHT_BLUE),
+
+    MON("galvanic mechamorph", S_BLOB,//Upgrade
+	LVL(10, 12, 90, 0), G_NOGEN,
+	DEF(NAT_AC(7)),
+	A(POLYWEP_ATTK(AT_WEAP, AD_ELEC, 2, 10), ATTK(AT_GAZE, AD_ELEC, 6, 6)),//TODO: laser beam attack more like a breath. wanna see green beam.
+	SIZ(WT_HUMAN, CN_HUMAN, MS_SILENT, MZ_HUMAN), MR_ELEC, MR_ELEC,
+	MM_AMORPHOUS /*MM*/, 0 /*MT*/, MF_MARTIAL_B /*MF*/,
+	MB_HUMANOID|MB_HAS_FEET /*MB*/, 0  /*MC*/, MG_NASTY|MG_NOWISH|MG_NOPOLY|MG_INFRAVISIBLE /*MG*/,
+	MA_ET /*MA*/,  MV_DETECTION /*MV*/, 0 /*MW*/, 0 /*light radius*/, CLR_BRIGHT_GREEN),
+
+    MON("petrosapien", S_HUMANOID,//Diamondhead
+	LVL(10, 12, 100, 0), G_NOGEN,
+	DEF(NAT_AC(15), NAT_DR(30)),
+	A(POLYWEP_ATTK(AT_WEAP, AD_PHYS, 3, 8), ATTK(AT_ARRW, AD_PHYS, 1, 8)),
+	SIZ(WT_HUGE, CN_HUMAN, MS_CUSS, MZ_HUMAN), 0, 0,
+	0 /*MM*/, MT_METALLIVORE /*MT*/, MF_BAB_FULL|MF_MARTIAL_B /*MF*/,
+	MB_HUMANOID /*MB*/, MC_THICK_HIDE  /*MC*/, MG_NASTY|MG_NOWISH|MG_NOPOLY|MG_INFRAVISIBLE /*MG*/,
+	MA_ET /*MA*/,  MV_NORMAL /*MV*/, 0 /*MW*/, 0 /*light radius*/, CLR_WHITE),
+
+    MON("pisciss volann", S_HUMAN,//Rip-jaws
+	LVL(10, 10, 10, 0), G_NOGEN,
+	DEF(NAT_AC(3)),
+	A(POLYWEP_ATTK(AT_WEAP, AD_PHYS, 1, 4), POLYWEP_ATTK(AT_XWEP, AD_PHYS, 1, 4),
+	    ATTK(AT_BITE, AD_PHYS, 3, 3), ATTK_LEV(AT_BITE, AD_PHYS, 3, 3, 25)),
+	SIZ(WT_HUMAN, CN_HUMAN, MS_CUSS, MZ_HUMAN), 0, 0,
+	MM_AMPHIBIOUS|MM_SWIM /*MM*/, 0 /*MT*/, MF_MARTIAL_B /*MF*/,
+	MB_HUMANOID /*MB*/, 0  /*MC*/, MG_NASTY|MG_NOWISH|MG_NOPOLY|MG_INFRAVISIBLE /*MG*/,
+	MA_ET|MA_AQUATIC /*MA*/,  MV_NORMAL|MV_LOWLIGHT3 /*MV*/, 0 /*MW*/, 1 /*light radius*/, CLR_GREEN),
+
+    MON("lepidopterran", S_ANT,//stinkfly
+	LVL(15, 18, 20, 0), G_NOGEN,
+	DEF(DEX_AC(8)),
+	A(ATTK(AT_STNG, AD_PHYS, 2, 4), ATTK(AT_SPIT, AD_ACID, 4, 4)),
+	SIZ(WT_HUMAN, CN_HUMAN, MS_CUSS, MZ_HUMAN), MR_POISON|MR_SICK, MR_POISON|MR_SICK,
+	MM_FLY /*MM*/, MT_OMNIVORE /*MT*/, MF_BAB_FULL|MF_MARTIAL_B /*MF*/,
+	MB_HUMANOID|MB_WINGS /*MB*/, MC_POIS  /*MC*/, MG_NASTY|MG_NOWISH|MG_NOPOLY|MG_INFRAVISIBLE /*MG*/,
+	MA_ET|MA_INSECTOID /*MA*/,  MV_NORMAL /*MV*/, 0 /*MW*/, 0 /*light radius*/, CLR_GREEN),
+
+    MON("ectonurite", S_LICH,//Ghostfreak
+	LVL(15, 12, 10, 0), G_NOGEN,
+	DEF(),
+	A(POLYWEP_ATTK(AT_CLAW, AD_PHYS, 1, 6), ATTK(AT_TUCH, AD_SLOW, 0, 0)),
+	SIZ(WT_HUMAN, CN_HUMAN, MS_SHRIEK, MZ_HUMAN), 0, 0,
+	MM_FLY|MM_WALLWALK|MM_BREATHLESS /*MM*/, 0 /*MT*/, 0 /*MF*/,
+	MB_HUMANOID|MB_NOFEET /*MB*/, MC_UNSOLID  /*MC*/, MG_NASTY|MG_NOWISH|MG_NOPOLY|MG_INFRAVISIBLE /*MG*/,
+	MA_ET|MA_UNDEAD /*MA*/,  MV_NORMAL|MV_LIFESENSE /*MV*/, 0 /*MW*/, 0 /*light radius*/, CLR_GRAY),
+
+    MON("pyronite", S_HUMAN,//Diamondhead
+	LVL(20, 12, 70, 0), G_NOGEN,
+	DEF(),
+	A(ATTK(AT_WEAP, AD_FIRE, 2, 6), ATTK_LEV(AT_XWEP, AD_FIRE, 1, 6, 25),
+      ATTK(AT_BREA, AD_EFIR, 6, 6)),
+	SIZ(WT_HUGE, CN_HUMAN, MS_CUSS, MZ_HUMAN), MR_FIRE|MR_POISON|MR_STONE|MR_SICK, 0,
+	0 /*MM*/, 0 /*MT*/, MF_BAB_FULL|MF_MARTIAL_B /*MF*/,
+	MB_HUMANOID /*MB*/, 0  /*MC*/, MG_NASTY|MG_NOWISH|MG_NOPOLY|MG_INFRAVISIBLE /*MG*/,
+	MA_ET /*MA*/,  MV_NORMAL /*MV*/, 0 /*MW*/, 4 /*light radius*/, CLR_ORANGE),
+
 /*
  * last but not least, the mighty array terminator!
  */
