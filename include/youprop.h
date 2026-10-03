@@ -315,6 +315,10 @@
 						(dimness(u.ux,u.uy) <= 0) &&\
 						!(ublindf && !Blindfolded))
 #define Blinded			u.uprops[BLINDED].intrinsic
+#define BlindedTimeout	(Blinded & TIMEOUT)
+#define PermaBlind		((Blinded & FROMOUTSIDE) != 0L) /* OPTIONS:blind */
+		/* permanent, or lasting until specifically cured */
+#define LongtermBlind	(PermaBlind || (Blinded & TIMEOUT_INF) != 0L)
 #define HBlind_res		u.uprops[BLIND_RES].intrinsic
 #define EBlind_res		u.uprops[BLIND_RES].extrinsic
 #define Blind_res		(HBlind_res || EBlind_res)

@@ -3870,6 +3870,7 @@ struct monst *owner;
 			    /* The Lethe sometimes does a little rewrite */
 			    obj->otyp = (is_lethe && !rn2(10)) ?
 					SCR_AMNESIA : SCR_BLANK_PAPER;
+			remove_oprop(obj, OPROP_TACTB);
 			obj->spe = 0;
 			obj->oward = 0;
 		    }
@@ -4670,9 +4671,19 @@ struct monst * mtmp;
 	if (mtmp->mtame){
 		verbalize("Thank you for rescuing me!");
 	}
-	else if ((luck_tame || rnd(20) < ACURR(A_CHA)) && !(is_animal(mtmp->data) || mindless_mon(mtmp))){
+	else if ((luck_tame || mtmp->mrecruitable || rnd(20) < ACURR(A_CHA)) && !(is_animal(mtmp->data) || mindless_mon(mtmp))){
 		struct monst *newmon;
-		pline("%s is very grateful!", Monnam(mtmp));
+		if (mtmp->mrecruitable && u.uroleplay.pauper
+			&& urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH
+			&& !quest_status.qvar2_healer_pet_message
+		) {
+			verbalize("Thank you for freeing me!");
+			verbalize("Your homeland is in great danger.");
+			verbalize("We must meet up with the expeditionary force in Menzoberranzan's ceiling district!");
+			quest_status.qvar2_healer_pet_message = TRUE;
+		}
+		else
+			pline("%s is very grateful!", Monnam(mtmp));
 		newmon = tamedog_core(mtmp, (struct obj *)0, TD_ENHANCED);
 		if (newmon) mtmp = newmon;
 		if (!mtmp->mtame)

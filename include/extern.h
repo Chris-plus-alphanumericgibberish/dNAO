@@ -1654,6 +1654,8 @@ E void NDECL(mkslabroom);
 E void NDECL(mkhellvaultroom);
 E void FDECL(mkgrymldroom, (boolean *));
 E void FDECL(fill_grymldroom, (struct mkroom *, boolean *));
+E void NDECL(mkprison);
+E void FDECL(fill_prison, (struct mkroom *));
 E void NDECL(mineralize);
 E void NDECL(mklev);
 #ifdef SPECIALIZATION
@@ -1794,6 +1796,9 @@ E void NDECL(place_neutral_features);
 E void NDECL(place_sum_all_features);
 E struct mkroom * FDECL(pick_room,(boolean, boolean));
 E struct mkroom * FDECL(pick_room_grymld,(boolean, boolean));
+E struct mkroom * NDECL(pick_room_prison);
+E boolean FDECL(random_cell_spot, (struct mkroom *, int *, int *, int *, int *));
+E void FDECL(mkemptycell, (int, int, int, int));
 E boolean FDECL(special_room_requires_full_walls, (int));
 E void FDECL(mkroom, (int));
 E void FDECL(fill_zoo, (struct mkroom *));
@@ -2736,6 +2741,7 @@ E void FDECL(quest_talk, (struct monst *));
 E void FDECL(quest_stat_check, (struct monst *));
 E void FDECL(finish_quest, (struct obj *));
 E void NDECL(turn_stag);
+E boolean FDECL(tactile_quest_book, (struct obj *));
 
 /* ### questpgr.c ### */
 
@@ -2982,6 +2988,7 @@ E int FDECL(inhishop, (struct monst *));
 E struct monst *FDECL(shop_keeper, (CHAR_P));
 E boolean FDECL(tended_shop, (struct mkroom *));
 E void FDECL(delete_contents, (struct obj *));
+E void FDECL(uncreate_contents, (struct obj *));
 E void FDECL(obfree, (struct obj *,struct obj *));
 E void FDECL(home_shk, (struct monst *,BOOLEAN_P));
 E void FDECL(pacify_shk, (struct monst *));
@@ -3740,6 +3747,7 @@ E void FDECL(bypass_obj, (struct obj *));
 E void NDECL(clear_bypasses);
 E int FDECL(magic_negation, (struct monst *));
 E void FDECL(light_damage, (genericptr_t, long));
+E void FDECL(crumble_if_improved, (genericptr_t, long));
 E int NDECL(heal_mlevel_bonus);
 E int NDECL(heal_vilya);
 E int NDECL(lev_lomya);

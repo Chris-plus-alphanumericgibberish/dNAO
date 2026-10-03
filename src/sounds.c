@@ -4,6 +4,7 @@
 
 #include "hack.h"
 #include "mattkbp.h"
+#include "qtext.h"
 
 #ifdef USER_SOUNDS
 # ifdef USER_SOUNDS_REGEX
@@ -308,6 +309,71 @@ dosounds()
 		else		pline(throne_msg[2], uhis());
 		return;
 	    }
+	}
+    }
+    if (level.flags.has_prison && !rn2(200)) {
+	struct mkroom *sroom;
+	int x, y;
+	boolean prisoner = FALSE, guard = FALSE;
+
+	/* prisoners are shackled, in a prison or in the cells around it;
+	   guards are any other intelligent monsters in the prison itself */
+	for (sroom = rooms; sroom->hx > 0; sroom++) {
+	    if (sroom->rtype != PRISON) continue;
+	    for (x = sroom->lx-2; x <= sroom->hx+2; x++)
+		for (y = sroom->ly-2; y <= sroom->hy+2; y++) {
+		    if (!isok(x, y) || !(mtmp = m_at(x, y)) || DEADMONSTER(mtmp))
+			continue;
+		    if (mtmp->entangled_otyp == SHACKLES)
+			prisoner = TRUE;
+		    else if (x >= sroom->lx && x <= sroom->hx
+			&& y >= sroom->ly && y <= sroom->hy
+			&& intelligent_mon(mtmp)
+		    )
+			guard = TRUE;
+		}
+	}
+	if (prisoner || guard) {
+		static const char * const guard_msg[4] = {
+			"loud snoring.",
+			"dice rolling.",
+			"cruel laughter.",
+			"guards killing time!",
+		};
+		static const char * const guard_no_prisoner_msg[5] = {
+			"angry shouting.",
+			"dark oaths.",
+			"furious searching.",
+			"the sound of nobody being found!",
+			"someone turning the dungeon upside down!",
+		};
+		static const char * const prisoner_msg[4] = {
+			"faint moaning.",
+			"chains rattling.",
+			"metal scraping on metal.",
+			"someone tunneling with a teaspoon!",
+		};
+		static const char * const both_msg[4] = {
+			"a whip crack.",
+			"a cell door crash shut.",
+			"a guard shouting.",
+			"a captive audience applauding!",
+		};
+		if(prisoner && guard){
+			//50%
+			if(rn2(2))
+			    You_hear("%s", both_msg[rn2(3) + hallu]);
+			//25% each
+			else if(rn2(2))
+			    You_hear("%s", guard_msg[rn2(3) + hallu]);
+			else
+			    You_hear("%s", prisoner_msg[rn2(3) + hallu]);
+		}
+		else if(prisoner)
+		    You_hear("%s", prisoner_msg[rn2(3) + hallu]);
+		else if(guard)
+		    You_hear("%s", guard_no_prisoner_msg[rn2(3) + 2*hallu]);
+	    return;
 	}
     }
     if (level.flags.has_garden && !rn2(200)) {
@@ -1407,7 +1473,7 @@ asGuardian:
 					if(!Blind){
 						Your("vision fills with grasping roots!");
 						
-						make_blinded(Blinded+(long)rnd(20),FALSE);
+						make_blinded(BlindedTimeout+(long)rnd(20),FALSE);
 						if (!Blind) Your1(vision_clears);
 					}
 				break;
@@ -2424,7 +2490,7 @@ humanoid_sound:
 													 : "Greetings, little brother. How fare you on your quest for the Amulet?";
 						}
 						else {
-							com_pager(226);
+							com_pager(QT_COMMON_DROW_HEALER_AMULET);
 						}
 					}
 				break;
@@ -3395,7 +3461,7 @@ int dz;
 			pline("%s seems not to notice you.", Monnam(mtmp));
 		return MOVE_INSTANT;
     }
-    if (is_deaf(mtmp) && !mtmp->mcansee) {
+    if (is_deaf(mtmp) && is_blind(mtmp)) {
 		/* If it is unseen, the player can't tell the difference between
 		   not noticing him and just not existing, so skip the message. */
 		if (canspotmon(mtmp))

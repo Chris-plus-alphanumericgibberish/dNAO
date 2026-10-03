@@ -949,7 +949,7 @@ nh_timeout()
 			stop_occupation();
 			break;
 		case BLINDED:
-			Blinded = 1;
+			set_itimeout(&Blinded, 1L);
 			make_blinded(0L, TRUE);
 			stop_occupation();
 			break;
@@ -3197,6 +3197,7 @@ static const ttable timeout_funcs[NUM_TIME_FUNCS] = {
 	TTAB(cloud_drift,		(timeout_proc)0,	"cloud_drift"),
 	TTAB(unsuppress_object,	(timeout_proc)0,	"unsuppress_object"),
 	TTAB(relight_mon,		(timeout_proc)0,	"relight_mon"),
+	TTAB(crumble_if_improved,	(timeout_proc)0,	"crumble_if_improved"),
 };
 #undef TTAB
 

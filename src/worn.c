@@ -427,6 +427,8 @@ long mask;
 		}
 	    }
 	}
+	if (obj && (obj->owornmask & W_ARMOR) != 0L && !restoring)
+		u.uroleplay.nudist = FALSE;
 	if(!restoring) {
 		vision_full_recalc = 1;
 		see_monsters(); //More objects than just artifacts grant warning now, and this is a convienient place to add a failsafe see_monsters check
@@ -2995,6 +2997,57 @@ long timeout;
 
 	if (on_floor) newsym(x, y);
 	else if (in_invent) update_inventory();
+}
+
+/* Timer callback, run every turn: destroy the object if it has become
+   uncursed or positively enchanted, otherwise check again next turn. */
+void
+crumble_if_improved(genericptr_t arg, long timeout)
+{
+	struct obj *obj = (struct obj *) arg;
+	struct monst *mon;
+	xchar x, y;
+
+	if (obj->cursed && obj->spe <= 0) {
+		start_timer(1, TIMER_OBJECT, CRUMBLE_IMPROVED, arg);
+		return;
+	}
+
+	switch (obj->where) {
+	case OBJ_INVENT:
+		Your("%s %s to dust!", xname(obj), otense(obj, "crumble"));
+		stop_occupation();
+		if (flags.run) nomul(0, NULL);
+		if (obj->owornmask)
+			remove_worn_item(obj, TRUE);
+		useupall(obj);
+		update_inventory();
+		break;
+	case OBJ_FLOOR:
+		x = obj->ox;
+		y = obj->oy;
+		if (cansee(x, y))
+			pline("%s %s to dust.", The(xname(obj)), otense(obj, "crumble"));
+		delobj(obj);
+		newsym(x, y);
+		break;
+	case OBJ_MINVENT:
+		mon = obj->ocarry;
+		if (canseemon(mon))
+			pline("%s %s %s to dust!", s_suffix(Monnam(mon)), xname(obj),
+				otense(obj, "crumble"));
+		obj->quan = 1L;	/* so m_useup() destroys the whole stack */
+		m_useup(mon, obj);
+		break;
+	case OBJ_CONTAINED:
+		obj_extract_self(obj);
+		obfree(obj, (struct obj *)0);
+		break;
+	default:
+		/* buried, migrating, etc.: check again once it's somewhere else */
+		start_timer(1, TIMER_OBJECT, CRUMBLE_IMPROVED, arg);
+		break;
+	}
 }
 
 STATIC_OVL int

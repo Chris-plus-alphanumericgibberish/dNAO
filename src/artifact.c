@@ -4191,7 +4191,7 @@ voidPen_hit(struct monst *magr, struct monst *mdef, struct obj *pen, int *dmgptr
 	if (pen->ovara_seals&SEAL_HUGINN_MUNINN){
 		if(youdefend){
 			if(!Blind){
-				make_blinded(Blinded+1L,FALSE);
+				make_blinded(BlindedTimeout+1L,FALSE);
 				*dmgptr += d(dnum,4);
 			}
 		}
@@ -4365,7 +4365,7 @@ voidPen_hit(struct monst *magr, struct monst *mdef, struct obj *pen, int *dmgptr
 			make_stunned((HStun + 5), FALSE);
 			if(mvitals[PM_ACERERAK].died > 0) *dmgptr += d(2,4);
 		}
-		else if(mdef->mcansee && haseyes(mdef->data)){
+		else if(!is_blind(mdef) && haseyes(mdef->data)){
 			pline("%s is dazzled by prismatic feathers!", Monnam(mdef));
 			mdef->mstun = 1;
 			mdef->mconf = 1;
@@ -7783,7 +7783,7 @@ boolean printmessages; /* print generic elemental damage messages */
 		rnd_tmp = rn2(5) + otmp->spe;
 		if (rnd_tmp<2) rnd_tmp = 2;
 		if (youdef) {
-			make_blinded(Blinded + rnd_tmp, FALSE);
+			make_blinded(BlindedTimeout + rnd_tmp, FALSE);
 			if (!Blind) Your1(vision_clears);
 		}
 		else {
@@ -10772,7 +10772,7 @@ arti_invoke(obj)
 		int healamt = (maybe_polyd(u.mhmax - u.mh, u.uhpmax - u.uhp) + 1) / 2;
 	    long creamed = (long)u.ucreamed;
 
-	    if (healamt || Sick || Slimed || Blinded > creamed)
+	    if (healamt || Sick || Slimed || BlindedTimeout > creamed)
 		You_feel("better.");
 	    else
 		goto nothing_special;
@@ -10782,7 +10782,7 @@ arti_invoke(obj)
 	    }
 	    if(Sick) make_sick(0L,(char *)0,FALSE,SICK_ALL);
 	    if(Slimed) Slimed = 0L;
-	    if (Blinded > creamed) make_blinded(creamed, FALSE);
+	    if (BlindedTimeout > creamed) make_blinded(creamed, FALSE);
 	    flags.botl = 1;
 	    break;
 	  }
@@ -10850,7 +10850,7 @@ arti_invoke(obj)
 	    extern int n_dgns; /* from dungeon.c */
 		
 		if(In_quest(&u.uz)){
-			pline("Nothing happens!");
+			pline("Nothing happens.");
 			break;
 		}
 	    if(u.uhave.amulet || In_endgame(&u.uz)){
@@ -10874,8 +10874,7 @@ arti_invoke(obj)
 		if(u.urider && mon_has_amulet(u.urider)){
 			rider_dismounts_you(DISMOUNT_VANISHED);
 		}
-		if(!Blind) You("are sucked into the scroll!");
-		else You_feel("weightless for a moment.");
+		You("are sucked into the scroll!");
 		
 		obj_extract_self(obj);
 		dropy(obj);
@@ -11107,7 +11106,7 @@ arti_invoke(obj)
 				obj->age = 0;
 				break;
 			} else if(u.dx || u.dy) {
-				if (isok(u.ux+u.dx, u.uy+u.dy) && (mtmp = m_at(u.ux+u.dx, u.uy+u.dy)) != 0 && mtmp->mcansee && mon_can_see_you(mtmp)) {
+				if (isok(u.ux+u.dx, u.uy+u.dy) && (mtmp = m_at(u.ux+u.dx, u.uy+u.dy)) != 0 && !is_blind(mtmp) && mon_can_see_you(mtmp)) {
 					boolean youattack = mtmp == &youmonst;
 					if(obj->otyp == ROUNDSHIELD) You("display the shield's device to %s.", mon_nam(mtmp));
 					else if(obj->otyp == CLOAK) You("display the cloak's clasp to %s.", mon_nam(mtmp));
@@ -13603,7 +13602,7 @@ arti_invoke(obj)
 						break;
 					case 3 : if (!resists_blnd(&youmonst)) {
 						pline("%s your vision!", Tobjnam(obj, "damage"));
-						make_blinded(Blinded + rnd(100),FALSE);
+						make_blinded(BlindedTimeout + rnd(100),FALSE);
 						if (!Blind) Your1(vision_clears);
 						} else {
 						pline("%s your vision.", Tobjnam(obj, "assault"));
@@ -13700,7 +13699,7 @@ arti_invoke(obj)
 			/* Clear blindness and hallucination, and provide temporary immunity.
 			* However, any new applications can still result in blindness/hallu the moment the protection wears off */
 			n = (Race_if(PM_ORC) && !Upolyd) ? 40 : 30;
-			Blinded = 0;
+			Blinded &= ~TIMEOUT;
 			HBlind_res += n;
 			HHalluc_resistance += n;
 			(void)make_hallucinated(FALSE, FALSE, W_ART);	/* silent */
@@ -13833,19 +13832,28 @@ arti_invoke(obj)
         case DETESTATION:
 			obj->age = 0L;
 			if(!Pantheon_if(PM_MADMAN) || u.uevent.uhand_of_elbereth){
-				pline("It's just a piece of blank paper!");
+				if(Blind)
+					pline("Actually, you know it's just a piece of blank paper!");
+				else
+					pline("It's just a piece of blank paper!");
 				obj->oartifact = 0;
 				/* remove old name */
 				rem_ox(obj, OX_ENAM);
 			}
 			else if(!u.uevent.qcompleted && Role_if(PM_MADMAN)){
-				pline("A throbbing yellow haze obscures your vision!");
+				if(Blind)
+					pline("A throbbing yellow haze fills your mind!");
+				else
+					pline("A throbbing yellow haze obscures your vision!");
 				You_cant("use this right now.");
 			}
 			else if(!IS_ALTAR(levl[u.ux][u.uy].typ)){
 				pline("This records the very secret and ancient rite once performed by the high-priests of Sarnath in detestation of Bokrug, the water-lizard, whose followers their ancestors had cruelly slain.");
 				if(!u.detestation_ritual){
-					pline("The rite is penned in your hand.");
+					if(Blind)
+						pline("You know the rite is penned in your hand.");
+					else
+						pline("The rite is penned in your hand.");
 					pline("What were you going to do with it?");
 				}
 				else {
@@ -14297,7 +14305,7 @@ nothing_special:
 		}
 		
 		if (!Punished) {
-			setworn(mkobj(CHAIN_CLASS, TRUE), W_CHAIN);
+			setworn(mkobj(CHAIN_CLASS, NO_MKOBJ_FLAGS), W_CHAIN);
 			setworn(obj, W_BALL);
 			uball->spe = 1;
 			if (!u.uswallow) {

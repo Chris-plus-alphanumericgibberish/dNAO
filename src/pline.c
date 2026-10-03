@@ -680,7 +680,7 @@ ustatusline()
 	if (Blind) {
 	    Strcat(info, ", blind");
 	    if (u.ucreamed) {
-		if ((long)u.ucreamed < Blinded || Blindfolded
+		if ((long)u.ucreamed < BlindedTimeout || Blindfolded
 						|| !haseyes(youracedata))
 		    Strcat(info, ", cover");
 		Strcat(info, "ed by sticky goop");

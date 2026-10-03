@@ -72,6 +72,7 @@ static struct Bool_Opt
 #else
 	{"BIOS", (boolean *)0, FALSE, SET_IN_FILE},
 #endif
+	{"blind", &u.uroleplay.blind, FALSE, DISP_IN_GAME},
 	{"botl_updates", &iflags.botl_updates, TRUE, SET_IN_GAME},
 	{"bones", (boolean *)&iflags.bones, TRUE, SET_IN_GAME},
 #ifdef INSURANCE
@@ -201,6 +202,7 @@ static struct Bool_Opt
 #endif
 	{"msg_wall_hits", &iflags.notice_walls, FALSE, SET_IN_GAME},
 	{"block_forget_map", &iflags.no_forget_map, FALSE, SET_IN_GAME},
+	{"nudist", &u.uroleplay.nudist, FALSE, DISP_IN_GAME},
 	{"null", &flags.null, TRUE, SET_IN_GAME},
 	{"obscure_role_obj_names",    &iflags.obscure_role_obj_names, FALSE, SET_IN_GAME},
 	{"old_C_behaviour", &iflags.old_C_behaviour, FALSE, SET_IN_GAME},
@@ -215,6 +217,7 @@ static struct Bool_Opt
 	{"paranoid_remove", &iflags.paranoid_remove, FALSE, SET_IN_GAME},
 	{"paranoid_swim", &iflags.paranoid_swim, TRUE, SET_IN_GAME},
 	{"paranoid_wand_break", &iflags.paranoid_wand_break, TRUE, SET_IN_GAME},
+	{"pauper", &u.uroleplay.pauper, FALSE, DISP_IN_GAME},
 	{"perm_invent", &flags.perm_invent, FALSE, SET_IN_GAME},
        {"pickup_thrown", &iflags.pickup_thrown, FALSE, SET_IN_GAME},
 	{"polearm_old_style", &flags.standard_polearms, FALSE, SET_IN_GAME},

@@ -622,7 +622,7 @@ struct obj * otmp;	/* optional: item not in your inventory that is being stolen 
 	eshkp->robbed += total;
 	You("stole %ld %s worth of merchandise.",
 	    total, currency(total));
-	if (!Role_if(PM_ROGUE)) {     /* stealing is unlawful */
+	if (!Role_if(PM_ROGUE) && !u.uurchin) {     /* stealing is unlawful */
 	    adjalign(-sgn(u.ualign.type));
 	    You("feel like an evil rogue.");
 		if(u.ualign.type >= 0){
@@ -1014,6 +1014,24 @@ register struct obj *obj;
 	}
 }
 
+/* Delete everything in container 'obj', including the contents of nested
+   containers, and mark any artifacts among them as never having existed so
+   they can be generated again. */
+void
+uncreate_contents(struct obj *obj)
+{
+	struct obj *curr;
+
+	while ((curr = obj->cobj) != 0) {
+		if (Has_contents(curr))
+			uncreate_contents(curr);
+		if (curr->oartifact)
+			artifact_exists(curr, ONAME(curr), FALSE);
+		obj_extract_self(curr);
+		obfree(curr, (struct obj *)0);
+	}
+}
+
 /* called with two args on merge */
 void
 obfree(obj, merge)
@@ -1234,7 +1252,7 @@ register boolean silentketer;
 	pacify_shk(shkp);
 	eshkp->following = 0;
 	eshkp->robbed = 0L;
-	if (!Role_if(PM_ROGUE))
+	if (!Role_if(PM_ROGUE) && !u.uurchin)
 		adjalign(sgn(u.ualign.type));
 	if(!inhishop(shkp)) {
 		char shk_nam[BUFSZ];

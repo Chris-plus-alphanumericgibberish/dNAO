@@ -103,6 +103,7 @@ STATIC_DCL void FDECL(greenway,(int,xchar *,xchar *,xchar *,boolean *,xchar,xcha
 STATIC_DCL void FDECL(tree_lined,(int,int,int,boolean));
 STATIC_DCL void FDECL(statue_lined,(int,int,int,boolean));
 STATIC_DCL void NDECL(makehallways);
+STATIC_DCL void NDECL(mk_healer_pet_level);
 STATIC_DCL void FDECL(mkinvpos, (XCHAR_P,XCHAR_P,int));
 STATIC_DCL void FDECL(mk_knox_portal, (XCHAR_P,XCHAR_P));
 
@@ -2644,6 +2645,55 @@ clear_level_structures()
 	clear_regions();
 }
 
+/* Set up the level where a pauper drow healer can recruit a pet.  Call
+   this while the level's rooms are being populated, before any special
+   rooms are added. */
+STATIC_OVL void
+mk_healer_pet_level(void)
+{
+	struct mkroom *sroom;
+	struct monst *mon;
+	struct obj *obj;
+	struct permonst *ptr;
+	coord mm;
+	int cx, cy, dx, dy;
+	int i, norcs, area, tries;
+
+	if (!(sroom = pick_room_prison()))
+		return;
+	sroom->rtype = PRISON;
+	level.flags.has_prison = 1;
+
+	/* sleeping orcs in the prison itself */
+	norcs = 1 + rnd(10);
+	area = (sroom->hx - sroom->lx + 1) * (sroom->hy - sroom->ly + 1);
+	if (norcs > area)
+		norcs = area;
+	for (i = 0; i < norcs; i++) {
+		tries = 50;
+		do
+			(void) somexy(sroom, &mm);
+		while (MON_AT(mm.x, mm.y) && --tries > 0);
+		if (MON_AT(mm.x, mm.y))
+			continue;
+		if (!(ptr = mkclass(S_ORC, 0)))
+			break;
+		if ((mon = makemon(ptr, mm.x, mm.y, MM_NOGROUP)) != 0)
+			mon->msleeping = 1;
+	}
+
+	if (!random_cell_spot(sroom, &cx, &cy, &dx, &dy))
+		return;
+	mkemptycell(cx, cy, dx, dy);
+	mon = makemon(&mons[PM_KNIGHT], cx, cy, NO_MINVENT|MM_ADJACENTOK);
+	if (mon && (obj = mongets(mon, SHACKLES, NO_MKOBJ_FLAGS)) != 0) {
+		mon->entangled_otyp = SHACKLES;
+		mon->entangled_oid = obj->o_id;
+		mon->mpeaceful = TRUE;
+		mon->mrecruitable = TRUE;
+	}
+}
+
 STATIC_OVL void
 special_mklev_actions()
 {
@@ -2711,6 +2761,11 @@ makelevel()
 			else 
 				Sprintf(fillname, "%s-loca", urole.filecode);
 			makemaz(fillname);
+		    return;
+		}
+	    /* pauper Noblemen get their own home level */
+		if(u.uroleplay.pauper && !strcmp(urole.filecode, "Nob") && Is_qstart(&u.uz)){
+			makemaz("Nob-paup");
 		    return;
 		}
 	    /* check for special levels */
@@ -2872,6 +2927,12 @@ makelevel()
 
     {
 	int u_depth = depth(&u.uz);
+
+	if (u.uroleplay.pauper && urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH
+		&& In_dungeons_of_doom(&u.uz)
+		&& u.uz.dlevel == quest_status.qvar1_healer_pet_level
+	)
+		mk_healer_pet_level();
 
 #ifdef WIZARD
 	if(wizard && nh_getenv("SHOPTYPE")) mkroom(SHOPBASE); else
@@ -3876,7 +3937,7 @@ struct mkroom *croom;
 		/* Possibly fill it with objects */
 		if (!rn2(3)) (void)mkgold(0L, m.x, m.y);
 		for (tryct = rn2(5); tryct; tryct--) {
-			struct obj *otmp = mkobj(RANDOM_CLASS, TRUE);
+			struct obj *otmp = mkobj(RANDOM_CLASS, MKOBJ_ARTIF);
 			if (!otmp)
 				continue;
 			curse(otmp);

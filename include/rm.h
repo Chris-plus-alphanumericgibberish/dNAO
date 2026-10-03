@@ -615,6 +615,8 @@ struct levelflags {
 	Bitfield(day, 1);	/* Is the map currently in day mode? */
 	Bitfield(walkers, 2);	/* How many rage-walkers for this level? (0-3) */
 	/*36*/
+	Bitfield(has_prison, 1);
+	/*37*/
 
 };
 

@@ -112,7 +112,7 @@ const char *fmt, *arg;
 	    }
 	}
 	if (was_blind && !Blind) {	/* reverting from eyeless */
-	    Blinded = 1L;
+	    set_itimeout(&Blinded, 1L);
 	    make_blinded(0L, TRUE);	/* remove blindness */
 	}
 
@@ -587,7 +587,7 @@ int	mntmp;
 	    }
 	}
 	if (was_blind && !Blind) {	/* previous form was eyeless */
-	    Blinded = 1L;
+	    set_itimeout(&Blinded, 1L);
 	    make_blinded(0L, TRUE);	/* remove blindness */
 	}
 	newsym(u.ux,u.uy);		/* Change symbol */

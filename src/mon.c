@@ -3300,7 +3300,7 @@ struct monst *looker;
 		/* nv range auto-succeeds within its distance */
 		if (nvrange > 0
 			&& dist2(looker->mx, looker->my, u.ux, u.uy) <= nvrange * nvrange + nvrange
-			&& !(Stealth && (Role_if(PM_ROGUE) || (u.sealsActive&SEAL_ANDROMALIUS) || !rn2(8)))
+			&& !(Stealth && (Role_if(PM_ROGUE) || u.uurchin || (u.sealsActive&SEAL_ANDROMALIUS) || !rn2(8)))
 		) {
 			return TRUE;
 		}

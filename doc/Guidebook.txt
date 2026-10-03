@@ -1656,6 +1656,10 @@
 
           inhibit spell casting.
 
+               The nudist option can be set (prior to game start) to attempt
+          to play the entire game without wearing any armor (a self-imposed
+          challenge which is extremely difficult to accomplish).
+
                The commands to use armor are `W' (wear) and `T' (take off).
           The  `A'  command  can  also be used to take off armor as well as
           other worn items.
@@ -1858,6 +1862,10 @@
           tools  have  a limited number of uses, akin to wand charges.  For
           example, lamps burn out after a while.  Other tools are  contain-
           ers, which objects can be placed into or taken out of.
+
+               The blind option can be set (prior to game start) to attempt
+          to play the entire game without being able to see (a self-imposed
+          challenge which is very difficult to accomplish).
 
                The command to use tools is `a' (apply).
 
@@ -2189,6 +2197,10 @@
             ly fill your quiver with the `Q' command instead.  If no weapon
             is found or the option is false, the `t' (throw) command is ex-
             ecuted instead.  (default false)
+
+          blind
+            Start the character permanently blind (default false).  Cannot
+            be set with the `O' command.
 
           boulder
             Set the character used to display  boulders  (default  is  rock
@@ -2590,6 +2602,12 @@
             news is shown at the beginning of the game, there's no point in
             setting this with the `O' command.
 
+          nudist
+            Start the character with no armor (default false).  Cursed armor
+            that the character would be stuck wearing is still provided, and
+            does not count against the challenge until it is put back on
+            after being removed.  Cannot be set with the `O' command.
+
           null
             Send padding nulls to the terminal (default off).
 
@@ -2625,6 +2643,16 @@
           paranoid_remove
             If true, always show menu with the R and T commands even when
 	    there is only one item to remove or take off.
+
+          pauper
+            Start the character with no possessions (default false).  Also
+            start with no gold, spells, known wards, or skills beyond
+            unskilled, no pre-identified objects (though some roles still
+            recognize one key item), and a starting pet without equipment.
+            Harmful starting gear, such as cursed items the character would
+            be stuck with, is still provided.  Implies the nudist option.
+            Does not inhibit acquiring and using items, spells, and skills
+            once play has started.  Cannot be set with the `O' command.
 
           perm_invent
             If true, always display your current  inventory  in  a  window.

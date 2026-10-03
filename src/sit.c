@@ -426,7 +426,7 @@ dosit()
 				pline("A voice echoes:");
 		verbalize("A curse upon thee for sitting upon this most holy throne!");
 				if (Luck > 0)  {
-					make_blinded(Blinded + rn1(100,250),TRUE);
+					make_blinded(BlindedTimeout + rn1(100,250),TRUE);
 				} else	    rndcurse();
 				break;
 				case 10:

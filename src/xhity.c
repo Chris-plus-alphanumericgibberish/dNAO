@@ -4668,7 +4668,7 @@ int vis;
 				if (youdef) {
 					if(!Blind)
 						You("go blind!");
-					make_blinded(Blinded + d(3, 3), FALSE);
+					make_blinded(BlindedTimeout + d(3, 3), FALSE);
 				}
 				else {
 					if (canseemon(mdef) && !is_blind(mdef))
@@ -6869,7 +6869,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 		if (can_blnd(magr, mdef, attk->aatyp, (struct obj*)0)) {
 			if (youdef){
 				if (!Blind) pline("%s blinds you!", Monnam(magr));
-				make_blinded(Blinded + (long)dmg, FALSE);
+				make_blinded(BlindedTimeout + (long)dmg, FALSE);
 				if (!Blind) Your1(vision_clears);
 			}
 			else {
@@ -10451,7 +10451,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 					"cursed unicorn's horn", TRUE, SICK_NONVOMITABLE);
 				break;
 			case 1:
-				make_blinded(Blinded + lcount, TRUE);
+				make_blinded(BlindedTimeout + lcount, TRUE);
 				break;
 			case 2: if (!Confusion)
 				You("suddenly feel %s.",
@@ -12332,7 +12332,7 @@ int vis;
 				}
 				else
 					/* keep player blind until disgorged */
-					make_blinded(Blinded + 1, FALSE);
+					make_blinded(BlindedTimeout + 1, FALSE);
 			}
 			else {
 				struct obj *otmp = dust_mask ? dust_mask : towel;
@@ -12786,7 +12786,7 @@ int vis;
 				}
 				else
 					/* keep player blind until disgorged */
-					make_blinded(Blinded + 1, FALSE);
+					make_blinded(BlindedTimeout + 1, FALSE);
 			}
 			else {
 				if (vis&VIS_MDEF && mdef->mcansee)
@@ -16249,6 +16249,8 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 			sneak_dice++;
 		if (Role_if(PM_UNDEAD_HUNTER) && !Upolyd)
 			sneak_dice++;
+		if (u.uurchin && !Upolyd)
+			sneak_dice++;
 		if (Role_if(PM_ANACHRONONAUT) && Race_if(PM_MYRKALFR) && !Upolyd)
 			sneak_dice++;
 		if (Role_if(PM_CONVICT) && !Upolyd && weapon && weapon->owornmask && (weapon->otyp == SPOON || (weapon->oartifact == ART_STORM_CURSE && weapon->o_e_trait&ETRAIT_FOCUS_FIRE)))
@@ -16394,10 +16396,14 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 		}
 
 		/* calculate snekdmg */
-		/* Undead Hunters are not as good as Rogues, but any additional source of sneak attack damage upgrades their natural die to a regular-strength one */
-		if(youagr && Role_if(PM_UNDEAD_HUNTER) && !Upolyd && sneak_dice == 1){
+		/* Undead Hunters and urchins are not as good as Rogues, but any
+		   additional source of sneak attack damage upgrades their natural die
+		   to a regular-strength one */
+		if(youagr && (Role_if(PM_UNDEAD_HUNTER) || u.uurchin) && !Upolyd && sneak_dice == 1){
 			snekdie = (2*snekdie+1)/3;
 		}
+		if(youagr && u.uurchin && !Upolyd)
+			snekdie += 2;
 		if (weapon && weapon->owornmask && Role_if(PM_KENSEI) && u.role_variant == ART_ANSERMEE && is_kensei_weapon(weapon))
 			snekdie += 3;
 		// snekdmg = d(sneak_dice, snekdie);
@@ -17591,7 +17597,7 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 								(num_eyes == 1) ? "s" : "");
 						}
 						u.ucreamed += blindinc;
-						make_blinded(Blinded + (long)blindinc, FALSE);
+						make_blinded(BlindedTimeout + (long)blindinc, FALSE);
 						if (!Blind)
 							Your1(vision_clears);
 					}

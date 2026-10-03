@@ -560,7 +560,8 @@ boolean	inc_or_dec;
 	if(check_preservation(PRESERVE_PREVENT_ABUSE) && !inc_or_dec)
 		return;
 
-	if(abs(AEXE(i)) < AVAL) {
+	/* a deprived upbringing halves both the cap and the chance of gain */
+	if(abs(AEXE(i)) < (u.udeprived ? AVAL/2 : AVAL)) {
 		/*
 		 *	Law of diminishing returns (Part I):
 		 *
@@ -570,9 +571,12 @@ boolean	inc_or_dec;
 		 *
 		 *	Note: *YES* ACURR is the right one to use.
 		 */
-		AEXE(i) += (inc_or_dec)
-			? ((rn2(19) > ACURR(i)) || (AEXE(i) < 0 && rn2(AEXE(i)*-1 + 1)))
-			: -rn2(2);
+		if(inc_or_dec){
+			if(!u.udeprived || rn2(2))
+				AEXE(i) += ((rn2(19) > ACURR(i)) || (AEXE(i) < 0 && rn2(AEXE(i)*-1 + 1)));
+		}
+		else
+			AEXE(i) -= rn2(2);
 #ifdef DEBUG
 		pline("%s, %s AEXE = %d",
 			(i == A_STR) ? "Str" : (i == A_WIS) ? "Wis" :

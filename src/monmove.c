@@ -2843,7 +2843,7 @@ not_special:
 			appr = -1;
 
 		/* monsters can track you */
-		if (!should_see && (goodsmeller(ptr) || (mtmp)->mcansee)) {
+		if (!should_see && (goodsmeller(ptr) || !is_blind(mtmp))) {
 			register coord *cp;
 			/* good trackers can follow your trail up to 200 turns, others just for your few most recent steps */
 			cp = gettrack(omx, omy, can_track(ptr) ? 0 : rnd(ACURR_MON(A_INT, mtmp)/3));

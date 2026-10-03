@@ -3469,7 +3469,13 @@ boolean past;
 		}
 	}
 
-	switch(urace.malenum){
+	if(u.uroleplay.pauper){
+		u.uurchin = TRUE;
+		expert_weapon_skill(P_DAGGER);
+		expert_weapon_skill(P_SHORT_SWORD);
+		expert_weapon_skill(P_TWO_WEAPON_COMBAT);
+	}
+	else switch(urace.malenum){
 		default:
 		case PM_HALF_DRAGON:
 			if(flags.initgend){

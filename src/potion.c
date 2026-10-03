@@ -247,7 +247,7 @@ make_blinded(xtime, talk)
 long xtime;
 boolean talk;
 {
-	long old = Blinded;
+	long old = BlindedTimeout;
 	boolean u_could_see, can_see_now;
 	int eyecnt;
 	char buf[BUFSZ];
@@ -255,9 +255,9 @@ boolean talk;
 	/* we need to probe ahead in case the Eye of the Overworld
 	   are or will be overriding blindness */
 	u_could_see = !Blind;
-	Blinded = xtime ? 1L : 0L;
+	set_itimeout(&Blinded, xtime ? 1L : 0L);
 	can_see_now = !Blind;
-	Blinded = old;		/* restore */
+	set_itimeout(&Blinded, old);	/* restore */
 
 	if (u.usleep) talk = FALSE;
 
@@ -271,7 +271,7 @@ boolean talk;
 	} else if (old && !xtime) {
 	    /* clearing temporary blindness without toggling blindness */
 	    if (talk) {
-		if (!haseyes(youracedata)) {
+		if (!haseyes(youracedata) || PermaBlind) {
 		    strange_feeling((struct obj *)0, (char *)0);
 		} else if (Blindfolded) {
 		    Strcpy(buf, body_part(EYE_BP));
@@ -297,7 +297,7 @@ boolean talk;
 	} else if (!old && xtime) {
 	    /* setting temporary blindness without toggling blindness */
 	    if (talk) {
-		if (!haseyes(youracedata)) {
+		if (!haseyes(youracedata) || PermaBlind) {
 		    strange_feeling((struct obj *)0, (char *)0);
 		} else if (Blindfolded) {
 		    Strcpy(buf, body_part(EYE_BP));

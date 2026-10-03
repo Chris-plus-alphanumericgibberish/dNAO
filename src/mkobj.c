@@ -470,16 +470,16 @@ struct obj *box;
 			otmp->age = 0L;
 			stop_corpse_timers(otmp);
 	    } else if(box->otyp == MASSIVE_STONE_CRATE){
-			if (!(otmp = mkobj(FOOD_CLASS, TRUE))) continue;
+			if (!(otmp = mkobj(FOOD_CLASS, MKOBJ_ARTIF))) continue;
 	    } else if(box->otyp == WRITING_DESK){
 			if(rn2(4)){
-				if (!(otmp = mkobj(SCROLL_CLASS, TRUE))) continue;
+				if (!(otmp = mkobj(SCROLL_CLASS, MKOBJ_ARTIF))) continue;
 			}
 			else if(rn2(4)){
 				if (!(otmp = mksobj(SCR_BLANK_PAPER, MKOBJ_NOINIT))) continue;
 			}
 			else {
-				if (!(otmp = mkobj(SPBOOK_CLASS, TRUE))) continue;
+				if (!(otmp = mkobj(SPBOOK_CLASS, MKOBJ_ARTIF))) continue;
 			}
 	    } else {
 		register int tprob;
@@ -487,7 +487,7 @@ struct obj *box;
 
 		for (tprob = rnd(100); (tprob -= iprobs->iprob) > 0; iprobs++)
 		    ;
-		if (!(otmp = mkobj(iprobs->iclass, TRUE))) continue;
+		if (!(otmp = mkobj(iprobs->iclass, MKOBJ_ARTIF))) continue;
 
 		/* handle a couple of special cases */
 		if (otmp->oclass == COIN_CLASS) {
@@ -1826,6 +1826,12 @@ int mkflags;
 	    flags.made_life = TRUE;
 	if (otyp == WORD_OF_KNOWLEDGE)
 	    flags.made_know = TRUE;
+
+	if ((otmp->oclass == SPBOOK_CLASS || otmp->oclass == SCROLL_CLASS)
+		&& otmp->otyp != SPE_BLANK_PAPER && otmp->otyp != SCR_BLANK_PAPER
+		&& tactile_quest_book(otmp)
+	)
+		add_oprop(otmp, OPROP_TACTB);
 	
 	fix_object(otmp);
 	return(otmp);

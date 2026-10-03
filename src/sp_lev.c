@@ -1134,7 +1134,7 @@ struct mkroom	*croom;
 			if (oclass == COIN_CLASS)
 			otmp = mkgold(0L, x, y);
 			else
-			otmp = mkobj_at(oclass, x, y, !named);
+			otmp = mkobj_at(oclass, x, y, mkobjflags);
 		}
 	}
 	
@@ -1899,7 +1899,10 @@ default_case:
 
 	// Madman's old stuff to reclaim
 	if(Is_real_container(otmp) && otmp->spe == 7){
-		struct obj *stuff;
+		struct obj *stuff, *nobj;
+		/* paupers get none of the box's random loot */
+		if(u.uroleplay.pauper)
+			uncreate_contents(otmp);
 		stuff = mksartifact(ART_RITE_OF_DETESTATION);
 		add_to_container(otmp, stuff);
 #define size_items_to_pc(stuff) if(stuff->oclass == WEAPON_CLASS\
@@ -1923,561 +1926,589 @@ default_case:
 			stuff = oname(stuff, artilist[u.inherited].name);
 			add_to_container(otmp, stuff);
 		}
-
-		switch(urace.malenum){
-			default:
-			case PM_HUMAN:
-			case PM_VAMPIRE:
-			case PM_INCANTIFIER:
-			case PM_GNOME:
-				if(flags.initgend){
-					default_add(STILETTOS);
-					default_add(VICTORIAN_UNDERWEAR);
-					default_add(GLOVES);
-					
-					default_add_2(GENTLEWOMAN_S_DRESS);
-					if(Race_if(PM_INCANTIFIER)){
-						default_add_2(ROBE);
-						set_material_gm(stuff, CLOTH);
-						stuff->obj_color = CLR_GRAY;
-					}
-					else if(Race_if(PM_VAMPIRE)){
-						default_add_2(find_opera_cloak());
-					}
-					default_add_2(KNIFE);
-				}
-				else {
-					default_add(HIGH_BOOTS);
-					default_add(RUFFLED_SHIRT);
-					default_add(GLOVES);
-					default_add_2(GENTLEMAN_S_SUIT);
-					default_add_2(RAPIER);
-
-					if(Race_if(PM_INCANTIFIER)){
-						default_add(ROBE);
-						set_material_gm(stuff, CLOTH);
-						stuff->obj_color = CLR_GRAY;
-					}
-					else if(Race_if(PM_VAMPIRE)){
-						default_add(find_opera_cloak());
+		if(u.uroleplay.pauper){
+			/* same forced shirt a pauper convict starts with */
+			if(!is_weldproof(&mons[urace.malenum])){
+				stuff = mksobj(STRIPED_SHIRT, MKOBJ_NOINIT);
+				stuff->spe = 0;
+				curse(stuff);
+				size_items_to_pc(stuff)
+				add_to_container(otmp, stuff);
+				start_timer(1, TIMER_OBJECT, CRUMBLE_IMPROVED, (genericptr_t)stuff);
+			}
+		}
+		else {
+			switch(urace.malenum){
+				default:
+				case PM_HUMAN:
+				case PM_VAMPIRE:
+				case PM_INCANTIFIER:
+				case PM_GNOME:
+					if(flags.initgend){
+						default_add(STILETTOS);
+						default_add(VICTORIAN_UNDERWEAR);
+						default_add(GLOVES);
+						
+						default_add_2(GENTLEWOMAN_S_DRESS);
+						if(Race_if(PM_INCANTIFIER)){
+							default_add_2(ROBE);
+							set_material_gm(stuff, CLOTH);
+							stuff->obj_color = CLR_GRAY;
+						}
+						else if(Race_if(PM_VAMPIRE)){
+							default_add_2(find_opera_cloak());
+						}
+						default_add_2(KNIFE);
 					}
 					else {
+						default_add(HIGH_BOOTS);
+						default_add(RUFFLED_SHIRT);
+						default_add(GLOVES);
+						default_add_2(GENTLEMAN_S_SUIT);
+						default_add_2(RAPIER);
+
+						if(Race_if(PM_INCANTIFIER)){
+							default_add(ROBE);
+							set_material_gm(stuff, CLOTH);
+							stuff->obj_color = CLR_GRAY;
+						}
+						else if(Race_if(PM_VAMPIRE)){
+							default_add(find_opera_cloak());
+						}
+						else {
+							default_add(CLOAK);
+							set_material_gm(stuff, CLOTH);
+							stuff->obj_color = CLR_BLACK;
+						}
+					}
+					if(urace.malenum == PM_GNOME){
+						default_add_2(GNOMISH_POINTY_HAT);
+						/* Gnomish pointy hats are supposed to be medium */
+						stuff->objsize = MZ_MEDIUM;
+						default_add_2(AKLYS);
+					}
+					if(urace.malenum == PM_HUMAN){
+						if(flags.initgend){
+							default_add_2(BLADE_OF_MERCY);
+							set_material_gm(stuff, COPPER);
+						}
+						else {
+							default_add_2(RAKUYO);
+						}
+					}
+					if(urace.malenum == PM_VAMPIRE){
+						if(flags.initgend){
+							default_add(CHIKAGE);
+							set_material_gm(stuff, COPPER);
+							default_add_2(FACELESS_HELM);
+							set_material_gm(stuff, METAL);
+							add_oprop(stuff, OPROP_BRIL);
+						}
+						else {
+							default_add_2(SOLDIER_S_RAPIER);
+							default_add(NIGHTMARE_S_BULLET_MOLD);
+						}
+					}
+				break;
+				case PM_HALF_DRAGON:
+					if(flags.initgend){
+						//Zerth
+						int merctypes[] = {BROADSWORD, LONG_SWORD, TWO_HANDED_SWORD, KATANA, NAGAMAKI, SPEAR, TRIDENT, MACE, MORNING_STAR };
+						int gauntlettypes[] = {GAUNTLETS_OF_POWER, GAUNTLETS, GAUNTLETS_OF_DEXTERITY, ORIHALCYON_GAUNTLETS };
+						int boottypes[] = {ARMORED_BOOTS, HIGH_BOOTS, SPEED_BOOTS, WATER_WALKING_BOOTS, JUMPING_BOOTS, KICKING_BOOTS, FLYING_BOOTS };
+						int index;
+						index = rn2(SIZE(merctypes));
+						default_add(merctypes[index]);
+						set_material_gm(stuff, MERCURIAL);
+						//Spiked gauntlets
+						stuff = mksobj(gauntlettypes[rn2(SIZE(gauntlettypes))], MKOBJ_NOINIT);
+						size_items_to_pc(stuff);
+						if(index < SPEAR){
+							add_omod(stuff, OMOD_SPIKED);
+							stuff->spe = 2;
+						}
+						else {
+							add_omod(stuff, OMOD_BLADED);
+							stuff->spe = 2;
+						}
+						add_to_container(otmp, stuff);
+						default_add_2(RED_DRAGON_SCALE_MAIL);
+						//Spiked boots
+						stuff = mksobj(boottypes[rn2(SIZE(boottypes))], MKOBJ_NOINIT);
+						size_items_to_pc(stuff);
+						add_omod(stuff, OMOD_SPIKED);
+						stuff->spe = 2;
+						add_to_container(otmp, stuff);
+					}
+					else {
+						//Knight
+						stuff = mksobj(TWO_HANDED_SWORD, mkobjflags);
+						size_items_to_pc(stuff);
+						set_material_gm(stuff, SILVER);
+						add_oprop(stuff, OPROP_VORPW);
+						add_oprop(stuff, OPROP_GSSDW);
+						stuff->spe = 3;
+						add_to_container(otmp, stuff);
+
+						default_add_2(find_gcirclet());
+						set_material_gm(stuff, SILVER);
+						add_oprop(stuff, OPROP_BLAST);
+
+						default_add_2(ARCHAIC_PLATE_MAIL);
+						set_material_gm(stuff, SILVER);
+						add_oprop(stuff, OPROP_BRIL);
+						add_oprop(stuff, OPROP_LITN);
+
+						default_add_2(ARCHAIC_GAUNTLETS);
+						set_material_gm(stuff, SILVER);
+						add_oprop(stuff, OPROP_CAST);
+
+						default_add_2(ARCHAIC_BOOTS);
+						set_material_gm(stuff, SILVER);
+						add_oprop(stuff, OPROP_CAST);
+					}
+				break;
+				case PM_DWARF:
+					default_add(HIGH_BOOTS);
+
+					default_add(RUFFLED_SHIRT);
+					stuff->obj_color = CLR_BLACK;
+
+					default_add(GLOVES);
+
+					default_add_2(CHAIN_MAIL);
+					set_material_gm(stuff, SILVER);
+
+					default_add(DWARVISH_CLOAK);
+					stuff->obj_color = CLR_BLACK;
+
+					default_add_2(BATTLE_AXE);
+				break;
+				case PM_DROW:
+					default_add(find_signet_ring());
+					if(flags.initgend){
+						default_add(STILETTOS);
+						default_add_2(VICTORIAN_UNDERWEAR);
+						default_add(GLOVES);
+
+						default_add_2(NOBLE_S_DRESS);
+						set_material_gm(stuff, SILVER);
+						add_oprop(stuff, OPROP_REFL);
+
+						default_add_2(DROVEN_DAGGER);
+					}
+					else {
+						default_add(HIGH_BOOTS);
+						default_add(RUFFLED_SHIRT);
+						default_add(GLOVES);
+						default_add_2(GENTLEMAN_S_SUIT);
+						default_add_2(DROVEN_SHORT_SWORD);
+
+						default_add(DROVEN_GREATSWORD);
+						set_material_gm(stuff, SILVER);
+						add_oprop(stuff, OPROP_SECR_ACID);
+
 						default_add(CLOAK);
 						set_material_gm(stuff, CLOTH);
 						stuff->obj_color = CLR_BLACK;
 					}
-				}
-				if(urace.malenum == PM_GNOME){
-					default_add_2(GNOMISH_POINTY_HAT);
-					/* Gnomish pointy hats are supposed to be medium */
-					stuff->objsize = MZ_MEDIUM;
-					default_add_2(AKLYS);
-				}
-				if(urace.malenum == PM_HUMAN){
-					if(flags.initgend){
-						default_add_2(BLADE_OF_MERCY);
-						set_material_gm(stuff, COPPER);
-					}
-					else {
-						default_add_2(RAKUYO);
-					}
-				}
-				if(urace.malenum == PM_VAMPIRE){
-					if(flags.initgend){
-						default_add(CHIKAGE);
-						set_material_gm(stuff, COPPER);
-						default_add_2(FACELESS_HELM);
-						set_material_gm(stuff, METAL);
-						add_oprop(stuff, OPROP_BRIL);
-					}
-					else {
-						default_add_2(SOLDIER_S_RAPIER);
-						default_add(NIGHTMARE_S_BULLET_MOLD);
-					}
-				}
-			break;
-			case PM_HALF_DRAGON:
-				if(flags.initgend){
-					//Zerth
-					int merctypes[] = {BROADSWORD, LONG_SWORD, TWO_HANDED_SWORD, KATANA, NAGAMAKI, SPEAR, TRIDENT, MACE, MORNING_STAR };
-					int gauntlettypes[] = {GAUNTLETS_OF_POWER, GAUNTLETS, GAUNTLETS_OF_DEXTERITY, ORIHALCYON_GAUNTLETS };
-					int boottypes[] = {ARMORED_BOOTS, HIGH_BOOTS, SPEED_BOOTS, WATER_WALKING_BOOTS, JUMPING_BOOTS, KICKING_BOOTS, FLYING_BOOTS };
-					int index;
-					index = rn2(SIZE(merctypes));
-					default_add(merctypes[index]);
-					set_material_gm(stuff, MERCURIAL);
-					//Spiked gauntlets
-					stuff = mksobj(gauntlettypes[rn2(SIZE(gauntlettypes))], MKOBJ_NOINIT);
-					size_items_to_pc(stuff);
-					if(index < SPEAR){
-						add_omod(stuff, OMOD_SPIKED);
-						stuff->spe = 2;
-					}
-					else {
-						add_omod(stuff, OMOD_BLADED);
-						stuff->spe = 2;
-					}
+				break;
+				case PM_ELF:
+					stuff = mksobj(ELVEN_BROADSWORD, MKOBJ_NOINIT);
+					stuff->spe = 2;
+					set_material_gm(stuff, GOLD);
+					add_oprop(stuff, OPROP_ELFLW);
+					add_oprop(stuff, OPROP_WRTHW);
 					add_to_container(otmp, stuff);
-					default_add_2(RED_DRAGON_SCALE_MAIL);
-					//Spiked boots
-					stuff = mksobj(boottypes[rn2(SIZE(boottypes))], MKOBJ_NOINIT);
+
+					stuff = mksobj(UPGRADE_KIT, MKOBJ_NOINIT);
+					set_material_gm(stuff, WOOD);
+					add_to_container(otmp, stuff);
+
+					stuff = mksobj(UPGRADE_KIT, MKOBJ_NOINIT);
+					set_material_gm(stuff, WOOD);
+					add_to_container(otmp, stuff);
+
+					stuff = mksobj(SCR_ENCHANT_ARMOR, MKOBJ_NOINIT);
+					add_to_container(otmp, stuff);
+
+					stuff = mksobj(SADDLE, MKOBJ_ARTIF);
+					set_material_gm(stuff, WOOD);
+					add_oprop(stuff, OPROP_PHSEW);
+					stuff->obj_color = CLR_BRIGHT_GREEN;
+					add_to_container(otmp, stuff);
+
+					if(flags.initgend){
+						default_add(PLAIN_DRESS);
+						stuff->obj_color = rn2(2) ? CLR_YELLOW : CLR_BRIGHT_GREEN;
+					}
+					else {
+						default_add(RUFFLED_SHIRT);
+						stuff->obj_color = rn2(2) ? CLR_BROWN : CLR_GREEN;
+						default_add(GENTLEMAN_S_SUIT);
+						stuff->obj_color = rn2(2) ? CLR_BROWN : CLR_GRAY;
+					}
+					default_add(GLOVES);
+					default_add(LOW_BOOTS);
+
+				break;
+				case PM_ORC:
+					default_add(LOW_BOOTS);
+					default_add(ORCISH_HELM);
+
+					stuff = mksobj(ORCISH_RING_MAIL, MKOBJ_NOINIT);
 					size_items_to_pc(stuff);
-					add_omod(stuff, OMOD_SPIKED);
+					set_material_gm(stuff, GOLD);
 					stuff->spe = 2;
 					add_to_container(otmp, stuff);
-				}
-				else {
-					//Knight
-					stuff = mksobj(TWO_HANDED_SWORD, mkobjflags);
-					size_items_to_pc(stuff);
-					set_material_gm(stuff, SILVER);
+
+					default_add_2(HIGH_ELVEN_WARSWORD);
+					set_material_gm(stuff, GREEN_STEEL);
+					add_oprop(stuff, OPROP_UNHYW);
+					add_oprop(stuff, OPROP_HOLYW);
+					add_oprop(stuff, OPROP_LIVEW);
+					add_oprop(stuff, OPROP_WRTHW);
+					add_oprop(stuff, OPROP_INSTW);
+
+					default_add_2(ORCISH_BOW);
+					add_oprop(stuff, OPROP_UNHYW);
+					add_oprop(stuff, OPROP_MORGW);
 					add_oprop(stuff, OPROP_VORPW);
-					add_oprop(stuff, OPROP_GSSDW);
-					stuff->spe = 3;
+					add_oprop(stuff, OPROP_INSTW);
+				break;
+				case PM_YUKI_ONNA:
+					stuff = mksobj(SHOES, MKOBJ_NOINIT);
+					size_items_to_pc(stuff);
+					set_material_gm(stuff, WOOD);
 					add_to_container(otmp, stuff);
 
-					default_add_2(find_gcirclet());
+					stuff = mksobj(WAKIZASHI, MKOBJ_NOINIT);
+					size_items_to_pc(stuff);
+					set_material_gm(stuff, MITHRIL);
+					add_oprop(stuff, OPROP_RAKUW);
+					stuff->spe = 2;
+					add_to_container(otmp, stuff);
+
+					stuff = mksobj(KATANA, MKOBJ_NOINIT);
+					size_items_to_pc(stuff);
 					set_material_gm(stuff, SILVER);
-					add_oprop(stuff, OPROP_BLAST);
+					add_oprop(stuff, OPROP_RAKUW);
+					stuff->spe = 2;
+					add_to_container(otmp, stuff);
 
-					default_add_2(ARCHAIC_PLATE_MAIL);
-					set_material_gm(stuff, SILVER);
-					add_oprop(stuff, OPROP_BRIL);
-					add_oprop(stuff, OPROP_LITN);
+					default_add(YUMI);
+					stuff = mksobj(YA, MKOBJ_NOINIT);
+					size_items_to_pc(stuff);
+					stuff->quan = 30L;
+					fix_object(stuff);
+					add_to_container(otmp, stuff);
+					
+					stuff = mksobj(WAISTCLOTH, MKOBJ_NOINIT);
+					size_items_to_pc(stuff);
+					stuff->obj_color = CLR_WHITE;
+					stuff->spe = 2;
+					add_to_container(otmp, stuff);
 
-					default_add_2(ARCHAIC_GAUNTLETS);
-					set_material_gm(stuff, SILVER);
-					add_oprop(stuff, OPROP_CAST);
+					stuff = mksobj(ROBE, MKOBJ_NOINIT);
+					size_items_to_pc(stuff);
+					stuff->obj_color = CLR_BRIGHT_BLUE;
+					stuff->spe = 2;
+					add_to_container(otmp, stuff);
 
-					default_add_2(ARCHAIC_BOOTS);
-					set_material_gm(stuff, SILVER);
-					add_oprop(stuff, OPROP_CAST);
-				}
-			break;
-			case PM_DWARF:
-				default_add(HIGH_BOOTS);
+					stuff = mksobj(SEDGE_HAT, MKOBJ_NOINIT);
+					size_items_to_pc(stuff);
+					stuff->obj_color = CLR_ORANGE;
+					add_to_container(otmp, stuff);
+				break;
+				case PM_TIEFLING:
+					if(flags.initgend){
+						default_add_2(TOOTH);
+						stuff->objsize = MZ_TINY;
+						stuff->ovar1_tooth_type = SERPENT_TOOTH;
+						add_oprop(stuff, OPROP_PSIOW);
+						add_omod(stuff, OMOD_SECONDSTRIKE);
+						fix_object(stuff);
 
-				default_add(RUFFLED_SHIRT);
-				stuff->obj_color = CLR_BLACK;
+						default_add_2(TOOTH);
+						stuff->objsize = MZ_TINY;
+						stuff->ovar1_tooth_type = MAGMA_TOOTH;
+						add_oprop(stuff, OPROP_PSIOW);
+						add_omod(stuff, OMOD_SECONDSTRIKE);
+						fix_object(stuff);
 
-				default_add(GLOVES);
+						default_add_2(TOOTH);
+						stuff->objsize = MZ_TINY;
+						stuff->ovar1_tooth_type = VOID_TOOTH;
+						add_oprop(stuff, OPROP_PSIOW);
+						add_omod(stuff, OMOD_SECONDSTRIKE);
+						fix_object(stuff);
 
-				default_add_2(CHAIN_MAIL);
-				set_material_gm(stuff, SILVER);
+						default_add(ARMOR_SALVE);
 
-				default_add(DWARVISH_CLOAK);
-				stuff->obj_color = CLR_BLACK;
+						stuff = mksobj(GENTLEWOMAN_S_DRESS, MKOBJ_NOINIT);
+						size_items_to_pc(stuff);
+						stuff->obj_color = CLR_WHITE;
+						stuff->spe = 2;
+						stuff->oeroded2 = 3;
+						add_to_container(otmp, stuff);
 
-				default_add_2(BATTLE_AXE);
-			break;
-			case PM_DROW:
-				default_add(find_signet_ring());
-				if(flags.initgend){
-					default_add(STILETTOS);
-					default_add_2(VICTORIAN_UNDERWEAR);
-					default_add(GLOVES);
+						stuff = mksobj(VICTORIAN_UNDERWEAR, MKOBJ_NOINIT);
+						size_items_to_pc(stuff);
+						stuff->obj_color = CLR_BLACK;
+						stuff->spe = 2;
+						stuff->oeroded2 = 3;
+						add_to_container(otmp, stuff);
+					}
+					else {
+						int fist_coin = 0;
+						default_add_2(DEVIL_FIST);
+						set_material_gm(stuff, GREEN_STEEL);
+						if(stuff->cobj)
+							fist_coin = stuff->cobj->otyp;
+						add_oprop(stuff, OPROP_FIRE);
+						add_oprop(stuff, OPROP_COLD);
+						add_oprop(stuff, OPROP_OCLTW);
 
-					default_add_2(NOBLE_S_DRESS);
-					set_material_gm(stuff, SILVER);
-					add_oprop(stuff, OPROP_REFL);
+						stuff = mksobj(GENTLEMAN_S_SUIT, MKOBJ_NOINIT);
+						size_items_to_pc(stuff);
+						stuff->obj_color = CLR_BLACK;
+						stuff->spe = 2;
+						stuff->oeroded3 = 3;
+						add_to_container(otmp, stuff);
 
-					default_add_2(DROVEN_DAGGER);
-				}
-				else {
-					default_add(HIGH_BOOTS);
-					default_add(RUFFLED_SHIRT);
-					default_add(GLOVES);
-					default_add_2(GENTLEMAN_S_SUIT);
-					default_add_2(DROVEN_SHORT_SWORD);
+						stuff = mksobj(RUFFLED_SHIRT, MKOBJ_NOINIT);
+						size_items_to_pc(stuff);
+						stuff->obj_color = CLR_RED;
+						stuff->spe = 2;
+						stuff->oeroded3 = 3;
+						add_to_container(otmp, stuff);
 
-					default_add(DROVEN_GREATSWORD);
-					set_material_gm(stuff, SILVER);
-					add_oprop(stuff, OPROP_SECR_ACID);
+						stuff = mksobj(PRESERVATIVE_ENGINE, MKOBJ_NOINIT);
+						stuff->spe = 0;
+						add_to_container(otmp, stuff);
 
-					default_add(CLOAK);
-					set_material_gm(stuff, CLOTH);
-					stuff->obj_color = CLR_BLACK;
-				}
-			break;
-			case PM_ELF:
-				stuff = mksobj(ELVEN_BROADSWORD, MKOBJ_NOINIT);
+						int coins[] = {WAGE_OF_ENVY, WAGE_OF_GLUTTONY, WAGE_OF_GREED, WAGE_OF_LUST, WAGE_OF_PRIDE, WAGE_OF_SLOTH, WAGE_OF_WRATH};
+						//shuffle
+						int tmp, j, i;
+						for(i = SIZE(coins) - 1; i > 0; i--){
+							j = rn2(i + 1);
+							tmp = coins[j];
+							coins[j] = coins[i];
+							coins[i] = tmp;
+						}
+						i = 2;
+						j = -1;
+						while (i > 0){
+							j++;
+							if(coins[j] == fist_coin)
+								continue;
+							stuff = mksobj(coins[j], NO_MKOBJ_FLAGS);
+							stuff->quan = 1L;
+							fix_object(stuff);
+							add_to_container(otmp, stuff);
+							i--;
+						}
+					}
+				break;
+				case PM_AASIMAR:
+					if(flags.aasimar_type == AASIMAR_TYPE_SERAPH){
+						stuff = mksobj(ROBE, MKOBJ_NOINIT);
+						size_items_to_pc(stuff);
+						stuff->spe = 2;
+						add_oprop(stuff, OPROP_WOOL);
+						stuff->obj_color = CLR_WHITE;
+						add_to_container(otmp, stuff);
+
+						stuff = mksobj(CRYSTAL_SWORD, MKOBJ_NOINIT);
+						stuff->spe = 2;
+						set_material_gm(stuff, GEMSTONE);
+						set_submat(stuff, DIAMOND);
+						add_oprop(stuff, OPROP_HOLYW);
+						add_oprop(stuff, OPROP_UNHYW);
+						add_oprop(stuff, OPROP_FIREW);
+						add_oprop(stuff, OPROP_LIVEW);
+						add_oprop(stuff, OPROP_INSTW);
+						add_to_container(otmp, stuff);
+
+						stuff = mksobj(BOW, MKOBJ_NOINIT);
+						stuff->spe = 0;
+						set_material_gm(stuff, PLATINUM);
+						add_oprop(stuff, OPROP_AAMOW);
+						add_oprop(stuff, OPROP_HOLYW);
+						add_oprop(stuff, OPROP_UNHYW);
+						add_to_container(otmp, stuff);
+
+						stuff = mksobj(EYE, NO_MKOBJ_FLAGS);
+						stuff->quan = 1;
+						fully_identify_obj(stuff);
+						stuff->ovar1_your_eye = TRUE;
+						set_material_gm(stuff, GEMSTONE);
+						set_submat(stuff, DIAMOND);
+						add_to_container(otmp, stuff);
+					}
+					else if(flags.aasimar_type == AASIMAR_TYPE_PRIMINAL){
+						stuff = mksobj(QUARTERSTAFF, MKOBJ_NOINIT);
+						stuff->spe = 2;
+						add_oprop(stuff, OPROP_HOLYW);
+						add_oprop(stuff, OPROP_UNHYW);
+						add_oprop(stuff, OPROP_CONCW);
+						add_oprop(stuff, OPROP_LIVEW);
+						add_oprop(stuff, OPROP_INSTW);
+						add_to_container(otmp, stuff);
+
+						int typ = find_wooden_ring();
+						if(typ == RIN_POLYMORPH)
+							typ = RIN_NOTHING;
+						stuff = mksobj(typ, MKOBJ_NOINIT);
+						set_material_gm(stuff, WOOD);
+						stuff->spe = 2;
+						add_oprop(stuff, OPROP_HEAL);
+						add_oprop(stuff, OPROP_LIFE);
+						add_oprop(stuff, OPROP_ELECW);
+						add_to_container(otmp, stuff);
+
+						stuff = mksobj(ROBE, MKOBJ_NOINIT);
+						stuff->spe = 2;
+						add_oprop(stuff, OPROP_HOLY);
+						add_oprop(stuff, OPROP_UNHY);
+						add_oprop(stuff, OPROP_CONC);
+						set_material_gm(stuff, DRAGON_HIDE);
+						add_to_container(otmp, stuff);
+					}
+					else if(flags.aasimar_type == AASIMAR_TYPE_CLOUDFACE){
+						default_add_2(HOODED_CAPELET);
+						if(stuff)
+							stuff->obj_color = CLR_ORANGE;
+						default_add_2(ELVEN_TOGA);
+						if(stuff){
+							stuff->obj_color = CLR_ORANGE;
+							add_omod(stuff, OMOD_SHOULDER_BARING);
+						}
+						default_add_2(GLOVES);
+						default_add_2(ELVEN_BOOTS);
+						default_add(MAGIC_HARP);
+						default_add(BUGLE);
+						default_add(SPE_CAUSE_FEAR);
+						default_add(SPE_EXTRA_HEALING);
+						default_add(SPE_TELEPORT_AWAY);
+						default_add(SPE_CHARM_MONSTER);
+					}
+				break;
+			}
+			if(urace.malenum == PM_GNOME){
+				int stars[] = {PM_YELLOW_LIGHT, PM_YELLOW_LIGHT, PM_BLACK_LIGHT, PM_MOTE_OF_LIGHT, PM_TINY_BEING_OF_LIGHT};
+				stuff = mksobj(ISAMUSEI, MKOBJ_NOINIT);
 				stuff->spe = 2;
-				set_material_gm(stuff, GOLD);
-				add_oprop(stuff, OPROP_ELFLW);
-				add_oprop(stuff, OPROP_WRTHW);
 				add_to_container(otmp, stuff);
 
-				stuff = mksobj(UPGRADE_KIT, MKOBJ_NOINIT);
-				set_material_gm(stuff, WOOD);
-				add_to_container(otmp, stuff);
-
-				stuff = mksobj(UPGRADE_KIT, MKOBJ_NOINIT);
-				set_material_gm(stuff, WOOD);
-				add_to_container(otmp, stuff);
-
-				stuff = mksobj(SCR_ENCHANT_ARMOR, MKOBJ_NOINIT);
-				add_to_container(otmp, stuff);
-
-				stuff = mksobj(SADDLE, MKOBJ_ARTIF);
-				set_material_gm(stuff, WOOD);
-				add_oprop(stuff, OPROP_PHSEW);
-				stuff->obj_color = CLR_BRIGHT_GREEN;
-				add_to_container(otmp, stuff);
-
-				if(flags.initgend){
-					default_add(PLAIN_DRESS);
-					stuff->obj_color = rn2(2) ? CLR_YELLOW : CLR_BRIGHT_GREEN;
-				}
-				else {
-					default_add(RUFFLED_SHIRT);
-					stuff->obj_color = rn2(2) ? CLR_BROWN : CLR_GREEN;
-					default_add(GENTLEMAN_S_SUIT);
-					stuff->obj_color = rn2(2) ? CLR_BROWN : CLR_GRAY;
-				}
-				default_add(GLOVES);
-				default_add(LOW_BOOTS);
-
-			break;
-			case PM_ORC:
-				default_add(LOW_BOOTS);
-				default_add(ORCISH_HELM);
-
-				stuff = mksobj(ORCISH_RING_MAIL, MKOBJ_NOINIT);
-				size_items_to_pc(stuff);
-				set_material_gm(stuff, GOLD);
-				stuff->spe = 2;
-				add_to_container(otmp, stuff);
-
-				default_add_2(HIGH_ELVEN_WARSWORD);
-				set_material_gm(stuff, GREEN_STEEL);
-				add_oprop(stuff, OPROP_UNHYW);
-				add_oprop(stuff, OPROP_HOLYW);
-				add_oprop(stuff, OPROP_LIVEW);
-				add_oprop(stuff, OPROP_WRTHW);
-				add_oprop(stuff, OPROP_INSTW);
-
-				default_add_2(ORCISH_BOW);
-				add_oprop(stuff, OPROP_UNHYW);
-				add_oprop(stuff, OPROP_MORGW);
-				add_oprop(stuff, OPROP_VORPW);
-				add_oprop(stuff, OPROP_INSTW);
-			break;
-			case PM_YUKI_ONNA:
-				stuff = mksobj(SHOES, MKOBJ_NOINIT);
-				size_items_to_pc(stuff);
-				set_material_gm(stuff, WOOD);
-				add_to_container(otmp, stuff);
-
-				stuff = mksobj(WAKIZASHI, MKOBJ_NOINIT);
-				size_items_to_pc(stuff);
-				set_material_gm(stuff, MITHRIL);
-				add_oprop(stuff, OPROP_RAKUW);
-				stuff->spe = 2;
-				add_to_container(otmp, stuff);
-
-				stuff = mksobj(KATANA, MKOBJ_NOINIT);
-				size_items_to_pc(stuff);
-				set_material_gm(stuff, SILVER);
-				add_oprop(stuff, OPROP_RAKUW);
-				stuff->spe = 2;
-				add_to_container(otmp, stuff);
-
-				default_add(YUMI);
-				stuff = mksobj(YA, MKOBJ_NOINIT);
-				size_items_to_pc(stuff);
-				stuff->quan = 30L;
+				stuff = mksobj(POT_STARLIGHT, MKOBJ_NOINIT);
+				stuff->quan = d(3,3);
 				fix_object(stuff);
 				add_to_container(otmp, stuff);
-				
-				stuff = mksobj(WAISTCLOTH, MKOBJ_NOINIT);
-				size_items_to_pc(stuff);
-				stuff->obj_color = CLR_WHITE;
-				stuff->spe = 2;
+
+				stuff = mksobj(ROCK, MKOBJ_NOINIT);
+				stuff->quan = d(3,3);
+				set_material_gm(stuff, IRON);
+				fix_object(stuff);
 				add_to_container(otmp, stuff);
 
-				stuff = mksobj(ROBE, MKOBJ_NOINIT);
-				size_items_to_pc(stuff);
-				stuff->obj_color = CLR_BRIGHT_BLUE;
-				stuff->spe = 2;
+				stuff = mksobj(ROCK, MKOBJ_NOINIT);
+				set_material_gm(stuff, IRON);
+				add_oprop(stuff, OPROP_COLDW);
 				add_to_container(otmp, stuff);
 
-				stuff = mksobj(SEDGE_HAT, MKOBJ_NOINIT);
-				size_items_to_pc(stuff);
-				stuff->obj_color = CLR_ORANGE;
+				stuff = mksobj(DIAMOND, MKOBJ_NOINIT);
+				stuff->quan = d(1,3);
+				fix_object(stuff);
 				add_to_container(otmp, stuff);
-			break;
-			case PM_TIEFLING:
-				if(flags.initgend){
-					default_add_2(TOOTH);
+
+				for(int i = d(3,3); i > 0; i--){
+					stuff = mksobj(FIGURINE, MKOBJ_NOINIT);
+					stuff->corpsenm = ROLL_FROM(stars);
+					if(stuff->corpsenm == PM_MOTE_OF_LIGHT)
+						stuff->spe = FIGURINE_LOYAL|FIGURINE_PSEUDO;
+					else stuff->spe = FIGURINE_LOYAL;
 					stuff->objsize = MZ_TINY;
-					stuff->ovar1_tooth_type = SERPENT_TOOTH;
-					add_oprop(stuff, OPROP_PSIOW);
-					add_omod(stuff, OMOD_SECONDSTRIKE);
-					fix_object(stuff);
-
-					default_add_2(TOOTH);
-					stuff->objsize = MZ_TINY;
-					stuff->ovar1_tooth_type = MAGMA_TOOTH;
-					add_oprop(stuff, OPROP_PSIOW);
-					add_omod(stuff, OMOD_SECONDSTRIKE);
-					fix_object(stuff);
-
-					default_add_2(TOOTH);
-					stuff->objsize = MZ_TINY;
-					stuff->ovar1_tooth_type = VOID_TOOTH;
-					add_oprop(stuff, OPROP_PSIOW);
-					add_omod(stuff, OMOD_SECONDSTRIKE);
-					fix_object(stuff);
-
-					default_add(ARMOR_SALVE);
-
-					stuff = mksobj(GENTLEWOMAN_S_DRESS, MKOBJ_NOINIT);
-					size_items_to_pc(stuff);
-					stuff->obj_color = CLR_WHITE;
-					stuff->spe = 2;
-					stuff->oeroded2 = 3;
-					add_to_container(otmp, stuff);
-
-					stuff = mksobj(VICTORIAN_UNDERWEAR, MKOBJ_NOINIT);
-					size_items_to_pc(stuff);
-					stuff->obj_color = CLR_BLACK;
-					stuff->spe = 2;
-					stuff->oeroded2 = 3;
-					add_to_container(otmp, stuff);
-				}
-				else {
-					int fist_coin = 0;
-					default_add_2(DEVIL_FIST);
-					set_material_gm(stuff, GREEN_STEEL);
-					if(stuff->cobj)
-						fist_coin = stuff->cobj->otyp;
-					add_oprop(stuff, OPROP_FIRE);
-					add_oprop(stuff, OPROP_COLD);
-					add_oprop(stuff, OPROP_OCLTW);
-
-					stuff = mksobj(GENTLEMAN_S_SUIT, MKOBJ_NOINIT);
-					size_items_to_pc(stuff);
-					stuff->obj_color = CLR_BLACK;
-					stuff->spe = 2;
-					stuff->oeroded3 = 3;
-					add_to_container(otmp, stuff);
-
-					stuff = mksobj(RUFFLED_SHIRT, MKOBJ_NOINIT);
-					size_items_to_pc(stuff);
-					stuff->obj_color = CLR_RED;
-					stuff->spe = 2;
-					stuff->oeroded3 = 3;
-					add_to_container(otmp, stuff);
-
-					stuff = mksobj(PRESERVATIVE_ENGINE, MKOBJ_NOINIT);
-					stuff->spe = 0;
-					add_to_container(otmp, stuff);
-
-					int coins[] = {WAGE_OF_ENVY, WAGE_OF_GLUTTONY, WAGE_OF_GREED, WAGE_OF_LUST, WAGE_OF_PRIDE, WAGE_OF_SLOTH, WAGE_OF_WRATH};
-					//shuffle
-					int tmp, j, i;
-					for(i = SIZE(coins) - 1; i > 0; i--){
-						j = rn2(i + 1);
-						tmp = coins[j];
-						coins[j] = coins[i];
-						coins[i] = tmp;
-					}
-					i = 2;
-					j = -1;
-					while (i > 0){
-						j++;
-						if(coins[j] == fist_coin)
-							continue;
-						stuff = mksobj(coins[j], NO_MKOBJ_FLAGS);
-						stuff->quan = 1L;
-						fix_object(stuff);
-						add_to_container(otmp, stuff);
-						i--;
-					}
-				}
-			break;
-			case PM_AASIMAR:
-				if(flags.aasimar_type == AASIMAR_TYPE_SERAPH){
-					stuff = mksobj(ROBE, MKOBJ_NOINIT);
-					size_items_to_pc(stuff);
-					stuff->spe = 2;
-					add_oprop(stuff, OPROP_WOOL);
-					stuff->obj_color = CLR_WHITE;
-					add_to_container(otmp, stuff);
-
-					stuff = mksobj(CRYSTAL_SWORD, MKOBJ_NOINIT);
-					stuff->spe = 2;
 					set_material_gm(stuff, GEMSTONE);
 					set_submat(stuff, DIAMOND);
-					add_oprop(stuff, OPROP_HOLYW);
-					add_oprop(stuff, OPROP_UNHYW);
-					add_oprop(stuff, OPROP_FIREW);
-					add_oprop(stuff, OPROP_LIVEW);
-					add_oprop(stuff, OPROP_INSTW);
-					add_to_container(otmp, stuff);
-
-					stuff = mksobj(BOW, MKOBJ_NOINIT);
-					stuff->spe = 0;
-					set_material_gm(stuff, PLATINUM);
-					add_oprop(stuff, OPROP_AAMOW);
-					add_oprop(stuff, OPROP_HOLYW);
-					add_oprop(stuff, OPROP_UNHYW);
-					add_to_container(otmp, stuff);
-
-					stuff = mksobj(EYE, NO_MKOBJ_FLAGS);
-					stuff->quan = 1;
-					fully_identify_obj(stuff);
-					stuff->ovar1_your_eye = TRUE;
-					set_material_gm(stuff, GEMSTONE);
-					set_submat(stuff, DIAMOND);
+					fix_object(stuff);
 					add_to_container(otmp, stuff);
 				}
-				else if(flags.aasimar_type == AASIMAR_TYPE_PRIMINAL){
-					stuff = mksobj(QUARTERSTAFF, MKOBJ_NOINIT);
-					stuff->spe = 2;
-					add_oprop(stuff, OPROP_HOLYW);
-					add_oprop(stuff, OPROP_UNHYW);
-					add_oprop(stuff, OPROP_CONCW);
-					add_oprop(stuff, OPROP_LIVEW);
-					add_oprop(stuff, OPROP_INSTW);
-					add_to_container(otmp, stuff);
 
-					int typ = find_wooden_ring();
-					if(typ == RIN_POLYMORPH)
-						typ = RIN_NOTHING;
-					stuff = mksobj(typ, MKOBJ_NOINIT);
-					set_material_gm(stuff, WOOD);
-					stuff->spe = 2;
-					add_oprop(stuff, OPROP_HEAL);
-					add_oprop(stuff, OPROP_LIFE);
-					add_oprop(stuff, OPROP_ELECW);
-					add_to_container(otmp, stuff);
-
-					stuff = mksobj(ROBE, MKOBJ_NOINIT);
-					stuff->spe = 2;
-					add_oprop(stuff, OPROP_HOLY);
-					add_oprop(stuff, OPROP_UNHY);
-					add_oprop(stuff, OPROP_CONC);
-					set_material_gm(stuff, DRAGON_HIDE);
-					add_to_container(otmp, stuff);
-				}
-				else if(flags.aasimar_type == AASIMAR_TYPE_CLOUDFACE){
-					default_add_2(HOODED_CAPELET);
-					if(stuff)
-						stuff->obj_color = CLR_ORANGE;
-					default_add_2(ELVEN_TOGA);
-					if(stuff){
-						stuff->obj_color = CLR_ORANGE;
-						add_omod(stuff, OMOD_SHOULDER_BARING);
-					}
-					default_add_2(GLOVES);
-					default_add_2(ELVEN_BOOTS);
-					default_add(MAGIC_HARP);
-					default_add(BUGLE);
-					default_add(SPE_CAUSE_FEAR);
-					default_add(SPE_EXTRA_HEALING);
-					default_add(SPE_TELEPORT_AWAY);
-					default_add(SPE_CHARM_MONSTER);
-				}
-			break;
-		}
-		if(urace.malenum == PM_GNOME){
-			int stars[] = {PM_YELLOW_LIGHT, PM_YELLOW_LIGHT, PM_BLACK_LIGHT, PM_MOTE_OF_LIGHT, PM_TINY_BEING_OF_LIGHT};
-			stuff = mksobj(ISAMUSEI, MKOBJ_NOINIT);
-			stuff->spe = 2;
-			add_to_container(otmp, stuff);
-
-			stuff = mksobj(POT_STARLIGHT, MKOBJ_NOINIT);
-			stuff->quan = d(3,3);
-			fix_object(stuff);
-			add_to_container(otmp, stuff);
-
-			stuff = mksobj(ROCK, MKOBJ_NOINIT);
-			stuff->quan = d(3,3);
-			set_material_gm(stuff, IRON);
-			fix_object(stuff);
-			add_to_container(otmp, stuff);
-
-			stuff = mksobj(ROCK, MKOBJ_NOINIT);
-			set_material_gm(stuff, IRON);
-			add_oprop(stuff, OPROP_COLDW);
-			add_to_container(otmp, stuff);
-
-			stuff = mksobj(DIAMOND, MKOBJ_NOINIT);
-			stuff->quan = d(1,3);
-			fix_object(stuff);
-			add_to_container(otmp, stuff);
-
-			for(int i = d(3,3); i > 0; i--){
-				stuff = mksobj(FIGURINE, MKOBJ_NOINIT);
-				stuff->corpsenm = ROLL_FROM(stars);
-				if(stuff->corpsenm == PM_MOTE_OF_LIGHT)
-					stuff->spe = FIGURINE_LOYAL|FIGURINE_PSEUDO;
-				else stuff->spe = FIGURINE_LOYAL;
+				stuff = mksobj(CRYSTAL_SKULL, NO_MKOBJ_FLAGS);
 				stuff->objsize = MZ_TINY;
 				set_material_gm(stuff, GEMSTONE);
 				set_submat(stuff, DIAMOND);
+				int armors[] = {CRYSTAL_BOOTS, GAUNTLETS_OF_POWER, CRYSTAL_PLATE_MAIL, CLOAK_OF_MAGIC_RESISTANCE, CRYSTAL_HELM, SHIELD_OF_REFLECTION, CRYSTAL_SWORD};
+				struct obj *armor;
+				for(int i =  0; i < SIZE(armors); i++){
+					armor = mksobj(armors[i], MKOBJ_NOINIT);
+					armor->objsize = MZ_TINY;
+					if(armor->otyp == CLOAK_OF_MAGIC_RESISTANCE){
+						set_material_gm(armor, VEGGY);
+						switch(rn2(4)){
+							case 0:
+								armor->obj_color = CLR_YELLOW;
+							break;
+							case 1:
+								armor->obj_color = CLR_RED;
+							break;
+							case 2:
+								armor->obj_color = CLR_BRIGHT_MAGENTA;
+							break;
+							case 3:
+								armor->obj_color = CLR_BLUE;
+							break;
+						}
+					}
+					else {
+						set_material_gm(armor, GEMSTONE);
+						set_submat(armor, DIAMOND);
+					}
+					if(armor->otyp == CRYSTAL_SWORD){
+						add_oprop(armor, OPROP_MAGCW);
+						add_oprop(armor, OPROP_INSTW);
+					}
+					fix_object(armor);
+					add_to_container(stuff, armor);
+				}
 				fix_object(stuff);
 				add_to_container(otmp, stuff);
 			}
+			if(urace.malenum == PM_VAMPIRE){
+				stuff = mksobj(LIFELESS_DOLL, NO_MKOBJ_FLAGS);
+				add_to_container(otmp, stuff);
 
-			stuff = mksobj(CRYSTAL_SKULL, NO_MKOBJ_FLAGS);
-			stuff->objsize = MZ_TINY;
-			set_material_gm(stuff, GEMSTONE);
-			set_submat(stuff, DIAMOND);
-			int armors[] = {CRYSTAL_BOOTS, GAUNTLETS_OF_POWER, CRYSTAL_PLATE_MAIL, CLOAK_OF_MAGIC_RESISTANCE, CRYSTAL_HELM, SHIELD_OF_REFLECTION, CRYSTAL_SWORD};
-			struct obj *armor;
-			for(int i =  0; i < SIZE(armors); i++){
-				armor = mksobj(armors[i], MKOBJ_NOINIT);
-				armor->objsize = MZ_TINY;
-				if(armor->otyp == CLOAK_OF_MAGIC_RESISTANCE){
-					set_material_gm(armor, VEGGY);
-					switch(rn2(4)){
-						case 0:
-							armor->obj_color = CLR_YELLOW;
-						break;
-						case 1:
-							armor->obj_color = CLR_RED;
-						break;
-						case 2:
-							armor->obj_color = CLR_BRIGHT_MAGENTA;
-						break;
-						case 3:
-							armor->obj_color = CLR_BLUE;
-						break;
-					}
-				}
-				else {
-					set_material_gm(armor, GEMSTONE);
-					set_submat(armor, DIAMOND);
-				}
-				if(armor->otyp == CRYSTAL_SWORD){
-					add_oprop(armor, OPROP_MAGCW);
-					add_oprop(armor, OPROP_INSTW);
-				}
-				fix_object(armor);
-				add_to_container(stuff, armor);
+				stuff = mksobj(PLAIN_DRESS, MKOBJ_NOINIT);
+				add_to_container(otmp, stuff);
+
+				stuff = mksobj(CLOAK, MKOBJ_NOINIT);
+				set_material_gm(stuff, CLOTH);
+				add_to_container(otmp, stuff);
+
+				stuff = mksobj(LOW_BOOTS, MKOBJ_NOINIT);
+				add_to_container(otmp, stuff);
+
+				stuff = mksobj(GLOVES, MKOBJ_NOINIT);
+				set_material_gm(stuff, CLOTH);
+				add_to_container(otmp, stuff);
 			}
-			fix_object(stuff);
-			add_to_container(otmp, stuff);
-		}
-		if(urace.malenum == PM_VAMPIRE){
-			stuff = mksobj(LIFELESS_DOLL, NO_MKOBJ_FLAGS);
-			add_to_container(otmp, stuff);
 
-			stuff = mksobj(PLAIN_DRESS, MKOBJ_NOINIT);
-			add_to_container(otmp, stuff);
-
-			stuff = mksobj(CLOAK, MKOBJ_NOINIT);
-			set_material_gm(stuff, CLOTH);
-			add_to_container(otmp, stuff);
-
-			stuff = mksobj(LOW_BOOTS, MKOBJ_NOINIT);
-			add_to_container(otmp, stuff);
-
-			stuff = mksobj(GLOVES, MKOBJ_NOINIT);
-			set_material_gm(stuff, CLOTH);
-			add_to_container(otmp, stuff);
+			/* adjust for starting challenge options */
+			for(stuff = otmp->cobj; stuff; stuff = nobj){
+				nobj = stuff->nobj;
+				if(u.uroleplay.nudist_start && stuff->oclass == ARMOR_CLASS
+					&& !get_timer(stuff->timed, CRUMBLE_IMPROVED)
+				){
+					obj_extract_self(stuff);
+					obfree(stuff, (struct obj *)0);
+					continue;
+				}
+				if(u.uroleplay.blind_start
+					&& (stuff->oclass == SPBOOK_CLASS || stuff->oclass == SCROLL_CLASS)
+				)
+					add_oprop(stuff, OPROP_TACTB);
+			}
 		}
 	}
 
@@ -2576,7 +2607,7 @@ default_case:
 		goto o_done;		/* don't stack, but do other cleanup */
 	    /* container */
 	    case 2:
-		delete_contents(otmp);
+		uncreate_contents(otmp);
 		container = otmp;
 		break;
 	    /* neither container nor contained, reset container var */
@@ -3284,6 +3315,9 @@ boolean prefilled;
 		case ELSHAROOM:
 		    fill_zoo(croom);
 		    break;
+		case PRISON:
+		    fill_prison(croom);
+		    break;
 	    }
 	}
 	switch (croom->rtype) {
@@ -3305,6 +3339,9 @@ boolean prefilled;
 		break;
 	    case BEEHIVE:
 		level.flags.has_beehive = TRUE;
+		break;
+	    case PRISON:
+		level.flags.has_prison = TRUE;
 		break;
 	    case BARRACKS:
 		level.flags.has_barracks = TRUE;

@@ -2467,6 +2467,11 @@ register boolean newlev;
 			rt = 0;
 			wake = TRUE;
 	    break;
+		case PRISON:
+		    You("enter a dingy prison!");
+			rt = 0;
+			wake = TRUE;
+	    break;
 		case LEPREHALL:
 		    You("enter a leprechaun hall!");
 			rt = 0;

@@ -5429,7 +5429,7 @@ int tary;
 					u.ucreamed += rn1(20, 9);
 					Your("%s is coated in %sgunk!", body_part(FACE),
 						(old ? "even more " : ""));
-					make_blinded(Blinded + (long)u.ucreamed - old, FALSE);
+					make_blinded(BlindedTimeout + (long)u.ucreamed - old, FALSE);
 				}
 				else {
 					mdef->mcansee = 0;
@@ -7779,8 +7779,14 @@ int tary;
 							otmp->objsize = youracedata->msize;
 							pickup_object(otmp, 1, TRUE);
 							curse(otmp);
-							setworn(otmp, W_ARM);
-							Armor_on();
+							{
+								/* being forced into it doesn't break nudism */
+								boolean nudist = u.uroleplay.nudist;
+								setworn(otmp, W_ARM);
+								Armor_on();
+								u.uroleplay.nudist = nudist;
+							}
+							start_timer(1, TIMER_OBJECT, CRUMBLE_IMPROVED, (genericptr_t)otmp);
 							// Did something
 							break;
 						}
@@ -8016,7 +8022,7 @@ int tary;
 				HTelepat &= ~TIMEOUT;
 				if(!Blind_telepat) see_monsters();	/* Can't sense mons anymore! */
 			}
-			make_blinded(Blinded + 10, TRUE);
+			make_blinded(BlindedTimeout + 10, TRUE);
 		}
 		else{
 			if(haseyes(mdef->data)){

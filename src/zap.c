@@ -6379,6 +6379,11 @@ retry:
 
 	if (otmp != &zeroobj) {
 
+	    if (otmp->oclass == SPBOOK_CLASS && otmp->otyp != SPE_BLANK_PAPER
+			&& LongtermBlind
+		)
+			add_oprop(otmp, OPROP_TACTB);
+
 	    if (!flags.debug) {
 			char llog[BUFSZ+20];
 			Sprintf(llog, "wished for \"%s\"", mungspaces(bufcpy));

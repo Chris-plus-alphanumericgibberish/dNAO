@@ -163,6 +163,7 @@ static struct {
 	{ "anthole",	 ANTHOLE },
 	{ "cocknest",	 COCKNEST },
 	{ "leprehall",	 LEPREHALL },
+	{ "prison",	 PRISON },
 	{ "shop",	 SHOPBASE },
 	{ "armor shop",	 ARMORSHOP },
 	{ "scroll shop", SCROLLSHOP },

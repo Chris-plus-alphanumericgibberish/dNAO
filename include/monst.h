@@ -226,7 +226,8 @@ struct monst {
 	Bitfield(mcombat,1); /* pet is currently engaged in combat */
 	Bitfield(mgroup_summoned,1); /* monster has used its group summon ability */
 	Bitfield(mprone,1); /* monster is prone after being knocked down */
-	/*154*/
+	Bitfield(mrecruitable,1); /* monster can be recruited for quest reasons */
+	/*155*/
 
 	unsigned long long int 	seenmadnesses;	/* monster has seen these madnesses */
 	

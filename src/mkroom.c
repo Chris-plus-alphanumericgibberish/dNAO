@@ -482,14 +482,14 @@ mkmivaultitem(container)
 	if(!rn2(4)){
 		do {
 		if (otmp) delobj(otmp);
-		otmp = mkobj(ARMOR_CLASS, FALSE);
+		otmp = mkobj(ARMOR_CLASS, NO_MKOBJ_FLAGS);
 		} while (--try_limit > 0 &&
 		  !(objects[otmp->otyp].oc_magic || otmp->oartifact));
 		add_to_container(container, otmp);
 	} else {
 		do {
 			if(otmp && !Is_container(otmp)) delobj(otmp);
-			otmp = mkobj(RANDOM_CLASS, TRUE);
+			otmp = mkobj(RANDOM_CLASS, MKOBJ_ARTIF);
 			if(Is_container(otmp)){
 				place_object(otmp, container->ox, container->oy);
 			}
@@ -591,7 +591,7 @@ mklolthvaultitem()
 		type = RANDOM_CLASS;
 	do {
 		if(otmp) delobj(otmp);
-		otmp = sobj ? mksobj(type, MKOBJ_ARTIF) : mkobj(type, TRUE);
+		otmp = sobj ? mksobj(type, MKOBJ_ARTIF) : mkobj(type, MKOBJ_ARTIF);
 		if(!rn2(10) || ((objects[otmp->otyp].oc_magic || otmp->oartifact) && !rn2(3))){
 			otmp = mk_special(otmp);
 			if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp) || otmp->oclass == ARMOR_CLASS)
@@ -678,7 +678,7 @@ int oclass;
 		}break;
 	}
 	//default
-	return mkobj(oclass, TRUE);
+	return mkobj(oclass, MKOBJ_ARTIF);
 }
 
 struct obj *
@@ -690,7 +690,7 @@ int vn;
 		return mk_jrt_obj(oclass);
 	}
 	else{
-		return mkobj(oclass, TRUE);
+		return mkobj(oclass, MKOBJ_ARTIF);
 	}
 }
 
@@ -804,7 +804,7 @@ mkchromaticvaultitem()
 	}
 	do {
 		if (otmp) delobj(otmp);
-		otmp = sobj ? mksobj(type, MKOBJ_ARTIF) : mkobj(type, TRUE);
+		otmp = sobj ? mksobj(type, MKOBJ_ARTIF) : mkobj(type, MKOBJ_ARTIF);
 		if (otmp->otyp == RIN_NOTHING) {
 			otmp = mk_chromatic_special(otmp);
 		} else if (!rn2(10) || ((objects[otmp->otyp].oc_magic || otmp->oartifact) && !rn2(3))) {
@@ -2299,13 +2299,13 @@ mkkamereltowers()
 					mtmp->mhpmax += 4*8;
 					mtmp->mhp = mtmp->mhpmax;
 					mtmp->mstrategy |= STRAT_WAITFORU;
-					otmp = mkobj(RANDOM_CLASS, TRUE);
+					otmp = mkobj(RANDOM_CLASS, MKOBJ_ARTIF);
 					(void) mpickobj(mtmp, otmp);
-					otmp = mkobj(RANDOM_CLASS, TRUE);
+					otmp = mkobj(RANDOM_CLASS, MKOBJ_ARTIF);
 					(void) mpickobj(mtmp, otmp);
-					otmp = mkobj(RANDOM_CLASS, TRUE);
+					otmp = mkobj(RANDOM_CLASS, MKOBJ_ARTIF);
 					(void) mpickobj(mtmp, otmp);
-					otmp = mkobj(RANDOM_CLASS, TRUE);
+					otmp = mkobj(RANDOM_CLASS, MKOBJ_ARTIF);
 					(void) mpickobj(mtmp, otmp);
 				}
 				break;
@@ -2380,7 +2380,7 @@ mkkamereltowers()
 				case 1:
 					mtmp = makemon(&mons[PM_AMM_KAMEREL], x, y, MM_ADJACENTOK);
 					if (mtmp){
-						otmp = mkobj(RANDOM_CLASS, TRUE);
+						otmp = mkobj(RANDOM_CLASS, MKOBJ_ARTIF);
 						(void) mpickobj(mtmp, otmp);
 					}
 				break;
@@ -2821,7 +2821,7 @@ mkfishinghut(left)
 				if(!rn2(9)) mksobj_at(POT_BOOZE, x+1, y+1, NO_MKOBJ_FLAGS);
 				if(!rn2(9)) mksobj_at(CRAM_RATION, x+1, y+1, NO_MKOBJ_FLAGS);
 				if(!rn2(20)){
-					otmp = mkobj(AMULET_CLASS, TRUE);
+					otmp = mkobj(AMULET_CLASS, MKOBJ_ARTIF);
 					set_material_gm(otmp, GOLD);
 					otmp->owt = weight(otmp);
 					place_object(otmp, x+i, y+j);
@@ -6575,6 +6575,7 @@ int	roomtype;
 	case ELSHAROOM:	mkzoo(ELSHAROOM); break;
 	case HELL_VAULT:	mkhellvaultroom(); break;
 	case GRYMLDROOM:	mkgrymldroom((boolean *)0); break;
+	case PRISON:	mkprison(); break;
 	default:	impossible("Tried to make a room of type %d.", roomtype);
     }
 }
@@ -7012,6 +7013,117 @@ int sx,sy;
 			}
 		}
 	return TRUE;
+}
+
+/* Return how many cells could be built around 'sroom' the way a throne
+   room builds them: one square of solid rock two tiles beyond a straight
+   stretch of wall, entered through that wall. */
+STATIC_OVL int
+count_cell_spots(struct mkroom *sroom)
+{
+	int sx, sy, n = 0;
+
+	for (sx = sroom->lx+1; sx <= sroom->hx-1; sx++) {
+		if (cell_spot(sx, sroom->ly-2)) n++;
+		if (cell_spot(sx, sroom->hy+2)) n++;
+	}
+	for (sy = sroom->ly+1; sy <= sroom->hy-1; sy++) {
+		if (cell_spot(sroom->lx-2, sy)) n++;
+		if (cell_spot(sroom->hx+2, sy)) n++;
+	}
+	return n;
+}
+
+/* Pick one of the cell sites around 'sroom' (as counted by
+   count_cell_spots()) uniformly at random.  Return FALSE if there are
+   none; otherwise set (*cx,*cy) to the cell square and (*dx,*dy) to the
+   direction from the room to the cell. */
+boolean
+random_cell_spot(struct mkroom *sroom, int *cx, int *cy, int *dx, int *dy)
+{
+	int sx, sy, n;
+
+	if (!(n = count_cell_spots(sroom)))
+		return FALSE;
+	n = rn2(n);
+	for (sx = sroom->lx+1; sx <= sroom->hx-1; sx++) {
+		if (cell_spot(sx, sroom->ly-2) && !n--) {
+			*cx = sx; *cy = sroom->ly-2; *dx = 0; *dy = -1;
+			return TRUE;
+		}
+		if (cell_spot(sx, sroom->hy+2) && !n--) {
+			*cx = sx; *cy = sroom->hy+2; *dx = 0; *dy = 1;
+			return TRUE;
+		}
+	}
+	for (sy = sroom->ly+1; sy <= sroom->hy-1; sy++) {
+		if (cell_spot(sroom->lx-2, sy) && !n--) {
+			*cx = sroom->lx-2; *cy = sy; *dx = -1; *dy = 0;
+			return TRUE;
+		}
+		if (cell_spot(sroom->hx+2, sy) && !n--) {
+			*cx = sroom->hx+2; *cy = sy; *dx = 1; *dy = 0;
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+/* Carve an empty cell at (sx,sy), entered through a locked, barred door in
+   the room wall at (sx-dx,sy-dy). */
+void
+mkemptycell(int sx, int sy, int dx, int dy)
+{
+	levl[sx][sy].typ = CORR;
+	unblock_point(sx, sy);
+	levl[sx-dx][sy-dy].typ = DOOR;
+	levl[sx-dx][sy-dy].doormask = D_LOCKED | D_BARRED;
+	unblock_point(sx-dx, sy-dy);
+}
+
+/* Return a random empty, rectangular, ordinary room with no stairs that
+   has room for at least one cell beyond its walls, or 0 if there is none. */
+struct mkroom *
+pick_room_prison(void)
+{
+	struct mkroom *sroom;
+	int i;
+	int minroom = level.flags.sp_lev_nroom;
+	int nrange = nroom - minroom;
+	int start;
+
+	if (nrange <= 0)
+		return (struct mkroom *)0;
+
+	start = rn2(nrange);
+	for (i = nrange; i > 0; i--, start++) {
+		sroom = &rooms[minroom + (start % nrange)];
+		if (sroom->rtype != OROOM || sroom->irregular)
+			continue;
+		if (has_upstairs(sroom) || has_dnstairs(sroom))
+			continue;
+		if (!count_cell_spots(sroom))
+			continue;
+		return sroom;
+	}
+	return (struct mkroom *)0;
+}
+
+void
+mkprison(void)
+{
+	struct mkroom *sroom;
+
+	if ((sroom = pick_room_prison()) != 0) {
+		sroom->rtype = PRISON;
+		level.flags.has_prison = 1;
+		fill_prison(sroom);
+	}
+}
+
+void
+fill_prison(struct mkroom *sroom)
+{
 }
 
 struct monst *

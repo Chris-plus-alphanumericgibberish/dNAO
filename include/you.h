@@ -98,6 +98,23 @@ struct u_conduct {		/* number of times... */
 				/* genocides already listed at end of game */
 };
 
+/*
+ * Challenges selected via options before the game starts.  Unlike
+ * u_conduct these are flags, set at the start and possibly voided later.
+ */
+struct u_roleplay {
+	boolean	blind;		/* permanently blind */
+	boolean	blind_start;	/* blind was set when the game started */
+	boolean	nudist;		/* has not worn any armor, ever */
+	boolean	nudist_start;	/* nudist was set when the game started */
+	boolean	deaf;		/* reserved: permanently deaf (not yet supported) */
+	boolean	pauper;		/* no starting inventory */
+	boolean	reserved1;
+	boolean	reserved2;
+	boolean	reserved3;
+	boolean	reserved4;
+};
+
 /*** Unified structure containing role information ***/
 struct Role {
 	/*** Strings that name various things ***/
@@ -271,6 +288,7 @@ extern struct Race urace;
 #define youracedata	(maybe_polyd(youmonst.data, &mons[urace.malenum]))
 /* All drow-derived player races: update this macro when adding a new drow variant */
 #define RACE_IF_DROW	(Race_if(PM_DROW) || Race_if(PM_DRIDER) || Race_if(PM_DARK_FEY_RI) || Race_if(PM_DOKKIMAR))
+#define STAR_ELF_MADMAN	(Role_if(PM_MADMAN) && Race_if(PM_ELF) && !u.uroleplay.pauper)
 /* Drow variants with the drow myrkalfr branch included */
 #define RACE_IF_DROW_MYRKALFR	(Race_if(PM_DROW) || Race_if(PM_MYRKALFR) || Race_if(PM_DRIDER) || Race_if(PM_DARK_FEY_RI) || Race_if(PM_DOKKIMAR))
 #define Humanoid_half_dragon(role)	(Role_if(PM_MADMAN) || (Role_if(PM_NOBLEMAN) && flags.initgend))
@@ -682,7 +700,9 @@ struct you {
 	Bitfield(uiearepairs,1);	/* Knows how to repair Imperial Elven Armor */
 	Bitfield(upriest,1);	/* Knows some priestly skills */
 	Bitfield(uwizard,1);	/* Knows some arcane secrets */
-	/* 9 free bits */
+	Bitfield(udeprived,1);	/* Suffers less from starvation, benefits less from exercise */
+	Bitfield(uurchin,1);	/* Street urchin background (rogue-lite) */
+	/* 7 free bits */
 	
 	int oonaenergy;				/* Record the energy type used by Oona in your game. (Worm that Walks switches?) */
 	int brand_otyp;				/* Record the otyp of Fire and Frost Brand in this game */
@@ -693,6 +713,7 @@ struct you {
 	struct u_event	uevent;		/* certain events have happened */
 	struct u_have	uhave;		/* you're carrying special objects */
 	struct u_conduct uconduct;	/* KMH, conduct */
+	struct u_roleplay uroleplay;	/* challenges set via options */
 	struct attribs	acurr,		/* your current attributes (eg. str)*/
 			aexe,		/* for gain/loss via "exercise" */
 			abon,		/* your bonus attributes (eg. str) */

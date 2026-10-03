@@ -5,6 +5,7 @@
 #include <math.h>
 #include "hack.h"
 #include "artifact.h"
+#include "qtext.h"
 
 #ifdef REINCARNATION
 #include <ctype.h>
@@ -5054,7 +5055,7 @@ boolean greatequip;
 			otmp = mongets(mtmp, HIGH_BOOTS, mkobjflags|MKOBJ_NOINIT);
 			if(otmp) otmp->spe = 3;
 
-			if(Race_if(PM_ELF) && Role_if(PM_MADMAN)){
+			if(STAR_ELF_MADMAN){
 				otmp = mksobj_at(IMPERIAL_ELVEN_BOOTS, mtmp->mx, mtmp->my, MKOBJ_NOINIT);
 				set_material_gm(otmp, WOOD);
 				if(is_flammable(otmp))
@@ -5135,12 +5136,15 @@ boolean greatequip;
 				break;
 			}
 		} else if (mm == PM_SERVANT){
-			if(mtmp->female){
-				(void) mongets(mtmp, PLAIN_DRESS, mkobjflags);
-				(void) mongets(mtmp, STILETTOS, mkobjflags);
-			} else{
-				(void) mongets(mtmp, RUFFLED_SHIRT, mkobjflags);
-				(void) mongets(mtmp, LOW_BOOTS, mkobjflags);
+			/* a pauper Nobleman's household can't afford uniforms */
+			if(!(u.uroleplay.pauper && !strcmp(urole.filecode, "Nob") && Is_qstart(&u.uz))){
+				if(mtmp->female){
+					(void) mongets(mtmp, PLAIN_DRESS, mkobjflags);
+					(void) mongets(mtmp, STILETTOS, mkobjflags);
+				} else{
+					(void) mongets(mtmp, RUFFLED_SHIRT, mkobjflags);
+					(void) mongets(mtmp, LOW_BOOTS, mkobjflags);
+				}
 			}
 		} else if (mm == PM_ACOLYTE){
 			(void) mongets(mtmp, !rn2(10) ? KHAKKHARA : MACE, mkobjflags);
@@ -6093,7 +6097,7 @@ boolean goodequip;
 			otmp->oward = YELLOW_SIGN;
 		}
 
-		if(Role_if(PM_MADMAN) && Race_if(PM_ELF)){
+		if(STAR_ELF_MADMAN){
 			otmp = mksartifact(ART_STAR_EMPEROR_S_RING);
 			otmp->spe = 2;
 			mpickobj(mtmp, otmp);
@@ -6549,7 +6553,7 @@ boolean goodequip;
 			otmp = (struct obj *)0;
 			do {
 				if(otmp) delobj(otmp);
-				otmp = mkobj(RANDOM_CLASS, TRUE);
+				otmp = mkobj(RANDOM_CLASS, MKOBJ_ARTIF);
 			} while (!(objects[otmp->otyp].oc_magic || otmp->oartifact || Is_container(otmp)));
 			(void)mpickobj(mtmp, otmp);
 		}
@@ -6568,7 +6572,7 @@ boolean goodequip;
 			otmp = (struct obj *)0;
 			do {
 				if(otmp) delobj(otmp);
-				otmp = mkobj(RANDOM_CLASS, TRUE);
+				otmp = mkobj(RANDOM_CLASS, MKOBJ_ARTIF);
 			} while (!(objects[otmp->otyp].oc_magic || otmp->oartifact || Is_container(otmp)));
 			(void)mpickobj(mtmp, otmp);
 		}
@@ -9996,7 +10000,7 @@ int mmflags;
 									if(!rn2(10)) //1/20th total
 										(void) mongets(mtmp, SPE_SECRETS, mkobjflags);
 									else {
-										otmp = mkobj( SPBOOK_CLASS, FALSE );
+										otmp = mkobj( SPBOOK_CLASS, NO_MKOBJ_FLAGS );
 										curse(otmp);
 										(void) mpickobj(mtmp, otmp);
 									}
@@ -10004,19 +10008,19 @@ int mmflags;
 								else {
 									if(otmp) otmp->obj_color = CLR_YELLOW;
 									set_template(mtmp, YELLOW_TEMPLATE);
-									otmp = mkobj( SCROLL_CLASS, TRUE );
+									otmp = mkobj( SCROLL_CLASS, MKOBJ_ARTIF );
 									if(otmp){
 										otmp->obj_color = CLR_YELLOW;
 										curse(otmp);
 										(void) mpickobj(mtmp, otmp);
 									}
-									otmp = mkobj( SCROLL_CLASS, TRUE );
+									otmp = mkobj( SCROLL_CLASS, MKOBJ_ARTIF );
 									if(otmp){
 										otmp->obj_color = CLR_YELLOW;
 										curse(otmp);
 										(void) mpickobj(mtmp, otmp);
 									}
-									otmp = mkobj( SCROLL_CLASS, TRUE );
+									otmp = mkobj( SCROLL_CLASS, MKOBJ_ARTIF );
 									if(otmp){
 										otmp->obj_color = CLR_YELLOW;
 										curse(otmp);
@@ -14448,13 +14452,13 @@ boolean randmonst;
 			mkmon_template = WORLD_SHAPER;
 		}
 		/* the worm-entity has it out for mad elves for some reason */
-		else if(((Role_if(PM_MADMAN) && Race_if(PM_ELF)) || Infuture || check_insight()) && is_basic_worm(ptr) && roll_generic_flat_madness(TRUE)){
+		else if((STAR_ELF_MADMAN || Infuture || check_insight()) && is_basic_worm(ptr) && roll_generic_flat_madness(TRUE)){
 			mkmon_template = PSURLON;
 		}
-		else if(((Role_if(PM_MADMAN) && Race_if(PM_ELF)) || Infuture || (randmonst && check_insight())) && is_wormy_thing(ptr) && roll_generic_madness(TRUE)){
+		else if((STAR_ELF_MADMAN || Infuture || (randmonst && check_insight())) && is_wormy_thing(ptr) && roll_generic_madness(TRUE)){
 			mkmon_template = PSURLON;
 		}
-		else if(((Role_if(PM_MADMAN) && Race_if(PM_ELF)) || Infuture || check_insight()) && is_wormy_dragon(ptr) && roll_generic_flat_madness(TRUE) && check_insight() && randmonst){
+		else if((STAR_ELF_MADMAN || Infuture || check_insight()) && is_wormy_dragon(ptr) && roll_generic_flat_madness(TRUE) && check_insight() && randmonst){
 			mkmon_template = PSURLON;
 		}
 		/* insight check: making pseudonatural creatures out of anything reasonable */
@@ -15992,12 +15996,12 @@ int faction;
 				}
 				if (in_mklev) {
 					pline("A terrible silence reigns!");
-					com_pager(202);
+					com_pager(QT_COMMON_SILENCE_REIGNS);
 					mtmp->msleeping = 1;
 				}
 				else {
 					pline("A terrible silence falls!");
-					com_pager(203);
+					com_pager(QT_COMMON_SILENCE_FALLS);
 				}
 				nomul(0, NULL);
 			}
@@ -16101,13 +16105,13 @@ int faction;
 				mtmp->mhpmax = 2*mtmp->mhpmax;
 				mtmp->mhp = mtmp->mhpmax;
 				pline("Demogorgon, Prince of Demons, is near!");
-				com_pager(200);
+				com_pager(QT_COMMON_DEMOGORGON);
 			}
 			else if(mndx == PM_LAMASHTU){
 				mtmp->mhpmax = 2*mtmp->mhpmax;
 				mtmp->mhp = mtmp->mhpmax;
 				pline("Lamashtu, the Demon Queen, is near!");
-				com_pager(201);
+				com_pager(QT_COMMON_LAMASHTU);
 			}
 			else if(mndx == PM_PALE_NIGHT){
 				mtmp->mvar_paleWarning = 0;
