@@ -847,6 +847,7 @@ struct monst *magr;
 			}
 			/* Flowing sword: Rapidly-moving blade does extra damage, especially vs. large monsters */
 			if (obj && check_oprop(obj, OPROP_GSSDW)){
+#define im ((obj->oartifact == ART_AMALGAMATED_SKIES) ? 20 : 10)
 				int *modnum;
 				if(large){
 					modnum = &dmod;
@@ -855,17 +856,21 @@ struct monst *magr;
 					modnum = &flat;
 				}
 				if(magr == &youmonst || (!magr && obj->where == OBJ_INVENT)){
-					*modnum += Insight/10;
-					if (((moves)*(Insight % 10)) / 10 > ((moves - 1)*(Insight % 10)) / 10)
+					*modnum += (Insight/im);
+					if (((moves)*(Insight % im)) / im > ((moves - 1)*(Insight % im)) / im)
 						*modnum += 1;
 				}
 				else if(magr){
 					if(insightful(magr->data)){
-						*modnum += mlev(magr)/10;
-						if (((moves)*(mlev(magr) % 10)) / 10 > ((moves - 1)*(mlev(magr) % 10)) / 10)
+						*modnum += mlev(magr)/im;
+						if (((moves)*(mlev(magr) % im)) / im > ((moves - 1)*(mlev(magr) % im)) / im)
 							*modnum += 1;
 					}
 				}
+#undef im
+			}
+			if (obj && obj->oartifact == ART_AMALGAMATED_SKIES){
+				ocd -= 5; // it's that shrimple
 			}
 
 			if (obj->obj_material != objects[obj->otyp].oc_material){
