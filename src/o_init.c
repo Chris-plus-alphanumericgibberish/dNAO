@@ -1734,6 +1734,9 @@ fix_etraits(struct obj *otmp)
 	else if(otmp->oartifact == ART_RUINOUS_DESCENT_OF_STARS){
 		otmp->expert_traits = ETRAIT_KNOCK_BACK|ETRAIT_KNOCK_BACK_CHARGE;
 	}
+	else if(otmp->oartifact == ART_AMALGAMATED_SKIES){
+		otmp->expert_traits = ETRAIT_FOCUS_FIRE|ETRAIT_STOP_THRUST|ETRAIT_GRAZE; // the ones you get from silver sky normally
+	}
 
 	if(otmp->oartifact == ART_RUYI_JINGU_BANG){
 		//Special abnormal size rules

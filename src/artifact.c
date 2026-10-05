@@ -2386,7 +2386,7 @@ boolean mod;
 					artinstance[ART_SKY_REFLECTED].ZerthOtyp = otmp->otyp;
 				}
 				if(otmp->oartifact == ART_AMALGAMATED_SKIES){
-					artinstance[ART_AMALGAMATED_SKIES].TwinSkiesEtraits = objects[TWO_HANDED_SWORD].expert_traits;
+					artinstance[ART_AMALGAMATED_SKIES].TwinSkiesEtraits = 0;
 				}
 			}
 			if(otmp->oartifact && (get_artifact(otmp)->inv_prop == NECRONOMICON || get_artifact(otmp)->inv_prop == SPIRITNAMES)){
