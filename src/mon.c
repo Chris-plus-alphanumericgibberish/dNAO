@@ -1728,7 +1728,7 @@ struct monst *mon;
 	if(has_syllable(mon->data) && mon->mvar_syllable == SYLLABLE_OF_GRACE__UUR)
 		mmove += 6;
 	
-	if(u.sealsActive&SEAL_CHUPOCLOPS && distmin(mon->mx, mon->my, u.ux, u.uy) <= u.ulevel/5+1){
+	if(u.sealsActive&SEAL_CHUPOCLOPS && !mon->mtame && distmin(mon->mx, mon->my, u.ux, u.uy) <= u.ulevel/5+1){
 		mmove = max(mmove-(u.ulevel/10+1),1);
 	}
 	if(In_fog_cloud(mon)) mmove = max(mmove/3, 1);
