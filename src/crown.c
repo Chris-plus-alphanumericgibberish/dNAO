@@ -484,7 +484,7 @@ gcrownu()
 					"A %s appears at your feet", 
 					arti == ART_CROWN_OF_THE_SAINT_KING ? "crown" : "helm",
 					(const char *)0);
-				if(carried(obj)){
+				if(carried(obj) && !u.uroleplay.nudist){
 					if(uarmh) remove_worn_item(uarmh, TRUE);
 					setworn(obj, W_ARMH);
 					Helmet_on();

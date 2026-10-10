@@ -731,10 +731,13 @@ doread()
 	    const char *what = 0;
 	    if (scroll->oclass == SPBOOK_CLASS)
 			what = "mystic runes";
-	    else if (!scroll->dknown)
+	    else if (!scroll->dknown && scroll->oartifact != ART_PAINTING_FRAGMENT)
 			what = "formula on the scroll";
 	    if (what) {
-			if(check_oprop(scroll, OPROP_TACTB)){
+			if(scroll->otyp == SPE_BOOK_OF_THE_DEAD){
+				pline("The pages are oddly textured, and the runes on them feel as though they are cut deeply into stone.");
+			}
+			else if(check_oprop(scroll, OPROP_TACTB)){
 				pline("A tactile script supplements the %s.", what);
 			}
 			else {
@@ -768,12 +771,14 @@ doread()
 	if(!scroll->oartifact)
 		scroll->in_use = TRUE;	/* scroll, not spellbook, now being read */
 	if(scroll->oartifact) {
-		if(Blind && (scroll->oartifact == ART_MARAUDER_S_MAP || scroll->oartifact == ART_RITE_OF_DETESTATION)) {
+		if(Blind && scroll->oartifact == ART_MARAUDER_S_MAP) {
 			pline("Being blind, you cannot see %s.", the(xname(scroll)));
 			scroll->in_use = FALSE;
 			return MOVE_INSTANT;
 		}
-		if(scroll->oartifact != ART_PAINTING_FRAGMENT)
+		if(Blind && scroll->oartifact == ART_RITE_OF_DETESTATION)
+			pline("Being blind, you cannot see %s, but you know quite well what it is.", the(xname(scroll)));
+		else if(scroll->oartifact != ART_PAINTING_FRAGMENT)
 			pline("You examine %s.", the(xname(scroll)));
 	} else if(scroll->otyp != SCR_BLANK_PAPER) {
 	  if(Blind)
@@ -2308,7 +2313,12 @@ struct obj	*sobj;
 	    }
 	case SCR_BLANK_PAPER:
 		if(sobj->oartifact == ART_PAINTING_FRAGMENT){
-			You("can't make out any detail. There seems to have been a lot of white paint involved, though.");
+			if(!Blind)
+				You("can't make out any detail. There seems to have been a lot of white paint involved, though.");
+			pline("Your %s brush the surface of the %s...",
+				makeplural(body_part(FINGER)),
+				sobj->dknown ? "painting" : "scroll");
+			doparticularinvoke(sobj);
 		} else if(sobj->oartifact == ART_RITE_OF_DETESTATION){
 			doparticularinvoke(sobj);
 		} else {
@@ -3813,20 +3823,20 @@ register struct obj	*sobj;
 	}
 	if (amorphous_mon(&youmonst) || is_whirly(youracedata) || unsolid(youracedata)) {
 		pline("A ball and chain appears, then falls away.");
-		dropy(mkobj(BALL_CLASS, TRUE));
+		dropy(mkobj(BALL_CLASS, NO_MKOBJ_FLAGS));
 		return;
 	}
-	setworn(mkobj(CHAIN_CLASS, TRUE), W_CHAIN);
+	setworn(mkobj(CHAIN_CLASS, NO_MKOBJ_FLAGS), W_CHAIN);
 #ifdef CONVICT
     if (((otmp = carrying(BALL)) != 0) &&(otmp->oartifact ==
      ART_IRON_BALL_OF_LEVITATION)) {
         setworn(otmp, W_BALL);
         Your("%s chains itself to you!", xname(otmp));
     } else {
-		setworn(mkobj(BALL_CLASS, TRUE), W_BALL);
+		setworn(mkobj(BALL_CLASS, NO_MKOBJ_FLAGS), W_BALL);
     }
 #else
-	setworn(mkobj(BALL_CLASS, TRUE), W_BALL);
+	setworn(mkobj(BALL_CLASS, NO_MKOBJ_FLAGS), W_BALL);
 #endif /* CONVICT */
 	uball->spe = 1;		/* special ball (see save) */
 

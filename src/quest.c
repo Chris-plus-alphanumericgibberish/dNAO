@@ -33,7 +33,10 @@ on_start()
 				|| (Race_if(PM_SILVERKNIGHT) && Role_if(PM_KNIGHT))
 			? QT_VARIANT : 0;
 	if(!Qstat(first_start)) {
-		qt_pager(QT_FIRSTTIME + variant);
+		if(u.uroleplay.pauper && urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH)
+			qt_pager(quest_status.qvar2_healer_pet_message ? QT_PAUPER_HEALER_FIRSTTIME_FREED : QT_PAUPER_HEALER_FIRSTTIME);
+		else
+			qt_pager(QT_FIRSTTIME + variant);
 		Qstat(first_start) = TRUE;
 		if(Race_if(PM_ANDROID) && Role_if(PM_ANACHRONONAUT))
 			livelog_write_string("has already received their quest via sticky-note");
@@ -308,7 +311,7 @@ struct obj *obj;	/* quest artifact; possibly null if carrying Amulet */
 	    /* should have obtained bell during quest;
 	       if not, suggest returning for it now */
 	    if ((otmp = carrying(BELL_OF_OPENING)) == 0 && !Role_if(PM_ANACHRONONAUT))
-			com_pager(5);
+			com_pager(QT_COMMON_NEEDBELL);
 	}
 	Qstat(got_thanks) = TRUE;
 
@@ -496,7 +499,7 @@ chat_with_leader()
 			}
 			
 			if (!Punished) {
-				setworn(mkobj(CHAIN_CLASS, TRUE), W_CHAIN);
+				setworn(mkobj(CHAIN_CLASS, NO_MKOBJ_FLAGS), W_CHAIN);
 				setworn(obj, W_BALL);
 				uball->spe = 1;
 				if (!u.uswallow) {
@@ -934,6 +937,72 @@ turn_stag()
 		pline("\"Take this, to identify you as one of ours!  You should take off any armor with another faction's crest, though.\"");
 		hold_another_object(otmp, "You drop %s!",
 							  doname(otmp), (const char *)0);	}
+}
+
+/* Return whether 'obj', a non-blank book or scroll just created on the
+   current level, should be given a tactile script because of the hero's
+   quest and challenge options.  Call this for every such object, not just
+   those created inside the quest.  Some cases are decided by a random
+   roll, so call this once per object. */
+boolean
+tactile_quest_book(struct obj *obj)
+{
+	static const char *quests[] = {
+		"Arc", "Ana", "Bin", "Brd", "Hea", "Hnt", "Ken",
+		"Mon", "Pir", "Pri", "Ran", "Sam", "Val", "Wiz",
+		"Ndr", "Nhd", "Dnb", (const char *)0
+	};
+	static const char *no_pauper_quests[] = {
+		"Hnt", "Mad", "Nob", "Pir", "Ran", "Sam",
+		"Dro", "Ndr", "Hdr", "Dnb", "Gnr", (const char *)0
+	};
+	int i, skill;
+
+	/* Drow healers belong to an order of priests/priestesses
+	   with many ritually-blinded members */
+	if (!strcmp(urole.filecode, "Dhl") && In_quest(&u.uz)) {
+		if (obj->oclass == SPBOOK_CLASS) {
+			skill = spell_skilltype(obj->otyp);
+			if (skill != P_HEALING_SPELL && skill != P_CLERIC_SPELL
+				&& skill != P_DIVINATION_SPELL
+			)
+				return FALSE;
+		}
+		return !rn2(4);
+	}
+	/* Merlin left these books, and he's precognitive so each book
+	   reflects the PC's needs at the time it is found */
+	if (!strcmp(urole.filecode, "Kni"))
+		return In_quest(&u.uz) && LongtermBlind;
+	if (!u.uroleplay.blind_start)
+		return FALSE;
+	if (u.uroleplay.pauper)
+		for (i = 0; no_pauper_quests[i]; i++)
+			if (!strcmp(urole.filecode, no_pauper_quests[i]))
+				return FALSE;
+	/* The Gnome Ranger quest is in the mines */
+	if (!strcmp(urole.filecode, "Gnr"))
+		return (In_mines(&u.uz) || In_quest(&u.uz)) && !Is_nemesis(&u.uz);
+	/* Likewise, the Elf quest and Chaos 3 are the same place */
+	if (!strcmp(urole.filecode, "Elf"))
+		return (In_quest(&u.uz) && u.uz.dlevel < qlocate_level.dlevel)
+			|| (In_mordor_quest(&u.uz) && u.uz.dlevel < mordor_1_level.dlevel);
+	if (!In_quest(&u.uz))
+		return FALSE;
+	/* Roughly 1 in 6 books were meant for the PC vs a quest NPC */
+	if (!strcmp(urole.filecode, "Mad"))
+		return !rn2(6);
+	if (!strcmp(urole.filecode, "Nob"))
+		return Is_qhome(&u.uz) || !rn2(2);
+	if (!Is_qhome(&u.uz))
+		return FALSE;
+	/* Only book-heavy roles are provided special books */
+	if (!strcmp(urole.filecode, "Dro") || !strcmp(urole.filecode, "Hdr"))
+		return Role_if(PM_PRIEST) || Role_if(PM_WIZARD);
+	for (i = 0; quests[i]; i++)
+		if (!strcmp(urole.filecode, quests[i]))
+			return TRUE;
+	return FALSE;
 }
 
 /*quest.c*/

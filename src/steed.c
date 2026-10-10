@@ -716,7 +716,7 @@ dismount_steed(reason)
 	   unless we're in the midst of creating a bones file. */
 	if (reason == DISMOUNT_BONES) {
 	    /* move the steed to an adjacent square */
-	    if (enexto(&cc, u.ux, u.uy, mtmp->data))
+	    if (enexto_mon(&cc, u.ux, u.uy, mtmp))
 		rloc_to(mtmp, cc.x, cc.y);
 	    else	/* evidently no room nearby; move steed elsewhere */
 		(void) rloc(mtmp, FALSE);
@@ -776,7 +776,7 @@ dismount_steed(reason)
 			(void) mintrap(mtmp);
 		}
 	    /* Couldn't... try placing the steed */
-	    } else if (enexto(&cc, u.ux, u.uy, mtmp->data)) {
+	    } else if (enexto_mon(&cc, u.ux, u.uy, mtmp)) {
 		/* Keep player here, move the steed to cc */
 		rloc_to(mtmp, cc.x, cc.y);
 		/* Player stays put */
@@ -814,7 +814,7 @@ rider_dismounts_you(int reason)
 	if (!mtmp)		/* Just return silently */
 	    return;
 
-	boolean have_spot = enexto(&cc, u.ux, u.uy, mtmp->data);
+	boolean have_spot = enexto_mon(&cc, u.ux, u.uy, mtmp);
 
 	/* Check the reason for dismounting */
 	switch(reason){

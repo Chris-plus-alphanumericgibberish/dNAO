@@ -127,7 +127,9 @@
 #define SUBOUT_T_WING_CLAW_3B 59	/* Tiefling doubt wing-sting attack */
 #define SUBOUT_KICKING_BOOTS 60	/* kicking boots attack */
 #define SUBOUT_KICK	61	/* set whenever ANY finalized attack in the chain is AT_KICK, from any source */
-#define MAX_SUBOUT		SUBOUT_KICK
+#define SUBOUT_DEATHEYE_BITES 62	/* Death Eye: using its bite/tongue attacks this round */
+#define SUBOUT_DEATHEYE_DEATH 63	/* Death Eye: using its death gaze this round */
+#define MAX_SUBOUT		SUBOUT_DEATHEYE_DEATH
 #define SUBOUT_ARRAY_SIZE (MAX_SUBOUT/(sizeof(int)*8)+1)
 
 #define ATTKFLAG_FORCE_BLEED		0x00000001L

@@ -1610,6 +1610,8 @@ mon_leg_count(struct permonst *ptr)
 
     if (auton >= 0)
 	return auton;
+    if (ptr->mtyp == PM_SEA_RAIDER || ptr->mtyp == PM_SEA_PRIEST)
+	return 4;
     if (humanoid_feet(ptr))
 	return 2;
     if (nolimbs(ptr) || nofeet(ptr) || snakemanoid(ptr))

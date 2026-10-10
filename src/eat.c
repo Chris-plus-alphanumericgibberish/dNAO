@@ -1374,6 +1374,7 @@ BOOLEAN_P tin, nobadeffects, drained;
 			if (HConfusion > 2)  make_confused(2L,FALSE);
 		break;
 		case PM_BEHOLDER:
+		case PM_DEATH_BEHOLDER:
 			if(!drained || !rn2(5)) {
 				You(Hallucination ? "can see your own insides!"
 					: "feel as though you can see the world from a whole new angle!");
@@ -1532,7 +1533,7 @@ opentin()		/* called during each move whilst opening a tin */
 	    if (r == ROTTEN_TIN && (tin.tin->corpsenm == PM_LIZARD || tin.tin->corpsenm == PM_SMALL_CAVE_LIZARD ||
 			tin.tin->corpsenm == PM_CAVE_LIZARD || tin.tin->corpsenm == PM_BABY_CAVE_LIZARD || 
 			tin.tin->corpsenm == PM_LARGE_CAVE_LIZARD ||
-			tin.tin->corpsenm == PM_LICHEN || tin.tin->corpsenm == PM_BEHOLDER))
+			tin.tin->corpsenm == PM_LICHEN || tin.tin->corpsenm == PM_BEHOLDER || tin.tin->corpsenm == PM_DEATH_BEHOLDER))
 		r = DRIED_TIN;		/* lizards don't rot */
 	    else if (tin.tin->spe == -1 && !tin.tin->blessed && !rn2(7))
 		r = ROTTEN_TIN;			/* some homemade tins go bad */
@@ -1914,7 +1915,7 @@ eatcorpse(otmp)		/* called when a corpse is selected as food */
 	}
 
 	if (mtyp != PM_LIZARD && mtyp != PM_SMALL_CAVE_LIZARD && mtyp != PM_CAVE_LIZARD 
-		&& mtyp != PM_LARGE_CAVE_LIZARD && mtyp != PM_LICHEN && mtyp != PM_BEHOLDER
+		&& mtyp != PM_LARGE_CAVE_LIZARD && mtyp != PM_LICHEN && mtyp != PM_BEHOLDER && mtyp != PM_DEATH_BEHOLDER
 	) {
 		long age = peek_at_iced_corpse_age(otmp);
 
@@ -2044,7 +2045,7 @@ eatcorpse(otmp)		/* called when a corpse is selected as food */
 	if (otmp->odrained) victual.reqtime = (u.sealsActive&SEAL_AHAZU) ? 1 : rounddiv(victual.reqtime, 5);
 
 	if (!tp && mtyp != PM_LIZARD && mtyp != PM_SMALL_CAVE_LIZARD && mtyp != PM_CAVE_LIZARD 
-		&& mtyp != PM_LARGE_CAVE_LIZARD && mtyp != PM_LICHEN && mtyp != PM_BEHOLDER &&
+		&& mtyp != PM_LARGE_CAVE_LIZARD && mtyp != PM_LICHEN && mtyp != PM_BEHOLDER && mtyp != PM_DEATH_BEHOLDER &&
 			(otmp->orotten || !rn2(7))) {
 	    if ( (monstermoves - peek_at_iced_corpse_age(otmp)) > 5 && rottenfood(otmp)) {
 		otmp->orotten = TRUE;
@@ -2161,7 +2162,7 @@ struct obj *otmp;
 		       for deciding whether to be sickened by this meal */
 		    if (rn2(2) && !CANNIBAL_ALLOWED())
 #ifdef CONVICT
-		    if (!Role_if(PM_CONVICT))
+		    if (!u.udeprived)
 #endif /* CONVICT */
 			make_vomiting((long)rn1(victual.reqtime, 14), FALSE);
 		}
@@ -2207,7 +2208,7 @@ struct obj *otmp;
 		if (otmp->otyp == EGG && stale_egg(otmp)) {
 		    pline("Ugh.  Rotten egg.");	/* perhaps others like it */
 #ifdef CONVICT
-		if (Role_if(PM_CONVICT) && (rn2(8) > u.ulevel)) {
+		if (u.udeprived && (rn2(8) > u.ulevel)) {
 		    You_feel("a slight stomach ache.");	/* prisoners are used to bad food */
 		} else
 #endif /* CONVICT */
@@ -2692,7 +2693,7 @@ struct obj *otmp;
 		    stoneorslime = !Slime_res(&youmonst);
 
 		if (cadaver && mtyp != PM_LIZARD && mtyp != PM_SMALL_CAVE_LIZARD && mtyp != PM_CAVE_LIZARD 
-		&& mtyp != PM_LARGE_CAVE_LIZARD && mtyp != PM_LICHEN && mtyp != PM_BEHOLDER ) {
+		&& mtyp != PM_LARGE_CAVE_LIZARD && mtyp != PM_LICHEN && mtyp != PM_BEHOLDER && mtyp != PM_DEATH_BEHOLDER ) {
 			long age = peek_at_iced_corpse_age(otmp);
 			/* worst case rather than random
 			   in this calculation to force prompt */
@@ -4043,8 +4044,9 @@ gethungry()	/* as time goes by - called by moveloop() and domove() */
 	}
 	
 	if(u.usleep) hungermod *= 10; /* slow metabolic rate while asleep */
-	/* Monks and Convicts can last twice as long at hungry and below. Convicts last 5x as long at weak or lower. */
-	if(Role_if(PM_CONVICT)){
+	/* Monks and the deprived can last twice as long at hungry and below.
+	   The deprived last 5x as long at weak or lower. */
+	if(u.udeprived){
 		if(u.uhs == HUNGRY) hungermod *= 2;
 		else if(u.uhs > HUNGRY) hungermod *=5;	/* WEAK or hungrier */
 	}
@@ -4501,11 +4503,11 @@ sync_hunger()
 	if(is_fainted()) {
 		flags.soundok = 0;
 		if(get_uhungersizemod() > 1){
-			if(Role_if(PM_CONVICT)) nomul(-1+( YouHunger/(20*get_uhungersizemod())), "fainted from lack of food");
+			if(u.udeprived) nomul(-1+( YouHunger/(20*get_uhungersizemod())), "fainted from lack of food");
 			else nomul(-10+( YouHunger/(10*get_uhungersizemod())), "fainted from lack of food");
 		}
 		else {
-			if(Role_if(PM_CONVICT)) nomul(-1+( YouHunger/20), "fainted from lack of food");
+			if(u.udeprived) nomul(-1+( YouHunger/20), "fainted from lack of food");
 			else nomul(-10+( YouHunger/10), "fainted from lack of food");
 		}
 		nomovemsg = "You regain consciousness.";
@@ -4580,7 +4582,7 @@ boolean incr;
 	            } else {
 					You("faint from lack of food.");
 					flags.soundok = 0;
-					if(Role_if(PM_CONVICT)) nomul(-1+YouHunger/20, "fainted from lack of food");
+					if(u.udeprived) nomul(-1+YouHunger/20, "fainted from lack of food");
 					else nomul(-10+YouHunger/10, "fainted from lack of food");
 					nomovemsg = "You regain consciousness.";
 					afternmv = unfaint;

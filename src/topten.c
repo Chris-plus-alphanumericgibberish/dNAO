@@ -80,6 +80,8 @@ STATIC_DCL int FDECL(score_wanted,
 		(BOOLEAN_P, int,struct toptenentry *,int,const char **,int));
 #ifdef RECORD_CONDUCT
 /*STATIC_DCL long FDECL(encodeconduct, (void));*/
+STATIC_DCL void FDECL(add_conductX, (char *, const char *, boolean));
+STATIC_DCL char *FDECL(encodeconductX, (char *));
 #endif
 #ifdef RECORD_ACHIEVE
 STATIC_DCL long FDECL(encodeachieve, (void));
@@ -317,6 +319,10 @@ struct toptenentry *tt;
 
 #ifdef RECORD_CONDUCT
   (void)fprintf(rfile, SEP "conduct=0x%lx", encodeconduct());
+  {
+	  char conductXbuff[BUFSZ];
+	  (void)fprintf(rfile, SEP "conductX=%s", encodeconductX(conductXbuff));
+  }
 #endif
 
 #ifdef RECORD_TURNS
@@ -1060,6 +1066,45 @@ encodeconduct(void)
        if(!u.uconduct.IDs)             e |= 0x2000L;
 
        return e;
+}
+
+/* Append 'conduct' to the comma-separated list in 'buf' if 'condition'. */
+STATIC_OVL void
+add_conductX(char *buf, const char *conduct, boolean condition)
+{
+	if (condition) {
+		if (buf[0] != '\0')
+			Strcat(buf, ",");
+		Strcat(buf, conduct);
+	}
+}
+
+/* Fill 'buf' (at least BUFSZ) with the names of all conducts kept, and
+   return it. */
+STATIC_OVL char *
+encodeconductX(char *buf)
+{
+	buf[0] = '\0';
+	add_conductX(buf, "foodless",     !u.uconduct.food);
+	add_conductX(buf, "vegan",        !u.uconduct.unvegan);
+	add_conductX(buf, "vegetarian",   !u.uconduct.unvegetarian);
+	add_conductX(buf, "atheist",      !u.uconduct.gnostic);
+	add_conductX(buf, "weaponless",   !u.uconduct.weaphit);
+	add_conductX(buf, "pacifist",     !u.uconduct.killer);
+	add_conductX(buf, "illiterate",   !u.uconduct.literate);
+	add_conductX(buf, "polyless",     !u.uconduct.polypiles);
+	add_conductX(buf, "polyselfless", !u.uconduct.polyselfs);
+	add_conductX(buf, "wishless",     !u.uconduct.wishes);
+	add_conductX(buf, "artiwishless", !u.uconduct.wisharti);
+	add_conductX(buf, "genocideless", !num_genocides());
+	add_conductX(buf, "shopidless",   !u.uconduct.shopID);
+	add_conductX(buf, "idless",       !u.uconduct.IDs);
+	add_conductX(buf, "blind",        u.uroleplay.blind);
+	add_conductX(buf, "nudist",       u.uroleplay.nudist);
+	add_conductX(buf, "pauper",       u.uroleplay.pauper);
+	add_conductX(buf, "descendant",   flags.descendant > 0);
+
+	return buf;
 }
 #endif
 

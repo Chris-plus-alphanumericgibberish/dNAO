@@ -622,7 +622,7 @@ struct obj * otmp;	/* optional: item not in your inventory that is being stolen 
 	eshkp->robbed += total;
 	You("stole %ld %s worth of merchandise.",
 	    total, currency(total));
-	if (!Role_if(PM_ROGUE)) {     /* stealing is unlawful */
+	if (!Role_if(PM_ROGUE) && !u.uurchin) {     /* stealing is unlawful */
 	    adjalign(-sgn(u.ualign.type));
 	    You("feel like an evil rogue.");
 		if(u.ualign.type >= 0){
@@ -1014,6 +1014,24 @@ register struct obj *obj;
 	}
 }
 
+/* Delete everything in container 'obj', including the contents of nested
+   containers, and mark any artifacts among them as never having existed so
+   they can be generated again. */
+void
+uncreate_contents(struct obj *obj)
+{
+	struct obj *curr;
+
+	while ((curr = obj->cobj) != 0) {
+		if (Has_contents(curr))
+			uncreate_contents(curr);
+		if (curr->oartifact)
+			artifact_exists(curr, ONAME(curr), FALSE);
+		obj_extract_self(curr);
+		obfree(curr, (struct obj *)0);
+	}
+}
+
 /* called with two args on merge */
 void
 obfree(obj, merge)
@@ -1234,7 +1252,7 @@ register boolean silentketer;
 	pacify_shk(shkp);
 	eshkp->following = 0;
 	eshkp->robbed = 0L;
-	if (!Role_if(PM_ROGUE))
+	if (!Role_if(PM_ROGUE) && !u.uurchin)
 		adjalign(sgn(u.ualign.type));
 	if(!inhishop(shkp)) {
 		char shk_nam[BUFSZ];
@@ -3851,7 +3869,8 @@ register struct monst *shkp;
 	    remove_damage(shkp, FALSE);
 
 	if((udist = distu(omx,omy)) < 3 &&
-		((shkp->mtyp != PM_GRID_BUG && shkp->mtyp != PM_BEBELITH) || (omx==u.ux || omy==u.uy)) &&
+		(!orthogonal_mover(shkp) || (omx==u.ux || omy==u.uy)) &&
+		(!diagonal_mover(shkp) || (omx!=u.ux && omy!=u.uy)) &&
 		(!is_vectored_mtyp(shkp->mtyp) ||
 			(omx + xdir[(int)shkp->mvar_vector] == u.ux && 
 			   omy + ydir[(int)shkp->mvar_vector] == u.uy 
@@ -6121,12 +6140,15 @@ int y;
 	return FALSE;
 }
 
+STATIC_OVL boolean
+smith_mat_compatible(int otyp, int mat)
+{
+	return mat == SHADOWSTEEL || mat == DRAGON_HIDE
+		|| hard_mat(objects[otyp].oc_material) == hard_mat(mat);
+}
+
 int
-pick_object(example, simple_list, extended_simple_list, extended_allowed_list, mat)
-struct obj *example;
-int *simple_list;
-int *extended_simple_list, *extended_allowed_list;
-int mat;
+pick_object(struct obj *example, int *simple_list, int *extended_simple_list, int *extended_allowed_list, int *matching_allowed_list, int mat)
 {
 	int i, n;
 	int unduplicatable_otyps[] = {
@@ -6158,6 +6180,11 @@ int mat;
 					return example->otyp;
 			}
 		}
+		//Objects on the matching list are allowed only if their (possibly shuffled) material is compatible.
+		for(i = 0; matching_allowed_list[i]; i++){
+			if(matching_allowed_list[i] == example->otyp)
+				return smith_mat_compatible(example->otyp, mat) ? example->otyp : 0;
+		}
 		//If a normally unduplicatable object is specifically allowed, it is allowed.
 		for(i = 0; unduplicatable_otyps[i]; i++){
 			if(unduplicatable_otyps[i] == example->otyp)
@@ -6172,9 +6199,7 @@ int mat;
 			return 0;
 		}
 		//material incompatibilities. Shadowstuff and dragon hide are compatable with everything. Otherwise hadness must match.
-		if(mat != SHADOWSTEEL && mat != DRAGON_HIDE
-			&& (hard_mat(objects[example->otyp].oc_material) != hard_mat(mat))
-		)
+		if(!smith_mat_compatible(example->otyp, mat))
 			return 0;
 		return example->otyp;
 	}
@@ -6229,18 +6254,15 @@ int mat;
 		{
 			0
 		};
-	return pick_object(example, simple_otyps, extended_simple_list, extended_allowed_list, mat);
+	return pick_object(example, simple_otyps, extended_simple_list, extended_allowed_list, simple_otyps, mat);
 }
 
 int
-pickarmor(example, extended_simple_list, extended_allowed_list, mat)
-struct obj *example;
-int *extended_simple_list, *extended_allowed_list;
-int mat;
+pickarmor(struct obj *example, int *extended_simple_list, int *extended_allowed_list, int *matching_allowed_list, int mat)
 {
 	int simple_otyps[] = 
 		{ 0 };
-	return pick_object(example, simple_otyps, extended_simple_list, extended_allowed_list, mat);
+	return pick_object(example, simple_otyps, extended_simple_list, extended_allowed_list, matching_allowed_list, mat);
 }
 
 //Pick ring: smiths can't make rings
@@ -6254,7 +6276,7 @@ int mat;
 {
 	int simple_otyps[] = 
 		{0};
-	return pick_object(example, simple_otyps, extended_simple_list, extended_allowed_list, mat);
+	return pick_object(example, simple_otyps, extended_simple_list, extended_allowed_list, simple_otyps, mat);
 }
 
 //Pick food: smiths can't make food
@@ -6526,6 +6548,11 @@ struct monst *smith;
 			BELT_OF_POWER, BELT_OF_WEAKNESS, BELT_OF_CARRYING, BELT_OF_WEIGHT, UTILITY_BELT,
 			0
 	};
+	int oona_matching_armor[] = {WING_GUARDS_OF_REFLECTION, WINGLETS_OF_ADORNMENT,
+			WING_GUARDS_OF_SPEED, WING_GUARDS_OF_THE_RAPTOR, DEXTEROUS_WING_GUARDS, WING_GUARDS_OF_DISPLACEMENT,
+			WING_GUARDS_OF_INVISIBILITY, CONSTRICTING_WING_GUARDS, WING_GUARDS_OF_WEAKNESS, WING_GUARDS_OF_BUMBLING,
+			0
+	};
 	int oona_advanced_tools[] = { 0 };
 	int oona_advanced_weapons[] = {0};
 	struct obj *example = 0;
@@ -6587,7 +6614,7 @@ struct monst *smith;
 	switch(picked){
 		case 1:
 d_armor:
-			otyp = pickarmor(example, oona_basic_armor, oona_advanced_armor, PLATINUM);
+			otyp = pickarmor(example, oona_basic_armor, oona_advanced_armor, oona_matching_armor, PLATINUM);
 		break;
 		case 2:
 d_tool:
@@ -6869,7 +6896,9 @@ struct monst *smith;
 	int dracae_advanced_armor[] = {OILSKIN_CLOAK, LEO_NEMAEUS_HIDE, ROBE, CLOAK_OF_PROTECTION, CLOAK_OF_INVISIBILITY, CLOAK_OF_MAGIC_RESISTANCE, CLOAK_OF_DISPLACEMENT, 
 			BELT_OF_POWER, BELT_OF_WEAKNESS, BELT_OF_CARRYING, BELT_OF_WEIGHT, UTILITY_BELT,
 			SPEED_BOOTS, JUMPING_BOOTS, FUMBLE_BOOTS, FLYING_BOOTS,
-			GAUNTLETS_OF_DEXTERITY,
+			GAUNTLETS_OF_DEXTERITY,WINGLETS_OF_ADORNMENT,
+			WING_GUARDS_OF_SPEED, WING_GUARDS_OF_THE_RAPTOR, DEXTEROUS_WING_GUARDS, WING_GUARDS_OF_DISPLACEMENT,
+			WING_GUARDS_OF_INVISIBILITY, CONSTRICTING_WING_GUARDS, WING_GUARDS_OF_WEAKNESS, WING_GUARDS_OF_BUMBLING,
 			GRAY_DRAGON_SCALE_MAIL, SILVER_DRAGON_SCALE_MAIL, SHIMMERING_DRAGON_SCALE_MAIL, WHITE_DRAGON_SCALE_MAIL, ORANGE_DRAGON_SCALE_MAIL, BLACK_DRAGON_SCALE_MAIL, BLUE_DRAGON_SCALE_MAIL, GREEN_DRAGON_SCALE_MAIL, RED_DRAGON_SCALE_MAIL, DEEP_DRAGON_SCALE_MAIL, YELLOW_DRAGON_SCALE_MAIL,
 			GRAY_DRAGON_SCALES, SILVER_DRAGON_SCALES, SHIMMERING_DRAGON_SCALES, WHITE_DRAGON_SCALES, ORANGE_DRAGON_SCALES, BLACK_DRAGON_SCALES, BLUE_DRAGON_SCALES, GREEN_DRAGON_SCALES, RED_DRAGON_SCALES, DEEP_DRAGON_SCALES, YELLOW_DRAGON_SCALES,
 			GRAY_DRAGON_SCALE_SHIELD, SILVER_DRAGON_SCALE_SHIELD, SHIMMERING_DRAGON_SCALE_SHIELD, WHITE_DRAGON_SCALE_SHIELD, ORANGE_DRAGON_SCALE_SHIELD, BLACK_DRAGON_SCALE_SHIELD, BLUE_DRAGON_SCALE_SHIELD, GREEN_DRAGON_SCALE_SHIELD, RED_DRAGON_SCALE_SHIELD, DEEP_DRAGON_SCALE_SHIELD, YELLOW_DRAGON_SCALE_SHIELD,
@@ -6939,7 +6968,7 @@ struct monst *smith;
 	switch(picked){
 		case 1:
 d_armor:
-			otyp = pickarmor(example, dracae_basic_armor, dracae_advanced_armor, DRAGON_HIDE);
+			otyp = pickarmor(example, dracae_basic_armor, dracae_advanced_armor, empty_list, DRAGON_HIDE);
 		break;
 		case 2:
 d_tool:
@@ -7200,7 +7229,7 @@ struct monst *smith;
 			0
 		};
 	int treesinger_basic_tools[] = {BLINDFOLD, BOX, FLUTE, LOCK_PICK, PICK_AXE, SACK, 0, 0};
-	int treesinger_advanced_armor[] = {KIDNEY_BELT, UTILITY_BELT};
+	int treesinger_advanced_armor[] = {KIDNEY_BELT, UTILITY_BELT, 0};
 	int treesinger_advanced_tools[] = {0};
 	int empty_list[] = {0};
 	struct obj *example = 0;
@@ -7249,7 +7278,7 @@ struct monst *smith;
 	switch(picked){
 		case 1:
 d_armor:
-			otyp = pickarmor(example, treesinger_basic_armor, treesinger_advanced_armor, DRAGON_HIDE);
+			otyp = pickarmor(example, treesinger_basic_armor, treesinger_advanced_armor, empty_list, DRAGON_HIDE);
 		break;
 		case 2:
 d_tool:
@@ -7382,15 +7411,8 @@ d_weapon:
 }
 
 void
-generic_smithy(smith, basic_armor, advanced_armor, basic_tool, advanced_tool, basic_weapon, advanced_weapon, smithResource, resourceString, mat, threshold)
-struct monst *smith;
-int *basic_armor, *advanced_armor;
-int *basic_tool, *advanced_tool;
-int *basic_weapon, *advanced_weapon;
-int *smithResource;
-char *resourceString;
-int mat;
-int threshold;
+generic_smithy(struct monst *smith, int *basic_armor, int *advanced_armor, int *matching_armor, int *basic_tool, int *advanced_tool,
+	int *basic_weapon, int *advanced_weapon, int *smithResource, char *resourceString, int mat, int threshold)
 {
 	winid tmpwin;
 	anything any;
@@ -7466,7 +7488,7 @@ int threshold;
 	switch(picked){
 		case 1:
 d_armor:
-			otyp = pickarmor(example, basic_armor, advanced_armor, mat);
+			otyp = pickarmor(example, basic_armor, advanced_armor, matching_armor, mat);
 		break;
 		case 2:
 d_tool:
@@ -7720,10 +7742,11 @@ struct monst *smith;
 	int advanced_weapons[] = {0};
 	int basic_armor[] = { ORCISH_HELM, ORCISH_CHAIN_MAIL, ORCISH_RING_MAIL, ORCISH_SHIELD, 0 };
 	int advanced_armor[] = {0};
+	int matching_armor[] = {0};
 	int basic_tools[] = { BOX, LOCK_PICK, 0 };
 	int advanced_tools[] = {0};
 		
-	generic_smithy(smith, basic_armor, advanced_armor, basic_tools, advanced_tools, basic_weapons, advanced_weapons, &(ESMT(smith)->smith_iron_stockpile), "iron", IRON, 750);
+	generic_smithy(smith, basic_armor, advanced_armor, matching_armor, basic_tools, advanced_tools, basic_weapons, advanced_weapons, &(ESMT(smith)->smith_iron_stockpile), "iron", IRON, 750);
 }
 
 void
@@ -7734,10 +7757,11 @@ struct monst *smith;
 	int advanced_weapons[] = {0};
 	int basic_armor[] = { CHAIN_MAIL, DWARVISH_HELM, DWARVISH_ROUNDSHIELD, GAUNTLETS, SHOES, 0 };
 	int advanced_armor[] = { 0 };
+	int matching_armor[] = {0};
 	int basic_tools[] = { BOX, LOCK_PICK, MASK, OIL_LAMP, PICK_AXE, SKELETON_KEY, 0 };
 	int advanced_tools[] = { SADDLE, 0 };
 
-	generic_smithy(smith, basic_armor, advanced_armor, basic_tools, advanced_tools, basic_weapons, advanced_weapons, &(ESMT(smith)->smith_iron_stockpile), "iron", IRON, 750);
+	generic_smithy(smith, basic_armor, advanced_armor, matching_armor, basic_tools, advanced_tools, basic_weapons, advanced_weapons, &(ESMT(smith)->smith_iron_stockpile), "iron", IRON, 750);
 }
 
 void
@@ -7748,10 +7772,11 @@ struct monst *smith;
 	int advanced_weapons[] = { 0 };
 	int basic_armor[] = { DWARVISH_HELM, KICKING_BOOTS, 0 };
 	int advanced_armor[] = { SHIELD_OF_REFLECTION, 0 };
+	int matching_armor[] = {0};
 	int basic_tools[] = { BUGLE, DRUM, FLUTE, HARP, TOOLED_HORN, 0 };
 	int advanced_tools[] = {0};
 
-	generic_smithy(smith, basic_armor, advanced_armor, basic_tools, advanced_tools, basic_weapons, advanced_weapons, &(ESMT(smith)->smith_silver_stockpile), "silver", SILVER, 750);
+	generic_smithy(smith, basic_armor, advanced_armor, matching_armor, basic_tools, advanced_tools, basic_weapons, advanced_weapons, &(ESMT(smith)->smith_silver_stockpile), "silver", SILVER, 750);
 }
 
 void
@@ -7780,10 +7805,14 @@ struct monst *smith;
 							 WATER_WALKING_BOOTS, JUMPING_BOOTS, KICKING_BOOTS, FUMBLE_BOOTS, 
 							 FLYING_BOOTS, DWARVISH_MITHRIL_COAT, 
 							 0 };
+	int matching_armor[] = { WING_GUARDS_OF_REFLECTION, WINGLETS_OF_ADORNMENT,
+							 WING_GUARDS_OF_SPEED, WING_GUARDS_OF_THE_RAPTOR, DEXTEROUS_WING_GUARDS, WING_GUARDS_OF_DISPLACEMENT,
+							 WING_GUARDS_OF_INVISIBILITY, CONSTRICTING_WING_GUARDS, WING_GUARDS_OF_WEAKNESS, WING_GUARDS_OF_BUMBLING,
+							 0 };
 	int basic_tools[] = { BOX, LOCK_PICK, MASK, OIL_LAMP, PICK_AXE, SKELETON_KEY, BELL, BUGLE, DRUM, FLUTE, HARP, TOOLED_HORN, 0 };
 	int advanced_tools[] = { 0 };
 
-	generic_smithy(smith, basic_armor, advanced_armor, basic_tools, advanced_tools, basic_weapons, advanced_weapons, &(ESMT(smith)->smith_mithril_stockpile), "mithril", MITHRIL, 300);
+	generic_smithy(smith, basic_armor, advanced_armor, matching_armor, basic_tools, advanced_tools, basic_weapons, advanced_weapons, &(ESMT(smith)->smith_mithril_stockpile), "mithril", MITHRIL, 300);
 }
 
 void
@@ -7796,11 +7825,15 @@ struct monst *smith;
 	int advanced_armor[] = { DUNCE_CAP, HELM_OF_BRILLIANCE, HELM_OF_OPPOSITE_ALIGNMENT, HELM_OF_TELEPATHY, HELM_OF_DRAIN_RESISTANCE,
 							 GAUNTLETS_OF_FUMBLING, GAUNTLETS_OF_POWER, GAUNTLETS_OF_DEXTERITY, SPEED_BOOTS, 
 							 WATER_WALKING_BOOTS, JUMPING_BOOTS, ELVEN_BOOTS, KICKING_BOOTS, FUMBLE_BOOTS, 
+							 WING_GUARDS_OF_REFLECTION, WINGLETS_OF_ADORNMENT,
+							 WING_GUARDS_OF_SPEED, WING_GUARDS_OF_THE_RAPTOR, DEXTEROUS_WING_GUARDS, WING_GUARDS_OF_DISPLACEMENT,
+							 WING_GUARDS_OF_INVISIBILITY, CONSTRICTING_WING_GUARDS, WING_GUARDS_OF_WEAKNESS, WING_GUARDS_OF_BUMBLING,
 							 FLYING_BOOTS, 0 };
+	int matching_armor[] = {0};
 	int basic_tools[] = { MASK, UPGRADE_KIT, 0 };
 	int advanced_tools[] = { 0 };
 
-	generic_smithy(smith, basic_armor, advanced_armor, basic_tools, advanced_tools, basic_weapons, advanced_weapons, &(ESMT(smith)->smith_shadow_stockpile), "fossil dark", SHADOWSTEEL, 300);
+	generic_smithy(smith, basic_armor, advanced_armor, matching_armor, basic_tools, advanced_tools, basic_weapons, advanced_weapons, &(ESMT(smith)->smith_shadow_stockpile), "fossil dark", SHADOWSTEEL, 300);
 }
 
 void
@@ -7813,11 +7846,12 @@ struct monst *smith;
 	int advanced_weapons[] = {0};
 	int basic_armor[] = { ARMORED_BOOTS, BANDED_MAIL, BUCKLER, CHAIN_MAIL, HELMET, KITE_SHIELD, GAUNTLETS, PLATE_MAIL, 
 						  RING_MAIL, SCALE_MAIL, SPLINT_MAIL, TOWER_SHIELD, KIDNEY_BELT, 0 };
-	int advanced_armor[] = {UTILITY_BELT};
+	int advanced_armor[] = {UTILITY_BELT, 0};
+	int matching_armor[] = {0};
 	int basic_tools[] = { BOX, LOCK_PICK, MASK, OIL_LAMP, PICK_AXE, SKELETON_KEY, 0 };
 	int advanced_tools[] = {0};
 
-	generic_smithy(smith, basic_armor, advanced_armor, basic_tools, advanced_tools, basic_weapons, advanced_weapons, &(ESMT(smith)->smith_iron_stockpile), "iron", IRON, 750);
+	generic_smithy(smith, basic_armor, advanced_armor, matching_armor, basic_tools, advanced_tools, basic_weapons, advanced_weapons, &(ESMT(smith)->smith_iron_stockpile), "iron", IRON, 750);
 }
 
 void

@@ -277,11 +277,12 @@
 #define AD_SLWC		167 /* Slowing cold attack */
 #define AD_HELL		168 /* Hellish energy attack */
 #define AD_SFLM		169 /* Silver Flame cult's silver flame invocation (Silver Flame-upgraded fireball) */
+#define AD_LGHT		170 /* Light */
 
 //#define AD_AHAZU	116 /*  */
 //Amon is a headbutt (AT_BUTT/AD_PHYS)
 //Chupoclops is a poisonous bite (AT_BITE/AD_DRST)
-#define AD_DUNSTAN	170
+#define AD_DUNSTAN	171
 #define AD_IRIS		AD_DUNSTAN+1
 #define AD_NABERIUS	AD_DUNSTAN+2
 #define AD_OTIAX	AD_DUNSTAN+3

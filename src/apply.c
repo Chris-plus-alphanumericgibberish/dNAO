@@ -421,7 +421,7 @@ use_towel(obj)
 			u.ucreamed += rn1(10, 3);
 			pline("Yecch! Your %s %s gunk on it!", body_part(FACE),
 			      (old ? "has more" : "now has"));
-			make_blinded(Blinded + (long)u.ucreamed - old, TRUE);
+			make_blinded(BlindedTimeout + (long)u.ucreamed - old, TRUE);
 			IMPURITY_UP(u.uimp_dirtiness)
 		    } else {
 			const char *what = (ublindf->otyp == LENSES || ublindf->otyp == SUNGLASSES) ? "lenses" 
@@ -448,8 +448,8 @@ use_towel(obj)
 		You("wipe off your %s.", makeplural(body_part(HAND)));
 		return MOVE_STANDARD;
 	} else if(u.ucreamed) {
-		if(Blinded < u.ucreamed)
-			Blinded = 0L;
+		if(BlindedTimeout < u.ucreamed)
+			Blinded &= ~TIMEOUT;
 		else
 			Blinded -= u.ucreamed;
 		u.ucreamed = 0;
@@ -5352,7 +5352,7 @@ unihorn_troubles(int *troubles)
 	int n = 0;
 #define trbl(X)	do { if (troubles) troubles[n] = (X); n++; } while (0)
 	if (Sick) trbl(SICK);
-	if (Blinded > (long)u.ucreamed) trbl(BLINDED);
+	if (BlindedTimeout > (long)u.ucreamed) trbl(BLINDED);
 	if (HHallucination) trbl(HALLUC);
 	if (Vomiting) trbl(VOMITING);
 	if (HConfusion) trbl(CONFUSION);
@@ -5411,7 +5411,7 @@ struct obj *obj;
 	    case 0: make_sick(Sick ? Sick/3L + 1L : (long)rn1(ACURR(A_CON),20),
 			xname(obj), TRUE, SICK_NONVOMITABLE);
 		    break;
-	    case 1: make_blinded(Blinded + lcount, TRUE);
+	    case 1: make_blinded(BlindedTimeout + lcount, TRUE);
 		    break;
 	    case 2: if (!Confusion)
 			You("suddenly feel %s.",
@@ -8221,7 +8221,7 @@ struct obj *obj;
 	if(can_blnd((struct monst*)0, &youmonst, AT_WEAP, obj)) {
 		int blindinc = rnd(25);
 		u.ucreamed += blindinc;
-		make_blinded(Blinded + (long)blindinc, FALSE);
+		make_blinded(BlindedTimeout + (long)blindinc, FALSE);
 		if (!Blind || (Blind && wasblind))
 			pline("There's %ssticky goop all over your %s.",
 				wascreamed ? "more " : "",

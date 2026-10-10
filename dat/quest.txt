@@ -2574,6 +2574,29 @@ has been visited a hundredfold upon the commoners.
 %Cp Dhl 00036
 Once again you approach the %i.
 %E
+%Cc Dhl 00037
+What sorcery has brought you back to Menzoberranzan?
+You thought you had finally escaped from your depraved homeland.
+
+...Yet, all is not as it should be. You %x the shrieker mushrooms
+are feral and hungry, and the scent of disease hangs in the cavern
+air.
+
+Perhaps you should seek out Sister T'eirastra, the head of the
+mendicant order to which you belong?
+%E
+%Cc Dhl 00038
+You arrive in familiar surroundings, in the caverns above
+Menzoberranzan.
+
+You never thought that you would return to your depraved
+homeland; never dreamed that you would try to SAVE it. You
+%x the shrieker mushrooms are feral and hungry, and the
+scent of disease hangs in the cavern air.
+
+Perhaps you should seek out Sister T'eirastra, the head of the
+mendicant order to which you belong?
+%E
 %Cc Dhl 00040
 You sense that you have reached the ritual site. You must find
 the perpetrators of this madness.
@@ -10040,4 +10063,27 @@ to recover the Amulet for your school, or die in the
 attempt.  Your hour of truth has come.  For the sake
 of us all:  Go bravely and may the light shine between
 your eyes!
+%E
+#
+#	Alternate legacy text for Android Ana paupers
+#
+%Cc - 00228
+Which made it all the more confusing to have awakened
+by yourself, apparently in the distant past, with
+a pair of yellow sticky notes shoved in your mouth.
+%E
+%Cc - 00229
+"We're going to grab you out of your storage pod
+and throw you into a time-space rupture.  Your
+cosmetic layers aren't going to survive the trip,
+but there's no time to do better.  Our sisters are
+holding the perimeter as best they can, but more
+enemies are pouring in from all directions.
+
+"Once you wake up, you need to find the Dungeons of
+Doom, locate the Bastions' time-portal, retrieve the
+Annulus from wherever it ended up, and use it against
+Ilsensine in the past.
+
+"So, you know.  Good luck."
 %E

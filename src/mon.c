@@ -1763,7 +1763,7 @@ mcalcdistress()
 		You("are thrown by a blast of wind!");
 		hurtle(rn2(3)-1, rn2(3)-1, rnd(6), FALSE, TRUE);
 		for(tmpm = fmon; tmpm; tmpm = tmpm->nmon){
-			if(tmpm != mtmp && !DEADMONSTER(tmpm) && distmin(tmpm->mx, tmpm->my, mtmp->mx, mtmp->my) < 6){
+			if(tmpm != mtmp && !DEADMONSTER(tmpm) && isok(tmpm->mx, tmpm->my) && distmin(tmpm->mx, tmpm->my, mtmp->mx, mtmp->my) < 6){
 				mhurtle(tmpm, rn2(3)-1, rn2(3)-1, rnd(6), FALSE);
 			}
 		}
@@ -2537,7 +2537,7 @@ boolean devour;
 	if(obj->otyp == CORPSE){
 		mtyp = obj->corpsenm;
 		if (mtyp != PM_LIZARD && mtyp != PM_SMALL_CAVE_LIZARD && mtyp != PM_CAVE_LIZARD 
-			&& mtyp != PM_LARGE_CAVE_LIZARD && mtyp != PM_LICHEN && mtyp != PM_BEHOLDER
+			&& mtyp != PM_LARGE_CAVE_LIZARD && mtyp != PM_LICHEN && mtyp != PM_BEHOLDER && mtyp != PM_DEATH_BEHOLDER
 		) {
 			long age = peek_at_iced_corpse_age(obj);
 
@@ -3045,7 +3045,10 @@ mon_can_see_mon(looker, lookie)
 	boolean clearpath;
 	boolean hardtosee;
 	boolean indark = (dimness(looker->mx, looker->my) > 0);
-	
+
+	if(!shared_world(looker, lookie->mx, lookie->my))
+		return FALSE;
+
 	if(lookie->mtyp == PM_TWIN_SIBLING && !insightful(looker->data) && !is_great_old_one(looker->data))
 		return FALSE;
 	
@@ -3206,7 +3209,10 @@ struct monst *looker;
 	boolean clearpath;
 	boolean hardtosee;
 	boolean catsightdark = !(levl[looker->mx][looker->my].lit || (viz_array[looker->my][looker->mx]&TEMP_LIT1 && !(viz_array[looker->my][looker->mx]&TEMP_DRK1)));
-	
+
+	if(!shared_world(looker, u.ux, u.uy))
+		return FALSE;
+
 	if(looker->mtyp == PM_DREADBLOSSOM_SWARM){
 		if(youracedata->mtyp == PM_DREADBLOSSOM_SWARM) return FALSE;
 		else return canseemon(looker);
@@ -3294,7 +3300,7 @@ struct monst *looker;
 		/* nv range auto-succeeds within its distance */
 		if (nvrange > 0
 			&& dist2(looker->mx, looker->my, u.ux, u.uy) <= nvrange * nvrange + nvrange
-			&& !(Stealth && (Role_if(PM_ROGUE) || (u.sealsActive&SEAL_ANDROMALIUS) || !rn2(8)))
+			&& !(Stealth && (Role_if(PM_ROGUE) || u.uurchin || (u.sealsActive&SEAL_ANDROMALIUS) || !rn2(8)))
 		) {
 			return TRUE;
 		}
@@ -3474,7 +3480,7 @@ mfndpos(mon, poss, info, flag)
 	register int cnt = 0;
 	register uchar ntyp;
 	uchar nowtyp;
-	boolean wantpool, puddleispool, wantdry, poolok, cubewaterok, lavaok, nodiag, quantumlock;
+	boolean wantpool, puddleispool, wantdry, poolok, cubewaterok, lavaok, nodiag, noortho, quantumlock;
 	boolean rockok = FALSE, treeok = FALSE, thrudoor;
 	boolean stand_off = (standoff(mdat) || mon->mstance == MSTANCE_MAGIC) && !mon->mpeaceful;
 	int maxx, maxy;
@@ -3491,7 +3497,8 @@ mfndpos(mon, poss, info, flag)
 	y = mon->my;
 	nowtyp = levl[x][y].typ;
 
-	nodiag = (mdat->mtyp == PM_GRID_BUG) || (mdat->mtyp == PM_BEBELITH);
+	nodiag = orthogonal_mover(mdat);
+	noortho = diagonal_mover(mdat);
 	wantpool = !!(mdat->mflagsm&MM_AQUATIC);
 	wantdry = !(mdat->mflagsm&MM_AQUATIC);
 	puddleispool = (wantpool && mdat->msize == MZ_TINY) || (wantdry && is_iron(mon));
@@ -3572,6 +3579,8 @@ nexttry:
 	       ))
 			continue;
 	    }
+	    if(((nx == x) != (ny == y)) && noortho)
+			continue;
 		if(is_vectored_mtyp(mdat->mtyp)){
 			if(x + xdir[(int)mon->mvar_vector] != nx || 
 			   y + ydir[(int)mon->mvar_vector] != ny 
@@ -3814,7 +3823,10 @@ mm_displacement(struct monst *magr, struct monst *mdef)
 	if (is_displacer(pa) && (!is_displacer(pd) || magr->m_lev > mdef->m_lev)
 		/* no displacing grid bugs/bebeliths diagonally */
 		&& !(magr->mx != mdef->mx && magr->my != mdef->my
-			 && (pd->mtyp == PM_GRID_BUG || pd->mtyp == PM_BEBELITH))
+			 && orthogonal_mover(pd))
+		/* no displacing sea raiders/sea priests orthogonally */
+		&& !((magr->mx == mdef->mx || magr->my == mdef->my)
+			 && diagonal_mover(pd))
 		/* no displacing trapped monsters or multi-segment long worms */
 		&& !mdef->mtrapped && (!mdef->wormno || !count_wsegs(mdef))
 		/* riders can displace anything; others, same size or smaller only */
@@ -4320,7 +4332,8 @@ register int x,y;
 /* Is the square close enough for the monster to move or attack into? */
 {
 	register int distance = dist2(mon->mx, mon->my, x, y);
-	if (distance==2 && (mon->mtyp==PM_GRID_BUG || mon->mtyp==PM_BEBELITH)) return 0;
+	if (distance==2 && orthogonal_mover(mon)) return 0;
+	if (distance==1 && diagonal_mover(mon)) return 0;
 	if(mon->mtyp == PM_CLOCKWORK_SOLDIER || mon->mtyp == PM_CLOCKWORK_DWARF || 
 	   mon->mtyp == PM_FABERGE_SPHERE
 	) if(mon->mx + xdir[(int)mon->mvar_vector] != x || 
@@ -5218,11 +5231,6 @@ register struct monst *mtmp;
 	/* cease occupation if the monster was associated */
 	if(mtmp->moccupation) stop_occupation();
 	
-	if(mtmp->isgd) {
-		/* if we're going to abort the death, it *must* be before
-		 * the m_detach or there will be relmon problems later */
-		if(!grddead(mtmp)) return;
-	}
 	if (!DEADMONSTER(mtmp)) {
 		lifesaved_monster(mtmp);
 		if (mtmp->mhp > 0) return;
@@ -5575,6 +5583,7 @@ detach_only:
 	if(glyph_is_invisible(levl[mtmp->mx][mtmp->my].glyph))
 		unmap_object(mtmp->mx, mtmp->my);
 	m_detach(mtmp, mptr);
+	if(mtmp->isgd) grddead(mtmp);
 }
 
 STATIC_DCL int
@@ -7169,7 +7178,7 @@ mnexto(mtmp)	/* Make monster mtmp next to you (if possible) */
 	}
 #endif
 
-	if(!enexto(&mm, u.ux, u.uy, mtmp->data)) return;
+	if(!enexto_mon(&mm, u.ux, u.uy, mtmp)) return;
 	rloc_to(mtmp, mm.x, mm.y);
 	return;
 }
@@ -7195,7 +7204,7 @@ monline(mtmp)	/* Make monster mtmp next to you (if possible) */
 	}
 #endif
 
-	if(!eonline(&mm, u.ux, u.uy, mtmp->data)) return;
+	if(!eonline(&mm, u.ux, u.uy, mtmp)) return;
 	rloc_to(mtmp, mm.x, mm.y);
 	return;
 }
@@ -7211,7 +7220,7 @@ mammon_swim_target(coord *cc, struct monst *mtmp, int cx, int cy)
 	int j, x, y, i, bx = -1, by = -1, bestdist = -1;
 
 	if (mtmp->mpeaceful || mtmp->mtame)
-		return enexto(cc, cx, cy, mtmp->data);
+		return enexto_mon(cc, cx, cy, mtmp);
 
 	for (j = 0; j < 8; j++) {
 		x = u.ux; y = u.uy;
@@ -7291,7 +7300,7 @@ mofflin(mtmp)	/* Make monster mtmp near to you (if possible) */
 	}
 #endif
 
-	if(!eofflin(&mm, u.ux, u.uy, mtmp->data)) return;
+	if(!eofflin(&mm, u.ux, u.uy, mtmp)) return;
 	rloc_to(mtmp, mm.x, mm.y);
 	return;
 }
@@ -7317,7 +7326,7 @@ mofflin_close(mtmp)	/* Make monster mtmp near to you (if possible) */
 	}
 #endif
 
-	if(!eofflin_close(&mm, u.ux, u.uy, mtmp->data)) return;
+	if(!eofflin_close(&mm, u.ux, u.uy, mtmp)) return;
 	rloc_to(mtmp, mm.x, mm.y);
 	return;
 }
@@ -7355,7 +7364,7 @@ boolean move_other;	/* make sure mtmp gets to x, y! so move m_at(x, y) */
 		 * migrating_mons that need to be placed will cause
 		 * no end of trouble.
 		 */
-		if (!enexto(&mm, newx, newy, mtmp->data)) return(FALSE);
+		if (!enexto_mon(&mm, newx, newy, mtmp)) return(FALSE);
 		newx = mm.x; newy = mm.y;
 	}
 
@@ -8166,6 +8175,7 @@ boolean msg;		/* "The oldmon turns into a newmon!" */
 	set_mon_data(mtmp, mtyp);
 
 	/* monster lightsources */
+	(void) stop_timer(LIGHT_EXHAUSTED, mtmp->timed);
 	del_light_source(mtmp->light);	/* clear old */
 	if (emits_light_mon(mtmp)|| olddata->mtyp == PM_MASKED_QUEEN) {
 		/* masked queen is effectively illuminated, but not -- poly should add illumination */

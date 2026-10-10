@@ -13,6 +13,7 @@
 #include "xhity.h"
 #include "hashmap.h"
 #include "hashutil.h"
+#include "qtext.h"
 
 #ifndef NO_SIGNAL
 #include <signal.h>
@@ -2552,7 +2553,7 @@ karemade:
 					}
 				}
 
-				if(BlowingWinds && !mtmp->mtame){
+				if(BlowingWinds && !mtmp->mtame && isok(mtmp->mx, mtmp->my)){
 					static long lastbwmessage = 0L;
 					if(lastbwmessage != monstermoves && canspotmon(mtmp)){
 						lastbwmessage = monstermoves;
@@ -3998,6 +3999,10 @@ karemade:
 	    if (vision_full_recalc) vision_recalc(0);	/* vision! */
 	}
 	oldBlind = !!Blind;
+	if (u.uroleplay.blind && !Blind) {
+		pline("For the first time in your life, you can see!");
+		u.uroleplay.blind = FALSE;
+	}
 ////////////////////////////////////////////////////////////////////////////////////////////////
 	if(!flags.mv || LightBlind || oldLightBlind != (!!LightBlind)) {
 	    /* redo monsters if hallu or wearing a helm of telepathy */
@@ -4285,14 +4290,16 @@ newgame()
 	 */
 	if(MON_AT(u.ux, u.uy)) mnexto(m_at(u.ux, u.uy));
 	(void) makedog();
-	if(Race_if(PM_ANDROID))
+	if(Race_if(PM_ANDROID) && Role_if(PM_ANACHRONONAUT) && !u.uroleplay.pauper)
 		scatter_weapons();
 	if(flags.aasimar_type == AASIMAR_TYPE_SERAPH)
 		scatter_eyes();
 	docrt();
-	if (Role_if(PM_CONVICT) || (Role_if(PM_MADMAN) && Race_if(PM_VAMPIRE))) {
-		setworn(mkobj(CHAIN_CLASS, TRUE), W_CHAIN);
-		setworn(mkobj(BALL_CLASS, TRUE), W_BALL);
+	if ((Role_if(PM_CONVICT) && !(u.uroleplay.pauper && Race_if(PM_YUKI_ONNA)))
+		|| (Role_if(PM_MADMAN) && Race_if(PM_VAMPIRE))
+	) {
+		setworn(mkobj(CHAIN_CLASS, NO_MKOBJ_FLAGS), W_CHAIN);
+		setworn(mkobj(BALL_CLASS, MKOBJ_ARTIF), W_BALL);
 		uball->spe = 1;
 		if (Race_if(PM_CHIROPTERAN)) uball->owt = 1600;
 		placebc();
@@ -4302,41 +4309,41 @@ newgame()
 	if (flags.legacy) {
 		flush_screen(1);
         if(Role_if(PM_EXILE)){
-			com_pager(217);
+			com_pager(QT_COMMON_LEGACY_BINDER);
 #ifdef CONVICT
 		} else if (Role_if(PM_CONVICT)) {
-		    com_pager(199);
+		    com_pager(QT_COMMON_LEGACY_CONVICT);
 #endif /* CONVICT */
         // } else if(Race_if(PM_ELF)){
-			// com_pager(211);
+			// com_pager(QT_COMMON_LEGACY_ELF);
 		} else if(Race_if(PM_ELF) && (Role_if(PM_PRIEST) || Role_if(PM_RANGER) || Role_if(PM_NOBLEMAN) || Role_if(PM_WIZARD))){
-			com_pager(211);
+			com_pager(QT_COMMON_LEGACY_ELF);
 		} else if(Role_if(PM_ANACHRONONAUT)){
-			com_pager(218);
+			com_pager(QT_COMMON_LEGACY_ANA);
 			if(Race_if(PM_ANDROID)){
-				com_pager(222);
-				com_pager(223);
-				com_pager(224);
-				com_pager(225);
+				com_pager(QT_COMMON_LEGACY_ANDROID);
+				com_pager(u.uroleplay.pauper ? QT_COMMON_LEGACY_ANDROID2_PAUPER : QT_COMMON_LEGACY_ANDROID2);
+				com_pager(QT_COMMON_LEGACY_ANDROID3);
+				com_pager(u.uroleplay.pauper ? QT_COMMON_LEGACY_ANDROID4_PAUPER : QT_COMMON_LEGACY_ANDROID4);
 			} else {
-				com_pager(219);
-				com_pager(220);
-				com_pager(221);
+				com_pager(QT_COMMON_LEGACY_ANA2);
+				com_pager(QT_COMMON_LEGACY_ANA3);
+				com_pager(QT_COMMON_LEGACY_ANA4);
 			}
 		} else if(Role_if(PM_UNDEAD_HUNTER)){
-			com_pager(227);
+			com_pager(QT_COMMON_LEGACY_UH);
 		} else if(Race_if(PM_WORM_THAT_WALKS)){
 			if(Role_if(PM_CONVICT)){
-				com_pager(214);
+				com_pager(QT_COMMON_LEGACY_WORM_CONVICT);
 			} else if(Race_if(PM_ELF) && (Role_if(PM_PRIEST) || Role_if(PM_RANGER) || Role_if(PM_NOBLEMAN) || Role_if(PM_WIZARD))){
-				com_pager(213);
+				com_pager(QT_COMMON_LEGACY_WORM_ELF);
 			} else {
-				com_pager(212);
+				com_pager(QT_COMMON_LEGACY_WORM);
 			}
-			com_pager(215);
-			com_pager(216);
+			com_pager(QT_COMMON_LEGACY_WORM2);
+			com_pager(QT_COMMON_LEGACY_WORM3);
 		} else {
-			com_pager(1);
+			com_pager(QT_COMMON_LEGACY);
 		}
 	}
 	if(Darksight) litroom(FALSE,NULL);
@@ -4421,7 +4428,7 @@ newgame()
 			}
 		}
 	}
-	if(Race_if(PM_SILVERKNIGHT)){
+	if(Race_if(PM_SILVERKNIGHT) && !u.uroleplay.pauper){
 		struct obj *otmp;
 #define MKSNSTITEM(otyp) otmp = mksobj_at(otyp, u.ux, u.uy, MKOBJ_NOINIT); otmp->mired = 1; otmp->blessed = 1; otmp->spe = 1; fully_identify_obj(otmp);
 		MKSNSTITEM(SILVERKNIGHT_ARMOR);

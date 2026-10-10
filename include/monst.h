@@ -226,7 +226,8 @@ struct monst {
 	Bitfield(mcombat,1); /* pet is currently engaged in combat */
 	Bitfield(mgroup_summoned,1); /* monster has used its group summon ability */
 	Bitfield(mprone,1); /* monster is prone after being knocked down */
-	/*154*/
+	Bitfield(mrecruitable,1); /* monster can be recruited for quest reasons */
+	/*155*/
 
 	unsigned long long int 	seenmadnesses;	/* monster has seen these madnesses */
 	
@@ -419,6 +420,7 @@ struct monst {
 #define mvar1_halo_sec_element	mvar1
 #define	mvar1_summon_ID			mvar1
 #define	mvar_mammon_dive_x		mvar1
+#define	mvar1_seaParity			mvar1
 #define mvar1_bereft_syllable	mvar1
 	long mvar2;
 #define	mvar_dracaePregTimer	mvar2
@@ -475,6 +477,10 @@ struct monst {
 #define MON_SWEP(mon)	((mon)->msw)
 #define MON_NOSWEP(mon)	((mon)->msw = (struct obj *)0)
 
-#define MIGRATINGMONSTER(mon)	((mon) != &youmonst && !(mon)->mx && !(mon)->my)
+/* a vault guard that has finished its job is parked at (0,0) until its
+ * fake corridor is removed; it is still on the level, not migrating */
+#define PARKEDGUARD(mon)	((mon)->isgd && get_mx(mon, MX_EVGD) && EVGD(mon)->gddone)
+#define MIGRATINGMONSTER(mon)	((mon) != &youmonst && !(mon)->mx && !(mon)->my \
+				 && !PARKEDGUARD(mon))
 
 #endif /* MONST_H */

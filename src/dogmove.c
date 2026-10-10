@@ -21,6 +21,14 @@ extern boolean FDECL(would_prefer_rwep,(struct monst *,struct obj *));
 #define DOG_CHOKE 5*DOG_SATIATED
 #define SQSRCHRADIUS 5
 
+/* bundles what wantdoor() (a do_clear_area callback, so its signature is
+ * fixed) needs beyond x,y: the current best squared-distance and the
+ * seeking monster (used to exclude doors a diagonal_mover can't use) */
+struct wantdoor_ctx {
+	int distance;
+	struct monst *mon;
+};
+
 #ifdef OVL0
 
 STATIC_DCL boolean FDECL(dog_hunger,(struct monst *,struct edog *));
@@ -435,7 +443,7 @@ boolean devour;
 	if(obj->otyp == CORPSE){
 		mtyp = obj->corpsenm;
 		if (mtyp != PM_LIZARD && mtyp != PM_SMALL_CAVE_LIZARD && mtyp != PM_CAVE_LIZARD 
-			&& mtyp != PM_LARGE_CAVE_LIZARD && mtyp != PM_LICHEN && mtyp != PM_BEHOLDER
+			&& mtyp != PM_LARGE_CAVE_LIZARD && mtyp != PM_LICHEN && mtyp != PM_BEHOLDER && mtyp != PM_DEATH_BEHOLDER
 		) {
 			long age = peek_at_iced_corpse_age(obj);
 
@@ -944,6 +952,13 @@ pet_sphere_goal(struct monst *mtmp, struct edog *edog, int after, int udist, int
 				gx += sdx;
 				gy += sdy;
 			}
+			/* a cardinal flight path flips parity each step, so a
+			 * diagonal_mover may need to back off one square to land
+			 * back in its own world */
+			if(!shared_world(mtmp, gx, gy)){
+				gx -= sdx;
+				gy -= sdy;
+			}
 		}
 		appr = 1;
 	}
@@ -1113,10 +1128,12 @@ dog_find_track_goal(struct monst *mtmp, struct edog *edog, boolean in_masters_si
 		    gy = edog->ogoal.y;
 		    edog->ogoal.x = 0;
 		} else {
-		    int fardist = FARAWAY * FARAWAY;
+		    struct wantdoor_ctx wdc;
+		    wdc.distance = FARAWAY * FARAWAY;
+		    wdc.mon = mtmp;
 		    gx = gy = FARAWAY; /* random */
 		    do_clear_area(omx, omy, 9, wantdoor,
-				  (genericptr_t)&fardist);
+				  (genericptr_t)&wdc);
 
 		    /* here gx == FARAWAY e.g. when dog is in a vault */
 		    if (gx == FARAWAY || (gx == omx && gy == omy)) {
@@ -1869,7 +1886,8 @@ xchar nx, ny;
 {
     if ((!is_pool(nx,ny, FALSE) || mon_resistance(mon,SWIMMING)) &&
 	(!is_lava(nx,ny) || likes_lava(mon->data)) &&
-	(!boulder_at(nx,ny) || throws_rocks(mon->data)))
+	(!boulder_at(nx,ny) || throws_rocks(mon->data)) &&
+	shared_world(mon, nx, ny))
     	return TRUE;
     return FALSE;
 }
@@ -1919,16 +1937,25 @@ xchar mx, my, fx, fy;
 
 /*ARGSUSED*/	/* do_clear_area client */
 STATIC_PTR void
-wantdoor(x, y, distance)
+wantdoor(x, y, arg)
 int x, y;
-genericptr_t distance;
+genericptr_t arg;
 {
+    struct wantdoor_ctx *wdc = (struct wantdoor_ctx *)arg;
     int ndist;
 
-    if (*(int*)distance > (ndist = distu(x, y))) {
+    /* a diagonal_mover can't pass through an intact door at all
+     * and separately still needs the door to be in the correct world */
+    if (diagonal_mover(wdc->mon)
+	&& (!IS_DOOR(levl[x][y].typ)
+	    || (levl[x][y].doormask & ~D_BROKEN)
+	    || !shared_world(wdc->mon, x, y)))
+	return;
+
+    if (wdc->distance > (ndist = distu(x, y))) {
 	gx = x;
 	gy = y;
-	*(int*)distance = ndist;
+	wdc->distance = ndist;
     }
 }
 

@@ -112,7 +112,7 @@ const char *fmt, *arg;
 	    }
 	}
 	if (was_blind && !Blind) {	/* reverting from eyeless */
-	    Blinded = 1L;
+	    set_itimeout(&Blinded, 1L);
 	    make_blinded(0L, TRUE);	/* remove blindness */
 	}
 
@@ -587,7 +587,7 @@ int	mntmp;
 	    }
 	}
 	if (was_blind && !Blind) {	/* previous form was eyeless */
-	    Blinded = 1L;
+	    set_itimeout(&Blinded, 1L);
 	    make_blinded(0L, TRUE);	/* remove blindness */
 	}
 	newsym(u.ux,u.uy);		/* Change symbol */
@@ -1680,6 +1680,12 @@ dogaze(struct monst *mtmp)
 		   	     } else if(mortal_race(mtmp)){
 		   	         dmg *= 2;
 				 }
+		   	 break;
+		   	 case AD_LGHT:
+		   	     dmg = d(damn,damd);
+		   	     You("attack %s with a searing stare!", mon_nam(mtmp));
+		   	     if (mon_reflects(mtmp, "The searing light is reflected by %s %s!"))
+		   	         dmg = 0;
 		   	 break;
 			 case AD_STDY:
 				You("study %s carefully.",mon_nam(mtmp));

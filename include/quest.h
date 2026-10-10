@@ -48,6 +48,10 @@ struct q_score {			/* Quest "scorecard" */
 	long time_doing_quest;
 #define CON_QUEST_INCREMENT	3000
 	unsigned leader_m_id;
+	long qvar1;
+#define qvar1_healer_pet_level qvar1
+	long qvar2;
+#define qvar2_healer_pet_message qvar2
 };
 //Random spawns invade city:
 #define UH_QUEST_TIME_0	16000

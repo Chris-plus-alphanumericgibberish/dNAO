@@ -287,7 +287,7 @@ in_trouble()
 	if (u.uhitinc < 0) return(TROUBLE_TOHIT_CURSED);
 	if (u.uacinc < 0) return(TROUBLE_AC_CURSED);
 	if (u.udaminc < 0) return(TROUBLE_DAMAGE_CURSED);
-	if (Blinded > 1 && haseyes(youracedata)) return(TROUBLE_BLIND);
+	if (BlindedTimeout > 1 && haseyes(youracedata)) return(TROUBLE_BLIND);
 	for(i=0; i<A_MAX; i++)
 	    if(ABASE(i) < AMAX(i)) return(TROUBLE_POISONED);
 	if(Wounded_legs
@@ -1186,7 +1186,16 @@ pleased(int godnum, boolean altar, int pray_trouble, boolean set_timeout)
 			at_your_feet("An object");
 			/* not yet known spells given preference over already known ones */
 			/* Also, try to grant a spell for which there is a skill slot */
-			otmp = mkobj(SPBOOK_CLASS, TRUE);
+			otmp = (struct obj *)0;
+			do {
+				if (otmp) {
+					//properly uncreate an artifact
+					if (otmp->oartifact)
+						artifact_exists(otmp, ONAME(otmp), FALSE);
+					delobj(otmp);
+				}
+				otmp = mkobj(SPBOOK_CLASS, NO_MKOBJ_FLAGS);
+			} while (otmp->oartifact);
 			while (--trycnt > 0) {
 			if (otmp->otyp != SPE_BLANK_PAPER) {
 				for (sp_no = 0; sp_no < MAXSPELL; sp_no++)

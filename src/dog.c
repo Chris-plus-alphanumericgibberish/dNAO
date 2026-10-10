@@ -252,6 +252,7 @@ makedog()
 	static int petname_used = 0;
 
 	if (preferred_pet == 'n' || Role_if(PM_ANACHRONONAUT) || Role_if(PM_UNDEAD_HUNTER) || u.silverknight_mire) return((struct monst *) 0);
+	if (u.uroleplay.pauper && Role_if(PM_HEALER) && RACE_IF_DROW) return((struct monst *) 0);
 
 	pettype = pet_type();
 	if (pettype == PM_LITTLE_DOG)
@@ -297,7 +298,7 @@ makedog()
 	    if(Role_if(PM_CONVICT)) petname = "Nicodemus"; /* Rats of NIMH */
     }
 #endif /* CONVICT */
-	mtmp = makemon(&mons[pettype], u.ux, u.uy, pettype == PM_SECRET_WHISPERER ? MM_ADJACENTOK|NO_MINVENT|MM_NOCOUNTBIRTH|MM_EDOG|MM_ESUM : MM_ADJACENTOK|MM_EDOG);
+	mtmp = makemon(&mons[pettype], u.ux, u.uy, pettype == PM_SECRET_WHISPERER ? MM_ADJACENTOK|NO_MINVENT|MM_NOCOUNTBIRTH|MM_EDOG|MM_ESUM : MM_ADJACENTOK|MM_EDOG|(u.uroleplay.pauper ? NO_MINVENT : 0));
 
 	if(!mtmp) return((struct monst *) 0); /* pets were genocided */
 	
@@ -319,38 +320,40 @@ makedog()
 		struct obj *obj;
 		mtmp->m_lev = 1;
 		remove_mintrinsic(mtmp, FAST);
-		obj = mongets(mtmp, CRAM_RATION, MKOBJ_NOINIT);
-		if(obj){
-			obj->quan = 3;
-			fix_object(obj);
+		if(!u.uroleplay.pauper){
+			obj = mongets(mtmp, CRAM_RATION, MKOBJ_NOINIT);
+			if(obj){
+				obj->quan = 3;
+				fix_object(obj);
+				fully_identify_obj(obj);
+			}
+			obj = mongets(mtmp, FOOD_RATION, MKOBJ_NOINIT);
+			if(obj){
+				obj->quan = 1;
+				fix_object(obj);
+				fully_identify_obj(obj);
+			}
+			obj = mongets(mtmp, HIGH_BOOTS, MKOBJ_NOINIT);
+			if(obj) fully_identify_obj(obj);
+			obj = mongets(mtmp, CHAIN_MAIL, MKOBJ_NOINIT);
+			if(obj) fully_identify_obj(obj);
+			obj = mongets(mtmp, GAUNTLETS, MKOBJ_NOINIT);
+			if(obj) fully_identify_obj(obj);
+			obj = mongets(mtmp, AMULET_OF_NULLIFY_MAGIC, MKOBJ_NOINIT);
 			fully_identify_obj(obj);
+			obj = mongets(mtmp, HELMET, MKOBJ_NOINIT);
+			if(obj) fully_identify_obj(obj);
+			obj = mongets(mtmp, KITE_SHIELD, MKOBJ_NOINIT);
+			if(obj) fully_identify_obj(obj);
+			obj = mongets(mtmp, LONG_SWORD, MKOBJ_NOINIT);
+			if(obj){
+				bless(obj);
+				obj->spe = 1;
+				fully_identify_obj(obj);
+			}
+			m_dowear(mtmp, TRUE);
+			init_mon_wield_item(mtmp);
 		}
-		obj = mongets(mtmp, FOOD_RATION, MKOBJ_NOINIT);
-		if(obj){
-			obj->quan = 1;
-			fix_object(obj);
-			fully_identify_obj(obj);
-		}
-		obj = mongets(mtmp, HIGH_BOOTS, MKOBJ_NOINIT);
-		if(obj) fully_identify_obj(obj);
-		obj = mongets(mtmp, CHAIN_MAIL, MKOBJ_NOINIT);
-		if(obj) fully_identify_obj(obj);
-		obj = mongets(mtmp, GAUNTLETS, MKOBJ_NOINIT);
-		if(obj) fully_identify_obj(obj);
-		obj = mongets(mtmp, AMULET_OF_NULLIFY_MAGIC, MKOBJ_NOINIT);
-		fully_identify_obj(obj);
-		obj = mongets(mtmp, HELMET, MKOBJ_NOINIT);
-		if(obj) fully_identify_obj(obj);
-		obj = mongets(mtmp, KITE_SHIELD, MKOBJ_NOINIT);
-		if(obj) fully_identify_obj(obj);
-		obj = mongets(mtmp, LONG_SWORD, MKOBJ_NOINIT);
-		if(obj){
-			bless(obj);
-			obj->spe = 1;
-			fully_identify_obj(obj);
-		}
-		m_dowear(mtmp, TRUE);
-		init_mon_wield_item(mtmp);
 	}
 
 	if(Role_if(PM_HEALER)){
@@ -370,6 +373,7 @@ makedog()
 #ifdef STEED
 	/* Horses already wear a saddle */
 	if ((pettype == PM_PONY || pettype == PM_GIANT_SPIDER || pettype == PM_SMALL_CAVE_LIZARD || pettype == PM_RIDING_PSEUDODRAGON)
+		&& !u.uroleplay.pauper
 		&& !!(otmp = mksobj(SADDLE, 0))
 	) {
 	    if (mpickobj(mtmp, otmp))
@@ -523,10 +527,13 @@ boolean with_you;
 	       goto_level(do.c) decides who ends up at your target spot
 	       when there is a monster there too. */
 	    if (!MON_AT(u.ux, u.uy) &&
+		    shared_world(mtmp, u.ux, u.uy) &&
 		    !rn2(mtmp->mtame ? 10 : mtmp->mpeaceful ? 5 : 2)
 		)
 			rloc_to(mtmp, u.ux, u.uy);
 	    else
+			/* mnexto()'s own goodpos() check keeps a diagonal_mover
+			 * on its own parity even when the stairway isn't */
 			mnexto(mtmp);
 		if(mtmp->mx == 0){
 			if(wizard) pline("no room for buddy! Arriving later.");
@@ -819,7 +826,8 @@ boolean portal;
 				follow_dist++;
 			}
 		}
-	    if (((monnear(mtmp, u.ux, u.uy) && levl_follower(mtmp)) || 
+	    if (((monnear(mtmp, u.ux, u.uy) && levl_follower(mtmp)
+			&& shared_world(mtmp, u.ux, u.uy)) ||
 			(mtmp->mtame && (all_pets ||
 							(distmin(mtmp->mx, mtmp->my, u.ux, u.uy) <= follow_dist)
 							|| (get_mx(mtmp, MX_EDOG) && EDOG(mtmp)->dominated) //Crystal skull monsters always follow
@@ -1100,6 +1108,7 @@ rock:
 						&& obj->corpsenm != PM_LARGE_CAVE_LIZARD
 						&& obj->corpsenm != PM_LICHEN
 						&& obj->corpsenm != PM_BEHOLDER
+						&& obj->corpsenm != PM_DEATH_BEHOLDER
 						&& mon->data->mlet != S_FUNGUS) ||
 			(mons[obj->corpsenm].mflagsa == mon->data->mflagsa && intel) ||
 			(polyfodder(obj) && !resists_poly(mon->data) && (intel || goodsmeller(mon->data))) ||
@@ -1260,6 +1269,7 @@ rock:
 				&& obj->corpsenm != PM_LARGE_CAVE_LIZARD
 				&& obj->corpsenm != PM_LICHEN
 				&& obj->corpsenm != PM_BEHOLDER
+				&& obj->corpsenm != PM_DEATH_BEHOLDER
 				&& mon->data->mlet != S_FUNGUS
 			)
 				return 0;
@@ -1444,7 +1454,7 @@ struct monst *
 tamedog_core(struct monst *mtmp, struct obj *obj, int td_flags)
 {
 	boolean enhanced = td_flags & TD_ENHANCED;
-	boolean loyal = td_flags & TD_LOYAL;
+	boolean loyal = (td_flags & TD_LOYAL) || mtmp->mrecruitable;
 	struct monst *curmon, *weakdog = (struct monst *) 0;
 	/* The Wiz, Medusa and the quest nemeses aren't even made peaceful. || mtmp->mtyp == PM_MEDUSA */
 	if (is_untamable(mtmp->data) || mtmp->notame || mtmp->iswiz

@@ -890,7 +890,7 @@ boolean dumping;
 		if (youmonst.mprone) you_are("prone");
 		if (Stunned) you_are("stunned");
 		if (Confusion) you_are("confused");
-		if (Blinded) you_are("blinded");
+		if (Blinded) you_are(PermaBlind ? "permanently blind" : "blinded");
 		if (Sick) {
 			if (u.usick_type & SICK_VOMITABLE)
 				you_are("sick from food poisoning");
@@ -2854,6 +2854,21 @@ boolean dumping;
 
 	put_enl("Voluntary challenges:");
 	put_enl("");
+
+	if (u.uroleplay.blind)
+	    you_have_been("blind from birth");
+	/* pauper can't be voided; only the phrasing changes once the hero
+	   has picked something up */
+	if (u.uroleplay.pauper) {
+	    boolean have_stuff = (invent != 0);
+#ifndef GOLDOBJ
+	    have_stuff = have_stuff || u.ugold;
+#endif
+	    enl_msg(You_, have_stuff ? "started " : "are ", "started out ",
+		    "without possessions");
+	}
+	if (u.uroleplay.nudist)
+	    you_have_been("faithfully nudist");
 
 	if (!u.uconduct.food)
 	    enl_msg(You_, "have gone", "went", " without food");

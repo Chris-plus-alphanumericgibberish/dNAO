@@ -1864,7 +1864,7 @@ register struct monst *mtmp;
 			    Snprintf(prompt, BUFSZ, "Tell %s your real location?", mon_nam(mtmp));
 			    if (yn(prompt) == 'y') {
 				coord cc;
-				enexto(&cc, u.ux, u.uy, mtmp->data);
+				enexto_mon(&cc, u.ux, u.uy, mtmp);
 			        rloc_to(mtmp, cc.x, cc.y);
 				mtmp->mux = u.ux;
 				mtmp->muy = u.uy;
@@ -2421,8 +2421,7 @@ register struct monst *mtmp;
 		    case 3:	/* absolutely no movement */
 				/* for pets, case 0 and 3 are equivalent */
 			/* vault guard might have vanished */
-			if (mtmp->isgd && (mtmp->mhp < 1 ||
-					    (mtmp->mx == 0 && mtmp->my == 0)))
+			if (mtmp->isgd && mtmp->mx == 0 && mtmp->my == 0)
 			    return 1;	/* behave as if it died */
 			/* During hallucination, monster appearance should
 			 * still change - even if it doesn't move.
@@ -2844,7 +2843,7 @@ not_special:
 			appr = -1;
 
 		/* monsters can track you */
-		if (!should_see && (goodsmeller(ptr) || (mtmp)->mcansee)) {
+		if (!should_see && (goodsmeller(ptr) || !is_blind(mtmp))) {
 			register coord *cp;
 			/* good trackers can follow your trail up to 200 turns, others just for your few most recent steps */
 			cp = gettrack(omx, omy, can_track(ptr) ? 0 : rnd(ACURR_MON(A_INT, mtmp)/3));
@@ -3673,6 +3672,11 @@ register struct monst *mtmp;
 			/*x goes from 1 to colno-1, y goes from 0 to rowno-1*/
 			mtmp->mux = rnd(COLNO-1);
 			mtmp->muy = rn2(ROWNO);
+			/* sea people can't wander toward a goal in another world */
+			if(!shared_world(mtmp, mtmp->mux, mtmp->muy)){
+				if(mtmp->muy < ROWNO-1) mtmp->muy++;
+				else mtmp->muy--;
+			}
 		}
 		/* Otherwise, don't change the current */
 		return;
@@ -3704,7 +3708,8 @@ register struct monst *mtmp;
 		      !mon_resistance(mtmp,PASSES_WALLS) &&
 		      (!ACCESSIBLE(levl[mx][my].typ) ||
 		       (closed_door(mx, my) && !can_ooze(mtmp))))
-		  || !couldsee(mx, my));
+		  || !couldsee(mx, my)
+		  || !shared_world(mtmp, mx, my));
 	} else {
 found_you:
 	    mx = u.ux;

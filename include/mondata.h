@@ -8,6 +8,18 @@
 #define verysmall(ptr)		((ptr)->msize < MZ_SMALL)
 #define bigmonst(ptr)		((ptr)->msize >= MZ_LARGE)
 
+#define orthogonal_mover(ptr)	((ptr)->mtyp == PM_GRID_BUG || (ptr)->mtyp == PM_BEBELITH)
+
+#define sea_person(ptr)		((ptr)->mtyp == PM_SEA_RAIDER || (ptr)->mtyp == PM_SEA_PRIEST)
+
+#define diagonal_mover(ptr)	sea_person(ptr)
+
+/* Diagonal movement never changes the parity of (x+y), so a diagonal_mover is
+   permanently confined to one parity of squares -- the other parity is, from
+   its perspective, a different universe entirely. Monsters without that
+   restriction share a world with every square. */
+#define shared_world(mon,x,y)	(!diagonal_mover(mon) || ((((mon)->mx+(mon)->my) % 2) == (((x)+(y)) % 2)))
+
 #define MON_BAB(mon)		((mon)->data->mflagsf&MF_BAB_FULL ? 1.0 : (mon)->data->mflagsf&MF_BAB_HALF ? .5 : .75)
 
 #define lev_limit_30(ptr)		((ptr)->mflagsf&MF_LEVEL_30)
@@ -394,7 +406,7 @@
 								((ptr)->mlet != S_JELLY) && ((ptr)->mlet != S_BLOB) && !is_elemental(ptr) &&\
 								!is_plant(ptr) && !is_demon(ptr) && !is_great_old_one(ptr) && !is_primordial(ptr) && !(mvitals[monsndx(ptr)].mvflags&G_NOCORPSE))
 #define is_lich(ptr)			((ptr)->mlet == S_LICH)
-#define is_weldproof(ptr)		(is_undead(ptr) || (is_demon(ptr) && !is_tiefling_mtyp((ptr)->mtyp)) || is_were(ptr) || is_great_old_one(ptr) || is_android(ptr) || ptr->mtyp == PM_DAUGHTER_OF_NAUNET || ptr->mtyp == PM_PARASITIC_WALL_HUGGER)
+#define is_weldproof(ptr)		(is_undead(ptr) || (is_demon(ptr) && !is_tiefling_mtyp((ptr)->mtyp)) || is_were(ptr) || is_great_old_one(ptr) || is_android(ptr) || (ptr)->mtyp == PM_DAUGHTER_OF_NAUNET || (ptr)->mtyp == PM_PARASITIC_WALL_HUGGER)
 #define is_weldproof_mon(mon)		(is_weldproof((mon)->data))
 #define is_were(ptr)		(((ptr)->mflagsa & MA_WERE) != 0L)
 #define is_heladrin(ptr)		(\
@@ -1110,7 +1122,8 @@
    Maximum allowable lightsource radius is currently 10 (30 after 3x lowlight modifier) */
 #define emits_light(ptr)	((ptr)->light_radius)
 
-#define emits_light_mon(mon) (emits_light((mon)->data))
+/* light radius of a monster right now: 0 while its light-emitting cells are exhausted */
+#define emits_light_mon(mon) (get_timer((mon)->timed, LIGHT_EXHAUSTED) ? 0 : emits_light((mon)->data))
 
 /*	The Voice casts light */
 #define Is_darklight_monster(ptr)	((ptr)->mtyp == PM_EDDERKOP\
@@ -1616,6 +1629,7 @@
 #define	hamWarded(data)	(is_auton(data) \
 			|| data->mtyp == PM_FLOATING_EYE \
 			|| data->mtyp == PM_BEHOLDER \
+			|| data->mtyp == PM_DEATH_BEHOLDER \
 			|| data->mtyp == PM_APHANACTONAN_ASSESSOR \
 			|| data->mtyp == PM_EYE_OF_DOOM \
 			|| data->mtyp == PM_MANY_EYED_SEEKER \

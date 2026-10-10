@@ -382,6 +382,8 @@ NON_DIGGABLE:(00,00,75,20)
 STAIR:place[0],down
 LADDER:(35,10),down
 
+MONSTER: 'e', "Death-beholder", (35,12), hostile
+
 CONTAINER: '(', "chest"  , (31,08)
 OBJECT:'?',"charging", contained
 
@@ -481,7 +483,6 @@ MONSTER: 'y', "black light", random, hostile
 MONSTER: 'y', "black light", random, hostile
 MONSTER: 'y', "black light", random, hostile
 
-#MONSTER: 'e', "beholder", random, hostile, "Death Eye"
 MONSTER: 'e', "beholder", random, hostile
 MONSTER: 'e', "beholder", random, hostile
 MONSTER: 'e', "beholder", random, hostile

@@ -7,6 +7,7 @@
 #include "hack.h"
 #include "lev.h"
 #include "artifact.h"
+#include "qtext.h"
 
 #ifdef SINKS
 # ifdef OVLB
@@ -1740,6 +1741,10 @@ misc_levelport:
 	    }
 	}
 
+	/* The PC can end up moving between parity worlds as a result of stairs etc. */
+	if(diagonal_mover(&youmonst))
+		youmonst.mvar1_seaParity = 1 + ((u.ux + u.uy) % 2);
+
 	/* initial movement of bubbles just before vision_recalc */
 	if (Is_waterlevel(&u.uz))
 		movebubbles();
@@ -1814,7 +1819,7 @@ misc_levelport:
 #endif
 	/* Final confrontation */
 	if (In_endgame(&u.uz) && newdungeon && u.uhave.amulet){
-		if(Role_if(PM_MADMAN) && Race_if(PM_ELF)){
+		if(STAR_ELF_MADMAN){
 			makemon(&mons[flags.initgend ? PM_PUPPET_EMPEROR_XELETH : PM_PUPPET_EMPRESS_XEDALLI], u.ux, u.uy, MM_ADJACENTOK);
 			verbalize("Why won't you JUST. STAY. DEAD!?");
 			makemon(&mons[PM_FLAXEN_STAR_PHANTOM], u.ux, u.uy, MM_ADJACENTOK);
@@ -1880,9 +1885,9 @@ misc_levelport:
 			}
 		} else {
 			if (u.uevent.qcalled) {
-				com_pager(Role_if(PM_ROGUE) ? 4 : 3);
+				com_pager(Role_if(PM_ROGUE) ? QT_COMMON_QCALL_AGAIN_ROGUE : QT_COMMON_QCALL_AGAIN);
 			} else {
-				com_pager(2);
+				com_pager(QT_COMMON_QCALL);
 				u.uevent.qcalled = TRUE;
 			}
 		}
@@ -1966,7 +1971,7 @@ final_level()
 		(void) makemon(&mons[PM_ANCIENT_OF_ICE], u.ux, u.uy, MM_ADJACENTOK);
 /*		for(host = 0; host < 10; host++ )*/ (void) makemon(&mons[PM_FALLEN_ANGEL], u.ux, u.uy, MM_ADJACENTOK);
 	}
-	if(Role_if(PM_MADMAN) && Race_if(PM_ELF)){
+	if(STAR_ELF_MADMAN){
 		makemon(&mons[PM_FLAXEN_STAR_PHANTOM], 0, 0, MM_ADJACENTOK);
 		makemon(&mons[PM_FLAXEN_STAR_PHANTOM], 0, 0, MM_ADJACENTOK);
 		makemon(&mons[PM_FLAXEN_STAR_PHANTOM], 0, 0, MM_ADJACENTOK);
@@ -2964,7 +2969,7 @@ wipeoff()
 {
 	if(u.ucreamed < 4)	u.ucreamed = 0;
 	else			u.ucreamed -= 4;
-	if (Blinded < 4)	Blinded = 0;
+	if (BlindedTimeout < 4)	Blinded &= ~TIMEOUT;
 	else			Blinded -= 4;
 	if (!Blinded) {
 		pline("You've got the glop off.");

@@ -468,10 +468,11 @@ struct monst *mtmp;
 		for(xx = x-1; xx <= x+1; xx++) for(yy = y-1; yy <= y+1; yy++)
 		if (isok(xx,yy))
 		if (!(xx == u.ux && yy == u.uy))
-		if ((mtmp->mtyp != PM_GRID_BUG && mtmp->mtyp != PM_BEBELITH) || xx == x || yy == y)
+		if (!orthogonal_mover(mtmp) || xx == x || yy == y)
+		if (!diagonal_mover(mtmp) || ((xx == x) == (yy == y)))
 		if(!is_vectored_mtyp(mtmp->mtyp) ||
-			(x + xdir[(int)mtmp->mvar_vector] == xx && 
-			   y + ydir[(int)mtmp->mvar_vector] == yy 
+			(x + xdir[(int)mtmp->mvar_vector] == xx &&
+			   y + ydir[(int)mtmp->mvar_vector] == yy
 			)
 		)
 		if ((xx==x && yy==y) || !level.monsters[xx][yy])
@@ -2284,7 +2285,8 @@ struct monst *mtmp;
 	  for(xx = x-1; xx <= x+1; xx++)
 	    for(yy = y-1; yy <= y+1; yy++)
 		if (isok(xx,yy) && !(xx == u.ux && yy == u.uy))
-		    if ((mdat->mtyp != PM_GRID_BUG && mtmp->mtyp != PM_BEBELITH) || xx == x || yy == y)
+		    if (!orthogonal_mover(mtmp) || xx == x || yy == y)
+		    if (!diagonal_mover(mtmp) || ((xx == x) == (yy == y)))
 			if(!is_vectored_mtyp(mtmp->mtyp) ||
 				(x + xdir[(int)mtmp->mvar_vector] == xx && 
 				   y + ydir[(int)mtmp->mvar_vector] == yy 

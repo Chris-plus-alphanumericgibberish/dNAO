@@ -791,6 +791,13 @@ mapglyph(int glyph, glyph_t *ochar, int *ocolor, unsigned int *obgcolor, int *oa
     if (is_monster_glyph) {
 		struct monst *mtmp = m_u_at(x, y);
 		if (mtmp) {
+			/* sea people on the odd-parity world are drawn blue/light
+			 * blue instead of green/light green, so the two worlds are
+			 * visually distinguishable at a glance */
+			if (diagonal_mover(mtmp) && mtmp->mvar1_seaParity == 2) {
+				if (color == CLR_GREEN) color = CLR_BLUE;
+				else if (color == CLR_BRIGHT_GREEN) color = CLR_BRIGHT_BLUE;
+			}
 			switch (mtmp->mstance) {
 			case MSTANCE_MAGIC:
 			case MSTANCE_PUSH:
