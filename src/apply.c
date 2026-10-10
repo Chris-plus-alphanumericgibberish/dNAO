@@ -3286,6 +3286,18 @@ parasite_ok()
 	return FALSE;
 }
 
+STATIC_OVL boolean
+parasite_implant_ok(void)
+{
+	if(!parasite_ok() || !carrying(PARASITE))
+		return FALSE;
+	if(!(active_glyph(LUMEN) || (u.ualign.god == GOD_THE_CHOIR && known_glyph(LUMEN))))
+		return FALSE;
+	if(!(on_god_altar(GOD_THE_CHOIR) || find_charged_object_type(invent, DISSECTION_KIT)))
+		return FALSE;
+	return TRUE;
+}
+
 int
 defile_count()
 {
@@ -4733,10 +4745,7 @@ use_trephination_kit(obj)
 register struct obj *obj;
 {
 	boolean skulls = !!carrying(CRYSTAL_SKULL);
-	boolean parasites = !!(parasite_ok() && carrying(PARASITE) && (
-		active_glyph(LUMEN)
-		|| (u.ualign.god == GOD_THE_CHOIR && known_glyph(LUMEN))
-	));
+	boolean parasites = parasite_implant_ok();
 	
 	if(!obj->spe){
 		pline("The kit's medical supplies are exhausted.");
@@ -13612,10 +13621,7 @@ dotrephination_options()
 	}
 	incntlet++;
 	
-	if(parasite_ok() && carrying(PARASITE) && (
-		active_glyph(LUMEN)
-		|| (u.ualign.god == GOD_THE_CHOIR && known_glyph(LUMEN))
-	) && (on_god_altar(GOD_THE_CHOIR) || find_charged_object_type(invent, DISSECTION_KIT))){
+	if(parasite_implant_ok()){
 		Sprintf(buf, "Putting parasites in your brain");
 		any.a_int = TREPH_PARASITES;	/* must be non-zero */
 		add_menu(tmpwin, NO_GLYPH, &any,
