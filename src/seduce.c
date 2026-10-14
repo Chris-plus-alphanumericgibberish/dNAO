@@ -34,6 +34,7 @@ struct attack *mattk;
 	xchar genagr, gendef;
 	boolean tiefling = (youagr && (check_mutation(TT_ATTRACTIVE_1) || check_mutation(TT_ATTRACTIVE_2)));
 	boolean tiefling_nymph = (youagr && check_mutation(TT_ATTRACTIVE_1));
+	boolean grace_gifts = full_grace_empowers(magr, AAT_GRACE_GIFTS);
 	if(youdef || youagr){
 		if(Chastity) return 0;
 		
@@ -78,11 +79,12 @@ struct attack *mattk;
 	if(pagr->mlet == S_NYMPH || pagr->mtyp == PM_INCUBUS || pagr->mtyp == PM_SUCCUBUS
 			|| pagr->mtyp == PM_CARMILLA || pagr->mtyp == PM_VLAD_THE_IMPALER || pagr->mtyp == PM_LEVISTUS
 			|| tiefling
+			|| grace_gifts
 	){
 		if(genagr == 1 - gendef)
 			return 1;
 		else
-			return (tiefling_nymph || pagr->mlet == S_NYMPH || pagr->mtyp == PM_LEVISTUS) ? 2 : 0;
+			return (grace_gifts || tiefling_nymph || pagr->mlet == S_NYMPH || pagr->mtyp == PM_LEVISTUS) ? 2 : 0;
 	}
 	else if(pagr->mtyp == PM_MOTHER_LILITH || pagr->mtyp == PM_BELIAL){
 		if(genagr == 1 - gendef) return 1;

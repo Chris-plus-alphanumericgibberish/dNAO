@@ -598,7 +598,7 @@ boolean you_abilities;
 	if (you_abilities && hasfightingforms() > 0) {	/* I can't wait until fighting forms are mainstream */
 		add_ability('F', "Pick a fighting form", MATTK_U_STYLE);
 	}
-	if (mon_abilities && (attacktype(youracedata, AT_GAZE) || (!Upolyd && check_vampire(VAMPIRE_GAZE)) || (!Upolyd && TIEFLING_GAZE))) {
+	if (mon_abilities && (attacktype(youracedata, AT_GAZE) || (!Upolyd && check_vampire(VAMPIRE_GAZE)) || (!Upolyd && (TIEFLING_GAZE || AASIMAR_GAZE)))) {
 		add_ability('g', "Gaze at something", MATTK_GAZE);
 	}
 	if (mon_abilities && (!Upolyd && MISC_TIEFLING_ABILITY)){
@@ -1782,7 +1782,7 @@ hasfightingforms(){
 		|| uring_art(ART_STAR_EMPEROR_S_RING)
 		|| check_rot(ROT_CENT)
 		|| check_rot(ROT_STING)
-		|| (!Upolyd && (TIEFLING_AUTOATTACKS || storm_aasimar(flags.aasimar_subtype) || Race_if(PM_DOKKIMAR)))
+		|| (!Upolyd && (TIEFLING_AUTOATTACKS || storm_aasimar(flags.aasimar_subtype) || flags.aasimar_type == AASIMAR_TYPE_IKSH_NA))
 		//Tiefling and aasimar
 	)
 		formmask |= AUTO_ATTKS;
@@ -1825,7 +1825,7 @@ hasfightingforms(){
 			!is_null_attk(attk);
 			attk = getattk(&youmonst, (struct monst *) 0, res, &indexnum, &prev_attk, FALSE, subout, &tohitmod)
 		){
-			if(attk->aatyp == AT_NONE) formmask |= AVOID_URPASSIVES;
+			if(attk->aatyp == AT_NONE || attk->aatyp == AT_MNTL) formmask |= AVOID_URPASSIVES;
 		}
 	}
 	if (u.uavoid_msplcast)

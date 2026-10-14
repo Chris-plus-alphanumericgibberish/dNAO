@@ -1455,7 +1455,7 @@ undesirable_disp(struct monst *mtmp, xchar x, xchar y)
 {
 	struct trap *trap = t_at(x, y);
 
-	if (trap && trap->tseen && rn2(40))
+	if (trap && trap->tseen && rn2(40) && !grace_escapes_trap(mtmp, trap))
 		return TRUE;
 	if (!is_weldproof_mon(mtmp) && cursed_object_at(x, y))
 		return TRUE;
@@ -1738,7 +1738,9 @@ register int after;	/* this is extra fast monster movement */
 			    /* 1/40 chance of stepping on it anyway, in case
 			     * it has to pass one to follow the player...
 			     */
-			    if ((trap->tseen || mon_resistance(mtmp, SEARCHING)) && rn2(40)) continue;
+			    if ((trap->tseen || mon_resistance(mtmp, SEARCHING)) && rn2(40)
+					&& !grace_escapes_trap(mtmp, trap)
+				) continue;
 		    }
 		}
 

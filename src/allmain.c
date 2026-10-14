@@ -666,6 +666,11 @@ boolean affect_game_state;
 			if ((uwep && fast_weapon(uwep))
 				|| (!uwep && uarmg && fast_weapon(uarmg))
 				|| (uwep && uwep->oartifact == ART_FROST_BRAND && u.twoweap && uswapwep && uswapwep->oartifact == ART_FIRE_BRAND && fast_weapon(uswapwep))
+				|| (uwep && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep)) && (
+						(!bimanual_mon(uwep, &youmonst) && full_grace_empowers(&youmonst, AAT_GRACE_STRIKE))
+						|| ( light_weapon_mon(uwep, &youmonst) && grace_empowers(&youmonst, AAT_GRACE_STRIKE))
+					)
+				)
 			){
 				current_cost -= NORMAL_SPEED / 6;
 			}
@@ -822,6 +827,10 @@ you_calc_movement()
 	if(uwep && uwep->oartifact == ART_SINGING_SWORD && uwep->osinging == OSING_HASTE){
 		moveamt += 2;
 	}
+	
+	/* When moving while riding the PC gets the extra move from the steed's mcalcmove() instead. */
+	if(u.umoved && !u.usteed && check_grace(AAT_GRACE_SWIFT))
+		moveamt += 3;
 	
 	if(u.specialSealsActive&SEAL_BLACK_WEB && u.utrap && u.utraptype == TT_WEB)
 		moveamt += 8;
@@ -1407,6 +1416,12 @@ you_regen_pw()
 		if((Role_if(PM_MONK) || Role_if(PM_KENSEI)) && u.unull){
 			reglevel *= 2;
 			reglevel += 8;
+			if(MEDITATION_MUDRA)
+				reglevel += HEALCYCLE;
+		}
+		else if(MEDITATION_MUDRA){
+			reglevel *= 2;
+			reglevel += 8;
 		}
 		if (Role_if(PM_WIZARD)){
 			reglevel *= 2;
@@ -1576,6 +1591,10 @@ san_threshhold()
 	if (Role_if(PM_MADMAN))   reglevel -= 10;
 	if (Role_if(PM_UNDEAD_HUNTER) && (Insight >= 50 || quest_status.moon_close))   reglevel -= 10;
 	//Maybe scale undead hunter based on how well they did on the quest as well.
+
+	if (MEDITATION_MUDRA){
+		reglevel += 8;
+	}
 
 	if (Race_if(PM_ELF))   reglevel += 3;
 	if (Race_if(PM_ORC))   reglevel -= 3;
@@ -3487,7 +3506,7 @@ karemade:
 				more_experienced(u.ulevel,0);
 				newexplevel();
 			}
-			if (u.uencouraged && ((active_glyph(BEASTS_EMBRACE) ? !rn2(6) : !rn2(8)))) {
+			if (u.uencouraged && ((u.uencouraged < 0 && CLARITY_MUDRA) || (active_glyph(BEASTS_EMBRACE) ? !rn2(6) : !rn2(8)))) {
 				if(u.uencouraged > 0) u.uencouraged--;
 				else u.uencouraged++;
 				if (!(u.uencouraged)) 
@@ -3738,7 +3757,7 @@ karemade:
 			perform_widegaze_attacks();
 		if(flags.aasimar_type == AASIMAR_TYPE_CLOUDFACE && !Upolyd)
 			perform_cloudface_widegaze();
-		if(!Upolyd && TIEFLING_AURAS)
+		if(!Upolyd && (TIEFLING_AURAS || AASIMAR_HALOS || AASIMAR_AURAS))
 			mutation_auras();
 		// Decrease your pucture counter
 		if(youmonst.mpunctured > 0 && rn2(2)) youmonst.mpunctured--;
@@ -4397,16 +4416,19 @@ newgame()
 			switch(inher_arti){
 				case INHERITED_SERAPH_BLOOD:
 					flags.aasimar_type = AASIMAR_TYPE_SERAPH;
+					flags.aasimar_subtype = 0;
 					u.seraph_eyes = 7;
-					HSee_invisible |= W_UPGRADE;
 					findit();
-					HExtramission |= W_UPGRADE;
-					doredraw();
+					vision_full_recalc = 1;
+					see_monsters();
 					expert_weapon_skill(P_SHIELD);
 				break;
 				case INHERITED_PRIMINAL_BLOOD:
 					flags.aasimar_type = AASIMAR_TYPE_PRIMINAL;
+					flags.aasimar_subtype = 0;
 					add_mutation(AAT_PRIMINAL);
+					//Futureproofing: swap out mudras, even though you don't start with any
+					(void) priminal_mudras();
 					add_mutation(AAT_PRIMINAL_TAIL);
 					skilled_weapon_skill(P_BEAST_MASTERY);
 					gm_weapon_skill(P_BARE_HANDED_COMBAT);
@@ -4415,6 +4437,7 @@ newgame()
 				break;
 				case INHERITED_CLOUDFACE_BLOOD:
 					flags.aasimar_type = AASIMAR_TYPE_CLOUDFACE;
+					flags.aasimar_subtype = 0;
 					u.veil = FALSE;
 					u.uinsight = 1;
 					for(struct obj *obj = invent; obj; obj = obj->nobj){
@@ -5958,29 +5981,7 @@ struct monst *mon;
 				}
 				if(canseemon(mtmp) && mtmp->mhp < mtmp->mhpmax)
 					pline("%s looks much better!", Monnam(mtmp));
-				mtmp->mhp = mtmp->mhpmax;
-				mtmp->mspec_used = 0;
-				mtmp->mstdy = 0;
-				mtmp->ustdym = 0;
-				set_mcan(mtmp, FALSE);
-				
-				mtmp->mflee = 0;
-				mtmp->mfleetim = 0;
-				mtmp->mcansee = 1;
-				mtmp->mblinded = 0;
-				mtmp->mcanhear = 1;
-				mtmp->mdeafened = 0;
-				mtmp->mcanmove = 1;
-				mtmp->mfrozen = 0;
-				mtmp->msleeping = 0;
-				mtmp->mstun = 0;
-				mtmp->mpunctured = 0;
-				mtmp->mconf = 0;
-				mtmp->mtrapped = 0;
-				mtmp->entangled_otyp = 0;
-				mtmp->entangled_oid = 0;
-				mtmp->owrk = 0; mtmp->ruh = 0; mtmp->shey = 0;
-				mtmp->luahv = 0; mtmp->nean = 0; mtmp->nooh = 0;
+				mon_fix_troubles(mtmp, MFT_HEAL|MFT_STUDY|MFT_UNCANCEL|MFT_COOLDOWN|MFT_TRAPPED);
 			}
 		}
 		xlocale += rn2(3) - 1;
@@ -6037,29 +6038,7 @@ struct monst *mon;
 			}
 			if(canseemon(mtmp) && mtmp->mhp < mtmp->mhpmax)
 				pline("%s looks much better!", Monnam(mtmp));
-			mtmp->mhp = mtmp->mhpmax;
-			mtmp->mspec_used = 0;
-			mtmp->mstdy = 0;
-			mtmp->ustdym = 0;
-			set_mcan(mtmp, FALSE);
-			
-			mtmp->mflee = 0;
-			mtmp->mfleetim = 0;
-			mtmp->mcansee = 1;
-			mtmp->mblinded = 0;
-			mtmp->mcanhear = 1;
-			mtmp->mdeafened = 0;
-			mtmp->mcanmove = 1;
-			mtmp->mfrozen = 0;
-			mtmp->msleeping = 0;
-			mtmp->mstun = 0;
-			mtmp->mconf = 0;
-			mtmp->mpunctured = 0;
-			mtmp->mtrapped = 0;
-			mtmp->entangled_otyp = 0;
-			mtmp->entangled_oid = 0;
-			mtmp->owrk = 0; mtmp->ruh = 0; mtmp->shey = 0;
-			mtmp->luahv = 0; mtmp->nean = 0; mtmp->nooh = 0;
+			mon_fix_troubles(mtmp, MFT_HEAL|MFT_STUDY|MFT_UNCANCEL|MFT_COOLDOWN|MFT_TRAPPED);
 
 			break; //ends the loop
 		}
@@ -6113,28 +6092,7 @@ struct monst *mon;
 					if(canseemon(mtmp)) pline("Dark waters seal %s's wounds!", mon_nam(mtmp));
 				} else {
 					mtmp->mhp = min(mtmp->mhp+9, mtmp->mhpmax);
-					mtmp->mspec_used = 0;
-					mtmp->mstdy = 0;
-					mtmp->ustdym = 0;
-					set_mcan(mtmp, FALSE);
-					
-					mtmp->mflee = 0;
-					mtmp->mfleetim = 0;
-					mtmp->mcansee = 1;
-					mtmp->mblinded = 0;
-					mtmp->mcanhear = 1;
-					mtmp->mdeafened = 0;
-					mtmp->mcanmove = 1;
-					mtmp->mfrozen = 0;
-					mtmp->msleeping = 0;
-					mtmp->mstun = 0;
-					mtmp->mconf = 0;
-					mtmp->mpunctured = 0;
-					mtmp->mtrapped = 0;
-					mtmp->entangled_otyp = 0;
-					mtmp->entangled_oid = 0;
-					mtmp->owrk = 0; mtmp->ruh = 0; mtmp->shey = 0;
-					mtmp->luahv = 0; mtmp->nean = 0; mtmp->nooh = 0;
+					mon_fix_troubles(mtmp, MFT_STUDY|MFT_UNCANCEL|MFT_COOLDOWN|MFT_TRAPPED);
 				}
 			}
 		}
@@ -6247,28 +6205,7 @@ struct monst *mon;
 					pline("Dark waters seal %s's wounds!", mon_nam(mtmp));
 			} else {
 				mtmp->mhp = min(mtmp->mhp+9, mtmp->mhpmax);
-				mtmp->mspec_used = 0;
-				mtmp->mstdy = 0;
-				mtmp->ustdym = 0;
-				set_mcan(mtmp, FALSE);
-				
-				mtmp->mflee = 0;
-				mtmp->mfleetim = 0;
-				mtmp->mcansee = 1;
-				mtmp->mblinded = 0;
-				mtmp->mcanhear = 1;
-				mtmp->mdeafened = 0;
-				mtmp->mcanmove = 1;
-				mtmp->mfrozen = 0;
-				mtmp->msleeping = 0;
-				mtmp->mstun = 0;
-				mtmp->mconf = 0;
-				mtmp->mpunctured = 0;
-				mtmp->mtrapped = 0;
-				mtmp->entangled_otyp = 0;
-				mtmp->entangled_oid = 0;
-				mtmp->owrk = 0; mtmp->ruh = 0; mtmp->shey = 0;
-				mtmp->luahv = 0; mtmp->nean = 0; mtmp->nooh = 0;
+				mon_fix_troubles(mtmp, MFT_STUDY|MFT_UNCANCEL|MFT_COOLDOWN|MFT_TRAPPED);
 			}
 		}
 	}

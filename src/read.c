@@ -1852,36 +1852,10 @@ mon_forget(struct monst *mtmp, int howmuch, boolean blessed, boolean cursed, boo
 			mtmp->mamnesia = TRUE;
 		}
 		mtmp->seenmadnesses = 0;
-		mtmp->mcrazed = 0;
 		mtmp->mberserk = 0;
-		mtmp->mdisrobe = 0;
 		mtmp->mdoubt = 0;
 		mon_heal_injuries(mtmp, HEAL_ALL_INJURIES);
-		mtmp->msanctity = 0;
-		mtmp->mgluttony = 0;
-		mtmp->mfrigophobia = 0;
-		mtmp->mcannibal = 0;
-		mtmp->mrage = 0;
-		mtmp->margent = 0;
-		mtmp->msuicide = 0;
-		mtmp->mnudist = 0;
-		mtmp->mophidio = 0;
-		mtmp->marachno = 0;
-		mtmp->mentomo = 0;
-		mtmp->mthalasso = 0;
-		mtmp->mhelmintho = 0;
-		mtmp->mparanoid = 0;
-		mtmp->mtalons = 0;
-		mtmp->mdreams = 0;
-		mtmp->msciaphilia = 0;
-		mtmp->mforgetful = 0;
-		mtmp->mapostasy = 0;
-		mtmp->mtoobig = 0;
-		mtmp->mrotting = 0;
-		mtmp->mformication = 0;
-		mtmp->mscorpions = 0;
-		mtmp->mvermin = 0;
-		mtmp->mcaterpillars = 0;
+		mon_cure_madnesses(mtmp);
 	} else {
 		if (!silent) pline("%s looks angry and confused!", Monnam(mtmp));
 		untame(mtmp, 0);
@@ -3433,11 +3407,14 @@ do_it:
 	/* No-op in water - can only see the adjacent squares and that's it! */
 	if (Underwater || Is_waterlevel(&u.uz)) return;
 	/*
-	 *  If we are darkening the room and the hero is punished but not
-	 *  blind, then we have to pick up and replace the ball and chain so
-	 *  that we don't remember them if they are out of sight.
+	 *  If the hero is punished but not blind, then we have to pick up and
+	 *  replace the ball and chain so that they are redrawn if they are still
+	 *  in sight after the lighting changes, and not remembered if they aren't.
+	 *  Which squares stay in sight depends on the hero's vision type, so do
+	 *  this regardless of whether we are lighting or darkening.
 	 */
-	if (Punished && (Darksight ? on : !on) && !Blind)
+	boolean replace_bc = Punished && !Blind;
+	if (replace_bc)
 	    move_bc(1, 0, uball->ox, uball->oy, uchain->ox, uchain->oy);
 
 #ifdef REINCARNATION
@@ -3466,13 +3443,12 @@ do_it:
 	 *  correctly update all previously seen positions *and* correctly
 	 *  set the waslit bit [could be messed up from above].
 	 */
-	if (!Blind) {
+	if (!Blind)
 	    vision_recalc(2);
 
-	    /* replace ball&chain */
-	    if (Punished && (Darksight ? on : !on))
-			move_bc(0, 0, uball->ox, uball->oy, uchain->ox, uchain->oy);
-	}
+	/* replace ball&chain */
+	if (replace_bc)
+	    move_bc(0, 0, uball->ox, uball->oy, uchain->ox, uchain->oy);
 
 	vision_full_recalc = 1;	/* delayed vision recalculation */
 }

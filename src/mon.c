@@ -1686,6 +1686,16 @@ struct monst *mon;
 	}
 	if(mon->data->mlet == S_DRAGON && mon->mtame && Dragon_trainer)
 		mmove += 4;
+	/* monsters don't track whether they moved, so graced pets always get the bonus mmove */
+	if(mon->data->mmove > 0 && grace_empowers(mon, AAT_GRACE_SWIFT))
+		mmove += 3;
+	/* not for the steed, whose movement becomes the riding hero's */
+	if(mon->data->mmove > 0 && mon != u.usteed){
+		if(full_grace_empowers(mon, AAT_GRACE_STRIKE))
+			mmove += 2;
+		else if(grace_empowers(mon, AAT_GRACE_STRIKE))
+			mmove += 1;
+	}
 	if(mon->mtyp == PM_CHOKHMAH_SEPHIRAH)
 		mmove += u.chokhmah;
 	if(mon->mtyp == PM_BANDERSNATCH && mon->mflee)
@@ -3037,6 +3047,25 @@ register struct monst *mtmp;
 	return (int) carcap;
 }
 
+/* Return TRUE if looker has omnisense and can perceive lookie (a monster or the hero) through one of the senses omnisense extends. */
+boolean
+mon_sees_with_omnisense(struct monst *looker, struct monst *lookie)
+{
+	boolean youdef = (lookie == &youmonst);
+	struct permonst *pd = youdef ? youracedata : lookie->data;
+	boolean invisible = youdef ? Invis : lookie->minvis;
+	boolean hidden = youdef ? u.uundetected : lookie->mundetected;
+
+	if(!omnisense(looker->data))
+		return FALSE;
+	if(!is_tracker(looker->data) && ((invisible && !mon_resistance(looker, SEE_INVIS)) || hidden))
+		return FALSE;
+	return ((infravision(looker->data) && infravisible(pd) && !is_blind(looker))
+		|| (bloodsense(looker->data) && has_blood(pd))
+		|| (lifesense(looker->data) && !nonliving(pd))
+		|| senseall(looker->data));
+}
+
 boolean
 mon_can_see_mon(looker, lookie)
 	struct monst *looker;
@@ -3051,7 +3080,10 @@ mon_can_see_mon(looker, lookie)
 
 	if(lookie->mtyp == PM_TWIN_SIBLING && !insightful(looker->data) && !is_great_old_one(looker->data))
 		return FALSE;
-	
+
+	if(check_mutation(AAT_TRUMPET_AURA) && looker->mtame && in_beast_mastery_range(looker))
+		return TRUE;
+
 	if(looker->mtyp == PM_DREADBLOSSOM_SWARM){
 		if(lookie->mtyp == PM_DREADBLOSSOM_SWARM) return FALSE;
 		else return mon_can_see_mon(lookie, looker);
@@ -3159,6 +3191,14 @@ mon_can_see_mon(looker, lookie)
 
 	if(echolocation(looker->data) && !is_deaf(looker) && !unsolid(lookie->data)){
 		if (clearpath) {
+			return TRUE;
+		}
+	}
+	/* x-ray vision sees through walls, with the hero's base x-ray range */
+	if(mon_resistance(looker, XRAY_VISION) && !is_blind(looker)
+		&& within_vision_circle(looker->mx, looker->my, lookie->mx, lookie->my, 3)
+	){
+		if(!hardtosee || !rn2(11)){
 			return TRUE;
 		}
 	}
@@ -3318,6 +3358,14 @@ struct monst *looker;
 	}
 	if(echolocation(looker->data) && !is_deaf(looker) && !unsolid(youracedata)){
 		if (clearpath) {
+			return TRUE;
+		}
+	}
+	/* x-ray vision sees through walls, with the hero's base x-ray range */
+	if(mon_resistance(looker, XRAY_VISION) && !is_blind(looker)
+		&& within_vision_circle(looker->mx, looker->my, u.ux, u.uy, 3)
+	){
+		if(!hardtosee || !rn2(11)){
 			return TRUE;
 		}
 	}

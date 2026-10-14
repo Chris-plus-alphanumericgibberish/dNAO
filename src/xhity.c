@@ -24,7 +24,33 @@ STATIC_DCL int FDECL(xexplodey, (struct monst *, struct monst *, struct attack *
 STATIC_DCL int FDECL(hmoncore, (struct monst *, struct monst *, struct attack *, struct attack *, struct obj **, void *, int, int, int, boolean, int, boolean, int, unsigned long));
 STATIC_DCL void FDECL(add_silvered_art_sear_adjectives, (char *, struct obj*));
 STATIC_DCL int FDECL(shadow_strike, (struct monst *));
-STATIC_DCL int FDECL(xpassivehity, (struct monst *, struct monst *, struct attack *, struct attack *, struct obj *, int, int, struct permonst *, boolean));
+STATIC_DCL int FDECL(xpassivehity, (struct monst *, struct monst *, struct attack *, struct attack *, struct obj **, int, int, struct permonst *, boolean, boolean *));
+STATIC_DCL int FDECL(xmantlehity, (struct monst *, struct monst *, struct attack *, struct attack *, struct obj **, int, int, int, boolean *));
+STATIC_DCL void FDECL(mantle_destroys_weapon, (struct monst *, struct monst *, struct obj **, const char *, const char *));
+STATIC_DCL boolean FDECL(pierces_mantle, (struct obj *));
+STATIC_DCL boolean FDECL(star_mantle_stops, (struct monst *, struct monst *, struct obj **, int, const char *));
+STATIC_DCL boolean FDECL(water_mantle_stops, (struct monst *, struct monst *, struct obj **, int));
+STATIC_DCL boolean FDECL(hurt_by_water, (struct monst *));
+STATIC_DCL boolean FDECL(fire_mantle_stops, (struct monst *, struct monst *, struct obj **, int, boolean *));
+STATIC_DCL boolean FDECL(cold_mantle_stops, (struct monst *, struct monst *, struct obj **, int, boolean *));
+STATIC_DCL boolean FDECL(elec_mantle_stops, (struct monst *, struct monst *, struct obj **, int, boolean *));
+STATIC_DCL boolean FDECL(dust_mantle_stops, (struct monst *, struct monst *, struct obj **, int, const char *));
+STATIC_DCL boolean FDECL(ash_mantle_stops, (struct monst *, struct monst *, struct obj *, int));
+STATIC_DCL int FDECL(four_seasons_turn, (struct monst *));
+STATIC_DCL int FDECL(seasons_mantle_adtyp, (struct monst *));
+STATIC_DCL boolean FDECL(growth_mantle_stops, (struct monst *, struct monst *, struct obj *, int));
+STATIC_DCL boolean FDECL(foliage_mantle_stops, (struct monst *, struct monst *, struct obj *, int));
+STATIC_DCL boolean FDECL(cover_in_pollen, (struct monst *));
+STATIC_DCL boolean FDECL(has_mantle_attack, (struct monst *, int));
+STATIC_DCL boolean FDECL(seeking_blow, (struct monst *, struct obj *));
+STATIC_DCL boolean FDECL(sees_through_mantle, (struct monst *, struct monst *, struct obj *));
+STATIC_DCL void FDECL(lose_sight_in_mantle, (struct monst *, struct monst *, int, const char *));
+STATIC_DCL boolean FDECL(dust_mantle_buffets, (struct monst *, struct monst *, int, const char *));
+STATIC_DCL void FDECL(leaf_mantle_drains, (struct monst *, struct monst *, struct obj *, int));
+STATIC_DCL boolean FDECL(dust_mantle_blunts, (struct monst *, struct obj *));
+STATIC_DCL boolean FDECL(resists_holy_element, (struct monst *, int));
+STATIC_DCL int FDECL(mantle_elemental_dmg, (struct monst *, int, int));
+STATIC_DCL int FDECL(mantle_blunted_dmg, (struct monst *, struct monst *, struct obj *, int));
 STATIC_DCL boolean FDECL(blacklight_tentacles_suck_x, (struct monst *, struct monst *, int, int, const char *));
 STATIC_DCL int FDECL(bonus_ac, (struct monst *, struct monst *));
 /* for long worms */
@@ -448,6 +474,7 @@ xattacky(struct monst *magr, struct monst *mdef, int tarx, int tary, long modifi
 	boolean missedother = (!youagr && !youdef && mdef && (tarx != mdef->mx || tary != mdef->my));	/* monster tried to attack something, but it got the location wrong */
 	boolean ranged = (distmin(x(magr), y(magr), tarx, tary) > 1);	/* is magr near its target? */
 	boolean dopassive = FALSE;	/* whether or not to provoke a passive counterattack */
+	boolean leaf_drained = FALSE;	/* whether a leaf mantle has drained magr's life force during this attack chain */
 	/* if TRUE, don't make attacks that will be fatal to self (like touching a cockatrice) */
 	boolean be_safe = (mdef && !(youagr ? (Hallucination || flags.forcefight || (!canspotmon(mdef) && mdef != u.ustuck)) :
 		(magr->mcrazed || mindless_mon(magr) || (youdef && !mon_can_see_you(magr)) || (!youdef && !mon_can_see_mon(magr, mdef)))));
@@ -508,6 +535,11 @@ xattacky(struct monst *magr, struct monst *mdef, int tarx, int tary, long modifi
 		if (u_surprise(magr, canseemon(magr)))
 			return MM_MISS;	/* they can't attack this turn */
 	}
+
+	if (!youagr && !ranged && !missedyou && !missedother && !(youdef && u.uswallow)
+		&& grace_gifts_offer(magr, mdef)
+	)
+		return MM_MISS;
 
 	/*	Special demon/minion handling code */
 	/* mvu only; we don't want it mvm and player's is handled as an ability */
@@ -748,6 +780,7 @@ xattacky(struct monst *magr, struct monst *mdef, int tarx, int tary, long modifi
 //////////////////////////////////////////////////////////////
 			/* non attacks, do not occur here */
 		case AT_NONE:	// retaliatory when hit
+		case AT_MNTL:	// mantle, retaliatory when hit
 		case AT_BOOM:	// retaliatory explosion when killed
 			continue;
 //////////////////////////////////////////////////////////////
@@ -1123,7 +1156,7 @@ xattacky(struct monst *magr, struct monst *mdef, int tarx, int tary, long modifi
 						result |= hit_with_tonguesnake(magr, tarx, tary, 0);
 					}
 					/* Dancers hit additional targets */
-					if(!ranged && !(result&(MM_AGR_DIED|MM_AGR_STOP)) && is_dancer(magr->data)){
+					if(!ranged && !(result&(MM_AGR_DIED|MM_AGR_STOP)) && (is_dancer(magr->data) || grace_empowers(magr, AAT_GRACE_DANCE))){
 						result |= hit_with_dance(magr, otmp, tarx, tary, tohitmod, attk)&(MM_AGR_DIED|MM_AGR_STOP);
 					}
 					/* Rejection antennae hit additional targets (last) */
@@ -1548,6 +1581,14 @@ xattacky(struct monst *magr, struct monst *mdef, int tarx, int tary, long modifi
 		/* make per-attack counterattacks */
 		if (dopassive_local) {
 			dopassive = TRUE;
+			/* the hero's justice aura punishes monsters that strike pets in its range */
+			if(!youagr && !youdef && (result&MM_HIT) && !(result&MM_AGR_DIED) && mdef->mtame
+				&& check_mutation(AAT_JUSTICE_AURA) && in_beast_mastery_range(mdef)
+			){
+				xdamagey(DEADMONSTER(mdef) ? (struct monst *)0 : mdef, magr, (struct attack *)0, 7);
+				if(DEADMONSTER(magr))
+					result |= MM_AGR_DIED;
+			}
 			if(youdef && !u.uavoid_urpassives && (result&MM_HIT) && u.uspellprot && (artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_BALANCE)){
 				struct monst *mon;
 				for(int i = 0; i < 8; i++){
@@ -1557,8 +1598,10 @@ xattacky(struct monst *magr, struct monst *mdef, int tarx, int tary, long modifi
 				if(DEADMONSTER(magr))
 					result |= MM_AGR_DIED;
 			}
-			result = xpassivey(magr, mdef, attk, otmp, vis, result, pd, FALSE);
+			result = xpassivey(magr, mdef, attk, &otmp, vis, result, pd, FALSE, &leaf_drained);
 		}
+		/* only passives care about mantle blasts; elsewhere a stopped blow is a plain miss */
+		result &= ~MM_MANTLE_BLAST;
 
 		/* double check MM_DEF_DIED, MM_AGR_DIED */
 		if (*hp(mdef) < 1)
@@ -1608,7 +1651,7 @@ xattacky(struct monst *magr, struct monst *mdef, int tarx, int tary, long modifi
 	}
 	/* make per-round counterattacks -- note that these cannot use otmp or attk, as those are per-attack */
 	if (dopassive)
-		allres = xpassivey(magr, mdef, (struct attack *)0, (struct obj *)0, vis, allres, pd, TRUE);
+		allres = xpassivey(magr, mdef, (struct attack *)0, (struct obj **)0, vis, allres, pd, TRUE, &leaf_drained);
 	
 	/* reset lillend mask usage */
 	if (!youagr && pa->mtyp == PM_LILLEND)
@@ -2605,7 +2648,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 	   but also keep squeeze, passive, and explosion attacks */
 	if (!youagr && magr->mstance == MSTANCE_MAGIC) {
 		if (!is_null_attk(attk) && attk->aatyp != AT_MAGC && attk->aatyp != AT_MMGC
-		    && attk->aatyp != AT_SQUZ && attk->aatyp != AT_NONE && attk->aatyp != AT_BOOM)
+		    && attk->aatyp != AT_SQUZ && attk->aatyp != AT_NONE && attk->aatyp != AT_MNTL && attk->aatyp != AT_BOOM)
 			GETNEXT
 	}
 	/* monsters in melee stance suppress spellcasting attacks */
@@ -2983,6 +3026,22 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			}
 			remove_subout(subout, SUBOUT_XWEP);	/* allow another followup offhand attack if twoweaponing */
 		}
+	}
+
+	/* the hero's extra-attack grace gives the hero and allies a bonus weapon attack at full HP */
+	if (full_grace_empowers(magr, AAT_GRACE_EXTRA) && (*indexnum > 0)
+		&& ((is_null_attk(attk) || (attk->aatyp != AT_WEAP && attk->aatyp != AT_XWEP))
+		&& (prev_attack.aatyp == AT_WEAP || prev_attack.aatyp == AT_XWEP))
+		&& !check_subout(subout, SUBOUT_GRACE_EXTRA)
+	) {
+		attk->aatyp = AT_WEAP;
+		attk->adtyp = AD_PHYS;
+		attk->damn = 1;
+		attk->damd = 4;
+		attk->bodypart = ATKBP(ARM_DOMINANT);
+		fromlist = FALSE;
+		add_subout(subout, SUBOUT_GRACE_EXTRA);
+		remove_subout(subout, SUBOUT_XWEP);	/* allow another followup offhand attack if twoweaponing */
 	}
 
 	/* Some armor can insert attacks */
@@ -3456,6 +3515,70 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		}
 	}
 
+	/* the hero's monadic astra gives allies a monadic deva's elemental gaze */
+	if (is_null_attk(attk) && !youagr && astra_empowers(magr, AAT_MONADIC_ASTRA)
+		&& pa->mtyp != PM_MONADIC_DEVA && !check_subout(subout, SUBOUT_ASTRA_GAZE)
+	) {
+		struct attack astra_gaze = {AT_GAZE, AD_RETR, 4, 8};
+		*attk = astra_gaze;
+		attk->bodypart = attk_bodyparts(pa, attk);
+		add_subout(subout, SUBOUT_ASTRA_GAZE);
+		fromlist = FALSE;
+	}
+
+	/* the hero's surya astra gives intelligent allies a surya deva's arrows of slaying */
+	if (is_null_attk(attk) && !youagr && astra_empowers(magr, AAT_SURYA_ASTRA) && intelligent_mon(magr)
+		&& pa->mtyp != PM_SURYA_DEVA && !mtarget_adjacent(magr) && !check_subout(subout, SUBOUT_ASTRA_ARROW)
+	) {
+		struct attack astra_arrow = {AT_ARRW, AD_SURY, 1, 1};
+		*attk = astra_arrow;
+		attk->bodypart = attk_bodyparts(pa, attk);
+		add_subout(subout, SUBOUT_ASTRA_ARROW);
+		fromlist = FALSE;
+	}
+
+	/* the hero's mantle grace gives the hero and allies a mantle, unless they already have one of its type */
+	if (is_null_attk(attk) && high_grace_empowers(magr, AAT_GRACE_MANTLE)
+		&& !check_subout(subout, SUBOUT_GRACE_MANTLE)
+	) {
+		int adtyp = grace_mantle_adtyp();
+		if (!attacktype_fordmg(pa, AT_MNTL, adtyp)) {
+			struct attack grace_mantle = {AT_MNTL, adtyp, 1, 20};
+			switch (adtyp) {
+			case AD_WET:
+				grace_mantle.damn = 6;
+				grace_mantle.damd = 6;
+				break;
+			case AD_FIRE:
+				grace_mantle.damn = 2;
+				grace_mantle.damd = 6;
+				break;
+			case AD_COLD:
+				grace_mantle.damd = 8;
+				break;
+			case AD_ELEC:
+				grace_mantle.damd = 12;
+				break;
+			case AD_BLND:
+				grace_mantle.damd = 6;
+				break;
+			case AD_PYCL:
+				grace_mantle.damd = 12;
+				break;
+			case AD_HOLY:
+				grace_mantle.damd = 7;
+				break;
+			case AD_SESN:
+				grace_mantle.damd = 8;
+				break;
+			}
+			*attk = grace_mantle;
+			attk->bodypart = attk_bodyparts(pa, attk);
+			fromlist = FALSE;
+		}
+		add_subout(subout, SUBOUT_GRACE_MANTLE);
+	}
+
 	/* Player may get rot stinger attack */
 	if (youagr && is_null_attk(attk) && !by_the_book && check_rot(ROT_STING)
 		&& !check_subout(subout, SUBOUT_ROT_STING)
@@ -3688,6 +3811,13 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 		return getattk(magr, mdef, prev_res, indexnum, prev_and_buf, by_the_book, subout, tohitmod);
 	}
 
+	/* the hero's sword aura turns pets' physical melee attacks into archon fire
+	 * (deliberately also by_the_book, so the pet's listed attacks match what it makes) */
+	if (!youagr && magr->mtame && attk->adtyp == AD_PHYS && melee_contact_at(attk->aatyp)
+		&& check_mutation(AAT_SWORD_AURA) && in_beast_mastery_range(magr)
+	)
+		attk->adtyp = AD_ACFR;
+
 	/* possibly increment indexnum, if we want to move on in the monster's attack list
 	 * this is most of the time, except for when we have inserted attacks into [magr]'s chain */
 	if (fromlist) {
@@ -3799,8 +3929,8 @@ xyhitmsg(struct monst *magr, struct monst *mdef, struct attack *attk, struct obj
 	struct permonst * pd = youdef ? youracedata : mdef->data;
 	int compat;
 
-	/* AT_NONE is silent */
-	if (attk->aatyp == AT_NONE)
+	/* AT_NONE and AT_MNTL are silent */
+	if (attk->aatyp == AT_NONE || attk->aatyp == AT_MNTL)
 		return;
 
 	/* Note: if opposite gender, "seductively" */
@@ -5177,6 +5307,9 @@ int *shield_margin;
 		if (youdef ? multi < 0 : !mdef->mcanmove)
 			vdef_acc += 4;
 	}
+	/* the hero's dazzling halo protects the hero and peaceful monsters in its light */
+	if ((youdef || mdef->mpeaceful) && (check_mutation(AAT_HALO_DAZZLING) || check_mutation(AAT_FACE_DAZZLING)) && in_halo_light(mdef))
+		vdef_acc -= AASIMAR_HALO_PENALTY;
 	/* Elves hate orcs, and the devs like elves. */
 	if (magr && is_orc(pd) && is_elf(pa))
 		vdef_acc += 1;
@@ -5524,6 +5657,7 @@ xmeleehity(struct monst *magr, struct monst *mdef, struct attack *attk, struct o
 	struct obj * otmp;
 	char buf[BUFSZ];
 	int result;			/* did attack hit, miss, defender live, die, agressor die, stop? */
+	boolean mantle_blast = FALSE;	/* the defender's mantle acted on the weapon in a way that harms the attacker */
 
 	int dieroll;				/* rolled accuracy */
 	int accuracy;				/* accuracy of attack; if this is less than dieroll, the attack hits */
@@ -5566,6 +5700,8 @@ xmeleehity(struct monst *magr, struct monst *mdef, struct attack *attk, struct o
 		/* No special message, they just miss? */
 		miss = TRUE;
 	}
+	if (shield_aura_deflects(mdef) || grace_dodges(mdef))
+		miss = TRUE;
 
 	/* get accuracy of attack */
 	if (miss){
@@ -5839,8 +5975,12 @@ xmeleehity(struct monst *magr, struct monst *mdef, struct attack *attk, struct o
 	// if (youdef && uarm && uarm->oartifact && !rn2(10))
 		// touch_artifact(uarm, &youmonst, FALSE);
 
+	/* a mantle may stop the blow before it lands */
+	if ((hit || graze) && mantle_stops_blow(magr, mdef, weapon_p, vis, &mantle_blast)) {
+		result = MM_MISS;
+	}
 	/* if we hit... */
-	if (hit) {
+	else if (hit) {
 		/* DEAL THE DAMAGE */
 		long modifiers = longslash;
 		int flatdamage = -1;
@@ -5884,6 +6024,9 @@ xmeleehity(struct monst *magr, struct monst *mdef, struct attack *attk, struct o
 	else {
 		result = MM_MISS;
 	}
+	/* the mantle's effect on the weapon harms the attacker, whether or not the blow landed */
+	if (mantle_blast && !(result & MM_AGR_DIED))
+		result |= MM_MANTLE_BLAST;
 
 	/* if the attack hits, or if the creature is able to notice it was attacked (but the attack missed) it wakes up */
 	if (youdef || (hit || (!mdef->msleeping && mdef->mcanmove)))
@@ -6134,7 +6277,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 				dohitmsg = FALSE;
 			result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, dohitmsg, 0, dieroll, vis, ranged);
 			/* return early if cannot continue the attack */
-			if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
+			if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP)) return result;
 			/* then, make the elemental attack */
 			alt_attk = *attk;
 			alt_attk.aatyp = AT_NONE;
@@ -6863,7 +7006,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 		alt_attk.adtyp = AD_PHYS;
 		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, dohitmsg, dmg, dieroll, vis, ranged);
 		/* return early if cannot continue the attack */
-		if (result&(MM_DEF_DIED|MM_DEF_LSVD))
+		if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP))
 			return result;
 
 		if (can_blnd(magr, mdef, attk->aatyp, (struct obj*)0)) {
@@ -6890,7 +7033,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 		alt_attk.adtyp = AD_PHYS;
 		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, dohitmsg, dmg, dieroll, vis, ranged);
 		/* return early if cannot continue the attack */
-		if (result&(MM_DEF_DIED|MM_DEF_LSVD))
+		if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP))
 			return result;
 
 		if (notmcan && !rn2(4)) {
@@ -6914,7 +7057,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 		alt_attk.adtyp = AD_PHYS;
 		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, dohitmsg, dmg, dieroll, vis, ranged);
 		/* return early if cannot continue the attack */
-		if (result&(MM_DEF_DIED|MM_DEF_LSVD))
+		if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP))
 			return result;
 
 		if (notmcan && !rn2(4) && (youagr || !magr->mspec_used)) {
@@ -6945,7 +7088,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 		alt_attk.adtyp = AD_PHYS;
 		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, dohitmsg, dmg, dieroll, vis, ranged);
 		/* return early if cannot continue the attack */
-		if (result&(MM_DEF_DIED|MM_DEF_LSVD))
+		if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP))
 			return result;
 
 		if (notmcan && !rn2(4) && (youagr || !magr->mspec_used)) {
@@ -6983,7 +7126,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 		alt_attk.adtyp = AD_PHYS;
 		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, dohitmsg, dmg, dieroll, vis, ranged);
 		/* return early if cannot continue the attack */
-		if (result&(MM_DEF_DIED|MM_DEF_LSVD))
+		if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP))
 			return result;
 
 		if (uncancelled && !rn2(4)) {
@@ -7010,7 +7153,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 		alt_attk.adtyp = AD_PHYS;
 		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, dohitmsg, dmg, dieroll, vis, ranged);
 		/* return early if cannot continue the attack */
-		if (result&(MM_DEF_DIED|MM_DEF_LSVD))
+		if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP))
 			return result;
 
 		if (uncancelled
@@ -7051,7 +7194,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 			result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, dohitmsg, dmg, dieroll, vis, ranged);
 		}
 		/* return early if cannot continue the attack */
-		if (result&(MM_DEF_DIED|MM_DEF_LSVD))
+		if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP))
 			return result;
 		
 		if (uncancelled && !cantmove(mdef) && !rn2(3)) {
@@ -7090,7 +7233,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 		alt_attk.adtyp = AD_PHYS;
 		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, dohitmsg, dmg, dieroll, vis, ranged);
 		/* return early if cannot continue the attack */
-		if (result&(MM_DEF_DIED|MM_DEF_LSVD))
+		if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP))
 			return result;
 
 		if (uncancelled
@@ -7111,6 +7254,8 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 				(youagr ? "You" : Monnam(magr)),
 				(youagr ? "are" : "is")
 				);
+			else if (youdef && check_grace(AAT_GRACE_TRAPS))
+				You("gracefully avoid getting stuck!");
 			else
 				u.ustuck = (youagr ? mdef : youdef ? magr : u.ustuck);
 		}
@@ -7121,7 +7266,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 		alt_attk.adtyp = AD_PHYS;
 		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, dohitmsg, dmg, dieroll, vis, ranged);
 		/* return early if cannot continue the attack */
-		if (result&(MM_DEF_DIED|MM_DEF_LSVD))
+		if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP))
 			return result;
 
 		/* sometimes infect */
@@ -7149,7 +7294,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 		alt_attk.adtyp = AD_PHYS;
 		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, dohitmsg, dmg, dieroll, vis, ranged);
 		/* return early if cannot continue the attack */
-		if (result&(MM_DEF_DIED|MM_DEF_LSVD))
+		if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP))
 			return result;
 		/* polymorph? */
 		if (uncancelled
@@ -7177,7 +7322,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 		alt_attk.adtyp = AD_PHYS;
 		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, dohitmsg, 0, dieroll, vis, ranged);
 		/* return early if cannot continue the attack */
-		if (result&(MM_DEF_DIED|MM_DEF_LSVD))
+		if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP))
 			return result;
 
 		if ((uncancelled) || pa->mtyp == PM_PALE_NIGHT) {
@@ -7196,27 +7341,10 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 		alt_attk.adtyp = AD_PHYS;
 		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged);
 		/* return early if cannot continue the attack */
-		if (result&(MM_DEF_DIED|MM_DEF_LSVD))
+		if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP))
 			return result;
 		
-		if(youdef){
-			You("are covered in pollen!");
-			if(!Breathless && !nonliving(pd)){
-				You("start sneezing uncontrollably!");
-				nomul(-1, "paralyzed by an allergy fit");
-			}
-		}
-		else {
-			if(canseemon(mdef))
-				pline("%s is covered in pollen!", Monnam(mdef));
-			if(!breathless_mon(mdef) && !nonliving(mdef->data)){
-				if(canseemon(mdef))
-					pline("%s starts sneezing uncontrollably!", Monnam(mdef));
-				mdef->mcanmove = 0;
-				mdef->mfrozen = rnd(6);
-				mdef->mstrategy &= ~STRAT_WAITFORU;
-			}
-		}
+		cover_in_pollen(mdef);
 		
 		return result;
 
@@ -7911,7 +8039,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 				else {
 					result = xdamagey(magr, mdef, attk, d(amnt, 10));
 					/* return early if cannot continue the attack */
-					if (result&(MM_DEF_DIED|MM_DEF_LSVD))
+					if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP))
 						return result;
 					/* otherwise continue to finish the attack (with physical damage) */
 				}
@@ -8522,6 +8650,8 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 					(youagr ? "is" : "are")
 					);
 			}
+			else if (youdef && check_grace(AAT_GRACE_TRAPS))
+				You("gracefully slip free!");
 			else
 				u.ustuck = (youdef ? magr : youagr ? mdef : u.ustuck); /* it is now stuck to you, and you to it */
 		}
@@ -9296,7 +9426,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		/* return early if cannot continue the attack */
-		if (result&(MM_DEF_DIED|MM_DEF_LSVD))
+		if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP))
 			return result;
 
 		if (youdef) {
@@ -9371,7 +9501,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 			xyhitmsg(magr, mdef, originalattk, weapon);
 		}
 		/* return early if cannot continue the attack */
-		if (result&(MM_DEF_DIED|MM_DEF_LSVD))
+		if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP))
 			return result;
 
 		if (youdef) {
@@ -9490,7 +9620,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 		alt_attk.adtyp = AD_PHYS;
 		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, dohitmsg, dmg, dieroll, vis, ranged);
 		/* return early if cannot continue the attack */
-		if (result&(MM_DEF_DIED|MM_DEF_LSVD))
+		if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP))
 			return result;
 
 		/* youdef vs youagr vs mvm are all separate */
@@ -9570,7 +9700,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 		alt_attk.adtyp = AD_PHYS;
 		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, dohitmsg, dmg, dieroll, vis, ranged);
 		/* return early if cannot continue the attack */
-		if (result&(MM_DEF_DIED|MM_DEF_LSVD))
+		if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP))
 			return result;
 
 		/* mhitu */
@@ -9655,7 +9785,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 		alt_attk.adtyp = AD_PHYS;
 		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, dohitmsg, dmg, dieroll, vis, ranged);
 		/* return early if cannot continue the attack */
-		if (result&(MM_DEF_DIED|MM_DEF_LSVD))
+		if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP))
 			return result;
 
 		/* only works when uncancelled */
@@ -10270,6 +10400,8 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 							(youagr ? "is" : "are")
 							);
 					}
+					else if (youdef && check_grace(AAT_GRACE_TRAPS))
+						You("gracefully slip free!");
 					else
 						u.ustuck = mtmp; /* it is now stuck to you, and you to it */
 				}
@@ -10531,20 +10663,20 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 			alt_attk.aatyp = AT_NONE;
 			alt_attk.adtyp = AD_ELEC;
 			result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged);		/* elec damage */
-			if (result&(MM_DEF_DIED | MM_DEF_LSVD)) return result;
+			if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP)) return result;
 			alt_attk.adtyp = AD_FIRE;
 			result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged);		/* fire damage */
-			if (result&(MM_DEF_DIED | MM_DEF_LSVD)) return result;
+			if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP)) return result;
 			alt_attk.adtyp = AD_STUN;
 			result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, 3, dieroll, vis, ranged);		/* 3 turn stun, minor physical damage */
-			if (result&(MM_DEF_DIED | MM_DEF_LSVD)) return result;
+			if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP)) return result;
 		}
 		else {
 			/* 1-damage physical touch */
 			alt_attk.aatyp = AT_TUCH;
 			alt_attk.adtyp = AD_PHYS;
 			result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, 1, dieroll, vis, ranged);
-			if (result&(MM_DEF_DIED | MM_DEF_LSVD)) return result;
+			if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP)) return result;
 		}
 
 		/* but wait, there's more! */
@@ -10558,17 +10690,17 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 			alt_attk.aatyp = AT_NONE;
 			alt_attk.adtyp = AD_COLD;
 			result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged);		/* cold damage */
-			if (result&(MM_DEF_DIED | MM_DEF_LSVD)) return result;
+			if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP)) return result;
 			alt_attk.adtyp = AD_DRLI;
 			result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, 0, dieroll, vis, ranged);		/* level drain */
-			if (result&(MM_DEF_DIED | MM_DEF_LSVD)) return result;
+			if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP)) return result;
 		}
 		else {
 			/* 1-damage physical touch */
 			alt_attk.aatyp = AT_TUCH;
 			alt_attk.adtyp = AD_PHYS;
 			result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, 1, dieroll, vis, ranged);
-			if (result&(MM_DEF_DIED | MM_DEF_LSVD)) return result;
+			if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP)) return result;
 		}
 
 		return result;
@@ -10577,13 +10709,13 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 		/* make a physical attack */
 		alt_attk.adtyp = AD_PHYS;
 		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, dohitmsg, dmg, dieroll, vis, ranged);
-		if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
+		if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP)) return result;
 		alt_attk.aatyp = AT_NONE;
 		/* add fire damage, if not resistant */
 		if (!Fire_res(mdef)) {
 			alt_attk.adtyp = AD_FIRE;
 			result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged);
-			if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
+			if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP)) return result;
 		}
 		/* add holy damage */
 		if (hates_holy_mon(mdef)) {
@@ -10594,7 +10726,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 					);
 			}
 			result = xdamagey(magr, mdef, &alt_attk, dmg);
-			if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
+			if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP)) return result;
 		}
 
 		return result;
@@ -10603,13 +10735,13 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 		/* make a physical attack */
 		alt_attk.adtyp = AD_PHYS;
 		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, dohitmsg, dmg, dieroll, vis, ranged);
-		if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
+		if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP)) return result;
 		alt_attk.aatyp = AT_NONE;
 		/* add cold damage, if not resistant */
 		if (!Cold_res(mdef)) {
 			alt_attk.adtyp = AD_COLD;
 			result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, FALSE, dmg, dieroll, vis, ranged);
-			if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
+			if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP)) return result;
 		}
 		/* add unholy damage */
 		if (hates_unholy_mon(mdef)) {
@@ -10620,7 +10752,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 					);
 			}
 			result = xdamagey(magr, mdef, &alt_attk, dmg);
-			if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
+			if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP)) return result;
 		}
 
 		return result;
@@ -10631,7 +10763,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 		alt_attk.damn = 1;
 		alt_attk.damd = 1;
 		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, dohitmsg, dmg, dieroll, vis, ranged);
-		if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
+		if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP)) return result;
 		/* add holy damage */
 		if (youdef ? (hates_holy(pd)) : (hates_holy_mon(mdef))) {
 			if (vis) {
@@ -10657,7 +10789,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 		alt_attk.damn = 1;
 		alt_attk.damd = 1;
 		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, dohitmsg, dmg, dieroll, vis, ranged);
-		if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
+		if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP)) return result;
 		/* add unholy damage */
 		if (youdef ? (hates_unholy(pd)) : (hates_unholy_mon(mdef))) {
 			if (vis) {
@@ -10680,7 +10812,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 		alt_attk.damn = 1;
 		alt_attk.damd = 1;
 		result = xmeleehurty(magr, mdef, &alt_attk, originalattk, weapon_p, dohitmsg, dmg, dieroll, vis, ranged);
-		if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
+		if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP)) return result;
 		/* add unholy damage */
 		if (youdef ? (hates_unholy(pd) || hates_holy(pd)) : (hates_unholy_mon(mdef) || hates_holy_mon(mdef))) {
 			if (vis) {
@@ -10852,22 +10984,22 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 		return xmeleehurty(magr, mdef, &alt_attk, &alt_attk, weapon_p, dohitmsg, dmg, dieroll, vis, ranged);
 
 	case AD_SESN:
-		/* use random damage type */
+		/* use the damage type of magr's current season */
 		/* note: replaces originalattk */
-		switch(rnd(4)){
-			case 1:
+		switch(four_seasons_turn(magr)){
+			case SEASON_WINTER:
 				//Winter: Frozen
 				alt_attk.adtyp = AD_ECLD;
 			break;
-			case 2:
+			case SEASON_SPRING:
 				//Spring: Growing
 				alt_attk.adtyp = AD_SHRD;
 			break;
-			case 3:
+			case SEASON_SUMMER:
 				//Summer: 
 				alt_attk.adtyp = AD_POLN;
 			break;
-			case 4:
+			case SEASON_FALL:
 				//Fall: Withering
 				alt_attk.adtyp = AD_DRLI;
 			break;
@@ -11071,7 +11203,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 				}
 				mdef->mironmarked = TRUE;
 				result = xdamagey(magr, mdef, attk, d(rnd(5), (mlev(mdef) + 1) / 2));
-				if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
+				if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP)) return result;
 			}
 		}
 		/* 1/5 chance of radiant feathers */
@@ -11089,7 +11221,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 				}
 				mdef->mironmarked = TRUE;
 				result = xdamagey(magr, mdef, attk, d(5, mlev(mdef)));
-				if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
+				if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP)) return result;
 			}
 			/* check random "resistances" */
 			int i;
@@ -11121,7 +11253,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 				if (hurts) {
 					/* in this case, non-players arbitrarily get a spiritDsize of 5 */
 					result = xdamagey(magr, mdef, attk, rnd((extrahurts ? 2 : 1) * (youagr ? spiritDsize() : 5)));
-					if (result&(MM_DEF_DIED|MM_DEF_LSVD)) return result;
+					if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP)) return result;
 				}
 				else {
 					if (vis) {
@@ -14373,7 +14505,7 @@ int vis;
 				(haseyes(pd)) &&
 				(!(youdef ? Blind : is_blind(mdef))) &&
 				(!(youagr ? Invis : magr->minvis) || (youdef ? See_invisible(x(magr), y(magr)) : mon_resistance(mdef, SEE_INVIS))) &&
-				(youdef ? canseemon(magr) : youagr ? mon_can_see_you(mdef) : mon_can_see_mon(mdef, magr)) &&
+				(youdef ? umetgaze(magr) : youagr ? mon_can_see_you(mdef) : mon_can_see_mon(mdef, magr)) &&
 				(!(youdef ? Sleeping : mdef->msleeping)) &&
 				(!Gaze_res(mdef)) /* wearing the Eyes, nearly anything is safe to see */
 				))
@@ -16501,6 +16633,16 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 		)
 			stunning_strike = TRUE;
 	}
+	// Astral astra: every third weapon hit by an ally is a stunning strike
+	if(!recursed && weapon && valid_weapon_attack && astra_empowers(magr, AAT_ASTRAL_ASTRA)){
+		if(magr->mastral_hits < 2)
+			magr->mastral_hits++;
+		/* a natural stunning strike doesn't use up the astra's */
+		else if(!stunning_strike){
+			stunning_strike = TRUE;
+			magr->mastral_hits = 0;
+		}
+	}
 	// Whip-tricks expert weapon trait
 	if(!recursed && weapon && valid_weapon_attack && 
 		 magr && CHECK_ETRAIT(weapon, magr, ETRAIT_WHIP_TRICKS)
@@ -16521,6 +16663,11 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 		)
 			anti_undead_strike = TRUE;
 	}
+	// Monadic astra: allies' weapons strike the undead
+	if(!recursed && weapon && valid_weapon_attack && is_undead(pd) && !anti_undead_strike
+		&& astra_empowers(magr, AAT_MONADIC_ASTRA) && !rn2(4)
+	)
+		anti_undead_strike = TRUE;
 	/* monk special */
 	if (youagr && (melee || thrust) && !recursed && !Upolyd) {
 		// 100%
@@ -16679,6 +16826,22 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 		(valid_weapon_attack || invalid_weapon_attack), unarmed_punch,
 		unarmed_kick, unarmed_wing, modifier_flags,
 		eurynome_shape, eurynome_thin, &strike_obj);
+	/* the hero's precision grace adds 1 to the precision multiplier (unarmed blows count as light and one-handed) */
+	if (magr && !noanatomy(pd)
+		&& ((weapon && valid_weapon_attack) || unarmed_punch || unarmed_kick || unarmed_wing)
+	) {
+		boolean armed = (weapon && valid_weapon_attack);
+		boolean light = !armed || light_weapon_mon(weapon, magr);
+		boolean one_handed = !armed || !bimanual_mon(weapon, magr);
+		boolean precise;
+		if (attackmask == PIERCE)
+			precise = (one_handed && full_grace_empowers(magr, AAT_GRACE_PRECISION))
+				|| (light && grace_empowers(magr, AAT_GRACE_PRECISION));
+		else
+			precise = light && full_grace_empowers(magr, AAT_GRACE_PRECISION);
+		if (precise)
+			precision_mult = (precision_mult ? precision_mult : 1) + 1;
+	}
 	/* fake weapons */
 	if (attk && (
 		attk->adtyp == AD_GLSS
@@ -18429,7 +18592,7 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 						You("twirl and strike!");
 					}
 				}
-				else if(is_elf(pa) && ROLL_ETRAIT(weapon, magr, rn2(3), !rn2(3))){
+				else if((is_elf(pa) || grace_empowers(magr, AAT_GRACE_BLADES)) && ROLL_ETRAIT(weapon, magr, rn2(3), !rn2(3))){
 					tratdmg += weapon_dmg_roll(&wdice, youdef);
 					if (wizard && (iflags.wizcombatdebug & WIZCOMBATDEBUG_DMG) && WIZCOMBATDEBUG_APPLIES(magr, mdef))
 						pline("Blade dance!");
@@ -18589,6 +18752,15 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 			}
 			if(!fired && otmp->otyp == CARCOSAN_STING && otmp->ovar1_charges < 95)
 				otmp->ovar1_charges += rnd(5);
+		}
+		/* The hero's power grace duplicates the purity bonus for certain weapons, unless the weapon already gives it. */
+		if (valid_weapon_attack && weapon && magr && (melee || thrust) && !on_level(&spire_level, &u.uz)
+			&& (weapon->oclass == WEAPON_CLASS || is_weptool(weapon))
+			&& ((full_grace_empowers(magr, AAT_GRACE_POWER) && !bimanual_mon(weapon, magr))
+				|| (grace_empowers(magr, AAT_GRACE_POWER) && light_weapon_mon(weapon, magr)))
+		) {
+			if (!grants_purity_bonus(weapon, magr))
+				artidmg += basedmg*.2;
 		}
 		/* ranged weapon attacks also proc effects of the launcher */
 		if (fired && launcher && valid_weapon_attack) {
@@ -18791,6 +18963,9 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 	if (subtotl < 1)
 		subtotl = (real_attack ? 1 : 0);
 
+	/* mantles blunt some blows */
+	subtotl = mantle_blunted_dmg(magr, mdef, weapon, subtotl);
+
 	/* some attacks only deal searing damage to insubstantial creatures */
 	if (insubstantial(pd) && hits_insubstantial(magr, mdef, attk, weapon) == 1) {
 		subtotl = 0;
@@ -18921,6 +19096,7 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 			&& (subtotl > 0)
 			&& !(strike_obj && spec_applies(strike_obj, mdef, TRUE))
 			&& !(strike_obj && magr && CHECK_ETRAIT(strike_obj, magr, ETRAIT_ANTI_UNDEAD) && is_undead(mdef->data))
+			&& !(strike_obj && is_undead(mdef->data) && astra_empowers(magr, AAT_MONADIC_ASTRA))
 		) {
 			/* damage reduced by 75% */
 			subtotl /= 4;
@@ -20413,21 +20589,22 @@ struct monst * mexclude;
  * Does not include AT_BOOM effects, which are handled in mon.c for monsters.
  * SCOPECREEP: handle AT_BOOM effects for players somewhere/somehow.
  * 
- * Call with [attk] and [weapon] (if applicable) with [endofchain]=FALSE for each indiviudal attack
+ * Call with [attk] and [weapon_p] (if applicable) with [endofchain]=FALSE for each indiviudal attack
  * and then once [attk]=NULL and [endofchain]=TRUE, if there are multiple attacks being made at once
  * 
  * Call with [attk] and [endofchain=TRUE] if there is a single attack being made and retaliated against
  */
 int
-xpassivey(magr, mdef, attk, weapon, vis, result, pd, endofchain)
-struct monst * magr;		/* original attacker, being affected by the passive */
-struct monst * mdef;		/* original defender, whose passive is being proced */
-struct attack * attk;		/* attacker's attack */
-struct obj * weapon;		/* attacker's weapon */
-int vis;					/* visiblity of original attack */
-int result;					/* if attack hit / def died / agr died / agr-def moved */
-struct permonst * pd;		/* defender's pd; cannot use mdef->data when player rehumanizes */
-boolean endofchain;			/* if the attacker has finished their attack chain */
+xpassivey(
+struct monst * magr,		/* original attacker, being affected by the passive */
+struct monst * mdef,		/* original defender, whose passive is being proced */
+struct attack * attk,		/* attacker's attack */
+struct obj ** weapon_p,		/* pointer to attacker's weapon (may be null); nulled if a passive destroys it */
+int vis,					/* visiblity of original attack */
+int result,					/* if attack hit / def died / agr died / agr-def moved */
+struct permonst * pd,		/* defender's pd; cannot use mdef->data when player rehumanizes */
+boolean endofchain,			/* if the attacker has finished their attack chain */
+boolean * leaf_drained)		/* set once a leaf mantle has drained the attacker's life force during its attack chain (may be null) */
 {
 	int i;					/* loop counter */
 	int newres;
@@ -20513,7 +20690,7 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 		/* get next attack */
 		passive = getattk(mdef, magr, res, &indexnum, &prev_attk, FALSE, subout, &tohitmod);
 		/* if we don't have a passive attack, continue */
-		if (is_null_attk(passive) || passive->aatyp != AT_NONE)
+		if (is_null_attk(passive) || (passive->aatyp != AT_NONE && passive->aatyp != AT_MNTL))
 			continue;
 
 		/* Only make noise about the lillend mask if applicable */
@@ -20523,7 +20700,7 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 			pline("%s uses a %s mask!", Monnam(mdef), pd->mname);
 		}
 		/* do the passive */
-		res[0] = xpassivehity(magr, mdef, passive, attk, weapon, vis, result, pd, endofchain);
+		res[0] = xpassivehity(magr, mdef, passive, attk, weapon_p, vis, result, pd, endofchain, leaf_drained);
 		result |= res[0];
 
 	} while (!(
@@ -20774,17 +20951,19 @@ boolean endofchain;			/* if the attacker has finished their attack chain */
 
 
 int
-xpassivehity(magr, mdef, passive, attk, weapon, vis, result, pd, endofchain)
-struct monst * magr;		/* original attacker, being affected by the passive */
-struct monst * mdef;		/* original defender, whose passive is being proced */
-struct attack * passive;	/* defender's passive being used */
-struct attack * attk;		/* attacker's attack */
-struct obj * weapon;		/* attacker's weapon */
-int vis;					/* visiblity of original attack */
-int result;					/* if attack hit / def died / agr died / agr-def moved */
-struct permonst * pd;		/* defender's pd; cannot use mdef->data when player rehumanizes */
-boolean endofchain;			/* if the passive is occuring at the end of aggressor's attack chain */
+xpassivehity(
+struct monst * magr,		/* original attacker, being affected by the passive */
+struct monst * mdef,		/* original defender, whose passive is being proced */
+struct attack * passive,	/* defender's passive being used */
+struct attack * attk,		/* attacker's attack */
+struct obj ** weapon_p,		/* pointer to attacker's weapon (may be null); nulled if the passive destroys it */
+int vis,					/* visiblity of original attack */
+int result,					/* if attack hit / def died / agr died / agr-def moved */
+struct permonst * pd,		/* defender's pd; cannot use mdef->data when player rehumanizes */
+boolean endofchain,			/* if the passive is occuring at the end of aggressor's attack chain */
+boolean * leaf_drained)		/* set once a leaf mantle has drained the attacker's life force during its attack chain (may be null) */
 {
+	struct obj * weapon = (weapon_p ? *weapon_p : (struct obj *)0);	/* attacker's weapon */
 	int newres;
 	int dmg;
 	struct monst * mtmp = (struct monst *)0;
@@ -20822,6 +21001,10 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 		dmg = d(mlev(mdef)/3 + 1, passive->damd);
 	else
 		dmg = 0;
+
+	/* mantles have their own effects */
+	if (passive->aatyp == AT_MNTL)
+		return xmantlehity(magr, mdef, passive, attk, weapon_p, vis, result, dmg, leaf_drained);
 
 	/* These passives specifically happen per attack. */
 	/* necessary for passives that interact with [attk] */
@@ -21629,6 +21812,1115 @@ boolean endofchain;			/* if the passive is occuring at the end of aggressor's at
 	return result;
 }
 
+/* Destroy one of the object in *weapon_p, with which magr (which may be null)
+ * struck mdef's mantle, wherever it is (wielded, carried, or in flight), with
+ * the message "<object> <verb> <how>!" (e.g. "crumble", "to stardust").
+ * *weapon_p is nulled if the whole object is gone.
+ */
+STATIC_OVL void
+mantle_destroys_weapon(struct monst * magr, struct monst * mdef, struct obj ** weapon_p, const char * verb, const char * how)
+{
+	struct obj * weapon = *weapon_p;
+	boolean dealloc = (weapon->quan == 1L || weapon->where == OBJ_FREE);
+	char buf[BUFSZ];
+
+	Strcpy(buf, makesingular(xname(weapon)));
+	if (magr == &youmonst)
+		Your("%s %s %s!", buf, vtense(buf, verb), how);
+	else if (mdef == &youmonst)
+		pline("%s %s %s %s against your mantle!",
+			magr ? s_suffix(Monnam(magr)) : "The", buf, vtense(buf, verb), how);
+	else if (canseemon(mdef))
+		pline("%s %s %s %s!",
+			magr ? s_suffix(Monnam(magr)) : "The", buf, vtense(buf, verb), how);
+
+	switch (weapon->where) {
+	case OBJ_FREE:
+		obfree(weapon, (struct obj *)0);
+		break;
+	case OBJ_INVENT:
+		if (dealloc) {
+			if (weapon == uwep)
+				uwepgone();
+			else if (weapon == uswapwep)
+				uswapwepgone();
+		}
+		useup(weapon);
+		break;
+	case OBJ_MINVENT:
+		if (dealloc)
+			setmnotwielded(weapon->ocarry, weapon);
+		m_useup(weapon->ocarry, weapon);
+		break;
+	default:
+		impossible("mantle destroying weapon from where? (%d)", weapon->where);
+		dealloc = FALSE;
+		break;
+	}
+	if (dealloc)
+		*weapon_p = (struct obj *)0;
+}
+
+/* Return TRUE if obj is magical enough to pierce a mantle rather than be
+ * destroyed by it.
+ */
+STATIC_OVL boolean
+pierces_mantle(struct obj * obj)
+{
+	if (obj->oartifact || !check_oprop(obj, OPROP_NONE))
+		return TRUE;
+	if (obj->oclass == WEAPON_CLASS || is_weptool(obj))
+		return (obj->spe > 0);
+	return objects[obj->otyp].oc_magic;
+}
+
+/* Return TRUE if a mantle of silver stars or an aurora mantle stops the blow
+ * struck at it with the object in *weapon_p (by magr, which may be null),
+ * nulling *weapon_p if the whole object is gone. remains says what a destroyed
+ * object crumbles into.
+ */
+STATIC_OVL boolean
+star_mantle_stops(struct monst * magr, struct monst * mdef, struct obj ** weapon_p, int vis, const char * remains)
+{
+	struct obj * weapon = *weapon_p;
+
+	if (!pierces_mantle(weapon)) {
+		mantle_destroys_weapon(magr, mdef, weapon_p, "crumble", remains);
+		return TRUE;
+	}
+	if (!weapon->oartifact && (weapon->oclass == WEAPON_CLASS || is_weptool(weapon)) && weapon->spe > 0) {
+		if (drain_item(weapon)) {
+			if (magr == &youmonst)
+				Your("%s less effective.", aobjnam(weapon, "seem"));
+			else if (vis)
+				pline("%s %s less effective.", The(xname(weapon)), otense(weapon, "seem"));
+		}
+	}
+	return FALSE;
+}
+
+/* Return TRUE if a water mantle stops the blow struck at it with the object in
+ * *weapon_p (by magr, which may be null), nulling *weapon_p if the whole object
+ * is gone.
+ */
+STATIC_OVL boolean
+water_mantle_stops(struct monst * magr, struct monst * mdef, struct obj ** weapon_p, int vis)
+{
+	struct obj * weapon = *weapon_p;
+	struct monst * owner = (weapon->where == OBJ_INVENT) ? &youmonst
+		: (weapon->where == OBJ_MINVENT) ? weapon->ocarry : (struct monst *)0;
+
+	/* grease protects an object from the water, but may be washed away */
+	if (weapon->greased) {
+		grease_protect(weapon, (char *)0, owner);
+		return FALSE;
+	}
+	if (is_rustprone(weapon) && !weapon->oerodeproof) {
+		/* fully rusted objects no longer pierce it, unless they're artifacts or have object properties */
+		if (!pierces_mantle(weapon)
+			|| (weapon->oeroded >= MAX_ERODE && !weapon->oartifact && check_oprop(weapon, OPROP_NONE))
+		) {
+			mantle_destroys_weapon(magr, mdef, weapon_p, "rust", "away");
+			return TRUE;
+		}
+		erode_obj(weapon, FALSE, FALSE);
+	}
+	else if (weapon->oclass == SCROLL_CLASS || weapon->oclass == SPBOOK_CLASS || weapon->oclass == POTION_CLASS) {
+		if (weapon->oclass != POTION_CLASS && !pierces_mantle(weapon)) {
+			mantle_destroys_weapon(magr, mdef, weapon_p, "dissolve", "away");
+			return TRUE;
+		}
+		if (magr == &youmonst)
+			Your("%s soaked.", aobjnam(weapon, "get"));
+		else if (vis)
+			pline("%s %s soaked.", The(xname(weapon)), otense(weapon, "get"));
+		if (water_damage_obj(weapon, TRUE, 0, owner)) {
+			*weapon_p = (struct obj *)0;
+			return TRUE;
+		}
+	}
+	/* and washes coatings off whatever pierces it */
+	wash_poisons(weapon, magr == &youmonst, FALSE);
+	return FALSE;
+}
+
+/* Return TRUE if a fire mantle stops the blow struck at it with the object in
+ * *weapon_p (by magr, which may be null), nulling *weapon_p if the whole object
+ * is gone. Sets *blast (if blast is non-null) when the mantle's effect on the
+ * object harms the attacker.
+ */
+STATIC_OVL boolean
+fire_mantle_stops(struct monst * magr, struct monst * mdef, struct obj ** weapon_p, int vis, boolean * blast)
+{
+	struct obj * weapon = *weapon_p;
+
+	if (weapon->oclass == SCROLL_CLASS || weapon->oclass == SPBOOK_CLASS || weapon->oclass == POTION_CLASS) {
+		/* papers and oil burst into flame; other potions just boil */
+		boolean burns = (weapon->oclass != POTION_CLASS || weapon->otyp == POT_OIL);
+		/* fire_damage() only reports TRUE for these when it destroys them */
+		if (fire_damage(weapon, TRUE, x(mdef), y(mdef))) {
+			*weapon_p = (struct obj *)0;
+			if (blast && burns)
+				*blast = TRUE;
+			return TRUE;
+		}
+		return FALSE;
+	}
+	if (!is_flammable(weapon) || weapon->oerodeproof)
+		return FALSE;
+	/* non-magical objects burst into flame, and fully burnt ones no longer pierce
+	 * it, unless they're artifacts or have object properties */
+	if (!pierces_mantle(weapon)) {
+		mantle_destroys_weapon(magr, mdef, weapon_p, "burst", "into flame");
+		if (blast)
+			*blast = TRUE;
+		return TRUE;
+	}
+	if (weapon->oeroded >= MAX_ERODE && !weapon->oartifact && check_oprop(weapon, OPROP_NONE)) {
+		mantle_destroys_weapon(magr, mdef, weapon_p, "burn", "to ashes");
+		return TRUE;
+	}
+	if (weapon->oeroded < MAX_ERODE && !(weapon->blessed && rnl(100) < 25)) {
+		weapon->oeroded++;
+		if (magr == &youmonst)
+			Your("%s %s%s!", xname(weapon), otense(weapon, "burn"),
+				weapon->oeroded == MAX_ERODE ? " completely" : weapon->oeroded > 1 ? " further" : "");
+		else if (vis)
+			pline("%s %s%s!", The(xname(weapon)), otense(weapon, "burn"),
+				weapon->oeroded == MAX_ERODE ? " completely" : weapon->oeroded > 1 ? " further" : "");
+	}
+	return FALSE;
+}
+
+/* Return TRUE if a cold mantle stops the blow struck at it with the object in
+ * *weapon_p (by magr, which may be null), nulling *weapon_p if the whole object
+ * is gone. Sets *blast (if blast is non-null) when the mantle's effect on the
+ * object harms the attacker.
+ */
+STATIC_OVL boolean
+cold_mantle_stops(struct monst * magr, struct monst * mdef, struct obj ** weapon_p, int vis, boolean * blast)
+{
+	struct obj * weapon = *weapon_p;
+
+	if (weapon->oclass == POTION_CLASS) {
+		if (weapon->otyp == POT_OIL || weapon->oerodeproof || weapon->oartifact)
+			return FALSE;
+		mantle_destroys_weapon(magr, mdef, weapon_p, "shatter", "into frozen shards");
+		if (blast)
+			*blast = TRUE;
+		return TRUE;
+	}
+	if ((weapon->oclass == WEAPON_CLASS || is_weptool(weapon))
+		&& !is_hard(weapon) && !hard_mat(objects[weapon->otyp].oc_material)
+		&& !weapon->oartifact && check_oprop(weapon, OPROP_NONE)
+	) {
+		mantle_destroys_weapon(magr, mdef, weapon_p, "shatter", "into frozen shards");
+		return TRUE;
+	}
+	return FALSE;
+}
+
+/* Return TRUE if an electric mantle stops the blow struck at it with the object
+ * in *weapon_p (by magr, which may be null), nulling *weapon_p if the whole
+ * object is gone. Sets *blast (if blast is non-null) when the mantle's effect
+ * on the object harms the attacker.
+ */
+STATIC_OVL boolean
+elec_mantle_stops(struct monst * magr, struct monst * mdef, struct obj ** weapon_p, int vis, boolean * blast)
+{
+	struct obj * weapon = *weapon_p;
+
+	if (weapon->oclass == WAND_CLASS) {
+		if (weapon->otyp == WAN_LIGHTNING || weapon->spe <= 0 || weapon->oartifact)
+			return FALSE;
+		weapon->spe--;
+		if (magr == &youmonst)
+			Your("%s a spray of sparks!", aobjnam(weapon, "shoot"));
+		else if (vis)
+			pline("%s %s a spray of sparks!", The(xname(weapon)), otense(weapon, "shoot"));
+		if (blast)
+			*blast = TRUE;
+		return FALSE;
+	}
+	if ((weapon->oclass == WEAPON_CLASS || is_weptool(weapon)) && pierces_mantle(weapon) && !rn2(10)) {
+		if (!weapon->oartifact && check_oprop(weapon, OPROP_NONE) && weapon->spe < rnd(3)) {
+			mantle_destroys_weapon(magr, mdef, weapon_p, "explode", "in a shower of sparks");
+			if (blast)
+				*blast = TRUE;
+			return TRUE;
+		}
+		if (weapon->spe <= 0)
+			return FALSE;
+		if (blast)
+			*blast = TRUE;
+		costly_cancel(weapon);
+		weapon->spe--;
+		if (magr == &youmonst)
+			Your("%s in a spray of sparks!", aobjnam(weapon, "discharge"));
+		else if (vis)
+			pline("%s %s in a spray of sparks!", The(xname(weapon)), otense(weapon, "discharge"));
+	}
+	return FALSE;
+}
+
+/* Return the season (SEASON_WINTER, _SPRING, _SUMMER or _FALL) that mon's
+ * four-seasons nature presents this move. It changes at random every move, but
+ * is fixed within a move, so everything that consults it during one move agrees.
+ */
+STATIC_OVL int
+four_seasons_turn(struct monst * mon)
+{
+	unsigned long int hashed = hash((unsigned long) (monstermoves + hash(AD_SESN + mon->m_id)));
+	return (int)(hashed%4);
+}
+
+/* Cover mon in pollen. Returns TRUE if it started sneezing (and is paralyzed). */
+STATIC_OVL boolean
+cover_in_pollen(struct monst * mon)
+{
+	if(mon == &youmonst){
+		You("are covered in pollen!");
+		if(!Breathless && !nonliving(youracedata)){
+			You("start sneezing uncontrollably!");
+			nomul(-1, "paralyzed by an allergy fit");
+			return TRUE;
+		}
+	}
+	else {
+		if(canseemon(mon))
+			pline("%s is covered in pollen!", Monnam(mon));
+		if(!breathless_mon(mon) && !nonliving(mon->data)){
+			if(canseemon(mon))
+				pline("%s starts sneezing uncontrollably!", Monnam(mon));
+			mon->mcanmove = 0;
+			mon->mfrozen = rnd(6);
+			mon->mstrategy &= ~STRAT_WAITFORU;
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+/* Return TRUE if magr's (which may be null) blow with weapon (null for a
+ * weaponless blow) seeks its target.
+ */
+STATIC_OVL boolean
+seeking_blow(struct monst * magr, struct obj * weapon)
+{
+	struct obj * shield;
+
+	if (weapon && weapon->oartifact && arti_worn_prop(weapon, ARTP_SEEK))
+		return TRUE;
+	if (magr) {
+		shield = (magr == &youmonst) ? uarms : which_armor(magr, W_ARMS);
+		if (shield && shield->oartifact && arti_worn_prop(shield, ARTP_SEEK))
+			return TRUE;
+	}
+	return FALSE;
+}
+
+/* Return TRUE if magr (which may be null), striking at mdef with weapon (null
+ * for a weaponless blow), can make mdef out through an obscuring mantle.
+ */
+STATIC_OVL boolean
+sees_through_mantle(struct monst * magr, struct monst * mdef, struct obj * weapon)
+{
+	if (seeking_blow(magr, weapon))
+		return TRUE;
+	if (magr == &youmonst && mdef != &youmonst
+		&& (see_with_omnisense(mdef)
+			|| (!Blind && xrayrange() > 0 && within_vision_circle(u.ux, u.uy, x(mdef), y(mdef), xrayrange())))
+	)
+		return TRUE;
+	/* monsters' x-ray vision has the hero's base range */
+	if (magr && magr != &youmonst
+		&& (mon_sees_with_omnisense(magr, mdef)
+			|| (!is_blind(magr) && mon_resistance(magr, XRAY_VISION)
+				&& within_vision_circle(x(magr), y(magr), x(mdef), y(mdef), 3)))
+	)
+		return TRUE;
+	return FALSE;
+}
+
+/* Print that magr (which may be null) lost sight of mdef in the stuff (such as
+ * "swirling dust") of mdef's mantle.
+ */
+STATIC_OVL void
+lose_sight_in_mantle(struct monst * magr, struct monst * mdef, int vis, const char * stuff)
+{
+	if (magr == &youmonst)
+		You("lose sight of %s in the %s!", mon_nam(mdef), stuff);
+	else if (magr && mdef == &youmonst)
+		pline("%s loses sight of you in your %s!", Monnam(magr), stuff);
+	else if (magr && vis)
+		pline("%s loses sight of %s in the %s!", Monnam(magr), mon_nam(mdef), stuff);
+}
+
+/* Return TRUE if a dust or leaf mantle (full of stuff, such as "swirling dust")
+ * hides mdef so the blow struck with the object in *weapon_p (by magr, which
+ * may be null) goes astray. The object is never harmed.
+ */
+STATIC_OVL boolean
+dust_mantle_stops(struct monst * magr, struct monst * mdef, struct obj ** weapon_p, int vis, const char * stuff)
+{
+	if (sees_through_mantle(magr, mdef, *weapon_p) || rn2(2))
+		return FALSE;
+	lose_sight_in_mantle(magr, mdef, vis, stuff);
+	return TRUE;
+}
+
+/* Return TRUE if an ash mantle hides mdef so magr's (which may be null) blow
+ * with weapon (null for a weaponless blow) goes astray.
+ */
+STATIC_OVL boolean
+ash_mantle_stops(struct monst * magr, struct monst * mdef, struct obj * weapon, int vis)
+{
+	if (sees_through_mantle(magr, mdef, weapon) || !rn2(3))
+		return FALSE;
+	lose_sight_in_mantle(magr, mdef, vis, "swirling ash");
+	return TRUE;
+}
+
+/* Return TRUE if a mantle of springy new growth turns aside the blow struck at
+ * it with weapon by magr (which may be null).
+ */
+STATIC_OVL boolean
+growth_mantle_stops(struct monst * magr, struct monst * mdef, struct obj * weapon, int vis)
+{
+	char what[BUFSZ];
+
+	if (!(attack_mask(weapon, 0, 0, magr) & WHACK))
+		return FALSE;
+	/* projectiles are named; held weapons are the attacker's blow */
+	if (weapon->where == OBJ_FREE)
+		Strcpy(what, the(xname(weapon)));
+	else if (magr == &youmonst)
+		Strcpy(what, "your blow");
+	else if (magr)
+		Sprintf(what, "%s blow", s_suffix(mon_nam(magr)));
+	else
+		Strcpy(what, "the blow");
+	if (mdef == &youmonst)
+		pline("The springy new growth of your mantle turns aside %s!", what);
+	else if (vis || magr == &youmonst)
+		pline("The springy new growth of %s mantle turns aside %s!", s_suffix(mon_nam(mdef)), what);
+	return TRUE;
+}
+
+/* Return TRUE if a foliage mantle hides mdef so magr's (which may be null) blow
+ * with weapon (null for a weaponless blow) goes astray.
+ */
+STATIC_OVL boolean
+foliage_mantle_stops(struct monst * magr, struct monst * mdef, struct obj * weapon, int vis)
+{
+	if (sees_through_mantle(magr, mdef, weapon) || rn2(2))
+		return FALSE;
+	lose_sight_in_mantle(magr, mdef, vis, "summer foliage");
+	return TRUE;
+}
+
+/* Return TRUE if the winds of mdef's mantle (named mantle, such as "dust
+ * mantle") knock magr's weaponless blow off course.
+ */
+STATIC_OVL boolean
+dust_mantle_buffets(struct monst * magr, struct monst * mdef, int vis, const char * mantle)
+{
+	static const int mantle_weights[] = { 0, WT_TINY, WT_SMALL, WT_MEDIUM, WT_LARGE, WT_HUGE };
+	int wt = (magr == &youmonst) ? youracedata->cwt : magr->data->cwt;
+	int roll, upper, lower;
+
+	/* weightless attackers and those heavier than WT_HUGE always get through */
+	if (wt == 0 || wt > WT_HUGE)
+		return FALSE;
+	/* a 0 always stops the blow; otherwise the roll picks a weight class, which magr
+	 * passes if it's at least that heavy, or by chance in proportion to how far its
+	 * weight lies above the class below */
+	roll = rn2(MWT_HUGE + 1);
+	if (roll >= MWT_TINY) {
+		upper = mantle_weights[roll];
+		lower = mantle_weights[roll - 1];
+		if (upper <= wt)
+			return FALSE;
+		if (lower < wt && rn2(upper - lower) < wt - lower)
+			return FALSE;
+	}
+	if (magr == &youmonst)
+		You("are buffeted off course by %s %s!", s_suffix(mon_nam(mdef)), mantle);
+	else if (mdef == &youmonst)
+		pline("%s is buffeted off course by your %s!", Monnam(magr), mantle);
+	else if (vis)
+		pline("%s is buffeted off course by %s %s!", Monnam(magr), s_suffix(mon_nam(mdef)), mantle);
+	return TRUE;
+}
+
+/* Drain obj, which magr (which may be null) struck through mdef's leaf mantle
+ * with.
+ */
+STATIC_OVL void
+leaf_mantle_drains(struct monst * magr, struct monst * mdef, struct obj * obj, int vis)
+{
+	boolean seen = (obj->where == OBJ_INVENT || magr == &youmonst || mdef == &youmonst || vis);
+
+	if (obj->oclass == WEAPON_CLASS || is_weptool(obj)) {
+		if (!drain_item(obj))
+			return;
+	}
+	else {
+		if (obj_resists(obj, 10, 90))
+			return;
+		cancel_item(obj);
+		if (carried(obj))
+			update_inventory();
+	}
+	if (seen)
+		pline("%s %s drained by the withering leaves!", The(xname(obj)), otense(obj, "are"));
+}
+
+/* Return TRUE if a dust or leaf mantle slightly blunts magr's (which may be
+ * null) blow with weapon (null for a weaponless blow).
+ */
+STATIC_OVL boolean
+dust_mantle_blunts(struct monst * magr, struct obj * weapon)
+{
+	int wt;
+
+	if (weapon)
+		return (materials[weapon->obj_material].density < materials[MITHRIL].density);
+	if (!magr)
+		return FALSE;
+	wt = (magr == &youmonst) ? youracedata->cwt : magr->data->cwt;
+	return (wt > 0 && wt <= WT_HUGE);
+}
+
+/* Return the damage dmg that an elemental mantle of damage type adtyp deals to
+ * mon: none if mon resists the element, and half again as much if mon is
+ * vulnerable to it.
+ */
+STATIC_OVL int
+mantle_elemental_dmg(struct monst * mon, int adtyp, int dmg)
+{
+	switch (adtyp) {
+	case AD_FIRE:
+		if (Fire_res(mon))
+			return 0;
+		if (fire_vulnerable(mon))
+			dmg = dmg * 3 / 2;
+		break;
+	case AD_COLD:
+		if (Cold_res(mon))
+			return 0;
+		if (cold_vulnerable(mon))
+			dmg = dmg * 3 / 2;
+		break;
+	case AD_ELEC:
+		if (Shock_res(mon))
+			return 0;
+		if (shock_vulnerable(mon))
+			dmg = dmg * 3 / 2;
+		break;
+	}
+	return dmg;
+}
+
+/* Return TRUE if mon resists the holy form of damage type adtyp (AD_FIRE,
+ * AD_COLD, or AD_ELEC); FALSE for any other damage type.
+ */
+STATIC_OVL boolean
+resists_holy_element(struct monst * mon, int adtyp)
+{
+	int prop;
+
+	switch (adtyp) {
+	case AD_FIRE:
+		if (mon == &youmonst)
+			return BaseHolyFire_resistance;
+		prop = HOLY_FIRE_RES;
+		break;
+	case AD_COLD:
+		if (mon == &youmonst)
+			return BaseHolyCold_resistance;
+		prop = HOLY_COLD_RES;
+		break;
+	case AD_ELEC:
+		if (mon == &youmonst)
+			return BaseHolyShock_resistance;
+		prop = HOLY_SHOCK_RES;
+		break;
+	default:
+		return FALSE;
+	}
+	return mon_resistance(mon, prop);
+}
+
+/* Return the damage dmg of a blow struck at mdef by magr (which may be null)
+ * with weapon (null for a weaponless blow), after mdef's mantles blunt it.
+ * Blunting from different mantles stacks.
+ */
+STATIC_OVL int
+mantle_blunted_dmg(struct monst * magr, struct monst * mdef, struct obj * weapon, int dmg)
+{
+	if (dmg > 0 && !weapon && (
+		(mon_has_mantle(mdef, AD_FIRE) && !(magr && resists_holy_element(magr, AD_FIRE)))
+		|| (mon_has_mantle(mdef, AD_COLD) && !(magr && resists_holy_element(magr, AD_COLD)))
+		|| (mon_has_mantle(mdef, AD_ELEC) && !(magr && resists_holy_element(magr, AD_ELEC)))
+	))
+		dmg /= 2;
+	if (dmg > 0 && weapon && !weapon->oartifact && mon_has_mantle(mdef, AD_COLD))
+		dmg /= 2;
+	if (dmg > 0 && weapon && is_metallic(weapon) && mon_has_mantle(mdef, AD_ELEC))
+		dmg /= 2;
+	if (dmg > 0 && (!weapon || materials[weapon->obj_material].density < materials[MITHRIL].density)
+		&& mon_has_mantle(mdef, AD_WET)
+	)
+		dmg /= 2;
+	if (dmg > 0 && !(weapon && (weapon->oclass == WEAPON_CLASS || is_weptool(weapon)))
+		&& mon_has_mantle(mdef, AD_STAR)
+	)
+		dmg /= 2;
+	if (dmg > 0 && !(weapon && (weapon->oclass == WEAPON_CLASS || is_weptool(weapon)))
+		&& mon_has_mantle(mdef, AD_HOLY)
+	)
+		dmg /= 2;
+	if (dmg > 0 && mon_has_mantle(mdef, AD_BLND) && dust_mantle_blunts(magr, weapon))
+		dmg = dmg * 9 / 10;
+	if (dmg > 0 && mon_has_mantle(mdef, AD_DRLI) && dust_mantle_blunts(magr, weapon))
+		dmg = dmg * 9 / 10;
+	if (dmg > 0 && mon_has_mantle(mdef, AD_PYCL) && !seeking_blow(magr, weapon))
+		dmg /= 2;
+	if (dmg > 0 && weapon && (attack_mask(weapon, 0, 0, magr) & SLASH) && mon_has_mantle(mdef, AD_POLN))
+		dmg /= 2;
+	if (dmg > 0 && !(weapon && (attack_mask(weapon, 0, 0, magr) & PIERCE)) && mon_has_mantle(mdef, AD_SESN))
+		dmg /= 2;
+	return dmg;
+}
+
+/* Return TRUE if mdef's mantle stops the blow struck at it with the object in
+ * *weapon_p (by magr, which may be null; *weapon_p null for a weaponless blow)
+ * before it lands, nulling *weapon_p if the mantle destroys the whole object.
+ * If blast is non-null, *blast is set when the mantle's effect on the object
+ * harms the attacker, and cleared otherwise.
+ */
+boolean
+mantle_stops_blow(struct monst * magr, struct monst * mdef, struct obj ** weapon_p, int vis, boolean * blast)
+{
+	struct monst * owner;
+
+	if (blast)
+		*blast = FALSE;
+	/* weaponless blows can only be lost in an ash or foliage mantle or knocked off course by a dust or leaf mantle's winds */
+	if (!weapon_p || !*weapon_p)
+		return (magr && ((mon_has_mantle(mdef, AD_PYCL) && ash_mantle_stops(magr, mdef, (struct obj *)0, vis))
+			|| (mon_has_mantle(mdef, AD_POLN) && foliage_mantle_stops(magr, mdef, (struct obj *)0, vis))
+			|| (mon_has_mantle(mdef, AD_BLND) && dust_mantle_buffets(magr, mdef, vis, "dust mantle"))
+			|| (mon_has_mantle(mdef, AD_DRLI) && dust_mantle_buffets(magr, mdef, vis, "mantle of autumn leaves"))));
+	/* springy new growth turns aside whatever can whack */
+	if (mon_has_mantle(mdef, AD_SESN) && growth_mantle_stops(magr, mdef, *weapon_p, vis))
+		return TRUE;
+	if (mon_has_mantle(mdef, AD_PYCL)) {
+		/* swinging a weapon through the ash stirs it up into the attacker's face half the time */
+		if (blast && (*weapon_p)->where != OBJ_FREE && !rn2(2))
+			*blast = TRUE;
+		/* and the ash hides the defender whatever the object is */
+		if (ash_mantle_stops(magr, mdef, *weapon_p, vis))
+			return TRUE;
+	}
+	if (mon_has_mantle(mdef, AD_BLND)) {
+		/* swinging a weapon through the dust stirs it up into the attacker's face half the time */
+		if (blast && (*weapon_p)->where != OBJ_FREE && !rn2(2))
+			*blast = TRUE;
+		/* and the dust hides the defender whatever the object is */
+		if (dust_mantle_stops(magr, mdef, weapon_p, vis, "swirling dust"))
+			return TRUE;
+	}
+	/* blowing leaves hide the defender too, but never blast */
+	if (mon_has_mantle(mdef, AD_DRLI) && dust_mantle_stops(magr, mdef, weapon_p, vis, "blowing leaves"))
+		return TRUE;
+	if (mon_has_mantle(mdef, AD_POLN)) {
+		/* swinging a weapon through the foliage shakes pollen loose onto the attacker one time in ten */
+		if (blast && (*weapon_p)->where != OBJ_FREE && !rn2(10))
+			*blast = TRUE;
+		/* and the foliage hides the defender whatever the object is */
+		if (foliage_mantle_stops(magr, mdef, *weapon_p, vis))
+			return TRUE;
+	}
+	/* objects in flight belong to whoever threw them */
+	owner = ((*weapon_p)->where == OBJ_INVENT) ? &youmonst
+		: ((*weapon_p)->where == OBJ_MINVENT) ? (*weapon_p)->ocarry : magr;
+	if (owner && ProtectItems(owner))
+		return FALSE;
+	if (mon_has_mantle(mdef, AD_STAR) && star_mantle_stops(magr, mdef, weapon_p, vis, "to stardust"))
+		return TRUE;
+	if (*weapon_p && mon_has_mantle(mdef, AD_HOLY) && star_mantle_stops(magr, mdef, weapon_p, vis, "to faint curtains of rainbow light"))
+		return TRUE;
+	if (*weapon_p && mon_has_mantle(mdef, AD_WET) && water_mantle_stops(magr, mdef, weapon_p, vis))
+		return TRUE;
+	if (*weapon_p && mon_has_mantle(mdef, AD_FIRE) && fire_mantle_stops(magr, mdef, weapon_p, vis, blast))
+		return TRUE;
+	if (*weapon_p && mon_has_mantle(mdef, AD_COLD) && cold_mantle_stops(magr, mdef, weapon_p, vis, blast))
+		return TRUE;
+	if (*weapon_p && mon_has_mantle(mdef, AD_ELEC) && elec_mantle_stops(magr, mdef, weapon_p, vis, blast))
+		return TRUE;
+	/* what gets through the withering leaves is drained */
+	if (*weapon_p && mon_has_mantle(mdef, AD_DRLI))
+		leaf_mantle_drains(magr, mdef, *weapon_p, vis);
+	return FALSE;
+}
+
+/* Return TRUE if mon is harmed by being drenched with water (like a rust trap
+ * would harm it) and isn't waterproof.
+ */
+STATIC_OVL boolean
+hurt_by_water(struct monst * mon)
+{
+	struct permonst * ptr = (mon == &youmonst) ? youracedata : mon->data;
+
+	if (mon == &youmonst ? Waterproof : mon_resistance(mon, WATERPROOF))
+		return FALSE;
+	return (is_iron(ptr) || ptr->mtyp == PM_FLAMING_SPHERE);
+}
+
+/* Return the mantle damage type that a four-seasons mantle acts as in season
+ * (SEASON_WINTER, _SPRING, _SUMMER or _FALL).
+ */
+int
+mantle_adtyp_for_season(int season)
+{
+	switch (season) {
+	case SEASON_WINTER:
+		return AD_COLD;
+	case SEASON_SPRING:
+		return AD_SESN;
+	case SEASON_SUMMER:
+		return AD_POLN;
+	case SEASON_FALL:
+		return AD_DRLI;
+	}
+	return AD_ANY;
+}
+
+/* Return the mantle damage type that mon's four-seasons mantle acts as this move. */
+STATIC_OVL int
+seasons_mantle_adtyp(struct monst * mon)
+{
+	return mantle_adtyp_for_season(four_seasons_turn(mon));
+}
+
+/* Return TRUE if mon has a mantle attack of damage type adtyp, including one
+ * granted by the hero's mantle grace.
+ */
+STATIC_OVL boolean
+has_mantle_attack(struct monst * mon, int adtyp)
+{
+	struct permonst * ptr = (mon == &youmonst) ? youracedata : mon->data;
+
+	if (attacktype_fordmg(ptr, AT_MNTL, adtyp) != (struct attack *)0)
+		return TRUE;
+	return (high_grace_empowers(mon, AAT_GRACE_MANTLE) && grace_mantle_adtyp() == adtyp);
+}
+
+/* Return TRUE if mon has a mantle that acts as a mantle of damage type adtyp
+ * this move, including a four-seasons mantle whose current season acts as that
+ * type.
+ */
+boolean
+mon_has_mantle(struct monst * mon, int adtyp)
+{
+	if (adtyp != AD_SESN && has_mantle_attack(mon, adtyp))
+		return TRUE;
+	return (has_mantle_attack(mon, AD_SESN) && seasons_mantle_adtyp(mon) == adtyp);
+}
+
+/* Apply the retaliation of defender mdef's mantle to attacker magr after a blow
+ * with attk and the weapon in *weapon_p (null for a weaponless blow or a
+ * destroyed weapon). dmg is the mantle's rolled damage; leaf_drained (which may
+ * be null) tracks whether a leaf mantle has already drained magr this attack
+ * chain. Returns result, updated with the attacker's fate.
+ */
+STATIC_OVL int
+xmantlehity(struct monst * magr, struct monst * mdef, struct attack * mantle, struct attack * attk, struct obj ** weapon_p, int vis, int result, int dmg, boolean * leaf_drained)
+{
+	boolean youagr = (magr == &youmonst);
+	boolean youdef = (mdef == &youmonst);
+	struct permonst * pa = youagr ? youracedata : magr->data;
+	struct obj * weapon = (weapon_p ? *weapon_p : (struct obj *)0);
+	int newres;
+	struct attack season_mantle;
+
+	if (!attk || !(result & (MM_HIT|MM_MANTLE_BLAST)))
+		return result;
+
+	/* a four-seasons mantle retaliates as the mantle its current season acts as */
+	if (mantle->adtyp == AD_SESN) {
+		season_mantle = *mantle;
+		season_mantle.adtyp = seasons_mantle_adtyp(mdef);
+		mantle = &season_mantle;
+	}
+
+	switch (mantle->adtyp) {
+	case AD_STAR:
+		/* the starlight sears silver-haters that touch it */
+		if ((result & MM_HIT) && !weapon && hates_silver(pa)) {
+			if (youdef)
+				pline("Your mantle of silver stars sears %s!", mon_nam(magr));
+			else if (youagr)
+				pline("%s mantle of silver stars sears you!", s_suffix(Monnam(mdef)));
+			else if (vis)
+				pline("%s mantle of silver stars sears %s!", s_suffix(Monnam(mdef)), mon_nam(magr));
+			newres = xdamagey(mdef, magr, mantle, dmg);
+			if (newres&MM_DEF_DIED)
+				result |= MM_AGR_DIED;	/* attacker died */
+			if (newres&MM_DEF_LSVD)
+				result |= MM_AGR_STOP;	/* attacker lifesaved */
+		}
+	break;
+	case AD_HOLY:
+		/* the aurora's holy light sears holy-haters that touch it */
+		if ((result & MM_HIT) && !weapon && hates_holy(pa)) {
+			if (youdef)
+				pline("Your aurora mantle sears %s!", mon_nam(magr));
+			else if (youagr)
+				pline("%s aurora mantle sears you!", s_suffix(Monnam(mdef)));
+			else if (vis)
+				pline("%s aurora mantle sears %s!", s_suffix(Monnam(mdef)), mon_nam(magr));
+			newres = xdamagey(mdef, magr, mantle, dmg);
+			if (newres&MM_DEF_DIED)
+				result |= MM_AGR_DIED;	/* attacker died */
+			if (newres&MM_DEF_LSVD)
+				result |= MM_AGR_STOP;	/* attacker lifesaved */
+		}
+	break;
+	case AD_WET:
+		/* the water drenches creatures that water harms and that touch it */
+		if (!(result & MM_HIT))
+			break;
+		if (!weapon && hurt_by_water(magr)) {
+			if (youdef)
+				pline("Your water mantle drenches %s!", mon_nam(magr));
+			else if (youagr)
+				pline("%s water mantle drenches you!", s_suffix(Monnam(mdef)));
+			else if (vis)
+				pline("%s water mantle drenches %s!", s_suffix(Monnam(mdef)), mon_nam(magr));
+			newres = xdamagey(mdef, magr, mantle, dmg);
+			if (newres&MM_DEF_DIED)
+				result |= MM_AGR_DIED;	/* attacker died */
+			if (newres&MM_DEF_LSVD)
+				result |= MM_AGR_STOP;	/* attacker lifesaved */
+		}
+		/* and, like any drenching, multiplies gremlins that touch it */
+		else if (!weapon && pa->mtyp == PM_GREMLIN && rn2(3)
+			&& !(youagr ? Waterproof : mon_resistance(magr, WATERPROOF))
+		) {
+			(void) split_mon(magr, (struct monst *)0);
+		}
+	break;
+	case AD_BLND: {
+		/* the attacker breathes the dust: its weaponless blows land in it, and its weapons may stir it up */
+		struct obj * otmp;
+		if (!(((result & MM_HIT) && !weapon) || (result & MM_MANTLE_BLAST)))
+			break;
+		/* in Mithardir, the dust is that of its dust storms */
+		if (In_mithardir_quest(&u.uz)) {
+			int adtyp;
+			int dustdmg = mithardir_dust_inhale(magr, dmg, &adtyp);
+			if (dustdmg >= 0) {
+				if (youagr)
+					nomul(0, NULL);
+				newres = xdamagey(mdef, magr, mantle, dustdmg);
+				if (newres&MM_DEF_DIED)
+					result |= MM_AGR_DIED;	/* attacker died */
+				if (newres&MM_DEF_LSVD)
+					result |= MM_AGR_STOP;	/* attacker lifesaved */
+			}
+			break;
+		}
+		/* elsewhere it blinds and chokes, unless the attacker wears a shemagh or a towel */
+		otmp = youagr ? uarmh : which_armor(magr, W_ARMH);
+		if (otmp && otmp->otyp == SHEMAGH)
+			break;
+		otmp = youagr ? ublindf : which_armor(magr, W_TOOL);
+		if (otmp && otmp->otyp == TOWEL)
+			break;
+		if (can_blnd(mdef, magr, AT_ENGL, (struct obj *)0)) {
+			if (youagr) {
+				if (!Blind)
+					pline("%s dust mantle blinds you!", s_suffix(Monnam(mdef)));
+				make_blinded(BlindedTimeout + (long)dmg, FALSE);
+			}
+			else {
+				int blindtime = dmg + magr->mblinded;
+				if (canseemon(magr) && !is_blind(magr))
+					pline("%s is blinded by %s dust mantle!", Monnam(magr),
+						youdef ? "your" : s_suffix(mon_nam(mdef)));
+				magr->mblinded = min(blindtime, 127);
+				magr->mcansee = 0;
+				magr->mstrategy &= ~STRAT_WAITFORU;
+			}
+		}
+		/* only creatures that are alive and breathe choke */
+		if (youagr ? (nonliving(youracedata) || Breathless) : (nonliving(magr->data) || breathless_mon(magr)))
+			break;
+		if (youagr)
+			You("choke on the dust!");
+		else if (vis)
+			pline("%s chokes on the dust!", Monnam(magr));
+		newres = xdamagey(mdef, magr, mantle, dmg);
+		if (newres&MM_DEF_DIED)
+			result |= MM_AGR_DIED;	/* attacker died */
+		if (newres&MM_DEF_LSVD)
+			result |= MM_AGR_STOP;	/* attacker lifesaved */
+	}
+	break;
+	case AD_PYCL: {
+		/* the attacker is caught in the freezing ash: its weaponless blows land in it, and its weapons may stir it up */
+		struct attack alt_attk = *mantle;
+		int rolled = dmg;
+		struct obj * towel = youagr ? ublindf : which_armor(magr, W_TOOL);
+		struct obj * shemagh = youagr ? uarmh : which_armor(magr, W_ARMH);
+		boolean harmed = FALSE;
+		if (towel && towel->otyp != TOWEL)
+			towel = (struct obj *)0;
+		if (shemagh && shemagh->otyp != SHEMAGH)
+			shemagh = (struct obj *)0;
+		if (!(((result & MM_HIT) && !weapon) || (result & MM_MANTLE_BLAST)))
+			break;
+		/* like a pyroclastic vortex's, the ash does one of four things */
+		switch (rnd(4)) {
+		case 1:
+			/* it freezes, unless a towel keeps the attacker warm */
+			alt_attk.adtyp = AD_COLD;
+			if (towel) {
+				if (youagr)
+					pline("The %s keeps you warm!", simple_typename(towel->otyp));
+				break;
+			}
+			dmg = mantle_elemental_dmg(magr, AD_COLD, dmg);
+			if (vis&VIS_MAGR || youagr) {
+				if (dmg)
+					pline("%s %s freezing in the ash!", youagr ? "You" : Monnam(magr), youagr ? "are" : "is");
+				else
+					pline("%s %s mildly chilly.", youagr ? "You" : Monnam(magr), youagr ? "feel" : "seems");
+			}
+			if (!UseInvCold_res(magr) && mlev(mdef) > rn2(20))
+				destroy_item(magr, POTION_CLASS, AD_COLD);
+			if (youagr)
+				ugolemeffects(AD_COLD, rolled);
+			else
+				golemeffects(magr, AD_COLD, rolled);
+			if (dmg && youagr)
+				roll_frigophobia();
+			harmed = (dmg > 0);
+			break;
+		case 2:
+			/* it scours */
+			alt_attk.adtyp = AD_PHYS;
+			if (youagr)
+				You("are pummeled with debris!");
+			else if (vis&VIS_MAGR)
+				pline("%s is pummeled with debris!", Monnam(magr));
+			harmed = TRUE;
+			break;
+		case 3:
+			/* it chokes and stings the eyes of attackers that breathe, unless a towel wards it off */
+			alt_attk.adtyp = AD_DRST;
+			if (youagr ? Breathless : breathless_mon(magr))
+				break;
+			if (towel) {
+				if (youagr)
+					pline("The %s wards off the choking ash!", simple_typename(towel->otyp));
+				break;
+			}
+			if (Poison_res(magr))
+				dmg = 0;
+			if (dmg) {
+				if (youagr) {
+					pline("The ash is burning your %s!", makeplural(body_part(LUNG)));
+					if (!Separate_Respiration)
+						You("cough and spit %s!", body_part(BLOOD));
+					silverman_exhultation(4);
+				}
+				else if (vis&VIS_MAGR) {
+					pline("%s coughs!", Monnam(magr));
+					silverman_exhultation(4);
+				}
+			}
+			else if (youagr)
+				You("cough!");
+			if (youagr) {
+				if (!Blind)
+					make_blinded(1L, FALSE);
+			}
+			else {
+				magr->mcansee = 0;
+				if (!magr->mblinded)
+					magr->mblinded = 1;
+			}
+			harmed = (dmg > 0);
+			break;
+		case 4:
+			/* it blinds, unless a shemagh or towel protects the attacker */
+			if (shemagh || towel) {
+				if (youagr)
+					pline("The %s protects you from the ash!", simple_typename((shemagh ? shemagh : towel)->otyp));
+				break;
+			}
+			if (can_blnd(mdef, magr, AT_ENGL, (struct obj *)0)) {
+				if (youagr) {
+					if (!Blind)
+						pline("%s ash mantle blinds you!", s_suffix(Monnam(mdef)));
+					make_blinded(BlindedTimeout + (long)dmg, FALSE);
+				}
+				else {
+					int blindtime = dmg + magr->mblinded;
+					if (canseemon(magr) && !is_blind(magr))
+						pline("%s is blinded by %s ash mantle!", Monnam(magr),
+							youdef ? "your" : s_suffix(mon_nam(mdef)));
+					magr->mblinded = min(blindtime, 127);
+					magr->mcansee = 0;
+					magr->mstrategy &= ~STRAT_WAITFORU;
+				}
+			}
+			break;
+		}
+		if (harmed) {
+			newres = xdamagey(mdef, magr, &alt_attk, dmg);
+			if (newres&MM_DEF_DIED)
+				result |= MM_AGR_DIED;	/* attacker died */
+			if (newres&MM_DEF_LSVD)
+				result |= MM_AGR_STOP;	/* attacker lifesaved */
+		}
+	}
+	break;
+	case AD_DRLI:
+		/* the withering leaves drain the life of attackers whose weaponless blows land in them */
+		if (!(result & MM_HIT) || weapon || Drain_res(magr))
+			break;
+		/* the life force withers only once per attack chain; later blows are merely scratched by the leaves */
+		if (leaf_drained && *leaf_drained) {
+			if (youagr)
+				You("are scratched by %s withered leaves!", s_suffix(mon_nam(mdef)));
+			else if (youdef)
+				pline("%s is scratched by your withered leaves!", Monnam(magr));
+			else if (vis)
+				pline("%s is scratched by %s withered leaves!", Monnam(magr), s_suffix(mon_nam(mdef)));
+			newres = xdamagey(mdef, magr, mantle, dmg);
+			if (newres&MM_DEF_DIED)
+				result |= MM_AGR_DIED;	/* attacker died */
+			if (newres&MM_DEF_LSVD)
+				result |= MM_AGR_STOP;	/* attacker lifesaved */
+			break;
+		}
+		if (leaf_drained)
+			*leaf_drained = TRUE;
+		if (youagr) {
+			You_feel("your life force wither in %s falling leaves!", s_suffix(mon_nam(mdef)));
+			losexp("withering leaves", TRUE, FALSE, FALSE);
+		}
+		else {
+			/* monsters lose a hit die's worth of max HP */
+			int drain = rnd(hd_size(magr->data));
+
+			if (youdef)
+				pline("%s withers in your falling leaves!", Monnam(magr));
+			else if (vis)
+				pline("%s withers in %s falling leaves!", Monnam(magr), s_suffix(mon_nam(mdef)));
+			/* kill if this will level-drain below 0 m_lev, or lifedrain below 1 maxhp */
+			if (mlev(magr) == 0 || *hpmax(magr) <= drain) {
+				if (youdef)
+					killed(magr);
+				else
+					monkilled(magr, "", AD_DRLI);
+				if (DEADMONSTER(magr))
+					result |= MM_AGR_DIED;	/* attacker died */
+				else
+					result |= MM_AGR_STOP;	/* attacker lifesaved */
+			}
+			else {
+				magr->m_lev--;
+				magr->mhpmax -= drain;
+				magr->mhp = min(magr->mhpmax, magr->mhp);
+			}
+		}
+	break;
+	case AD_POLN:
+		/* the foliage's pollen covers attackers that strike it, and those who shook it loose */
+		if (result & MM_MANTLE_BLAST) {
+			if (youagr)
+				pline("Your blow shakes a cloud of pollen loose from %s foliage!", s_suffix(mon_nam(mdef)));
+			else if (youdef)
+				pline("%s blow shakes a cloud of pollen loose from your foliage!", s_suffix(Monnam(magr)));
+			else if (vis)
+				pline("%s blow shakes a cloud of pollen loose from %s foliage!", s_suffix(Monnam(magr)), s_suffix(mon_nam(mdef)));
+		}
+		/* an attacker set sneezing stops attacking */
+		if (cover_in_pollen(magr))
+			result |= MM_AGR_STOP;
+	break;
+	case AD_FIRE:
+	case AD_COLD:
+	case AD_ELEC: {
+		/* per element: mantle name, contact verb, blast cause and verb, conducting weapon verb and state, resisted feeling */
+		static const char * const fire_strs[] = { "fire", "burns", "flames", "burned", "grow", "searingly hot", "mildly warm" };
+		static const char * const cold_strs[] = { "frost", "freezes", "frozen shards", "frozen", "grow", "bitterly cold", "a mild chill" };
+		static const char * const elec_strs[] = { "lightning", "shocks", "sparks", "jolted", "crackle", "with electricity", "a mild tingle" };
+		const char * const * strs = (mantle->adtyp == AD_FIRE) ? fire_strs
+			: (mantle->adtyp == AD_COLD) ? cold_strs : elec_strs;
+		/* the mantle's effect on the object the attacker struck with harms them */
+		boolean blasted = !!(result & MM_MANTLE_BLAST);
+		/* metal weapons conduct the element to the attacker */
+		boolean conducted = !blasted && (result & MM_HIT) && weapon && is_metallic(weapon);
+		/* and it harms those that touch it */
+		boolean touched = !blasted && (result & MM_HIT) && !weapon;
+		int eldmg;
+
+		if (!blasted && !conducted && !touched)
+			break;
+		eldmg = mantle_elemental_dmg(magr, mantle->adtyp, dmg);
+		/* resistant attackers are unharmed, but golems may be affected */
+		if (!eldmg) {
+			if (youagr) {
+				shieldeff(u.ux, u.uy);
+				You_feel("%s.", strs[6]);
+				ugolemeffects(mantle->adtyp, dmg);
+			}
+			else {
+				golemeffects(magr, mantle->adtyp, dmg);
+			}
+			break;
+		}
+		if (blasted) {
+			if (youagr)
+				You("are %s by the %s!", strs[3], strs[2]);
+			else if (vis)
+				pline("%s is %s by the %s!", Monnam(magr), strs[3], strs[2]);
+		}
+		else if (conducted) {
+			if (youagr)
+				Your("%s %s!", aobjnam(weapon, strs[4]), strs[5]);
+			else if (vis)
+				pline("%s %s %s!", s_suffix(Monnam(magr)), aobjnam(weapon, strs[4]), strs[5]);
+		}
+		else {
+			if (youdef)
+				pline("Your %s mantle %s %s!", strs[0], strs[1], mon_nam(magr));
+			else if (youagr)
+				pline("%s %s mantle %s you!", s_suffix(Monnam(mdef)), strs[0], strs[1]);
+			else if (vis)
+				pline("%s %s mantle %s %s!", s_suffix(Monnam(mdef)), strs[0], strs[1], mon_nam(magr));
+		}
+		if (youagr && mantle->adtyp == AD_COLD)
+			roll_frigophobia();
+		/* xdamagey() applies elemental_dmg_resistance() for the mantle's damage type */
+		newres = xdamagey(mdef, magr, mantle, eldmg);
+		if (newres&MM_DEF_DIED)
+			result |= MM_AGR_DIED;	/* attacker died */
+		if (newres&MM_DEF_LSVD)
+			result |= MM_AGR_STOP;	/* attacker lifesaved */
+	}
+	break;
+	}
+	return result;
+}
+
 void
 passive_obj2(magr, mdef, otmp, attk, passive)
 struct monst * magr;		/* creature who was attacking first */
@@ -22260,7 +23552,7 @@ movement_combos()
 		}
 	}
 	if(!Blind && !flags.nopick && (multi >= 0) && (u.umoved || u.uattked)){
-		if(attacktype(youracedata, AT_GAZE) || (!Upolyd && check_vampire(VAMPIRE_GAZE)) || (!Upolyd && TIEFLING_GAZE))
+		if(attacktype(youracedata, AT_GAZE) || (!Upolyd && check_vampire(VAMPIRE_GAZE)) || (!Upolyd && (TIEFLING_GAZE || AASIMAR_GAZE)))
 			perform_gaze_attacks();
 	}
 	extern coord save_d;

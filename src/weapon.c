@@ -3221,6 +3221,9 @@ int atr;
 				(otmp->otyp == LIGHTSABER && !otmp->oartifact && otmp->ovar1_lightsaberHandle == 0))
 				mod += 1;
 
+			if (otmp->otyp == CRYSTAL_SWORD && grace_empowers(mtmp, AAT_GRACE_CRYSTAL))
+				mod += 1;
+
 			return mod;
 		case A_CON:
 			if (check_oprop(otmp, OPROP_BYAKW) || is_silverknight_weapon(otmp))
@@ -3286,6 +3289,9 @@ int atr;
 				mod += 0.5;
 
 			if(is_silverknight_weapon(otmp) && (check_oprop(otmp, OPROP_VORPW) || check_oprop(otmp, OPROP_ACIDW) || check_oprop(otmp, OPROP_OCLTW)))
+				mod += 1;
+
+			if (otmp->otyp == CRYSTAL_SWORD && full_grace_empowers(mtmp, AAT_GRACE_CRYSTAL))
 				mod += 1;
 
 			return mod;
@@ -5096,6 +5102,14 @@ process_etraits(unsigned long traits, int otyp, struct obj *obj, struct monst *m
 			traits |= ETRAIT_LUNGE|ETRAIT_STOP_THRUST;
 		}
 	}
+	if(obj->otyp == CRYSTAL_SWORD && grace_empowers(mon, AAT_GRACE_CRYSTAL)){
+		if(youagr && activeFightingForm(FFORM_HALF_SWORD))
+			traits |= ETRAIT_PUNCTURE;
+		else if(youagr && activeFightingForm(FFORM_POMMEL))
+			traits |= ETRAIT_ANTI_UNDEAD;
+		else
+			traits |= ETRAIT_BLEED;
+	}
 	if(obj->otyp == SILVERKNIGHT_SWORD && !check_oprop(obj, OPROP_NONE)){
 		if((check_oprop(obj, OPROP_FIREW) || check_oprop(obj, OPROP_ACIDW)) && (obj->where != OBJ_INVENT || (!activeFightingForm(FFORM_POMMEL) && !activeFightingForm(FFORM_HALF_SWORD))))
 			traits |= ETRAIT_CLEAVE;
@@ -5185,6 +5199,18 @@ process_etraits(unsigned long traits, int otyp, struct obj *obj, struct monst *m
 				traits |= ETRAIT_BLADEDANCE;
 		}
 	}
+	/* the hero's blade-dance grace gives one-handed weapons blade dance at full HP, and light weapons above half HP */
+	if((obj->oclass == WEAPON_CLASS || is_weptool(obj))
+		&& ((full_grace_empowers(mon, AAT_GRACE_BLADES) && !bimanual_mon(obj, mon))
+			|| (grace_empowers(mon, AAT_GRACE_BLADES) && light_weapon_mon(obj, mon)))
+	)
+		traits |= ETRAIT_BLADEDANCE;
+	/* the hero's lunge grace gives one-handed weapons lunge above half HP, and any weapon at full HP */
+	if((obj->oclass == WEAPON_CLASS || is_weptool(obj))
+		&& (full_grace_empowers(mon, AAT_GRACE_LUNGE)
+			|| (grace_empowers(mon, AAT_GRACE_LUNGE) && !bimanual_mon(obj, mon)))
+	)
+		traits |= ETRAIT_LUNGE;
 
 	return traits;
 }

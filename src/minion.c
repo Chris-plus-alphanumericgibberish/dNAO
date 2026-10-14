@@ -171,7 +171,10 @@ msummon(struct monst *mon, struct permonst *ptr)
 	struct monst *mtmp;
 
 	/* Wielded Demonbane prevents demons from gating in others. From Sporkhack*/
-	if (uwep && uwep->oartifact && arti_worn_prop(uwep, ARTP_NOCALL) && mon && is_demon(mon->data)) {
+	/* So does the hero's threatening mudra */
+	if (mon && is_demon(mon->data)
+		&& ((uwep && uwep->oartifact && arti_worn_prop(uwep, ARTP_NOCALL)) || THREATENING_MUDRA)
+	) {
 		pline("%s looks puzzled for a moment.", Monnam(mon));
 		return;
 	}

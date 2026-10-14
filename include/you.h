@@ -291,6 +291,10 @@ extern struct Race urace;
 #define STAR_ELF_MADMAN	(Role_if(PM_MADMAN) && Race_if(PM_ELF) && !u.uroleplay.pauper)
 /* Drow variants with the drow myrkalfr branch included */
 #define RACE_IF_DROW_MYRKALFR	(Race_if(PM_DROW) || Race_if(PM_MYRKALFR) || Race_if(PM_DRIDER) || Race_if(PM_DARK_FEY_RI) || Race_if(PM_DOKKIMAR))
+/* All aasimar-derived player races */
+#define RACE_IF_AASIMAR	(Race_if(PM_AASIMAR) || Race_if(PM_DOKKIMAR))
+/* All tiefling-derived player races */
+#define RACE_IF_TIEFLING	(Race_if(PM_TIEFLING) || Race_if(PM_DARK_FEY_RI))
 #define Humanoid_half_dragon(role)	(Role_if(PM_MADMAN) || (Role_if(PM_NOBLEMAN) && flags.initgend))
 
 /*** Unified structure specifying gender information ***/
@@ -1184,6 +1188,9 @@ struct you {
 	long mutations[MUTATION_LISTSIZE];
 	int next_tiefling_mutation;
 	int next_mutation_level;
+	int next_aasimar_mutation;		/* aasimar mutation currently forming, 0 if none */
+	int next_aasimar_mutation_level;	/* level at which next_aasimar_mutation activates */
+	long aasimar_mutation_stages;		/* AAS_STAGE_* flags for aasimar mutation stages begun */
 	char seraph_eyes;
 #define SE_SUN 1
 #define SE_INVIS 2

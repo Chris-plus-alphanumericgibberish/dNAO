@@ -52,6 +52,8 @@
 
 
 STATIC_DCL int FDECL(ready_weapon, (struct obj *, boolean));
+STATIC_DCL int FDECL(wielder_eff_size, (struct permonst *, boolean, boolean));
+STATIC_DCL int FDECL(weapon_eff_size, (struct obj *));
 
 /* used by will_weld() */
 /* probably should be renamed */
@@ -1267,36 +1269,32 @@ struct monst * mon;
 	return 1;
 }
 
-boolean
-bimanual(struct obj * otmp, struct permonst * ptr, boolean base_only, boolean yours)
+/* Return the effective size (MZ_*) of a wielder of form ptr (MZ_MEDIUM if ptr
+ * is null) when comparing it against weapon sizes. Unless base_only, includes
+ * the hero's size bonuses if yours.
+ */
+STATIC_OVL int
+wielder_eff_size(struct permonst * ptr, boolean base_only, boolean yours)
 {
-	int wielder_size;	/* uses standard MZ_ values */
-	int eff_size;		/* uses standard MZ_ values */
-	int size_mod;		/* otyp's size modifier; halve */
+	int wielder_size = (ptr ? ptr->msize : MZ_MEDIUM);	/* uses standard MZ_ values */
 
-	/* we *need* an object to get its size */
-	if (!otmp)
-		return FALSE;
-	/* only weapons and tools are valid twohanded weapons */
-	if (otmp->oclass != WEAPON_CLASS && otmp->oclass != TOOL_CLASS)
-		return FALSE;
-	/* get wielder's size -- optional, will assume medium (human) */
-	wielder_size = (ptr ? ptr->msize : MZ_MEDIUM);
-	
 	if (yours && !base_only) {
 		if (Role_if(PM_CAVEMAN))
 			wielder_size += 1;
 		if (u.sealsActive&SEAL_YMIR)
 			wielder_size += 1;
 	}
+	return wielder_size;
+}
 
-	/* Some creatures are specifically always able to wield any weapon in one hand */
-	if (ptr && always_one_hand_mtyp(ptr) && !base_only)
-		return FALSE;
-
-	/* half-sword style requires both hands on the sword, regardless of size */
-	if (yours && is_knight_sword(otmp) && selectedFightingForm(FFORM_HALF_SWORD))
-		return TRUE;
+/* Return the effective size (MZ_*) of weapon or tool otmp: its own size,
+ * adjusted by half its type's size relative to MZ_MEDIUM.
+ */
+STATIC_OVL int
+weapon_eff_size(struct obj * otmp)
+{
+	int eff_size;		/* uses standard MZ_ values */
+	int size_mod;		/* otyp's size modifier; halve */
 
 	/* get object size */
 	size_mod = objects[otmp->otyp].oc_size - MZ_MEDIUM;
@@ -1318,9 +1316,59 @@ bimanual(struct obj * otmp, struct permonst * ptr, boolean base_only, boolean yo
 		eff_size = MZ_GIGANTIC;
 	if (eff_size > MZ_HUGE && eff_size != MZ_GIGANTIC)
 		eff_size = MZ_HUGE;
+	return eff_size;
+}
+
+boolean
+bimanual(struct obj * otmp, struct permonst * ptr, boolean base_only, boolean yours)
+{
+	int wielder_size;	/* uses standard MZ_ values */
+
+	/* we *need* an object to get its size */
+	if (!otmp)
+		return FALSE;
+	/* only weapons and tools are valid twohanded weapons */
+	if (otmp->oclass != WEAPON_CLASS && otmp->oclass != TOOL_CLASS)
+		return FALSE;
+	/* get wielder's size -- optional, will assume medium (human) */
+	wielder_size = wielder_eff_size(ptr, base_only, yours);
+
+	/* Some creatures are specifically always able to wield any weapon in one hand */
+	if (ptr && always_one_hand_mtyp(ptr) && !base_only)
+		return FALSE;
+
+	/* half-sword style requires both hands on the sword, regardless of size */
+	if (yours && is_knight_sword(otmp) && selectedFightingForm(FFORM_HALF_SWORD))
+		return TRUE;
 
 	/* bimanual rule: Needs two hands if [object's size] > [wielder's size] by 1 full size */
-	return (eff_size > wielder_size);
+	return (weapon_eff_size(otmp) > wielder_size);
+}
+
+/* Return TRUE if weapon or tool otmp is light for a wielder of form ptr
+ * (MZ_MEDIUM if ptr is null): its effective size is smaller than the wielder's.
+ * Unless base_only, includes the hero's size bonuses if yours.
+ */
+boolean
+light_weapon(struct obj * otmp, struct permonst * ptr, boolean base_only, boolean yours)
+{
+	if (!otmp)
+		return FALSE;
+	if (otmp->oclass != WEAPON_CLASS && otmp->oclass != TOOL_CLASS)
+		return FALSE;
+	return (weapon_eff_size(otmp) < wielder_eff_size(ptr, base_only, yours));
+}
+
+/* Return TRUE if weapon or tool otmp is light for mon: its effective size is
+ * smaller than mon's, including the hero's size bonuses if mon is the hero.
+ * The hero's off-hand weapon must also be within the hero's off-hand weight limit.
+ */
+boolean
+light_weapon_mon(struct obj * otmp, struct monst * mon)
+{
+	if (mon == &youmonst && u.twoweap && otmp == uswapwep && otmp->owt > max_offhand_weight())
+		return FALSE;
+	return light_weapon(otmp, mon->data, FALSE, mon == &youmonst);
 }
 
 boolean

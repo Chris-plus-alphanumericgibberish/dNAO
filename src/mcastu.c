@@ -2982,6 +2982,12 @@ xcasty(struct monst *magr, struct monst *mdef, struct attack *attk, int tarx, in
 		if(DefensiveLuck)
 			spell_roll = min_ints(spell_roll, rn2(spell_skill));
 	}
+	/* the hero's dispelling halo hinders hostile casters that hate the hero's holiness */
+	if(!youagr && !magr->mpeaceful && (check_mutation(AAT_HALO_DISPEL) || check_mutation(AAT_FACE_DISPEL))
+		&& (u_holiness() == UNHOLY_HOLINESS ? hates_unholy_mon(magr) : hates_holy_mon(magr))
+		&& (in_halo_light(magr) || (mdef && in_halo_light(mdef)))
+	)
+		chance += AASIMAR_HALO_PENALTY;
 	if(!youagr && mon_resistance(magr, FUMBLING)){
 		chance++;
 		spell_roll = min_ints(spell_roll, rn2(spell_skill));
@@ -3049,6 +3055,22 @@ xcasty(struct monst *magr, struct monst *mdef, struct attack *attk, int tarx, in
 	
 	if(youdef && ublindf && ublindf->oartifact == ART_MIRRORED_MASK && rn2(2)){
 		Your("mask shifts and reflects the spell!");
+		youdef = FALSE;
+		mdef = magr;
+		tarx = mdef->mx;
+		tary = mdef->my;
+	}
+	/* the hero's deflect-spells grace turns directed spells back on their caster */
+	else if(!youagr && !notarget && foundem && !(spellnum && is_undirected_spell(spellnum))
+		&& full_grace_empowers(mdef, AAT_GRACE_DEFLECT_SPELLS) && (youdef || intelligent_mon(mdef))
+		&& rn2(3)
+		&& rnd(3) < (youdef ? P_SKILL(weapon_type(uwep))
+			: (mdef->data->mflagsf&MF_MARTIAL_E) ? P_EXPERT : (mdef->data->mflagsf&MF_MARTIAL_S) ? P_SKILLED : P_BASIC)
+	){
+		if(youdef)
+			You("deflect the spell back at %s!", mon_nam(magr));
+		else if(canseemon(mdef))
+			pline("%s deflects the spell back at %s!", Monnam(mdef), mon_nam(magr));
 		youdef = FALSE;
 		mdef = magr;
 		tarx = mdef->mx;

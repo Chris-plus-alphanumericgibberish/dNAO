@@ -990,6 +990,8 @@ attk_bodyparts(struct permonst *ptr, struct attack *attk)
 	if (attk->adtyp == AD_PLYS && paralysis_is_gaze(ptr))
 	    return ATKBP(EYES);
 	return ATKBP(NONE);
+    case AT_MNTL:
+	return ATKBP(NONE);
     case AT_BITE:
     case AT_LNCK:
     case AT_5SBT:

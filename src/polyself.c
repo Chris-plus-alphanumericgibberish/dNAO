@@ -23,6 +23,7 @@ STATIC_DCL void NDECL(newman);
 STATIC_DCL short NDECL(doclockmenu);
 STATIC_DCL short NDECL(dodroidmenu);
 STATIC_DCL void FDECL(worddescriptions, (int));
+STATIC_DCL boolean FDECL(mon_meets_u_gaze, (struct monst *));
 
 /* assumes u.umonnum is set already */
 void
@@ -1438,11 +1439,23 @@ dotinker()
 	return MOVE_STANDARD;
 }
 
+/* Return TRUE if mon can see the hero with its eyes, and so meet the hero's gaze. */
+STATIC_OVL boolean
+mon_meets_u_gaze(struct monst *mon)
+{
+	return (haseyes(mon->data)
+		&& !is_blind(mon)
+		&& !mon->msleeping
+		&& (!Invis || mon_resistance(mon, SEE_INVIS))
+		&& mon_can_see_you(mon)
+	);
+}
+
 int
 dogaze(struct monst *mtmp)
 {
 	boolean pre_targeted = mtmp != NULL;
-	boolean attack_gazes = !pre_targeted || (u.uattked && (attacktype(youracedata, AT_GAZE) || (!Upolyd && check_vampire(VAMPIRE_GAZE)) || (!Upolyd && TIEFLING_GAZE)) );
+	boolean attack_gazes = !pre_targeted || (u.uattked && (attacktype(youracedata, AT_GAZE) || (!Upolyd && check_vampire(VAMPIRE_GAZE)) || (!Upolyd && (TIEFLING_GAZE || AASIMAR_GAZE))) );
 	int result = 0;
 
 	if (Blind) {
@@ -1494,6 +1507,15 @@ dogaze(struct monst *mtmp)
 					}
 				}
 			}
+			if(attack_gazes && check_mutation(AAT_ELADRIN_GAZE)){
+				struct attack gaze;
+				if(eladrin_gaze_attack(&gaze)){
+					result |= xgazey(&youmonst, mtmp, &gaze, -1);
+					if(DEADMONSTER(mtmp)){
+						return MOVE_STANDARD;
+					}
+				}
+			}
 			if(attack_gazes && check_mutation(TT_MESMERIZING_GAZE) && !mindless_mon(mtmp) && !resist(mtmp, 0, 0, FALSE)
 				&& m_canseeu(mtmp)
 			){
@@ -1507,10 +1529,21 @@ dogaze(struct monst *mtmp)
 			if(DEADMONSTER(mtmp)){
 				return MOVE_STANDARD;
 			}
-			if(!mindless_mon(mtmp) && (check_mutation(TT_ODD_EYES_1) || check_mutation(TT_ODD_EYES_2) || check_mutation(TT_ODD_EYES_3) || check_mutation(TT_MANY_ODD_EYES))){
+			if(!mindless_mon(mtmp) && mon_meets_u_gaze(mtmp) && (check_mutation(TT_ODD_EYES_1) || check_mutation(TT_ODD_EYES_2) || check_mutation(TT_ODD_EYES_3) || check_mutation(TT_MANY_ODD_EYES))){
 				if(mtmp->encouraged > -6){
 					mtmp->encouraged--;
 					//pline("%s seems less confident than before.", Monnam(mtmp));
+					result |= MM_HIT;
+				}
+			}
+			if(aasimar_hunts(mtmp)){
+				struct attack gaze = {AT_GAZE, AD_STDY, 1, 7, .bodypart = ATKBP(EYES)};
+				result |= xgazey(&youmonst, mtmp, &gaze, -1);
+				if(DEADMONSTER(mtmp)){
+					return MOVE_STANDARD;
+				}
+				if(!mindless_mon(mtmp) && mon_meets_u_gaze(mtmp) && mtmp->encouraged > -7){
+					mtmp->encouraged--;
 					result |= MM_HIT;
 				}
 			}

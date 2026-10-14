@@ -15,6 +15,8 @@ extern const struct attack noattack;
 STATIC_DCL int FDECL(disturb,(struct monst *));
 STATIC_DCL void FDECL(distfleeck,(struct monst *,int *,int *,int *));
 STATIC_DCL int FDECL(m_arrival, (struct monst *));
+STATIC_DCL struct monst * FDECL(mon_expert_move_target, (struct monst *));
+STATIC_DCL int FDECL(mon_perform_expert_move, (struct monst *));
 STATIC_DCL void FDECL(watch_on_duty,(struct monst *));
 void FDECL(ford_rises,(struct monst *));
 boolean FDECL(check_shore,(int, int));
@@ -1253,13 +1255,19 @@ register struct monst *mtmp;
 		}
 	}
 
-   if (mdat->mtyp != PM_GIANT_TURTLE || !mtmp->mflee)
-	if (!(mtmp->mcanmove && mtmp->mnotlaugh && !mtmp->mequipping) || (mtmp->mstrategy & STRAT_WAITMASK)) {
-	    if (Hallucination) newsym(mtmp->mx,mtmp->my);
-	    if (mtmp->mcanmove && mtmp->mnotlaugh && !mtmp->mequipping && (mtmp->mstrategy & STRAT_CLOSE) &&
-	       !mtmp->msleeping && monnear(mtmp, u.ux, u.uy))
-		quest_talk(mtmp);	/* give the leaders a chance to speak */
-	    return(0);	/* other frozen monsters can't do anything */
+	if (check_mutation(AAT_PANAKEIAN_AURA) && mtmp->mtame && in_beast_mastery_range(mtmp)) {
+		mon_fix_troubles(mtmp, 0);
+	}
+
+	if (mdat->mtyp != PM_GIANT_TURTLE || !mtmp->mflee){
+		if (!(mtmp->mcanmove && mtmp->mnotlaugh && !mtmp->mequipping) || (mtmp->mstrategy & STRAT_WAITMASK)) {
+			if (Hallucination) newsym(mtmp->mx,mtmp->my);
+			if (mtmp->mcanmove && mtmp->mnotlaugh && !mtmp->mequipping && (mtmp->mstrategy & STRAT_CLOSE)
+				&& !mtmp->msleeping && monnear(mtmp, u.ux, u.uy)
+			)
+				quest_talk(mtmp);	/* give the leaders a chance to speak */
+			return(0);	/* other frozen monsters can't do anything */
+		}
 	}
 
 	/* there is a chance we will wake it */
@@ -2663,6 +2671,90 @@ should_displace(struct monst *mtmp, coord *poss, long *info, int cnt, xchar ggx,
  * 2: monster died.
  * 3: did not move, and can't do anything else either.
  */
+/* Return the creature magr, which just moved, would strike with an expert move
+ * on the next square in its direction of travel, or null if there is none it's
+ * willing to attack in melee.
+ */
+STATIC_OVL struct monst *
+mon_expert_move_target(struct monst *magr)
+{
+	int x = magr->mx + magr->mprev_dir.x;
+	int y = magr->my + magr->mprev_dir.y;
+	struct monst *mdef;
+	long mmflag;
+
+	if (!magr->mprev_dir.x && !magr->mprev_dir.y)
+		return (struct monst *)0;
+	if (!isok(x, y))
+		return (struct monst *)0;
+	if (x == u.ux && y == u.uy) {
+		if (u.uswallow || magr->mtame || (magr->mpeaceful && !magr->mberserk))
+			return (struct monst *)0;
+		if (magr->mux != u.ux || magr->muy != u.uy)
+			return (struct monst *)0;
+		return &youmonst;
+	}
+	mdef = m_at(x, y);
+	if (!mdef || DEADMONSTER(mdef))
+		return (struct monst *)0;
+	if (magr->mtame)
+		return (!mdef->mtame && acceptable_pet_target(magr, mdef, FALSE)) ? mdef : (struct monst *)0;
+	mmflag = mm_aggression(magr, mdef);
+	if (!(mmflag & ALLOW_M) || (mdef->mtame && !(mmflag & ALLOW_TM)))
+		return (struct monst *)0;
+	return mdef;
+}
+
+/* Let magr, which just moved, make any expert move its wielded weapon allows
+ * (a lunge or a knock-back charge) at what lies ahead of it. Returns the
+ * combined result of the attacks made (0 if none).
+ */
+STATIC_OVL int
+mon_perform_expert_move(struct monst *magr)
+{
+	struct obj *wep = MON_WEP(magr);
+	struct monst *mdef;
+	struct attack hit;
+	boolean messaged = FALSE;
+	int vis;
+	int result = 0;
+
+	if (!wep || DEADMONSTER(magr) || (u.uswallow && magr == u.ustuck))
+		return 0;
+	if (CHECK_ETRAIT(wep, magr, ETRAIT_LUNGE)
+		&& ROLL_ETRAIT(wep, magr, TRUE, rn2(2))
+		&& (mdef = mon_expert_move_target(magr))
+	) {
+		vis = getvis(magr, mdef, 0, 0);
+		if (wizard && (vis&VIS_MAGR))
+			pline("Lunge!");
+		else if (vis&VIS_MAGR) {
+			pline("%s charges %s.", Monnam(magr), mdef == &youmonst ? "you" : mon_nam(mdef));
+			messaged = TRUE;
+		}
+		hit = wielded_weapon_attack(magr, wep);
+		result |= xmeleehity(magr, mdef, &hit, &wep, vis, 0, FALSE, 0);
+		if (result & (MM_AGR_DIED|MM_AGR_STOP))
+			return result;
+	}
+	wep = MON_WEP(magr);
+	if (wep && CHECK_ETRAIT(wep, magr, ETRAIT_KNOCK_BACK_CHARGE)
+		&& ROLL_ETRAIT(wep, magr, TRUE, rn2(2))
+		&& (wep->o_e_trait&ETRAIT_KNOCK_BACK)
+		&& (mdef = mon_expert_move_target(magr))
+	) {
+		vis = getvis(magr, mdef, 0, 0);
+		if (wizard && (vis&VIS_MAGR))
+			pline("Push!");
+		else if (!messaged && (vis&VIS_MAGR))
+			pline("%s charges %s.", Monnam(magr), mdef == &youmonst ? "you" : mon_nam(mdef));
+		hit = wielded_weapon_attack(magr, wep);
+		hit.adtyp = AD_PSH1;
+		result |= xmeleehity(magr, mdef, &hit, &wep, vis, 0, FALSE, 0);
+	}
+	return result;
+}
+
 int
 m_move(mtmp, after)
 register struct monst *mtmp;
@@ -3486,6 +3578,9 @@ postmov:
 		    swallowed(0);
 		} else
 		newsym(mtmp->mx,mtmp->my);
+
+		if (mon_perform_expert_move(mtmp) & MM_AGR_DIED)
+			return(2);
 	    }
 	    if(OBJ_AT(mtmp->mx, mtmp->my) && mtmp->mcanmove && mtmp->mnotlaugh && !mtmp->mequipping) {
 		/* recompute the likes tests, in case we polymorphed

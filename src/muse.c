@@ -1016,37 +1016,7 @@ mon_tele:
 		else if(flags.soundok)
 			verbalize("Lex Rex!");
 		otmp->spe -= 3;
-		set_mcan(mtmp, FALSE);
-		mtmp->mspec_used = 0;
-		if(!mtmp->mnotlaugh){
-			mtmp->mnotlaugh = 1;
-			mtmp->mlaughing = 0;
-		}
-		if(!mtmp->mcansee){
-			mtmp->mcansee = 1;
-			mtmp->mblinded = 0;
-		}
-		mtmp->mberserk = 0;
-		if(!mtmp->mcanmove){
-			mtmp->mcanmove = 1;
-			mtmp->mfrozen = 0;
-		}
-		if(mtmp->mstdy > 0) mtmp->mstdy = 0;
-		mtmp->mstun = 0;
-		mtmp->mconf = 0;
-		mtmp->mpunctured = 0;
-		mtmp->msleeping = 0;
-		mtmp->mflee = 0;
-		mtmp->mfleetim = 0;
-		mtmp->mbleed = 0;
-		mtmp->mgmld_throat = 0;
-		mtmp->mgmld_skin = 0;
-		mtmp->owrk = 0;
-		mtmp->ruh = 0;
-		mtmp->shey = 0;
-		mtmp->luahv = 0;
-		mtmp->nean = 0;
-		mtmp->nooh = 0;
+		mon_fix_troubles(mtmp, MFT_UNCANCEL|MFT_COOLDOWN);
 		boolean blessed = mlev(mtmp) > 13;
 		for (struct obj *obj = mtmp->minvent; obj; obj = obj->nobj)
 		{

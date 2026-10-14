@@ -561,7 +561,7 @@ int know_spell;
 	if (u.uhp < u.uhpmax * 0.3) chance *= 2;
 
 	/* it's also difficult to play some instruments while wearing a shield. */
-	if (uarms && (instr_otyp == HARP || instr_otyp == DRUM)) 
+	if (uarms && !check_mutation(AAT_SHIELD_AURA) && (instr_otyp == HARP || instr_otyp == DRUM)) 
 		chance /= 2;
 
 	/* but it's easier with the eyes closed */
@@ -1184,6 +1184,7 @@ int distance;
 				mtmp->mdisrobe = 0;
 				mtmp->mgmld_throat = 0;
 				mtmp->mgmld_skin = 0;
+				mtmp->mbleed /= 2;
 				/* anti-syllable curses have no monster equivalent of the PC's
 				 * counteracting-syllable cure, so an expert rally can lift them */
 				mtmp->owrk = 0;
@@ -2010,7 +2011,7 @@ struct obj *instr;
 		return 0;
     }
 
-    if (uarms && (instr->otyp == HARP || instr->otyp == DRUM)){
+    if (uarms && !check_mutation(AAT_SHIELD_AURA) && (instr->otyp == HARP || instr->otyp == DRUM)){
 	    You("can't play properly while wearing a shield.");
 		return 0;
 	}

@@ -598,7 +598,7 @@ vision_recalc(control)
     else {
 		/* determine night vision range */
 		indark = (dimness_func(u.ux, u.uy) > 0);
-		darksight = ((Catsight && indark) || (Darksight));
+		darksight = (Catsight ? indark : Darksight);
 		if (Blind || LightBlind) nv_range = 0;
 		else if (Elfsight) nv_range = 3;
 		else if (Lowlightsight) nv_range = 2;
@@ -708,7 +708,7 @@ vision_recalc(control)
     viz_array = next_array;
 	/* determine night vision range */
 	indark = (dimness_func(u.ux, u.uy) > 0);
-	darksight = ((Catsight && indark) || (Darksight));
+	darksight = (Catsight ? indark : Darksight);
 	if (Blind || LightBlind) nv_range = 0;
 	else if (Elfsight) nv_range = 3;
 	else if (Lowlightsight) nv_range = 2;

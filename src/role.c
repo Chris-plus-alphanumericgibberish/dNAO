@@ -2959,9 +2959,9 @@ give_ascension_trophy()
 		set_trophy(YUKI_ASC);
 	else if(Race_if(PM_CENTAUR) || Race_if(PM_FORMIAN) || Race_if(PM_DRIDER))
 		set_trophy(CEN_ASC);
-	else if(Race_if(PM_TIEFLING) || Race_if(PM_DARK_FEY_RI))
+	else if(RACE_IF_TIEFLING)
 		set_trophy(TIE_ASC);
-	else if(Race_if(PM_AASIMAR) || Race_if(PM_DOKKIMAR))
+	else if(RACE_IF_AASIMAR)
 		set_trophy(AAS_ASC);
 	else if(Race_if(PM_SILVERMAN))
 		set_trophy(SIL_ASC);

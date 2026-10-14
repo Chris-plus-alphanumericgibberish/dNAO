@@ -2598,6 +2598,8 @@ weapon:
 				}
 				else Sprintf(eos(buf), " (%d:%d)", (int)obj->recharged, obj->spe);
 			}
+			else if (KNOWS_ENCHANTMENT)
+				Sprintf(eos(buf), " (%d)", obj->spe);
 			else if (obj->spe <= 0 && KNOWS_MAGIC)
 				Sprintf(eos(buf), " (empty)");
 			break;

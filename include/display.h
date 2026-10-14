@@ -121,6 +121,15 @@
  */
 #define see_with_earthsense(mon) (Earthsense && !(mon_resistance((mon),FLYING) || mon_resistance((mon),LEVITATION) || unsolid((mon)->data)))
 
+/*
+ * see_with_omnisense()
+ *
+ * True if the player has omnisense and perceives mon with infravision,
+ * bloodsense, lifesense, or senseall. Also checks mon_visible() itself.
+ */
+#define see_with_omnisense(mon) (Omnisense && (see_with_infrared(mon) || see_with_bloodsense(mon) \
+	|| see_with_lifesense(mon) || see_with_senseall(mon)) && mon_visible(mon))
+
 
 /*
  * canseemon()
@@ -140,7 +149,7 @@
  * Principally for use with Medusa, who's curse cares about you knowing what she
  * "looks like" in a superficial sense.
  */
-#define canseemon_eyes(mon) ((mon->wormno ? worm_known(mon) : \
+#define canseemon_eyes(mon) (!Blind && (mon->wormno ? worm_known(mon) : \
 	    (cansee(mon->mx, mon->my) || see_with_infrared(mon))) \
 	&& mon_visible(mon))
 

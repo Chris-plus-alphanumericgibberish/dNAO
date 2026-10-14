@@ -171,9 +171,98 @@ struct mutationtype {
 #define LAST_TIEFLING_TRAIT		TT_WING_CLAW_3
 #define AAT_PRIMINAL			LAST_TIEFLING_TRAIT+1
 #define AAT_PRIMINAL_TAIL		LAST_TIEFLING_TRAIT+2
-#define	LAST_MUTATION		AAT_PRIMINAL_TAIL
+#define AAT_EXTRAMISSION_1		LAST_TIEFLING_TRAIT+3
+#define AAT_BLESSINGS_1			LAST_TIEFLING_TRAIT+4
+#define AAT_INVIS_1				LAST_TIEFLING_TRAIT+5
+#define AAT_HUNT_UNHOLY_1		LAST_TIEFLING_TRAIT+6
+#define AAT_HUNT_UNORDERED		LAST_TIEFLING_TRAIT+7
+#define AAT_DEVA_SIGHT			LAST_TIEFLING_TRAIT+8
+#define AAT_BLESSINGS_2			LAST_TIEFLING_TRAIT+9
+#define AAT_INVIS_2				LAST_TIEFLING_TRAIT+10
+#define AAT_HUNT_UNHOLY_2		LAST_TIEFLING_TRAIT+11
+#define AAT_HUNT_UNBALANCED		LAST_TIEFLING_TRAIT+12
+#define AAT_ELADRIN_SIGHT		LAST_TIEFLING_TRAIT+13
+#define AAT_BLESSINGS_3			LAST_TIEFLING_TRAIT+14
+#define AAT_HUNT_UNHOLY_3		LAST_TIEFLING_TRAIT+15
+#define AAT_HUNT_TYRANTS		LAST_TIEFLING_TRAIT+16
+#define AAT_IKSH_NA_SIGHT		LAST_TIEFLING_TRAIT+17
+#define AAT_ELADRIN_GAZE		LAST_TIEFLING_TRAIT+18
+#define AAT_HALO_PURIFY			LAST_TIEFLING_TRAIT+19
+#define AAT_HALO_CLEANSE		LAST_TIEFLING_TRAIT+20
+#define AAT_HALO_ORDER			LAST_TIEFLING_TRAIT+21
+#define AAT_HALO_DAZZLING		LAST_TIEFLING_TRAIT+22
+#define AAT_HALO_PROTECTIVE		LAST_TIEFLING_TRAIT+23
+#define AAT_HALO_DISPEL			LAST_TIEFLING_TRAIT+24
+#define AAT_HALO_DAWN_PURIFY	LAST_TIEFLING_TRAIT+25
+#define AAT_HALO_DAWN_FIRE		LAST_TIEFLING_TRAIT+26
+#define AAT_HALO_DAWN_CLEANSE	LAST_TIEFLING_TRAIT+27
+#define AAT_HALO_DAWN_HEAL		LAST_TIEFLING_TRAIT+28
+#define AAT_HALO_SILVER			LAST_TIEFLING_TRAIT+29
+#define AAT_JUSTICE_AURA		LAST_TIEFLING_TRAIT+30
+#define AAT_SHIELD_AURA			LAST_TIEFLING_TRAIT+31
+#define AAT_SWORD_AURA			LAST_TIEFLING_TRAIT+32
+#define AAT_TRUMPET_AURA		LAST_TIEFLING_TRAIT+33
+#define AAT_WARDEN_AURA			LAST_TIEFLING_TRAIT+34
+#define AAT_PANAKEIAN_AURA		LAST_TIEFLING_TRAIT+35
+#define AAT_MOVANIC_ASTRA		LAST_TIEFLING_TRAIT+36
+#define AAT_MONADIC_ASTRA		LAST_TIEFLING_TRAIT+37
+#define AAT_ASTRAL_ASTRA		LAST_TIEFLING_TRAIT+38
+#define AAT_SURYA_ASTRA			LAST_TIEFLING_TRAIT+39
+#define AAT_FEARLESSNESS_MUDRA	LAST_TIEFLING_TRAIT+40
+#define AAT_MEDITATION_MUDRA	LAST_TIEFLING_TRAIT+41
+#define AAT_CLARITY_MUDRA		LAST_TIEFLING_TRAIT+42
+#define AAT_THREATENING_MUDRA	LAST_TIEFLING_TRAIT+43
+#define AAT_GRACE_TRAPS			LAST_TIEFLING_TRAIT+44
+#define AAT_GRACE_DODGE			LAST_TIEFLING_TRAIT+45
+#define AAT_GRACE_SWIFT			LAST_TIEFLING_TRAIT+46
+#define AAT_GRACE_PRECISION		LAST_TIEFLING_TRAIT+47
+#define AAT_GRACE_MANTLE		LAST_TIEFLING_TRAIT+48
+#define AAT_GRACE_BLADES		LAST_TIEFLING_TRAIT+49
+#define AAT_GRACE_DANCE			LAST_TIEFLING_TRAIT+50
+#define AAT_GRACE_EXTRA			LAST_TIEFLING_TRAIT+51
+#define AAT_GRACE_STRIKE		LAST_TIEFLING_TRAIT+52
+#define AAT_GRACE_POWER			LAST_TIEFLING_TRAIT+53
+#define AAT_GRACE_GIFTS			LAST_TIEFLING_TRAIT+54
+#define AAT_GRACE_DEFLECT		LAST_TIEFLING_TRAIT+55
+#define AAT_GRACE_DEFLECT_SPELLS	LAST_TIEFLING_TRAIT+56
+#define AAT_GRACE_PARRY			LAST_TIEFLING_TRAIT+57
+#define AAT_GRACE_LUNGE			LAST_TIEFLING_TRAIT+58
+#define AAT_GRACE_CRYSTAL		LAST_TIEFLING_TRAIT+59
+#define AAT_CLOUDFACE_INFRAVISION	LAST_TIEFLING_TRAIT+60
+#define AAT_CLOUDFACE_BLOODSENSE	LAST_TIEFLING_TRAIT+61
+#define AAT_CLOUDFACE_LIFESENSE		LAST_TIEFLING_TRAIT+62
+#define AAT_INVIS_3				LAST_TIEFLING_TRAIT+63
+#define AAT_BLESSINGS_4			LAST_TIEFLING_TRAIT+64
+#define AAT_EXTRAMISSION_2		LAST_TIEFLING_TRAIT+65
+#define AAT_PRIMINAL_FEARLESSNESS_MUDRA	LAST_TIEFLING_TRAIT+66
+#define AAT_PRIMINAL_MEDITATION_MUDRA	LAST_TIEFLING_TRAIT+67
+#define AAT_PRIMINAL_CLARITY_MUDRA		LAST_TIEFLING_TRAIT+68
+#define AAT_PRIMINAL_THREATENING_MUDRA	LAST_TIEFLING_TRAIT+69
+#define AAT_ACIDIC_ASTRA		LAST_TIEFLING_TRAIT+70
+#define AAT_WATERY_ASTRA		LAST_TIEFLING_TRAIT+71
+#define AAT_FACE_PURIFY			LAST_TIEFLING_TRAIT+72
+#define AAT_FACE_CLEANSE		LAST_TIEFLING_TRAIT+73
+#define AAT_FACE_FREEDOM		LAST_TIEFLING_TRAIT+74
+#define AAT_FACE_DAZZLING		LAST_TIEFLING_TRAIT+75
+#define AAT_FACE_PROTECTIVE		LAST_TIEFLING_TRAIT+76
+#define AAT_FACE_DISPEL			LAST_TIEFLING_TRAIT+77
+#define AAT_FACE_HEAL			LAST_TIEFLING_TRAIT+78
+#define AAT_FACE_FIRE			LAST_TIEFLING_TRAIT+79
+#define	LAST_MUTATION		AAT_FACE_FIRE
 
 #define MUTATION_LISTSIZE	((LAST_MUTATION-1)/32 + 1)
+
+/* Aasimar mutation stages (u.aasimar_mutation_stages): set once a stage's mutation begins forming */
+#define AAS_STAGE_GAZE		0x0001L
+#define AAS_STAGE_HALO		0x0002L
+#define AAS_STAGE_AURA		0x0004L
+#define AAS_STAGE_HALO_2	0x0008L
+#define AAS_STAGE_HALO_3	0x0010L
+#define AAS_STAGE_ASTRA		0x0020L
+#define AAS_STAGE_MUDRA		0x0040L
+#define AAS_STAGE_GRACE		0x0080L
+#define AAS_STAGE_GRACE_2	0x0100L
+#define AAS_STAGE_GRACE_3	0x0200L
 
 #define check_mutation(mut) (has_mutation(mut) && (mut <= LAST_CULT_MUTATION || !Upolyd))
 #define has_mutation(mut) ((u.mutations[(mut-1)/32]) & (0x1L << ((mut-1)%32)))
@@ -200,6 +289,71 @@ struct mutationtype {
 	 has_mutation(TT_BEHOLDER) || \
 	 has_mutation(TT_CANCEL_GAZE) || \
 	 has_mutation(TT_MESMERIZING_GAZE))
+
+#define AASIMAR_GAZE \
+	(has_mutation(AAT_HUNT_UNHOLY_1) \
+	 || has_mutation(AAT_HUNT_UNHOLY_2) \
+	 || has_mutation(AAT_HUNT_UNHOLY_3) \
+	 || has_mutation(AAT_HUNT_UNORDERED) \
+	 || has_mutation(AAT_HUNT_UNBALANCED) \
+	 || has_mutation(AAT_HUNT_TYRANTS) \
+	 || has_mutation(AAT_ELADRIN_GAZE) \
+	)
+
+#define AASIMAR_HALOS \
+	(has_mutation(AAT_HALO_PURIFY) \
+	 || has_mutation(AAT_HALO_CLEANSE) \
+	 || has_mutation(AAT_HALO_ORDER) \
+	 || has_mutation(AAT_HALO_DAWN_PURIFY) \
+	 || has_mutation(AAT_HALO_DAWN_FIRE) \
+	 || has_mutation(AAT_HALO_DAWN_CLEANSE) \
+	 || has_mutation(AAT_HALO_DAWN_HEAL) \
+	 || has_mutation(AAT_HALO_SILVER) \
+	 || has_mutation(AAT_FACE_PURIFY) \
+	 || has_mutation(AAT_FACE_CLEANSE) \
+	 || has_mutation(AAT_FACE_FREEDOM) \
+	 || has_mutation(AAT_FACE_HEAL) \
+	 || has_mutation(AAT_FACE_FIRE) \
+	)
+
+#define AASIMAR_AURAS \
+	(has_mutation(AAT_WARDEN_AURA) \
+	 || has_mutation(AAT_PANAKEIAN_AURA) \
+	 || has_mutation(AAT_THREATENING_MUDRA) \
+	 || has_mutation(AAT_PRIMINAL_THREATENING_MUDRA) \
+	)
+
+#define FEARLESSNESS_MUDRA	(check_mutation(AAT_FEARLESSNESS_MUDRA) || check_mutation(AAT_PRIMINAL_FEARLESSNESS_MUDRA))
+#define MEDITATION_MUDRA	(check_mutation(AAT_MEDITATION_MUDRA) || check_mutation(AAT_PRIMINAL_MEDITATION_MUDRA))
+#define CLARITY_MUDRA		(check_mutation(AAT_CLARITY_MUDRA) || check_mutation(AAT_PRIMINAL_CLARITY_MUDRA))
+#define THREATENING_MUDRA	(check_mutation(AAT_THREATENING_MUDRA) || check_mutation(AAT_PRIMINAL_THREATENING_MUDRA))
+
+#define AASIMAR_DAWN_HALO \
+	(check_mutation(AAT_HALO_DAWN_PURIFY) \
+	 || check_mutation(AAT_HALO_DAWN_FIRE) \
+	 || check_mutation(AAT_HALO_DAWN_CLEANSE) \
+	 || check_mutation(AAT_HALO_DAWN_HEAL) \
+	)
+
+/* to-hit and spellcasting penalty imposed by the dazzling and dispelling halos */
+#define AASIMAR_HALO_PENALTY	(u.ulevel/6+1)
+/* DR granted by the protective halo */
+#define AASIMAR_HALO_DR		(u.ulevel/10)
+
+/* eladrin graces work at high HP, and eladrin auto-attacks at low HP */
+#define eladrin_low_hp()	(Upolyd ? (u.mh < u.mhmax/2) : (u.uhp < u.uhpmax/2))
+#define check_grace(mut)	(check_mutation(mut) && !eladrin_low_hp())
+#define eladrin_full_hp()	(Upolyd ? (u.mh >= u.mhmax) : (u.uhp >= u.uhpmax))
+#define check_full_grace(mut)	(check_mutation(mut) && eladrin_full_hp())
+#define eladrin_high_hp()	(Upolyd ? (u.mh*10 >= u.mhmax*9) : (u.uhp*10 >= u.uhpmax*9))
+#define check_high_grace(mut)	(check_mutation(mut) && eladrin_high_hp())
+
+#define AASIMAR_BLESSING_SIGHT \
+	(check_mutation(AAT_BLESSINGS_1) \
+	 || check_mutation(AAT_BLESSINGS_2) \
+	 || check_mutation(AAT_BLESSINGS_3) \
+	 || check_mutation(AAT_BLESSINGS_4) \
+	)
 
 #define TIEFLING_AUTOGAZE \
 	(has_mutation(TT_ODD_EYES_1) || \
@@ -271,10 +425,11 @@ struct mutationtype {
 	 || mut == TT_FALLEN_AURA \
 	 || mut == TT_FALLEN_SCARS \
 	)
-#define KNOWS_CURSES (check_mutation(TT_HATEFUL_VISION) || u.seraph_eyes >= SE_CURSES)
-#define KNOWS_BLESSINGS (Race_if(PM_AASIMAR) && u.ulevel >= 7)
+#define KNOWS_CURSES (check_mutation(TT_HATEFUL_VISION) || u.seraph_eyes >= SE_CURSES || AASIMAR_BLESSING_SIGHT)
+#define KNOWS_BLESSINGS (RACE_IF_AASIMAR && u.ulevel >= 7)
 #define KNOWS_BUC (u.upriest || (KNOWS_CURSES && KNOWS_BLESSINGS))
 
-#define KNOWS_MAGIC (Race_if(PM_INCANTIFIER) || u.seraph_eyes >= SE_MAGIC)
+#define KNOWS_ENCHANTMENT (u.seraph_eyes >= SE_MAGIC || AASIMAR_BLESSING_SIGHT)
+#define KNOWS_MAGIC (Race_if(PM_INCANTIFIER) || KNOWS_ENCHANTMENT)
 
 #endif /* MUTATION_H */

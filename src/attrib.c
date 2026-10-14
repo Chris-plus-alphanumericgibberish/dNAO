@@ -249,6 +249,12 @@ const struct innate {
 			 {	14, &(HFlying), "your aura form into wings", "your aura lose cohesion" },
 		     {	 0, 0, 0, 0 } },
 
+	aasi_surya_abil[] = { 
+			 {	 1, &(u.uprops[HOLY_SHOCK_RES].intrinsic), "", "" },
+			 {	 7, &(u.uprops[HOLY_FIRE_RES].intrinsic), "sun-touched", "less radiant" },
+			 {	14, &(HFlying), "your aura form into wings", "your aura lose cohesion" },
+		     {	 0, 0, 0, 0 } },
+
 	aasi_deva_abil[] = { 
 			 {	 1, &(u.uprops[HOLY_SHOCK_RES].intrinsic), "", "" },
 			 {	14, &(HNo_prop), "your aura form into arms", "your aura lose cohesion" },
@@ -1024,6 +1030,8 @@ int oldlevel, newlevel;
 	case PM_AASIMAR:
 		if(flags.aasimar_type == AASIMAR_TYPE_ARCHON || flags.aasimar_type == AASIMAR_TYPE_SERAPH)
 			rabil = aasi_archon_abil;
+		else if(flags.aasimar_type == AASIMAR_TYPE_SURYA)
+			rabil = aasi_surya_abil;
 		else if(flags.aasimar_type == AASIMAR_TYPE_DEVA)
 			rabil = aasi_deva_abil;
 		else if(flags.aasimar_type == AASIMAR_TYPE_ELADRIN){
@@ -1627,6 +1635,8 @@ boolean check;
 	int nightmare_starting_sanity = NightmareAware_Sanity;
 	int starting_sanity = u.usanity;
 	int starting_insanity = NightmareAware_Insanity;
+	if(FEARLESSNESS_MUDRA)
+		check = FALSE;
 	if(discover || wizard)
 		pline("Sanity change: %d + %d", u.usanity, delta);
 	u.usanity += delta;

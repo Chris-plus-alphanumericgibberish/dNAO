@@ -3695,6 +3695,8 @@ boolean past;
 				expert_weapon_skill(P_QUARTERSTAFF);
 				free_skill_up(P_QUARTERSTAFF);
 				pline("You suddenly remember that you are gelatinous!");
+				if(priminal_mudras())
+					pline("You also realize you don't have an aura of many hands, you have many pseudopods instead.");
 				pline("Oh, and you've got a tail.");
 				add_mutation(AAT_PRIMINAL);
 				add_mutation(AAT_PRIMINAL_TAIL);

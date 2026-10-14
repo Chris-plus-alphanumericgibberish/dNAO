@@ -1310,6 +1310,83 @@ genericptr_t p2;
     return TRUE;		/* OK, it's gone, you can free it! */
 }
 
+/* Apply the effects, other than damage, of mon (the hero or a monster) breathing
+ * Mithardir dust of strength damage. Return the damage mon should take, with
+ * *adtyp set to its damage type, or -1 if mon is unaffected.
+ */
+int
+mithardir_dust_inhale(struct monst *mon, int damage, int *adtyp)
+{
+	boolean youdef = (mon == &youmonst);
+	struct permonst *pd = youdef ? youracedata : mon->data;
+	struct obj *otmp;
+
+	*adtyp = AD_PHYS;
+	if (youdef && Invulnerable)
+		return -1;
+	if (pd->mtyp == PM_SENTINEL_OF_MITHARDIR) {
+		if (youdef)
+			healup(damage, 0, FALSE, FALSE);
+		else
+			mon->mhp = min(mon->mhp+damage, mon->mhpmax);
+	}
+	if (youdef ? (nonliving(youracedata) || Breathless) : (nonliving(mon->data) || breathless_mon(mon)))
+		return -1;
+	otmp = youdef ? uarmh : which_armor(mon, W_ARMH);
+	if (otmp && otmp->otyp == SHEMAGH) {
+		if (youdef && !rn2(4))
+			pline("The %s protects you from the dust!", simple_typename(otmp->otyp));
+		return -1;
+	}
+	otmp = youdef ? ublindf : which_armor(mon, W_TOOL);
+	if (otmp && otmp->otyp == TOWEL) {
+		if (youdef && !rn2(4))
+			pline("The %s protects you from the dust!", simple_typename(otmp->otyp));
+		return -1;
+	}
+
+	if (youdef) {
+		if (!Blind)
+			make_blinded(1L, FALSE);
+		if (damage > 3 && !rn2(20) && !Sick_resistance) {
+			//Dormant spores
+			make_sick(Sick ? Sick/2L + 1L : ACURR(A_CON)*300L, //~3000 turns
+				"white spores", TRUE, SICK_NONVOMITABLE);
+			You("are covered with dust and can barely breathe!");
+			return rnd(damage);
+		} else if (!rn2(10) && !is_anhydrous(youracedata)) {
+			//Salt
+			You("are covered with dust and can barely breathe!");
+			pline("Salt dust burns your %s!", makeplural(body_part(LUNG)));
+			if (!Separate_Respiration)
+				You("cough and spit %s!", body_part(BLOOD));
+			return rnd(damage)+5;
+		}
+		You("are covered with dust and can barely breathe!");
+		return rnd(damage);
+	}
+
+	if (haseyes(mon->data) && mon->mcansee) {
+		mon->mblinded = 1;
+		mon->mcansee = 0;
+	}
+	if (damage > 3 && !rn2(20) && !resists_sickness(mon)) {
+		//Dormant spores: monsters can't be made ill, so they take extra damage instead
+		if (cansee(mon->mx, mon->my))
+			pline("%s looks sick!", Monnam(mon));
+		*adtyp = AD_DRST;
+		return rnd(damage)+5+mon->m_lev;
+	} else if (!rn2(10) && !is_anhydrous(mon->data)) {
+		//Salt
+		if (cansee(mon->mx, mon->my))
+			pline("%s coughs!", Monnam(mon));
+		return rnd(damage)+5;
+	}
+	if (cansee(mon->mx, mon->my))
+		pline("%s struggles to breathe!", Monnam(mon));
+	return rnd(damage);
+}
+
 boolean
 inside_dust_cloud(p1, p2)
 genericptr_t p1;
@@ -1318,117 +1395,34 @@ genericptr_t p2;
     NhRegion *reg;
     struct monst *mtmp;
     int damage;
+    int dmg;
+    int adtyp;
     struct region_arg *cloud_data;
 
     reg = (NhRegion *) p1;
     cloud_data = (struct region_arg *) &reg->arg;
     damage = cloud_data->damage;
     if (p2 == NULL) {		/* This means *YOU* Bozo! */
-		if (Invulnerable)
-			return FALSE;
-		if (youracedata->mtyp == PM_SENTINEL_OF_MITHARDIR){
-			healup(damage, 0, FALSE, FALSE);
-		}
-		if (nonliving(youracedata) || Breathless)
-			return FALSE;
-		
-		if (uarmh && uarmh->otyp == SHEMAGH){
-			if (!rn2(4))
-				pline("The %s protects you from the dust!", simple_typename(uarmh->otyp));
-			
-			return FALSE;
-		}
-		if (ublindf && ublindf->otyp == TOWEL){
-			if (!rn2(4))
-				pline("The %s protects you from the dust!", simple_typename(ublindf->otyp));
-
-			return FALSE;
-		}
-		if (!Blind)
-			make_blinded(1L, FALSE);
-		if(damage > 3 && !rn2(20) && !Sick_resistance){ //Only a large dust storm
-			//Dormant spores
-			make_sick(Sick ? Sick/2L + 1L : ACURR(A_CON)*300L, //~3000 turns
-				"white spores", TRUE, SICK_NONVOMITABLE);
-			You("are covered with dust and can barely breathe!");
-			losehp(rnd(damage), "dust storm", KILLED_BY_AN);
-			nomul(0, NULL);
-		} else if(!rn2(10) && !is_anhydrous(youracedata)){
-			//Salt
-			You("are covered with dust and can barely breathe!");
-			pline("Salt dust burns your %s!", makeplural(body_part(LUNG)));
-			if(!Separate_Respiration)
-				You("cough and spit %s!", body_part(BLOOD));
-			losehp(rnd(damage)+5, "dust storm", KILLED_BY_AN);
-			nomul(0, NULL);
-		} else {
-			You("are covered with dust and can barely breathe!");
-			losehp(rnd(damage), "dust storm", KILLED_BY_AN);
+		dmg = mithardir_dust_inhale(&youmonst, damage, &adtyp);
+		if (dmg >= 0) {
+			losehp(dmg, "dust storm", KILLED_BY_AN);
 			nomul(0, NULL);
 		}
 		return FALSE;
     } else {			/* A monster is inside the cloud */
 		mtmp = (struct monst *) p2;
 
-		if (mtmp->mtyp == PM_SENTINEL_OF_MITHARDIR){
-			mtmp->mhp = min(mtmp->mhp+damage, mtmp->mhpmax);
-		}
-		struct obj *otmp = which_armor(mtmp, W_ARMH);
-		
-		if (otmp && otmp->otyp == SHEMAGH)
-			return FALSE;
-
-		otmp = which_armor(mtmp, W_TOOL);
-		if (otmp && otmp->otyp == TOWEL)
-			return FALSE;
-		
-		/* Non living or non breathing are not concerned */
-		if (!nonliving(mtmp->data) && !breathless_mon(mtmp)) {
+		dmg = mithardir_dust_inhale(mtmp, damage, &adtyp);
+		if (dmg >= 0) {
 			if(heros_fault(reg)) setmangry(mtmp);
-			if (haseyes(mtmp->data) && mtmp->mcansee) {
-				mtmp->mblinded = 1;
-				mtmp->mcansee = 0;
-			}
-			if(!rn2(20) && !resists_sickness(mtmp)){
-				//Dormant spores
-				if (cansee(mtmp->mx, mtmp->my))
-					pline("%s looks sick!", Monnam(mtmp));
-				mtmp->mhp -= rnd(damage)+5+mtmp->m_lev;
-				if (mtmp->mhp <= 0) {
-					if (heros_fault(reg))
-						killed(mtmp);
-					else
-						monkilled(mtmp, "dust cloud", AD_DRST);
-					if (mtmp->mhp <= 0) {	/* not lifesaved */
-						return TRUE;
-					}
-				}
-			} else if(!rn2(10) && !is_anhydrous(mtmp->data)){
-				//Salt
-				if (cansee(mtmp->mx, mtmp->my))
-					pline("%s coughs!", Monnam(mtmp));
-				mtmp->mhp -= rnd(damage) + 5;
-				if (mtmp->mhp <= 0) {
-					if (heros_fault(reg))
-						killed(mtmp);
-					else
-						monkilled(mtmp, "dust cloud", AD_PHYS);
-					if (mtmp->mhp <= 0) {	/* not lifesaved */
-						return TRUE;
-					}
-				}
-			} else {
-				if (cansee(mtmp->mx, mtmp->my))
-					pline("%s struggles to breathe!", Monnam(mtmp));
-				mtmp->mhp -= rnd(damage);
-				if (mtmp->mhp <= 0) {
-					if (heros_fault(reg))
-						killed(mtmp);
-					else
-						monkilled(mtmp, "dust cloud", AD_PHYS);
-					if (mtmp->mhp <= 0) {	/* not lifesaved */
-						return TRUE;
-					}
+			mtmp->mhp -= dmg;
+			if (mtmp->mhp <= 0) {
+				if (heros_fault(reg))
+					killed(mtmp);
+				else
+					monkilled(mtmp, "dust cloud", adtyp);
+				if (mtmp->mhp <= 0) {	/* not lifesaved */
+					return TRUE;
 				}
 			}
 		}

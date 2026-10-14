@@ -1786,13 +1786,14 @@ cast_protection()
 	}
 }
 
-/* Attempts to abjure all adjacent summoned creatures 
+/* Attempts to abjure all adjacent summoned creatures, or only the hostile ones
+ * if hostile_only is TRUE.
  * Monsters may roll to resist.
  * If they fail, they are immediately dispelled.
  * If they suceeed, non-permanent summons' durations are halved.
  */
 void
-cast_abjuration()
+cast_abjuration(boolean hostile_only)
 {
 	struct monst * mtmp;
 	int i, x, y;
@@ -1802,7 +1803,7 @@ cast_abjuration()
 	for (i=0; i<8; i++) {
 		x = u.ux + xdir[i];
 		y = u.uy + ydir[i];
-		if ((mtmp = m_at(x, y)) && get_mx(mtmp, MX_ESUM)) {
+		if ((mtmp = m_at(x, y)) && get_mx(mtmp, MX_ESUM) && !(hostile_only && mtmp->mpeaceful)) {
 			resisted = resist(mtmp, SPBOOK_CLASS, 0, TRUE);
 			dur = timer_duration_remaining(get_timer(mtmp->timed, DESUMMON_MON));
 			if (!resisted)
@@ -4996,7 +4997,7 @@ dothrowspell:
 			pline1(nothing_happens);
 		break;
 	case SPE_ABJURATION:
-		cast_abjuration();
+		cast_abjuration(FALSE);
 		break;
 	case SPE_MASS_HEALING:
 		cast_mass_healing(pseudo);
@@ -6014,6 +6015,7 @@ int spell;
 	int chance, splcaster, special, statused, casting_stat = base_casting_stat();
 	int difficulty;
 	int skill;
+	int caster_level;
 	
 	if(!spellev(spell)) return 0;
 	if(Deadmagic && casting_stat == A_INT) return 0;
@@ -6297,7 +6299,7 @@ int spell;
 			splcaster += uarmfbon;
 	}
 
-	if (uarms) {
+	if (uarms && !check_mutation(AAT_SHIELD_AURA)) {
 		splcaster += casting_stat == A_CHA ? 0 : urole.spelshld;
 	}
 
@@ -6352,7 +6354,15 @@ int spell;
 	 */
 	skill = P_SKILL(spell_skilltype(spellid(spell)));
 	skill = max(skill,P_UNSKILLED) - 1;	/* unskilled => 0 */
-	difficulty= (spellev(spell)-1) * 4 - ((skill * 6) + (u.ulevel/3) + 1);
+	caster_level = u.ulevel;
+	// Pre-difficulty adjustments based on mutations
+	if(CLARITY_MUDRA){
+		skill += 1;
+		caster_level += caster_level/3;
+		splcaster -= urole.spelarmr;
+		chance += 44;
+	}
+	difficulty= (spellev(spell)-1) * 4 - ((skill * 6) + (caster_level/3) + 1);
 	if(check_mutation(TT_EXTRA_FINGERS)){
 		splcaster -= urole.spelarmr;
 		difficulty -= 3;
@@ -6388,7 +6398,7 @@ int spell;
 	if(size_adjust < 1)
 		size_adjust = 1;
 	else size_adjust += 1;
-	if (uarms && casting_stat != A_CHA && ((metal_blocks_spellcasting(uarms)) || weight(uarms) > ((int) objects[BUCKLER].oc_weight)*size_adjust)) {
+	if (uarms && casting_stat != A_CHA && !check_mutation(AAT_SHIELD_AURA) && ((metal_blocks_spellcasting(uarms)) || weight(uarms) > ((int) objects[BUCKLER].oc_weight)*size_adjust)) {
 		if (spellid(spell) == urole.spelspec) {
 			chance /= 2;
 		} else {

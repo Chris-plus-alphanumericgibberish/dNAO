@@ -4878,6 +4878,61 @@ Am_hit(struct monst *magr, struct monst *mdef, struct obj *mb, int *dmgptr, int 
 }
 
 
+/* Add the bonus damage granted by the hero's astras to a hit on mdef by magr with otmp. */
+boolean
+astra_dbon(struct obj *otmp, struct monst *magr, struct monst *mdef, int basedmg, int *plusdmgptr, int *truedmgptr)
+{
+	int original_truedmgptr = *truedmgptr;
+	boolean youdef = (mdef == &youmonst);
+	struct permonst *pd = youdef ? youracedata : mdef->data;
+
+	if(astra_empowers(magr, AAT_MOVANIC_ASTRA) && !Fire_res(mdef)){
+		int fire_dmg = d(4, 6) + otmp->spe;
+		if(fire_dmg > 0)
+			*truedmgptr += elemental_dmg_resistance(mdef, magr, fire_dmg, AD_FIRE);
+	}
+	if(astra_empowers(magr, AAT_ACIDIC_ASTRA) && !Acid_res(mdef)){
+		int acid_dmg = d(4, 6) + otmp->spe;
+		if(acid_dmg > 0)
+			*truedmgptr += elemental_dmg_resistance(mdef, magr, acid_dmg, AD_ACID);
+	}
+	if(astra_empowers(magr, AAT_WATERY_ASTRA)){
+		struct obj *cloak = youdef ? uarmc : which_armor(mdef, W_ARMC);
+
+		/* a greased cloak sheds the water, though the water may dissolve the grease */
+		if(cloak && cloak->greased){
+			if(!rn2(cloak->blessed ? 4 : 2)){
+				cloak->greased = 0;
+				if(youdef)
+					pline("The layer of grease on your %s dissolves.", xname(cloak));
+				else if(canseemon(mdef))
+					pline("The layer of grease on %s's %s dissolves.", mon_nam(mdef), xname(cloak));
+			}
+		}
+		else if(!(youdef ? Waterproof : mon_resistance(mdef, WATERPROOF))){
+			int water_dmg = d(3, 6) + otmp->spe;
+			if(water_dmg > 0)
+				*truedmgptr += water_dmg * ((flaming(pd) || is_iron(pd)) ? 2 : 1);
+		}
+	}
+	return *truedmgptr != original_truedmgptr;
+}
+
+/* Add bonus damage from the hero's graces to a hit on mdef by magr with otmp. */
+boolean
+grace_dbon(struct obj *otmp, struct monst *magr, struct monst *mdef, int basedmg, int *plusdmgptr, int *truedmgptr)
+{
+	int original_truedmgptr = *truedmgptr;
+
+	if(otmp->otyp == CRYSTAL_SWORD && full_grace_empowers(magr, AAT_GRACE_CRYSTAL) && !Magic_res(mdef)){
+		double mult = 1;
+		if(magm_vulnerable(mdef))
+			mult *= 1.5;
+		*truedmgptr += mult*basedmg;
+	}
+	return *truedmgptr != original_truedmgptr;
+}
+
 /* special damage bonus */
 /* returns FALSE if no bonus damage was applicable */
 /* Just do bonus damage, don't make any modifications to the defender */
@@ -5957,6 +6012,19 @@ struct obj *otmp;
 	}
 }
 
+/* Return TRUE if otmp's purity grants its wielder magr (the hero or a monster, which may be null) a bonus to damage. */
+boolean
+grants_purity_bonus(struct obj *otmp, struct monst *magr)
+{
+	int amalg_otyp = otmp->oartifact == ART_AMALGAMATED_SKIES ? artinstance[ART_SKY_REFLECTED].ZerthOtyp : 0;
+
+	if(!(pure_weapon(otmp) || (amalg_otyp && pure_otyp(amalg_otyp))) || otmp->spe < 6 || on_level(&spire_level,&u.uz))
+		return FALSE;
+	if(magr == &youmonst)
+		return Upolyd ? (u.mh == u.mhmax) : (u.uhp == u.uhpmax);
+	return (magr && magr->mhp == magr->mhpmax);
+}
+
 /*  */
 void
 otyp_hit(magr, mdef, otmp, basedmg, plusdmgptr, truedmgptr, dieroll, hittxt, printmessages, direct_weapon)
@@ -6340,28 +6408,8 @@ boolean direct_weapon;
 		*truedmgptr += bonus;
 	}
 	
-	if(pure_weapon(otmp) && otmp->spe >= 6 && !on_level(&spire_level,&u.uz)){
-		if(youagr){
-			if(Upolyd && u.mh == u.mhmax)
-				*plusdmgptr += basedmg*.2;
-			else if(!Upolyd && u.uhp == u.uhpmax)
-				*plusdmgptr += basedmg*.2;
-		} else {
-			if(magr && magr->mhp == magr->mhpmax)
-				*plusdmgptr += basedmg*.2;
-		}
-	}
-	else if(amalg_otyp && pure_otyp(amalg_otyp) && otmp->spe >= 6 && !on_level(&spire_level,&u.uz)){
-		if(youagr){
-			if(Upolyd && u.mh == u.mhmax)
-				*plusdmgptr += basedmg*.2;
-			else if(!Upolyd && u.uhp == u.uhpmax)
-				*plusdmgptr += basedmg*.2;
-		} else {
-			if(magr && magr->mhp == magr->mhpmax)
-				*plusdmgptr += basedmg*.2;
-		}
-	}
+	if(grants_purity_bonus(otmp, magr))
+		*plusdmgptr += basedmg*.2;
 	
 	if(dark_weapon(otmp) && otmp->spe >= 6 && !on_level(&spire_level,&u.uz)){
 		if(youagr){
@@ -6848,6 +6896,8 @@ boolean printmessages; /* print generic elemental damage messages */
 		spec_dbon(otmp, mdef, basedmg, plusdmgptr, truedmgptr, magr);
 	if (!check_oprop(otmp, OPROP_NONE))
 		oproperty_dbon(otmp, magr, mdef, basedmg, plusdmgptr, truedmgptr);
+	astra_dbon(otmp, magr, mdef, basedmg, plusdmgptr, truedmgptr);
+	grace_dbon(otmp, magr, mdef, basedmg, plusdmgptr, truedmgptr);
 	if (otmp->obj_material == MERCURIAL)
 		material_dbon(otmp, magr, mdef, basedmg, plusdmgptr, truedmgptr, dieroll);
 	
@@ -8506,7 +8556,7 @@ boolean printmessages; /* print generic elemental damage messages */
 	}
 
 	/* water damage to inventory */
-	if (check_oprop(otmp, OPROP_WATRW)) {
+	if (check_oprop(otmp, OPROP_WATRW) || astra_empowers(magr, AAT_WATERY_ASTRA)) {
 		water_damage(youdef ? invent : mdef->minvent, FALSE, FALSE, FALSE, mdef);
 
 		struct obj *cloak;
@@ -16406,6 +16456,8 @@ do_passive_attacks()
 {
 	struct monst *mtmp;
 	struct obj *armor;
+	/* storm eladrin aasimar only lash out once badly hurt */
+	boolean eladrin_hurt = eladrin_low_hp();
 	if(Invulnerable)
 		return;
 
@@ -16428,13 +16480,14 @@ do_passive_attacks()
 			dochrombite(&youmonst);
 		if(uring_art(ART_STAR_EMPEROR_S_RING))
 			dostarblades(&youmonst);
-		if(flags.aasimar_subtype == AASIMAR_SUBTYPE_COURE && u.ulevel >= 14 && rn1(17, 13) < u.ulevel)
+		/* Coure and Gae lash out whatever their HP, in place of their first grace */
+		if(flags.aasimar_subtype == AASIMAR_SUBTYPE_COURE && u.ulevel >= 14 && rn1(20, 10) < u.ulevel)
 			dostarblades(&youmonst);
-		if(storm_aasimar(flags.aasimar_subtype) && u.ulevel >= 14 && rn1(17, 13) < u.ulevel)
+		if(storm_aasimar(flags.aasimar_subtype) && u.ulevel >= 14 && eladrin_hurt && rn1(20, 10) < u.ulevel)
 			dostorm(&youmonst);
-		if(Race_if(PM_DOKKIMAR) && Insight >= 11 && (rn2(30)+rn2(30)) < u.ulevel)
+		if(flags.aasimar_type == AASIMAR_TYPE_IKSH_NA && Insight >= 11 && (rn2(30)+rn2(30)) < u.ulevel)
 			doikshna_gaze(&youmonst);
-		if(flags.aasimar_subtype == AASIMAR_SUBTYPE_GAE && u.ulevel >= 14 && rn1(17, 13) < u.ulevel)
+		if(flags.aasimar_subtype == AASIMAR_SUBTYPE_GAE && u.ulevel >= 14 && rn1(20, 10) < u.ulevel)
 			dovines(&youmonst);
 		if(check_rot(ROT_CENT))
 			dorotbite(&youmonst);
@@ -16878,7 +16931,7 @@ int
 soth_weapon_damage_turn(obj)
 struct obj *obj;
 {
-	unsigned long int hashed = hash((unsigned long) (monstermoves/100 + obj->o_id + hash(OPROP_SOTHW)));
+	unsigned long int hashed = hash((unsigned long) (monstermoves/100 + hash(OPROP_SOTHW + obj->o_id)));
 	switch(hashed%8){
 		case 0: return AD_STTP;
 		case 1: return AD_VAMP;

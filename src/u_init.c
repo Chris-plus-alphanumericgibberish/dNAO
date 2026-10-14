@@ -2409,7 +2409,7 @@ u_init()
 		if(Race_if(PM_VAMPIRE) && !u.uroleplay.pauper && !u.uroleplay.nudist){
 			ini_inv(Ironmask);
 		}
-		if(Race_if(PM_AASIMAR) && flags.initalign == INITALIGN_CHAOTIC){
+		if(RACE_IF_AASIMAR && flags.initalign == INITALIGN_CHAOTIC){
 			ini_inv(Hood);
 		}
         knows_object(SKELETON_KEY);
@@ -2851,7 +2851,7 @@ u_init()
 		break;
 #endif
 	case PM_UNDEAD_HUNTER:
-		if(Race_if(PM_VAMPIRE) || Race_if(PM_AASIMAR)){
+		if(Race_if(PM_VAMPIRE) || RACE_IF_AASIMAR){
 			switch(rn2(5)){
 			case 0:
 				//UndeadHunter[U_WEAPON].trotyp = CANE;
@@ -3468,6 +3468,10 @@ u_init()
 				flags.aasimar_type = AASIMAR_TYPE_CLOUDFACE;
 			}
 		}
+		/* Not currently reachable: Kensei don't allow aasimar */
+		else if(Role_if(PM_KENSEI) && flags.initalign == INITALIGN_NEUTRAL){
+			flags.aasimar_type = AASIMAR_TYPE_SURYA;
+		}
 		else {
 			flags.aasimar_type = rnd(3);
 			if(flags.aasimar_type == AASIMAR_TYPE_ELADRIN){
@@ -3477,9 +3481,12 @@ u_init()
 					flags.aasimar_subtype = rnd(LAST_UNCOMMON_ELADRIN_SUBTYPE - LAST_COMMON_ELADRIN_SUBTYPE) + LAST_COMMON_ELADRIN_SUBTYPE;
 				}
 			}
+			else if(flags.aasimar_type == AASIMAR_TYPE_ARCHON){
+				flags.aasimar_subtype = rn1(LAST_ARCHON_SUBTYPE - FIRST_ARCHON_SUBTYPE + 1, FIRST_ARCHON_SUBTYPE);
+			}
 		}
 	}
-	else if(Race_if(PM_TIEFLING) || Race_if(PM_DARK_FEY_RI)){
+	else if(RACE_IF_TIEFLING){
 		// int mutation_levels[] = {3,10,14,18,22,26};
 		int mutation_levels[] = {3,7,11,15,19,23,27};
 		for(int i=0; i<SIZE(mutation_levels); i++){
@@ -3645,7 +3652,7 @@ register struct trobj *trop;
 				set_material_gm(obj, MITHRIL);
 			}
 			if(Role_if(PM_UNDEAD_HUNTER)){
-				if((Race_if(PM_VAMPIRE) || Race_if(PM_AASIMAR)) && obj->otyp != HIGH_BOOTS){
+				if((Race_if(PM_VAMPIRE) || RACE_IF_AASIMAR) && obj->otyp != HIGH_BOOTS){
 					if(obj->obj_material == LEATHER || obj->otyp == TRICORN){
 						set_material_gm(obj, CLOTH);
 						if(obj->otyp == GLOVES)

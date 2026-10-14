@@ -11,6 +11,7 @@
 
 /*	These routines provide basic data for any type of monster. */
 STATIC_DCL void FDECL(set_template_data, (struct permonst *, struct permonst *, int));
+STATIC_DCL int FDECL(passive_max_dmg, (struct monst *, struct monst *, struct attack *, int));
 
 char * nameless_horror_name;
 
@@ -393,6 +394,91 @@ mon_heal_injuries(struct monst *mon, int count)
 		n++;
 	}
 	return n;
+}
+
+/* Cure mon of all its madnesses (not spores, which are the effects of a physical infection). */
+void
+mon_cure_madnesses(struct monst *mon)
+{
+	mon->mcrazed = 0;
+	mon->mdisrobe = 0;
+	mon->mnotlaugh = 1;
+	mon->mlaughing = 0;
+	mon->msanctity = 0;
+	mon->mgluttony = 0;
+	mon->mfrigophobia = 0;
+	mon->mcannibal = 0;
+	mon->mrage = 0;
+	mon->margent = 0;
+	mon->msuicide = 0;
+	mon->mnudist = 0;
+	mon->mophidio = 0;
+	mon->marachno = 0;
+	mon->mentomo = 0;
+	mon->mthalasso = 0;
+	mon->mhelmintho = 0;
+	mon->mparanoid = 0;
+	mon->mtalons = 0;
+	mon->mdreams = 0;
+	mon->msciaphilia = 0;
+	mon->mforgetful = 0;
+	mon->mapostasy = 0;
+	mon->mtoobig = 0;
+	mon->mrotting = 0;
+	mon->mformication = 0;
+	mon->mscorpions = 0;
+	mon->mvermin = 0;
+	mon->mcaterpillars = 0;
+}
+
+/* Fix mon's temporary troubles (status effects, curses, positive study, and injuries if at full HP); mft_flags (MFT_*) selects additional fixes. */
+void
+mon_fix_troubles(struct monst *mon, int mft_flags)
+{
+	if(mft_flags & MFT_HEAL)
+		mon->mhp = mon->mhpmax;
+	if(mon->mhp >= mon->mhpmax)
+		mon_heal_injuries(mon, HEAL_ALL_INJURIES);
+	if(mft_flags & MFT_STUDY)
+		mon->ustdym = 0;
+	if(mft_flags & MFT_UNCANCEL)
+		set_mcan(mon, FALSE);
+	if(mft_flags & MFT_COOLDOWN)
+		mon->mspec_used = 0;
+	if(mft_flags & MFT_MADNESS){
+		mon_cure_madnesses(mon);
+		mon->mspores = 0;
+	}
+	if(mft_flags & MFT_TRAPPED){
+		mon->mtrapped = 0;
+		mon->entangled_otyp = 0;
+		mon->entangled_oid = 0;
+	}
+
+	if(mon->mstdy > 0)
+		mon->mstdy = 0;
+	mon->mflee = 0;
+	mon->mfleetim = 0;
+	mon->mberserk = 0;
+	mon->mcansee = 1;
+	mon->mblinded = 0;
+	mon->mcanhear = 1;
+	mon->mdeafened = 0;
+	mon->mcanmove = 1;
+	mon->mfrozen = 0;
+	mon->msleeping = 0;
+	mon->mstun = 0;
+	mon->mconf = 0;
+	mon->mpunctured = 0;
+	mon->mbleed = 0;
+	mon->mgmld_throat = 0;
+	mon->mgmld_skin = 0;
+	mon->owrk = 0;
+	mon->ruh = 0;
+	mon->shey = 0;
+	mon->luahv = 0;
+	mon->nean = 0;
+	mon->nooh = 0;
 }
 
 /*
@@ -1792,13 +1878,13 @@ int template;
 		((attk->aatyp > AT_HUGS && !weapon_aatyp(attk->aatyp) \
 			&& !(attk->aatyp == AT_BREA && ptr->mlet == S_DRAGON)) || attk->aatyp == AT_NONE)) \
 	&& (insert = TRUE))
-#define end_insert_okay(specvar) (!(specvar) && (is_null_attk(attk) || attk->aatyp == AT_NONE) && (insert = TRUE))
+#define end_insert_okay(specvar) (!(specvar) && (is_null_attk(attk) || attk->aatyp == AT_NONE || attk->aatyp == AT_MNTL) && (insert = TRUE))
 #define maybe_insert() if(insert) {for(j=NATTK-i-1;j>0;j--)attk[j]=attk[j-1];*attk=noattack;insert=FALSE;}
 		/* zombies/skeletons get a melee attack if they don't have any (likely due to disallowed aatyp) */
 		if ((template == ZOMBIFIED || template == ROT_ZOMBIE || template == SPORE_ZOMBIE || template == SKELIFIED || template == SPARK_SKELETON || template == MINDLESS) && (
 			i == 0 && (!nolimbs(ptr) || has_head(ptr)) && (
 			is_null_attk(attk) ||
-			(attk->aatyp == AT_NONE || attk->aatyp == AT_BOOM)
+			(attk->aatyp == AT_NONE || attk->aatyp == AT_MNTL || attk->aatyp == AT_BOOM)
 			) && (insert = TRUE)
 			)
 		){
@@ -2972,7 +3058,7 @@ struct monst *magr;
 		!is_null_attk(attk);
 		attk = getattk(magr, (struct monst *) 0, res, &indexnum, &prev_attk, FALSE, subout, &tohitmod)
 	){
-		if(attk->aatyp != AT_NONE && attk->aatyp != AT_SPIT && attk->aatyp != AT_BREA
+		if(attk->aatyp != AT_NONE && attk->aatyp != AT_MNTL && attk->aatyp != AT_SPIT && attk->aatyp != AT_BREA
 		&& attk->aatyp != AT_BOOM && attk->aatyp != AT_GAZE && attk->aatyp != AT_ARRW
 		&& attk->aatyp != AT_TNKR && attk->aatyp != AT_WDGZ && attk->aatyp != AT_REND
 		)
@@ -3003,7 +3089,7 @@ has_multi_or_nonweapon_nonkick_attk(struct monst *magr)
 		!is_null_attk(attk);
 		attk = getattk(magr, (struct monst *) 0, res, &indexnum, &prev_attk, FALSE, subout, &tohitmod)
 	){
-		if(attk->aatyp != AT_NONE && attk->aatyp != AT_SPIT && attk->aatyp != AT_BREA
+		if(attk->aatyp != AT_NONE && attk->aatyp != AT_MNTL && attk->aatyp != AT_SPIT && attk->aatyp != AT_BREA
 		&& attk->aatyp != AT_BOOM && attk->aatyp != AT_GAZE && attk->aatyp != AT_ARRW
 		&& attk->aatyp != AT_TNKR && attk->aatyp != AT_WDGZ && attk->aatyp != AT_REND
 		&& attk->aatyp != AT_KICK
@@ -3826,32 +3912,125 @@ int dtyp;
     return dmgtype_fromattack(ptr, dtyp, AT_ANY) ? TRUE : FALSE;
 }
 
-/* returns the maximum damage a defender can do to the attacker via
- * a passive defense */
-int
-max_passive_dmg(mdef, magr)
-    register struct monst *mdef, *magr;
+/* Return the most damage mdef's passive attack attk, acting as damage type adtyp, could do to magr in one retaliation (0 if it can't harm magr). */
+STATIC_OVL int
+passive_max_dmg(struct monst *mdef, struct monst *magr, struct attack *attk, int adtyp)
 {
-    int	i, dmg = 0;
-    uchar adtyp;
+	int dmg, extra = 0;
+	boolean harms, vulnerable = FALSE;
+	struct obj *otmp;
+	boolean shemagh, towel;
 
-    for(i = 0; i < NATTK; i++)
-	if(mdef->data->mattk[i].aatyp == AT_NONE ||
-		mdef->data->mattk[i].aatyp == AT_BOOM) {
-	    adtyp = mdef->data->mattk[i].adtyp;
-	    if ((adtyp == AD_ACID && !resists_acid(magr)) ||
-		    (adtyp == AD_COLD && !resists_cold(magr)) ||
-		    (adtyp == AD_FIRE && !resists_fire(magr)) ||
-		    (adtyp == AD_ELEC && !resists_elec(magr)) ||
-		    adtyp == AD_PHYS) {
-		dmg = mdef->data->mattk[i].damn;
-		if(!dmg) dmg = mdef->data->mlevel+1;
-		dmg *= mdef->data->mattk[i].damd;
-	    } else dmg = 0;
-
-	    return dmg;
+	otmp = which_armor(magr, W_ARMH);
+	shemagh = (otmp && otmp->otyp == SHEMAGH);
+	otmp = which_armor(magr, W_TOOL);
+	towel = (otmp && otmp->otyp == TOWEL);
+	switch(adtyp){
+		case AD_ACID:
+			harms = !resists_acid(magr);
+			break;
+		case AD_COLD:
+			harms = !resists_cold(magr);
+			vulnerable = (attk->aatyp == AT_MNTL && cold_vulnerable(magr));
+			break;
+		case AD_FIRE:
+			harms = !resists_fire(magr);
+			vulnerable = (attk->aatyp == AT_MNTL && fire_vulnerable(magr));
+			break;
+		case AD_ELEC:
+			harms = !resists_elec(magr);
+			vulnerable = (attk->aatyp == AT_MNTL && shock_vulnerable(magr));
+			break;
+		case AD_PHYS:
+			harms = TRUE;
+			break;
+		case AD_STAR:
+			harms = (attk->aatyp == AT_MNTL && hates_silver(magr->data));
+			break;
+		case AD_HOLY:
+			harms = (attk->aatyp == AT_MNTL && hates_holy(magr->data));
+			break;
+		case AD_WET:
+			harms = (attk->aatyp == AT_MNTL && is_iron(magr->data));
+			break;
+		case AD_BLND:
+			harms = (attk->aatyp == AT_MNTL && !nonliving(magr->data) && !breathless_mon(magr)
+				&& !shemagh && !towel);
+			if(harms && In_mithardir_quest(&u.uz))
+				extra = !resists_sickness(magr) ? 5 + magr->m_lev
+					: !is_anhydrous(magr->data) ? 5 : 0;
+			break;
+		case AD_PYCL:
+			harms = (attk->aatyp == AT_MNTL);
+			vulnerable = (harms && !resists_cold(magr) && cold_vulnerable(magr) && !towel);
+			break;
+		case AD_DRLI:
+			harms = (attk->aatyp == AT_MNTL && !resists_drli(magr));
+			break;
+		default:
+			harms = FALSE;
+			break;
 	}
-    return 0;
+	if(!harms)
+		return 0;
+	dmg = attk->damn;
+	if(!dmg)
+		dmg = mdef->data->mlevel+1;
+	dmg *= attk->damd;
+	if(vulnerable)
+		dmg = dmg * 3 / 2;
+	/* a leaf mantle's first drain in a chain takes a hit die's worth of max HP, and kills level-0 monsters outright */
+	if(adtyp == AD_DRLI){
+		dmg = max(dmg, hd_size(magr->data));
+		if(magr->m_lev == 0)
+			dmg = max(dmg, magr->mhp);
+	}
+	return dmg + extra;
+}
+
+/* Return the most damage mdef's passive defenses (AT_NONE and AT_BOOM passives,
+ * and AT_MNTL mantles) could do to magr in one retaliation: the largest maximum
+ * roll (half again more against an element magr is vulnerable to, plus anything
+ * a passive adds on top of its roll) among the passives that could harm it.
+ * Elemental passives and mantles don't harm attackers resisting their element;
+ * mantles of silver stars only harm silver-haters, aurora mantles only
+ * holy-haters, and water mantles only iron
+ * creatures. Dust mantles only harm living, breathing attackers without a
+ * shemagh or towel, and in Mithardir their dust may also carry spores (5 +
+ * magr's level more damage, unless magr resists sickness) or salt (5 more,
+ * unless magr is anhydrous). Ash mantles can always scour, and freeze for half
+ * again more if magr is vulnerable to cold, doesn't resist it, and has no towel.
+ * Leaf mantles only harm attackers that don't resist level drain: they drain up
+ * to magr's hit die size of max HP once per attack chain and do their rolled
+ * damage after that, counted as the larger of the two, and kill level-0
+ * attackers (counted as at least magr's current HP).
+ * A four-seasons mantle counts as the most harmful of the mantles its seasons act
+ * as, since which season it's in can't be seen.
+ */
+int
+max_passive_dmg(struct monst *mdef, struct monst *magr)
+{
+	int i, season, dmg, maxdmg = 0;
+	struct attack *attk;
+
+	for(i = 0; i < NATTK; i++){
+		attk = &mdef->data->mattk[i];
+		if(attk->aatyp != AT_NONE && attk->aatyp != AT_BOOM && attk->aatyp != AT_MNTL)
+			continue;
+		if(attk->aatyp == AT_MNTL && attk->adtyp == AD_SESN){
+			for(season = SEASON_WINTER; season <= SEASON_FALL; season++){
+				dmg = passive_max_dmg(mdef, magr, attk, mantle_adtyp_for_season(season));
+				if(dmg > maxdmg)
+					maxdmg = dmg;
+			}
+		}
+		else {
+			dmg = passive_max_dmg(mdef, magr, attk, attk->adtyp);
+			if(dmg > maxdmg)
+				maxdmg = dmg;
+		}
+	}
+	return maxdmg;
 }
 
 #endif /* OVL1 */

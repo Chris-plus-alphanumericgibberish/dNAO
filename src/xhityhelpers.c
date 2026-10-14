@@ -1353,6 +1353,25 @@ find_freehand_set(void)
 	return ATKBP(NONE);
 }
 
+/* Return TRUE if mon (the hero or a monster) has a hand free to manipulate things. */
+boolean
+mon_freehand(struct monst *mon)
+{
+	struct obj *mwep;
+
+	if (mon == &youmonst)
+		return (boolean) freehand();
+	if (nohands(mon->data) || straitjacketed_mon(mon))
+		return FALSE;
+	mwep = MON_WEP(mon);
+	if (mwep && mwep->cursed && !is_weldproof_mon(mon)
+		&& (bimanual_mon(mwep, mon) || (which_armor(mon, W_ARMS) && which_armor(mon, W_ARMS)->cursed))
+		&& !has_extra_arms(mon)
+	)
+		return FALSE;
+	return TRUE;
+}
+
 boolean
 has_extra_arms(struct monst *mon)
 {
@@ -4279,7 +4298,11 @@ struct attack * attk;
 	int dy = sgn(tary - y(magr));
 	int nx, ny;
 	int result = 0;
-	int cleave_range = (mlev(magr) - 16)/2;
+	int cleave_range = is_dancer(youagr ? youracedata : magr->data) ? (mlev(magr) - 16)/2 : 0;
+	/* the hero's dance grace gives a range that starts earlier */
+	if(grace_empowers(magr, AAT_GRACE_DANCE))
+		cleave_range = max(cleave_range, mlev(magr)/5 + 1);
+	cleave_range = min(cleave_range, 7);
 	/*Not all attacks can cleave*/
 	if(attk->aatyp != AT_WEAP
 	 && attk->aatyp != AT_XWEP

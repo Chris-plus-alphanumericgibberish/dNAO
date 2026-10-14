@@ -783,6 +783,22 @@ long nmv;		/* number of moves */
 #endif /* OVLB */
 #ifdef OVL2
 
+/* Return the hero's beast mastery range (a distmin() distance), based on beast mastery skill. */
+int
+beast_mastery_range(void)
+{
+	int range = max(P_SKILL(P_BEAST_MASTERY), 1);
+	if(has_crook(uwep))
+		range++;
+	return range;
+}
+
+boolean
+in_beast_mastery_range(struct monst *mtmp)
+{
+	return distmin(mtmp->mx, mtmp->my, u.ux, u.uy) <= beast_mastery_range();
+}
+
 /* called when you move to another level */
 void
 keepdogs(pets_only, newlev, portal)
@@ -795,12 +811,8 @@ boolean portal;
 	int num_segs;
 	boolean stay_behind;
 	boolean all_pets = FALSE;
-	int pet_dist = P_SKILL(P_BEAST_MASTERY);
+	int pet_dist = beast_mastery_range();
 	int follow_dist;
-	if(pet_dist < 1)
-		pet_dist = 1;
-	if(has_crook(uwep))
-		pet_dist++;
 	if(u.specialSealsActive&SEAL_COSMOS ||
 		(uarmh && uarmh->oartifact == ART_CROWN_OF_THE_SAINT_KING) ||
 		(uarmh && uarmh->oartifact == ART_HELM_OF_THE_DARK_LORD)

@@ -2598,18 +2598,22 @@ struct obj * otmp;
 	if (!Is_spire(&u.uz) && !otmp->suppressed && otmp->spe && (!is_belt(otmp) || otmp->otyp == KIDNEY_BELT))
 	{
 		int spemult = 1; // out of 2
+		int spedef;
 		// shields get full enchantment to AC
 		if (is_shield(otmp))
 			spemult += 1;
 		// crystal armor bonus enchantment
-		if (otmp->otyp == CRYSTAL_PLATE_MAIL ||
-			otmp->otyp == CRYSTAL_HELM ||
-			otmp->otyp == CRYSTAL_BOOTS ||
-			otmp->otyp == CRYSTAL_SHIELD ||
-			otmp->otyp == CRYSTAL_GAUNTLETS)
+		if (is_crystal_armor(otmp))
 			spemult *= 2;
 
-		def += (otmp->spe * spemult + 0) / 2;
+		spedef = (otmp->spe * spemult + 0) / 2;
+		// Crystal synergy restores the original +10 enchantment "limit" of crystal armor.
+		if (crystal_grace_enchants(otmp))
+			spedef += spedef / 2;
+		// at full HP the crystal grace doubles crystal plate mail's enchantment to AC
+		if (crystal_grace_armor(otmp, TRUE))
+			spedef *= 2;
+		def += spedef;
 		
 		//Full spe bonus to AC on top of normal 1/2 bonus.
 		if(otmp->otyp == IMPERIAL_ELVEN_ARMOR && check_imp_mod(otmp, IEA_DEFLECTION))
@@ -2710,17 +2714,19 @@ arm_dr_bonus(struct obj * otmp, int slot)
 	if (!Is_spire(&u.uz) && !otmp->suppressed && otmp->spe && (!is_belt(otmp) || otmp->otyp == KIDNEY_BELT))
 	{
 		int spemult = 1; // out of 2
+		int spedef;
 		// shields get no enchantment to DR
 		if (is_shield(otmp))
 			spemult = 0;
 		// crystal armor bonus enchantment
-		if (otmp->otyp == CRYSTAL_PLATE_MAIL ||
-			otmp->otyp == CRYSTAL_HELM ||
-			otmp->otyp == CRYSTAL_BOOTS ||
-			otmp->otyp == CRYSTAL_GAUNTLETS)
+		if (is_crystal_armor(otmp))
 			spemult *= 2;
 
-		def += sgn(otmp->spe)*(abs(otmp->spe) * spemult + 1) / 2;
+		spedef = sgn(otmp->spe)*(abs(otmp->spe) * spemult + 1) / 2;
+		// Crystal synergy restores the original +10 enchantment "limit" of crystal armor.
+		if (crystal_grace_enchants(otmp))
+			spedef += spedef / 2;
+		def += spedef;
 	}
 
 	// artifact bonus def
@@ -2872,7 +2878,7 @@ base_uac()
 				uac -= Insight - 10;
 		}
 		if(!flat_foot){
-			if((is_rapier(uwep) && arti_phasing(uwep)) || 
+			if((can_parry_with(uwep, &youmonst) && arti_phasing(uwep)) || 
 				(uwep->otyp == LIGHTSABER && litsaber(uwep) && uwep->oartifact != ART_ANNULUS && uwep->ovar1_lightsaberHandle == 0)
 					) uac -= max(
 						min(
@@ -2983,7 +2989,10 @@ base_uac()
 	if(multi < 0 || mad_turn(MAD_SUICIDAL) || u.ustuck){
 		dexbonus = -5;
 	} else {
-		dexbonus += (int)( (ACURR(A_DEX)-11)/2 ); /*ranges from -5 to +7 (1 to 25) */
+		int dexmod = (int)( (ACURR(A_DEX)-11)/2 ); /*ranges from -5 to +7 (1 to 25) */
+		if(check_grace(AAT_GRACE_TRAPS))
+			dexmod = max(3, dexmod + dexmod*2/3);
+		dexbonus += dexmod;
 		if(u.umadness&MAD_RAGE && !BlockableClearThoughts){
 			dexbonus -= (NightmareAware_Insanity)/10;
 		}
@@ -3108,7 +3117,7 @@ find_ac()
 		uac -= (2 + material_def_bonus(uswapwep, 2, TRUE) + (swapwep_spe)/2 - min((int)greatest_erosion(uswapwep), 2))/2;
 
 	if(uwep){
-		if((is_rapier(uwep) && !arti_phasing(uwep)))
+		if((can_parry_with(uwep, &youmonst) && !arti_phasing(uwep)))
 			uac -= max(
 				min(
 				(ACURR(A_DEX)-13)/4,
@@ -3240,6 +3249,7 @@ int base_udr()
 	}
 
 	if(check_mutation(TT_DR_AURA)) udr += u.ulevel >= 30 ? 6 : (u.ulevel >= 14 ? 3 : 1);
+	if((check_mutation(AAT_HALO_PROTECTIVE) || check_mutation(AAT_FACE_PROTECTIVE)) && in_halo_light(&youmonst)) udr += AASIMAR_HALO_DR;
 
 	if (udr > 127) udr = 127;
 	if (udr < 0) udr = 0;
@@ -3390,6 +3400,14 @@ uchar aatyp;
 			case AASIMAR_TYPE_SERAPH:
 				if(slot == HEAD_DR)
 					bas_udr += u.ulevel >= 21 ? 7 : 3;
+			break;
+			case AASIMAR_TYPE_SURYA:
+				if(slot == HEAD_DR)
+					bas_udr += u.ulevel >= 21 ? 7 : 3;
+				if(slot == UPPER_TORSO_DR)
+					bas_udr += u.ulevel >= 24 ? 4 : 2;
+				else if(slot&(LOWER_TORSO_DR))
+					bas_udr += u.ulevel >= 24 ? 2 : 1;
 			break;
 			case AASIMAR_TYPE_DEVA:
 				if(slot == UPPER_TORSO_DR)

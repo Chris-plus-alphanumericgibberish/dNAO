@@ -57,6 +57,7 @@
 #define AT_JUGL		47	/* Juggles weapons */
 #define AT_SQUZ		48	/* Squeezes grappled opponent */
 #define AT_WING		49	/* Wing buffet; works like AT_CLAW, but concerns wing-guard armor (W_ARMW) instead of gloves */
+#define AT_MNTL		50	/* mantle: passive like AT_NONE, but may also stop or blunt blows */
 
 #define AT_WEAP		252	/* uses weapon */
 #define AT_XWEP		253	/* uses offhanded weapon */
@@ -78,6 +79,36 @@
 	(aatyp) == AT_MSPR || \
 	(aatyp) == AT_DSPR || \
 	(aatyp) == AT_ESPR \
+	)
+
+/* melee attacks that make contact and whose damage type is resolved by the melee hit code */
+#define melee_contact_at(aatyp)	(\
+		(aatyp) == AT_WEAP\
+		|| (aatyp) == AT_XWEP\
+		|| (aatyp) == AT_MARI\
+		|| (aatyp) == AT_DEVA\
+		|| (aatyp) == AT_JUGL\
+		|| (aatyp) == AT_CLAW\
+		|| (aatyp) == AT_BITE\
+		|| (aatyp) == AT_KICK\
+		|| (aatyp) == AT_BUTT\
+		|| (aatyp) == AT_TUCH\
+		|| (aatyp) == AT_STNG\
+		|| (aatyp) == AT_HUGS\
+		|| (aatyp) == AT_TENT\
+		|| (aatyp) == AT_WHIP\
+		|| (aatyp) == AT_LRCH\
+		|| (aatyp) == AT_LNCK\
+		|| (aatyp) == AT_5SQR\
+		|| (aatyp) == AT_5SBT\
+		|| (aatyp) == AT_REND\
+		|| (aatyp) == AT_VINE\
+		|| (aatyp) == AT_OBIT\
+		|| (aatyp) == AT_WBIT\
+		|| (aatyp) == AT_TAIL\
+		|| (aatyp) == AT_TONG\
+		|| (aatyp) == AT_SQUZ\
+		|| (aatyp) == AT_WING\
 	)
 
 #define is_bite_at(aatyp)	(\
@@ -328,5 +359,6 @@
 #define MM_AGR_STOP 0x08	/* aggressor stopped attacking for some reason other than being fully dead */
 #define MM_DEF_LSVD 0x10	/* defender died and was lifesaved */
 #define MM_REFLECT	0x20	/* for projectiles: projectile was reflected. */
+#define MM_MANTLE_BLAST	0x40	/* defender's mantle hit back even though no direct contact was made; cleared after passives */
 
 #endif /* MONATTK_H */

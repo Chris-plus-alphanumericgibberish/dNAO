@@ -2480,7 +2480,7 @@ boolean praying;	/* false means no messages should be given */
     p_god = on_altar() ? (god_at_altar(u.ux,u.uy)) : u.ualign.god;
     p_trouble = in_trouble();
 
-    if (is_demon(youracedata) && (!Race_if(PM_TIEFLING) && !Race_if(PM_DARK_FEY_RI)) && (galign(p_god) == A_LAWFUL || galign(p_god) == A_NEUTRAL)) {
+    if (is_demon(youracedata) && !RACE_IF_TIEFLING && (galign(p_god) == A_LAWFUL || galign(p_god) == A_NEUTRAL)) {
 	if (praying)
 	    pline_The("very idea of praying to a %s god is repugnant to you.",
 		  godlist[p_god].alignment ? "lawful" : "neutral");

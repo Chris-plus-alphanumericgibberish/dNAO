@@ -1238,19 +1238,7 @@ asGuardian:
 		if(mtmp->mvar_dreadPrayer_progress){
 			if(mtmp->mvar_dreadPrayer_progress < moves){
 				mtmp->mvar_dreadPrayer_progress = 0;
-				mtmp->mhp = mtmp->mhpmax;
-				mtmp->mspec_used = 0;
-				set_mcan(mtmp, FALSE);
-				mtmp->mflee = 0; mtmp->mfleetim = 0;
-				mtmp->mcrazed = 0; mtmp->mberserk = 0; mtmp->mdisrobe = 0;
-				mtmp->mcansee = 1; mtmp->mblinded = 0;
-				mtmp->mcanmove = 1; mtmp->mfrozen = 0;
-				mtmp->mnotlaugh = 1; mtmp->mlaughing = 0;
-				mtmp->msleeping = 0;
-				mtmp->mstun = 0; mtmp->mconf = 0;
-				mtmp->mpunctured = 0;
-				mtmp->owrk = 0; mtmp->ruh = 0; mtmp->shey = 0;
-				mtmp->luahv = 0; mtmp->nean = 0; mtmp->nooh = 0;
+				mon_fix_troubles(mtmp, MFT_HEAL|MFT_UNCANCEL|MFT_COOLDOWN|MFT_MADNESS|MFT_TRAPPED);
 				untame(mtmp, 0);
 				
 				u.ustdy = mtmp->m_lev;

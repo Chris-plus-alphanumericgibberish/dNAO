@@ -1898,6 +1898,17 @@ struct obj *obj;
 				map_invisible(u.ux+u.dx,u.uy+u.dy);
 			}
 		}
+		else if(mon->mspores){
+			mon->mspores = 0;
+		    if (canseemon(mon)) pline("%s looks clear-%sed!", Monnam(mon), mbodypart(mon, HEAD));
+			else {
+				if(shackles)
+					pline("Your broken shackles touch it!");
+				else
+					pline("Your staff touches it!");
+				map_invisible(u.ux+u.dx,u.uy+u.dy);
+			}
+		}
 		else if(has_template(mon, PLAGUE_TEMPLATE)){
 			set_template(mon, 0);
 			mon->mhpmax = max(3, (mon->m_lev * hd_size(mon->data))-1);
@@ -3881,7 +3892,7 @@ blood_draw(struct obj *obj)
 		any.a_int = 1;
 		add_menu(tmpwin, NO_GLYPH, &any , 'b', 0, ATR_NONE,
 			 "Exsanguinate yourself", MENU_UNSELECTED);
-		if(Race_if(PM_VAMPIRE) || (Role_if(PM_UNDEAD_HUNTER) && Race_if(PM_AASIMAR))){
+		if(Race_if(PM_VAMPIRE) || (Role_if(PM_UNDEAD_HUNTER) && RACE_IF_AASIMAR)){
 			any.a_int = 2;
 			add_menu(tmpwin, NO_GLYPH, &any , 'c', 0, ATR_NONE,
 				 "Distill your blood", MENU_UNSELECTED);

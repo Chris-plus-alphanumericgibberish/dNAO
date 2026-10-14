@@ -1035,7 +1035,7 @@ struct monst *mon;
 					base -= 6;
 			}
 		}
-		if((is_rapier(monwep) && arti_phasing(monwep)))
+		if((can_parry_with(monwep, mon) && arti_phasing(monwep)))
 			armac += mon_weapon_dam_bonus(mon->data, monwep, weapon_type(monwep));
 	}
 
@@ -1044,6 +1044,8 @@ struct monst *mon;
 	else {
 		struct obj * armor = which_armor(mon, W_ARM);
 		register int mondodgeac = mon->data->dac;
+		if(grace_empowers(mon, AAT_GRACE_TRAPS))
+			mondodgeac = max(3, mondodgeac + mondodgeac*2/3);
 		if(u.ustuck == mon)
 			mondodgeac = min(-5, mondodgeac);
 		else if(mon->permspeed == MSLOW)
@@ -1152,7 +1154,7 @@ struct monst *mon;
 	struct obj *monwep = MON_WEP(mon);
 	if(monwep){
 		int monwep_spe = (!monwep->suppressed && !Is_spire(&u.uz)) ? monwep->spe : 0;
-		if((is_rapier(monwep) && !arti_phasing(monwep)))
+		if((can_parry_with(monwep, mon) && !arti_phasing(monwep)))
 			armac += mon_weapon_dam_bonus(mon->data, monwep, weapon_type(monwep));
 		if(monwep->oartifact == ART_TOBIUME)
 			armac += max(monwep_spe,0);
@@ -1338,7 +1340,7 @@ struct monst *mon;
 	struct obj *monwep = MON_WEP(mon);
 	if(monwep){
 		int monwep_spe = (!monwep->suppressed && !Is_spire(&u.uz)) ? monwep->spe : 0;
-		if((is_rapier(monwep) && !arti_phasing(monwep)))
+		if((can_parry_with(monwep, mon) && !arti_phasing(monwep)))
 			armac += mon_weapon_dam_bonus(mon->data, monwep, weapon_type(monwep));
 		if(monwep->oartifact == ART_TOBIUME)
 			armac += max(monwep_spe,0);
@@ -1368,6 +1370,8 @@ struct monst *mon;
 	else {
 		struct obj * armor = which_armor(mon, W_ARM);
 		register int mondodgeac = mon->data->dac;
+		if(grace_empowers(mon, AAT_GRACE_TRAPS))
+			mondodgeac = max(3, mondodgeac + mondodgeac*2/3);
 		if(u.ustuck == mon)
 			mondodgeac = -5;
 		else if(mon->permspeed == MSLOW)
@@ -1502,6 +1506,8 @@ struct monst *mon;
 	}
 	if(has_syllable(mon->data) && mon->mvar_syllable == SYLLABLE_OF_SPIRIT__VAUL)
 		base += 10;
+	if(mon->mpeaceful && (check_mutation(AAT_HALO_PROTECTIVE) || check_mutation(AAT_FACE_PROTECTIVE)) && in_halo_light(mon))
+		base += AASIMAR_HALO_DR;
 	
 	return base;
 }
@@ -1539,6 +1545,8 @@ struct monst *mon;
 	}
 	if(has_syllable(mon->data) && mon->mvar_syllable == SYLLABLE_OF_SPIRIT__VAUL)
 		base += 10;
+	if(mon->mpeaceful && (check_mutation(AAT_HALO_PROTECTIVE) || check_mutation(AAT_FACE_PROTECTIVE)) && in_halo_light(mon))
+		base += AASIMAR_HALO_DR;
 	
 
 	if(!mon->mcan && mon->mstance != MSTANCE_MAGIC && !(mon->mtyp == PM_SHADOWSMITH && dimness(mon->mx,mon->my) <= 0)){

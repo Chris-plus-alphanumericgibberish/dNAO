@@ -781,6 +781,7 @@ struct obj {
 #define is_knight_sword(otmp) (\
 			    otmp->otyp == LONG_SWORD \
 			 || otmp->otyp == SILVERKNIGHT_SWORD \
+			 || (otmp->otyp == CRYSTAL_SWORD && has_mutation(AAT_GRACE_CRYSTAL)) \
 			)
 #define is_rapier(otmp)	(otmp->oclass == WEAPON_CLASS && (\
 			 otmp->otyp == RAPIER || \
@@ -788,6 +789,16 @@ struct obj {
 			 otmp->otyp == RAKUYO_SABER || \
 			 otmp->otyp == SOLDIER_S_RAPIER || \
 			 otmp->otyp == CROW_QUILL))
+#define is_crystal_armor(otmp)	((otmp)->otyp == CRYSTAL_PLATE_MAIL || \
+			 (otmp)->otyp == CRYSTAL_HELM || \
+			 (otmp)->otyp == CRYSTAL_BOOTS || \
+			 (otmp)->otyp == CRYSTAL_SHIELD || \
+			 (otmp)->otyp == CRYSTAL_GAUNTLETS)
+#define is_crystal_weapon(otmp)	((otmp)->otyp == CRYSTAL_SWORD)
+/* rapiers, or any one-handed weapon or weapon-tool if the hero's parry grace empowers mon */
+#define can_parry_with(otmp, mon)	(is_rapier(otmp) || \
+			 (((otmp)->oclass == WEAPON_CLASS || is_weptool(otmp)) \
+			  && grace_empowers((mon), AAT_GRACE_PARRY) && !bimanual_mon((otmp), (mon))))
 #define is_rakuyo(otmp)	(otmp->otyp == RAKUYO || \
 			 otmp->otyp == RAKUYO_SABER || \
 			 otmp->otyp == RAKUYO_DAGGER)
@@ -1292,8 +1303,8 @@ struct obj {
 
 #define is_silverknight_otyp(otyp)	((otyp) == SILVERKNIGHT_HELM || (otyp) == SILVERKNIGHT_ARMOR\
 								|| (otyp) == SILVERKNIGHT_GAUNTLETS || (otyp) == SILVERKNIGHT_BOOTS)
-#define is_light_armor(otmp)	(((otmp)->otyp == IMPERIAL_ELVEN_ARMOR && check_imp_mod(otmp, IEA_MITHRIL)) || ((otmp)->oartifact == ART_SCORPION_CARAPACE && check_carapace_mod(otmp, CPROP_FLEXIBLE)) || objects[(otmp)->otyp].oc_dexclass == ARMSZ_LIGHT || check_oprop(otmp, OPROP_LITE) || (objects[(otmp)->otyp].oc_dexclass == ARMSZ_MEDIUM && check_oprop(otmp, OPROP_LITN)))
-#define is_medium_armor(otmp)	(objects[(otmp)->otyp].oc_dexclass == ARMSZ_MEDIUM || (objects[(otmp)->otyp].oc_dexclass == ARMSZ_HEAVY && check_oprop(otmp, OPROP_LITN)))
+#define is_light_armor(otmp)	(((otmp)->otyp == IMPERIAL_ELVEN_ARMOR && check_imp_mod(otmp, IEA_MITHRIL)) || ((otmp)->oartifact == ART_SCORPION_CARAPACE && check_carapace_mod(otmp, CPROP_FLEXIBLE)) || objects[(otmp)->otyp].oc_dexclass == ARMSZ_LIGHT || check_oprop(otmp, OPROP_LITE) || (objects[(otmp)->otyp].oc_dexclass == ARMSZ_MEDIUM && check_oprop(otmp, OPROP_LITN)) || crystal_grace_armor(otmp, TRUE))
+#define is_medium_armor(otmp)	(objects[(otmp)->otyp].oc_dexclass == ARMSZ_MEDIUM || (objects[(otmp)->otyp].oc_dexclass == ARMSZ_HEAVY && check_oprop(otmp, OPROP_LITN)) || crystal_grace_armor(otmp, FALSE))
 
 #define is_elven_armor(otmp)	((otmp)->otyp == ELVEN_HELM\
 				|| (otmp)->otyp == HIGH_ELVEN_HELM\

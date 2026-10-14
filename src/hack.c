@@ -1414,7 +1414,7 @@ domove()
 					result |= hit_with_tonguesnake(&youmonst, x, y, 0);
 				}
 				/* Dancers hit additional targets */
-				if(!(result&(MM_AGR_DIED|MM_AGR_STOP)) && is_dancer(&youmonst)){
+				if(!(result&(MM_AGR_DIED|MM_AGR_STOP)) && (is_dancer(&youmonst) || grace_empowers(&youmonst, AAT_GRACE_DANCE))){
 					result |= hit_with_dance(&youmonst, otmp, x, y, 0, attk);
 				}
 				/* Rejection antennae hit additional targets (last) */
@@ -3198,6 +3198,8 @@ inv_weight()
 	int objwt;
 	boolean nymph = youracedata->mlet == S_NYMPH;
 	boolean silverknight = Race_if(PM_SILVERKNIGHT) || youracedata->mtyp == PM_SILVERKNIGHT;
+	/* the crystal grace never switches off, since a sudden weight gain could be fatal */
+	boolean crystal = has_mutation(AAT_GRACE_CRYSTAL);
 	int wtmod = mlev(&youmonst)*5;
 
 #ifndef GOLDOBJ
@@ -3243,6 +3245,8 @@ inv_weight()
 				if(nymph)
 					objwt = max(0, objwt - wtmod);
 				if(silverknight && otmp->obj_material == SILVER)
+					objwt = max(0, objwt - wtmod);
+				if(crystal && (otmp->obj_material == GLASS || is_crystal_armor(otmp) || is_crystal_weapon(otmp)))
 					objwt = max(0, objwt - wtmod);
 				wt += objwt;
 			}

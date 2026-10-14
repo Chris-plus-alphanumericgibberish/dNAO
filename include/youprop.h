@@ -290,7 +290,7 @@
 					|| (uarmc && FacelessCloak(uarmc) && is_opaque(uarmc)) \
 				)
 
-#define save_vs_sanloss()	((uwep && uwep->oartifact == ART_NODENSFORK) || (rnd(30) < (ACURR(A_WIS) + (uring_art(ART_NARYA) ? narya() : 0))))
+#define save_vs_sanloss()	(FEARLESSNESS_MUDRA || (uwep && uwep->oartifact == ART_NODENSFORK) || (rnd(30) < (ACURR(A_WIS) + (uring_art(ART_NARYA) ? narya() : 0))))
 
 #define HDark_res		u.uprops[DARK_RES].intrinsic
 #define EDark_res		u.uprops[DARK_RES].extrinsic
@@ -311,7 +311,7 @@
 #define HDoubt		u.uprops[DOUBT].intrinsic
 #define Doubt		(HDoubt || EDoubt)
 
-#define LightBlind		((Darksight && !Is_waterlevel(&u.uz) && !Extramission) &&\
+#define LightBlind		((Darksight && !Catsight && !Is_waterlevel(&u.uz) && !Extramission) &&\
 						(dimness(u.ux,u.uy) <= 0) &&\
 						!(ublindf && !Blindfolded))
 #define Blinded			u.uprops[BLINDED].intrinsic
@@ -421,15 +421,34 @@
 #define Normalvision		((HNormalvision || ENormalvision || \
 				 normalvision(youracedata)) && !DarksightOnly)
 
+/* Senses granted by mutations and by a seraph's recovered eyes. Suppressed by polymorph. */
+#define Seraph_eye(n)		(flags.aasimar_type == AASIMAR_TYPE_SERAPH && !Upolyd && u.seraph_eyes >= (n))
+#define Lowlightsight_mutation	(check_mutation(TT_LIGHT))
+#define Elfsight_mutation	(check_mutation(AAT_DEVA_SIGHT))
+#define Catsight_mutation	(check_mutation(AAT_ELADRIN_SIGHT))
+#define Extramission_mutation	(check_mutation(TT_EXTRAMISSION_1) || check_mutation(TT_EXTRAMISSION_2) \
+				 || check_mutation(AAT_EXTRAMISSION_1) || check_mutation(AAT_EXTRAMISSION_2) || Seraph_eye(SE_ALL))
+#define See_invisible_mutation	(check_mutation(AAT_IKSH_NA_SIGHT) || check_mutation(AAT_INVIS_1) \
+				 || check_mutation(AAT_INVIS_2) || check_mutation(AAT_INVIS_3) || Seraph_eye(SE_INVIS))
+#define Echolocation_mutation	(check_mutation(TT_ECHOLOCATION))
+#define Infravision_mutation	(check_mutation(TT_INFRAVISION_1) || check_mutation(AAT_ELADRIN_SIGHT) \
+				 || check_mutation(AAT_CLOUDFACE_INFRAVISION))
+#define Bloodsense_mutation	(check_mutation(AAT_CLOUDFACE_BLOODSENSE))
+#define Lifesense_mutation	(check_mutation(AAT_DEVA_SIGHT) || check_mutation(AAT_IKSH_NA_SIGHT) \
+				 || check_mutation(AAT_CLOUDFACE_LIFESENSE))
+#define Omnisense_mutation	(check_mutation(AAT_CLOUDFACE_INFRAVISION) || check_mutation(AAT_CLOUDFACE_BLOODSENSE) \
+				 || check_mutation(AAT_CLOUDFACE_LIFESENSE))
+#define Telepat_mutation	(check_mutation(AAT_DEVA_SIGHT) || check_mutation(AAT_IKSH_NA_SIGHT))
+
 #define HLowlightsight		u.uprops[LOWLIGHTSIGHT].intrinsic
 #define ELowlightsight		u.uprops[LOWLIGHTSIGHT].extrinsic
 #define Lowlightsight		((HLowlightsight || ELowlightsight || \
-				 lowlightsight2(youracedata)) && !DarksightOnly)
+				 lowlightsight2(youracedata) || Lowlightsight_mutation) && !DarksightOnly)
 
 #define HElfsight		u.uprops[ELFSIGHT].intrinsic
 #define EElfsight		u.uprops[ELFSIGHT].extrinsic
 #define Elfsight		((HElfsight || EElfsight || \
-				 lowlightsight3(youracedata)) && !DarksightOnly)
+				 lowlightsight3(youracedata) || Elfsight_mutation) && !DarksightOnly)
 
 #define HDarksight		u.uprops[DARKSIGHT].intrinsic
 #define EDarksight		u.uprops[DARKSIGHT].extrinsic
@@ -439,12 +458,12 @@
 #define HCatsight		u.uprops[CATSIGHT].intrinsic
 #define ECatsight		u.uprops[CATSIGHT].extrinsic
 #define Catsight		((HCatsight || ECatsight || \
-				 catsight(youracedata)) && !DarksightOnly)
+				 catsight(youracedata) || Catsight_mutation) && !DarksightOnly)
 
 #define HExtramission		u.uprops[EXTRAMISSION].intrinsic
 #define EExtramission		u.uprops[EXTRAMISSION].extrinsic
 #define Extramission		((HExtramission || EExtramission || \
-				 extramission(youracedata)) && !DarksightOnly)
+				 extramission(youracedata) || Extramission_mutation) && !DarksightOnly)
 
 #define HXray_vision	u.uprops[XRAY_VISION].intrinsic
 #define EXray_vision	u.uprops[XRAY_VISION].extrinsic
@@ -453,28 +472,28 @@
 #define HSee_invisible		u.uprops[SEE_INVIS].intrinsic
 #define ESee_invisible		u.uprops[SEE_INVIS].extrinsic
 #define See_invisible_old	(HSee_invisible || ESee_invisible || \
-				 species_perceives(youracedata))
+				 species_perceives(youracedata) || See_invisible_mutation)
 #define See_invisible(X,Y)	(ESee_invisible || (See_invisible_old && dist2(u.ux, u.uy, X, Y)<13))
 
 #define HEcholocation		u.uprops[ECHOLOCATION].intrinsic
 #define EEcholocation		u.uprops[ECHOLOCATION].extrinsic
 #define Echolocation		(HEcholocation || EEcholocation || \
-				  echolocation(youracedata))
+				  echolocation(youracedata) || Echolocation_mutation)
 
 #define HInfravision		u.uprops[INFRAVISION].intrinsic
 #define EInfravision		u.uprops[INFRAVISION].extrinsic
 #define Infravision		((HInfravision || EInfravision || \
-				  infravision(youracedata)) && !DarksightOnly)
+				  infravision(youracedata) || Infravision_mutation) && !DarksightOnly)
 
 #define HBloodsense		u.uprops[BLOODSENSE].intrinsic
 #define EBloodsense		u.uprops[BLOODSENSE].extrinsic
 #define Bloodsense		((HBloodsense || EBloodsense || \
-				  bloodsense(youracedata)) && !DarksightOnly)
+				  bloodsense(youracedata) || Bloodsense_mutation) && !DarksightOnly)
 
 #define HLifesense		u.uprops[LIFESENSE].intrinsic
 #define ELifesense		u.uprops[LIFESENSE].extrinsic
 #define Lifesense		((HLifesense || ELifesense || \
-				  lifesense(youracedata)) && !DarksightOnly)
+				  lifesense(youracedata) || Lifesense_mutation) && !DarksightOnly)
 
 #define HSenseall		u.uprops[SENSEALL].intrinsic
 #define ESenseall		u.uprops[SENSEALL].extrinsic
@@ -484,7 +503,7 @@
 #define HOmnisense		u.uprops[OMNISENSE].intrinsic
 #define EOmnisense		u.uprops[OMNISENSE].extrinsic
 #define Omnisense		(HOmnisense || EOmnisense || \
-				  omnisense(youracedata))
+				  omnisense(youracedata) || Omnisense_mutation)
 
 #define HEarthsense		u.uprops[EARTHSENSE].intrinsic
 #define EEarthsense		u.uprops[EARTHSENSE].extrinsic
@@ -498,7 +517,7 @@
 #define HTelepat		u.uprops[TELEPAT].intrinsic
 #define ETelepat		u.uprops[TELEPAT].extrinsic
 #define Blind_telepat		(HTelepat || ETelepat || \
-				 species_is_telepathic(youracedata))
+				 species_is_telepathic(youracedata) || Telepat_mutation)
 #define Unblind_telepat		(ETelepat || (Blind_telepat && uarmh && uarmh->oartifact == ART_ENFORCED_MIND))
 #define Tele_blind		(!Blind_telepat && uarmh && uarmh->oartifact == ART_ENFORCED_MIND)
 

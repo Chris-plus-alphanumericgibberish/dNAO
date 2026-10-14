@@ -935,7 +935,8 @@ unsigned trflags;
 		ttype != ANTI_MAGIC && !forcebungle &&
 		(!rn2(5) ||
 	    ((ttype == PIT || ttype == SPIKED_PIT) && is_clinger(youracedata)) ||
-		((ttype == HOLE || ttype == TRAPDOOR || ttype == PIT || ttype == SPIKED_PIT) && u.sealsActive&SEAL_SIMURGH)
+		((ttype == HOLE || ttype == TRAPDOOR || ttype == PIT || ttype == SPIKED_PIT) && u.sealsActive&SEAL_SIMURGH) ||
+		check_grace(AAT_GRACE_TRAPS)
 		)) {
 		You("escape %s %s.",
 		    ((ttype == ARROW_TRAP || ttype == VIVI_TRAP) && !trap->madeby_u) ? "an" :
@@ -944,6 +945,19 @@ unsigned trflags;
 		nomul(0, NULL);
 		return;
 	    }
+	} else if(check_grace(AAT_GRACE_TRAPS) && rn2(3)
+		&& !Fumbling && ttype != MAGIC_PORTAL && ttype != ANTI_MAGIC && !forcebungle
+		/* flying or levitating over these is handled by the trap itself */
+		&& !((Levitation || Flying) && (ttype == PIT || ttype == SPIKED_PIT || ttype == HOLE || ttype == BEAR_TRAP))
+	) {
+		/* graceful eladrin can escape traps they hadn't seen */
+		seetrap(trap);
+		You("escape %s %s.",
+		    ((ttype == ARROW_TRAP || ttype == VIVI_TRAP) && !trap->madeby_u) ? "an" :
+			a_your[trap->madeby_u],
+		    defsyms[trap_to_defsym(ttype)].explanation);
+		nomul(0, NULL);
+		return;
 	}
 
 #ifdef STEED
@@ -2178,6 +2192,19 @@ schar dx,dy;
 #endif /* OVL3 */
 #ifdef OVL1
 
+/* Return TRUE if the hero's trap grace guarantees that mtmp, the hero's pet, escapes a known trap when it steps on it. */
+boolean
+grace_escapes_trap(struct monst *mtmp, struct trap *trap)
+{
+	int tt = trap->ttyp;
+
+	if (!grace_empowers(mtmp, AAT_GRACE_TRAPS) || mtmp == u.usteed)
+		return FALSE;
+	if (((tt == HOLE || tt == PIT) && In_sokoban(&u.uz) && !trap->madeby_u) || tt == STATUE_TRAP)
+		return FALSE;
+	return ((mtmp->mtrapseen & (1 << (tt-1))) != 0 || (tt == HOLE && !mindless_mon(mtmp)));
+}
+
 int
 mintrap_core(struct monst *mtmp, boolean forcebungle)
 {
@@ -2248,9 +2275,12 @@ mintrap_core(struct monst *mtmp, boolean forcebungle)
 		    ((mtmp->mtrapseen & (1 << (tt-1))) != 0 ||
 			(tt == HOLE && !mindless_mon(mtmp)))) {
 		/* it has been in such a trap - perhaps it escapes */
-		if (!forcebungle && rn2(4)) return(0);
+		if (!forcebungle && (rn2(4) || grace_empowers(mtmp, AAT_GRACE_TRAPS))) return(0);
 	    } else {
 		mtmp->mtrapseen |= (1 << (tt-1));
+		/* the hero's grace lets pets escape traps they hadn't seen */
+		if (!inescapable && !forcebungle && grace_empowers(mtmp, AAT_GRACE_TRAPS) && rn2(3))
+			return(0);
 	    }
 	    /* Monster is aggravated by being trapped by you.
 	       Recognizing who made the trap isn't completely
@@ -3777,20 +3807,11 @@ xchar x, y;
 
 /* returns TRUE if obj is destroyed */
 boolean
-water_damage(obj, force, here, modifiers, owner)
-struct obj *obj;
-boolean force, here;
-uchar modifiers;
-struct monst *owner;
+water_damage(struct obj *obj, boolean force, boolean here, uchar modifiers, struct monst *owner)
 {
-	/* Dips in the Lethe are a very poor idea - Lethe patch*/
-	boolean lethe = modifiers&WD_LETHE;
-	boolean blood = modifiers&WD_BLOOD;
-	int luckpenalty = lethe ? 7 : 0;
 	struct obj *otmp;
 	struct obj *obj_original = obj;
 	boolean obj_destroyed = FALSE;
-	int is_lethe = lethe;
 	if(owner == &youmonst){
 		if(Waterproof) {
 			return 0;
@@ -3818,195 +3839,210 @@ struct monst *owner;
 	   pieces of armor may get affected by the water */
 	for (; obj; obj = otmp) {
 		otmp = here ? obj->nexthere : obj->nobj;
-
-		if(owner && ProtectItems(owner) &&
-			(obj->oclass == POTION_CLASS
-			 || obj->oclass == SCROLL_CLASS
-			 || obj->oclass == WAND_CLASS
-		))
-			continue;
-		(void) snuff_lit(obj);
-
-		if(obj->otyp == CAN_OF_GREASE && obj->spe > 0) {
-			continue;
-		} else if (!force && (20-(Luck - luckpenalty + 5)) < rn2(100)) {
-			/*  chance per item of sustaining damage:
-			 *	max luck (full moon):	 5%
-			 *	max luck (elsewhen):	10%
-			 *	avg luck (Luck==0):	75%
-			 *	awful luck (Luck<-4):  100%
-			 *  If this is the Lethe, things are much worse.
-			 */
-			continue;
-		/* An oil skin cloak protects your body armor  */
-		} else if(obj->greased) {
-			if (force || !rn2(obj->blessed ? 4 : 2)){
-				obj->greased = 0;
-				pline("The layer of grease on %s dissolves.", the(xname(obj)));
-			}
-		} else if(Is_container(obj) && !Is_box(obj) &&
-			(obj->otyp != OILSKIN_SACK || (obj->cursed && !rn2(3)))) {
-			water_damage(obj->cobj, force, FALSE, lethe, (struct monst *) 0);
-		} else {
-		    /* The Lethe strips blessed and cursed status... */
-		    if (is_lethe) {
-				uncurse(obj);
-				unbless(obj);
-		    }
-			if(blood){
-				if(obj->blessed)
-					unbless(obj);
-				else if(!obj->cursed)
-					curse(obj);
-			}
-
-		    switch (obj->oclass) {
-		    case SCROLL_CLASS:
-			if(obj->oartifact || obj->otyp == SCR_RESISTANCE) break;
-#ifdef MAIL
-		    if (obj->otyp != SCR_MAIL)
-#endif
-		    {
-			    /* The Lethe sometimes does a little rewrite */
-			    obj->otyp = (is_lethe && !rn2(10)) ?
-					SCR_AMNESIA : SCR_BLANK_PAPER;
-			remove_oprop(obj, OPROP_TACTB);
-			obj->spe = 0;
-			obj->oward = 0;
-		    }
-			break;
-		    case SPBOOK_CLASS:
-			/* Spell books get blanked... */
-			if (obj->otyp == SPE_BOOK_OF_THE_DEAD)
-				pline("Steam rises from %s.", the(xname(obj)));
-			else if (obj->oartifact) /*do nothing*/;
-			else {
-				obj->otyp = SPE_BLANK_PAPER;
-				obj->obj_color = objects[SPE_BLANK_PAPER].oc_color;
-				remove_oprop(obj, OPROP_TACTB);
-			}
-			break;
-		    case POTION_CLASS:
-			if (obj->otyp == POT_ACID) {
-				/* damage player/monster? */
-				if (cansee(obj->ox,obj->oy) &&
-				  obj->where != OBJ_CONTAINED)
-				    pline("%s!", aobjnam(obj, "explode"));
-				delobj(obj);
-				obj_destroyed = (obj == obj_original);
-				continue;
-			} else
-			/* Potions turn to water or amnesia... */
-			if (is_lethe) {
-				if (obj->otyp == POT_STARLIGHT)
-					end_burn(obj, FALSE);
-			    if (obj->otyp == POT_WATER)
-					obj->otyp = POT_AMNESIA;
-			    else if (obj->otyp != POT_AMNESIA) {
-					obj->otyp = POT_WATER;
-				obj->odiluted = 0;
-				set_object_color(obj);
-			    }
-			} else if (blood) {
-			    if (obj->otyp != POT_BLOOD){
-					if(obj->odiluted){
-						if (obj->otyp == POT_STARLIGHT)
-							end_burn(obj, FALSE);
-						obj->otyp = POT_BLOOD;
-						obj->corpsenm = PM_HUMAN;
-						obj->odiluted = 0;
-						set_object_color(obj);
-					}
-					else obj->odiluted = TRUE;
-				}
-				else obj->odiluted = 0;
-			} else if (obj->odiluted || obj->otyp == POT_AMNESIA) {
-				if (obj->otyp == POT_STARLIGHT)
-					end_burn(obj, FALSE);
-				obj->otyp = POT_WATER;
-				obj->blessed = obj->cursed = 0;
-				obj->odiluted = 0;
-				set_object_color(obj);
-			} else if (obj->otyp != POT_WATER)
-				obj->odiluted++;
-			break;
-		    case GEM_CLASS:
-			// if (is_lethe && (obj->otyp == LUCKSTONE
-					// || obj->otyp == LOADSTONE
-					// || obj->otyp == TOUCHSTONE))
-			    // obj->otyp = FLINT;
-			break;
-		    case TOOL_CLASS:
-			// if (is_lethe) {
-			    // switch (obj->otyp) {
-			    // case MAGIC_LAMP:
-				// obj->otyp = OIL_LAMP;
-				// break;
-			    // case MAGIC_WHISTLE:
-				// obj->otyp = WHISTLE;
-				// break;	
-			    // case MAGIC_FLUTE:
-				// obj->otyp = FLUTE;
-				// obj->spe  = 0;
-				// break;	
-			    // case MAGIC_HARP:
-				// obj->otyp = HARP;
-				// obj->spe  = 0;
-				// break;
-			    // case FIRE_HORN:
-			    // case FROST_HORN:
-			    // case HORN_OF_PLENTY:
-				// obj->otyp = TOOLED_HORN;
-				// obj->spe  = 0;
-				// break;
-			    // case DRUM_OF_EARTHQUAKE:
-				// obj->otyp = DRUM;
-				// obj->spe  = 0;
-				// break;
-			    // }
-			// }
-
-			/* Drop through */
-			/* Weapons, armor and tools may be disenchanted... */
-			/* Wands and rings lose a charge... */
-		    case WEAPON_CLASS:
-		    case ARMOR_CLASS:
-		    case WAND_CLASS:
-		    case RING_CLASS:
-			if ( is_lethe
-					&& ( obj->oclass == WEAPON_CLASS
-						|| obj->oclass == ARMOR_CLASS
-						|| obj->oclass == WAND_CLASS
-						|| obj->oclass == RING_CLASS
-						|| is_weptool(obj) )) {
-
-			    /* Shift enchantment one step closer to 0 */
-			    if (obj->spe > 0) drain_item(obj);
-			}
-
-			/* Magic markers run... */
-			if ( is_lethe
-					&& obj->otyp == MAGIC_MARKER ) {
-			    obj->spe -= (3 + rn2(10));
-			    if (obj->spe < 0) obj->spe = 0;
-			}
-
-			/* Drop through for rusting effects... */
-			/* Weapons, armor, tools and other things may rust... */
-		    default:
-			if (is_rustprone(obj) && obj->oeroded < MAX_ERODE &&
-					!(obj->oerodeproof || 
-					 (obj->blessed && rnl(100) < 25)))
-				obj->oeroded++;
-			/* The Lethe may unfooproof the item... */
-			// if (is_lethe
-					// && obj->oerodeproof && !rn2(5))
-			    // obj->oerodeproof = FALSE;
-		    }
-		}
-		obj_destroyed = FALSE;
+		if (water_damage_obj(obj, force, modifiers, owner) && obj == obj_original)
+			obj_destroyed = TRUE;
 	}
 	return obj_destroyed;
+}
+
+/* Expose obj alone (not the objects chained after it) to water. Unless force,
+ * luck may spare it. owner (which may be null) is whoever carries it; whether
+ * owner is waterproof isn't checked. Returns TRUE if obj was destroyed.
+ */
+boolean
+water_damage_obj(struct obj * obj, boolean force, uchar modifiers, struct monst * owner)
+{
+	/* Dips in the Lethe are a very poor idea - Lethe patch*/
+	boolean lethe = modifiers&WD_LETHE;
+	boolean blood = modifiers&WD_BLOOD;
+	int luckpenalty = lethe ? 7 : 0;
+	int is_lethe = lethe;
+
+	if(owner && ProtectItems(owner) &&
+		(obj->oclass == POTION_CLASS
+		 || obj->oclass == SCROLL_CLASS
+		 || obj->oclass == WAND_CLASS
+	))
+		return FALSE;
+	(void) snuff_lit(obj);
+
+	if(obj->otyp == CAN_OF_GREASE && obj->spe > 0) {
+		return FALSE;
+	} else if (!force && (20-(Luck - luckpenalty + 5)) < rn2(100)) {
+		/*  chance per item of sustaining damage:
+		 *	max luck (full moon):	 5%
+		 *	max luck (elsewhen):	10%
+		 *	avg luck (Luck==0):	75%
+		 *	awful luck (Luck<-4):  100%
+		 *  If this is the Lethe, things are much worse.
+		 */
+		return FALSE;
+	/* An oil skin cloak protects your body armor  */
+	} else if(obj->greased) {
+		if (force || !rn2(obj->blessed ? 4 : 2)){
+			obj->greased = 0;
+			pline("The layer of grease on %s dissolves.", the(xname(obj)));
+		}
+	} else if(Is_container(obj) && !Is_box(obj) &&
+		(obj->otyp != OILSKIN_SACK || (obj->cursed && !rn2(3)))) {
+		water_damage(obj->cobj, force, FALSE, lethe, (struct monst *) 0);
+	} else {
+	    /* The Lethe strips blessed and cursed status... */
+	    if (is_lethe) {
+			uncurse(obj);
+			unbless(obj);
+	    }
+		if(blood){
+			if(obj->blessed)
+				unbless(obj);
+			else if(!obj->cursed)
+				curse(obj);
+		}
+
+	    switch (obj->oclass) {
+	    case SCROLL_CLASS:
+		if(obj->oartifact || obj->otyp == SCR_RESISTANCE) break;
+#ifdef MAIL
+	    if (obj->otyp != SCR_MAIL)
+#endif
+	    {
+		    /* The Lethe sometimes does a little rewrite */
+		    obj->otyp = (is_lethe && !rn2(10)) ?
+				SCR_AMNESIA : SCR_BLANK_PAPER;
+		remove_oprop(obj, OPROP_TACTB);
+		obj->spe = 0;
+		obj->oward = 0;
+	    }
+		break;
+	    case SPBOOK_CLASS:
+		/* Spell books get blanked... */
+		if (obj->otyp == SPE_BOOK_OF_THE_DEAD)
+			pline("Steam rises from %s.", the(xname(obj)));
+		else if (obj->oartifact) /*do nothing*/;
+		else {
+			obj->otyp = SPE_BLANK_PAPER;
+			obj->obj_color = objects[SPE_BLANK_PAPER].oc_color;
+			remove_oprop(obj, OPROP_TACTB);
+		}
+		break;
+	    case POTION_CLASS:
+		if (obj->otyp == POT_ACID) {
+			/* damage player/monster? */
+			if (cansee(obj->ox,obj->oy) &&
+			  obj->where != OBJ_CONTAINED)
+			    pline("%s!", aobjnam(obj, "explode"));
+			delobj(obj);
+			return TRUE;
+		} else
+		/* Potions turn to water or amnesia... */
+		if (is_lethe) {
+			if (obj->otyp == POT_STARLIGHT)
+				end_burn(obj, FALSE);
+		    if (obj->otyp == POT_WATER)
+				obj->otyp = POT_AMNESIA;
+		    else if (obj->otyp != POT_AMNESIA) {
+				obj->otyp = POT_WATER;
+			obj->odiluted = 0;
+			set_object_color(obj);
+		    }
+		} else if (blood) {
+		    if (obj->otyp != POT_BLOOD){
+				if(obj->odiluted){
+					if (obj->otyp == POT_STARLIGHT)
+						end_burn(obj, FALSE);
+					obj->otyp = POT_BLOOD;
+					obj->corpsenm = PM_HUMAN;
+					obj->odiluted = 0;
+					set_object_color(obj);
+				}
+				else obj->odiluted = TRUE;
+			}
+			else obj->odiluted = 0;
+		} else if (obj->odiluted || obj->otyp == POT_AMNESIA) {
+			if (obj->otyp == POT_STARLIGHT)
+				end_burn(obj, FALSE);
+			obj->otyp = POT_WATER;
+			obj->blessed = obj->cursed = 0;
+			obj->odiluted = 0;
+			set_object_color(obj);
+		} else if (obj->otyp != POT_WATER)
+			obj->odiluted++;
+		break;
+	    case GEM_CLASS:
+		// if (is_lethe && (obj->otyp == LUCKSTONE
+				// || obj->otyp == LOADSTONE
+				// || obj->otyp == TOUCHSTONE))
+		    // obj->otyp = FLINT;
+		break;
+	    case TOOL_CLASS:
+		// if (is_lethe) {
+		    // switch (obj->otyp) {
+		    // case MAGIC_LAMP:
+			// obj->otyp = OIL_LAMP;
+			// break;
+		    // case MAGIC_WHISTLE:
+			// obj->otyp = WHISTLE;
+			// break;	
+		    // case MAGIC_FLUTE:
+			// obj->otyp = FLUTE;
+			// obj->spe  = 0;
+			// break;	
+		    // case MAGIC_HARP:
+			// obj->otyp = HARP;
+			// obj->spe  = 0;
+			// break;
+		    // case FIRE_HORN:
+		    // case FROST_HORN:
+		    // case HORN_OF_PLENTY:
+			// obj->otyp = TOOLED_HORN;
+			// obj->spe  = 0;
+			// break;
+		    // case DRUM_OF_EARTHQUAKE:
+			// obj->otyp = DRUM;
+			// obj->spe  = 0;
+			// break;
+		    // }
+		// }
+
+		/* Drop through */
+		/* Weapons, armor and tools may be disenchanted... */
+		/* Wands and rings lose a charge... */
+	    case WEAPON_CLASS:
+	    case ARMOR_CLASS:
+	    case WAND_CLASS:
+	    case RING_CLASS:
+		if ( is_lethe
+				&& ( obj->oclass == WEAPON_CLASS
+					|| obj->oclass == ARMOR_CLASS
+					|| obj->oclass == WAND_CLASS
+					|| obj->oclass == RING_CLASS
+					|| is_weptool(obj) )) {
+
+		    /* Shift enchantment one step closer to 0 */
+		    if (obj->spe > 0) drain_item(obj);
+		}
+
+		/* Magic markers run... */
+		if ( is_lethe
+				&& obj->otyp == MAGIC_MARKER ) {
+		    obj->spe -= (3 + rn2(10));
+		    if (obj->spe < 0) obj->spe = 0;
+		}
+
+		/* Drop through for rusting effects... */
+		/* Weapons, armor, tools and other things may rust... */
+	    default:
+		if (is_rustprone(obj) && obj->oeroded < MAX_ERODE &&
+				!(obj->oerodeproof || 
+				 (obj->blessed && rnl(100) < 25)))
+			obj->oeroded++;
+		/* The Lethe may unfooproof the item... */
+		// if (is_lethe
+				// && obj->oerodeproof && !rn2(5))
+		    // obj->oerodeproof = FALSE;
+	    }
+	}
+	return FALSE;
 }
 
 /*

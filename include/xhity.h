@@ -129,8 +129,25 @@
 #define SUBOUT_KICK	61	/* set whenever ANY finalized attack in the chain is AT_KICK, from any source */
 #define SUBOUT_DEATHEYE_BITES 62	/* Death Eye: using its bite/tongue attacks this round */
 #define SUBOUT_DEATHEYE_DEATH 63	/* Death Eye: using its death gaze this round */
-#define MAX_SUBOUT		SUBOUT_DEATHEYE_DEATH
+#define SUBOUT_ASTRA_GAZE 64	/* Monadic astra elemental gaze attack */
+#define SUBOUT_ASTRA_ARROW 65	/* Surya astra arrow of slaying attack */
+#define SUBOUT_GRACE_MANTLE 66	/* Eladrin mantle grace passive */
+#define SUBOUT_GRACE_EXTRA 67	/* Eladrin extra-attack grace bonus weapon attack */
+#define MAX_SUBOUT		SUBOUT_GRACE_EXTRA
 #define SUBOUT_ARRAY_SIZE (MAX_SUBOUT/(sizeof(int)*8)+1)
+
+/* mantle weight classes: buffeting winds roll one of these (or a miss) against a weaponless attacker's weight */
+#define MWT_TINY	1	/* WT_TINY */
+#define MWT_SMALL	2	/* WT_SMALL */
+#define MWT_MEDIUM	3	/* WT_MEDIUM */
+#define MWT_LARGE	4	/* WT_LARGE */
+#define MWT_HUGE	5	/* WT_HUGE */
+
+/* the four seasons a Gae eladrin's nature presents */
+#define SEASON_WINTER	0
+#define SEASON_SPRING	1
+#define SEASON_SUMMER	2
+#define SEASON_FALL	3
 
 #define ATTKFLAG_FORCE_BLEED		0x00000001L
 #define ATTKFLAG_FORCE_CHECK_JOUST	0x00000002L

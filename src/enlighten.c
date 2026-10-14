@@ -3057,6 +3057,14 @@ aasimar_enlightenment_subroutine(boolean dumping)
 			   "Your stolen eyes were not recovered.");
 		break;
 
+	case AASIMAR_TYPE_SURYA:
+		pt("Your blazing halo protects your head.",
+			"Your blazing halo protected your head.");
+		if(u.ulevel >= 14)
+			pt("Your aura has formed into wings, granting you flight.",
+			   "Your aura had formed into wings, granting you flight.");
+		break;
+
 	case AASIMAR_TYPE_DEVA:
 		pt("Your glowing aureola protects your torso.",
 			"Your glowing aureola protected your torso.");
@@ -3149,6 +3157,13 @@ mutations_enlightenment(boolean dumping)
 		}
 	}
 	for(i= 0; mutationtypes[i].mutation; i++){
+		if(u.next_aasimar_mutation == mutationtypes[i].mutation){
+			put_or_dump(mutationtypes[i].start_forming, dumping);
+			any_shown = TRUE;
+			break;
+		}
+	}
+	for(i= 0; mutationtypes[i].mutation; i++){
 		if(check_mutation(mutationtypes[i].mutation)
 			&& (mutationtypes[i].mutation != YOG_GAZE_1 || u.specialSealsActive&SEAL_YOG_SOTHOTH)
 			&& (mutationtypes[i].mutation != YOG_GAZE_2 || u.specialSealsActive&SEAL_YOG_SOTHOTH)
@@ -3161,7 +3176,17 @@ mutations_enlightenment(boolean dumping)
 		}
 	}
 	if(!any_shown){
-		if(Upolyd)
+		boolean any_held = FALSE;
+		for(i = 0; mutationtypes[i].mutation; i++){
+			if(has_mutation(mutationtypes[i].mutation)){
+				any_held = TRUE;
+				break;
+			}
+		}
+		if(!any_held)
+			put_or_dump(dumping ? "You had no mutations."
+			                    : "You have no mutations.", dumping);
+		else if(Upolyd)
 			put_or_dump(dumping ? "Your mutations were suppressed while polymorphed."
 			                    : "Your mutations are suppressed while polymorphed.", dumping);
 		else

@@ -12,6 +12,7 @@ STATIC_DCL void FDECL(return_thrownobj, (struct monst *, struct obj *));
 STATIC_DCL void FDECL(toss_up, (struct obj *, boolean));
 STATIC_DCL int FDECL(calc_range, (struct monst *, struct obj *, struct obj *, int *));
 STATIC_DCL boolean FDECL(misthrow, (struct monst *, struct obj *, struct obj *, boolean, int *, int *, int *));
+STATIC_DCL boolean FDECL(aerodynamic_projectile, (struct obj *, struct obj *));
 STATIC_DCL boolean FDECL(wheel_bounce_target, (struct monst *, int, int, int, int, int *, int *));
 STATIC_DCL struct obj * FDECL(blaster_ammo, (struct obj *));
 
@@ -1286,6 +1287,10 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 			vis |= VIS_NONE;
 	}
 
+	boolean blaster_proj = (thrownobj->otyp == LASER_BEAM || thrownobj->otyp == BLASTER_BOLT
+		|| thrownobj->otyp == HEAVY_BLASTER_BOLT || thrownobj->otyp == CARCOSAN_BOLT);
+	int mon_deflect_skill = youdef ? 0 : (pd->mflagsf&MF_MARTIAL_E) ? P_EXPERT : (pd->mflagsf&MF_MARTIAL_S) ? P_SKILLED : P_BASIC;
+
 	/* train player's Shien skill, if player is defending */
 	if (youdef && uwep && is_lightsaber(uwep) && litsaber(uwep) && P_SKILL(weapon_type(uwep)) >= P_BASIC){
 		if (P_SKILL(P_SHII_CHO) >= P_BASIC){
@@ -1368,9 +1373,7 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 	}
 	/* Non-future (and rockets) protectiles are blown back by Tiamat's winds (somehow!) */
 	/*  And also not a rock from a sling. It's pretty arbitrary, but the idea is aerodynamic stuff gets blown back. */
-	else if (!(thrownobj->otyp == LASER_BEAM || thrownobj->otyp == BLASTER_BOLT || thrownobj->otyp == HEAVY_BLASTER_BOLT || thrownobj->otyp == CARCOSAN_BOLT || thrownobj->otyp == BULLET 
-			|| (launcher && (launcher->otyp == SLING || launcher->otyp == GRENADE_LAUNCHER))
-		)
+	else if (aerodynamic_projectile(thrownobj, launcher)
 		&& !trap
 		&& (mdef->mtyp == PM_TIAMAT__THE_FIEND_OF_WIND || (mdef->mtyp == PM_CHAOS && !PURIFIED_WIND)))
 	{
@@ -1395,6 +1398,63 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 		obfree(thrownobj, (struct obj*) 0);
 		*thrownobj_p = NULL;
 		return MM_HIT;
+	}
+	/* the hero's deflect grace lets the hero redirect projectiles in any direction; intelligent pets always throw them back at the attacker */
+	else if (!blaster_proj && !is_bullet(thrownobj) && !youagr && full_grace_empowers(mdef, AAT_GRACE_DEFLECT)
+		&& (youdef ? (freehand() && rnd(3) < P_SKILL(P_BARE_HANDED_COMBAT))
+			: (magr && !magr->mtame && intelligent_mon(mdef) && mon_freehand(mdef) && rnd(3) < mon_deflect_skill))
+	){
+		boolean redirected = FALSE;
+		if (youdef) {
+			You("redirect %s!", the(xname(thrownobj)));
+			if (getdir("Redirect it which way?") && (u.dx || u.dy)) {
+				*pdx = u.dx;
+				*pdy = u.dy;
+				redirected = TRUE;
+			}
+		}
+		else if (vis) {
+			pline("%s redirects %s!", Monnam(mdef), the(xname(thrownobj)));
+		}
+		if (!redirected) {
+			*pdx *= -1;
+			*pdy *= -1;
+		}
+		/* spends some range */
+		if (range2 > range) {
+			*prange = *prange2;
+			*prange2 -= range2 - range;
+		}
+		return MM_REFLECT;
+	}
+	/* dust mantles blow aerodynamic projectiles back at whoever launched them */
+	else if (aerodynamic_projectile(thrownobj, launcher) && !trap && !(youagr && youdef)
+		&& mon_has_mantle(mdef, AD_BLND)
+	){
+		if (vis)
+			pline("%s blown back by %s dust mantle!", Tobjnam(thrownobj, "are"),
+				youdef ? "your" : s_suffix(mon_nam(mdef)));
+		*pdx *= -1;
+		*pdy *= -1;
+		/* spends some range */
+		if (range2 > range) {
+			*prange = *prange2;
+			*prange2 -= range2 - range;
+		}
+		return MM_REFLECT;
+	}
+	/* the deflect grace also lets the hero and intelligent pets block projectiles that weren't redirected */
+	else if (!blaster_proj && !youagr && !(magr && magr->mtame) && grace_empowers(mdef, AAT_GRACE_DEFLECT)
+		&& (youdef ? ((!uwep || !bimanual_mon(uwep, &youmonst)) && rnd(3) < P_SKILL(weapon_type(uwep)))
+			: (intelligent_mon(mdef) && (MON_WEP(mdef) ? !bimanual_mon(MON_WEP(mdef), mdef) : !nohands(pd))
+				&& rnd(3) < mon_deflect_skill))
+	){
+		if (youdef)
+			You("deflect %s!", the(xname(thrownobj)));
+		else if (vis)
+			pline("%s deflects %s!", Monnam(mdef), the(xname(thrownobj)));
+		*prange = *prange2 = 0;
+		return MM_MISS;
 	}
 
 	/* unicorns */
@@ -1525,8 +1585,11 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 	if (miss_via_insubstantial(magr, mdef, attkp, thrownobj, vis)) {
 		/* message already printed by miss_via_insubstantial */;
 	}
-	else if (accuracy > dieroll || (dieroll == 1 && accuracy > -10))
+	else if (!shield_aura_deflects(mdef) && !grace_dodges(mdef) && (accuracy > dieroll || (dieroll == 1 && accuracy > -10)))
 	{
+		/* a mantle may stop the projectile before it lands */
+		if (mantle_stops_blow(magr, mdef, thrownobj_p, vis, (boolean *)0))
+			return MM_MISS;
 		/* hit */
 		/* (player-only) exercise dex */
 		if (youagr)
@@ -3879,6 +3942,9 @@ boolean forcedestroy;
 	/* call projectile() to shoot n times */
 	for (m_shot.i = 1; m_shot.i <= m_shot.n; m_shot.i++) {
 		int dx = odx, dy = ody, dz = 0;
+		/* a shooter killed by an earlier shot (whose inventory has been dropped) stops firing */
+		if (DEADMONSTER(magr))
+			break;
 		boolean impaired = misthrow(magr, ammo, launcher, m_shot.s, &dx, &dy, &dz);
 		/* note: we actually don't care if the projectile hit anything */
 		result = projectile(magr, ammo, launcher, HMON_PROJECTILE|(m_shot.s ? HMON_PROJECTILE|HMON_FIRED : 0),
@@ -3891,6 +3957,19 @@ boolean forcedestroy;
 	m_shot.o = STRANGE_OBJECT;
 	m_shot.s = FALSE;
 	return result;
+}
+
+/* Return TRUE if thrownobj, launched from launcher (null if none), is aerodynamic enough to be blown about by wind. */
+STATIC_OVL boolean
+aerodynamic_projectile(struct obj * thrownobj, struct obj * launcher)
+{
+	if (thrownobj->otyp == LASER_BEAM || thrownobj->otyp == BLASTER_BOLT || thrownobj->otyp == HEAVY_BLASTER_BOLT
+		|| thrownobj->otyp == CARCOSAN_BOLT || thrownobj->otyp == BULLET
+	)
+		return FALSE;
+	if (launcher && (launcher->otyp == SLING || launcher->otyp == GRENADE_LAUNCHER))
+		return FALSE;
+	return TRUE;
 }
 
 /* wheel_bounce_target()

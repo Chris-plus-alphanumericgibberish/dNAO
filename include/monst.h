@@ -228,6 +228,8 @@ struct monst {
 	Bitfield(mprone,1); /* monster is prone after being knocked down */
 	Bitfield(mrecruitable,1); /* monster can be recruited for quest reasons */
 	/*155*/
+	Bitfield(mastral_hits,2); /* weapon hits toward the hero's astral astra's next stunning strike */
+	/*157*/
 
 	unsigned long long int 	seenmadnesses;	/* monster has seen these madnesses */
 	
@@ -445,6 +447,13 @@ struct monst {
 	struct atkbp_set mbodyparts;		/* those the PC can perceive */
 	struct atkbp_set minjuries;			/* those that have been injured */
 #define HEAL_ALL_INJURIES	(-1)	/* mon_heal_injuries() count: mend everything */
+/* mon_fix_troubles() flags */
+#define MFT_HEAL		0x01	/* restore HP to maximum */
+#define MFT_STUDY		0x02	/* clear the hero's study of the monster (ustdym) */
+#define MFT_UNCANCEL	0x04	/* remove cancellation */
+#define MFT_COOLDOWN	0x08	/* reset special-ability cooldown (mspec_used) */
+#define MFT_MADNESS		0x10	/* cure madnesses and spores */
+#define MFT_TRAPPED		0x20	/* free from traps and entanglement */
 
 	struct ls_t * light;
 

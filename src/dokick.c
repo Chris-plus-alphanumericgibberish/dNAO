@@ -62,7 +62,7 @@ register boolean clumsy;
 	check_caitiff(mon);
 
 	result = xmeleehity(&youmonst, mon, &kick, (struct obj **)0, -1, 1000, FALSE, 0);
-	result = xpassivey(&youmonst, mon, &kick, (struct obj *)0, -1, result, mdat, TRUE);
+	result = xpassivey(&youmonst, mon, &kick, (struct obj **)0, -1, result, mdat, TRUE, (boolean *)0);
 
 	if (result) {
 		/* a good kick exercises your dex */
@@ -108,7 +108,7 @@ kick_lands(struct monst *mon, struct attack *kick, boolean clumsy, xchar x, xcha
 	if(!nohands(mon->data) && !rn2(martial() ? 5 : 3) && mon->movement >= 0) {
 		pline("%s blocks your %skick.", Monnam(mon),
 			clumsy ? "clumsy " : "");
-		xpassivey(&youmonst, mon, kick, (struct obj *)0, -1, MM_MISS, mon->data, TRUE);
+		xpassivey(&youmonst, mon, kick, (struct obj **)0, -1, MM_MISS, mon->data, TRUE, (boolean *)0);
 		mon->movement -= 6; //Note, may end up with up to -6 move points
 		return FALSE;
 	}
@@ -138,7 +138,7 @@ kick_lands(struct monst *mon, struct attack *kick, boolean clumsy, xchar x, xcha
 					"slides" : "jumps"),
 				clumsy ? "easily" : "nimbly",
 				clumsy ? "clumsy " : "");
-			xpassivey(&youmonst, mon, kick, (struct obj *)0, -1, MM_MISS, mon->data, TRUE);
+			xpassivey(&youmonst, mon, kick, (struct obj **)0, -1, MM_MISS, mon->data, TRUE, (boolean *)0);
 			return FALSE;
 		}
 	}
@@ -180,7 +180,7 @@ register xchar x, y;
 	   !mon_resistance(mon,FLYING)) {
 		pline("Floating in the air, you miss wildly!");
 		exercise(A_DEX, FALSE);
-		xpassivey(&youmonst, mon, &kick, (struct obj *)0, -1, MM_MISS, mon->data, TRUE);
+		xpassivey(&youmonst, mon, &kick, (struct obj **)0, -1, MM_MISS, mon->data, TRUE, (boolean *)0);
 		return;
 	}
 
@@ -192,7 +192,7 @@ register xchar x, y;
 			clumsy = TRUE;
 			if(martial()) goto doit;
 			Your("clumsy kick does no damage.");
-			xpassivey(&youmonst, mon, &kick, (struct obj *)0, -1, MM_MISS, mon->data, TRUE);
+			xpassivey(&youmonst, mon, &kick, (struct obj **)0, -1, MM_MISS, mon->data, TRUE, (boolean *)0);
 			return;
 		}
 		if(i < j/10) clumsy = TRUE;
@@ -236,7 +236,7 @@ struct monst *mon;
 		if(!nohands(mon->data) && !rn2(martial() ? 5 : 3) && mon->movement >= 0) {
 		    pline("%s blocks your %skick.", Monnam(mon),
 				clumsy ? "clumsy " : "");
-			xpassivey(&youmonst, mon, &kick, (struct obj *)0, -1, MM_MISS, mon->data, TRUE);
+			xpassivey(&youmonst, mon, &kick, (struct obj **)0, -1, MM_MISS, mon->data, TRUE, (boolean *)0);
 			mon->movement -= 6; //Note, may end up with up to -6 move points
 		    return;
 		}
@@ -297,7 +297,7 @@ flying_kick_monsters(void)
 			if(!nohands(mon->data) && !rn2(martial() ? 5 : 3) && mon->movement >= 0) {
 				pline("%s blocks your %skick.", Monnam(mon),
 					clumsy ? "clumsy " : "");
-				xpassivey(&youmonst, mon, &kick, (struct obj *)0, -1, MM_MISS, mon->data, TRUE);
+				xpassivey(&youmonst, mon, &kick, (struct obj **)0, -1, MM_MISS, mon->data, TRUE, (boolean *)0);
 				mon->movement -= 6; //Note, may end up with up to -6 move points
 				continue;
 			}
