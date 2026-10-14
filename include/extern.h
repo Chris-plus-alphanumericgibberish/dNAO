@@ -2662,6 +2662,7 @@ E void FDECL(save_gods, (int));
 E void FDECL(restore_gods, (int));
 E aligntyp FDECL(galign, (int));
 E int FDECL(gholiness, (int));
+E int FDECL(u_holiness, (void));
 E int FDECL(align_to_god, (aligntyp));
 E const char * FDECL(godname_full, (int));
 E const char * FDECL(godname, (int));

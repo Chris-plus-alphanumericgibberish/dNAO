@@ -5489,6 +5489,23 @@ int godnum;
 	return godlist[godnum].holiness;
 }
 
+int
+u_holiness()
+{
+	// 1 is holy, 0 is neutral, -1 is unholy
+	// fallen < -3, blessed > 3. >, not >=
+	switch (gholiness(u.ualign.god)){
+		case UNHOLY_HOLINESS:
+		case VOID_HOLINESS:
+			return (u_blessed()) ? UNHOLY_HOLINESS : ((u_fallen()) ? HOLY_HOLINESS : NEUTRAL_HOLINESS);
+		case HOLY_HOLINESS:
+		case NEUTRAL_HOLINESS:
+		default:
+			return (u_blessed()) ? HOLY_HOLINESS : ((u_fallen()) ? UNHOLY_HOLINESS : NEUTRAL_HOLINESS);
+	}
+	return 0;
+}
+
 /* transitory function, hopefully, to convert an alignment into the most likely candidate god */
 int
 align_to_god(alignmnt)

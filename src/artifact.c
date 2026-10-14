@@ -5011,8 +5011,9 @@ int * truedmgptr;
 	if(check_oprop(otmp, OPROP_ELFLW)){
 		int level = Insight >= 33 ? 2 : Insight >= 11 ? 1 : 0;
 		int bonus = 0;
+		int uholy = u_holiness();
 		if(youagr){
-			if(u.ualign.record < -3){
+			if(uholy == HOLY_HOLINESS){
 				bonus += d(level ? 2 : 1, 8);
 				if(level > 1)
 					bonus += otmp->spe;
@@ -5020,7 +5021,7 @@ int * truedmgptr;
 					bonus *= 2;
 				}
 			}
-			else if(u.ualign.record > 3){
+			else if(uholy == UNHOLY_HOLINESS){
 				bonus += d(level ? 2 : 1, 8);
 				if(level > 1)
 					bonus += otmp->spe;
@@ -5077,14 +5078,14 @@ int * truedmgptr;
 		int level = Insight >= 33 ? 2 : Insight >= 11 ? 1 : 0;
 		int bonus = 0;
 		if(youagr){
-			if(u.ualign.record < 4){
+			if(u_holiness() != HOLY_HOLINESS){
 				bonus += d(level ? 3 : 2, 5);
 				if(level > 1)
 					bonus += otmp->spe;
 				if(youdef ? (hates_unholy(youracedata)) : (hates_unholy_mon(mdef))){
 					bonus *= 2;
 				}
-				if(u.ualign.record < -3){ //curse and gravity
+				if(u_holiness() == UNHOLY_HOLINESS){ //curse and gravity
 					if(youdef || !resist(mdef, WEAPON_CLASS, 0, TRUE)){
 						*hp(mdef) -= *hp(mdef)/5; /*Percentage based damage, will not kill*/
 					}
@@ -6157,9 +6158,10 @@ boolean direct_weapon;
 		if(otmp->oartifact == ART_KISHIN_MIRROR && youagr){
 			int dtyp;
 			int dnum = 0;
-			if(u.ualign.record < -3){
+			int uholy = u_holiness();
+			if(uholy == UNHOLY_HOLINESS){
 				dtyp = AD_UNHY;
-				dnum = (u.ualign.record+1)/-3;
+				dnum = abs((u.ualign.record+1)/-3);
 				if(dnum > 20)
 					dnum = 20;
 				if(hates_holy_mon(mdef) && !hates_unholy_mon(mdef))
@@ -6167,9 +6169,9 @@ boolean direct_weapon;
 				else if(hates_unholy_mon(mdef))
 					dnum *= 1.5;
 			}
-			else if(u.ualign.record > 3){
+			else if(uholy == HOLY_HOLINESS){
 				dtyp = AD_HOLY;
-				dnum = (u.ualign.record-1)/3;
+				dnum = abs((u.ualign.record-1)/3);
 				if(dnum > 20)
 					dnum = 20;
 				if(hates_unholy_mon(mdef) && !hates_holy_mon(mdef))
@@ -6313,17 +6315,18 @@ boolean direct_weapon;
 		}
 		if(mdef){
 			if(youagr){
+				int uholy = u_holiness();
 				int bonus_die = (mdef && bigmonst(pd)) ? 
 							objects[atk_otyp].oc_wldam.oc_damd : 
 							objects[atk_otyp].oc_wsdam.oc_damd;
-				if(u.ualign.record < -3 && Insanity > 50)
+				if(uholy == UNHOLY_HOLINESS && Insanity > 50)
 					bonus += bonus_die*(50-u.usanity)/50;
-				else if(u.ualign.record > 3 && u.usanity > 90)
+				else if(uholy == HOLY_HOLINESS && u.usanity > 90)
 					bonus += bonus_die*(10-Insanity)/10;
 
-				if(u.ualign.record < -3 && hates_unholy_mon(mdef))
+				if(uholy == UNHOLY_HOLINESS && hates_unholy_mon(mdef))
 					bonus *= 2;
-				else if(u.ualign.record > 3 && hates_holy_mon(mdef))
+				else if(uholy == HOLY_HOLINESS && hates_holy_mon(mdef))
 					bonus *= 2;
 			}
 			else if(magr){
@@ -7711,12 +7714,12 @@ boolean printmessages; /* print generic elemental damage messages */
 	}
 		//sunlight code adapted from Sporkhack
 	if ((pd->mtyp == PM_GREMLIN || pd->mtyp == PM_HUNTING_HORROR)
-		&& (arti_bright(otmp) || (check_oprop(otmp, OPROP_ELFLW) && Insight >= 33 && u.ualign.record > 3))
+		&& (arti_bright(otmp) || (check_oprop(otmp, OPROP_ELFLW) && Insight >= 33 && u_holiness() == HOLY_HOLINESS))
 	){
 		wepdesc = oartifact ? artilist[oartifact].name : simple_typename(otmp->otyp);
 		/* Sunlight kills gremlins */
 		if (vis&VIS_MAGR && vis&VIS_MDEF) {
-			pline("%s sunlight sears %s!", s_suffix(wepdesc), hittee);
+			pline("%s%s sunlight sears %s!", (oartifact) ? "" : "The ", s_suffix(wepdesc), hittee);
 			otmp->dknown = TRUE;
 			*messaged = TRUE;
 		}
@@ -7729,14 +7732,14 @@ boolean printmessages; /* print generic elemental damage messages */
 		}
 	}
 	if ((pd->mlet == S_TROLL)
-		&& (arti_bright(otmp) || (check_oprop(otmp, OPROP_ELFLW) && Insight >= 33 && u.ualign.record > 3))
+		&& (arti_bright(otmp) || (check_oprop(otmp, OPROP_ELFLW) && Insight >= 33 && u_holiness() == HOLY_HOLINESS))
 	){
 		wepdesc = oartifact ? artilist[oartifact].name : simple_typename(otmp->otyp);
 		/* Sunlight turns trolls to stone (Middle-earth) */
 		if (pd->mlet == S_TROLL &&
 			!munstone(mdef, TRUE)) {
 			if (vis&VIS_MAGR && vis&VIS_MDEF){
-				pline("%s sunlight strikes %s!", s_suffix(wepdesc), hittee);
+				pline("%s%s sunlight strikes %s!", (oartifact) ? "" : "The ", s_suffix(wepdesc), hittee);
 				if (Stone_res(mdef)) pline("But %s %s even slow down!", hittee, youdef ? "don't" : "doesn't");
 				otmp->dknown = TRUE;
 				*messaged = TRUE;
@@ -9052,7 +9055,7 @@ boolean printmessages; /* print generic elemental damage messages */
 		}
 	}
 	
-	if(check_oprop(otmp, OPROP_ELFLW) && Insight >= 33 && (youagr ? u.ualign.record > 3 : magr ? (hates_unholy_mon(magr) || is_holy_mon(magr)) : FALSE) && Insight > rn2(333)){
+	if(check_oprop(otmp, OPROP_ELFLW) && Insight >= 33 && (youagr ? (u_holiness() == HOLY_HOLINESS) : magr ? (hates_unholy_mon(magr) || is_holy_mon(magr)) : FALSE) && Insight > rn2(333)){
 		/* cancel_monst handles resistance */
 		cancel_monst(mdef, otmp, youagr, FALSE, FALSE, FALSE);
 	}

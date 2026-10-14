@@ -1923,8 +1923,7 @@ struct monst * magr;
 		}
 #define sacred_bonus_dice ((FightingFormSkillLevel(FFORM_KNI_SACRED) >= P_EXPERT) ? 6 : (FightingFormSkillLevel(FFORM_KNI_SACRED) >= P_SKILLED ? 3 : 1))
 		if (activeFightingForm(FFORM_KNI_SACRED) && otmp == uwep){
-			if (((Holiness_if(HOLY_HOLINESS) || Holiness_if(NEUTRAL_HOLINESS)) && u.ualign.record >= 0) ||
-				((Holiness_if(UNHOLY_HOLINESS) || Holiness_if(VOID_HOLINESS)) && u.ualign.record < 0)){
+			if (u_holiness() == HOLY_HOLINESS && !Upolyd && youagr){
 				if (FightingFormSkillLevel(FFORM_KNI_SACRED) >= P_BASIC && u.uen >= 5){
 					holydmg += vd(sacred_bonus_dice, 8); // 1d8/3d8/6d8 for basic/skilled/expert
 					u.uen -= 5;
@@ -1944,7 +1943,7 @@ struct monst * magr;
 		}
 
 		/* aasimar auras */
-		if(youagr && flags.aasimar_type == AASIMAR_TYPE_ARCHON && u.ulevel >= 7 && u.ualign.record >= 0){
+		if(youagr && flags.aasimar_type == AASIMAR_TYPE_ARCHON && u.ulevel >= 7 && u_holiness() == HOLY_HOLINESS){
 			if(u.ulevel >= 21)
 				holydmg += vd(7, 7);
 			else if(u.ulevel >= 14)
@@ -2043,8 +2042,7 @@ struct monst * magr;
 		}
 
 		if (activeFightingForm(FFORM_KNI_SACRED) && otmp == uwep){
-			if (((Holiness_if(HOLY_HOLINESS) || Holiness_if(NEUTRAL_HOLINESS)) && u.ualign.record < 0) ||
-				((Holiness_if(UNHOLY_HOLINESS) || Holiness_if(VOID_HOLINESS)) && u.ualign.record >= 0)){
+			if (u_holiness() == UNHOLY_HOLINESS){
 				if (FightingFormSkillLevel(FFORM_KNI_SACRED) >= P_BASIC && u.uen >= 5){
 					dmg += vd(sacred_bonus_dice, 8); // 1d8/3d8/6d8 for basic/skilled/expert
 					u.uen -= 5;
@@ -2063,7 +2061,7 @@ struct monst * magr;
 			}
 		}
 		/* aasimar auras */
-		if(youagr && flags.aasimar_type == AASIMAR_TYPE_ARCHON && u.ulevel >= 7 && u.ualign.record < 0){
+		if(youagr && flags.aasimar_type == AASIMAR_TYPE_ARCHON && u.ulevel >= 7 && u_holiness() == UNHOLY_HOLINESS){
 			if(u.ulevel >= 21)
 				dmg += vd(6, 9);
 			else if(u.ulevel >= 14)

@@ -3373,17 +3373,17 @@ winid *datawin;
 				int lflat = (Insight >= 50) ? ldamd : 0;
 				int sflat = (Insight >= 50) ? sdamd : 0;
 
-				if(u.ualign.record < -3 && Insanity > 50){
+				if((u_holiness() == UNHOLY_HOLINESS) && Insanity > 50){
 					lflat += ldamd*(50-u.usanity)/50;
 					sflat += sdamd*(50-u.usanity)/50;
 				}
-				else if(u.ualign.record > 3 && u.usanity > 90){
+				else if(u_holiness() == HOLY_HOLINESS && u.usanity > 90){
 					lflat += ldamd*(10-Insanity)/10;
 					sflat += sdamd*(10-Insanity)/10;
 				}
 
 				Sprintf(buf2, "Deals +%dd%d%s %senergy damage versus small and +%dd%d%s versus large.",
-					dice, sdamd, (sflat ? sitoa(sflat) : ""), (u.ualign.record < -3) ? "unholy " : ((u.ualign.record > 3) ? "holy " : ""), 
+					dice, sdamd, (sflat ? sitoa(sflat) : ""), (u_holiness() == UNHOLY_HOLINESS) ? "unholy " : ((u_holiness() == HOLY_HOLINESS) ? "holy " : ""), 
 					dice, ldamd, (lflat ? sitoa(lflat) : ""));
 				OBJPUTSTR(buf2);
 			}

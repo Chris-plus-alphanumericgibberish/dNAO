@@ -2874,13 +2874,13 @@ boolean ordinary;
 		    }
 		    break;
 		case IMPERIAL_ELVEN_GAUNTLETS:
-			if(u.ualign.record > 3){
+			if(u_holiness() == HOLY_HOLINESS){
 				damage = d(max(1, 1+(obj->spe+1)/2),8);
 				if(hates_holy(youracedata))
 					damage *= 2;
 				pline("Idiot!  You've shot yourself!");
 			}
-			else if(u.ualign.record < -3){
+			else if(u_holiness() == UNHOLY_HOLINESS){
 				damage = d(max(1, 1+(obj->spe+1)/2),8);
 				if(hates_unholy(youracedata))
 					damage *= 2;
@@ -3588,12 +3588,12 @@ register struct	obj	*obj;
 			if(u.twoweap)
 				zapdat.damn *= 2;
 			zapdat.affects_floor = FALSE;
-			if(u.ualign.record > 3){
+			if(u_holiness() == HOLY_HOLINESS){
 				zapdat.damd = 8;
 				zapdat.adtyp = AD_HOLY;
 				zapdat.phase_armor = TRUE;
 			}
-			else if(u.ualign.record < -3){
+			else if(u_holiness() == UNHOLY_HOLINESS){
 				zapdat.damd = 8;
 				zapdat.adtyp = AD_UNHY;
 				zapdat.phase_armor = TRUE;

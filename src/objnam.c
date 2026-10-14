@@ -312,9 +312,9 @@ struct obj *otmp;
 	}
 	if(otmp->otyp == KAMEREL_VAJRA){
 		if(otmp->oartifact == ART_KISHIN_MIRROR){
-			if(u.ualign.record < -3)
+			if(u_holiness() == UNHOLY_HOLINESS)
 				return "black ash-bladed";
-			if(u.ualign.record > 3)
+			if(u_holiness() == HOLY_HOLINESS)
 				return "white sun-bladed";
 		}
 		return "lightning bladed";
