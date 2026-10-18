@@ -1310,9 +1310,9 @@ attk_equip_slot(struct monst *magr, struct attack *attk)
 		slot = W_ARMW;
 	else if (atkbp_intersects(attk->bodypart, ATKBP(HIT_WITH_SHIELD)))
 		slot = W_ARMS;
-	/* AURA_ARM: use gauntlets offensively but unneeded for protection */
+	/* AURA_ARM: not covered by any equipment slot */
 	else if (atkbp_intersects(attk->bodypart, ATKBP(AURA_ARM)))
-		slot = W_ARMG;
+		slot = 0;
 	/* ARMOR_ARM: attached to and made out of W_ARM, not part of the
 	 * wearer's body */
 	else if (atkbp_intersects(attk->bodypart, ATKBP(ARMOR_ARM)))
