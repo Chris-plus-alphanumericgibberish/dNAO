@@ -561,6 +561,16 @@ A("Ringil",			HIGH_ELVEN_WARSWORD,	(const char *)0,
 	NOINVOKE, NOFLAG
 	),
 
+A("Whirling Sword",			CRYSTAL_SWORD,	(const char *)0,
+	3000L, GEMSTONE, MZ_DEFAULT, WT_DEFAULT,
+	A_LAWFUL, PM_KENSEI, PM_AASIMAR, TIER_B, (ARTG_NOGEN),
+	NO_MONS(),
+	ATTK(AD_ELEC, 10, 12), NOFLAG,
+	PROPS(), NOFLAG,
+	PROPS(), NOFLAG,
+	NOINVOKE, NOFLAG
+	),
+
 /*Needs encyc entry*/
 A("The Rod of Lordly Might",		MACE,				(const char *)0,
 	4000L, MT_DEFAULT, MZ_DEFAULT, WT_SPECIAL,

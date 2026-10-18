@@ -1097,6 +1097,7 @@ E void FDECL(explode_pa, (int,int,int,int,int,int,int,struct permonst *));
 E void FDECL(explode_yours, (int,int,int,int,int,int,int,boolean));
 E void FDECL(explode_full, (int,int,int,int,int,int,int,int, boolean, struct permonst *, long));
 E void FDECL(explode_full_nocenter, (int,int,int,int,int,int,int,int, boolean, struct permonst *, long));
+E void FDECL(explode_full_threats, (int,int,int,int,int,int,int,int, boolean, struct permonst *, long));
 E void FDECL(splash, (int,int,int,int,int,int,int,int, long));
 E long FDECL(scatter, (int, int, int, unsigned int, struct obj *, long *, struct monst *));
 E void FDECL(splatter_burning_oil, (int, int));
@@ -3940,6 +3941,7 @@ E int FDECL(zappable, (struct obj *));
 E void FDECL(zapnodir, (struct obj *));
 E int NDECL(dozap);
 E struct zapdata * FDECL(basiczap, (struct zapdata *, int, int, int));
+E int FDECL(zapdamage, (struct monst *, struct monst *, struct zapdata *));
 E void FDECL(zap, (struct monst *, int, int, int, int, int, struct zapdata *));
 E int FDECL(zapyourself, (struct obj *,BOOLEAN_P));
 E boolean FDECL(cancel_monst, (struct monst *,struct obj *,

@@ -244,6 +244,8 @@ struct monst *magr;
 	   (holy_damage(mon))){
 		if(otmp->oartifact == ART_EXCALIBUR)
 			tmp += 7; //Quite holy
+		if(otmp->oartifact == ART_WHIRLING_SWORD)
+			tmp += 7; //Quite holy
 		if(otmp->oartifact == ART_JINJA_NAGINATA)
 			tmp += 5; //Quite holy
 		else if(otmp->oartifact == ART_VAMPIRE_KILLER)

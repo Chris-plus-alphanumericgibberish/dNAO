@@ -229,6 +229,7 @@ struct monst {
 	Bitfield(mrecruitable,1); /* monster can be recruited for quest reasons */
 	/*155*/
 	Bitfield(mastral_hits,2); /* weapon hits toward the hero's astral astra's next stunning strike */
+	Bitfield(mwhirling_sword_marked,1); /* struck by the whirling sword */
 	/*157*/
 
 	unsigned long long int 	seenmadnesses;	/* monster has seen these madnesses */

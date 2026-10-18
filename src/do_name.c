@@ -735,6 +735,9 @@ const char *name;
 		if (obj->oartifact == ART_ANGUIREL)
 			add_oprop(obj, OPROP_WRTHW);
 		
+		if (obj->oartifact == ART_WHIRLING_SWORD)
+			add_oprop(obj, OPROP_FIREW);
+		
 		/* symbol */
 		if (obj->oartifact == ART_LOMYA)
 			obj->oward = LOLTH_SYMBOL;
@@ -796,6 +799,9 @@ const char *name;
 		else if(obj->oartifact == ART_EYE_OF_THE_OVERWORLD){
 			set_material_gm(obj, GEMSTONE);
 			obj->sub_material = MORGANITE;
+		}
+		else if(obj->oartifact == ART_WHIRLING_SWORD){
+			obj->sub_material = SAPPHIRE;
 		}
 		else if(obj->oartifact == ART_IBITE_ARM){
 			obj->obj_color = CLR_BRIGHT_GREEN;

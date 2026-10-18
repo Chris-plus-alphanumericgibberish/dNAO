@@ -2653,6 +2653,41 @@ u_init()
 			case 2: Kensei[KEN_BOOK].trotyp = SPE_INVISIBILITY; break;
 			}
 		}
+		else if(Race_if(PM_AASIMAR)){
+			if(u.ualign.type == A_LAWFUL){
+				Skill_Ken[KENSEI_SKILL].skill = P_LONG_SWORD;
+				skill_init(Skill_Ken);
+				skill_add(Skill_Ken_LS);
+				u.role_variant = ART_WHIRLING_SWORD;
+			}
+			else if(u.ualign.type == A_NEUTRAL){
+				struct def_skill AltSkill_Ken[] = {
+					{ P_BROAD_SWORD, P_EXPERT }, 	{ P_BOW, P_EXPERT },
+					{ P_SHURIKEN, P_EXPERT },		{ P_DAGGER, P_EXPERT },
+					{ P_DART, P_EXPERT },			{ P_BOOMERANG, P_EXPERT },
+					{ P_ATTACK_SPELL, P_SKILLED },
+					{ P_HEALING_SPELL, P_EXPERT },	{ P_DIVINATION_SPELL, P_EXPERT },
+					{ P_ENCHANTMENT_SPELL, P_BASIC },{ P_CLERIC_SPELL, P_EXPERT }, 
+					{ P_ESCAPE_SPELL, P_EXPERT },	{ P_MATTER_SPELL, P_BASIC },
+					{ P_MARTIAL_ARTS, P_GRAND_MASTER },	{ P_TWO_WEAPON_COMBAT, P_GRAND_MASTER },
+					{ P_NONE, 0 }
+				};
+				skill_init(AltSkill_Ken);
+				// u.role_variant = ART_; //Balancer
+			}
+			else {
+				Skill_Ken[KENSEI_SKILL].skill = P_TWO_HANDED_SWORD;
+				skill_init(Skill_Ken);
+				skill_add(Skill_Ken_LS);
+				// u.role_variant = ART_WINTER_REAPER;
+			}
+			skill_add(Skill_Ken_GW);
+			switch (rn2(90) / 30) {
+			case 0: Kensei[KEN_BOOK].trotyp = SPE_SLOW_MONSTER; break;
+			case 1: Kensei[KEN_BOOK].trotyp = SPE_PROTECTION; break;
+			case 2: Kensei[KEN_BOOK].trotyp = SPE_INVISIBILITY; break;
+			}
+		}
 		Kensei[KEN_WEAPON].trotyp = kensei_starting_weapon();
 		knows_class(WEAPON_CLASS);
 		knows_class(ARMOR_CLASS);
@@ -3468,12 +3503,19 @@ u_init()
 				flags.aasimar_type = AASIMAR_TYPE_CLOUDFACE;
 			}
 		}
-		/* Not currently reachable: Kensei don't allow aasimar */
-		else if(Role_if(PM_KENSEI) && flags.initalign == INITALIGN_NEUTRAL){
-			flags.aasimar_type = AASIMAR_TYPE_SURYA;
-		}
 		else {
-			flags.aasimar_type = rnd(3);
+			if(Role_if(PM_KENSEI)){
+				if(flags.initalign == INITALIGN_LAWFUL){
+					flags.aasimar_type = AASIMAR_TYPE_ARCHON;
+				}
+				else if(flags.initalign == INITALIGN_NEUTRAL){
+					flags.aasimar_type = AASIMAR_TYPE_SURYA;
+				}
+				else { // == INITALIGN_CHAOTIC
+					flags.aasimar_type = AASIMAR_TYPE_ELADRIN;
+				}
+			}
+			else flags.aasimar_type = rnd(3);
 			if(flags.aasimar_type == AASIMAR_TYPE_ELADRIN){
 				if(rn2(7))
 					flags.aasimar_subtype = rnd(6);
@@ -3594,6 +3636,10 @@ register struct trobj *trop;
 				else if(Race_if(PM_HUMAN) && otyp == LONG_SWORD){
 					obj = mksobj(otyp, NO_MKOBJ_FLAGS);
 					set_material_gm(obj, METAL);
+				}
+				else if(Race_if(PM_AASIMAR) && u.role_variant == ART_WHIRLING_SWORD && otyp == LONG_SWORD){
+					obj = mksobj(otyp, NO_MKOBJ_FLAGS);
+					set_material_gm(obj, SILVER);
 				}
 				else if(Race_if(PM_YUKI_ONNA) && otyp == RAPIER){
 					obj = mksobj(otyp, NO_MKOBJ_FLAGS);
@@ -4208,6 +4254,10 @@ kensei_starting_weapon(void)
 		return u.ualign.type == A_LAWFUL ? KATANA
 			: u.ualign.type == A_NEUTRAL ? NAGAMAKI
 			: RAPIER;
+	if (Race_if(PM_AASIMAR))
+		return u.ualign.type == A_LAWFUL ? LONG_SWORD
+			: u.ualign.type == A_NEUTRAL ? BROADSWORD
+			: PRACTICE_SWORD;
 	return LONG_SWORD;
 }
 

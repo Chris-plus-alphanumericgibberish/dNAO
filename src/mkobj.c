@@ -2662,6 +2662,7 @@ int mat;
 	int oldmat = obj->obj_material;
 
 	if(mat == obj->obj_material) return; //Already done!
+	if(obj->oartifact == ART_WHIRLING_SWORD) return;
 	if(oldmat == MERCURIAL){
 		start_timer(d(8,8), TIMER_OBJECT,
 					REVERT_MERC, (genericptr_t)obj);

@@ -1263,7 +1263,7 @@ struct monst * mon;
 		return 1.5;
 
 	if (otmp->otyp == ISAMUSEI || otmp->otyp == CHIKAGE || otmp->otyp == KATANA || otmp->otyp == ODACHI
-		|| otmp->otyp == LONG_SWORD || is_vibrosword(otmp))
+		|| otmp->otyp == LONG_SWORD || otmp->otyp == CRYSTAL_SWORD || is_vibrosword(otmp))
 		return 1.5;
 	
 	return 1;

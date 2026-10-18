@@ -266,6 +266,46 @@ explode_full_nocenter(int x, int y, int adtyp, int olet, int dam, int color, int
 	free_explode_region(area);
 }
 
+/* Removes every location occupied by a nonthreat_ful() monster from reg */
+STATIC_OVL void
+remove_nonthreats_from_explode_region(ExplodeRegion *reg)
+{
+	struct monst *mtmp;
+	int i;
+	for(i = reg->nlocations - 1; i >= 0; i--){
+		mtmp = m_at(reg->locations[i].x, reg->locations[i].y);
+		if(mtmp && nonthreat_ful(mtmp))
+			remove_location_from_explode_region(reg->locations[i].x, reg->locations[i].y, reg);
+	}
+}
+
+/* As explode_full_nocenter(), but also skips any location occupied by a nonthreat_ful() monster */
+void
+explode_full_threats(int x, int y, int adtyp, int olet, int dam, int color, int radius, int dest, boolean yours, struct permonst *pa, long special_flags)
+{
+	ExplodeRegion *area;
+	if (radius == 0)
+		return;
+	area = create_explode_region();
+	if (radius == 1)
+	{	// can use simple method of creating explosions
+		int i, j;
+		for (i = -1; i <= 1; i++)
+		for (j = -1; j <= 1; j++)
+			if (isok(x + i, y + j))
+				add_location_to_explode_region(x + i, y + j, area);
+	}
+	else
+	{	// use circles
+		do_clear_area(x, y, radius, add_location_to_explode_region, (genericptr_t)(area));
+	}
+
+	remove_location_from_explode_region(x, y, area);
+	remove_nonthreats_from_explode_region(area);
+	do_explode(x, y, area, adtyp, olet, dam, color, dest, yours, pa, special_flags);
+	free_explode_region(area);
+}
+
 void
 splash(int x, int y, int dx, int dy, int adtyp, int olet, int dam, int color, long special_flags)
 {

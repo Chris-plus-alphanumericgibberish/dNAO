@@ -23984,7 +23984,7 @@ beam_monk_target(int range)
 		}
 		if(!peace_check_move(mon)){
 			//We'll call this the Monk's "sixth sense" talking <_<'
-			if(mon->mpeaceful && !Hallucination)
+			if(nonthreat_ful(mon) && !Hallucination)
 				return FALSE;
 			else continue;
 		}
@@ -24021,68 +24021,93 @@ warp_monk_target(int range)
 	return FALSE;
 }
 
-void
-monk_aura_bolt()
+/* Fills in zapdat with the hero's aura slash/bolt damage and damage type.
+ * A nonzero adtyp_override replaces the damage type (and lets the zap affect the floor).
+ */
+STATIC_OVL void
+monk_aura_zapdata(struct zapdata *zapdat, int adtyp_override)
 {
-	struct zapdata zapdat = { 0 };
-	basiczap(&zapdat, (u_holiness() == UNHOLY_HOLINESS) ? AD_UNHY : AD_HOLY, ZAP_SPELL, (u.ulevel+2) / 3 );
-	zapdat.damd = 4;
-	zapdat.affects_floor = FALSE;
-	zapdat.phase_armor = TRUE;
-	int range = monk_aura_range();
+	basiczap(zapdat, (u_holiness() == UNHOLY_HOLINESS) ? AD_UNHY : AD_HOLY, ZAP_SPELL, (u.ulevel+2) / 3 );
+	zapdat->damd = 4;
+	zapdat->affects_floor = FALSE;
+	zapdat->phase_armor = TRUE;
 	if(Role_if(PM_KENSEI) && uwep && is_kensei_weapon(uwep)){
 		struct weapon_dice wdice;
 		/* grab the weapon dice from dmgval_core */
 		dmgval_core(&wdice, FALSE, uwep, uwep->otyp, &youmonst);
-		zapdat.damd = wdice.oc_damd + wdice.bon_damd + wdice.flat*2;
+		zapdat->damd = wdice.oc_damd + wdice.bon_damd + wdice.flat*2;
 		if(uwep->oartifact){
 			if(artilist[uwep->oartifact].accuracy){
 				if(!artilist[uwep->oartifact].damage)
-					zapdat.damn *= 2;
+					zapdat->damn *= 2;
 				else
-					zapdat.damd += (artilist[uwep->oartifact].damage+zapdat.damd-1)/zapdat.damd;
+					zapdat->damd += (artilist[uwep->oartifact].damage+zapdat->damd-1)/zapdat->damd;
 			}
 			if(uwep->oartifact == ART_RINGIL){
-				zapdat.adtyp = AD_STAR;
+				zapdat->adtyp = AD_STAR;
 			}
 			else if(uwep->oartifact == ART_SKY_RENDER){
-				zapdat.adtyp = AD_VORP;
+				zapdat->adtyp = AD_VORP;
 			}
-			else if(is_always_holy(uwep)){
-				zapdat.adtyp = AD_HOLY;
+			else if(is_always_holy(uwep) || uwep->oartifact == ART_WHIRLING_SWORD){
+				zapdat->adtyp = AD_HOLY;
 			}
 			else if(is_always_unholy(uwep)){
-				zapdat.adtyp = AD_UNHY;
+				zapdat->adtyp = AD_UNHY;
 			}
 			else if(artilist[uwep->oartifact].adtyp == AD_COLD
 			 ||artilist[uwep->oartifact].adtyp == AD_FIRE
 			 ||artilist[uwep->oartifact].adtyp == AD_ELEC
 			 ||artilist[uwep->oartifact].adtyp == AD_SLEE
 			){
-				zapdat.adtyp = artilist[uwep->oartifact].adtyp;
-				zapdat.affects_floor = TRUE;
+				zapdat->adtyp = artilist[uwep->oartifact].adtyp;
+				zapdat->affects_floor = TRUE;
 			}
 			if(uwep->oartifact == ART_KISHIN_MIRROR){
 				if(!u_holiness())
-					zapdat.adtyp = AD_ELEC;
-				if(zapdat.adtyp != AD_UNHY)
-					zapdat.blinding = TRUE;
+					zapdat->adtyp = AD_ELEC;
+				if(zapdat->adtyp != AD_UNHY)
+					zapdat->blinding = TRUE;
 			}
 			else if(uwep->otyp == KAMEREL_VAJRA){
-				zapdat.adtyp = AD_ELEC;
+				zapdat->adtyp = AD_ELEC;
 			}
 		}
 	}
 	else if(uarmg && uarmg->oartifact == ART_WRAPPINGS_OF_THE_SACRED_FI)
-		zapdat.damd *= 2;
+		zapdat->damd *= 2;
 
 	if(Role_if(PM_KENSEI) && u.role_variant == ART_WINTER_REAPER)
-		zapdat.adtyp = AD_COLD;
+		zapdat->adtyp = AD_COLD;
 
+	if(adtyp_override){
+		zapdat->adtyp = adtyp_override;
+		zapdat->affects_floor = TRUE;
+	}
+}
+
+void
+monk_aura_bolt(int adtyp_override)
+{
+	struct zapdata zapdat = { 0 };
+	monk_aura_zapdata(&zapdat, adtyp_override);
 	//Currently these cook off without the player's explicit say-so
 	zapdat.no_bounce = TRUE;
 	zapdat.unreflectable = ZAP_REFL_NEVER;
-	zap(&youmonst, u.ux, u.uy, u.dx, u.dy, range, &zapdat);
+	zap(&youmonst, u.ux, u.uy, u.dx, u.dy, monk_aura_range(), &zapdat);
+}
+
+/* Burning cyclone: hit all adjacent enemies, then a fire burst around the hero that spares nonthreat_ful() monsters */
+STATIC_OVL void
+burning_cyclone(void)
+{
+	struct zapdata zapdat = { 0 };
+	cyclone_slash_monsters(TRUE);
+	if(Is_spire(&u.uz))
+		return;
+	monk_aura_zapdata(&zapdat, AD_FIRE);
+	explode_full_threats(u.ux, u.uy, AD_FIRE, 0, zapdamage(&youmonst, (struct monst *)0, &zapdat),
+		adtyp_expl_color(AD_FIRE), 2, 0, TRUE, (struct permonst *)0, 0L);
 }
 
 void
@@ -25201,6 +25226,69 @@ kensei_elf_millwheel(int *move_cost)
 	return messaged;
 }
 
+/* Returns TRUE if mtmp is affected by the hero's turn undead-style moves (based on alignment record and level) */
+static boolean
+kensei_turn_target(struct monst *mtmp)
+{
+	return (u.ualign.record >= 10 && (is_undead(mtmp->data) || (is_demon(mtmp->data) && (u.ulevel > (MAXULEV/2)))))
+		|| (u.ualign.record <= -10 && (is_elemental(mtmp->data) || (is_angel(mtmp->data) && (u.ulevel > (MAXULEV/2)))));
+}
+
+/* Turn undead-style effect: hostile turning targets in view are destroyed or flee */
+static void
+kensei_turn_effect(void)
+{
+	/* note: does not perform unturn_dead() on victims' inventories */
+	int range = BOLT_LIM + (u.ulevel / 5);	/* 5 to 11 */
+	range *= range;
+	struct monst *mtmp, *mtmp2;
+	for(mtmp = fmon; mtmp; mtmp = mtmp2) {
+		mtmp2 = mtmp->nmon;
+
+		if (DEADMONSTER(mtmp)) continue;
+		if (!couldsee(mtmp->mx,mtmp->my) ||
+			distu(mtmp->mx,mtmp->my) > range
+		) continue;
+
+		if (!mtmp->mpeaceful && kensei_turn_target(mtmp)) {
+			mtmp->msleeping = 0;
+			if (u.ulevel >= mtmp->m_lev && !resist(mtmp, '\0', 0, NOTELL)) {
+				killed(mtmp);
+			}
+			/* else flee */
+			if(!DEADMONSTER(mtmp))
+				monflee(mtmp, 0, FALSE, TRUE);
+		}
+	}
+}
+
+/* Lightning bolt from above striking mdef (as the LIGHTNING monster spell, but dealing the hero's aura slash damage) */
+static int
+kensei_lightning_strike(struct monst *mdef)
+{
+	struct attack lightning = { AT_MAGC, AD_ELEC, 0, 0 };
+	struct zapdata zapdat = { 0 };
+	boolean reflects;
+	int dmg = 0;
+
+	pline("A bolt of lightning strikes down at %s from above!", mon_nam(mdef));
+	reflects = mon_reflects(mdef, "It bounces off %s %s.");
+	if (reflects || Shock_res(mdef)) {
+		shieldeff(mdef->mx, mdef->my);
+	}
+	else {
+		monk_aura_zapdata(&zapdat, AD_ELEC);
+		dmg = zapdamage(&youmonst, mdef, &zapdat);
+		dmg = reduce_dmg(mdef, dmg, FALSE, TRUE);
+	}
+	if (!(reflects || UseInvShock_res(mdef))) {
+		destroy_item(mdef, WAND_CLASS, AD_ELEC);
+		destroy_item(mdef, RING_CLASS, AD_ELEC);
+	}
+	/* xdamagey() applies elemental resistances */
+	return xdamagey(&youmonst, mdef, &lightning, dmg);
+}
+
 /* Handle general throwing attack */
 static boolean
 kensei_throwing_move(int *move_cost)
@@ -25302,6 +25390,8 @@ move_name(int moveid)
 		case ELEMENT_A: return "Elemental slash";
 		case CHAIN_MAG: return "Chain magic";
 		case STEAL_S: return "Talon strike";
+		case LIGHTNING_S: return "Lightning slash";
+		case BURN_CYC: return "Burning cyclone";
 	}
 	return "unknown move id";
 }
@@ -25903,7 +25993,7 @@ perform_monk_move(int moveID, int *move_cost)
 			&& beam_monk_target(monk_aura_range())
 		){
 			pline("%s!", move_name(moveID));
-			monk_aura_bolt();
+			monk_aura_bolt(0);
 			return TRUE;
 		}
 		break;
@@ -25944,6 +26034,13 @@ perform_monk_move(int moveID, int *move_cost)
 		break;
 		case STEAL_S:
 			return  talon_strike();
+		break;
+		case BURN_CYC:
+			if(circle_monk_target(!!uwep)){
+				pline("%s!", move_name(moveID));
+				burning_cyclone();
+				return TRUE;
+			}
 		break;
 		case CYCLONE:
 			if(uwep && is_pole(uwep))
@@ -26402,37 +26499,36 @@ perform_monk_move(int moveID, int *move_cost)
 				return TRUE;
 			}
 		break;
+		case LIGHTNING_S:
+			if(!u.uswallow && (mdef = adjacent_move_target(!!uwep))){
+				boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+				boolean cleansing = kensei_turn_target(mdef);
+				pline("%s!", cleansing ? "Cleansing blast" : "Judgement bolt");
+				if(!Is_spire(&u.uz)){
+					kensei_lightning_strike(mdef);
+					if(cleansing)
+						kensei_turn_effect();
+				}
+				if(!DEADMONSTER(mdef) && !MIGRATINGMONSTER(mdef))
+					xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE, 0);
+				return TRUE;
+			}
+			if((!(uswapwep && u.twoweap) || is_monk_weapon(uswapwep))
+				&& !Is_spire(&u.uz)
+				&& beam_monk_target(monk_aura_range())
+			){
+				pline("%s!", move_name(moveID));
+				monk_aura_bolt(AD_ELEC);
+				return TRUE;
+			}
+		break;
 		case CLENSE:
 			if(!u.uswallow && (mdef = adjacent_move_target(!!uwep))){
 				boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
 				pline("%s!", move_name(moveID));
 				int res = xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE, ATTKFLAG_FORCE_BLEED);
-				if((res&MM_HIT) && !(res&(MM_AGR_STOP|MM_DEF_DIED))){
-					/* note: does not perform unturn_dead() on victims' inventories */
-					int range = BOLT_LIM + (u.ulevel / 5);	/* 5 to 11 */
-					range *= range;
-					struct monst *mtmp, *mtmp2;
-					for(mtmp = fmon; mtmp; mtmp = mtmp2) {
-						mtmp2 = mtmp->nmon;
-
-						if (DEADMONSTER(mtmp)) continue;
-						if (!couldsee(mtmp->mx,mtmp->my) ||
-							distu(mtmp->mx,mtmp->my) > range
-						) continue;
-
-						if ((!mtmp->mpeaceful)
-							&&((u.ualign.record >= 10 && (is_undead(mtmp->data) || (is_demon(mtmp->data) && (u.ulevel > (MAXULEV/2)))))
-							|| (u.ualign.record <=-10 && (is_elemental(mtmp->data) || (is_angel(mtmp->data) && (u.ulevel > (MAXULEV/2))))))
-						) {
-							mtmp->msleeping = 0;
-							if (u.ulevel >= mtmp->m_lev && !resist(mtmp, '\0', 0, NOTELL)) {
-								killed(mtmp);
-							}
-							/* else flee */
-							if(!DEADMONSTER(mtmp))
-								monflee(mtmp, 0, FALSE, TRUE);
-						}
-					}
+				if((res&MM_HIT) && !(res&(MM_AGR_STOP))){
+					kensei_turn_effect();
 				}
 				return TRUE;
 			}
@@ -26575,6 +26671,8 @@ forward_move()
 				return SPARKS; /* Note: handles both regular and artifact */
 			if(uwep->otyp == HIGH_ELVEN_WARSWORD)
 				return WHIRLWIND;
+			if(u.role_variant == ART_WHIRLING_SWORD)
+				return WHIRLWIND;
 			if(uwep->otyp == SQUARE_CLUB)
 				return SHOVE;
 			if(u.role_variant == ART_ANGUIREL)
@@ -26646,6 +26744,8 @@ hook_move()
 			return STRONG_P;
 		if(uwep->oartifact == ART_ANSERMEE)
 			return SONIC_B;
+		if(uwep->oartifact == ART_WHIRLING_SWORD)
+			return BURN_CYC;
 		if(uwep->oartifact == ART_WINTER_REAPER || objects[uwep->otyp].oc_skill == P_HARVEST)
 			return BLEED_S;
 		if(uwep->otyp == RAPIER)
@@ -26706,6 +26806,8 @@ uturn_move()
 		//Weapon-specific
 		if(uwep && is_kensei_weapon(uwep) && uwep->oartifact == ART_ANSERMEE)
 			return INFLICT;
+		if(uwep && is_kensei_weapon(uwep) && uwep->oartifact == ART_WHIRLING_SWORD)
+			return LIGHTNING_S;
 		if(u.role_variant == ART_KISHIN_MIRROR)
 			return CLENSE;
 		if(u.role_variant == ART_RINGIL)

@@ -535,7 +535,9 @@ struct you {
 #define PRAY_MANTIS 58
 #define SNAKE_S   59
 #define CLAP      60
-#define MAX_MYSTIC_FORMS 60
+#define LIGHTNING_S 61
+#define BURN_CYC  62
+#define MAX_MYSTIC_FORMS 62
 
 #define MFORM_STREAM MAX_MYSTIC_FORMS+1
 #define MFORM_CHAINS MAX_MYSTIC_FORMS+2

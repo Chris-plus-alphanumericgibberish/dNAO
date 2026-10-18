@@ -1915,8 +1915,10 @@ struct monst * magr;
 		if(youagr && !Upolyd && TIEFLING_FALLEN)
 			holydmg += vd(min(3, 1+mlev(magr)/10), 7);
 		/* special cases that don't affect dice */
-		if (otmp->oartifact == ART_EXCALIBUR ||
-			otmp->oartifact == ART_LANCE_OF_LONGINUS)
+		if (otmp->oartifact == ART_EXCALIBUR
+			|| otmp->oartifact == ART_LANCE_OF_LONGINUS
+			|| otmp->oartifact == ART_WHIRLING_SWORD
+		)
 			holydmg += vd(3, 7);
 		else if (otmp->oartifact == ART_ARCOR_KERYM)
 			holydmg += vd(2, 10); // Crackling holy energy

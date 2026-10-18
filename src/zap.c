@@ -29,7 +29,6 @@ STATIC_DCL struct obj * FDECL(poly_obj_core, (struct obj *, int));
 STATIC_DCL void FDECL(create_polymon, (struct obj *, int));
 STATIC_DCL boolean FDECL(zap_updown, (struct obj *));
 STATIC_DCL boolean FDECL(zap_reflect, (struct monst *, struct zapdata *));
-STATIC_DCL int FDECL(zapdamage, (struct monst *, struct monst *, struct zapdata *));
 STATIC_DCL int FDECL(zhit, (struct monst *, struct monst *, struct zapdata *));
 #ifdef STEED
 STATIC_DCL boolean FDECL(zap_steed, (struct obj *));

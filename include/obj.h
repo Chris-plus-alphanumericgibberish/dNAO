@@ -782,6 +782,7 @@ struct obj {
 			    otmp->otyp == LONG_SWORD \
 			 || otmp->otyp == SILVERKNIGHT_SWORD \
 			 || (otmp->otyp == CRYSTAL_SWORD && has_mutation(AAT_GRACE_CRYSTAL)) \
+			 || (otmp->otyp == CRYSTAL_SWORD && Role_if(PM_KENSEI) && u.role_variant == ART_WHIRLING_SWORD) \
 			)
 #define is_rapier(otmp)	(otmp->oclass == WEAPON_CLASS && (\
 			 otmp->otyp == RAPIER || \
@@ -1223,6 +1224,7 @@ struct obj {
 								u.role_variant == ART_WINTER_REAPER ? ((otmp)->otyp == RAPIER || (otmp)->otyp == SABER) : \
 								u.role_variant == ART_KIKU_ICHIMONJI ? (is_katana_ish(otmp)) : \
 								u.role_variant == ART_EPITAPH_OF_WONGAS ? (is_lightsaber(otmp)) : \
+								u.role_variant == ART_WHIRLING_SWORD ? ((otmp)->otyp == LONG_SWORD || (otmp)->otyp == CRYSTAL_SWORD) : \
 								(otmp)->otyp == artilist[u.role_variant].otyp)
 
 #define is_kensei_weapon_otyp(a_otyp)	( \
@@ -1230,6 +1232,7 @@ struct obj {
 						u.role_variant == ART_ANSERMEE ? (objects[(a_otyp)].oc_skill == P_SHORT_SWORD) : \
 						u.role_variant == ART_KISHIN_MIRROR ? (objects[(a_otyp)].oc_skill == P_MACE) : \
 						u.role_variant == ART_EPITAPH_OF_WONGAS ? (is_lightsaber_otyp(a_otyp)) : \
+						u.role_variant == ART_WHIRLING_SWORD ? ((a_otyp) == LONG_SWORD || (a_otyp) == CRYSTAL_SWORD) : \
 						(a_otyp) == artilist[u.role_variant].otyp)
 
 #define is_returning_snare(obj)	((obj)->oartifact == ART_JIN_GANG_ZUO || (obj)->oartifact == ART_KENJAKU)
