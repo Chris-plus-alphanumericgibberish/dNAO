@@ -1373,9 +1373,11 @@ struct monst *mon;
 		if(grace_empowers(mon, AAT_GRACE_TRAPS))
 			mondodgeac = max(3, mondodgeac + mondodgeac*2/3);
 		if(u.ustuck == mon)
-			mondodgeac = -5;
+			mondodgeac = min(-5, mondodgeac);
 		else if(mon->permspeed == MSLOW)
 			mondodgeac = min(0, mondodgeac);
+		if(mon->mprone && mondodgeac > 0)
+			mondodgeac /= 2;
 		if ((mondodgeac < 0)						/* penalties have full effect */
 			|| (!armor)								/* no armor = max mobility */
 			|| (armor && is_light_armor(armor))		/* light armor is also fine  */
@@ -1384,6 +1386,8 @@ struct monst *mon;
 		else if (armor && is_medium_armor(armor))	/* medium armor halves dodge AC */
 			base -= mondodgeac / 2;
 		/* else no adjustment */
+		if(mon->mprone)
+			base += 3;
 	}
 	
 	/* since arm_ac_bonus is positive, subtracting it increases AC */
