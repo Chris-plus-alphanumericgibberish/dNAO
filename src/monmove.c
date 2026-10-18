@@ -1337,6 +1337,12 @@ register struct monst *mtmp;
 		mtmp->encouraged = max(mtmp->encouraged, min(20, monstr[mtmp->mtyp]));
 	}
 	
+	/* stunned monsters get un-stunned with larger probability */
+	if (mtmp->mstun && !rn2(10)) mtmp->mstun = 0;
+
+	/* may reduce pucture-chance */
+	if (mtmp->mpunctured > 0 && rn2(2)) mtmp->mpunctured--;
+
 	if(mtmp->mdisrobe){
 		if(mon_throw_armor(mtmp))
 			return 0;
@@ -1351,26 +1357,6 @@ register struct monst *mtmp;
 			mtmp->mlaughing=rnd(5);
 		}
 	}
-	
-	if(mtmp->mtyp == PM_QUIVERING_BLOB && !mtmp->mflee){
-		if(!rn2(20)){
-			monflee(mtmp, 0, TRUE, TRUE);
-		}
-	}
-	if(mtmp->mtyp == PM_GRUE){
-		if(!mtmp->mflee && !isdark(mtmp->mx, mtmp->my)){
-			monflee(mtmp, 0, TRUE, TRUE);
-		} else if(mtmp->mflee && isdark(mtmp->mx, mtmp->my)){
-			mtmp->mflee = 0;
-			mtmp->mfleetim = 0;
-		}
-	}
-	
-	/* stunned monsters get un-stunned with larger probability */
-	if (mtmp->mstun && !rn2(10)) mtmp->mstun = 0;
-
-	/* may reduce pucture-chance */
-	if (mtmp->mpunctured > 0 && rn2(2)) mtmp->mpunctured--;
 
 	/* some monsters teleport */
 	if (mon_resistance(mtmp,TELEPORT)
@@ -1383,6 +1369,21 @@ register struct monst *mtmp;
 	) {
 		if (rloc(mtmp, TRUE))
 			return(0);
+	}
+	
+	/* Some monsters may flee */
+	if(mtmp->mtyp == PM_QUIVERING_BLOB && !mtmp->mflee){
+		if(!rn2(20)){
+			monflee(mtmp, 0, TRUE, TRUE);
+		}
+	}
+	if(mtmp->mtyp == PM_GRUE){
+		if(!mtmp->mflee && !isdark(mtmp->mx, mtmp->my)){
+			monflee(mtmp, 0, TRUE, TRUE);
+		} else if(mtmp->mflee && isdark(mtmp->mx, mtmp->my)){
+			mtmp->mflee = 0;
+			mtmp->mfleetim = 0;
+		}
 	}
 	
 	if(mtmp->mtyp == PM_DRACAE_ELADRIN){
