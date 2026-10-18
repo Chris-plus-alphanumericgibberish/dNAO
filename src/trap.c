@@ -2198,6 +2198,7 @@ grace_escapes_trap(struct monst *mtmp, struct trap *trap)
 {
 	int tt = trap->ttyp;
 
+	/* steed trap evasion is handled by the PC */
 	if (!grace_empowers(mtmp, AAT_GRACE_TRAPS) || mtmp == u.usteed)
 		return FALSE;
 	if (((tt == HOLE || tt == PIT) && In_sokoban(&u.uz) && !trap->madeby_u) || tt == STATUE_TRAP)
@@ -2265,6 +2266,7 @@ mintrap_core(struct monst *mtmp, boolean forcebungle)
 	    const char *fallverb;
 
 	    /* true when called from dotrap, inescapable is not an option */
+	    /* steed trap evasion is handled by the PC */
 	    if (mtmp == u.usteed) inescapable = TRUE;
 
 	    /* web-rippers always rip webs */
