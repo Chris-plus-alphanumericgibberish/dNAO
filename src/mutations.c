@@ -263,7 +263,7 @@ const struct mutationtype mutationtypes[] =
 	{ AAT_PRIMINAL_CLARITY_MUDRA, AURA_TRAIT, "clarity mudra", "A pair of your pseudopods make the gesture of clarity.", "mudra", "You have many pseudopods."},
 	{ AAT_PRIMINAL_THREATENING_MUDRA, AURA_TRAIT, "threatening mudra", "A pair of your pseudopods make the gesture of banishing demons.", "mudra", "You have many pseudopods."},
 	// Eladrin grace
-	{ AAT_GRACE_TRAPS, -1, "graceful trapavoid", "Your grace allows you to avoid traps.", "grace", "You move with graceful ease."},
+	{ AAT_GRACE_TRAPS, -1, "graceful trapavoid", "Your grace allows you to avoid traps and attacks.", "grace", "You move with graceful ease."},
 	{ AAT_GRACE_DODGE, -1, "graceful dodge", "Your grace allows you to dodge attacks.", "grace", "You move with graceful ease."},
 	{ AAT_GRACE_SWIFT, -1, "swift grace", "Your grace allows you to move swiftly.", "grace", "You move with graceful ease."},
 	{ AAT_GRACE_PRECISION, -1, "precise grace", "Your grace allows you to strike with precision.", "grace", "You move with graceful ease."},
