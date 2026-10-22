@@ -2878,14 +2878,13 @@ base_uac()
 				uac -= Insight - 10;
 		}
 		if(!flat_foot){
-			if((can_parry_with(uwep, &youmonst) && arti_phasing(uwep)) || 
-				(uwep->otyp == LIGHTSABER && litsaber(uwep) && uwep->oartifact != ART_ANNULUS && uwep->ovar1_lightsaberHandle == 0)
-					) uac -= max(
-						min(
-						(ACURR(A_DEX)-13)/4,
-						P_SKILL(weapon_type(uwep))-1
-						)
-					,0);
+			if(can_parry_with(uwep, &youmonst) && parries_as_phasing(uwep))
+				uac -= max(
+					min(
+					(ACURR(A_DEX)-13)/4,
+					P_SKILL(weapon_type(uwep))-1
+					)
+				,0);
 			if(is_lightsaber(uwep) && litsaber(uwep)){
 				if(activeFightingForm(FFORM_SORESU)){
 					switch(min(P_SKILL(P_SORESU), P_SKILL(weapon_type(uwep)))){
@@ -3072,6 +3071,7 @@ find_ac()
 	int uac;
 	int weapon_spe = (uwep && !uwep->suppressed && !Is_spire(&u.uz)) ? uwep->spe : 0;
 	int swapwep_spe = (uswapwep && !uswapwep->suppressed && !Is_spire(&u.uz)) ? uswapwep->spe : 0;
+	boolean flat_foot = multi < 0 || mad_turn(MAD_SUICIDAL) || u.ustuck;
 
 	uac = base_uac();
 	uac -= (u.uuur+1)/2;
@@ -3111,13 +3111,12 @@ find_ac()
 					)/2;
 		else
 			uac -= (2 + material_def_bonus(uwep, 2, TRUE) + (weapon_spe)/2 - min((int)greatest_erosion(uwep), 2))/2;
-		uac -= 2 + material_def_bonus(uwep, 2, TRUE) + (weapon_spe)/2 - min((int)greatest_erosion(uwep), 2);
 	}
 	else if(u.twoweap && uswapwep && hand_protecting(uswapwep) && !arti_phasing(uswapwep))
 		uac -= (2 + material_def_bonus(uswapwep, 2, TRUE) + (swapwep_spe)/2 - min((int)greatest_erosion(uswapwep), 2))/2;
 
 	if(uwep){
-		if((can_parry_with(uwep, &youmonst) && !arti_phasing(uwep)))
+		if(!flat_foot && can_parry_with(uwep, &youmonst) && !parries_as_phasing(uwep))
 			uac -= max(
 				min(
 				(ACURR(A_DEX)-13)/4,

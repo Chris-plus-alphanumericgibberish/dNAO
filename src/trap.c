@@ -163,7 +163,7 @@ boolean candestroy;
 		if (victim == &youmonst)
 		    Your("%s %s away!", ostr, vtense(ostr, destruction[type]));
 		else if (vismon)
-		    pline("%s's %s %s away!", Monnam(victim), ostr,
+		    pline("%s%s %s away!", mon_obj_possessive(victim, otmp, TRUE), ostr,
 			  vtense(ostr, destruction[type]));
 		if (victim == &youmonst)
 			useup(otmp);
@@ -180,7 +180,7 @@ boolean candestroy;
 		if (victim == &youmonst)
 		    Your("%s %s not affected.", ostr, vtense(ostr, "are"));
 		else if (vismon)
-		    pline("%s's %s %s not affected.", Monnam(victim), ostr,
+		    pline("%s%s %s not affected.", mon_obj_possessive(victim, otmp, TRUE), ostr,
 			  vtense(ostr, "are"));
 	    }
 	} else if (erosion < MAX_ERODE) {
@@ -192,8 +192,8 @@ boolean candestroy;
 			pline("Somehow, your %s %s not affected.",
 			      ostr, vtense(ostr, "are"));
 		    else if (vismon)
-			pline("Somehow, %s's %s %s not affected.",
-			      mon_nam(victim), ostr, vtense(ostr, "are"));
+			pline("Somehow, %s%s %s not affected.",
+			      mon_obj_possessive(victim, otmp, FALSE), ostr, vtense(ostr, "are"));
 		}
 	    } else {
 		if (victim == &youmonst)
@@ -202,7 +202,7 @@ boolean candestroy;
 			 erosion+1 == MAX_ERODE ? " completely" :
 			    erosion ? " further" : "");
 		else if (vismon)
-		    pline("%s's %s %s%s!", Monnam(victim), ostr,
+		    pline("%s%s %s%s!", mon_obj_possessive(victim, otmp, TRUE), ostr,
 			vtense(ostr, action[type]),
 			erosion+1 == MAX_ERODE ? " completely" :
 			  erosion ? " further" : "");
@@ -219,8 +219,8 @@ boolean candestroy;
 			 vtense(ostr, Blind ? "feel" : "look"),
 			 msg[type]);
 		else if (vismon)
-		    pline("%s's %s %s completely %s.",
-			  Monnam(victim), ostr,
+		    pline("%s%s %s completely %s.",
+			  mon_obj_possessive(victim, otmp, TRUE), ostr,
 			  vtense(ostr, "look"), msg[type]);
 	    }
 	}
@@ -240,13 +240,13 @@ struct monst *victim;
 	    if (victim == &youmonst)
 		Your("%s %s %s", ostr, vtense(ostr, "are"), txt);
 	    else if (vismon)
-		pline("%s's %s %s %s", Monnam(victim),
+		pline("%s%s %s %s", mon_obj_possessive(victim, otmp, TRUE),
 		    ostr, vtense(ostr, "are"), txt);
 	} else {
 	    if (victim == &youmonst)
 		Your("%s %s",aobjnam(otmp,"are"), txt);
 	    else if (vismon)
-		pline("%s's %s %s", Monnam(victim), aobjnam(otmp,"are"), txt);
+		pline("%s%s %s", mon_obj_possessive(victim, otmp, TRUE), aobjnam(otmp,"are"), txt);
 	}
 	if (!rn2(otmp->blessed ? 4 : 2)) {
 	    otmp->greased = 0;
@@ -6068,7 +6068,7 @@ uescape_entanglement()
 	for(obj = invent; obj; obj = obj->nobj){
 		if(obj->o_id == u.uentangled_oid){
 			//Very hard to escape from the diamond snare
-			if(is_returning_snare(obj) && rn2(20))
+			if(is_artifact_snare(obj) && rn2(20))
 				break;
 			You("slip loose from the entangling %s!", xname(obj));
 			obj->spe = 0;

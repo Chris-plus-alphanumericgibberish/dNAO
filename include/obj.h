@@ -128,6 +128,7 @@ enum {
 	OPROP_COLD_HOLY_SNCT,
 	OPROP_ELEC_HOLY_SNCT,
 	OPROP_ACID_HOLY_SNCT,
+	OPROP_SAMOW,
 	MAX_OPROP
 };
 
@@ -796,10 +797,13 @@ struct obj {
 			 (otmp)->otyp == CRYSTAL_SHIELD || \
 			 (otmp)->otyp == CRYSTAL_GAUNTLETS)
 #define is_crystal_weapon(otmp)	((otmp)->otyp == CRYSTAL_SWORD)
-/* rapiers, or any one-handed weapon or weapon-tool if the hero's parry grace empowers mon */
-#define can_parry_with(otmp, mon)	(is_rapier(otmp) || \
+#define is_parrying_lightsaber(otmp)	((otmp)->otyp == LIGHTSABER && litsaber(otmp) && \
+			 (otmp)->oartifact != ART_ANNULUS && (otmp)->ovar1_lightsaberHandle == 0)
+/* rapiers, lit plain lightsabers, or any one-handed weapon or weapon-tool if the hero's parry grace empowers mon */
+#define can_parry_with(otmp, mon)	(is_rapier(otmp) || is_parrying_lightsaber(otmp) || \
 			 (((otmp)->oclass == WEAPON_CLASS || is_weptool(otmp)) \
 			  && grace_empowers((mon), AAT_GRACE_PARRY) && !bimanual_mon((otmp), (mon))))
+#define parries_as_phasing(otmp)	(arti_phasing(otmp) || (is_lightsaber(otmp) && litsaber(otmp)))
 #define is_rakuyo(otmp)	(otmp->otyp == RAKUYO || \
 			 otmp->otyp == RAKUYO_SABER || \
 			 otmp->otyp == RAKUYO_DAGGER)
@@ -990,6 +994,8 @@ struct obj {
 							))
 #define is_grenade(otmp)	(is_ammo(otmp) && \
 			 	 objects[(otmp)->otyp].w_ammotyp == WP_GRENADE)
+#define u_can_fire_launcher(launcher) (ammo_and_launcher(uquiver, (launcher)) \
+			|| ((check_oprop((launcher), OPROP_AAMOW) || check_oprop((launcher), OPROP_SAMOW)) && !Is_spire(&u.uz)))
 #define ammo_and_launcher(otmp,ltmp) \
 			 ((otmp) && (ltmp) && (\
 			  (\
@@ -1225,6 +1231,7 @@ struct obj {
 								u.role_variant == ART_KIKU_ICHIMONJI ? (is_katana_ish(otmp)) : \
 								u.role_variant == ART_EPITAPH_OF_WONGAS ? (is_lightsaber(otmp)) : \
 								u.role_variant == ART_WHIRLING_SWORD ? ((otmp)->otyp == LONG_SWORD || (otmp)->otyp == CRYSTAL_SWORD) : \
+								u.role_variant == ART_SUN_S_BOW ? (objects[(otmp)->otyp].oc_skill == P_BOW) : \
 								(otmp)->otyp == artilist[u.role_variant].otyp)
 
 #define is_kensei_weapon_otyp(a_otyp)	( \
@@ -1233,9 +1240,12 @@ struct obj {
 						u.role_variant == ART_KISHIN_MIRROR ? (objects[(a_otyp)].oc_skill == P_MACE) : \
 						u.role_variant == ART_EPITAPH_OF_WONGAS ? (is_lightsaber_otyp(a_otyp)) : \
 						u.role_variant == ART_WHIRLING_SWORD ? ((a_otyp) == LONG_SWORD || (a_otyp) == CRYSTAL_SWORD) : \
+						u.role_variant == ART_SUN_S_BOW ? (objects[(a_otyp)].oc_skill == P_BOW) : \
 						(a_otyp) == artilist[u.role_variant].otyp)
 
-#define is_returning_snare(obj)	((obj)->oartifact == ART_JIN_GANG_ZUO || (obj)->oartifact == ART_KENJAKU)
+#define is_artifact_snare(obj)	((obj)->oartifact == ART_JIN_GANG_ZUO || (obj)->oartifact == ART_KENJAKU)
+
+#define is_returning_artifact(obj)	(is_artifact_snare(obj) || (obj)->oartifact == ART_CUTTING_WISDOM)
 
 /* multistriking() is 0-based so that only actual multistriking weapons return multistriking!=0 */
 #define multistriking(otmp)	(!(otmp) ? 0 : \

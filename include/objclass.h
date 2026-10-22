@@ -269,8 +269,8 @@ struct material {
 	const int density;			/* density (from old dnh) */
 	const int cost;				/* cost multiplier */
 	const int defense;			/* defense modifier */
-	const int flat_dr;			/* minimum ac modifier (torso, limbs and head are 1/2) */
-	const int flat_ac;			/* defense modifier (torso, limbs and head are 1/2) */
+	const int flat_dr;			/* minimum dr modifier (non-body armor is 1/2) */
+	const int flat_ac;			/* minimum ac modifier (non-body armor is 1/2) */
 };
 
 extern NEARDATA struct objclass objects[];

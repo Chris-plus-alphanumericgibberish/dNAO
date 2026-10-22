@@ -17,7 +17,6 @@ static NEARDATA const char *gate_str;
 extern boolean notonhead;	/* for long worms */
 
 STATIC_DCL boolean kick_lands(struct monst *, struct attack *, boolean, xchar, xchar, int);
-STATIC_DCL void FDECL(kick_monster, (XCHAR_P, XCHAR_P));
 STATIC_DCL int FDECL(kick_object, (XCHAR_P, XCHAR_P));
 STATIC_DCL char *FDECL(kickstr, (char *));
 STATIC_DCL void FDECL(otransit_msg, (struct obj *, BOOLEAN_P, long));
@@ -145,9 +144,8 @@ kick_lands(struct monst *mon, struct attack *kick, boolean clumsy, xchar x, xcha
 	return TRUE;
 }
 
-STATIC_OVL void
-kick_monster(x, y)
-register xchar x, y;
+void
+kick_monster(xchar x, xchar y)
 {
 	struct attack kick = basic_kick();
 	register boolean clumsy = FALSE;
@@ -882,6 +880,22 @@ dokick()
 	return dokick_core(0,0);
 }
 
+/* Returns TRUE if the hero is currently physically able to kick */
+boolean
+u_can_kick(void)
+{
+	if (nokicks(youracedata) || verysmall(youracedata) || Wounded_legs
+		|| near_capacity() > SLT_ENCUMBER || youracedata->mlet == S_LIZARD
+		|| u.uentangled_oid || u.utrap
+	)
+		return FALSE;
+#ifdef STEED
+	if (u.usteed)
+		return FALSE;
+#endif
+	return TRUE;
+}
+
 int
 dokick_core(dx,dy)
 int dx, dy;
@@ -892,61 +906,59 @@ int dx, dy;
 	boolean no_kick = FALSE;
 	char buf[BUFSZ];
 
-	if (nokicks(youracedata)) {
-		You("have no legs to kick with.");
-		no_kick = TRUE;
-	} else if (verysmall(youracedata)) {
-		You("are too small to do any kicking.");
-		no_kick = TRUE;
+	if (!u_can_kick()) {
+		if (nokicks(youracedata)) {
+			You("have no legs to kick with.");
+		} else if (verysmall(youracedata)) {
+			You("are too small to do any kicking.");
 #ifdef STEED
-	} else if (u.usteed) {
-		if (!dx && !dy && yn_function("Kick your steed?", ynchars, 'y') == 'y') {
-		    You("kick %s.", mon_nam(u.usteed));
-		    kick_steed();
-		    return MOVE_STANDARD;
-		} else {
-			if(dx || dy)
-				You("can't kick while riding!");
-		    return MOVE_CANCELLED;
-		}
+		} else if (u.usteed) {
+			if (!dx && !dy && yn_function("Kick your steed?", ynchars, 'y') == 'y') {
+			    You("kick %s.", mon_nam(u.usteed));
+			    kick_steed();
+			    return MOVE_STANDARD;
+			} else {
+				if(dx || dy)
+					You("can't kick while riding!");
+			    return MOVE_CANCELLED;
+			}
 #endif
-	} else if (Wounded_legs) {
-		/* note: jump() has similar code */
-		long wl = (EWounded_legs & BOTH_SIDES);
-		const char *bp = body_part(LEG);
+		} else if (Wounded_legs) {
+			/* note: jump() has similar code */
+			long wl = (EWounded_legs & BOTH_SIDES);
+			const char *bp = body_part(LEG);
 
-		if (wl == BOTH_SIDES) bp = makeplural(bp);
-		Your("%s%s %s in no shape for kicking.",
-		     (wl == LEFT_SIDE) ? "left " :
-			(wl == RIGHT_SIDE) ? "right " : "",
-		     bp, (wl == BOTH_SIDES) ? "are" : "is");
-		no_kick = TRUE;
-	} else if (near_capacity() > SLT_ENCUMBER) {
-		Your("load is too heavy to balance yourself for a kick.");
-		no_kick = TRUE;
-	} else if (youracedata->mlet == S_LIZARD) {
-		Your("legs cannot kick effectively.");
+			if (wl == BOTH_SIDES) bp = makeplural(bp);
+			Your("%s%s %s in no shape for kicking.",
+			     (wl == LEFT_SIDE) ? "left " :
+				(wl == RIGHT_SIDE) ? "right " : "",
+			     bp, (wl == BOTH_SIDES) ? "are" : "is");
+		} else if (near_capacity() > SLT_ENCUMBER) {
+			Your("load is too heavy to balance yourself for a kick.");
+		} else if (youracedata->mlet == S_LIZARD) {
+			Your("legs cannot kick effectively.");
+		} else if (u.uentangled_oid) {
+			You_cant("move your %s!", body_part(LEG));
+		} else if (u.utrap) {
+			switch (u.utraptype) {
+			    case TT_PIT:
+				pline("There's not enough room to kick down here.");
+				break;
+			    case TT_WEB:
+			    case TT_BEARTRAP:
+			    case TT_LAVA:
+			    case TT_SALIVA:
+				You_cant("move your %s!", body_part(LEG));
+				break;
+			    default:
+				break;
+			}
+		} else {
+			You_cant("kick!");
+		}
 		no_kick = TRUE;
 	} else if (u.uinwater && !rn2(2)) {
 		Your("slow motion kick doesn't hit anything.");
-		no_kick = TRUE;
-	} else if (u.uentangled_oid) {
-		You_cant("move your %s!", body_part(LEG));
-		no_kick = TRUE;
-	} else if (u.utrap) {
-		switch (u.utraptype) {
-		    case TT_PIT:
-			pline("There's not enough room to kick down here.");
-			break;
-		    case TT_WEB:
-		    case TT_BEARTRAP:
-		    case TT_LAVA:
-		    case TT_SALIVA:
-			You_cant("move your %s!", body_part(LEG));
-			break;
-		    default:
-			break;
-		}
 		no_kick = TRUE;
 	} else if (!rn2(2) && IS_PUDDLE(levl[u.ux][u.uy].typ) &&
 		    !Levitation && !Flying && !Wwalking &&

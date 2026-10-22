@@ -2300,6 +2300,12 @@ boolean getting_obj_base_desc;
 		else
 			Strcat(buf, " of light");
 	}
+	if(check_oprop(obj, OPROP_SAMOW) && obj->oartifact != ART_SUN_S_BOW && obj->known){
+		if(strstr(buf, " of "))
+			Strcat(buf, " and the sun");
+		else
+			Strcat(buf, " of the sun");
+	}
 	
 	if (!(obj->oartifact && undiscovered_artifact(obj->oartifact) && oart->desc)
 		|| (iflags.force_artifact_names && !getting_obj_base_desc && obj->oartifact != ART_FLUORITE_OCTAHEDRON)) {
@@ -6554,6 +6560,26 @@ struct monst *mtmp;
 		return obj_descr[idx].oc_name;
 	}
 	return "whatcha-may-callit";
+}
+
+/* Returns the possessive subject for mon's obj, with a trailing space: for a dancing sword's
+ * own wielded weapon, "The " (or nothing, if the weapon's name is a proper name), else "Mon's "
+ * (capitalized if upper).
+ */
+char *
+mon_obj_possessive(struct monst *mon, struct obj *obj, boolean upper)
+{
+	static char buf[BUFSZ];
+
+	if (mon != &youmonst && mon->mtyp == PM_DANCING_SWORD && obj && obj == MON_WEP(mon)) {
+		if (!strncmp(the(xname(obj)), "the ", 4))
+			Strcpy(buf, upper ? "The " : "the ");
+		else
+			buf[0] = '\0';
+	}
+	else
+		Sprintf(buf, "%s ", s_suffix(upper ? Monnam(mon) : mon_nam(mon)));
+	return buf;
 }
 #endif /* OVLB */
 

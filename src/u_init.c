@@ -712,6 +712,13 @@ static struct trobj Phial[] = {
 	{ 0, 0, 0, 0, 0 }
 };
 
+static struct trobj KenseiArrows[] = {
+#define KEN_TWO_ARROWS	0
+	{ YA, 2, WEAPON_CLASS, 50, UNDEF_BLESS },
+#define KEN_ZERO_ARROWS	1
+	{ YA, 0, WEAPON_CLASS, 30, UNDEF_BLESS },
+	{ 0, 0, 0, 0, 0 }
+};
 static struct trobj BlackTorches[] = {
 	{ SHADOWLANDER_S_TORCH, 0, TOOL_CLASS, 3, 0 },
 	{ 0, 0, 0, 0, 0 }
@@ -1919,7 +1926,7 @@ u_init()
 	u.uavoid_unsafetouch = 1;	// by default, avoid touching potentally unsafe monsters
 	u.uavoid_theft = 0;			// by default, allow theft attacks
 	u.uavoid_urpassives = 0;	// by default, allow passive attacks
-	u.umystic = ~0;				// by default, all monk style attacks are active
+	(void) memset((genericptr_t)u.umystic, 0xFF, sizeof u.umystic);	// by default, all monk style attacks are active
 	init_martial_forms();
 
 	u.summonMonster = FALSE;
@@ -2658,11 +2665,12 @@ u_init()
 				Skill_Ken[KENSEI_SKILL].skill = P_LONG_SWORD;
 				skill_init(Skill_Ken);
 				skill_add(Skill_Ken_LS);
+				skill_add(Skill_Ken_GW);
 				u.role_variant = ART_WHIRLING_SWORD;
 			}
 			else if(u.ualign.type == A_NEUTRAL){
 				struct def_skill AltSkill_Ken[] = {
-					{ P_BROAD_SWORD, P_EXPERT }, 	{ P_BOW, P_EXPERT },
+					{ P_BOW, P_EXPERT },
 					{ P_SHURIKEN, P_EXPERT },		{ P_DAGGER, P_EXPERT },
 					{ P_DART, P_EXPERT },			{ P_BOOMERANG, P_EXPERT },
 					{ P_ATTACK_SPELL, P_SKILLED },
@@ -2670,10 +2678,11 @@ u_init()
 					{ P_ENCHANTMENT_SPELL, P_BASIC },{ P_CLERIC_SPELL, P_EXPERT }, 
 					{ P_ESCAPE_SPELL, P_EXPERT },	{ P_MATTER_SPELL, P_BASIC },
 					{ P_MARTIAL_ARTS, P_GRAND_MASTER },	{ P_TWO_WEAPON_COMBAT, P_GRAND_MASTER },
+					{ P_BEAST_MASTERY, P_EXPERT },
 					{ P_NONE, 0 }
 				};
 				skill_init(AltSkill_Ken);
-				// u.role_variant = ART_; //Balancer
+				u.role_variant = ART_SUN_S_BOW;
 			}
 			else {
 				Skill_Ken[KENSEI_SKILL].skill = P_TWO_HANDED_SWORD;
@@ -2681,7 +2690,6 @@ u_init()
 				skill_add(Skill_Ken_LS);
 				// u.role_variant = ART_WINTER_REAPER;
 			}
-			skill_add(Skill_Ken_GW);
 			switch (rn2(90) / 30) {
 			case 0: Kensei[KEN_BOOK].trotyp = SPE_SLOW_MONSTER; break;
 			case 1: Kensei[KEN_BOOK].trotyp = SPE_PROTECTION; break;
@@ -2692,6 +2700,11 @@ u_init()
 		knows_class(WEAPON_CLASS);
 		knows_class(ARMOR_CLASS);
 		ini_inv(Kensei);
+		if(Race_if(PM_AASIMAR) && u.ualign.type == A_NEUTRAL){
+			KenseiArrows[KEN_TWO_ARROWS].trquan = rn1(10, 50);
+			KenseiArrows[KEN_ZERO_ARROWS].trquan = rn1(10, 30);
+			ini_inv(KenseiArrows);
+		}
 		if(RACE_IF_DROW){
 			ini_inv(BlackTorches);
 		}
@@ -4256,7 +4269,7 @@ kensei_starting_weapon(void)
 			: RAPIER;
 	if (Race_if(PM_AASIMAR))
 		return u.ualign.type == A_LAWFUL ? LONG_SWORD
-			: u.ualign.type == A_NEUTRAL ? BROADSWORD
+			: u.ualign.type == A_NEUTRAL ? YUMI
 			: PRACTICE_SWORD;
 	return LONG_SWORD;
 }

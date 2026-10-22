@@ -2246,6 +2246,8 @@ moveloop()
 			flags.spriest_level = 0;
 		    for (mtmp = fmon; mtmp; mtmp = nxtmon){
 				nxtmon = mtmp->nmon;
+				if(dancing_sword_disarmed(mtmp))
+					continue;
 				/* check for bad swap weapons */
 				if (mtmp->msw) {
 					struct obj *obj;
@@ -2424,7 +2426,7 @@ moveloop()
 							untame(blade, mtmp->mpeaceful);
 						}
 						if(mtmp->mpeaceful != blade->mpeaceful){
-							mtmp->mpeaceful = blade->mpeaceful;
+							blade->mpeaceful = mtmp->mpeaceful;
 						}
 					}
 				}

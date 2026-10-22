@@ -478,12 +478,10 @@ align_str_proper(alignment)
 	\
 	if(armac > 11) armac = (armac-10)/2 + 10;\
 	\
-	if(nat_dr && armac){\
+	if(nat_dr > 0 && armac > 0){\
 		base += sqrt(nat_dr*nat_dr + armac*armac);\
-	} else if(nat_dr){\
-		base += nat_dr;\
 	} else {\
-		base += armac;\
+		base += nat_dr + armac;\
 	}
 
 void

@@ -18403,6 +18403,7 @@ int type;
 		case PM_FLESH_GOLEM: return 40;
 		case PM_BRAIN_GOLEM: return 40;
 		case PM_DANCING_BLADE: return 49;
+		case PM_DANCING_SWORD: return 10;
 		case PM_SPELL_GOLEM: return 20;
 //		case PM_SAURON_THE_IMPRISONED: return 45;
 		case PM_CLAY_GOLEM: return 50;
@@ -18967,6 +18968,9 @@ struct monst *mon;
 	
 	if(uring_art(ART_LOMYA) && mon->mtame && lev_limit < 49)
 		lev_limit = min_ints(49, lev_limit + lev_lomya());
+
+	if(mon->mtyp == PM_DANCING_SWORD && mon->mtame)
+		lev_limit = u.ulevel;
 		
 
 	return lev_limit;

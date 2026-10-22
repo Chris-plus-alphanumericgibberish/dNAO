@@ -467,6 +467,7 @@ struct attack *mattk;
 	boolean mi_only = is_chuul(youracedata);
 
 	if (!mdef->minvent) return;		/* nothing to take */
+	if (mdef->mtyp == PM_DANCING_SWORD) return;
 
 	/* look for worn body armor */
 	stealoid = (struct obj *)0;
@@ -1816,6 +1817,22 @@ platinum_diesize(struct monst *mdef)
 	return diesize;
 }
 
+/* Returns TRUE if [otmp], hitting with [hmoncode] and [vpointer] is eligible for [magr]'s sacred style bonus. */
+STATIC_OVL boolean
+sacred_style_obj(struct obj *otmp, struct monst *magr, int hmoncode, void *vpointer, boolean holy)
+{
+	struct obj *launcher;
+
+	if(otmp == uwep)
+		return TRUE;
+	if(magr != &youmonst || !Role_if(PM_KENSEI) || !(hmoncode & HMON_FIRED) || (hmoncode & HMON_TRAP))
+		return FALSE;
+	launcher = (struct obj *)vpointer;
+	if(!launcher)
+		return TRUE;
+	return is_kensei_weapon(launcher) && (holy ? is_holy(launcher) : is_unholy(launcher));
+}
+
 /* hatesobjdmg()
  *
  * Calculates a damage roll from [mdef] being seared by [otmp]
@@ -1824,10 +1841,7 @@ platinum_diesize(struct monst *mdef)
  *
  */
 int
-hatesobjdmg(mdef, otmp, magr)
-struct monst * mdef;
-struct obj * otmp;
-struct monst * magr;
+hatesobjdmg(struct monst *mdef, struct obj *otmp, struct monst *magr, int hmoncode, void *vpointer, boolean hypothetical)
 {
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
@@ -1904,7 +1918,8 @@ struct monst * magr;
 			ndice = khakharadice;
 		/* calculate */
 		dmg += vd(ndice, diesize);
-		mdef->mironmarked = TRUE;
+		if(!hypothetical)
+			mdef->mironmarked = TRUE;
 	}
 	if (hates_holy_mon(mdef) &&
 		is_holy(otmp)) {
@@ -1939,17 +1954,19 @@ struct monst * magr;
 		else if (otmp->oartifact == ART_SEVEN_STAR_SWORD)
 			diesize = 20;
 
-		if(magr && Focused_aura(magr)){
+		if(magr && Focused_aura_wep(magr, otmp)){
 			diesize += 4;
 		}
 #define sacred_bonus_dice ((FightingFormSkillLevel(FFORM_KNI_SACRED) >= P_EXPERT) ? 6 : (FightingFormSkillLevel(FFORM_KNI_SACRED) >= P_SKILLED ? 3 : 1))
-		if (activeFightingForm(FFORM_KNI_SACRED) && otmp == uwep){
+		if (activeFightingForm(FFORM_KNI_SACRED) && sacred_style_obj(otmp, magr, hmoncode, vpointer, TRUE)){
 			if (u_holiness() == HOLY_HOLINESS && !Upolyd && youagr){
 				if (FightingFormSkillLevel(FFORM_KNI_SACRED) >= P_BASIC && u.uen >= 5){
 					holydmg += vd(sacred_bonus_dice, 8); // 1d8/3d8/6d8 for basic/skilled/expert
-					u.uen -= 5;
+					if(!hypothetical)
+						u.uen -= 5;
 				}
-				use_skill(P_KNI_SACRED, 1);
+				if(!hypothetical)
+					use_skill(P_KNI_SACRED, 1);
 			}
 		}
 		else if(otmp->where == OBJ_MINVENT){
@@ -1965,6 +1982,14 @@ struct monst * magr;
 
 		/* aasimar auras */
 		if(youagr && flags.aasimar_type == AASIMAR_TYPE_ARCHON && u.ulevel >= 7 && u_holiness() == HOLY_HOLINESS){
+			if(u.ulevel >= 21)
+				holydmg += vd(7, 7);
+			else if(u.ulevel >= 14)
+				holydmg += vd(3, 7);
+			else
+				holydmg += vd(1, 7);
+		}
+		if(surya_astra_sword(magr) && u.ulevel >= 7){
 			if(u.ulevel >= 21)
 				holydmg += vd(7, 7);
 			else if(u.ulevel >= 14)
@@ -2051,7 +2076,7 @@ struct monst * magr;
 		else if (otmp->oartifact == ART_TECPATL_OF_HUEHUETEOTL)
 		{	ndice = (otmp->cursed ? 4 : 2); diesize = 4; }
 
-		if(magr && Focused_aura(magr)){
+		if(magr && Focused_aura_wep(magr, otmp)){
 			diesize += 4;
 		}
 
@@ -2062,13 +2087,15 @@ struct monst * magr;
 			dmg += (u.uimpurity+4)/5;
 		}
 
-		if (activeFightingForm(FFORM_KNI_SACRED) && otmp == uwep){
+		if (activeFightingForm(FFORM_KNI_SACRED) && sacred_style_obj(otmp, magr, hmoncode, vpointer, FALSE)){
 			if (u_holiness() == UNHOLY_HOLINESS){
 				if (FightingFormSkillLevel(FFORM_KNI_SACRED) >= P_BASIC && u.uen >= 5){
 					dmg += vd(sacred_bonus_dice, 8); // 1d8/3d8/6d8 for basic/skilled/expert
-					u.uen -= 5;
+					if(!hypothetical)
+						u.uen -= 5;
 				}
-				use_skill(P_KNI_SACRED, 1);
+				if(!hypothetical)
+					use_skill(P_KNI_SACRED, 1);
 			}
 		}
 		else if(otmp->where == OBJ_MINVENT){
@@ -2142,7 +2169,7 @@ struct monst * magr;
 			diesize = 9;
 		}
 		
-		if(magr && Focused_aura(magr)){
+		if(magr && Focused_aura_wep(magr, otmp)){
 			diesize += 4;
 		}
 
@@ -2468,7 +2495,7 @@ struct obj * weapon;
 		if (weapon->oartifact == ART_GRAYSWANDIR) /* Grayswandir can interact with phantoms */
 			return 2;
 
-		if (hatesobjdmg(mdef, weapon, magr))
+		if (hatesobjdmg(mdef, weapon, magr, 0, (void *)0, TRUE))
 			return 1;
 
 		if ((hates_silver(pd) && !(youdef && u.sealsActive&SEAL_EDEN)) && (

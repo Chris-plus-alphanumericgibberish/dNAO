@@ -83,6 +83,7 @@
 							|| (ptr)->mtyp == PM_VERMIURGE \
 							|| (ptr)->mtyp == PM_TWIN_SIBLING \
 							|| (ptr)->mtyp == PM_DEEP_DRAGON \
+							|| (ptr)->mtyp == PM_DANCING_SWORD \
 							|| is_yochlol(ptr))
 
 #define resists_confusion(ptr)	(((ptr)->geno&G_UNIQ) || is_weeping(ptr) || is_yochlol(ptr))

@@ -1199,6 +1199,9 @@ msteal_m(struct monst *magr, struct monst *mdef, struct attack *attk, int *resul
 		return TRUE;
 	}
 
+	if(mdef->mtyp == PM_DANCING_SWORD)
+		return TRUE;
+
 	if(attk->adtyp == AD_SITM){
 		/* select item from defender's inventory */
 		for (otmp = mdef->minvent; otmp; otmp = otmp->nobj)

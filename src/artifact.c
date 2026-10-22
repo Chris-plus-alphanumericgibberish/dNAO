@@ -4882,14 +4882,29 @@ Am_hit(struct monst *magr, struct monst *mdef, struct obj *mb, int *dmgptr, int 
 boolean
 astra_dbon(struct obj *otmp, struct monst *magr, struct monst *mdef, int basedmg, int *plusdmgptr, int *truedmgptr)
 {
+	static const int monadic_elements[] = { AD_FIRE, AD_COLD, AD_ELEC };
 	int original_truedmgptr = *truedmgptr;
 	boolean youdef = (mdef == &youmonst);
 	struct permonst *pd = youdef ? youracedata : mdef->data;
+	int monadic_elem = 0;
 
-	if(astra_empowers(magr, AAT_MOVANIC_ASTRA) && !Fire_res(mdef)){
-		int fire_dmg = d(4, 6) + otmp->spe;
+	if(magr && magr != &youmonst && magr->mtyp == PM_DANCING_SWORD && astra_empowers(magr, AAT_MONADIC_ASTRA))
+		monadic_elem = ROLL_FROM(monadic_elements);
+
+	if((astra_empowers(magr, AAT_MOVANIC_ASTRA) || monadic_elem == AD_FIRE) && !Fire_res(mdef)){
+		int fire_dmg = d(monadic_elem ? 2 : 4, 6) + otmp->spe;
 		if(fire_dmg > 0)
 			*truedmgptr += elemental_dmg_resistance(mdef, magr, fire_dmg, AD_FIRE);
+	}
+	if(monadic_elem == AD_COLD && !Cold_res(mdef)){
+		int cold_dmg = d(monadic_elem ? 2 : 4, 6) + otmp->spe;
+		if(cold_dmg > 0)
+			*truedmgptr += elemental_dmg_resistance(mdef, magr, cold_dmg, AD_COLD);
+	}
+	if(monadic_elem == AD_ELEC && !Shock_res(mdef)){
+		int elec_dmg = d(monadic_elem ? 2 : 4, 6) + otmp->spe;
+		if(elec_dmg > 0)
+			*truedmgptr += elemental_dmg_resistance(mdef, magr, elec_dmg, AD_ELEC);
 	}
 	if(astra_empowers(magr, AAT_ACIDIC_ASTRA) && !Acid_res(mdef)){
 		int acid_dmg = d(4, 6) + otmp->spe;
@@ -10472,6 +10487,38 @@ boreal_invoke_effect(int face, struct obj *art, struct monst *mdef)
 	}
 }
 
+/* Cutting Wisdom's invoke: turn the sword into a loyal dancing sword pet that wields it */
+STATIC_OVL int
+do_wisdom_invoke(struct obj *art)
+{
+	struct monst *mtmp;
+
+	if(art->unpaid){
+		You("need to buy it first.");
+		return MOVE_CANCELLED;
+	}
+	mtmp = makemon(&mons[PM_DANCING_SWORD], u.ux, u.uy, MM_EDOG|MM_ADJACENTOK|NO_MINVENT|MM_NOCOUNTBIRTH);
+	if(!mtmp){
+		pline("%s quivers for a moment.", The(xname(art)));
+		return MOVE_STANDARD;
+	}
+	initedog(mtmp);
+	EDOG(mtmp)->loyal = TRUE;
+	EDOG(mtmp)->dominated = TRUE;
+	mtmp->m_lev = u.ulevel;
+	mtmp->mhpmax = golemhp(mtmp->mtyp) * max(1, mtmp->m_lev);
+	mtmp->mhp = mtmp->mhpmax;
+	mtmp = christen_monst(mtmp, artiname(ART_CUTTING_WISDOM));
+
+	pline("%s leaps into the air and begins to dance!", The(xname(art)));
+	obj_extract_and_unequip_self(art);
+	(void) mpickobj(mtmp, art);
+	init_mon_wield_item(mtmp);
+	m_dowear(mtmp, TRUE);
+	newsym(mtmp->mx, mtmp->my);
+	return MOVE_STANDARD;
+}
+
 int
 do_boreal_invoke(struct obj *art)
 {
@@ -14261,6 +14308,9 @@ arti_invoke(obj)
 		break;
 		case BOREAL_INVOKE:
 			time = do_boreal_invoke(obj);
+		break;
+		case WISDOM_DANCE:
+			time = do_wisdom_invoke(obj);
 		break;
 		default: pline("Program in disorder.  Artifact invoke property not recognized");
 		break;

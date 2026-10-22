@@ -10,7 +10,6 @@ STATIC_DCL void FDECL(quest_art_swap, (struct obj **, struct monst *));
 STATIC_DCL void FDECL(sho_obj_return, (struct obj *, int, int));
 STATIC_DCL void FDECL(return_thrownobj, (struct monst *, struct obj *));
 STATIC_DCL void FDECL(toss_up, (struct obj *, boolean));
-STATIC_DCL int FDECL(calc_range, (struct monst *, struct obj *, struct obj *, int *));
 STATIC_DCL boolean FDECL(misthrow, (struct monst *, struct obj *, struct obj *, boolean, int *, int *, int *));
 STATIC_DCL boolean FDECL(aerodynamic_projectile, (struct obj *, struct obj *));
 STATIC_DCL boolean FDECL(wheel_bounce_target, (struct monst *, int, int, int, int, int *, int *));
@@ -430,6 +429,11 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 
 			result = projectile_attack(magr, mdef, thrownobj_p, vpointer, hmoncode, &dx, &dy, &range, &initrange, forcedestroy);\
 			if(kicked && youagr)
+				u.uattked = TRUE;
+			/* a bow kensei's shot at a target counts as an attack in the firing direction, once per volley */
+			else if(youagr && fired && launcher && mdef != &youmonst
+				&& Role_if(PM_KENSEI) && u.role_variant == ART_SUN_S_BOW && is_kensei_weapon(launcher)
+			)
 				u.uattked = TRUE;
 
 			/* stop on hit? */
@@ -2092,13 +2096,24 @@ calc_multishot(struct monst *magr, struct obj *ammo, struct obj *launcher, int s
 			//No bonus shots from skill, base rof is 2
 			multishot = 1;
 		}
-		else switch (magr_wepskill) {
-		default:
-			multishot = 1; break;
-		case P_SKILLED:
-			multishot = 2; break;
-		case P_EXPERT:
-			multishot = 3; break;
+		else if(launcher && check_oprop(launcher, OPROP_SAMOW)){
+			//No bonus shots from skill
+			multishot = 1;
+		}
+		else {
+			switch (magr_wepskill) {
+				default:
+					multishot = 1; break;
+				case P_SKILLED:
+					multishot = 2; break;
+				case P_EXPERT:
+					multishot = 3; break;
+			}
+			//Counterpart to +1 melee attack, unlike other cases requires skill in the weapon used.
+			if(youagr && Role_if(PM_KENSEI) && multishot > 1 && !Upolyd && u.ulevel >= 30){
+				minmulti++;
+				multishot++;
+			}
 		}
 
 		if(youagr ? QuickDraw : mon_resistance(magr, QUICK_DRAW)){
@@ -2459,6 +2474,21 @@ ufire_blaster(struct obj *launcher, int shotlimit)
 	return result;
 }
 
+/* Returns a free stack of launcher's conjured arrows; the caller must obfree() it */
+struct obj *
+mk_conjured_arrows(struct obj *launcher)
+{
+	struct obj *arrow = mksobj(SILVER_ARROW, MKOBJ_NOINIT);
+	arrow->spe = max(7, launcher->spe);
+	arrow->blessed = launcher->blessed;
+	arrow->cursed = launcher->cursed;
+	arrow->quan = 30;		/* Make more than enough so that we are always able to manually destroy the excess */
+	if (check_oprop(launcher, OPROP_SAMOW))
+		add_oprop(arrow, OPROP_VORPW);
+	fix_object(arrow);
+	return arrow;
+}
+
 /*
  * dofire()
  *
@@ -2633,7 +2663,7 @@ dofire()
 		/* Rogue Gear Spirits' auto-generated ammo -- mainhand only */
 		if (uwep && (!uquiver || (is_ammo(uquiver) && !ammo_and_launcher(uquiver, uwep))) && uwep->oartifact == ART_ROGUE_GEAR_SPIRITS && !Is_spire(&u.uz)){
 			struct obj *bolt = mksobj(CROSSBOW_BOLT, MKOBJ_NOINIT);
-			bolt->spe = min(0, uwep->spe);
+			bolt->spe = max(0, uwep->spe);
 			bolt->blessed = uwep->blessed;
 			bolt->cursed = uwep->cursed;
 			bolt->objsize = MZ_SMALL;
@@ -2643,13 +2673,10 @@ dofire()
 			obfree(bolt, 0);
 			return result;
 		}
-		if (uwep && (!uquiver || (is_ammo(uquiver) && !ammo_and_launcher(uquiver, uwep))) && check_oprop(uwep, OPROP_AAMOW) && !Is_spire(&u.uz)){
-			struct obj *arrow = mksobj(SILVER_ARROW, MKOBJ_NOINIT);
-			arrow->spe = max(7, uwep->spe);
-			arrow->blessed = uwep->blessed;
-			arrow->cursed = uwep->cursed;
-			arrow->quan = 30;		/* Make more than enough so that we are always able to manually destroy the excess */
-			fix_object(arrow);
+		if (uwep && (!uquiver || (is_ammo(uquiver) && !ammo_and_launcher(uquiver, uwep)))
+			&& (check_oprop(uwep, OPROP_AAMOW) || check_oprop(uwep, OPROP_SAMOW)) && !Is_spire(&u.uz)
+		){
+			struct obj *arrow = mk_conjured_arrows(uwep);
 			result = uthrow(arrow, uwep, shotlimit, TRUE, FALSE);
 			obfree(arrow, 0);
 			return result;

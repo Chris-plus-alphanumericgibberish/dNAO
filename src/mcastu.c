@@ -5418,8 +5418,8 @@ int tary;
 				/* if we got a weapon, maybe filth it */
 				if (otmp && !rn2(20)) {
 					if (youdef || canseemon(mdef)) {
-						pline("%s %s is coated in gunk!",
-							youdef ? "Your" : s_suffix(Monnam(mdef)),
+						pline("%s%s is coated in gunk!",
+							youdef ? "Your " : mon_obj_possessive(mdef, otmp, TRUE),
 							xname(otmp));
 					}
 					/* filth weapon */
@@ -7492,11 +7492,16 @@ int tary;
 				}
 				else {
 					if (youdef || youagr || canseemon(mdef)) {
-						pline("%s %s shape in %s %s.",
-							youdef ? "Your" : s_suffix(Monnam(mdef)),
-							aobjnam(otmp, "change"),
-							youdef ? "your" : s_suffix(mon_nam(mdef)),
-							hands);
+						if (!youdef && mdef->mtyp == PM_DANCING_SWORD)
+							pline("%s%s shape.",
+								mon_obj_possessive(mdef, otmp, TRUE),
+								aobjnam(otmp, "change"));
+						else
+							pline("%s%s shape in %s %s.",
+								youdef ? "Your " : mon_obj_possessive(mdef, otmp, TRUE),
+								aobjnam(otmp, "change"),
+								youdef ? "your" : s_suffix(mon_nam(mdef)),
+								hands);
 					}
 					poly_obj(otmp, BANANA);
 				}
@@ -7513,12 +7518,17 @@ int tary;
 					}
 					else {
 						if (youagr || canseemon(mdef)) {
-							pline("%s %s knocked out of %s %s!",
-								s_suffix(Monnam(mdef)),
-								aobjnam(otmp, "are"),
-								hisherits(mdef),
-								hands
-								);
+							if (mdef->mtyp == PM_DANCING_SWORD)
+								pline("%s%s knocked away!",
+									mon_obj_possessive(mdef, otmp, TRUE),
+									aobjnam(otmp, "are"));
+							else
+								pline("%s%s knocked out of %s %s!",
+									mon_obj_possessive(mdef, otmp, TRUE),
+									aobjnam(otmp, "are"),
+									hisherits(mdef),
+									hands
+									);
 						}
 						/* unwield their weapon and drop it */
 						obj_extract_self(otmp);
@@ -7532,8 +7542,8 @@ int tary;
 			if (dofailmsg) {
 				if (youdef || canseemon(mdef)) {
 					if (otmp) {
-						pline("%s %s for a moment.",
-							youdef ? "Your" : s_suffix(Monnam(mdef)),
+						pline("%s%s for a moment.",
+							youdef ? "Your " : mon_obj_possessive(mdef, otmp, TRUE),
 							aobjnam(otmp, "shudder"));
 					}
 					else {

@@ -738,6 +738,9 @@ const char *name;
 		if (obj->oartifact == ART_WHIRLING_SWORD)
 			add_oprop(obj, OPROP_FIREW);
 		
+		if (obj->oartifact == ART_SUN_S_BOW)
+			add_oprop(obj, OPROP_SAMOW);
+		
 		/* symbol */
 		if (obj->oartifact == ART_LOMYA)
 			obj->oward = LOLTH_SYMBOL;

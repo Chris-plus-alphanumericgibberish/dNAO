@@ -2440,6 +2440,14 @@ dosacrifice()
 				unrestrict_weapon_skill(P_WHIP);
 			} else if(otmp->oartifact == ART_HELLRIDER_S_SADDLE){
 				unrestrict_weapon_skill(P_RIDING);
+			} else if(otmp->oartifact == ART_SUN_S_BOW && !art_already_exists(ART_CUTTING_WISDOM)){
+				struct obj *sword = mksartifact(ART_CUTTING_WISDOM);
+				if (sword->spe < 0) sword->spe = 0;
+				if (sword->cursed) uncurse(sword);
+				sword->oerodeproof = TRUE;
+				sword->gifted = u.ualign.god;
+				dropy(sword);
+				discover_artifact(ART_CUTTING_WISDOM);
 			}
 			
 			if(is_shield(otmp)){

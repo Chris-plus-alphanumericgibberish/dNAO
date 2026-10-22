@@ -471,10 +471,6 @@ struct you {
 	Bitfield(uavoid_urpassives,1);
 	Bitfield(uspin_crane,1);	/* redirect the next attack aimed at you */
 	Bitfield(upray_mantis,1);	/* block one limbed attack from each attacker */
-	unsigned long long int umystic;	/*Monk mystic attacks active*/
-#define monk_style_active(style) (style > 0 && u.umystic & (1ULL << (style-1)))
-#define toggle_monk_style(style) (u.umystic  = u.umystic ^ (1ULL << (style-1)))
-
 #define DIVE_KICK  1
 #define AURA_BOLT  2
 #define BIRD_KICK  3
@@ -537,11 +533,22 @@ struct you {
 #define CLAP      60
 #define LIGHTNING_S 61
 #define BURN_CYC  62
-#define MAX_MYSTIC_FORMS 62
+#define QUICKSHOT 63
+#define DOUBLE_SH 64
+#define THUNDER_V 65
+#define MAX_MYSTIC_FORMS 65
 
 #define MFORM_STREAM MAX_MYSTIC_FORMS+1
 #define MFORM_CHAINS MAX_MYSTIC_FORMS+2
 #define MFORM_KINSTL MAX_MYSTIC_FORMS+3
+
+	/* Monk mystic attacks active: one bit per move ID */
+#define MYSTIC_FORM_WORDS ((MAX_MYSTIC_FORMS + 63) / 64)
+	unsigned long long int umystic[MYSTIC_FORM_WORDS];
+#define valid_monk_style(style) ((style) > 0 && (style) <= MAX_MYSTIC_FORMS)
+#define monk_style_bit(style) (1ULL << (((style)-1) % 64))
+#define monk_style_active(style) (valid_monk_style(style) && (u.umystic[((style)-1) / 64] & monk_style_bit(style)))
+#define toggle_monk_style(style) (valid_monk_style(style) ? (u.umystic[((style)-1) / 64] ^= monk_style_bit(style)) : 0)
 
 #define u_blessed()	(u.ualign.record > 3)
 #define u_fallen()	(u.ualign.record < -3)

@@ -1998,11 +1998,14 @@ boolean *prev_loot;
 	){
 	if((otmp = pick_creatures_armor(mtmp, passed_info))){
 	long unwornmask;
+	boolean sword_disarmed;
 		if (nolimbs(youracedata)) {
 		    You_cant("do that without limbs."); /* not body_part(HAND) */
 		    return MOVE_CANCELLED;
 		}
-		if (otmp->cursed && otmp->owornmask && !is_weldproof_mon(mtmp)) {
+		if (otmp->cursed && otmp->owornmask && !is_weldproof_mon(mtmp)
+			&& !(mtmp->mtyp == PM_DANCING_SWORD && otmp == MON_WEP(mtmp))
+		) {
 		    You("can't. It seems to be stuck to %s.",
 			x_monnam(mtmp, ARTICLE_THE, (char *)0,
 				SUPPRESS_SADDLE, FALSE));
@@ -2032,11 +2035,21 @@ boolean *prev_loot;
 		    otmp->owornmask = 0L;
 		    update_mon_intrinsics(mtmp, otmp, FALSE, FALSE);
 		}
+		sword_disarmed = (mtmp->mtyp == PM_DANCING_SWORD && (unwornmask & W_WEP));
+		if (sword_disarmed) {
+			pline("%s stops dancing.", Monnam(mtmp));
+			if(otmp->oartifact && artilist[otmp->oartifact].inv_prop == WISDOM_DANCE)
+				otmp->age = 0L;
+		}
 		otmp = hold_another_object(otmp, "You drop %s!", doname(otmp),
 					(const char *)0);
 		timepassed = rnd(3) +  objects[otmp->otyp].oc_delay;
 		mtmp->mequipping = timepassed;
 		if (prev_loot) *prev_loot = TRUE;
+		if (sword_disarmed) {
+			relobj(mtmp, 0, FALSE);
+			mongone(mtmp);
+		}
 	} else {
 		return MOVE_CANCELLED;
 	}

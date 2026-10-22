@@ -571,6 +571,26 @@ A("Whirling Sword",			CRYSTAL_SWORD,	(const char *)0,
 	NOINVOKE, NOFLAG
 	),
 
+A("The Sun's Bow",			YUMI,		"long rainbow",
+	3000L, GOLD, MZ_DEFAULT, WT_DEFAULT,
+	A_NEUTRAL, PM_KENSEI, PM_AASIMAR, TIER_B, (ARTG_NOGEN),
+	NO_MONS(),
+	NO_ATTK(), NOFLAG,
+	PROPS(SEARCHING), (ARTP_SEEK),
+	PROPS(), NOFLAG,
+	NOINVOKE, NOFLAG
+	),
+
+A("Cutting Wisdom",			BROADSWORD,		(const char *)0,
+	3000L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	A_NEUTRAL, PM_KENSEI, PM_AASIMAR, TIER_B, (ARTG_NOGEN),
+	NO_MONS(),
+	ATTK(AD_PHYS, 4, 8), NOFLAG,
+	PROPS(), NOFLAG,
+	PROPS(), NOFLAG,
+	WISDOM_DANCE, NOFLAG
+	),
+
 /*Needs encyc entry*/
 A("The Rod of Lordly Might",		MACE,				(const char *)0,
 	4000L, MT_DEFAULT, MZ_DEFAULT, WT_SPECIAL,

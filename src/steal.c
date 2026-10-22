@@ -841,7 +841,7 @@ struct monst *mon;
 		else if(mon->entangled_oid == obj->o_id){
 			obj_extract_self(obj);
 			//Assumes that the only way the jin gang zuo can come into play is via crowning gift.
-			if(is_returning_snare(obj)){
+			if(is_returning_artifact(obj)){
 				hold_another_object(obj, "Oops!  The returning %s slips to the floor!", "snare", (const char *)0);
 			}
 			else {
@@ -879,7 +879,7 @@ boolean is_pet;		/* If true, pet should keep wielded/worn items */
 		while((otmp = mtmp->minvent)){
 			obj_extract_and_unequip_self(otmp);
 			//Assumes that the only way the jin gang zuo can come into play is via crowning gift.
-			if(is_returning_snare(otmp)){
+			if(is_returning_artifact(otmp)){
 				hold_another_object(otmp, "Oops!  The returning %s slips to the floor!", "snare", (const char *)0);
 			}
 			else {

@@ -799,7 +799,7 @@ boolean fade_scrolls;
 		    if (victim == &youmonst)
 			Your("%s.", aobjnam(target, "fade"));
 		    else if (vismon)
-			pline("%s's %s.", Monnam(victim),
+			pline("%s%s.", mon_obj_possessive(victim, target, TRUE),
 			      aobjnam(target, "fade"));
 		    else if (visobj)
 			pline_The("%s.", aobjnam(target, "fade"));
@@ -814,7 +814,7 @@ boolean fade_scrolls;
 		if (victim == &youmonst)
 		    Your("%s not affected.", aobjnam(target, "are"));
 		else if (vismon)
-		    pline("%s's %s not affected.", Monnam(victim),
+		    pline("%s%s not affected.", mon_obj_possessive(victim, target, TRUE),
 			aobjnam(target, "are"));
 		/* no message if not carried */
 	    }
@@ -825,7 +825,7 @@ boolean fade_scrolls;
 		    erosion+1 == MAX_ERODE ? " completely" :
 		    erosion ? " further" : "");
 	    else if (vismon)
-		pline("%s's %s%s!", Monnam(victim),
+		pline("%s%s%s!", mon_obj_possessive(victim, target, TRUE),
 		    aobjnam(target, acid_dmg ? "corrode" : "rust"),
 		    erosion+1 == MAX_ERODE ? " completely" :
 		    erosion ? " further" : "");
@@ -845,7 +845,7 @@ boolean fade_scrolls;
 			aobjnam(target, Blind ? "feel" : "look"),
 			acid_dmg ? "corroded" : "rusty");
 		else if (vismon)
-		    pline("%s's %s completely %s.", Monnam(victim),
+		    pline("%s%s completely %s.", mon_obj_possessive(victim, target, TRUE),
 			aobjnam(target, "look"),
 			acid_dmg ? "corroded" : "rusty");
 		else if (visobj)

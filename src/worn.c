@@ -870,13 +870,20 @@ boolean on, silently;
 		newsym(mon->mx, mon->my);
 }
 
+STATIC_OVL boolean
+shield_reach_wep(struct obj *wep)
+{
+	return wep && (objects[wep->otyp].oc_skill == P_SPEAR || objects[wep->otyp].oc_skill == P_POLEARMS
+		|| objects[wep->otyp].oc_skill == P_TRIDENT || objects[wep->otyp].oc_skill == P_LANCE);
+}
+
 int
-shield_ac_mon(mon, obj)
-struct monst *mon;
-struct obj *obj;
+shield_ac_mon(struct monst *mon, struct obj *obj)
 {
 	int shield_ac = 0;
 	shield_ac += max(0, arm_ac_bonus(obj) + (obj->objsize - mon->data->msize));
+	if(shield_reach_wep(MON_WEP(mon)))
+		shield_ac += 2;
 	if(mon_knight(mon) || mon_dark_knight(mon)){
 		if(mon->m_lev >= 28)
 			shield_ac += 8;
@@ -888,11 +895,69 @@ struct obj *obj;
 	return shield_ac;
 }
 
+/* AC mon gets from its Scorpion Carapace's arm shields, or 0 if it has none or wears a real shield */
+int
+carapace_shield_ac_mon(struct monst *mon)
+{
+	struct obj *armor = which_armor(mon, W_ARM);
+
+	if(which_armor(mon, W_ARMS) || !armor || armor->oartifact != ART_SCORPION_CARAPACE || !check_carapace_mod(armor, CPROP_SHIELDS))
+		return 0;
+	return shield_reach_wep(MON_WEP(mon)) ? 4 : 1;
+}
+
+STATIC_OVL int
+hand_protection_ac(struct obj *obj)
+{
+	int spe = (!obj->suppressed && !Is_spire(&u.uz)) ? obj->spe : 0;
+	return 2 + material_def_bonus(obj, 2, TRUE) + spe/2 - min((int)greatest_erosion(obj), 2);
+}
+
+/* AC from mon's hand-protecting wielded weapons, counting only those whose arti_phasing() matches phasing */
+STATIC_OVL int
+mon_hand_protection_ac(struct monst *mon, boolean phasing)
+{
+	struct obj *monwep = MON_WEP(mon);
+	struct obj *monswep = MON_SWEP(mon);
+	boolean wep_protects = monwep && hand_protecting(monwep) && !arti_phasing(monwep) == !phasing;
+	boolean swep_protects = monswep && hand_protecting(monswep) && !arti_phasing(monswep) == !phasing;
+
+	if(mon->mtyp == PM_DANCING_SWORD)
+		return 0;
+	if(wep_protects){
+		if(!monswep)
+			return hand_protection_ac(monwep);
+		else if(swep_protects)
+			return (hand_protection_ac(monwep) + hand_protection_ac(monswep))/2;
+		else
+			return hand_protection_ac(monwep)/2;
+	}
+	else if(swep_protects)
+		return hand_protection_ac(monswep)/2;
+	return 0;
+}
+
+/* AC (ac TRUE) or DR (ac FALSE) a dancing sword gets from the toughness of its wielded weapon */
+STATIC_OVL int
+dancing_sword_def(struct monst *mon, boolean ac)
+{
+	struct obj *monwep = MON_WEP(mon);
+	int spe, def;
+
+	if(mon->mtyp != PM_DANCING_SWORD || !monwep)
+		return 0;
+	spe = (!monwep->suppressed && !Is_spire(&u.uz)) ? monwep->spe : 0;
+	def = 2 + 2*(ac ? materials[monwep->obj_material].flat_ac : materials[monwep->obj_material].flat_dr);
+	def -= min((int)greatest_erosion(monwep), def);
+	def += ac ? spe/2 : (spe+1)/2;
+	return def;
+}
+
 int 
 base_mac(mon)
 struct monst *mon;
 {
-	int base = 10, armac = 0;
+	int base = 10;
 	struct obj *monwep;
 	
 	if(mon->mtyp == PM_OONA || mon->mtyp == PM_PORO_AULON){
@@ -1035,9 +1100,11 @@ struct monst *mon;
 					base -= 6;
 			}
 		}
-		if((can_parry_with(monwep, mon) && arti_phasing(monwep)))
-			armac += mon_weapon_dam_bonus(mon->data, monwep, weapon_type(monwep));
+		if((can_parry_with(monwep, mon) && parries_as_phasing(monwep)))
+			base -= mon_weapon_dam_bonus(mon->data, monwep, weapon_type(monwep));
 	}
+	base -= mon_hand_protection_ac(mon, TRUE);
+	base -= dancing_sword_def(mon, TRUE);
 
 	if (helpless(mon) || mon->msuicide)
 		base += 5;
@@ -1133,6 +1200,7 @@ struct monst *mon;
 				armac += arm_ac_bonus(obj);
 		}
 	}
+	armac += carapace_shield_ac_mon(mon);
 	//Weapon Stance AC
 	if(mon->mstance == MSTANCE_PUSH && mon->mtyp == PM_SILVERKNIGHT){
 		struct obj *monwep = MON_WEP(mon);
@@ -1154,7 +1222,7 @@ struct monst *mon;
 	struct obj *monwep = MON_WEP(mon);
 	if(monwep){
 		int monwep_spe = (!monwep->suppressed && !Is_spire(&u.uz)) ? monwep->spe : 0;
-		if((can_parry_with(monwep, mon) && !arti_phasing(monwep)))
+		if((can_parry_with(monwep, mon) && !parries_as_phasing(monwep)))
 			armac += mon_weapon_dam_bonus(mon->data, monwep, weapon_type(monwep));
 		if(monwep->oartifact == ART_TOBIUME)
 			armac += max(monwep_spe,0);
@@ -1175,7 +1243,10 @@ struct monst *mon;
 					armac += 1;
 			}
 		}
+		if(!which_armor(mon, W_ARMS) && is_elf(mon->data) && CHECK_ETRAIT(monwep, mon, ETRAIT_BLADEDANCE))
+			armac += ROLL_ETRAIT(monwep, mon, 3, 1);
 	}
+	armac += mon_hand_protection_ac(mon, FALSE);
 	if(armac > 11) armac = rnd(armac-10) + 10; /* high armor ac values act like player ac values */
 	
 	if (wizard && (iflags.wizcombatdebug & WIZCOMBATDEBUG_ACCURACY) && WIZCOMBATDEBUG_APPLIES((struct monst *)0, mon)) {
@@ -1319,6 +1390,7 @@ struct monst *mon;
 				armac += arm_ac_bonus(obj);
 		}
 	}
+	armac += carapace_shield_ac_mon(mon);
 	//Weapon Stance AC
 	if(mon->mstance == MSTANCE_PUSH && mon->mtyp == PM_SILVERKNIGHT){
 		struct obj *monwep = MON_WEP(mon);
@@ -1340,7 +1412,7 @@ struct monst *mon;
 	struct obj *monwep = MON_WEP(mon);
 	if(monwep){
 		int monwep_spe = (!monwep->suppressed && !Is_spire(&u.uz)) ? monwep->spe : 0;
-		if((can_parry_with(monwep, mon) && !arti_phasing(monwep)))
+		if((can_parry_with(monwep, mon) && !parries_as_phasing(monwep)))
 			armac += mon_weapon_dam_bonus(mon->data, monwep, weapon_type(monwep));
 		if(monwep->oartifact == ART_TOBIUME)
 			armac += max(monwep_spe,0);
@@ -1361,7 +1433,11 @@ struct monst *mon;
 					armac += 1;
 			}
 		}
+		if(!which_armor(mon, W_ARMS) && is_elf(mon->data) && CHECK_ETRAIT(monwep, mon, ETRAIT_BLADEDANCE))
+			armac += ROLL_ETRAIT(monwep, mon, 3, 1);
 	}
+	armac += mon_hand_protection_ac(mon, FALSE);
+	base -= dancing_sword_def(mon, TRUE);
 
 	base -= armac;
 	
@@ -1432,14 +1508,14 @@ struct monst *mon;
 				armac += arm_ac_bonus(obj);
 		}
 	}
+	armac += carapace_shield_ac_mon(mon);
 	if(is_law_demon(mon->data) && (Inhell || u.uevent.udemigod))
 		armac *= 2;
 	return 10 - armac;
 }
 
 int 
-base_nat_mdr(mon)
-struct monst *mon;
+base_nat_mdr(struct monst *mon)
 {
 	int base = 0;
 	
@@ -1451,6 +1527,8 @@ struct monst *mon;
 	if(mon->mtame){
 		if(u.specialSealsActive&SEAL_COSMOS) base += rnd(spiritDsize());
 	}
+
+	base += dancing_sword_def(mon, FALSE);
 	
 	return base;
 }
@@ -1649,12 +1727,10 @@ roll_mdr_detail(struct monst *mon, struct monst *magr, int slot, int depth, ucha
 	
 	if(armac > 11) armac = rnd(armac-10) + 10; /* high armor dr values act like player ac values */
 	
-	if(nat_dr && armac){
+	if(nat_dr > 0 && armac > 0){
 		base += sqrt(nat_dr*nat_dr + armac*armac);
-	} else if(nat_dr){
-		base += nat_dr;
 	} else {
-		base += armac;
+		base += nat_dr + armac;
 	}
 	
 	return base;
@@ -1778,6 +1854,12 @@ int depth;
 			else if(Insight > 20)
 				bas_mdr += (Insight - 20)/4;
 		}
+		else if(MON_WEP(mon)->oartifact == ART_LANCE_OF_LONGINUS)
+			bas_mdr += max(monwep_spe/2, 0);
+		if(hand_protecting(MON_WEP(mon)) && slot&ARM_DR && mon->mtyp != PM_DANCING_SWORD){
+			if(!MON_SWEP(mon) || hand_protecting(MON_SWEP(mon)))
+				arm_mdr += 4 + material_def_bonus(MON_WEP(mon), 4, FALSE) + (monwep_spe + 1) / 2 - min((int)greatest_erosion(MON_WEP(mon)), 4);
+		}
 	}
 	arm_mdr *= dr_multiplier;
 	/* Hod Sephirah OVERRIDE other arm_mdr sources with the player's total DR (regardless of who's attacking them) */
@@ -1880,12 +1962,10 @@ struct monst *mon;
 
 		if(armac > 11) armac = (armac-10)/2 + 10; /* high armor dr values act like player ac values */
 		
-		if(nat_dr && armac){
+		if(nat_dr > 0 && armac > 0){
 			base += sqrt(nat_dr*nat_dr + armac*armac);
-		} else if(nat_dr){
-			base += nat_dr;
 		} else {
-			base += armac;
+			base += nat_dr + armac;
 		}
 		sum += base;
 	}

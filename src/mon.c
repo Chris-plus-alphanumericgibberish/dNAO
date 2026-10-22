@@ -2147,6 +2147,8 @@ movemon()
 	}
 	if(u.specialSealsActive&SEAL_LIVING_CRYSTAL)
 		average_dogs();
+	if(dancing_sword_disarmed(mtmp))
+		continue;
 	if(maybe_vanish(mtmp))
 		continue;
     if(In_quest(&u.uz) && urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH && levl[mtmp->mx][mtmp->my].typ == AIR
@@ -8882,6 +8884,19 @@ struct monst *mtmp;
 /* check whether mtmp's insight/plot-armor state means it should vanish
  * (via insight_vanish()) this turn; returns TRUE if it did, in which case
  * the caller should treat mtmp as gone (e.g. "continue" a monster loop) */
+/* A dancing sword with no wielded weapon drops its inventory and is removed. Returns TRUE if mtmp was removed. */
+boolean
+dancing_sword_disarmed(struct monst *mtmp)
+{
+	if(DEADMONSTER(mtmp) || mtmp->mtyp != PM_DANCING_SWORD || MON_WEP(mtmp))
+		return FALSE;
+	if(canseemon(mtmp))
+		pline("%s dissipates.", Monnam(mtmp));
+	relobj(mtmp, 0, FALSE);
+	mongone(mtmp);
+	return TRUE;
+}
+
 boolean
 maybe_vanish(struct monst *mtmp)
 {
@@ -9368,7 +9383,7 @@ struct obj *obj;
 					else
 						pline("Your %s %s suddenly full of biting mouths!", xname(obj), obj->quan == 1 ? "is":"are");
 				} else {
-					if(canseemon(mon) && obj->olarva == 3) pline("%s %s disintegrate%s into a mass of strange larvae!", s_suffix(Monnam(mon)), xname(obj), obj->quan == 1 ? "s":"");
+					if(canseemon(mon) && obj->olarva == 3) pline("%s%s disintegrate%s into a mass of strange larvae!", mon_obj_possessive(mon, obj, TRUE), xname(obj), obj->quan == 1 ? "s":"");
 				}
 			}
 			else if(youdef && obj->olarva == 3 && !obj->oartifact){

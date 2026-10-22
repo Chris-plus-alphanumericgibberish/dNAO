@@ -256,7 +256,7 @@ struct monst *magr;
 			tmp += 3; //Quite holy
 		else tmp += 2;
 
-		if(magr && Focused_aura(magr)){
+		if(magr && Focused_aura_wep(magr, otmp)){
 			tmp += 4;
 		}
 	}
@@ -593,7 +593,7 @@ struct monst *magr;
 	/* set dmod, if possible*/
 	if (obj){
 		dmod = obj->objsize - MZ_MEDIUM;
-		if(magr && Focused_aura(magr)){
+		if(magr && Focused_aura_wep(magr, obj)){
 			dmod += 2;
 		}
 
@@ -1011,6 +1011,9 @@ struct monst *magr;
 			if (obj->oartifact == ART_VORPAL_BLADE || obj->oartifact == ART_SNICKERSNEE)
 				explode_amt = 1;
 		}
+
+		if (surya_astra_sword(magr) && obj == MON_WEP(magr))
+			ocn += 1;
 
 		/* other various artifacts and objects */
 		if (obj->oartifact == ART_VORPAL_BLADE

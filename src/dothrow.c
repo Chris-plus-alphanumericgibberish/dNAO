@@ -539,7 +539,18 @@ hurtle_step(arg, x, y)
 					last_messaged = monstermoves;
 				}
 			}
-			attack2(mon);
+			if(!Upolyd && Role_if(PM_KENSEI) && u.role_variant == ART_SUN_S_BOW
+				&& uwep && is_kensei_weapon(uwep) && u_can_kick()
+			){
+				if(u.ulevel >= 14){
+					u.uattked = TRUE;
+					check_caitiff(mon);
+					dive_kick_monster(mon);
+				}
+				else kick_monster(x, y);
+			}
+			else
+				attack2(mon);
 			flags.forcefight = FALSE;
 			boolean stop = m_at(x, y) || (!passage && !path && partial_action());
 			if(stop && m_at(x, y) && nightjar){

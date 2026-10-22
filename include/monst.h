@@ -425,6 +425,7 @@ struct monst {
 #define	mvar_mammon_dive_x		mvar1
 #define	mvar1_seaParity			mvar1
 #define mvar1_bereft_syllable	mvar1
+#define mvar1_sword_moved		mvar1
 	long mvar2;
 #define	mvar_dracaePregTimer	mvar2
 #define	mvar_spList_2	mvar2

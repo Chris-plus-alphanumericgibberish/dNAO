@@ -1574,6 +1574,13 @@ astra_empowers(struct monst *mon, int astra)
 		&& in_beast_mastery_range(mon);
 }
 
+/* Return TRUE if mon is a dancing sword empowered by the hero's surya astra. */
+boolean
+surya_astra_sword(struct monst *mon)
+{
+	return mon && mon != &youmonst && mon->mtyp == PM_DANCING_SWORD && astra_empowers(mon, AAT_SURYA_ASTRA);
+}
+
 /* Return TRUE if (x,y) is within the circle of the given radius centered on
  * (cx,cy) that vision uses for light sources and x-ray vision (ignoring line of
  * sight). A radius below 1 covers only the center.
