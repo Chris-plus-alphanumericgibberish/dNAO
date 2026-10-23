@@ -781,7 +781,7 @@ const char *name;
 							REVERT_MERC, (genericptr_t)obj);
 			}
 			if(Role_if(PM_KENSEI) && u.role_variant == ART_SKY_REFLECTED){
-				expert_weapon_skill(objects[obj->otyp].oc_skill);
+				expert_weapon_skill(abs(objects[obj->otyp].oc_skill));
 				if(is_knight_sword(obj)){
 					expert_weapon_skill(P_GENERIC_KNIGHT_FORM);
 				}

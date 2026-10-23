@@ -637,7 +637,7 @@ struct obj {
 							( (a) == &artilist[ART_GUNGNIR] ) ? (is_spear(o)) : \
 							( (a) == &artilist[ART_SINGING_SWORD] ) ? ((o)->otyp == LONG_SWORD || (o)->otyp == RAPIER || (o)->otyp == SABER || (Race_if(PM_ELF) && (o)->otyp == ELVEN_BROADSWORD)) : \
 							( (a) == &artilist[ART_DIRGE] ) ? (o->oclass == WEAPON_CLASS || is_weptool(o)) : \
-							( (a) == &artilist[ART_SKY_REFLECTED] ) ? ((o->obj_material == MERCURIAL || (Role_if(PM_KENSEI) && !is_launcher(o) && !is_ammo(o) && is_metallic(o) && u.role_variant == ART_SKY_REFLECTED)) && (o->oclass == WEAPON_CLASS || is_weptool(o))) : \
+							( (a) == &artilist[ART_SKY_REFLECTED] ) ? (((o->obj_material == MERCURIAL && !is_ammo(o)) || (Role_if(PM_KENSEI) && !is_launcher(o) && !is_ammo(o) && is_metallic(o) && u.role_variant == ART_SKY_REFLECTED)) && (o->oclass == WEAPON_CLASS || is_weptool(o))) : \
 							((a) == &artilist[ART_FIRE_BRAND] || (a) == &artilist[ART_FROST_BRAND]) ? \
 								(u.brand_otyp == STRANGE_OBJECT ? \
 									(brandtype((o)->otyp)) : \
