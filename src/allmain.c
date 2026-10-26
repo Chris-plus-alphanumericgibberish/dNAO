@@ -668,7 +668,7 @@ boolean affect_game_state;
 				|| (uwep && uwep->oartifact == ART_FROST_BRAND && u.twoweap && uswapwep && uswapwep->oartifact == ART_FIRE_BRAND && fast_weapon(uswapwep))
 				|| (uwep && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep)) && (
 						(!bimanual_mon(uwep, &youmonst) && full_grace_empowers(&youmonst, AAT_GRACE_STRIKE))
-						|| ( light_weapon_mon(uwep, &youmonst) && grace_empowers(&youmonst, AAT_GRACE_STRIKE))
+						|| ((light_weapon_mon(uwep, &youmonst) || is_hero_kensei_weapon(uwep, &youmonst)) && grace_empowers(&youmonst, AAT_GRACE_STRIKE))
 					)
 				)
 			){
@@ -1003,6 +1003,7 @@ you_calc_movement()
 	/* defensive monk stances last only for the remainder of the turn */
 	u.uspin_crane = 0;
 	u.upray_mantis = 0;
+	u.ureceptive_field = 0;
 	youmonst.movement += moveamt;
 	//floor how far into movement-debt you can fall.
 	if (youmonst.movement < -2*NORMAL_SPEED) youmonst.movement = -2*NORMAL_SPEED;

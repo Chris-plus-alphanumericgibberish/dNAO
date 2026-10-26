@@ -9,7 +9,7 @@
 
 extern int monstr[];
 
-#define STILLVALID(mdef) (!DEADMONSTER(mdef) && !MIGRATINGMONSTER(mdef) && mdef == m_at(u.ux + u.dx, u.uy + u.dy))
+#define STILLVALID(mdef) (!DEADMONSTER(mdef) && !MIGRATINGMONSTER(mdef) && (mdef == m_at(u.ux + u.dx, u.uy + u.dy) || (u.uswallow && mdef == u.ustuck)))
 
 STATIC_DCL void FDECL(wildmiss, (struct monst *, struct attack *, struct obj *, boolean));
 STATIC_DCL boolean FDECL(u_surprise, (struct monst *, boolean));
@@ -21,6 +21,9 @@ STATIC_DCL void FDECL(xymissmsg, (struct monst *, struct monst *, struct attack 
 STATIC_DCL int FDECL(do_weapon_multistriking_effects, (struct monst *, struct monst *, struct attack *, struct obj *, int));
 STATIC_DCL int FDECL(xcastmagicy, (struct monst *, struct monst *, struct attack *, int, int));
 STATIC_DCL int FDECL(xtinkery, (struct monst *, struct monst *, struct attack *, int));
+STATIC_DCL int FDECL(unarmed_multiplier, (struct monst *));
+STATIC_DCL void FDECL(unarmed_base_dice, (struct weapon_dice *, boolean, struct monst *));
+STATIC_DCL void FDECL(anti_undead_strike_msg, (struct monst *));
 STATIC_DCL int FDECL(xexplodey, (struct monst *, struct monst *, struct attack *, int));
 STATIC_DCL int FDECL(hmoncore, (struct monst *, struct monst *, struct attack *, struct attack *, struct obj **, void *, int, int, int, boolean, int, boolean, int, unsigned long));
 STATIC_DCL void FDECL(add_silvered_art_sear_adjectives, (char *, struct obj*));
@@ -54,6 +57,9 @@ STATIC_DCL int FDECL(mantle_elemental_dmg, (struct monst *, int, int));
 STATIC_DCL int FDECL(mantle_blunted_dmg, (struct monst *, struct monst *, struct obj *, int));
 STATIC_DCL boolean FDECL(blacklight_tentacles_suck_x, (struct monst *, struct monst *, int, int, const char *));
 STATIC_DCL int FDECL(bonus_ac, (struct monst *, struct monst *));
+STATIC_DCL boolean FDECL(beam_monk_target_from, (int, int));
+STATIC_DCL void FDECL(monk_aura_bolt_from, (int, int, int));
+STATIC_DCL void FDECL(engulfer_burst, (int, int));
 /* for long worms */
 extern boolean notonhead;
 
@@ -1597,6 +1603,13 @@ xattacky(struct monst *magr, struct monst *mdef, int tarx, int tary, long modifi
 					if(isok(x(mdef)+xdir[i], y(mdef)+ydir[i]) && (mon = m_at(x(mdef)+xdir[i], y(mdef)+ydir[i])) && !DEADMONSTER(mon) && !mon->mpeaceful)
 						xdamagey(mdef, mon, (struct attack *) 0, 8);
 				}
+				if(DEADMONSTER(magr))
+					result |= MM_AGR_DIED;
+			}
+			if(youdef && !youagr && !u.uavoid_urpassives && u.ureceptive_field && !Is_spire(&u.uz) && !(result&MM_AGR_DIED)
+				&& (attk->adtyp == AD_FIRE || attk->adtyp == AD_EFIR) && !breathless_mon(magr)
+			){
+				receptive_field_smother(magr);
 				if(DEADMONSTER(magr))
 					result |= MM_AGR_DIED;
 			}
@@ -4255,7 +4268,7 @@ boolean ranged;
 	if (!ranged) {
 		char *swingwords[] = {"thrusts", "swings"};
 		int swingindex;
-		int mask = attack_mask(otmp, 0, 0, magr);
+		int mask = attack_mask_vs_mdef(otmp, 0, 0, magr, mdef);
 		
 		if(!(mask&PIERCE))
 			swingindex = 1;
@@ -4676,6 +4689,85 @@ int dmg;				/* damage to deal */
 	return MM_HIT;
 }
 
+/* xdisintegratey()
+ * 
+ * [magr] deals [count] disintegration damage to [mdef]: each point damages or destroys a random piece of worn armor, or disintegrates [mdef] if it has none.
+ * 
+ * Returns:
+ * MM_HIT		0x01	(always) aggressor hit defender
+ * MM_DEF_DIED	0x02	(possible) defender was disintegrated
+ * MM_AGR_DIED	0x04	(possible) aggressor died (monagr got XP for the kill and leveled up into something genocided)
+ * MM_DEF_LSVD	0x10	(possible) defender was disintegrated and lifesaved
+ */
+int
+xdisintegratey(struct monst *magr, struct monst *mdef, int count, int vis)
+{
+	boolean youagr = (magr == &youmonst);
+	boolean youdef = (mdef == &youmonst);
+	struct permonst * pa = !magr ? (struct permonst *)0 : youagr ? youracedata : magr->data;
+	struct obj *otmp;
+
+	for (; count > 0; count--)
+	{
+		/* grab a random piece of equipped armor */
+		otmp = some_armor(mdef);
+
+		if (otmp){
+			if (obj_resists(otmp, 0, 80)){
+				break; //End loop
+			}
+			else {
+				if (oresist_disintegration(otmp))
+					continue;
+				if (otmp->spe > -1 * a_acdr(objects[otmp->otyp])){
+					damage_item(otmp);
+				}
+				else if (!otmp->oartifact){
+					destroy_marm(mdef, otmp);
+				}
+			}
+		}
+		else {
+			if (!Disint_res(mdef)){
+				/* you are disintegrated */
+				if (youdef) {
+					You("disintegrate!");
+					killer_format = KILLED_BY;
+					if (pa)
+						Sprintf(killer_buf, "disintegrated by %s", 
+							type_is_pname(pa) ? pa->mname : an(pa->mname));
+					else
+						Strcpy(killer_buf, "disintegrated");
+					killer = killer_buf;
+					/* when killed by disintegration, don't leave corpse */
+					u.ugrave_arise = NON_PM;
+					if (!u.uconduct.killer && !youagr){
+						//Pcifist PCs aren't combatants so if something kills them up "killed peaceful" type impurities
+						IMPURITY_UP(u.uimp_murder)
+						IMPURITY_UP(u.uimp_bloodlust)
+					}
+					done(DISINTEGRATED);
+					You("reintegrate!");//lifesaved
+					return (MM_HIT|MM_DEF_LSVD);
+				}
+				/* monster is disintegrated */
+				else {
+					if(vis) pline("%s disintegrates!", Monnam(mdef));
+					if (youagr)
+						xkilled(mdef, 2);
+					else
+						monkilled(mdef, "", AD_DISN);
+					if (mdef->mhp > 0)
+						return (MM_HIT|MM_DEF_LSVD);	/* lifesaved */
+					else
+						return (MM_HIT | MM_DEF_DIED | ((youagr || !magr || grow_up(magr, mdef)) ? 0 : MM_AGR_DIED));	/* grow_up might kill magr */
+				}
+			}
+		}
+	}
+	return MM_HIT;
+}
+
 /* xstoney()
  * 
  * Attempts to turn [mdef] to stone.
@@ -4996,7 +5088,7 @@ int *shield_margin;
 				base_acc = -5;
 			} else warnpanic = 0L;
 
-			if(weapon && is_knight_sword(weapon) && activeFightingForm(FFORM_HALF_SWORD)){
+			if(weapon && (is_knight_sword(weapon) || (Role_if(PM_KENSEI) && is_kensei_weapon(weapon))) && activeFightingForm(FFORM_HALF_SWORD)){
 				base_acc += 2; //Dagger bonus
 			}
 		}
@@ -5331,7 +5423,7 @@ int *shield_margin;
 	}
 	/* Smaug is vulnerable to stabbings */
 	if (pd->mtyp == PM_SMAUG && fired && weapon && launcher &&
-		attack_mask(weapon, 0, 0, magr) & PIERCE && is_ammo(weapon))
+		attack_mask_vs_mdef(weapon, 0, 0, magr, mdef) & PIERCE && is_ammo(weapon))
 	{
 		vdef_acc += 20;
 	}
@@ -5541,7 +5633,7 @@ int *shield_margin;
 	if ((youagr && u.sealsActive&SEAL_CHUPOCLOPS && (melee || thrust)) ||
 		(!youagr && magr && mad_monster_turn(magr, MAD_NON_EUCLID)) ||
 		(weapon && (arti_phasing(weapon) || (is_lightsaber(weapon) && litsaber(weapon)))) ||
-		(melee && youagr && weapon && is_knight_sword(weapon) && activeFightingForm(FFORM_HALF_SWORD)) ||
+		(melee && youagr && weapon && (is_knight_sword(weapon) || (Role_if(PM_KENSEI) && is_kensei_weapon(weapon))) && activeFightingForm(FFORM_HALF_SWORD)) ||
 		(melee && attk->aatyp == AT_TUCH) ||
 		(melee && attk->aatyp == AT_VINE) ||
 		(melee && attk->aatyp == AT_VOMT) ||
@@ -5724,7 +5816,10 @@ xmeleehity(struct monst *magr, struct monst *mdef, struct attack *attk, struct o
 		accuracy = tohitval(magr, mdef, attk, weapon, (void *)0, (ranged ? HMON_THRUST : HMON_WHACK), flat_acc, &shield_margin);
 
 	/* roll to-hit die */
-	dieroll = rnd(20);
+	if (attack_flags&ATTKFLAG_FORCE_CRIT)
+		dieroll = 1;
+	else
+		dieroll = rnd(20);
 	
 	if ((youdef || mdef->mtame) && DefensiveLuck && u.uluck > 0){
 		if (dieroll == 20){
@@ -6004,16 +6099,29 @@ xmeleehity(struct monst *magr, struct monst *mdef, struct attack *attk, struct o
 			modifiers |= MELEEHURT_SUPER_SNEAK;
 		if(attack_flags&ATTKFLAG_DOUBLE_DAMAGE)
 			modifiers |= MELEEHURT_DOUBLE_DAMAGE;
+		if(attack_flags&ATTKFLAG_BYPASS_RESIST)
+			modifiers |= MELEEHURT_BYPASS_RESIST;
+		if(attack_flags&ATTKFLAG_HALF_DAMAGE)
+			modifiers |= MELEEHURT_HALF_DAMAGE;
+		if(attack_flags&ATTKFLAG_WHACK)
+			modifiers |= MELEEHURT_WHACK;
+		if(attack_flags&ATTKFLAG_PIERCE)
+			modifiers |= MELEEHURT_PIERCE;
+		if(attack_flags&ATTKFLAG_SLASH)
+			modifiers |= MELEEHURT_SLASH;
 		if(attack_flags&ATTKFLAG_SHOCKWAVE && weapon){
 			flatdamage = 1;
 			modifiers |= MELEEHURT_SHOCKWAVE;
 		}
-		if(attack_flags&ATTKFLAG_SHOVE && weapon){
+		if(attack_flags&ATTKFLAG_SHOVE){
 			struct weapon_dice wdice;
 			/* grab the weapon dice from dmgval_core */
-			dmgval_core(&wdice, bigmonst(pd), weapon, weapon->otyp, magr);
+			if(weapon)
+				dmgval_core(&wdice, bigmonst(pd), weapon, weapon->otyp, magr);
+			else
+				unarmed_base_dice(&wdice, bigmonst(pd), magr);
 			/* add to the bonsdmg counter */
-			flatdamage = wdice.oc_damn + wdice.bon_damn + wdice.flat + weapon->spe;
+			flatdamage = wdice.oc_damn + wdice.bon_damn + wdice.flat + (weapon ? weapon->spe : 0);
 			if(flatdamage < 1)
 				flatdamage = 1;
 			modifiers |= MELEEHURT_SHOVE;
@@ -6369,14 +6477,14 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 			}
 		}
 		/* hit with [weapon] */
-		result = hmon_general_modifiers(magr, mdef, attk, originalattk, weapon_p, (struct obj *)0, (weapon && ranged) ? HMON_THRUST : HMON_WHACK, (modifier_flags&(MELEEHURT_SHOCKWAVE|ATTKFLAG_SHOVE)) ? flatdmg : 0, dmg, dohitmsg, dieroll, FALSE, vis, modifier_flags);
+		result = hmon_general_modifiers(magr, mdef, attk, originalattk, weapon_p, (struct obj *)0, (weapon && ranged) ? HMON_THRUST : HMON_WHACK, (modifier_flags&(MELEEHURT_SHOCKWAVE|MELEEHURT_SHOVE)) ? flatdmg : 0, dmg, dohitmsg, dieroll, FALSE, vis, modifier_flags);
 		if (weapon_p) weapon = *weapon_p;
 		if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP))
 			return result;
 		if (weapon && is_multi_hit(weapon) && weapon->ostriking) {
 			int i;
 			for (i = 0; weapon && (i < weapon->ostriking); i++) {
-				result = hmon_general_modifiers(magr, mdef, attk, originalattk, weapon_p, (struct obj *)0, (weapon && ranged) ? HMON_THRUST : HMON_WHACK, (modifier_flags&(MELEEHURT_SHOCKWAVE|ATTKFLAG_SHOVE)) ? flatdmg : 0, 0, FALSE, dieroll, TRUE, vis, modifier_flags);
+				result = hmon_general_modifiers(magr, mdef, attk, originalattk, weapon_p, (struct obj *)0, (weapon && ranged) ? HMON_THRUST : HMON_WHACK, (modifier_flags&(MELEEHURT_SHOCKWAVE|MELEEHURT_SHOVE)) ? flatdmg : 0, 0, FALSE, dieroll, TRUE, vis, modifier_flags);
 				if (weapon_p) weapon = *weapon_p;
 				if (result&(MM_DEF_DIED|MM_DEF_LSVD|MM_AGR_DIED|MM_AGR_STOP))
 					return result;
@@ -9971,62 +10079,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 				pline("%s %s %s!", Monnam(mdef), (pa->mtyp == PM_CHORISTER_JELLY) ? "radiates" : "glows", glow);
 		}
 		/* disintegrate! */
-		for (; dmg > 0; dmg--)
-		{
-			/* grab a random piece of equipped armor */
-			otmp = some_armor(mdef);
-
-			if (otmp){
-				if (obj_resists(otmp, 0, 80)){
-					break; //End loop
-				}
-				else {
-					if (oresist_disintegration(otmp))
-						continue;
-					if (otmp->spe > -1 * a_acdr(objects[otmp->otyp])){
-						damage_item(otmp);
-					}
-					else if (!otmp->oartifact){
-						destroy_marm(mdef, otmp);
-					}
-				}
-			}
-			else {
-				if (!Disint_res(mdef)){
-					/* you are disintegrated */
-					if (youdef) {
-						You("disintegrate!");
-						killer_format = KILLED_BY;
-						Sprintf(killer_buf, "disintegrated by %s", 
-							type_is_pname(pa) ? pa->mname : an(pa->mname));
-						killer = killer_buf;
-						/* when killed by disintegration, don't leave corpse */
-						u.ugrave_arise = NON_PM;
-						if (!u.uconduct.killer && !youagr){
-							//Pcifist PCs aren't combatants so if something kills them up "killed peaceful" type impurities
-							IMPURITY_UP(u.uimp_murder)
-							IMPURITY_UP(u.uimp_bloodlust)
-						}
-						done(DISINTEGRATED);
-						You("reintegrate!");//lifesaved
-						return (MM_HIT|MM_DEF_LSVD);
-					}
-					/* monster is disintegrated */
-					else {
-						if(vis) pline("%s disintegrates!", Monnam(mdef));
-						if (youagr)
-							xkilled(mdef, 2);
-						else
-							monkilled(mdef, "", AD_DISN);
-						if (mdef->mhp > 0)
-							return (MM_HIT|MM_DEF_LSVD);	/* lifesaved */
-						else
-							return (MM_HIT | MM_DEF_DIED | ((youagr || grow_up(magr, mdef)) ? 0 : MM_AGR_DIED));	/* grow_up might kill magr */
-					}
-				}
-			}
-		}
-		return MM_HIT;
+		return xdisintegratey(magr, mdef, dmg, vis);
 
 	case AD_DRIN:
 		/* Special case for Migo.
@@ -13250,6 +13303,9 @@ boolean verbose;
 		} else if (uwep && (uwep->oartifact == ART_SEVEN_STAR_SWORD)) {
 			if(verbose) You(mal_aura, "the curse-cleaving blade");
 			return TRUE;
+		} else if (uwep && (uwep->oartifact == ART_ANCIENT_RITUAL_SWORD)) {
+			if(verbose) You_feel("the ritual blade cut through a malignant aura.");
+			return TRUE;
 		} else if (uwep && (uwep->oartifact == ART_STAFF_OF_NECROMANCY)) {
 			if(verbose) You(mal_aura, "the skeletal staff");
 			return TRUE;
@@ -13323,6 +13379,11 @@ boolean verbose;
 		if (MON_WEP(mon) &&
 			(MON_WEP(mon)->oartifact == ART_MAGICBANE)) {
 			if (visible && verbose) You(mons_item_mal_aura, s_suffix(mon_nam(mon)), "magic-absorbing blade");
+			return TRUE;
+		}
+		if (MON_WEP(mon) &&
+			(MON_WEP(mon)->oartifact == ART_ANCIENT_RITUAL_SWORD)) {
+			if (visible && verbose) You_feel("%s ritual blade cut through a malignant aura.", s_suffix(mon_nam(mon)));
 			return TRUE;
 		}
 		if (MON_WEP(mon) &&
@@ -15796,7 +15857,7 @@ damage_resist_mask(struct permonst *pd)
 /* *otmp_p is set to the object that shaped the mask -- the weapon, or the
  * gloves/boots/wings the blow was made with, or NULL. */
 static int
-strike_attack_mask(struct monst *magr, struct attack *attk, struct attack *originalattk,
+strike_attack_mask(struct monst *magr, struct monst *mdef, struct attack *attk, struct attack *originalattk,
 	struct obj *weapon, boolean weapon_attack, boolean unarmed_punch,
 	boolean unarmed_kick, boolean unarmed_wing, unsigned long modifier_flags,
 	int eurynome_shape, boolean eurynome_thin, struct obj **otmp_p)
@@ -15806,7 +15867,7 @@ strike_attack_mask(struct monst *magr, struct attack *attk, struct attack *origi
 	int attackmask;
 
 	if (weapon && weapon_attack) {
-		attackmask = attack_mask(weapon, 0, 0, magr);
+		attackmask = attack_mask_vs_mdef(weapon, 0, 0, magr, mdef);
 		otmp = weapon;
 	}
 	else if (unarmed_punch) {
@@ -15875,12 +15936,14 @@ strike_attack_mask(struct monst *magr, struct attack *attk, struct attack *origi
 		attackmask = (WHACK | SLASH | PIERCE);
 	}
 
-	if(modifier_flags&MELEEHURT_SHOVE){
-		attackmask = WHACK;
-	}
-
-	if(modifier_flags&MELEEHURT_FORCE_CHECK_JOUST){
-		attackmask = PIERCE;
+	if(modifier_flags&(MELEEHURT_WHACK|MELEEHURT_PIERCE|MELEEHURT_SLASH)){
+		attackmask &= ~(WHACK|PIERCE|SLASH);
+		if(modifier_flags&MELEEHURT_WHACK)
+			attackmask |= WHACK;
+		if(modifier_flags&MELEEHURT_PIERCE)
+			attackmask |= PIERCE;
+		if(modifier_flags&MELEEHURT_SLASH)
+			attackmask |= SLASH;
 	}
 
 	*otmp_p = otmp;
@@ -15909,6 +15972,177 @@ boolean recursed;				/* True for all but one attacks when 1 object is hitting >1
 int vis;						/* True if action is at all visible to the player */
 {
 	return hmon_general_modifiers(magr, mdef, attk, originalattk, weapon_p, vpointer, hmoncode, flatbasedmg, monsdmg, dohitmsg, dieroll, recursed, vis, 0L);
+}
+
+/* Returns the multiplier [magr]'s claws, seals, and gloves apply to its unarmed punch die size. */
+STATIC_OVL int
+unarmed_multiplier(struct monst *magr)
+{
+	boolean youagr = (magr == &youmonst);
+	struct obj *gloves = (youagr ? uarmg : which_armor(magr, W_ARMG));
+	int unarmedMult;
+
+	if (youagr) {
+		unarmedMult = Race_if(PM_HALF_DRAGON) ? 3 : u.sealsActive&SEAL_ECHIDNA ? 2 : 1;
+		if(check_mutation(SHUB_CLAWS))
+			unarmedMult++;
+		if(!Upolyd && TIEFLING_CLAWS)
+			unarmedMult += 3;
+	}
+	else {
+		unarmedMult = 1;
+	}
+	if (gloves && gloves->oartifact == ART_GREAT_CLAWS_OF_URDLEN)
+		unarmedMult += 2;
+	return unarmedMult;
+}
+
+/* Fills in [wdice] with the deterministic part of [magr]'s unarmed punch dice against a [large] or small target. */
+STATIC_OVL void
+unarmed_base_dice(struct weapon_dice *wdice, boolean large, struct monst *magr)
+{
+	boolean youagr = (magr == &youmonst);
+	int unarmedMult = unarmed_multiplier(magr);
+
+	/* initialize struct */
+	dmgval_core(wdice, large, (struct obj *)0, 0, magr);
+
+	/* base unarmed dice */
+	if (youagr && martial_bonus())
+		wdice->oc_damd = 4 * unarmedMult;
+	else if (youagr && u.umaniac)
+		wdice->oc_damd = 3 * unarmedMult;
+	else
+		wdice->oc_damd = 2 * unarmedMult;
+
+	//Reduced damage from forms
+	if (youagr && !Upolyd && activeFightingForm(FFORM_MNK_MANTIS))
+		wdice->oc_damd = max(1, wdice->oc_damd - 2);
+
+	if(youagr && u.umaniac && weapon_dam_bonus((struct obj *) 0, P_BARE_HANDED_COMBAT) > 0)
+		wdice->oc_damd += weapon_dam_bonus((struct obj *) 0, P_BARE_HANDED_COMBAT)*2;
+	if (youagr && flags.aasimar_type == AASIMAR_TYPE_CLOUDFACE && !Upolyd && !uarmg)
+		wdice->oc_damd = max(wdice->oc_damd, 8);
+}
+
+/* Prints the message for an anti-undead strike pulverizing part of [mdef]. */
+STATIC_OVL void
+anti_undead_strike_msg(struct monst *mdef)
+{
+	boolean youdef = (mdef == &youmonst);
+	struct permonst *pd = youdef ? youracedata : mdef->data;
+	const char *whose = youdef ? "Your" : s_suffix(Monnam(mdef));
+	const char *flesh = mbodypart(mdef, BODY_FLESH);
+	const char *bones = mbodypart(mdef, BONES);
+	const char *blood = mbodypart(mdef, BLOOD);
+	const char *skin = mbodypart(mdef, BODY_SKIN);
+
+	switch(get_template(mdef)){
+		case CRYSTALFIED:
+			pline("%s vitrified %s %s shattered by the blow!", whose, flesh, vtense(flesh, "are"));
+			return;
+		case FRACTURED:
+			pline("%s broken-mirrored form fractures further from the blow!", whose);
+			return;
+		case BLOOD_MON:
+			pline("%s congealed %s %s splattered by the blow!", whose, blood, vtense(blood, "are"));
+			return;
+		case YELLOW_TEMPLATE:
+		case DREAM_LEECH:
+			pline("%s jaundiced %s %s pulverized by the blow!", whose, flesh, vtense(flesh, "are"));
+			return;
+		case VAMPIRIC:
+			pline("%s undying %s %s torn open by the blow!", whose, flesh, vtense(flesh, "are"));
+			return;
+		case FLAYED:
+			pline("%s %s %s %s pulverized by the blow!", whose, !strcmp(skin, "skin") ? "skinless" : "flayed", flesh, vtense(flesh, "are"));
+			return;
+	}
+
+	switch(pd->mtyp){
+		case PM_FLAYED_ANDROID:
+		case PM_FLAYED_GYNOID:
+			pline("%s exposed muscle-cables are pulverized by the blow!", whose);
+			return;
+		case PM_BLOB_OF_PRESERVED_ORGANS:
+			pline("%s pickled %s %s pulverized by the blow!", whose, flesh, vtense(flesh, "are"));
+			return;
+		case PM_DOKKALFAR_ETERNAL_MATRIARCH:
+			pline("%s heavily-eroded %s %s shattered by the blow!", whose, flesh, vtense(flesh, "are"));
+			return;
+		case PM_ALHOON:
+			pline("%s carefully-preserved %s %s pulverized by the blow!", whose, flesh, vtense(flesh, "are"));
+			return;
+		case PM_BARROW_WIGHT:
+		case PM_NAZGUL:
+		case PM_NECROMANCER:
+			pline("%s withered %s %s pulverized by the blow!", whose, flesh, vtense(flesh, "are"));
+			return;
+		case PM_ZARIELITE_ZEALOT:
+		case PM_ZARIELITE_HERETIC:
+			pline("%s damned soul is torn by the blow!", whose);
+			return;
+		case PM_BEFOULED_WRAITH:
+			pline("%s slime-befouled essence is rent by the blow!", whose);
+			return;
+		case PM_FLAXEN_STARSHADOW:
+		case PM_FLAXEN_STAR_PHANTOM:
+			pline("%s black starlit form is scattered by the blow!", whose);
+			return;
+		case PM_PHARAOH:
+			pline("%s embalmed %s %s under the blow!", whose, flesh, vtense(flesh, "crumble"));
+			return;
+		case PM_GHOUL_QUEEN_NITOCRIS:
+			pline("%s recently-slain %s %s pulverized by the blow!", whose, flesh, vtense(flesh, "are"));
+			return;
+		case PM_MUMMIFIED_ANDROID:
+		case PM_MUMMIFIED_GYNOID:
+			pline("%s dried-out cosmetic layer cracks under the blow!", whose);
+			return;
+		case PM_ROTTING_MONK:
+			pline("%s putrefying %s %s pulverized by the blow!", whose, flesh, vtense(flesh, "are"));
+			return;
+		case PM_GARO:
+		case PM_GARO_MASTER:
+			pline("%s brittle form is pulverized by the blow!", whose);
+			return;
+		case PM_BEING_OF_IB:
+		case PM_PRIEST_OF_IB:
+			pline("%s gelid green %s %s spattered by the blow!", whose, flesh, vtense(flesh, "are"));
+			return;
+		case PM_MAANZECORIAN:
+			pline("%s fragmentary divinity is rent by the blow!", whose);
+			return;
+	}
+
+	if(skeletal(pd)){
+		pline("%s brittle %s %s pulverized by the blow!", whose, bones, vtense(bones, "are"));
+		return;
+	}
+	if(is_vampire(pd)){
+		pline("%s undying %s %s torn open by the blow!", whose, flesh, vtense(flesh, "are"));
+		return;
+	}
+
+	switch(pd->mlet){
+		case S_MUMMY:
+			pline("%s desiccated %s %s under the blow!", whose, flesh, vtense(flesh, "crumble"));
+			break;
+		case S_GHOST:
+			pline("%s spectral form is torn asunder by the blow!", whose);
+			break;
+		case S_SHADE:
+			pline("%s shadowy form is scattered by the blow!", whose);
+			break;
+		case S_WRAITH:
+			pline("%s deathly essence is rent by the blow!", whose);
+			break;
+		case S_LICH:
+			//No remaining cases
+		default:
+			pline("%s rotted %s %s pulverized by the blow!", whose, flesh, vtense(flesh, "are"));
+			break;
+	}
 }
 
 // magr;			/* attacker */
@@ -16341,7 +16575,7 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 	/* Preliminary mask, for the attack riders below: they read the narrow
 	 * aatyp-based reading of the unarmed_ flags, before attk_equip_slot()
 	 * widens it. Recomputed once those have their final values. */
-	attackmask = strike_attack_mask(magr, attk, originalattk, weapon,
+	attackmask = strike_attack_mask(magr, mdef, attk, originalattk, weapon,
 		(valid_weapon_attack || invalid_weapon_attack), unarmed_punch,
 		unarmed_kick, unarmed_wing, modifier_flags,
 		eurynome_shape, eurynome_thin, &strike_obj);
@@ -16578,7 +16812,7 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 
 	/* jousting */
 #ifdef STEED
-	if (melee && !recursed && magr) {	/* do not joust in multihits */
+	if ((melee || (thrust && (modifier_flags&MELEEHURT_FORCE_CHECK_JOUST))) && !recursed && magr) {	/* do not joust in multihits */
 		if (((youagr && u.usteed) || (magr == u.urider) || centauroid(pa) || animaloid(pa) || (modifier_flags&MELEEHURT_FORCE_CHECK_JOUST)) 
 		    && weapon &&
 			(weapon_type(weapon) == P_LANCE ||
@@ -16604,7 +16838,7 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 
 			/* odds to joust are expert:80%, skilled:60%, basic:40%, unskilled:20% */
 			if ((joust_dieroll = rn2(5)) < skill_rating) {
-				if (!unsolid(pd) && !obj_resists(weapon, 0, 100) && weapon->otyp != PEST_GLAIVE){
+				if (!unsolid(pd) && !obj_resists(weapon, 0, 100) && weapon->otyp != PEST_GLAIVE && !(modifier_flags&MELEEHURT_FORCE_CHECK_JOUST)){
 					if (weapon->otyp == DROVEN_LANCE && rnl(40) == (40 - 1))
 						jousting = -1;	/* hit that breaks lance */
 					else if (joust_dieroll == 0){ /* Droven lances are especially brittle */
@@ -16838,7 +17072,7 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 		otmp = (struct obj *)0;
 		break;
 	}
-	attackmask = strike_attack_mask(magr, attk, originalattk, weapon,
+	attackmask = strike_attack_mask(magr, mdef, attk, originalattk, weapon,
 		(valid_weapon_attack || invalid_weapon_attack), unarmed_punch,
 		unarmed_kick, unarmed_wing, modifier_flags,
 		eurynome_shape, eurynome_thin, &strike_obj);
@@ -16849,12 +17083,13 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 		boolean armed = (weapon && valid_weapon_attack);
 		boolean light = !armed || light_weapon_mon(weapon, magr);
 		boolean one_handed = !armed || !bimanual_mon(weapon, magr);
+		boolean kensei_wep = armed && is_hero_kensei_weapon(weapon, magr);
 		boolean precise;
 		if (attackmask == PIERCE)
 			precise = (one_handed && full_grace_empowers(magr, AAT_GRACE_PRECISION))
-				|| (light && grace_empowers(magr, AAT_GRACE_PRECISION));
+				|| ((light || kensei_wep) && grace_empowers(magr, AAT_GRACE_PRECISION));
 		else
-			precise = light && full_grace_empowers(magr, AAT_GRACE_PRECISION);
+			precise = (light || kensei_wep) && full_grace_empowers(magr, AAT_GRACE_PRECISION);
 		if (precise)
 			precision_mult = (precision_mult ? precision_mult : 1) + 1;
 	}
@@ -17871,42 +18106,13 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 	else if (unarmed_punch) {
 		struct obj * gloves = (youagr ? uarmg : which_armor(magr, W_ARMG));
 		struct weapon_dice unarmed_dice;
-		int unarmedMult;
-		/* initialize struct */
-		dmgval_core(&unarmed_dice, bigmonst(pd), (struct obj *)0, 0, magr);
-		/* determine unarmedMult */
-		if (youagr) {
-			unarmedMult = Race_if(PM_HALF_DRAGON) ? 3 : u.sealsActive&SEAL_ECHIDNA ? 2 : 1;
-			if(check_mutation(SHUB_CLAWS))
-				unarmedMult++;
-			if(!Upolyd && TIEFLING_CLAWS)
-				unarmedMult += 3;
-		}
-		else {
-			unarmedMult = 1;
-		}
-		if (gloves && gloves->oartifact == ART_GREAT_CLAWS_OF_URDLEN)
-			unarmedMult += 2;
 
-		/* base unarmed dice */
-		if (youagr && martial_bonus())
-			unarmed_dice.oc_damd = 4 * unarmedMult;
-		else if (youagr && u.umaniac)
-			unarmed_dice.oc_damd = 3 * unarmedMult;
-		else
-			unarmed_dice.oc_damd = 2 * unarmedMult;
-
-		//Reduced damage from forms
-		if (youagr && !Upolyd && activeFightingForm(FFORM_MNK_MANTIS))
-			unarmed_dice.oc_damd = max(1, unarmed_dice.oc_damd - 2);
-
-		if(youagr && u.umaniac && weapon_dam_bonus((struct obj *) 0, P_BARE_HANDED_COMBAT) > 0)
-			unarmed_dice.oc_damd += weapon_dam_bonus((struct obj *) 0, P_BARE_HANDED_COMBAT)*2;
+		unarmed_base_dice(&unarmed_dice, bigmonst(pd), magr);
 		/* Eurynome causes exploding dice, sometimes larger dice */
 		if (youagr && u.sealsActive&SEAL_EURYNOME) {
 			unarmed_dice.exploding = TRUE;
 			unarmed_dice.oc_damd = max(unarmed_dice.oc_damd,
-				2 * rnd(5) + (martial_bonus() ? 2 * unarmedMult : 0));
+				2 * rnd(5) + (martial_bonus() ? 2 * unarmed_multiplier(magr) : 0));
 		}
 		/* Grandmaster's robe causes exploding dice, 50% chance of doubled dice */
 		otmp = (youagr ? uarmc : which_armor(magr, W_ARMC));
@@ -17920,8 +18126,6 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 		if (uwep && uwep->otyp == BESTIAL_CLAW && active_glyph(BEASTS_EMBRACE) && roll_generic_flat_madness(TRUE)){
 			unarmed_dice.oc_damn *= 2;
 		}
-		if (flags.aasimar_type == AASIMAR_TYPE_CLOUDFACE && !Upolyd && !uarmg)
-			unarmed_dice.oc_damd = max(unarmed_dice.oc_damd, 8);
 		/* calculate dice and set basedmg */
 		basedmg = weapon_dmg_roll(&unarmed_dice, FALSE);
 
@@ -18044,6 +18248,11 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 	/* multiply by precision_mult, if it applies */
 	basedmg *= (precision_mult ? precision_mult : 1);
 
+	/* possibly halve base damage */
+	if(modifier_flags&MELEEHURT_HALF_DAMAGE){
+		basedmg /= 2;
+	}
+
 	/* fakewep: Sword of Blood bonus damage */
 	if (originalattk && spirit_rapier_at(originalattk->aatyp) && originalattk->adtyp == AD_BLUD)
 	{
@@ -18079,7 +18288,7 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 	phase_armor = (
 		(weapon && arti_phasing(weapon)) ||
 		(youagr && u.sealsActive&SEAL_CHUPOCLOPS) ||
-		(youagr && weapon && is_knight_sword(weapon) && activeFightingForm(FFORM_HALF_SWORD)) ||
+		(youagr && weapon && (is_knight_sword(weapon) || (Role_if(PM_KENSEI) && is_kensei_weapon(weapon))) && activeFightingForm(FFORM_HALF_SWORD)) ||
 		(!youagr && magr && mad_monster_turn(magr, MAD_NON_EUCLID)) ||
 		(originalattk && spirit_rapier_at(originalattk->aatyp) && originalattk->adtyp != AD_BLUD && originalattk->adtyp != AD_WET) ||
 		(swordofblood) /* this touch adtyp is only conditionally phasing */
@@ -18455,6 +18664,7 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 			}
 			if((youdef ? has_blood(youracedata) : has_blood_mon(mdef))
 				&& ((modifier_flags&MELEEHURT_FORCE_BLEED) 
+				    || weapon->oartifact == ART_BLEEDING_VOID
 				    || (
 						CHECK_ETRAIT(weapon, magr, ETRAIT_BLEED)
 						&& ((weapon->oartifact == ART_LIFEHUNT_SCYTHE) ? ROLL_ETRAIT(weapon, magr, TRUE, !rn2(lhs)) : ROLL_ETRAIT(weapon, magr, rn2(e), !rn2(s)))
@@ -18465,12 +18675,12 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 				int bleeddmg;
 				/* grab the weapon dice from dmgval_core */
 				dmgval_core(&wdice, bigmonst(pd), weapon, weapon->otyp, magr);
-				bleeddmg = ((wdice.oc_damn*wdice.oc_damd) + (wdice.bon_damn*wdice.bon_damd))/2 + wdice.flat + ROLL_ETRAIT(weapon, magr, 2, 1);
-				/* add to the tratdmg counter */
-				tratdmg += bleeddmg;
+				bleeddmg = ((wdice.oc_damn*wdice.oc_damd) + (wdice.bon_damn*wdice.bon_damd))/2 + wdice.flat + ROLL_ETRAIT(weapon, magr, 3, 2);
 				//Focus boosts the bleed damage ONLY, not trait damage
 				if(youagr && ZFOCUS(weapon))
 					bleeddmg += ((wdice.oc_damn*wdice.oc_damd) + (wdice.bon_damn*wdice.bon_damd) + 1)/2 + ROLL_ETRAIT(weapon, magr, 6, 0);
+				if(weapon->oartifact == ART_BLEEDING_VOID)
+					bleeddmg += 4 + max(0, weapon->spe);
 				if (wizard && (iflags.wizcombatdebug & WIZCOMBATDEBUG_DMG) && WIZCOMBATDEBUG_APPLIES(magr, mdef))
 					pline("Bleeding wound!");
 				if (vis) 
@@ -18483,6 +18693,8 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 					if(youagr)
 						mdef->mubled = TRUE;
 				}
+				if(six_element_channel(weapon->oartifact, SIXEL_FIELD) && !Is_spire(&u.uz))
+					field_grows_grass(x(mdef), y(mdef));
 				if ((youdef || youagr) && active_glyph(BEASTS_EMBRACE)){
 					// bleeding wounds connect you to the beast inside, either dealing or taking
 					static long lastfrenzymessage = 0L;
@@ -18773,7 +18985,7 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 		if (valid_weapon_attack && weapon && magr && (melee || thrust) && !on_level(&spire_level, &u.uz)
 			&& (weapon->oclass == WEAPON_CLASS || is_weptool(weapon))
 			&& ((full_grace_empowers(magr, AAT_GRACE_POWER) && !bimanual_mon(weapon, magr))
-				|| (grace_empowers(magr, AAT_GRACE_POWER) && light_weapon_mon(weapon, magr)))
+				|| (grace_empowers(magr, AAT_GRACE_POWER) && (light_weapon_mon(weapon, magr) || is_hero_kensei_weapon(weapon, magr))))
 		) {
 			if (!grants_purity_bonus(weapon, magr))
 				artidmg += basedmg*.2;
@@ -19110,6 +19322,7 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 		}
 		if ((attackmask & ~(resistmask)) == 0L
 			&& (subtotl > 0)
+			&& !(modifier_flags&MELEEHURT_BYPASS_RESIST)
 			&& !(strike_obj && spec_applies(strike_obj, mdef, TRUE))
 			&& !(strike_obj && magr && CHECK_ETRAIT(strike_obj, magr, ETRAIT_ANTI_UNDEAD) && is_undead(mdef->data))
 			&& !(strike_obj && is_undead(mdef->data) && astra_empowers(magr, AAT_MONADIC_ASTRA))
@@ -19237,7 +19450,10 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 		}
 	}
 	/* Is the damage lethal? */
-	if(is_legion_devil(mdef->mtyp) && !mdef->mcan){
+	if(youdef && u.ureceptive_field){
+		lethaldamage = FALSE;
+	}
+	else if(is_legion_devil(mdef->mtyp) && !mdef->mcan){
 		int pool;
 		calc_legion_pool(mdef, &pool, 0);
 		if(totldmg >= pool)
@@ -19522,14 +19738,8 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 		if (vis)
 			pline("%s sustained a bleeding wound in the fighting!", youdef ? "You" : Monnam(mdef));
 	}
-	if(anti_undead_strike && !lethaldamage){
-		if(vis){
-			if(skeletal(pd))
-				pline("%s brittle %s are pulverized by the blow!", youdef ? "Your" : s_suffix(Monnam(mdef)), mbodypart(mdef, BONES));
-			else
-				pline("%s rotted %s is pulverized by the blow!", youdef ? "Your" : s_suffix(Monnam(mdef)), mbodypart(mdef, BODY_FLESH));
-		}
-	}
+	if(anti_undead_strike && !lethaldamage && vis)
+		anti_undead_strike_msg(mdef);
 	if(weapon && (weapon->obj_material == HEMARGYOS || check_oprop(weapon, OPROP_HAEM))){
 		if(youagr && !youdef){
 			if (has_blood_mon(mdef)
@@ -20323,7 +20533,11 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 	}
 	/* Deal Damage */
 	/* this can possibly kill, returning immediately */
-	result = xdamagey(magr, mdef, attk, totldmg);
+	if(youdef && u.ureceptive_field && totldmg > 0){
+		healup(totldmg, 0, FALSE, FALSE);
+		result = MM_HIT;
+	}
+	else result = xdamagey(magr, mdef, attk, totldmg);
 	if (result&(MM_DEF_DIED|MM_DEF_LSVD))
 		return result;
 
@@ -22212,7 +22426,7 @@ growth_mantle_stops(struct monst * magr, struct monst * mdef, struct obj * weapo
 {
 	char what[BUFSZ];
 
-	if (!(attack_mask(weapon, 0, 0, magr) & WHACK))
+	if (!(attack_mask_vs_mdef(weapon, 0, 0, magr, mdef) & WHACK))
 		return FALSE;
 	/* projectiles are named; held weapons are the attacker's blow */
 	if (weapon->where == OBJ_FREE)
@@ -22410,9 +22624,9 @@ mantle_blunted_dmg(struct monst * magr, struct monst * mdef, struct obj * weapon
 		dmg = dmg * 9 / 10;
 	if (dmg > 0 && mon_has_mantle(mdef, AD_PYCL) && !seeking_blow(magr, weapon))
 		dmg /= 2;
-	if (dmg > 0 && weapon && (attack_mask(weapon, 0, 0, magr) & SLASH) && mon_has_mantle(mdef, AD_POLN))
+	if (dmg > 0 && weapon && (attack_mask_vs_mdef(weapon, 0, 0, magr, mdef) & SLASH) && mon_has_mantle(mdef, AD_POLN))
 		dmg /= 2;
-	if (dmg > 0 && !(weapon && (attack_mask(weapon, 0, 0, magr) & PIERCE)) && mon_has_mantle(mdef, AD_SESN))
+	if (dmg > 0 && !(weapon && (attack_mask_vs_mdef(weapon, 0, 0, magr, mdef) & PIERCE)) && mon_has_mantle(mdef, AD_SESN))
 		dmg /= 2;
 	return dmg;
 }
@@ -23986,22 +24200,32 @@ monk_aura_range()
 boolean
 beam_monk_target(int range)
 {
-	struct monst *mon;
-	int i;
-	int ix = u.ux, iy = u.uy;
-	boolean at_least_one = FALSE;
 	//Same rules as kicking. Whirly monsters allow moves, solid ones do not.
 	if(u.ustuck && u.uswallow){
 		if(is_whirly(u.ustuck->data))
 			return TRUE;
 		else return FALSE;
 	}
-	for(i = 1; i <= range; i++){
+	return beam_monk_target_from(1, range);
+}
+
+/* Returns TRUE if a [range]-square beam along u.dx/u.dy, starting [start] squares from the hero, has a target and would not hit a nonthreat_ful() monster first.
+ * The squares before the start must be open terrain for the beam to get there; monsters on them are ignored.
+ * Takes no account of engulfing.
+ */
+STATIC_OVL boolean
+beam_monk_target_from(int start, int range)
+{
+	struct monst *mon;
+	int i;
+	int ix = u.ux, iy = u.uy;
+	boolean at_least_one = FALSE;
+	for(i = 1; i < start + range; i++){
 		ix += u.dx;
 		iy += u.dy;
 		if(!isok(ix,iy))
 			return at_least_one;
-		mon = m_at(ix, iy);
+		mon = (i >= start) ? m_at(ix, iy) : (struct monst *)0;
 		if(!mon){
 			if(!ZAP_POS(levl[ix][iy].typ) || closed_door(ix, iy))
 				return at_least_one;
@@ -24149,12 +24373,21 @@ monk_aura_zapdata(struct zapdata *zapdat, int adtyp_override)
 void
 monk_aura_bolt(int adtyp_override)
 {
+	monk_aura_bolt_from(1, monk_aura_range(), adtyp_override);
+}
+
+/* Fires the hero's aura bolt along u.dx/u.dy for [range] squares, starting [start] squares from the hero.
+ * A nonzero adtyp_override replaces the damage type.
+ */
+STATIC_OVL void
+monk_aura_bolt_from(int start, int range, int adtyp_override)
+{
 	struct zapdata zapdat = { 0 };
 	monk_aura_zapdata(&zapdat, adtyp_override);
 	//Currently these cook off without the player's explicit say-so
 	zapdat.no_bounce = TRUE;
 	zapdat.unreflectable = ZAP_REFL_NEVER;
-	zap(&youmonst, u.ux, u.uy, u.dx, u.dy, monk_aura_range(), &zapdat);
+	zap(&youmonst, u.ux + (start-1)*u.dx, u.uy + (start-1)*u.dy, u.dx, u.dy, range, &zapdat);
 }
 
 /* Burning cyclone: hit all adjacent enemies, then a fire burst around the hero that spares nonthreat_ful() monsters */
@@ -24162,12 +24395,208 @@ STATIC_OVL void
 burning_cyclone(void)
 {
 	struct zapdata zapdat = { 0 };
-	cyclone_slash_monsters(TRUE);
+	cyclone_slash_monsters(TRUE, FALSE);
 	if(Is_spire(&u.uz))
 		return;
 	monk_aura_zapdata(&zapdat, AD_FIRE);
+	if(u.uswallow){
+		if(!DEADMONSTER(u.ustuck))
+			engulfer_burst(AD_FIRE, zapdamage(&youmonst, (struct monst *)0, &zapdat));
+		return;
+	}
 	explode_full_threats(u.ux, u.uy, AD_FIRE, 0, zapdamage(&youmonst, (struct monst *)0, &zapdat),
 		adtyp_expl_color(AD_FIRE), 2, 0, TRUE, (struct permonst *)0, 0L);
+}
+
+/* A fire or cold ([adtyp] AD_FIRE or AD_COLD) burst around the engulfed hero, which hits only the engulfer, for [dam] damage scaled as an explosion inside an engulfer. */
+STATIC_OVL void
+engulfer_burst(int adtyp, int dam)
+{
+	struct monst *mtmp = u.ustuck;
+	int mdam = dam*2;
+	boolean cold = (adtyp == AD_COLD);
+
+	pline("%s gets %s!", Monnam(mtmp), cold ? (is_animal(mtmp->data) ? "chilly" : "slightly chilly") : is_animal(mtmp->data) ? "heartburn" : "slightly toasted");
+	if(!cold){
+		(void) destroy_item(mtmp, SCROLL_CLASS, AD_FIRE);
+		(void) destroy_item(mtmp, SPBOOK_CLASS, AD_FIRE);
+	}
+	(void) destroy_item(mtmp, POTION_CLASS, adtyp);
+	if(mtmp->data->msize > MZ_MEDIUM)
+		mdam = (mdam * mtmp->data->msize)/MZ_MEDIUM;
+	if(cold ? cold_vulnerable(mtmp) : fire_vulnerable(mtmp))
+		mdam *= 2;
+	mdam = elemental_dmg_resistance(mtmp, (struct monst *)0, mdam, adtyp);
+	mtmp->mhp -= mdam;
+	if(mtmp->mhp <= 0)
+		xkilled(mtmp, 1);
+	else
+		setmangry(mtmp);
+}
+
+/* Returns TRUE if a boulder flying up to [range] squares along u.dx/u.dy would land somewhere it could fill. */
+STATIC_OVL boolean
+boulder_fill_target(int range)
+{
+	struct trap *ttmp;
+	int i, x = u.ux, y = u.uy;
+
+	if(u.uswallow)
+		return FALSE;
+	for(i = 0; i < range; i++){
+		if(!isok(x + u.dx, y + u.dy) || !ZAP_POS(levl[x + u.dx][y + u.dy].typ) || closed_door(x + u.dx, y + u.dy))
+			break;
+		x += u.dx;
+		y += u.dy;
+	}
+	if(x == u.ux && y == u.uy)
+		return FALSE;
+	if(is_pool(x, y, TRUE) || is_lava(x, y))
+		return TRUE;
+	ttmp = t_at(x, y);
+	return ttmp && (ttmp->ttyp == PIT || ttmp->ttyp == SPIKED_PIT || ttmp->ttyp == HOLE || ttmp->ttyp == TRAPDOOR);
+}
+
+/* A wave of water slams into [mdef], dealing the hero's aura damage (with [damd_bonus] added to its die size) and soaking its inventory.
+ * If [typhoon], the wave is stronger and is followed by a rainstorm.
+ */
+STATIC_OVL void
+six_element_wave(struct monst *mdef, int damd_bonus, boolean typhoon)
+{
+	struct zapdata zapdat = { 0 };
+	int dmg;
+
+	monk_aura_zapdata(&zapdat, AD_PHYS);
+	zapdat.damd += damd_bonus;
+	if (typhoon)
+		zapdat.damn += 1;
+	if (canseemon(mdef))
+		pline("A wave slams into %s!", mon_nam(mdef));
+	dmg = zapdamage(&youmonst, (struct monst *)0, &zapdat);
+	dmg = reduce_dmg(mdef, dmg, TRUE, FALSE);
+	water_damage(mdef->minvent, FALSE, FALSE, FALSE, mdef);
+	if (typhoon) {
+		struct obj *helm = which_armor(mdef, W_ARMH);
+		boolean msg = flaming(mdef->data) && canseemon(mdef);
+
+		if (msg)
+			pline("A torrent of water rains down on %s!", mon_nam(mdef));
+		if (helm && is_wide_helm(helm)) {
+			if (msg)
+				pline("It runs off the brim of %s %s.", s_suffix(mon_nam(mdef)), OBJ_DESCR(objects[helm->otyp]));
+		}
+		else {
+			if (flaming(mdef->data))
+				dmg += reduce_dmg(mdef, d(8, 6), TRUE, FALSE);
+			water_damage(mdef->minvent, FALSE, FALSE, FALSE, mdef);
+		}
+	}
+	(void) xdamagey(&youmonst, mdef, (struct attack *)0, dmg);
+}
+
+/* Receptive field: the rich soil smothers the flames of [magr], which just swung a fire attack at the hero, dealing the hero's aura damage. */
+void
+receptive_field_smother(struct monst *magr)
+{
+	struct zapdata zapdat = { 0 };
+	int dmg;
+
+	monk_aura_zapdata(&zapdat, AD_PHYS);
+	if (canseemon(magr))
+		pline("The rich soil smothers %s flames!", s_suffix(mon_nam(magr)));
+	dmg = zapdamage(&youmonst, (struct monst *)0, &zapdat);
+	dmg = reduce_dmg(magr, dmg, TRUE, FALSE);
+	(void) xdamagey(&youmonst, magr, (struct attack *)0, dmg);
+}
+
+/* Field: soil at [x],[y] grows into grass. */
+void
+field_grows_grass(int x, int y)
+{
+	if (!isok(x, y) || levl[x][y].typ != SOIL)
+		return;
+	levl[x][y].typ = GRASS;
+	newsym(x, y);
+}
+
+STATIC_OVL struct monst *
+whirlpool_target_at(int x, int y)
+{
+	struct monst *mon;
+
+	if(!isok(x, y) || !(mon = m_at(x, y)))
+		return (struct monst *)0;
+	if((nonthreat_ful(mon) && !Hallucination) || DEADMONSTER(mon))
+		return (struct monst *)0;
+	return mon;
+}
+
+/* Whirlpool spiral strikes each hostile monster adjacent to the hero (a wave of water, or a half-damage weapon attack on the Spire), announcing itself first if [announce]. Returns TRUE if any monster was struck. */
+boolean
+whirlpool_spiral_waves(struct obj *obj, boolean announce)
+{
+	extern const int clockwisex[8];
+	extern const int clockwisey[8];
+	struct monst *mon;
+	boolean found = FALSE;
+	int i;
+
+	for(i = 0; i < 8 && !found; i++)
+		if(whirlpool_target_at(u.ux + clockwisex[i], u.uy + clockwisey[i]))
+			found = TRUE;
+	if(!found)
+		return FALSE;
+	if(announce)
+		pline("Whirlpool spiral!");
+	if(Is_spire(&u.uz)){
+		struct attack weaponhit = wielded_weapon_attack(&youmonst, uwep);
+		int sdx = u.dx, sdy = u.dy;
+		int offset = rn2(8);
+		long result;
+
+		for(i = 0; i < 8 && uwep; i++){
+			/* u.dx/u.dy set for any knockbacks */
+			u.dx = clockwisex[(offset+i)%8];
+			u.dy = clockwisey[(offset+i)%8];
+			if(!(mon = whirlpool_target_at(u.ux + u.dx, u.uy + u.dy)))
+				continue;
+			result = xmeleehity(&youmonst, mon, &weaponhit, &uwep, (VIS_MAGR | VIS_NONE) | (canseemon(mon) ? VIS_MDEF : 0), 0, FALSE, ATTKFLAG_HALF_DAMAGE);
+			if((result&(MM_AGR_DIED|MM_AGR_STOP)) || !(result&MM_DEF_DIED))
+				break;
+		}
+		u.dx = sdx;
+		u.dy = sdy;
+		return TRUE;
+	}
+	set_six_element_channel(obj, SIXEL_WATER);
+	for(i = 0; i < 8; i++)
+		if((mon = whirlpool_target_at(u.ux + clockwisex[i], u.uy + clockwisey[i])))
+			six_element_wave(mon, 0, FALSE);
+	return TRUE;
+}
+
+/* Still snowfall makes a cancellation attempt against each hostile monster adjacent to the hero, setting the Six-Element Sword [obj] to metal and frosted and announcing itself first if [announce]. Returns TRUE if any attempt was made. */
+boolean
+still_snowfall_cancels(struct obj *obj, boolean announce)
+{
+	extern const int clockwisex[8];
+	extern const int clockwisey[8];
+	struct monst *mon;
+	boolean found = FALSE;
+	int i;
+
+	for(i = 0; i < 8 && !found; i++)
+		if(whirlpool_target_at(u.ux + clockwisex[i], u.uy + clockwisey[i]))
+			found = TRUE;
+	if(!found)
+		return FALSE;
+	if(announce)
+		pline("Still snowfall!");
+	set_six_element_channel(obj, SIXEL_METAL|SIXEL_FROST);
+	for(i = 0; i < 8; i++)
+		if((mon = whirlpool_target_at(u.ux + clockwisex[i], u.uy + clockwisey[i])))
+			cancel_monst(mon, obj, TRUE, FALSE, FALSE, 0);
+	return TRUE;
 }
 
 void
@@ -25451,7 +25880,7 @@ kensei_repulse(struct monst *mdef, struct attack *weaponhit)
 	repulsehit.damn = 1;
 	repulsehit.damd = 8;
 	if(u.role_variant == ART_SKY_REFLECTED && bimanual_mon(uwep, &youmonst)){
-		result = xmeleehity(&youmonst, mdef, weaponhit, &uwep, vis, 0, FALSE, ATTKFLAG_SHOVE);
+		result = xmeleehity(&youmonst, mdef, weaponhit, &uwep, vis, 0, FALSE, ATTKFLAG_SHOVE|ATTKFLAG_WHACK);
 	}
 	else {
 		result = xmeleehity(&youmonst, mdef, &repulsehit, &uwep, vis, 0, FALSE, 0);
@@ -25467,6 +25896,75 @@ kensei_repulse(struct monst *mdef, struct attack *weaponhit)
 		yanki_psiblast(mdef);
 	}
 	return TRUE;
+}
+
+/* Returns TRUE if the hero's Kensei moves are the kendo set used by the Ancient Ritual Sword Kensei with an is_kendo_kensei_able() weapon.
+ * This includes the Six-Element Sword, whose own moveset must be checked first.
+ */
+STATIC_OVL boolean
+kendo_moveset(void)
+{
+	return Role_if(PM_KENSEI) && u.role_variant == ART_ANCIENT_RITUAL_SWORD && uwep && is_kendo_kensei_able(uwep);
+}
+
+STATIC_OVL boolean
+ritual_moveset(void)
+{
+	return Role_if(PM_KENSEI) && u.role_variant == ART_ANCIENT_RITUAL_SWORD && uwep && uwep->otyp == RITUAL_SWORD;
+}
+
+STATIC_OVL boolean
+six_element_moveset(void)
+{
+	return Role_if(PM_KENSEI) && u.role_variant == ART_ANCIENT_RITUAL_SWORD && uwep && uwep->oartifact == ART_SIX_ELEMENT_SWORD;
+}
+
+/* Returns TRUE if ritual sword [wep] strikes [mon] as a holy target. */
+boolean
+ritual_sword_target(struct obj *wep, struct monst *mon)
+{
+	return wep && wep->otyp == RITUAL_SWORD
+		&& ((wep->blessed && hates_holy_mon(mon)) || (wep->oartifact && spec_applies(wep, mon, FALSE)));
+}
+
+/* Returns the ATTKFLAG_ damage type for a thrust by [magr] with [wep] against [mdef] (which may be NULL), or 0 if [wep]'s damage type shouldn't be overridden. */
+STATIC_OVL long
+lance_thrust_dmgtype(struct obj *wep, struct monst *magr, struct monst *mdef)
+{
+	int mask;
+
+	if(!wep || !is_sword(wep))
+		return 0;
+	mask = attack_mask_vs_mdef(wep, 0, 0, magr, mdef);
+	return ((mask&PIERCE) || !(mask&WHACK)) ? ATTKFLAG_PIERCE : ATTKFLAG_WHACK;
+}
+
+STATIC_OVL long
+mask_attkflags(int mask)
+{
+	long flags = 0;
+
+	if(mask&WHACK)
+		flags |= ATTKFLAG_WHACK;
+	if(mask&PIERCE)
+		flags |= ATTKFLAG_PIERCE;
+	if(mask&SLASH)
+		flags |= ATTKFLAG_SLASH;
+	return flags;
+}
+
+/* Returns the ATTKFLAG_ damage types for an edge strike by [magr] with [wep] against [mdef] (which may be NULL), or 0 if [wep]'s damage types shouldn't be overridden. */
+long
+edge_strike_dmgtype(struct obj *wep, struct monst *magr, struct monst *mdef)
+{
+	int mask;
+
+	if(!wep || !is_sword(wep))
+		return 0;
+	mask = attack_mask_vs_mdef(wep, 0, 0, magr, mdef);
+	if(!(mask&SLASH))
+		return ATTKFLAG_WHACK;
+	return mask_attkflags(mask & ~PIERCE);
 }
 
 const char *
@@ -25493,10 +25991,10 @@ move_name(int moveid)
 		case ICICLES: return (u.uhp*2 > u.uhpmax && u.uhp > u.ulevel) ? "Icicle rush" : "Bloody snow";
 		case TRIPLE_F: return "Triple thrust";
 		case BLEED_S: return "Bloody sickle";
-		case LANCE_T: return "Lance thrust";
+		case LANCE_T: return kendo_moveset() ? "Tsuki" : "Lance thrust";
 		case THROW: return "Throw";
 		case HUBRIS: return "Hubris";
-		case CYCLONE: return (uwep && (attack_mask(uwep, 0, 0, &youmonst) & SLASH)) ? "Cyclone slash" : "Cyclone smash";
+		case CYCLONE: return kendo_moveset() ? "Do" : (uwep && (attack_mask(uwep, 0, 0, &youmonst) & SLASH)) ? "Cyclone slash" : "Cyclone smash";
 		case KNOCKBACK: return (uwep && is_kensei_weapon(uwep)) ? "Repulsing slash" : "Repulsing blast";
 		case VACUUM: return "Vacuum bolt";
 		case INFLICT: return "Debilitate";
@@ -25509,7 +26007,7 @@ move_name(int moveid)
 		case FLOURISH: return "Defensive flourish";
 		case WHIRLWIND: return "Windmill strike";
 		case MILLWHEEL: return "Millwheel strike";
-		case RISING_B: return (uwep && (attack_mask(uwep, 0, 0, &youmonst) & SLASH)) ? "Rising cut" : "Rising blow";
+		case RISING_B: return kendo_moveset() ? "Men" : (uwep && (attack_mask(uwep, 0, 0, &youmonst) & SLASH)) ? "Rising cut" : "Rising blow";
 		case SHOVE: return "Shove";
 		case REPULSE: return "Repulse";
 		case THUNDER_V: return "Voice of Thunder";
@@ -25523,7 +26021,7 @@ move_name(int moveid)
 		case SCORN: return "Scorn";
 		case BOREAL_B: return "Boreal blast";
 		case DARK_FEAR: return "Fear below";
-		case CROSS: return "Cross slash";
+		case CROSS: return kendo_moveset() ? "Kote" : "Cross slash";
 		case ICHIMONJI: return "Ichimonji";
 		case MORTAL_D: return "Mortal draw";
 		case DRAIN_L: return "Life drain";
@@ -25539,6 +26037,20 @@ move_name(int moveid)
 		case BURN_CYC: return "Burning cyclone";
 		case QUICKSHOT: return "Quickshot";
 		case DOUBLE_SH: return "Double shot";
+		case LAY_REST: return "Lay to rest";
+		case LIGHTNING_K: return "Lightning strike";
+		case SPLIT_STRK: return "Splitting strike";
+		case EARTH_AVAL: return "Avalanche";
+		case FLICKER_F: return "Flickering flames";
+		case QUICK_T: return "Quick thrust";
+		case ICE_STORM_K: return "Ice storm";
+		case REACH_FLAME: return "Reaching flame";
+		case RECEPT_F: return "Receptive field";
+		case GROW_SHOOT: return (uwep && six_element_channel(uwep->oartifact, SIXEL_LONG)) ? "Waving shoots" : "Growing shoots";
+		case FALLING_SKY: return (uwep && six_element_channel(uwep->oartifact, SIXEL_EARTH) && !Is_spire(&u.uz)) ? "Mountain's bones" : "Falling sky";
+		case IMPALE: return (uwep && six_element_channel(uwep->oartifact, SIXEL_WATER) && !Is_spire(&u.uz)) ? "Overgrowth" : "Impale";
+		case WAVE: return (uwep && six_element_channel(uwep->oartifact, SIXEL_METAL) && !Is_spire(&u.uz)) ? "Typhoon" : "Wave";
+		case INFERNO: return (uwep && six_element_channel(uwep->oartifact, SIXEL_WOOD) && !Is_spire(&u.uz)) ? "Raging Inferno" : "Inferno";
 	}
 	return "unknown move id";
 }
@@ -25680,28 +26192,49 @@ pole_thrust()
 	return TRUE;
 }
 
+/* Sweeps the wielded polearm in a full circle, attacking monsters two squares away and handle-striking adjacent ones; a surviving adjacent monster stops the sweep. Returns FALSE (doing nothing) if there is no target two squares away. */
 boolean
-pole_cyclone()
+pole_cyclone(void)
 {
 	struct monst *mon;
+	struct attack polehit = wielded_weapon_attack(&youmonst, uwep);
+	boolean inner_done[3][3] = {{FALSE}};
+	boolean vis;
+	long result;
+	int i, j, k, ox, oy, ix, iy;
+
 	if(!circle_pole_target(!!uwep))
 		return FALSE;
 	pline("Pole cyclone!");
 	//locate facing
-	int i;
 	for(i = 0; i < SIZE(distance_2_rotation_dx); i++){
 		if(distance_2_rotation_dx[i] == 2*u.dx && distance_2_rotation_dy[i] == 2*u.dy)
 			break;
 	}
-	struct attack polehit = wielded_weapon_attack(&youmonst, uwep);
-	boolean vis;
-	for(int j = 0; j < SIZE(distance_2_rotation_dx); j++){
-		int nx = u.ux + distance_2_rotation_dx[(i+j)%SIZE(distance_2_rotation_dx)]/2;
-		int ny = u.uy + distance_2_rotation_dy[(i+j)%SIZE(distance_2_rotation_dy)]/2;
-		if(!isok(nx, ny))
-			continue;
-		mon = m_at(nx, ny);
-		if(!mon)
+	for(j = 0; j < SIZE(distance_2_rotation_dx); j++){
+		k = (i+j)%SIZE(distance_2_rotation_dx);
+		ox = u.ux + distance_2_rotation_dx[k];
+		oy = u.uy + distance_2_rotation_dy[k];
+		/* the adjacent square the handle passes over (each is struck only once) */
+		ix = u.ux + distance_2_rotation_dx[k]/2;
+		iy = u.uy + distance_2_rotation_dy[k]/2;
+		if(!inner_done[ix-u.ux+1][iy-u.uy+1]){
+			inner_done[ix-u.ux+1][iy-u.uy+1] = TRUE;
+			if(isok(ix, iy) && (mon = m_at(ix, iy))
+				&& !((touch_petrifies(mon->data) || mon->mtyp == PM_MEDUSA) && !(Stone_resistance || uwep))
+				&& peace_check_move(mon)
+			){
+				vis = (VIS_MAGR | VIS_NONE) | (canseemon(mon) ? VIS_MDEF : 0);
+				result = xmeleehity(&youmonst, mon, &polehit, &uwep, vis, 0, FALSE, 0);
+				if(result&(MM_AGR_DIED|MM_AGR_STOP))
+					return TRUE;
+				if(!(result&MM_DEF_DIED))
+					return TRUE;
+			}
+		}
+		if(!uwep)
+			return TRUE;
+		if(!isok(ox, oy) || !(mon = m_at(ox, oy)))
 			continue;
 		if((touch_petrifies(mon->data)
 			|| mon->mtyp == PM_MEDUSA)
@@ -25710,7 +26243,9 @@ pole_cyclone()
 
 		if(peace_check_move(mon)){
 			vis = (VIS_MAGR | VIS_NONE) | (canseemon(mon) ? VIS_MDEF : 0);
-			xmeleehity(&youmonst, mon, &polehit, &uwep, vis, 0, TRUE, 0);
+			result = xmeleehity(&youmonst, mon, &polehit, &uwep, vis, 0, TRUE, 0);
+			if(result&(MM_AGR_DIED|MM_AGR_STOP))
+				return TRUE;
 		}
 	}
 	return TRUE;
@@ -25955,7 +26490,8 @@ perform_monk_move(int moveID, int *move_cost)
 			if((mdef = adjacent_move_target(!!uwep))){
 				pline("%s!", move_name(moveID));
 				boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
-				xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE, ATTKFLAG_FORCE_CHECK_JOUST);
+				xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE, ATTKFLAG_FORCE_CHECK_JOUST|lance_thrust_dmgtype(uwep, &youmonst, mdef));
+				return TRUE;
 			}
 		break;
 		case VACUUM:
@@ -26203,7 +26739,7 @@ perform_monk_move(int moveID, int *move_cost)
 				return pole_cyclone();
 			if(circle_monk_target(!!uwep)){
 				pline("%s!", move_name(moveID));
-				cyclone_slash_monsters(TRUE);
+				cyclone_slash_monsters(TRUE, kendo_moveset() || ritual_moveset());
 				return TRUE;
 			}
 		break;
@@ -26232,9 +26768,307 @@ perform_monk_move(int moveID, int *move_cost)
 		break;
 		case SHOVE:
 			if(!u.uswallow && (mdef = adjacent_move_target(!!uwep))){
-				pline("%s!", move_name(moveID));
 				boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
-				xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE, ATTKFLAG_SHOVE);
+				if(ritual_moveset() && ritual_sword_target(uwep, mdef)){
+					pline("%s!", move_name(LANCE_T));
+					xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE, ATTKFLAG_FORCE_CHECK_JOUST|ATTKFLAG_WHACK|ATTKFLAG_PIERCE);
+					return TRUE;
+				}
+				pline("%s!", move_name(moveID));
+				xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE, ATTKFLAG_SHOVE|ATTKFLAG_WHACK);
+				return TRUE;
+			}
+		break;
+		case QUICK_T:
+			if((mdef = adjacent_move_target(!!uwep))){
+				boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+				pline("%s!", move_name(moveID));
+				xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE, ATTKFLAG_HALF_DAMAGE|lance_thrust_dmgtype(uwep, &youmonst, mdef));
+				return TRUE;
+			}
+		break;
+		case FLICKER_F:
+			if((mdef = adjacent_move_target(!!uwep))){
+				boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+				pline("%s!", move_name(moveID));
+				set_six_element_channel(uwep, SIXEL_FIRE|SIXEL_FIRE_2);
+				for(int i = 0; i < 3 && STILLVALID(mdef); i++)
+					xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE, ATTKFLAG_HALF_DAMAGE);
+				return TRUE;
+			}
+		break;
+		case EARTH_AVAL:
+			if(Is_spire(&u.uz)){
+				if((mdef = adjacent_move_target(!!uwep))){
+					boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+					pline("%s!", move_name(moveID));
+					xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE, 0);
+					return TRUE;
+				}
+			}
+			else if(beam_monk_target(3) || boulder_fill_target(3)){
+				struct obj *boulder;
+				pline("%s!", move_name(moveID));
+				set_six_element_channel(uwep, SIXEL_EARTH);
+				boulder = mksobj(BOULDER, MKOBJ_NOINIT);
+				add_ox(boulder, OX_ESUM);
+				boulder->oextra_p->esum_p->summoner = (struct monst *)0;
+				boulder->oextra_p->esum_p->sm_id = 0;
+				boulder->oextra_p->esum_p->sm_o_id = 0;
+				boulder->oextra_p->esum_p->summonstr = 0;
+				boulder->oextra_p->esum_p->sticky = 0;
+				boulder->oextra_p->esum_p->permanent = 0;
+				boulder->oextra_p->esum_p->staleptr = 0;
+				start_timer(1, TIMER_OBJECT, DESUMMON_OBJ, (genericptr_t)boulder);
+				projectile(&youmonst, boulder, (void *)0, HMON_PROJECTILE|HMON_FIRED, u.ux, u.uy, u.dx, u.dy, 0, 3, FALSE, FALSE, FALSE);
+				return TRUE;
+			}
+		break;
+		case SPLIT_STRK:
+			if((mdef = adjacent_move_target(!!uwep))){
+				boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+				pline("%s!", move_name(moveID));
+				set_six_element_channel(uwep, SIXEL_METAL|SIXEL_AXE);
+				if(is_wooden(mdef->data) && !Is_spire(&u.uz))
+					mdef->mhp = max(1, mdef->mhp - u.ulevel);
+				xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE, ATTKFLAG_DOUBLE_DAMAGE);
+				return TRUE;
+			}
+		break;
+		case LIGHTNING_K:
+			if((mdef = adjacent_move_target(!!uwep))){
+				boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+				pline("%s!", move_name(moveID));
+				set_six_element_channel(uwep, SIXEL_WOOD|SIXEL_ELEC);
+				xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE, is_stone(mdef->data) ? (ATTKFLAG_DOUBLE_DAMAGE|ATTKFLAG_BYPASS_RESIST) : 0);
+				if(!Is_spire(&u.uz) && !DEADMONSTER(mdef) && !MIGRATINGMONSTER(mdef))
+					kensei_lightning_strike(mdef);
+				return TRUE;
+			}
+			if((!(uswapwep && u.twoweap) || is_monk_weapon(uswapwep))
+				&& !Is_spire(&u.uz)
+				&& beam_monk_target(monk_aura_range())
+			){
+				pline("%s!", move_name(moveID));
+				set_six_element_channel(uwep, SIXEL_WOOD|SIXEL_ELEC);
+				monk_aura_bolt(AD_ELEC);
+				return TRUE;
+			}
+		break;
+		case FALLING_SKY:
+			if((mdef = adjacent_move_target(!!uwep))){
+				boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+				boolean bones = six_element_channel(uwep->oartifact, SIXEL_EARTH) && !Is_spire(&u.uz);
+				int tx = u.ux + u.dx, ty = u.uy + u.dy;
+				pline("%s!", move_name(moveID));
+				set_six_element_channel(uwep, SIXEL_METAL);
+				xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE, ATTKFLAG_DOUBLE_DAMAGE);
+				if(bones && !u.uswallow && m_at(tx, ty) == mdef && !DEADMONSTER(mdef) && ZAP_POS(levl[tx][ty].typ) && !undiggable_floor(tx, ty)){
+					struct obj *boulder;
+					digfarhole(TRUE, tx, ty, TRUE);
+					boulder = mksobj(BOULDER, MKOBJ_NOINIT);
+					projectile(&youmonst, boulder, (void *)0, HMON_PROJECTILE|HMON_FIRED, u.ux, u.uy, u.dx, u.dy, 0, 1, FALSE, FALSE, FALSE);
+				}
+				return TRUE;
+			}
+		break;
+		case WAVE:
+			if(six_element_channel(uwep->oartifact, SIXEL_METAL) && !u.uswallow && !Is_spire(&u.uz)){
+				int i, range, tx, ty;
+				boolean found = FALSE;
+				for(range = 0; range < 3; range++){
+					tx = u.ux + (range+1)*u.dx;
+					ty = u.uy + (range+1)*u.dy;
+					if(!isok(tx, ty))
+						break;
+					if((mdef = m_at(tx, ty)) && !nonthreat_ful(mdef))
+						found = TRUE;
+					if(!ZAP_POS(levl[tx][ty].typ) || closed_door(tx, ty)){
+						range++;
+						break;
+					}
+				}
+				if(found){
+					pline("%s!", move_name(moveID));
+					set_six_element_channel(uwep, SIXEL_WATER);
+					for(i = 0; i < range; i++){
+						mdef = m_at(u.ux + (i+1)*u.dx, u.uy + (i+1)*u.dy);
+						if(mdef && !nonthreat_ful(mdef) && !DEADMONSTER(mdef))
+							six_element_wave(mdef, 6, TRUE);
+					}
+					return TRUE;
+				}
+				break;
+			}
+			if((mdef = adjacent_move_target(!!uwep))){
+				boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+				pline("%s!", move_name(moveID));
+				if(Is_spire(&u.uz)){
+					xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE, 0);
+					return TRUE;
+				}
+				set_six_element_channel(uwep, SIXEL_WATER);
+				/* Typhoon inside an engulfer strikes only the engulfer */
+				six_element_wave(mdef, 6, u.uswallow && six_element_channel(uwep->oartifact, SIXEL_METAL));
+				return TRUE;
+			}
+		break;
+		case IMPALE:
+			if(six_element_channel(uwep->oartifact, SIXEL_WATER) && !u.uswallow && !Is_spire(&u.uz)){
+				int i, range, tx, ty;
+				boolean found = FALSE;
+				for(range = 0; range < 2; range++){
+					tx = u.ux + (range+1)*u.dx;
+					ty = u.uy + (range+1)*u.dy;
+					if(!isok(tx, ty))
+						break;
+					if((mdef = m_at(tx, ty)) && !nonthreat_ful(mdef))
+						found = TRUE;
+					if(!ZAP_POS(levl[tx][ty].typ) || closed_door(tx, ty)){
+						range++;
+						break;
+					}
+				}
+				if(found){
+					pline("%s!", move_name(moveID));
+					set_six_element_channel(uwep, SIXEL_WOOD|SIXEL_LONG);
+					for(i = range-1; i >= 0 && uwep; i--){
+						mdef = m_at(u.ux + (i+1)*u.dx, u.uy + (i+1)*u.dy);
+						if(!mdef || nonthreat_ful(mdef) || DEADMONSTER(mdef))
+							continue;
+						boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+						xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, i > 0, ATTKFLAG_FORCE_CHECK_JOUST|ATTKFLAG_PIERCE|(is_stone(mdef->data) ? ATTKFLAG_BYPASS_RESIST : 0));
+					}
+					return TRUE;
+				}
+				break;
+			}
+			if((mdef = adjacent_move_target(!!uwep))){
+				boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+				pline("%s!", move_name(moveID));
+				/* Overgrowth inside an engulfer is a single attack, but still sets LONG */
+				set_six_element_channel(uwep, (u.uswallow && six_element_channel(uwep->oartifact, SIXEL_WATER)) ? (SIXEL_WOOD|SIXEL_LONG) : SIXEL_WOOD);
+				xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE, ATTKFLAG_FORCE_CHECK_JOUST|ATTKFLAG_PIERCE|(is_stone(mdef->data) ? ATTKFLAG_BYPASS_RESIST : 0));
+				return TRUE;
+			}
+			/* while long, Impale reaches one square further if there's no adjacent target */
+			if(six_element_channel(uwep->oartifact, SIXEL_LONG) && !u.uswallow
+				&& isok(u.ux+2*u.dx, u.uy+2*u.dy)
+				&& ZAP_POS(levl[u.ux+u.dx][u.uy+u.dy].typ) && !closed_door(u.ux+u.dx, u.uy+u.dy)
+				&& (mdef = m_at(u.ux+2*u.dx, u.uy+2*u.dy)) && !nonthreat_ful(mdef)
+			){
+				boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+				pline("%s!", move_name(moveID));
+				set_six_element_channel(uwep, SIXEL_WOOD);
+				xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, TRUE, ATTKFLAG_FORCE_CHECK_JOUST|ATTKFLAG_PIERCE|(is_stone(mdef->data) ? ATTKFLAG_BYPASS_RESIST : 0));
+				return TRUE;
+			}
+			/* while electrified, Impale with no target shoots a 2-square lightning aura bolt from just past the spear's reach */
+			if(six_element_channel(uwep->oartifact, SIXEL_ELEC) && !u.uswallow && !Is_spire(&u.uz)
+				&& (!(uswapwep && u.twoweap) || is_monk_weapon(uswapwep))
+			){
+				int start = six_element_channel(uwep->oartifact, SIXEL_LONG) ? 3 : 2;
+				if(beam_monk_target_from(start, 2)){
+					pline("%s!", move_name(moveID));
+					set_six_element_channel(uwep, SIXEL_WOOD);
+					monk_aura_bolt_from(start, 2, AD_ELEC);
+					return TRUE;
+				}
+			}
+		break;
+		case INFERNO:
+			if(circle_monk_target(!!uwep)){
+				struct zapdata zapdat = { 0 };
+				boolean raging = six_element_channel(uwep->oartifact, SIXEL_WOOD);
+				pline("%s!", move_name(moveID));
+				if(Is_spire(&u.uz)){
+					cyclone_slash_monsters(TRUE, TRUE);
+					return TRUE;
+				}
+				set_six_element_channel(uwep, SIXEL_FIRE|SIXEL_FIRE_1|(raging ? SIXEL_RAGING : 0L));
+				monk_aura_zapdata(&zapdat, AD_FIRE);
+				zapdat.damd += 6;
+				zapdat.damn += raging ? 2 : 1;
+				if(u.uswallow){
+					engulfer_burst(AD_FIRE, zapdamage(&youmonst, (struct monst *)0, &zapdat));
+					return TRUE;
+				}
+				explode_full_threats(u.ux, u.uy, AD_FIRE, 0, zapdamage(&youmonst, (struct monst *)0, &zapdat),
+					adtyp_expl_color(AD_FIRE), raging ? 2 : 1, 0, TRUE, (struct permonst *)0, 0L);
+				return TRUE;
+			}
+		break;
+		case ICE_STORM_K:
+			if(circle_monk_target(!!uwep)){
+				struct zapdata zapdat = { 0 };
+				pline("%s!", move_name(moveID));
+				if(Is_spire(&u.uz)){
+					cyclone_slash_monsters(TRUE, TRUE);
+					return TRUE;
+				}
+				set_six_element_channel(uwep, SIXEL_WATER|SIXEL_ICE);
+				monk_aura_zapdata(&zapdat, AD_COLD);
+				zapdat.damd += 6;
+				zapdat.damn += 1;
+				if(u.uswallow){
+					engulfer_burst(AD_COLD, zapdamage(&youmonst, (struct monst *)0, &zapdat));
+					return TRUE;
+				}
+				explode_full_threats(u.ux, u.uy, AD_COLD, 0, zapdamage(&youmonst, (struct monst *)0, &zapdat),
+					adtyp_expl_color(AD_COLD), 1, 0, TRUE, (struct permonst *)0, 0L);
+				return TRUE;
+			}
+		break;
+		case REACH_FLAME:
+			if((!(uswapwep && u.twoweap) || is_monk_weapon(uswapwep))
+				&& !Is_spire(&u.uz)
+				&& beam_monk_target(monk_aura_range())
+			){
+				pline("%s!", move_name(moveID));
+				set_six_element_channel(uwep, SIXEL_FIRE|SIXEL_FIRE_3);
+				monk_aura_bolt(AD_FIRE);
+				return TRUE;
+			}
+		break;
+		case GROW_SHOOT:
+			if(!six_element_channel(uwep->oartifact, SIXEL_LONG)){
+				if((mdef = adjacent_move_target(!!uwep))){
+					boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+					pline("%s!", move_name(moveID));
+					set_six_element_channel(uwep, SIXEL_WOOD|SIXEL_LONG);
+					xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE, ATTKFLAG_FORCE_CHECK_JOUST|ATTKFLAG_PIERCE|(is_stone(mdef->data) ? ATTKFLAG_BYPASS_RESIST : 0));
+					return TRUE;
+				}
+				break;
+			}
+			if(!u.uswallow && (mdef = adjacent_move_target(!!uwep))){
+				boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+				pline("%s!", move_name(moveID));
+				set_six_element_channel(uwep, SIXEL_WOOD);
+				xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE, ATTKFLAG_SHOVE|ATTKFLAG_WHACK);
+				return TRUE;
+			}
+			if(!u.uswallow
+				&& isok(u.ux+2*u.dx, u.uy+2*u.dy)
+				&& ZAP_POS(levl[u.ux+u.dx][u.uy+u.dy].typ) && !closed_door(u.ux+u.dx, u.uy+u.dy)
+				&& (mdef = m_at(u.ux+2*u.dx, u.uy+2*u.dy)) && !nonthreat_ful(mdef)
+			){
+				boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+				int tx = u.ux+2*u.dx, ty = u.uy+2*u.dy;
+				pline("%s!", move_name(moveID));
+				set_six_element_channel(uwep, SIXEL_WOOD);
+				for(int i = 0; i < 2 && uwep && !DEADMONSTER(mdef) && m_at(tx, ty) == mdef; i++)
+					xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, TRUE, ATTKFLAG_HALF_DAMAGE);
+				return TRUE;
+			}
+		break;
+		case LAY_REST:
+			if((mdef = adjacent_move_target(!!uwep)) && kensei_turn_target(mdef)){
+				boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+				pline("%s!", move_name(moveID));
+				xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE, 0);
+				if(!Is_spire(&u.uz))
+					kensei_turn_effect();
 				return TRUE;
 			}
 		break;
@@ -26305,7 +27139,8 @@ perform_monk_move(int moveID, int *move_cost)
 			if((mdef = adjacent_move_target(!!uwep))){
 				pline("%s!", move_name(moveID));
 				boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
-				xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE, (u.role_variant == ART_ANGUIREL && uwep && uwep->obj_material == OBSIDIAN_MT) ? ATTKFLAG_FORCE_BLEED|ATTKFLAG_DOUBLE_DAMAGE : ATTKFLAG_DOUBLE_DAMAGE);
+				xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE, ((u.role_variant == ART_ANGUIREL && uwep && uwep->obj_material == OBSIDIAN_MT) ? ATTKFLAG_FORCE_BLEED|ATTKFLAG_DOUBLE_DAMAGE : ATTKFLAG_DOUBLE_DAMAGE)
+					| edge_strike_dmgtype(uwep, &youmonst, mdef));
 				return TRUE;
 			}
 		break;
@@ -26369,6 +27204,14 @@ perform_monk_move(int moveID, int *move_cost)
 			if(circle_monk_target(TRUE)){
 				pline("%s!", move_name(moveID));
 				u.upray_mantis = 1;
+				return TRUE;
+			}
+		break;
+		case RECEPT_F:
+			if(!Is_spire(&u.uz) && circle_monk_target(TRUE)){
+				pline("%s!", move_name(moveID));
+				u.ureceptive_field = 1;
+				set_six_element_channel(uwep, SIXEL_EARTH|SIXEL_FIELD);
 				return TRUE;
 			}
 		break;
@@ -26602,12 +27445,13 @@ perform_monk_move(int moveID, int *move_cost)
 				boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
 				pline("%s!", move_name(moveID));
 				long one = FALSE, two = FALSE;
+				long edge_flags = edge_strike_dmgtype(uwep, &youmonst, mdef);
 				
-				one = xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE, 0);
+				one = xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE, edge_flags);
 				if(one&(MM_AGR_STOP|MM_DEF_DIED))
 					return one&(MM_HIT|MM_DEF_DIED) ? TRUE : FALSE;
 				
-				two = xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE, 0);
+				two = xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE, edge_flags);
 
 				if(two&(MM_AGR_STOP|MM_DEF_DIED))
 					return (one&(MM_HIT|MM_DEF_DIED) || two&(MM_HIT|MM_DEF_DIED)) ? TRUE : FALSE;
@@ -26794,6 +27638,14 @@ int
 forward_move()
 {
 	if(Role_if(PM_KENSEI)){
+		if(six_element_moveset() && six_element_channel(uwep->oartifact, SIXEL_WOOD))
+			return QUICK_T;
+		if(ritual_moveset() || six_element_moveset())
+			return SHOVE;
+		if(u.role_variant == ART_ANCIENT_RITUAL_SWORD && !uwep)
+			return SHOVE;
+		if(kendo_moveset())
+			return THROW;
 		if(uwep && is_kensei_weapon(uwep)){
 			if(u.role_variant == ART_SKY_REFLECTED
 				&& (uwep->oartifact == ART_SKY_REFLECTED || uwep->oartifact == ART_AMALGAMATED_SKIES)
@@ -26856,6 +27708,19 @@ int
 bent_move()
 {
 	if(Role_if(PM_KENSEI)){
+		if(six_element_moveset()){
+			if(six_element_channel(uwep->oartifact, SIXEL_EARTH))
+				return EARTH_AVAL;
+			if(six_element_channel(uwep->oartifact, SIXEL_FIRE))
+				return REACH_FLAME;
+			return IMPALE;
+		}
+		if(kendo_moveset())
+			return LANCE_T;
+		if(ritual_moveset())
+			return AURA_BOLT;
+		if(u.role_variant == ART_ANCIENT_RITUAL_SWORD && !uwep)
+			return THROW;
 		if(uwep && is_kensei_weapon(uwep)){
 			if(is_lightsaber(uwep) && !litsaber(uwep))
 				return DRAIN_L;
@@ -26892,6 +27757,15 @@ int
 hook_move()
 {
 	if(Role_if(PM_KENSEI)){
+		if(six_element_moveset()){
+			if(six_element_channel(uwep->oartifact, SIXEL_METAL))
+				return SPLIT_STRK;
+			if(six_element_channel(uwep->oartifact, SIXEL_EARTH))
+				return RECEPT_F;
+			return INFERNO;
+		}
+		if(kendo_moveset() || ritual_moveset())
+			return CYCLONE;
 		if(!(uwep && is_kensei_weapon(uwep)))
 			return STRONG_P;
 		if(is_lightsaber(uwep) && !litsaber(uwep))
@@ -26959,6 +27833,21 @@ int
 uturn_move()
 {
 	if(Role_if(PM_KENSEI)){
+		if(six_element_moveset()){
+			if(six_element_channel(uwep->oartifact, SIXEL_WOOD))
+				return LIGHTNING_K;
+			if(six_element_channel(uwep->oartifact, SIXEL_WATER))
+				return ICE_STORM_K;
+			return FALLING_SKY;
+		}
+		if(kendo_moveset())
+			return CROSS;
+		if(ritual_moveset())
+			return LAY_REST;
+		if(u.role_variant == ART_ANCIENT_RITUAL_SWORD && uwep && uwep->otyp == PANXIN_JIAN)
+			return CROSS;
+		if(u.role_variant == ART_ANCIENT_RITUAL_SWORD && !uwep)
+			return STRONG_P;
 		//Weapon-specific
 		if(uwep && is_kensei_weapon(uwep) && uwep->oartifact == ART_ANSERMEE)
 			return INFLICT;
@@ -27014,6 +27903,15 @@ int
 alternated_move()
 {
 	if(Role_if(PM_KENSEI)){
+		if(six_element_moveset()){
+			if(six_element_channel(uwep->oartifact, SIXEL_FIRE))
+				return FLICKER_F;
+			if(six_element_channel(uwep->oartifact, SIXEL_WOOD))
+				return GROW_SHOOT;
+			return WAVE;
+		}
+		if(kendo_moveset())
+			return RISING_B;
 		if(!(uwep && is_kensei_weapon(uwep)))
 			return Race_if(PM_INCANTIFIER) ? DRAIN_L : PUMMEL;
 		if(u.role_variant == ART_SUN_S_BOW)
@@ -27090,7 +27988,7 @@ dancing_sword_cyclone(struct monst *mtmp)
 		if(!attacked)
 			dancing_sword_announce(mtmp, "cyclone slash");
 		attacked = TRUE;
-		res = xmeleehity(mtmp, mdef, &weaponhit, &mwep, getvis(mtmp, mdef, 0, 0), 0, FALSE, 0);
+		res = xmeleehity(mtmp, mdef, &weaponhit, &mwep, getvis(mtmp, mdef, 0, 0), 0, FALSE, edge_strike_dmgtype(mwep, mtmp, mdef));
 		if((res&(MM_AGR_DIED|MM_AGR_STOP)) || DEADMONSTER(mtmp) || MIGRATINGMONSTER(mtmp) || !(mwep = MON_WEP(mtmp)))
 			break;
 	}
@@ -27118,7 +28016,7 @@ dancing_sword_millwheel(struct monst *mtmp, int dx, int dy)
 		if(!attacked)
 			dancing_sword_announce(mtmp, "millwheel strike");
 		attacked = TRUE;
-		res = xmeleehity(mtmp, mdef, &weaponhit, &mwep, getvis(mtmp, mdef, 0, 0), 0, FALSE, 0);
+		res = xmeleehity(mtmp, mdef, &weaponhit, &mwep, getvis(mtmp, mdef, 0, 0), 0, FALSE, edge_strike_dmgtype(mwep, mtmp, mdef));
 		if((res&(MM_AGR_DIED|MM_AGR_STOP)) || DEADMONSTER(mtmp) || MIGRATINGMONSTER(mtmp) || !(mwep = MON_WEP(mtmp)))
 			break;
 	}
@@ -27154,10 +28052,10 @@ dancing_sword_cross_slash(struct monst *mtmp, int dx, int dy)
 		return FALSE;
 	vis = getvis(mtmp, mdef, 0, 0);
 	dancing_sword_announce(mtmp, "cross slash");
-	one = xmeleehity(mtmp, mdef, &weaponhit, &mwep, vis, 0, FALSE, 0);
+	one = xmeleehity(mtmp, mdef, &weaponhit, &mwep, vis, 0, FALSE, edge_strike_dmgtype(mwep, mtmp, mdef));
 	if((one&(MM_AGR_DIED|MM_AGR_STOP|MM_DEF_DIED)) || DEADMONSTER(mtmp) || MIGRATINGMONSTER(mtmp) || !(mwep = MON_WEP(mtmp)))
 		return TRUE;
-	two = xmeleehity(mtmp, mdef, &weaponhit, &mwep, vis, 0, FALSE, 0);
+	two = xmeleehity(mtmp, mdef, &weaponhit, &mwep, vis, 0, FALSE, edge_strike_dmgtype(mwep, mtmp, mdef));
 	if((two&(MM_AGR_DIED|MM_AGR_STOP|MM_DEF_DIED)) || DEADMONSTER(mtmp) || MIGRATINGMONSTER(mtmp))
 		return TRUE;
 	if(((one|two)&MM_HIT) && !DEADMONSTER(mdef) && !MIGRATINGMONSTER(mdef) && MON_WEP(mdef)){
@@ -27219,7 +28117,8 @@ dancing_sword_lance_thrust(struct monst *mtmp, int dx, int dy)
 		return FALSE;
 	weaponhit = wielded_weapon_attack(mtmp, mwep);
 	dancing_sword_announce(mtmp, "lance thrust");
-	(void)xmeleehity(mtmp, mdef, &weaponhit, &mwep, getvis(mtmp, mdef, 0, 0), 0, FALSE, ATTKFLAG_FORCE_CHECK_JOUST);
+	(void)xmeleehity(mtmp, mdef, &weaponhit, &mwep, getvis(mtmp, mdef, 0, 0), 0, FALSE, ATTKFLAG_FORCE_CHECK_JOUST
+		| (mwep->oartifact == ART_CUTTING_WISDOM ? ATTKFLAG_SLASH|ATTKFLAG_PIERCE : lance_thrust_dmgtype(mwep, mtmp, mdef)));
 	return TRUE;
 }
 
@@ -27325,35 +28224,14 @@ restart:
 	}
 }
 
-/* check_monk_move()
- *
- * Based on prev_dir and current u.dx/dy, determine which monk move (if any) should happen.
- * Tame dancing swords also perform their own moves for the movement pattern.
- *
- * Returns the move ID or 0 if no ID can be chosen.
+/* Returns the move type (FORWARD_MOVE etc.) for a movement in direction dx2/dy2 following a movement in direction dx1/dy1,
+ * or 0 if the pair matches no move type. Both directions must be nonzero.
  */
-int
-check_monk_move(void)
+STATIC_OVL int
+monk_move_type(int dx1, int dy1, int dx2, int dy2)
 {
 	int i;
 	int move_type = 0;
-	int dx1 = u.prev_dir.x;
-	int dy1 = u.prev_dir.y;
-	int dx2 = u.dx;
-	int dy2 = u.dy;
-	if(!dx2 && !dy2){
-		extern coord save_d;
-		dx2 = save_d.x;
-		dy2 = save_d.y;
-	}
-	int last_dx = dx2;
-	int last_dy = dy2;
-	//If there haven't been two inputs for some reason, return false.
-	if(!(dx1 || dy1) || !(dx2 || dy2))
-		return 0;
-	//Did a move last turn
-	if(u.did_move)
-		return 0;
 	///Adjust first vector to first quadrent (favoring up over right)
 	//Reflect over y axis
 	if(dx1 < 0){
@@ -27428,8 +28306,40 @@ check_monk_move(void)
 		else if(dx2 == 0 && dy2 == -1)
 			move_type = ALTERNATED_MOVE;
 	}
+	return move_type;
+}
+
+/* check_monk_move()
+ *
+ * Based on prev_dir and current u.dx/dy, determine which monk move (if any) should happen.
+ * Tame dancing swords also perform their own moves for the movement pattern.
+ *
+ * Returns the move ID or 0 if no ID can be chosen.
+ */
+int
+check_monk_move(void)
+{
+	int move_type = 0;
+	int dx1 = u.prev_dir.x;
+	int dy1 = u.prev_dir.y;
+	int dx2 = u.dx;
+	int dy2 = u.dy;
+	if(!dx2 && !dy2){
+		extern coord save_d;
+		dx2 = save_d.x;
+		dy2 = save_d.y;
+	}
+	int last_dx = dx2;
+	int last_dy = dy2;
+	//If there haven't been two inputs for some reason, return false.
+	if(!(dx1 || dy1) || !(dx2 || dy2))
+		return 0;
+	//Did a move last turn
+	if(u.did_move)
+		return 0;
+	move_type = monk_move_type(dx1, dy1, dx2, dy2);
 	if(!move_type){
-		impossible("Unhandled move inputs (%d, %d)to(%d, %d), (%d, %d)to(%d, %d)", u.prev_dir.x, u.prev_dir.y, u.dx, u.dy, dx1, dy1, dx2, dy2);
+		impossible("Unhandled move inputs (%d, %d)to(%d, %d)", dx1, dy1, dx2, dy2);
 		return 0;
 	}
 	if(Role_if(PM_KENSEI) && uwep && !is_kensei_weapon(uwep))
@@ -27454,6 +28364,492 @@ check_monk_move(void)
 	}
 	dancing_sword_moves(move_type, last_dx, last_dy);
 	return result;
+}
+
+/* Returns Bleeding Void if it is inside [sheath], or null. */
+STATIC_OVL struct obj *
+sheathed_bleeding_void(struct obj *sheath)
+{
+	struct obj *otmp;
+
+	for(otmp = sheath->cobj; otmp; otmp = otmp->nobj)
+		if(otmp->oartifact == ART_BLEEDING_VOID)
+			return otmp;
+	return (struct obj *)0;
+}
+
+/* Returns the fully identified Bleeding Void inside a Six-Element Sword in the hero's main inventory (or drawn there), or null. */
+struct obj *
+inventory_bleeding_void(void)
+{
+	struct obj *otmp, *jian;
+
+	for(otmp = invent; otmp; otmp = otmp->nobj){
+		jian = (otmp->oartifact == ART_SIX_ELEMENT_SWORD) ? sheathed_bleeding_void(otmp)
+			: (otmp->oartifact == ART_BLEEDING_VOID) ? otmp : (struct obj *)0;
+		if(jian && !not_fully_identified(jian))
+			return jian;
+	}
+	return (struct obj *)0;
+}
+
+/* Returns the drawn Bleeding Void (one holding the Six-Element Sword) if it is in [chain] or inside an object in [chain], or null. */
+STATIC_OVL struct obj *
+drawn_bleeding_void_in(struct obj *chain)
+{
+	struct obj *otmp, *found;
+
+	for(otmp = chain; otmp; otmp = otmp->nobj){
+		if(otmp->oartifact == ART_BLEEDING_VOID && otmp->cobj)
+			return otmp;
+		if(otmp->cobj && (found = drawn_bleeding_void_in(otmp->cobj)))
+			return found;
+	}
+	return (struct obj *)0;
+}
+
+/* Silently draws Bleeding Void from the wielded Six-Element Sword and wields it in the sword's place. The sword is carried inside the jian until it is resheathed, and a one-turn REVERT_BLEEDING_VOID timer on the jian resheaths it if nothing else does. */
+STATIC_OVL void
+draw_bleeding_void(void)
+{
+	struct obj *sheath = uwep;
+	struct obj *jian = sheathed_bleeding_void(sheath);
+
+	obj_extract_self(jian);
+	fix_object(sheath);
+	if(!not_fully_identified(sheath))
+		fully_identify_obj(jian);
+	jian->invlet = sheath->invlet;
+	setuwep((struct obj *)0);
+	obj_extract_self(sheath);
+	jian = addinv(jian);
+	setuwep(jian);
+	(void) add_to_container(jian, sheath);
+	start_timer(1L, TIMER_OBJECT, REVERT_BLEEDING_VOID, (genericptr_t)jian);
+	update_inventory();
+}
+
+/* Silently returns a drawn Bleeding Void [jian] to the Six-Element Sword it holds, putting the sword where the jian was (in the same weapon slot, if the hero had it in one). Returns FALSE, doing nothing, if [jian] is somewhere this can't be done (such as buried or in transit); otherwise TRUE, including when [jian] holds no sword. */
+STATIC_OVL boolean
+resheath_jian(struct obj *jian)
+{
+	struct obj *sheath = jian->cobj;
+	struct monst *mon;
+	long slot;
+
+	if(!sheath || sheath->oartifact != ART_SIX_ELEMENT_SWORD)
+		return TRUE;
+	switch(jian->where){
+		case OBJ_INVENT:
+			slot = jian->owornmask & (W_WEP|W_SWAPWEP|W_QUIVER);
+			obj_extract_self(sheath);
+			sheath->invlet = jian->invlet;
+			obj_extract_and_unequip_self(jian);
+			sheath = addinv(sheath);
+			(void) add_to_container(sheath, jian);
+			if(slot & W_WEP)
+				setuwep(sheath);
+			else if(slot & W_SWAPWEP)
+				setuswapwep(sheath);
+			else if(slot & W_QUIVER)
+				setuqwep(sheath);
+			update_inventory();
+		break;
+		case OBJ_MINVENT:
+			mon = jian->ocarry;
+			obj_extract_self(sheath);
+			obj_extract_and_unequip_self(jian);
+			(void) mpickobj(mon, sheath);
+			(void) add_to_container(sheath, jian);
+			mon->weapon_check = NEED_WEAPON;
+		break;
+		case OBJ_FLOOR:
+		case OBJ_CONTAINED:
+			obj_extract_self(sheath);
+			replace_object(jian, sheath);
+			jian->where = OBJ_FREE;
+			(void) add_to_container(sheath, jian);
+			if(sheath->where == OBJ_CONTAINED)
+				container_weight(sheath->ocontainer);
+			else
+				newsym(sheath->ox, sheath->oy);
+		break;
+		default:
+			return FALSE;
+	}
+	fix_object(sheath);
+	if(jian->timed)
+		(void) stop_timer(REVERT_BLEEDING_VOID, jian->timed);
+	return TRUE;
+}
+
+/* Silently resheaths the drawn Bleeding Void, if it is in the hero's inventory, on the floor of the current level, or in a monster's inventory there (including inside containers in any of those). */
+void
+resheath_bleeding_void(void)
+{
+	struct obj *jian;
+	struct monst *mon;
+
+	jian = drawn_bleeding_void_in(invent);
+	if(!jian)
+		jian = drawn_bleeding_void_in(fobj);
+	for(mon = fmon; mon && !jian; mon = mon->nmon)
+		jian = drawn_bleeding_void_in(mon->minvent);
+	if(jian)
+		(void) resheath_jian(jian);
+}
+
+/* REVERT_BLEEDING_VOID timer for the drawn Bleeding Void [arg]: resheaths it, or tries again next turn if it can't be resheathed where it is. */
+void
+revert_bleeding_void(genericptr_t arg, long timeout)
+{
+	struct obj *jian = (struct obj *)arg;
+
+	if(!resheath_jian(jian))
+		start_timer(1L, TIMER_OBJECT, REVERT_BLEEDING_VOID, arg);
+}
+
+/* Sever name: two cancelling attacks on the adjacent target in direction u.dx/u.dy. Returns FALSE (doing nothing) if there is no target. */
+STATIC_OVL boolean
+bleeding_void_sever_name(void)
+{
+	struct monst *mdef;
+	struct attack weaponhit;
+	boolean vis;
+	long result;
+	int i, hits = 0, prevhp, totaldmg = 0;
+
+	if(!(mdef = adjacent_move_target(TRUE)))
+		return FALSE;
+	draw_bleeding_void();
+	pline("Sever name!");
+	weaponhit = wielded_weapon_attack(&youmonst, uwep);
+	vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+	for(i = 0; i < 2 && uwep && STILLVALID(mdef); i++){
+		prevhp = mdef->mhp;
+		result = xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE, 0);
+		if(result&(MM_AGR_DIED|MM_AGR_STOP))
+			break;
+		totaldmg += (result&MM_DEF_LSVD) ? prevhp : max(0, prevhp - mdef->mhp);
+		if(result&MM_HIT){
+			hits++;
+			if(!DEADMONSTER(mdef) && !(result&MM_DEF_DIED))
+				cancel_monst(mdef, uwep, TRUE, FALSE, FALSE, 0);
+		}
+	}
+	if(hits == 2 && STILLVALID(mdef)){
+		if(!mdef->mcan)
+			cancel_monst(mdef, uwep, TRUE, FALSE, FALSE, 0);
+		mdef->mstdy += totaldmg;
+		if(!unmaking_pain_immune(mdef))
+			unmaking_scream(mdef, min(MAX_BONUS_DICE, u.ulevel/3 + 1));
+		if(!is_great_old_one(mdef->data)){
+			mdef->owrk = max(mdef->owrk, 4);
+			mdef->ruh = max(mdef->ruh, 4);
+			mdef->shey = max(mdef->shey, 4);
+			mdef->luahv = max(mdef->luahv, 4);
+			mdef->nean = max(mdef->nean, 4);
+			mdef->nooh = max(mdef->nooh, 4);
+			unmaking_drain(&youmonst, mdef);
+		}
+	}
+	resheath_bleeding_void();
+	return TRUE;
+}
+
+STATIC_OVL struct monst *
+bleeding_void_target_at(int x, int y)
+{
+	struct monst *mon;
+
+	if(!isok(x, y) || !(mon = m_at(x, y)))
+		return (struct monst *)0;
+	if((touch_petrifies(mon->data) || mon->mtyp == PM_MEDUSA) && !(Stone_resistance || uwep))
+		return (struct monst *)0;
+	return peace_check_move(mon) ? mon : (struct monst *)0;
+}
+
+/* Void wind: a full-circle sweep attacking every target within two squares (or the engulfer, if the hero is engulfed). Returns FALSE (doing nothing) if there is no target, or if the hero is engulfed by a non-whirly monster. */
+STATIC_OVL boolean
+bleeding_void_void_wind(void)
+{
+	struct monst *mon;
+	struct attack weaponhit;
+	boolean inner_done[3][3] = {{FALSE}};
+	boolean found = FALSE;
+	boolean vis;
+	long result;
+	int i, j, k, ix, iy;
+
+	if(u.uswallow)
+		found = is_whirly(u.ustuck->data);
+	else for(k = 0; k < SIZE(distance_2_rotation_dx) && !found; k++){
+		if(bleeding_void_target_at(u.ux + distance_2_rotation_dx[k], u.uy + distance_2_rotation_dy[k])
+			|| bleeding_void_target_at(u.ux + distance_2_rotation_dx[k]/2, u.uy + distance_2_rotation_dy[k]/2)
+		)
+			found = TRUE;
+	}
+	if(!found)
+		return FALSE;
+	draw_bleeding_void();
+	pline("Void wind!");
+	weaponhit = wielded_weapon_attack(&youmonst, uwep);
+	//locate facing
+	for(i = 0; i < SIZE(distance_2_rotation_dx); i++){
+		if(distance_2_rotation_dx[i] == 2*u.dx && distance_2_rotation_dy[i] == 2*u.dy)
+			break;
+	}
+	for(j = 0; j < SIZE(distance_2_rotation_dx) && uwep; j++){
+		k = (i+j)%SIZE(distance_2_rotation_dx);
+		/* the adjacent square the sweep passes over (each is struck only once) */
+		ix = u.ux + distance_2_rotation_dx[k]/2;
+		iy = u.uy + distance_2_rotation_dy[k]/2;
+		if(!inner_done[ix-u.ux+1][iy-u.uy+1]){
+			inner_done[ix-u.ux+1][iy-u.uy+1] = TRUE;
+			if((mon = u.uswallow ? u.ustuck : bleeding_void_target_at(ix, iy))){
+				vis = (VIS_MAGR | VIS_NONE) | (canseemon(mon) ? VIS_MDEF : 0);
+				result = xmeleehity(&youmonst, mon, &weaponhit, &uwep, vis, 0, FALSE, 0);
+				if(result&(MM_AGR_DIED|MM_AGR_STOP))
+					break;
+			}
+		}
+		if(uwep && (mon = u.uswallow ? u.ustuck : bleeding_void_target_at(u.ux + distance_2_rotation_dx[k], u.uy + distance_2_rotation_dy[k]))){
+			vis = (VIS_MAGR | VIS_NONE) | (canseemon(mon) ? VIS_MDEF : 0);
+			result = xmeleehity(&youmonst, mon, &weaponhit, &uwep, vis, 0, TRUE, 0);
+			if(result&(MM_AGR_DIED|MM_AGR_STOP))
+				break;
+		}
+	}
+	resheath_bleeding_void();
+	return TRUE;
+}
+
+/* Void cut: attacks every target up to 4 squares away in direction u.dx/u.dy (or the engulfer, if the hero is engulfed). Returns FALSE (doing nothing) if there is no target, or if the hero is engulfed by a non-whirly monster. */
+STATIC_OVL boolean
+bleeding_void_void_cut(void)
+{
+	struct monst *mon;
+	struct attack weaponhit;
+	boolean found = FALSE;
+	boolean vis;
+	long result;
+	int i, range, tx, ty;
+
+	if(u.uswallow){
+		if(!is_whirly(u.ustuck->data))
+			return FALSE;
+		draw_bleeding_void();
+		pline("Void cut!");
+		weaponhit = wielded_weapon_attack(&youmonst, uwep);
+		vis = (VIS_MAGR | VIS_NONE) | (canseemon(u.ustuck) ? VIS_MDEF : 0);
+		xmeleehity(&youmonst, u.ustuck, &weaponhit, &uwep, vis, 0, FALSE, 0);
+		resheath_bleeding_void();
+		return TRUE;
+	}
+	for(range = 0; range < 4; range++){
+		tx = u.ux + (range+1)*u.dx;
+		ty = u.uy + (range+1)*u.dy;
+		if(!isok(tx, ty))
+			break;
+		if(bleeding_void_target_at(tx, ty))
+			found = TRUE;
+		if(!ZAP_POS(levl[tx][ty].typ) || closed_door(tx, ty)){
+			range++;
+			break;
+		}
+	}
+	if(!found)
+		return FALSE;
+	draw_bleeding_void();
+	pline("Void cut!");
+	weaponhit = wielded_weapon_attack(&youmonst, uwep);
+	for(i = 0; i < range && uwep; i++){
+		if(!(mon = bleeding_void_target_at(u.ux + (i+1)*u.dx, u.uy + (i+1)*u.dy)))
+			continue;
+		vis = (VIS_MAGR | VIS_NONE) | (canseemon(mon) ? VIS_MDEF : 0);
+		result = xmeleehity(&youmonst, mon, &weaponhit, &uwep, vis, 0, i > 0, 0);
+		if(result&(MM_AGR_DIED|MM_AGR_STOP))
+			break;
+	}
+	resheath_bleeding_void();
+	return TRUE;
+}
+
+/* Unfolding void: shoves the adjacent target in direction u.dx/u.dy with the Six-Element Sword, then attacks the target beyond it with Bleeding Void (a critical hit on the shoved monster). Returns FALSE (doing nothing) if neither attack has a target, or if the hero is engulfed by a non-whirly monster. */
+STATIC_OVL boolean
+bleeding_void_unfolding_void(void)
+{
+	struct monst *mdef, *shoved = (struct monst *)0;
+	struct attack weaponhit;
+	boolean vis;
+	long result;
+	int fx = u.ux + u.dx, fy = u.uy + u.dy;
+	int nx = u.ux + 2*u.dx, ny = u.uy + 2*u.dy;
+
+	if(u.uswallow){
+		if(!(shoved = adjacent_move_target(TRUE)))
+			return FALSE;
+	}
+	else if(!isok(fx, fy))
+		return FALSE;
+	else if(m_at(fx, fy)){
+		if(!(shoved = adjacent_move_target(TRUE)))
+			return FALSE;
+	}
+	else if(!ZAP_POS(levl[fx][fy].typ) || closed_door(fx, fy) || !bleeding_void_target_at(nx, ny))
+		return FALSE;
+	pline("Unfolding void!");
+	if(shoved){
+		weaponhit = wielded_weapon_attack(&youmonst, uwep);
+		vis = (VIS_MAGR | VIS_NONE) | (canseemon(shoved) ? VIS_MDEF : 0);
+		result = xmeleehity(&youmonst, shoved, &weaponhit, &uwep, vis, 0, FALSE, ATTKFLAG_SHOVE|ATTKFLAG_WHACK);
+		if(result&(MM_AGR_DIED|MM_AGR_STOP))
+			return TRUE;
+	}
+	if(u.uswallow)
+		return TRUE;
+	/* the hero may have moved (freed by the engulfer's death) */
+	fx = u.ux + u.dx, fy = u.uy + u.dy;
+	nx = u.ux + 2*u.dx, ny = u.uy + 2*u.dy;
+	if(!isok(fx, fy) || m_at(fx, fy) || !ZAP_POS(levl[fx][fy].typ) || closed_door(fx, fy))
+		return TRUE;
+	if(!(mdef = bleeding_void_target_at(nx, ny)))
+		return TRUE;
+	if(!uwep || uwep->oartifact != ART_SIX_ELEMENT_SWORD || !sheathed_bleeding_void(uwep))
+		return TRUE;
+	draw_bleeding_void();
+	weaponhit = wielded_weapon_attack(&youmonst, uwep);
+	vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+	xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, TRUE, (mdef == shoved) ? ATTKFLAG_FORCE_CRIT : 0);
+	resheath_bleeding_void();
+	return TRUE;
+}
+
+/* Cleaving void: two cleaves, there and back, through the three squares in front of the hero (or the engulfer, if the hero is engulfed). Returns FALSE (doing nothing) if none of the three squares has a target, or if the hero is engulfed by a non-whirly monster. */
+STATIC_OVL boolean
+bleeding_void_cleaving_void(void)
+{
+	struct monst *mon;
+	struct attack weaponhit;
+	boolean found = FALSE;
+	boolean vis;
+	long result;
+	int dxs[3], dys[3];
+	int i, pass, k;
+
+	dxs[0] = dxs[1] = dxs[2] = u.dx;
+	dys[0] = dys[1] = dys[2] = u.dy;
+	rotate_minus45(&dxs[0], &dys[0]);
+	rotate_plus45(&dxs[2], &dys[2]);
+	if(u.uswallow)
+		found = is_whirly(u.ustuck->data);
+	else for(i = 0; i < 3 && !found; i++)
+		if(bleeding_void_target_at(u.ux + dxs[i], u.uy + dys[i]))
+			found = TRUE;
+	if(!found)
+		return FALSE;
+	draw_bleeding_void();
+	pline("Cleaving void!");
+	weaponhit = wielded_weapon_attack(&youmonst, uwep);
+	for(pass = 0; pass < 2; pass++){
+		for(i = 0; i < 3 && uwep; i++){
+			k = pass ? 2-i : i;
+			if(!(mon = u.uswallow ? u.ustuck : bleeding_void_target_at(u.ux + dxs[k], u.uy + dys[k])))
+				continue;
+			vis = (VIS_MAGR | VIS_NONE) | (canseemon(mon) ? VIS_MDEF : 0);
+			result = xmeleehity(&youmonst, mon, &weaponhit, &uwep, vis, 0, FALSE, 0);
+			if(result&(MM_AGR_DIED|MM_AGR_STOP))
+				goto done;
+		}
+	}
+done:
+	resheath_bleeding_void();
+	return TRUE;
+}
+
+/* Invoking the Six-Element Sword [obj]: prompts for a direction and performs the Bleeding Void move for that direction and the hero's previous one. Returns the time taken. */
+int
+bleeding_void_invoke(struct obj *obj)
+{
+	struct weapon_dice wdice;
+	struct obj *jian;
+	int dice;
+
+	if(obj != uwep){
+		You("must be wielding %s to draw its jian.", the(xname(obj)));
+		return MOVE_CANCELLED;
+	}
+	if(!sheathed_bleeding_void(obj)){
+		pline("%s is empty.", The(xname(obj)));
+		return MOVE_CANCELLED;
+	}
+	if(u.veil){
+		pline("For some reason, you can't draw the jian.");
+		return MOVE_CANCELLED;
+	}
+	if(Is_spire(&u.uz)){
+		pline_The("jian will not leave the bar here.");
+		return MOVE_CANCELLED;
+	}
+	if(!(Role_if(PM_MONK) || Role_if(PM_KENSEI)) || Upolyd
+		|| (Role_if(PM_KENSEI) && !is_kensei_weapon(obj))
+		|| !(u.prev_dir.x || u.prev_dir.y) || u.did_move
+	){
+		You("aren't ready to draw the jian.");
+		return MOVE_CANCELLED;
+	}
+	if(!getdir((char *)0))
+		return MOVE_CANCELLED;
+	if(u.dz || !(u.dx || u.dy)){
+		You("see no target there.");
+		return MOVE_CANCELLED;
+	}
+	jian = sheathed_bleeding_void(obj);
+	dmgval_core(&wdice, FALSE, jian, jian->otyp, &youmonst);
+	dice = wdice.oc_damn + wdice.bon_damn;
+	switch(monk_move_type(u.prev_dir.x, u.prev_dir.y, u.dx, u.dy)){
+		case U_TURN_MOVE:
+			if(!bleeding_void_sever_name()){
+				You("see no target there.");
+				return MOVE_CANCELLED;
+			}
+		break;
+		case FORWARD_MOVE:
+			if(!bleeding_void_unfolding_void()){
+				You("see no target there.");
+				return MOVE_CANCELLED;
+			}
+		break;
+		case BENT_MOVE:
+			if(!bleeding_void_void_cut()){
+				You("see no target there.");
+				return MOVE_CANCELLED;
+			}
+		break;
+		case HOOK_MOVE:
+			if(!bleeding_void_void_wind()){
+				You("see no target there.");
+				return MOVE_CANCELLED;
+			}
+		break;
+		case ALTERNATED_MOVE:
+			if(!bleeding_void_cleaving_void()){
+				You("see no target there.");
+				return MOVE_CANCELLED;
+			}
+		break;
+		default:
+			impossible("Unhandled Bleeding Void move inputs (%d, %d)to(%d, %d)", u.prev_dir.x, u.prev_dir.y, u.dx, u.dy);
+			return MOVE_CANCELLED;
+	}
+	nomul(0, NULL);
+	u.did_move = TRUE;
+	adjalign(-dice);
+	u.ualign.sins += dice;
+	change_hod(dice);
+	if(Role_if(PM_KENSEI))
+		exercise(A_INT, FALSE);
+	return MOVE_STANDARD;
 }
 
 /* u_pole_pound()

@@ -1331,6 +1331,7 @@ register const char *let,*word;
 			  otmp->otyp != TONITRUS &&
 			  otmp->otyp != HUNTER_S_LONGSWORD && otmp->otyp != CHURCH_BLADE && otmp->otyp != CHURCH_SHEATH &&
 			  otmp->otyp != HUNTER_S_SHORTSWORD && otmp->otyp != CHURCH_HAMMER && otmp->otyp != CHURCH_BRICK &&
+			  otmp->otyp != PANXIN_JIAN && otmp->otyp != LIANQIAO_JIAN && otmp->otyp != BAR_SHEATH &&
 			  otmp->otyp != BEAST_CRUSHER && otmp->otyp != BEAST_CUTTER && otmp->otyp != DEVIL_FIST &&
 			  otmp->otyp != DEMON_CLAW && otmp->otyp != CHURCH_SHORTSWORD &&
 			  otmp->otyp != SMITHING_HAMMER &&
@@ -2456,6 +2457,8 @@ struct obj *obj;
 				"Latch or unlatch your rapier", MENU_UNSELECTED);
 	else if (obj->otyp == CHURCH_HAMMER || obj->otyp == HUNTER_S_SHORTSWORD || obj->otyp == CHURCH_BRICK
 		|| obj->otyp == CHURCH_BLADE || obj->otyp == HUNTER_S_LONGSWORD || obj->otyp == CHURCH_SHEATH
+		|| (obj->otyp == LIANQIAO_JIAN && !six_element_channel(obj->oartifact, SIXEL_LONG|SIXEL_AXE))
+		|| obj->otyp == PANXIN_JIAN || obj->otyp == BAR_SHEATH
 		|| obj->otyp == CHIKAGE
 	)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
@@ -3239,6 +3242,7 @@ winid *datawin;
 					case AD_HLUH: Strcat(buf, "corrupted holy damage"); break;
 					case AD_STAR: Strcat(buf, "silver damage"); break;
 					case AD_SLEE: Strcat(buf, "sleep damage"); break;
+					case AD_DISN: Strcat(buf, "disintegration damage"); break;
 					case AD_PHYS: Strcat(buf, "damage"); break;
 					default: break;
 				}
@@ -3659,6 +3663,29 @@ winid *datawin;
 		}
 #undef dbon_to_word
 #undef atr_to_word
+	}
+	/* Six-Element Sword channeled elements */
+	if (oartifact == ART_SIX_ELEMENT_SWORD && !Is_spire(&u.uz)) {
+		if (six_element_channel(oartifact, SIXEL_FIRE)) {
+			Sprintf(buf, "Deals %dd6 + enchantment bonus fire damage, even to fire-resistant metal creatures.", six_element_fire_dice());
+			OBJPUTSTR(buf);
+		}
+		else if (six_element_channel(oartifact, SIXEL_METAL)) {
+			if (six_element_channel(oartifact, SIXEL_FROST))
+				OBJPUTSTR("Deals 1d8 + half enchantment bonus cold damage, and may cancel its target.");
+			else
+				OBJPUTSTR("Deals 1d6 + half enchantment bonus cold damage.");
+		}
+		else if (six_element_channel(oartifact, SIXEL_WATER))
+			OBJPUTSTR("Deals 1d6 + half enchantment bonus water damage.");
+		if (six_element_channel(oartifact, SIXEL_ICE))
+			OBJPUTSTR("Deals 2d6 + enchantment bonus cold damage.");
+		if (six_element_channel(oartifact, SIXEL_ELEC))
+			OBJPUTSTR("Deals 1d8 + enchantment bonus lightning damage.");
+		if (six_element_channel(oartifact, SIXEL_EARTH))
+			OBJPUTSTR("Deals 1d20 + enchantment bonus damage to watery creatures.");
+		if (six_element_channel(oartifact, SIXEL_FIELD))
+			OBJPUTSTR("Harvests slain monsters to heal the wielder.");
 	}
 	/* object properties (objects only) */
 	if(!check_oprop(obj, OPROP_NONE)){
@@ -4813,6 +4840,7 @@ winid *datawin;
 		oartifact == ART_WRAPPINGS_OF_THE_SACRED_FI ||
 		oartifact == ART_SPELL_WARDED_WRAPPINGS_OF_ ||
 		oartifact == ART_SEVEN_STAR_SWORD ||
+		oartifact == ART_ANCIENT_RITUAL_SWORD ||
 		oartifact == ART_MAGICBANE)			OBJPUTSTR("Protects your inventory from being cursed.");
 
 	/* Effects based on the base description of the item -- only one will apply, so an if-else chain is appropriate */

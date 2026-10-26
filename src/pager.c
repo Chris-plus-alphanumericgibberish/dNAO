@@ -1482,8 +1482,11 @@ do_look(quick)
 			}
 			// check if they specified an artifact
 			else if ((x_str = artifact_name(out_str, &otyp, &oartifact))) {
+				struct obj *lookup = (struct obj *)0;
+				if (oartifact == ART_BLEEDING_VOID)
+					lookup = inventory_bleeding_void();
 				putstr(datawin, 0, x_str);
-				describe_item(NULL, otyp, oartifact, &datawin);
+				describe_item(lookup, otyp, oartifact, &datawin);
 			}
 			// check encyclopedia
 			if(checkfile(out_str, pm, (mntmp==NON_PM && otyp==STRANGE_OBJECT), TRUE, &datawin) || mntmp != NON_PM || otyp != STRANGE_OBJECT)

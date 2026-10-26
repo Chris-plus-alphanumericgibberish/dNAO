@@ -471,6 +471,7 @@ struct you {
 	Bitfield(uavoid_urpassives,1);
 	Bitfield(uspin_crane,1);	/* redirect the next attack aimed at you */
 	Bitfield(upray_mantis,1);	/* block one limbed attack from each attacker */
+	Bitfield(ureceptive_field,1);	/* attackers heal you */
 #define DIVE_KICK  1
 #define AURA_BOLT  2
 #define BIRD_KICK  3
@@ -536,7 +537,21 @@ struct you {
 #define QUICKSHOT 63
 #define DOUBLE_SH 64
 #define THUNDER_V 65
-#define MAX_MYSTIC_FORMS 65
+#define LAY_REST  66
+#define FALLING_SKY 67
+#define INFERNO   68
+#define IMPALE    69
+#define WAVE      70
+#define LIGHTNING_K 71
+#define SPLIT_STRK 72
+#define EARTH_AVAL 73
+#define FLICKER_F 74
+#define QUICK_T 75
+#define ICE_STORM_K 76
+#define REACH_FLAME 77
+#define GROW_SHOOT 78
+#define RECEPT_F 79
+#define MAX_MYSTIC_FORMS 79
 
 #define MFORM_STREAM MAX_MYSTIC_FORMS+1
 #define MFORM_CHAINS MAX_MYSTIC_FORMS+2

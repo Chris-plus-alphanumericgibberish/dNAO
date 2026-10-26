@@ -425,7 +425,7 @@ struct monst *magr;
 		))){
 		attackmask |= PIERCE;
 	}
-	if (youagr && obj && is_knight_sword(obj)){
+	if (youagr && obj && (is_knight_sword(obj) || (Role_if(PM_KENSEI) && is_kensei_weapon(obj)))){
 		if(activeFightingForm(FFORM_HALF_SWORD))
 			attackmask = PIERCE; // only thrusting
 		else if(activeFightingForm(FFORM_POMMEL))
@@ -492,10 +492,36 @@ struct monst *magr;
 		if (obj == uwep) attackmask |= EXPLOSION;
 		else attackmask = WHACK;
 	}
+	//Six element base substitutions
+	if (six_element_channel(oartifact, SIXEL_WOOD))
+		attackmask = PIERCE;
+	else if (six_element_channel(oartifact, SIXEL_WATER))
+		attackmask = SLASH;
+	//Six element additive modifiers
+	if (six_element_channel(oartifact, SIXEL_AXE))
+		attackmask |= SLASH;
+	if (six_element_channel(oartifact, SIXEL_ICE))
+		attackmask |= WHACK;
+	if (six_element_channel(oartifact, SIXEL_FIELD))
+		attackmask |= SLASH;
 	/* if it's not any of the above, we're just smacking things with it */
 	if (!attackmask)
 		attackmask = WHACK;
 
+	return attackmask;
+}
+
+/* Returns the attack mask of [obj] (or of [otyp] and [oartifact], if [obj] is NULL)
+ *		used as a weapon by [magr] against [mdef], which may be NULL.
+ * Some weapons may change their attack type depending on the target they are striking.
+ */
+int
+attack_mask_vs_mdef(struct obj *obj, int otyp, int oartifact, struct monst *magr, struct monst *mdef)
+{
+	int attackmask = attack_mask(obj, otyp, oartifact, magr);
+
+	if(obj && mdef && ritual_sword_target(obj, mdef))
+		attackmask |= WHACK|SLASH|PIERCE;
 	return attackmask;
 }
 
@@ -1014,6 +1040,40 @@ struct monst *magr;
 
 		if (surya_astra_sword(magr) && obj == MON_WEP(magr))
 			ocn += 1;
+
+		if (six_element_channel(obj->oartifact, SIXEL_EARTH) && !Is_spire(&u.uz))
+			ocn += 1;
+		if (six_element_channel(obj->oartifact, SIXEL_AXE) && !Is_spire(&u.uz)){
+			if(!bonn){
+				bonn = 1;
+				bond = max(4 + 2 * dmod, 2);
+			}
+			else bond += 4;
+			if(large) bonn++;
+		}
+		if (six_element_channel(obj->oartifact, SIXEL_LONG) && !Is_spire(&u.uz)){
+			flat++;
+		}
+		if(obj->oartifact == ART_BLEEDING_VOID){
+			int bonus_dice = 0;
+			int insight = Insight;
+			if(ocd < 1)
+				ocd = 1;
+			// How many extra base dice?
+			while(insight/(bonus_dice + 1) >= ocd){
+				bonus_dice++;
+				insight -= ocd*bonus_dice;
+			}
+			ocn += bonus_dice;
+			// Any leftover goes onto the bonus die or flat damage
+			if(insight/(bonus_dice + 1) > 1){
+				bond += insight/(bonus_dice + 1);
+				if(!bonn)
+					bonn = 1;
+			}
+			else if(insight/(bonus_dice + 1) > 0)
+				flat += insight/(bonus_dice + 1);
+		}
 
 		/* other various artifacts and objects */
 		if (obj->oartifact == ART_VORPAL_BLADE
@@ -1771,7 +1831,7 @@ struct monst *magr;
 			tmp = 0;
 	}
 	/* Smaug gets stabbed */
-	if((attack_mask(otmp, 0, 0, magr) & PIERCE) && ptr->mtyp == PM_SMAUG)
+	if((attack_mask_vs_mdef(otmp, 0, 0, magr, mon) & PIERCE) && ptr->mtyp == PM_SMAUG)
 		tmp += rnd(20);
 	/* axes deal more damage to wooden foes */
 	if (is_axe(otmp) && is_wooden(ptr))
@@ -1797,7 +1857,7 @@ struct monst *magr;
 		   so always subtract erosion even for blunt weapons. */
 		/* Rust weapons may now shatter when used, so don't subtract
 		   damage for blunt anymore */
-		if(!(attack_mask(otmp, 0, 0, magr) & WHACK)) tmp -= greatest_erosion(otmp);
+		if(!(attack_mask_vs_mdef(otmp, 0, 0, magr, mon) & WHACK)) tmp -= greatest_erosion(otmp);
 		if (tmp < 1) tmp = 1;
 	}
 	
@@ -5093,7 +5153,7 @@ process_etraits(unsigned long traits, int otyp, struct obj *obj, struct monst *m
 
 	//Add traits
 	if(youagr){
-		if(is_knight_sword(obj)){
+		if(is_knight_sword(obj) || (Role_if(PM_KENSEI) && is_kensei_weapon(obj))){
 			if(activeFightingForm(FFORM_HALF_SWORD)){
 				traits |= ETRAIT_QUICK;
 				traits &= ~(ETRAIT_LUNGE|ETRAIT_GRAZE);
@@ -5204,16 +5264,29 @@ process_etraits(unsigned long traits, int otyp, struct obj *obj, struct monst *m
 				traits |= ETRAIT_BLADEDANCE;
 		}
 	}
-	/* the hero's blade-dance grace gives one-handed weapons blade dance at full HP, and light weapons above half HP */
+	if(six_element_channel(obj->oartifact, SIXEL_WOOD)){
+		traits |= ETRAIT_PUNCTURE;
+		traits &= ~(ETRAIT_HEW|ETRAIT_STUNNING_STRIKE);
+	}
+	else if(six_element_channel(obj->oartifact, SIXEL_EARTH)){
+		traits |= ETRAIT_PENETRATE_ARMOR;
+		if(six_element_channel(obj->oartifact, SIXEL_FIELD))
+			traits |= ETRAIT_BLEED;
+	}
+	else if(six_element_channel(obj->oartifact, SIXEL_WATER)){
+		traits |= ETRAIT_LONG_SLASH;
+		traits &= ~(ETRAIT_HEW|ETRAIT_STUNNING_STRIKE);
+	}
+	/* the hero's blade-dance grace gives one-handed weapons blade dance at full HP, and light weapons and the hero's Kensei weapons above half HP */
 	if((obj->oclass == WEAPON_CLASS || is_weptool(obj))
 		&& ((full_grace_empowers(mon, AAT_GRACE_BLADES) && !bimanual_mon(obj, mon))
-			|| (grace_empowers(mon, AAT_GRACE_BLADES) && light_weapon_mon(obj, mon)))
+			|| (grace_empowers(mon, AAT_GRACE_BLADES) && (light_weapon_mon(obj, mon) || is_hero_kensei_weapon(obj, mon))))
 	)
 		traits |= ETRAIT_BLADEDANCE;
-	/* the hero's lunge grace gives one-handed weapons lunge above half HP, and any weapon at full HP */
+	/* the hero's lunge grace gives one-handed weapons and the hero's Kensei weapons lunge above half HP, and any weapon at full HP */
 	if((obj->oclass == WEAPON_CLASS || is_weptool(obj))
 		&& (full_grace_empowers(mon, AAT_GRACE_LUNGE)
-			|| (grace_empowers(mon, AAT_GRACE_LUNGE) && !bimanual_mon(obj, mon)))
+			|| (grace_empowers(mon, AAT_GRACE_LUNGE) && (!bimanual_mon(obj, mon) || is_hero_kensei_weapon(obj, mon))))
 	)
 		traits |= ETRAIT_LUNGE;
 

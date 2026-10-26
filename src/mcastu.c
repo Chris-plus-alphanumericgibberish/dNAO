@@ -3808,6 +3808,62 @@ unmk_hit_msg(struct monst *magr, struct monst *mdef, boolean youagr, boolean you
 	}
 }
 
+/* Returns TRUE if [mon] feels no pain from the word of unmaking. */
+boolean
+unmaking_pain_immune(struct monst *mon)
+{
+	return (nonliving(mon->data) && !is_android(mon->data))
+		|| has_template(mon, TOMB_HERD)
+		|| is_primordial(mon->data)
+		|| is_alienist(mon->data)
+		|| is_great_old_one(mon->data);
+}
+
+/* [mon] screams, shrieks, or writhes in pain (if it can currently act), and loses [dmn] movement, to no lower than -6. */
+void
+unmaking_scream(struct monst *mon, int dmn)
+{
+	if(mon->movement > 0 && mon->mcanmove){
+		if (!is_silent_mon(mon)){
+			if (canseemon(mon))
+				pline("%s %s in pain!", Monnam(mon), humanoid_torso(mon->data) ? "screams" : "shrieks");
+			else
+				You_hear("%s %s in pain!", mon->mtame ? noit_mon_nam(mon) : mon_nam(mon), humanoid_torso(mon->data) ? "screaming" : "shrieking");
+		}
+		else {
+			if (canseemon(mon))
+				pline("%s writhes in pain!", Monnam(mon));
+		}
+	}
+	mon->movement = max(mon->movement - dmn, -6);
+}
+
+/* [magr] drains two levels from [mdef] (one if [mdef] resists draining), killing [mdef] if it has no level or max HP left to lose. Returns MM_ flags. */
+int
+unmaking_drain(struct monst *magr, struct monst *mdef)
+{
+	boolean youagr = (magr == &youmonst);
+	int levels = Drain_res(mdef) ? 1 : 2;
+
+	if(canseemon(mdef))
+		pline("%s suddenly seems weaker!", Monnam(mdef));
+	while(levels-- > 0){
+		int ptmp = min(*hp(mdef), d(1, hd_size(mdef->data)));
+		if(mlev(mdef) == 0 || *hpmax(mdef) <= ptmp){
+			if(youagr) killed(mdef);
+			else monkilled(mdef, "", AD_DRLI);
+			if(mdef->mhp > 0)
+				return (MM_HIT | MM_DEF_LSVD);
+			else
+				return (MM_HIT | MM_DEF_DIED | ((youagr || grow_up(magr, mdef)) ? 0 : MM_AGR_DIED));
+		}
+		mdef->m_lev--;
+		mdef->mhpmax -= ptmp;
+		mdef->mhp = min(mdef->mhpmax, mdef->mhp);
+	}
+	return MM_HIT;
+}
+
 /* cast_spell
  * 
  * magr is casting a spell, possibly at mdef (who may or may not exist)
@@ -8174,26 +8230,8 @@ int tary;
 			mdef->mstdy += dmg;
 
 			/* crushing pain */
-			boolean pain_immune = (nonliving(mdef->data) && !is_android(mdef->data))
-				|| has_template(mdef, TOMB_HERD)
-				|| is_primordial(mdef->data)
-				|| is_alienist(mdef->data)
-				|| is_great_old_one(mdef->data);
-
-			if(!pain_immune){
-				if(mdef->movement > 0 && mdef->mcanmove){
-					if (!is_silent_mon(mdef)){
-						if (canseemon(mdef))
-							pline("%s %s in pain!", Monnam(mdef), humanoid_torso(mdef->data) ? "screams" : "shrieks");
-						else
-							You_hear("%s %s in pain!", mdef->mtame ? noit_mon_nam(mdef) : mon_nam(mdef), humanoid_torso(mdef->data) ? "screaming" : "shrieking");
-					}
-					else {
-						if (canseemon(mdef))
-							pline("%s writhes in pain!", Monnam(mdef));
-					}
-				}
-				mdef->movement = max(mdef->movement - 1*dmn, -6);
+			if(!unmaking_pain_immune(mdef)){
+				unmaking_scream(mdef, dmn);
 				{
 					int paindmg = reduce_dmg(mdef, dmg, TRUE, TRUE);
 					int pain_result = xdamagey(magr, mdef, attk, paindmg);
@@ -8202,25 +8240,8 @@ int tary;
 				}
 			}
 
-			if(!is_great_old_one(mdef->data)){
-				int levels = Drain_res(mdef) ? 1 : 2;
-				if(canseemon(mdef))
-					pline("%s suddenly seems weaker!", Monnam(mdef));
-				while(levels-- > 0){
-					int ptmp = min(*hp(mdef), d(1, hd_size(mdef->data)));
-					if(mlev(mdef) == 0 || *hpmax(mdef) <= ptmp){
-						if(youagr) killed(mdef);
-						else monkilled(mdef, "", AD_DRLI);
-						if(mdef->mhp > 0)
-							return (MM_HIT | MM_DEF_LSVD);
-						else
-							return (MM_HIT | MM_DEF_DIED | ((youagr || grow_up(magr, mdef)) ? 0 : MM_AGR_DIED));
-					}
-					mdef->m_lev--;
-					mdef->mhpmax -= ptmp;
-					mdef->mhp = min(mdef->mhpmax, mdef->mhp);
-				}
-			}
+			if(!is_great_old_one(mdef->data))
+				return unmaking_drain(magr, mdef);
 		}
 		return MM_HIT;
 	}

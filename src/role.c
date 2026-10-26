@@ -2799,6 +2799,9 @@ role_edit()
 		else if(u.role_variant == ART_RINGIL){
 			urole.enemy1sym = S_WRAITH;
 		}
+		else if(u.role_variant == ART_ANCIENT_RITUAL_SWORD){
+			urole.enemy2num = PM_ERINYS;
+		}
 		else if(Race_if(PM_INCANTIFIER)){
 			urole.enemy2num = PM_MIRKWOOD_SPIDER;
 			urole.enemy2sym = S_SPIDER;

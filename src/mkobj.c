@@ -905,6 +905,10 @@ int mkflags;
 		struct obj *sword = mksobj(HUNTER_S_LONGSWORD, mkflags);
 		add_to_container(otmp, sword);
 	}
+	else if(otmp->otyp == LIANQIAO_JIAN){
+		struct obj *sword = mksobj(PANXIN_JIAN, mkflags);
+		add_to_container(otmp, sword);
+	}
 	else if (otmp->otyp == MASS_SHADOW_PISTOL){
 		struct obj *stone = mksobj(ROCK, NO_MKOBJ_FLAGS);
 		stone->quan = 1;
@@ -3014,9 +3018,9 @@ register struct obj *obj;
 	}
 	if ((Is_container(obj) && obj->otyp != MAGIC_CHEST && obj->oartifact != ART_TREASURY_OF_PROTEUS)
 		|| obj->otyp == STATUE
-		|| obj->otyp == CHURCH_BLADE
-		|| obj->otyp == CHURCH_HAMMER
+		|| is_composite_weapon(obj)
 		|| obj->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD
+		|| obj->oartifact == ART_BLEEDING_VOID
 	) {
 		struct obj *contents;
 		register int cwt = 0;

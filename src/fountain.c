@@ -926,6 +926,10 @@ smithing_object(struct obj *obj)
 					obj->otyp = CHURCH_SHEATH;
 					fix_object(obj);
 				}
+				if(obj->otyp == LIANQIAO_JIAN){
+					obj->otyp = BAR_SHEATH;
+					fix_object(obj);
+				}
 				int mat1 = obj->obj_material;
 				int quan1 = obj->owt;
 				int mat2 = 0;
@@ -1007,7 +1011,7 @@ smithing_object(struct obj *obj)
 					if(Race_if(PM_INCANTIFIER))
 						morehungry(5*INC_BASE_NUTRITION);
 					flags.botl = 1;
-					if(obj->otyp == CHURCH_HAMMER || obj->otyp == CHURCH_BLADE){
+					if(is_composite_weapon(obj)){
 						if(obj->cobj && obj->spe > obj->cobj->spe){
 							/*Note: base obj already incremented*/
 							obj->cobj->spe++;
@@ -1025,7 +1029,7 @@ smithing_object(struct obj *obj)
 						struct obj *crystal = find_blood_smithing_crystal(obj);
 						obj->blood_smithed = TRUE;
 						obj->spe++;
-						if(obj->otyp == CHURCH_HAMMER || obj->otyp == CHURCH_BLADE)
+						if(is_composite_weapon(obj))
 							if(obj->cobj && obj->spe > obj->cobj->spe){ /*Note: base obj already incremented*/
 								obj->cobj->spe++;
 								obj->cobj->blood_smithed = TRUE;

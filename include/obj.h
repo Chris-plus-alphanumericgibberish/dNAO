@@ -752,9 +752,10 @@ struct obj {
 #define is_knife(otmp)	(otmp->oclass == WEAPON_CLASS && \
 			 (objects[otmp->otyp].oc_skill == P_DAGGER || \
 			 objects[otmp->otyp].oc_skill == P_KNIFE))
-#define is_axe(otmp)	((otmp->oclass == WEAPON_CLASS || \
+#define is_axe(otmp)	(((otmp->oclass == WEAPON_CLASS || \
 			 otmp->oclass == TOOL_CLASS) && \
-			 objects[otmp->otyp].oc_skill == P_AXE)
+			 objects[otmp->otyp].oc_skill == P_AXE) || \
+			 six_element_channel((otmp)->oartifact, SIXEL_AXE))
 #define is_pick(otmp)	(((otmp->oclass == WEAPON_CLASS || \
 			 otmp->oclass == TOOL_CLASS) && \
 			 (objects[otmp->otyp].oc_skill == P_PICK_AXE)) || \
@@ -778,6 +779,8 @@ struct obj {
 			 || otmp->otyp == SILVERKNIGHT_SWORD \
 			 || otmp->otyp == RUNESWORD \
 			 || otmp->otyp == ELVEN_BROADSWORD \
+			 || otmp->otyp == RITUAL_SWORD \
+			 || otmp->oartifact == ART_SIX_ELEMENT_SWORD \
 			)
 #define is_knight_sword(otmp) (\
 			    otmp->otyp == LONG_SWORD \
@@ -799,10 +802,10 @@ struct obj {
 #define is_crystal_weapon(otmp)	((otmp)->otyp == CRYSTAL_SWORD)
 #define is_parrying_lightsaber(otmp)	((otmp)->otyp == LIGHTSABER && litsaber(otmp) && \
 			 (otmp)->oartifact != ART_ANNULUS && (otmp)->ovar1_lightsaberHandle == 0)
-/* rapiers, lit plain lightsabers, or any one-handed weapon or weapon-tool if the hero's parry grace empowers mon */
+/* rapiers, lit plain lightsabers, or any one-handed weapon or weapon-tool (or the hero's Kensei weapons) if the hero's parry grace empowers mon */
 #define can_parry_with(otmp, mon)	(is_rapier(otmp) || is_parrying_lightsaber(otmp) || \
 			 (((otmp)->oclass == WEAPON_CLASS || is_weptool(otmp)) \
-			  && grace_empowers((mon), AAT_GRACE_PARRY) && !bimanual_mon((otmp), (mon))))
+			  && grace_empowers((mon), AAT_GRACE_PARRY) && (!bimanual_mon((otmp), (mon)) || is_hero_kensei_weapon((otmp), (mon)))))
 #define parries_as_phasing(otmp)	(arti_phasing(otmp) || (is_lightsaber(otmp) && litsaber(otmp)))
 #define is_rakuyo(otmp)	(otmp->otyp == RAKUYO || \
 			 otmp->otyp == RAKUYO_SABER || \
@@ -841,7 +844,8 @@ struct obj {
 			 otmp->otyp == ISAMUSEI ||\
 			 otmp->otyp == DISKOS ||\
 			 otmp->otyp == BREAKING_WHEEL ||\
-			 otmp->otyp == BESTIAL_CLAW)
+			 otmp->otyp == BESTIAL_CLAW ||\
+			 otmp->oartifact == ART_BLEEDING_VOID)
 
 #define	is_cclub_able(otmp)	(((otmp)->otyp == CLUB || (otmp)->otyp == CLAWED_HAND || (otmp)->oartifact == ART_AMALGAMATED_SKIES) && check_oprop(otmp, OPROP_CCLAW))
 
@@ -945,6 +949,7 @@ struct obj {
 			  (otmp)->oartifact==ART_RUYI_JINGU_BANG || \
 			  ((otmp)->oartifact==ART_GOLDEN_SWORD_OF_Y_HA_TALLA && (otmp)->otyp == BULLWHIP) || \
 			  (otmp)->oartifact==ART_DEATH_SPEAR_OF_KEPTOLO || \
+			  six_element_channel((otmp)->oartifact, SIXEL_LONG) || \
 			  ((otmp)->oartifact==ART_PEN_OF_THE_VOID && (otmp)->ovara_seals&SEAL_MARIONETTE ) \
 			 ))
 #define is_bad_melee_pole(otmp) (!((otmp)->otyp == POLEAXE ||\
@@ -961,14 +966,16 @@ struct obj {
 									(otmp)->oartifact == ART_SHADOWLOCK ||\
 									(otmp)->oartifact == ART_RUYI_JINGU_BANG ||\
 									(otmp)->oartifact == ART_GOLDEN_SWORD_OF_Y_HA_TALLA ||\
+									(otmp)->oartifact == ART_SIX_ELEMENT_SWORD ||\
 									(otmp)->oartifact == ART_PEN_OF_THE_VOID\
 								) && is_pole(otmp))
 #define is_spear(otmp)	((otmp->oclass == WEAPON_CLASS || is_weptool(otmp)) && \
 			 objects[otmp->otyp].oc_skill == P_SPEAR)
 #define is_hammer(otmp)	((otmp->oclass == WEAPON_CLASS || is_weptool(otmp)) && \
 			 objects[otmp->otyp].oc_skill == P_HAMMER)
-#define is_farm(otmp)	((otmp->oclass == WEAPON_CLASS || is_weptool(otmp)) && \
-			 objects[otmp->otyp].oc_skill == P_HARVEST)
+#define is_farm(otmp)	(((otmp->oclass == WEAPON_CLASS || is_weptool(otmp)) && \
+			 objects[otmp->otyp].oc_skill == P_HARVEST) || \
+			 (six_element_channel((otmp)->oartifact, SIXEL_FIELD) && !Is_spire(&u.uz)))
 #define is_sickle(otmp)	((otmp)->otyp == ELVEN_SICKLE || (otmp)->otyp == SICKLE)
 #define is_katana_ish(otmp) ((otmp)->otyp == WAKIZASHI || (otmp)->otyp == NINJA_TO || (otmp)->otyp == KATANA || (otmp)->otyp == ODACHI || (otmp)->otyp == NAGAMAKI || (otmp)->otyp == CHIKAGE)
 
@@ -1055,6 +1062,11 @@ struct obj {
 #define is_self_righteous(o)	(self_righteous_otyp((o)->otyp) \
 						|| ((o)->otyp == BREAKING_WHEEL && (o)->ovar1_wheelspeed == 0) \
 						)
+#define composite_weapon_otyp(otyp)	((otyp) == CHURCH_HAMMER \
+						|| (otyp) == CHURCH_BLADE \
+						|| (otyp) == LIANQIAO_JIAN \
+						)
+#define is_composite_weapon(o)	(composite_weapon_otyp((o)->otyp))
 
 #define is_lightsaber_otyp(otyp)	(is_lasersword_otyp(otyp) || \
 							 (otyp) == KAMEREL_VAJRA || \
@@ -1219,6 +1231,9 @@ struct obj {
 			 || (Role_if(PM_KENSEI) && is_kensei_weapon(otmp))\
 			 )
 
+#define is_kendo_kensei_able_otyp(a_otyp)	((a_otyp) == PRACTICE_SWORD || (a_otyp) == ISAMUSEI || (a_otyp) == CANE || (a_otyp) == FORCE_SWORD || (a_otyp) == LIANQIAO_JIAN)
+#define is_kendo_kensei_able(otmp)	is_kendo_kensei_able_otyp((otmp)->otyp)
+
 #define is_kensei_weapon(otmp) (u.role_variant == ART_SKY_REFLECTED ? (otmp)->obj_material == MERCURIAL :\
 								u.role_variant == ART_SILVER_SKY ? check_oprop((otmp), OPROP_GSSDW) : \
 								u.role_variant == ART_RINGIL ? (check_oprop((otmp), OPROP_WRTHW) || objects[(otmp)->otyp].oc_skill == P_SCIMITAR) : \
@@ -1232,7 +1247,9 @@ struct obj {
 								u.role_variant == ART_EPITAPH_OF_WONGAS ? (is_lightsaber(otmp)) : \
 								u.role_variant == ART_WHIRLING_SWORD ? ((otmp)->otyp == LONG_SWORD || (otmp)->otyp == CRYSTAL_SWORD) : \
 								u.role_variant == ART_SUN_S_BOW ? (objects[(otmp)->otyp].oc_skill == P_BOW) : \
+								u.role_variant == ART_ANCIENT_RITUAL_SWORD ? (is_kendo_kensei_able(otmp) || (otmp)->otyp == RITUAL_SWORD || (otmp)->otyp == PANXIN_JIAN) : \
 								(otmp)->otyp == artilist[u.role_variant].otyp)
+#define is_hero_kensei_weapon(otmp, mon)	((mon) == &youmonst && Role_if(PM_KENSEI) && is_kensei_weapon(otmp))
 
 #define is_kensei_weapon_otyp(a_otyp)	( \
 						u.role_variant == ART_RINGIL ? (objects[(a_otyp)].oc_skill == P_SCIMITAR) : \
@@ -1241,6 +1258,7 @@ struct obj {
 						u.role_variant == ART_EPITAPH_OF_WONGAS ? (is_lightsaber_otyp(a_otyp)) : \
 						u.role_variant == ART_WHIRLING_SWORD ? ((a_otyp) == LONG_SWORD || (a_otyp) == CRYSTAL_SWORD) : \
 						u.role_variant == ART_SUN_S_BOW ? (objects[(a_otyp)].oc_skill == P_BOW) : \
+						u.role_variant == ART_ANCIENT_RITUAL_SWORD ? (is_kendo_kensei_able_otyp(a_otyp) || (a_otyp) == RITUAL_SWORD || (a_otyp) == PANXIN_JIAN) : \
 						(a_otyp) == artilist[u.role_variant].otyp)
 
 #define is_artifact_snare(obj)	((obj)->oartifact == ART_JIN_GANG_ZUO || (obj)->oartifact == ART_KENJAKU)
@@ -1633,13 +1651,13 @@ struct obj {
 				)
 #define is_chupodible(otmp) ((otmp)->otyp == CORPSE && your_race(&mons[(otmp)->corpsenm]))
 
-#define is_always_holy(otmp) ((otmp)->oartifact == ART_SEVEN_STAR_SWORD)	
+#define is_always_holy(otmp) ((otmp)->oartifact == ART_SEVEN_STAR_SWORD || (otmp)->oartifact == ART_BLEEDING_VOID)
 #define is_holy(otmp)		(is_always_holy(otmp) || \
 							((otmp)->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD && artinstance[ART_GREEN_DRAGON_CRESCENT_BLAD].GDCBBlessedness&GDCB_BLESSED) || \
 							(otmp)->blessed)
 #define is_always_unholy(otmp)	((otmp)->oartifact == ART_STORMBRINGER || (otmp)->oartifact == ART_DIRGE || \
 							(otmp)->oartifact == ART_MALICE || (otmp)->oartifact == ART_TECPATL_OF_HUEHUETEOTL || \
-							(otmp)->oartifact == ART_ANGUIREL)
+							(otmp)->oartifact == ART_ANGUIREL || (otmp)->oartifact == ART_BLEEDING_VOID)
 #define is_unholy(otmp)	(((otmp)->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD && artinstance[ART_GREEN_DRAGON_CRESCENT_BLAD].GDCBBlessedness&GDCB_CURSED) || \
 							is_always_unholy(otmp) || (otmp)->cursed)
 #define is_unblessed(otmp)	(!(is_holy(otmp) || is_unholy(otmp)) || ((otmp)->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD && artinstance[ART_GREEN_DRAGON_CRESCENT_BLAD].GDCBBlessedness&GDCB_UNBLESSED))

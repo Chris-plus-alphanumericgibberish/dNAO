@@ -3390,7 +3390,11 @@ boolean narrow_only;
 				return FALSE;
 		break;
 		case AD_HOLY:
-			if (hates_unholy_mon(mdef))
+			if (hates_unholy_mon(mdef) && !hates_holy_mon(mdef))
+				return FALSE;
+		break;
+		case AD_DISN:
+			if (Disint_res(mdef))
 				return FALSE;
 		break;
 		default:
@@ -3732,7 +3736,7 @@ spec_dbon(struct obj *otmp, struct monst *mon, int basedmg, int *plusdmgptr, int
 #endif
 	/* determine if we will apply bonus damage */
 	if ((spec_dbon_applies && !(
-			(weap->adtyp == AD_SLEE) ||	(weap->adtyp == AD_STDY)	/* doesn't do damage */
+			(weap->adtyp == AD_SLEE) ||	(weap->adtyp == AD_STDY) || (weap->adtyp == AD_DISN)	/* doesn't do damage */
 			 || (otmp->oartifact == ART_TORCH_OF_XOLOTL && night()) // no 'base' damage in the day
 		)) || (
 		/* alternative conditions for dealing bonus damage (ie spec_dbon_applies == FALSE) */
@@ -6853,6 +6857,19 @@ silver_flame_disn_armor(struct monst *mdef, int i, boolean vis, struct obj *msgr
 	return i;
 }
 
+/* Returns the number of d6 fire damage dice the Six-Element Sword deals while channeling fire, from its current fire modifiers. */
+int
+six_element_fire_dice(void)
+{
+	int dice = 1;
+
+	if (six_element_channel(ART_SIX_ELEMENT_SWORD, SIXEL_FIRE_1)) dice++;
+	if (six_element_channel(ART_SIX_ELEMENT_SWORD, SIXEL_FIRE_2)) dice++;
+	if (six_element_channel(ART_SIX_ELEMENT_SWORD, SIXEL_FIRE_3)) dice++;
+	if (six_element_channel(ART_SIX_ELEMENT_SWORD, SIXEL_RAGING)) dice += 2;
+	return dice;
+}
+
 /* returns MM_style hitdata now, and is used for both artifacts and weapon properties */
 int
 special_weapon_hit(magr, mdef, otmp, msgr, basedmg, plusdmgptr, truedmgptr, dieroll, messaged, printmessages)
@@ -7678,6 +7695,35 @@ boolean printmessages; /* print generic elemental damage messages */
 			*messaged = TRUE;
 		}
 	}
+	if (attacks(AD_DISN, otmp)){
+		if ((vis&VIS_MAGR) && printmessages) {
+			if(otmp->oartifact == ART_BLEEDING_VOID)
+				pline_The("blood-rimmed gash %s %s%c",
+						!spec_dbon_applies ? "hits" :
+						"flays space around",
+					hittee, !spec_dbon_applies ? '.' : '!');
+			else pline_The("sickly green-glowing %s %s %s%c",
+				wepdesc,
+				vtense(wepdesc,
+					!spec_dbon_applies ? "hit" :
+					"unravel"),
+				hittee, !spec_dbon_applies ? '.' : '!');
+			*messaged = TRUE;
+		}
+		if (spec_dbon_applies) {
+			int dmg = arti_struct->damage ? rnd(arti_struct->damage) : basedmg;
+			if(youagr && otmp->oartifact == ART_BLEEDING_VOID){
+				dmg += (u.uimp_blood+1)/4;//Note: 0-4, since count + 1 is 1 to 16
+				*truedmgptr += u.uimpurity/2;
+			}
+			int result = xdisintegratey(magr, mdef, dmg, vis);
+			if (result & (MM_DEF_DIED | MM_DEF_LSVD | MM_AGR_DIED))
+				return result;
+		}
+		else if(youagr && otmp->oartifact == ART_BLEEDING_VOID){
+			*plusdmgptr += u.uimpurity/2;
+		}
+	}
 	if (attacks(AD_BLUD, otmp)){
 		if (vis&VIS_MAGR && printmessages) {
 			pline_The("bloodstained %s %s %s%c",
@@ -8260,6 +8306,15 @@ boolean printmessages; /* print generic elemental damage messages */
 					method = VORPAL_BISECT;
 			}
 			break;
+		case ART_BLEEDING_VOID:
+			wepdesc = "blood-rimmed gash";
+			if (dieroll == 1) {
+				if (has_head_mon(mdef) && !(youagr && u.uswallow))
+					method = VORPAL_BEHEAD;
+				else
+					method = VORPAL_BISECT;
+			}
+			break;
 		case ART_ARROW_OF_SLAYING:
 			wepdesc = "heart-seeking arrow";
 			if (dieroll == 1) {
@@ -8314,7 +8369,7 @@ boolean printmessages; /* print generic elemental damage messages */
 			wepdesc = buf;
 			if (dieroll == 1)
 			{
-				int mask = attack_mask(msgr, 0, 0, magr);
+				int mask = attack_mask_vs_mdef(msgr, 0, 0, magr, mdef);
 				if(check_oprop(otmp,OPROP_GSSDW) && has_head_mon(mdef))
 					method = VORPAL_BEHEAD;
 				else if (otmp->otyp == STAKE && is_vampire(mdef->data) && !naoid(mdef->data))
@@ -9577,7 +9632,75 @@ boolean printmessages; /* print generic elemental damage messages */
 
 			}
 		}
-	} 
+	}
+
+	if (oartifact == ART_SIX_ELEMENT_SWORD && !Is_spire(&u.uz)) {
+		if (six_element_channel(oartifact, SIXEL_FIRE)) {
+			if (!Fire_res(mdef) || is_metal_pm(pd)){
+				*truedmgptr += elemental_dmg_resistance(mdef, magr, max(0, d(six_element_fire_dice(), 6) + otmp->spe), AD_FIRE);
+			}
+			if (!UseInvFire_res(mdef)) {
+				if (!rn2(4)) (void) destroy_item(mdef, POTION_CLASS, AD_FIRE);
+				if (!rn2(4)) (void) destroy_item(mdef, SCROLL_CLASS, AD_FIRE);
+				if (!rn2(7)) (void) destroy_item(mdef, SPBOOK_CLASS, AD_FIRE);
+			}
+			if (youdef) burn_away_slime();
+			if (youdef && FrozenAir) melt_frozen_air();
+		}
+		else if (six_element_channel(oartifact, SIXEL_METAL)) {
+			boolean frosted = six_element_channel(oartifact, SIXEL_FROST);
+			if (!Cold_res(mdef))
+				*truedmgptr += elemental_dmg_resistance(mdef, magr, max(0, d(1, frosted ? 8 : 6) + otmp->spe/2), AD_COLD);
+			if (!UseInvCold_res(mdef)) {
+				if (!rn2(frosted ? 6 : 8)) (void) destroy_item(mdef, POTION_CLASS, AD_COLD);
+			}
+			if(frosted && !rn2(10)){
+				cancel_monst(mdef, otmp, TRUE, FALSE, FALSE, FALSE);
+			}
+		}
+		else if (six_element_channel(oartifact, SIXEL_WATER)) {
+			struct obj *cloak = youdef ? uarmc : which_armor(mdef, W_ARMC);
+
+			if (cloak && cloak->greased) {
+				if (!rn2(cloak->blessed ? 4 : 2)) {
+					cloak->greased = 0;
+					if (youdef)
+						pline("The layer of grease on your %s dissolves.", xname(cloak));
+					else if (canseemon(mdef))
+						pline("The layer of grease on %s's %s dissolves.", mon_nam(mdef), xname(cloak));
+				}
+			}
+			else if (!(youdef && Waterproof) && !(!youdef && mon_resistance(mdef, WATERPROOF))) {
+				int mult = (flaming(pd) || is_iron(pd)) ? 2 : 1;
+				*truedmgptr += mult * max(0, d(1, 6) + otmp->spe/2);
+				if (pd->mtyp == PM_GREMLIN && rn2(3))
+					(void)split_mon(mdef, (struct monst *)0);
+			}
+			water_damage(youdef ? invent : mdef->minvent, FALSE, FALSE, FALSE, mdef);
+		}
+		if (six_element_channel(oartifact, SIXEL_ICE)) {
+			if (!Cold_res(mdef))
+				*truedmgptr += elemental_dmg_resistance(mdef, magr, max(0, d(2, 6) + otmp->spe), AD_COLD);
+			if (!UseInvCold_res(mdef)) {
+				if (!rn2(4)) (void) destroy_item(mdef, POTION_CLASS, AD_COLD);
+			}
+		}
+		if (six_element_channel(oartifact, SIXEL_ELEC)) {
+			if (!Shock_res(mdef)) {
+				int mult = shock_vulnerable(mdef) ? 2 : 1;
+				*truedmgptr += elemental_dmg_resistance(mdef, magr, max(0, d(mult, 8) + otmp->spe), AD_ELEC);
+			}
+			if (!UseInvShock_res(mdef)) {
+				if (!rn2(5)) (void) destroy_item(mdef, RING_CLASS, AD_ELEC);
+				if (!rn2(5)) (void) destroy_item(mdef, WAND_CLASS, AD_ELEC);
+			}
+		}
+		if (six_element_channel(oartifact, SIXEL_EARTH)) {
+			if (is_watery(mdef->data)) {
+				*truedmgptr += rnd(20)+otmp->spe;
+			}
+		}
+	}
 	/* ********************************************
 	KLUDGE ALERT AND WARNING: FROM THIS POINT ON, NON-ARTIFACTS OR ARTIFACTS THAT DID NOT TRIGGER SPEC_DBON_APPLIES WILL NOT OCCUR
 	********************************************************
@@ -9601,6 +9724,11 @@ boolean printmessages; /* print generic elemental damage messages */
 		}
 		/* cancel_monst handles resistance */
 		cancel_monst(mdef, otmp, youagr, FALSE, FALSE, FALSE);
+	}
+
+	/*Bleeding Void injures a random limb of the target (only for spec_dbon_applies) */
+	if (oartifact == ART_BLEEDING_VOID && !youdef) {
+		injure_random_limbs(mdef, 1, "by the bleeding gashes");
 	}
 
 	if (oartifact == ART_LIFEHUNT_SCYTHE) {
@@ -10816,6 +10944,7 @@ arti_invoke(obj)
 		|| oart->inv_prop == AMALGUM_ART
 		|| oart->inv_prop == SCORPION_UPGRADES
 		|| oart->inv_prop == IBITE_ARM
+		|| oart->inv_prop == DRAW_BLEEDING_VOID
 	)) {
 	    /* the artifact is tired :-) */
 		if(obj->oartifact == ART_FIELD_MARSHAL_S_BATON){
@@ -10850,6 +10979,7 @@ arti_invoke(obj)
 		|| oart->inv_prop == SCORPION_UPGRADES
 		|| oart->inv_prop == SEVENFOLD
 		|| oart->inv_prop == IBITE_ARM
+		|| oart->inv_prop == DRAW_BLEEDING_VOID
 	))
 		obj->age = monstermoves + (long)(rnz(100)*(u.upriest ? .8 : 1));
 
@@ -14311,6 +14441,9 @@ arti_invoke(obj)
 		break;
 		case WISDOM_DANCE:
 			time = do_wisdom_invoke(obj);
+		break;
+		case DRAW_BLEEDING_VOID:
+			time = bleeding_void_invoke(obj);
 		break;
 		default: pline("Program in disorder.  Artifact invoke property not recognized");
 		break;

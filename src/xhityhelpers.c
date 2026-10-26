@@ -4633,6 +4633,12 @@ is_serration_vulnerable(struct monst *mon){
 boolean
 obj_is_material(struct obj *obj, int mat)
 {
+	if(six_element_channel(obj->oartifact, SIXEL_WOOD))
+		return mat == WOOD;
+	if(six_element_channel(obj->oartifact, SIXEL_EARTH))
+		return mat == MINERAL;
+	if(six_element_channel(obj->oartifact, SIXEL_METAL) && !Is_spire(&u.uz))
+		return metallic_material(mat);
 	if(obj->obj_material == mat)
 		return TRUE;
 	long artmat = 0L;

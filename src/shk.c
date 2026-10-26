@@ -5360,6 +5360,8 @@ struct monst *shkp;
 			}
 
 			obj->spe++;
+			if(is_composite_weapon(obj) && obj->cobj && obj->spe > obj->cobj->spe)
+				obj->cobj->spe++;
 			update_inventory();
 		break;
 		case 3:

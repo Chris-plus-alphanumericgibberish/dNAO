@@ -2490,6 +2490,155 @@ MONSTER: 'd',"werefox",random
 MONSTER: 'd',"werefox",random
 MONSTER: 'd',"werefox",random
 
+MAZE: "Ken-locn",' '
+FLAGS: hardfloor
+INIT_MAP: 'G' , 'T' , false, false, unlit , false
+NOMAP
+
+# Objects
+OBJECT[75%]:'*',random,random
+OBJECT[75%]:'*',random,random
+OBJECT[75%]:'*',random,random
+OBJECT[75%]:'*',random,random
+OBJECT[75%]:'*',random,random
+OBJECT[75%]:'*',random,random
+OBJECT[75%]:'*',random,random
+OBJECT[75%]:'*',random,random
+#
+OBJECT[75%]:'[',random,random
+OBJECT[75%]:'[',random,random
+OBJECT[75%]:'[',random,random
+OBJECT[75%]:'[',random,random
+OBJECT[75%]:'[',random,random
+OBJECT[75%]:'[',random,random
+OBJECT[75%]:'[',random,random
+OBJECT[75%]:'[',random,random
+#
+OBJECT[75%]:'(',random,random
+OBJECT[75%]:'(',random,random
+OBJECT[75%]:'(',random,random
+OBJECT[75%]:'(',random,random
+OBJECT[75%]:'(',random,random
+OBJECT[75%]:'(',random,random
+OBJECT[75%]:'(',random,random
+OBJECT[75%]:'(',random,random
+
+# Random traps
+TRAP:random,random
+TRAP:random,random
+TRAP:random,random
+TRAP:random,random
+TRAP:random,random
+TRAP:random,random
+TRAP:random,random
+TRAP:random,random
+TRAP:random,random
+TRAP:random,random
+TRAP:random,random
+TRAP:random,random
+
+# Random monsters.
+MONSTER:'#',"bard skeleton",random,hostile
+MONSTER:'#',"bard skeleton",random,hostile
+MONSTER:'#',"wolf zombie",random
+MONSTER:'#',"wolf zombie",random
+MONSTER:'#',"elf-lady skeleton",random,hostile
+MONSTER:'#',"wolf zombie",random
+MONSTER:'#',"wolf zombie",random
+MONSTER:'#',"elf-lord skeleton",random,hostile
+MONSTER:'#',"elf-lord skeleton",random,hostile
+MONSTER:'#',"wolf zombie",random
+MONSTER:'#',"lillend skeleton",random,hostile
+MONSTER:'#',"wolf zombie",random
+MONSTER:'#',"wolf zombie",random
+MONSTER:'#',"lillend skeleton",random,hostile
+MONSTER:'#',"wolf zombie",random
+MONSTER:'#',"elf-lady skeleton",random,hostile
+MONSTER:'d',random,random
+MONSTER:'#',"wolf zombie",random
+MONSTER:'W',"wraith",random
+MONSTER:'W',"wraith",random
+MONSTER:'W',"wraith",random
+MONSTER:'W',"wraith",random
+MONSTER:'W',"wraith",random
+MONSTER:'W',"wraith",random
+MONSTER:'W',"wraith",random
+MONSTER:'W',"wraith",random
+MONSTER:'W',"wraith",random
+
+MONSTER:'#',"ranger zombie",random,hostile
+MONSTER:'#',"ranger zombie",random,hostile
+MONSTER:'#',"ranger zombie",random,hostile
+MONSTER:'#',"ranger zombie",random,hostile
+MONSTER:'#',"ranger zombie",random,hostile
+MONSTER:'#',"ranger zombie",random,hostile
+
+MONSTER:'#',"ogre zombie",random
+MONSTER:'#',"ogre zombie",random
+MONSTER:'#',"ogre zombie",random
+MONSTER:'#',"ogre zombie",random
+MONSTER:'#',"ogre zombie",random
+MONSTER:'#',"ogre zombie",random
+
+MONSTER:'Z',"dao lao gui monk",random
+MONSTER:'Z',"dao lao gui monk",random
+MONSTER:'Z',"dao lao gui monk",random
+
+MONSTER:'Z',"dao lao gui monk",random
+MONSTER:'Z',"dao lao gui monk",random
+MONSTER:'Z',"dao lao gui monk",random
+
+MONSTER: random,random,random
+MONSTER: random,random,random
+MONSTER: random,random,random
+MONSTER: random,random,random
+MONSTER: random,random,random
+MONSTER: random,random,random
+MONSTER: random,random,random
+MONSTER: random,random,random
+MONSTER: random,random,random
+MONSTER: random,random,random
+MONSTER: random,random,random
+MONSTER: 'E',"terracotta soldier",random
+MONSTER: 'E',"earth elemental",random
+MONSTER: 'E',"earth elemental",random
+MONSTER: 'O', "ogre mage",random
+MONSTER: 'O', "ogre mage",random
+MONSTER: 'O', "ogre mage",random
+MONSTER: 'd',"werefox",random
+MONSTER: 'd',"werefox",random
+MONSTER: 'd',"werefox",random
+MONSTER: 'd',"werefox",random
+MONSTER: 'd',"werefox",random
+MONSTER: 'd',"werefox",random
+
+GEOMETRY:center,center
+#          1         2         3         4         5         6         7
+#0123456789012345678901234567890123456789012345678901234567890123456789012345
+MAP
+0,,,,,,,,,,,
+1,,,,,,,,,,,
+2,,,eeeee,,,
+3,,,eeeee,,,
+4,,,eeeee,,,
+5,,,eeeee,,,
+6,,,eeeee,,,
+7,,,,,,,,,,,
+8,,,,,,,,,,,
+ENDMAP
+# Magic Chest
+OBJECT:'(',"magic chest",(5,4)
+ALTAR:(5,4),noalign,altar,"an unknown deity"
+OBJECT:'#',"cursed +0 six-element sword",(5,4)
+
+# Stairs
+STAIR:levregion(03,18,78,20), (00,00,00,00), up
+STAIR:levregion(13,01,67,13), (00,00,00,00), down
+
+NOMAP
+# Dungeon Description
+REGION:(02,01,77,20),unlit,"morgue",unfilled
+
 #
 #	The "goal" level for the quest.
 #

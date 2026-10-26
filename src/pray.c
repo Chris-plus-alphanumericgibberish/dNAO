@@ -782,7 +782,7 @@ int godnum;
 	register int	maxanger;
 	char buf[BUFSZ];
 
-	if(godnum == GOD_THE_VOID || godnum == GOD_BOKRUG__THE_WATER_LIZARD || philosophy_index(godnum)) {
+	if(godnum == GOD_THE_VOID || godnum == GOD_BOKRUG__THE_WATER_LIZARD || no_anger_index(godnum)) {
 		/* the void does not get angry */
 		/* Bokrug DOES get angry, but has really bad aim. */
 		/* the various philosophies don't have gods per se. */
@@ -1310,7 +1310,7 @@ const char *words;
 	quot = "\"";
     else
 	words = "";
-	if(philosophy_index(godnum))
+	if(no_anger_index(godnum))
 		return;
 	
 	if(godnum == GOD_THE_VOID){
@@ -1352,7 +1352,7 @@ void
 gods_upset(godnum)
 int godnum;
 {
-	if(godnum == GOD_THE_VOID || philosophy_index(godnum)) return;
+	if(godnum == GOD_THE_VOID || no_anger_index(godnum)) return;
 
 	IMPURITY_UP(u.uimp_god_anger)
 
@@ -2260,7 +2260,7 @@ dosacrifice()
 			You("sense a conference between %s and %s.",
 				u_gname(), a_gname());
 			pline("But nothing else occurs.");
-		} else if(u.ualign.god == GOD_BOKRUG__THE_WATER_LIZARD || u.ualign.god == GOD_TEZCATLIPOCA || philosophy_index(u.ualign.god)){
+		} else if(u.ualign.god == GOD_BOKRUG__THE_WATER_LIZARD || u.ualign.god == GOD_TEZCATLIPOCA || no_anger_index(u.ualign.god)){
 			You("sense %s prepare for a conflict....",
 				a_gname());
 			pline("But nothing else occurs.");
@@ -2625,6 +2625,15 @@ prayer_done()		/* M. Stephenson (1.0.3b) */
 		Your("prayer goes unanswered.");
 		return MOVE_STANDARD; //I think this is meaningless?
 	}
+	if(on_altar() && (p_type == -1 || p_type == 2)
+		&& (no_altar_index(p_god) || p_god == GOD_BOKRUG__THE_WATER_LIZARD)
+	){
+		u.lastprayresult = PRAY_IGNORED;
+		Your("prayer goes unanswered.");
+		if(!no_anger_index(u.ualign.god))
+			adjalign(-1);
+		return MOVE_STANDARD;
+	}
     if(p_type == -1) {
 			godvoice(p_god,
 				gholiness(p_god) == HOLY_HOLINESS ?
@@ -2664,11 +2673,11 @@ prayer_done()		/* M. Stephenson (1.0.3b) */
     }
 
     if (p_type == 0) {
-        if(on_altar() && u.ualign.god != p_god)
+        if(on_altar() && u.ualign.god != p_god && !no_altar_index(p_god) && p_god != GOD_BOKRUG__THE_WATER_LIZARD)
             (void) water_prayer(FALSE);
         angrygods(u.ualign.god);       /* naughty */
     } else if (p_type == 1) {
-		if(on_altar() && u.ualign.god != p_god)
+		if(on_altar() && u.ualign.god != p_god && !no_altar_index(p_god) && p_god != GOD_BOKRUG__THE_WATER_LIZARD)
 			(void) water_prayer(FALSE);
 		if(u.ualign.type != A_VOID){
 			u.ublesscnt += rnz(250);
@@ -4035,7 +4044,7 @@ commune_with_goat()
 				otmp->oeroded = 0;
 				otmp->oeroded2 = 0;
 				otmp->oerodeproof = 1;
-				if(otmp->otyp == CHURCH_BLADE || otmp->otyp == CHURCH_HAMMER){
+				if(is_composite_weapon(otmp)){
 					if(otmp->cobj){
 						add_oprop(otmp->cobj, OPROP_LESSER_ACIDW);
 						otmp->cobj->oeroded = 0;
@@ -4064,7 +4073,7 @@ commune_with_goat()
 				otmp->oeroded = 0;
 				otmp->oeroded2 = 0;
 				otmp->oerodeproof = 1;
-				if(otmp->otyp == CHURCH_BLADE || otmp->otyp == CHURCH_HAMMER){
+				if(is_composite_weapon(otmp)){
 					if(otmp->cobj){
 						remove_oprop(otmp->cobj, OPROP_LESSER_ACIDW);
 						add_oprop(otmp->cobj, OPROP_GOATW);
@@ -4454,7 +4463,7 @@ commune_with_silver_flame()
 					cost = 50;
 					pline("The silver light within %s is focused by your mirror!", doname(otmp));
 					add_oprop(otmp, OPROP_MORTW);
-					if(otmp->otyp == CHURCH_BLADE || otmp->otyp == CHURCH_HAMMER){
+					if(is_composite_weapon(otmp)){
 						if(otmp->cobj){
 							add_oprop(otmp->cobj, OPROP_MORTW);
 						}
@@ -4476,7 +4485,7 @@ commune_with_silver_flame()
 					cost = 50;
 					pline("The silver light within %s is focused by your mirror!", doname(otmp));
 					add_oprop(otmp, OPROP_TDTHW);
-					if(otmp->otyp == CHURCH_BLADE || otmp->otyp == CHURCH_HAMMER){
+					if(is_composite_weapon(otmp)){
 						if(otmp->cobj){
 							add_oprop(otmp->cobj, OPROP_TDTHW);
 						}
@@ -4498,7 +4507,7 @@ commune_with_silver_flame()
 					cost = 50;
 					pline("The silver light within %s is focused by your mirror!", doname(otmp));
 					add_oprop(otmp, OPROP_SFUWW);
-					if(otmp->otyp == CHURCH_BLADE || otmp->otyp == CHURCH_HAMMER){
+					if(is_composite_weapon(otmp)){
 						if(otmp->cobj){
 							add_oprop(otmp->cobj, OPROP_SFUWW);
 						}
@@ -4916,7 +4925,7 @@ commune_with_yog()
 				otmp->oeroded = 0;
 				otmp->oeroded2 = 0;
 				otmp->oerodeproof = 1;
-				if(otmp->otyp == CHURCH_BLADE || otmp->otyp == CHURCH_HAMMER){
+				if(is_composite_weapon(otmp)){
 					if(otmp->cobj){
 						add_oprop(otmp->cobj, OPROP_LESSER_MAGCW);
 						otmp->cobj->oeroded = 0;
@@ -4944,7 +4953,7 @@ commune_with_yog()
 				otmp->oeroded = 0;
 				otmp->oeroded2 = 0;
 				otmp->oerodeproof = 1;
-				if(otmp->otyp == CHURCH_BLADE || otmp->otyp == CHURCH_HAMMER){
+				if(is_composite_weapon(otmp)){
 					if(otmp->cobj){
 						remove_oprop(otmp->cobj, OPROP_LESSER_MAGCW);
 						add_oprop(otmp->cobj, OPROP_SOTHW);
@@ -5153,7 +5162,7 @@ int eatflag;
 		value = 1;
 	}
 
-	if (eatflag != GOAT_EAT_PASSIVE && your_race(ptr) && !is_animal(ptr) && !mindless(ptr) && u.ualign.type != A_VOID && !Role_if(PM_ANACHRONONAUT) && !philosophy_index(u.ualign.god)) {
+	if (eatflag != GOAT_EAT_PASSIVE && your_race(ptr) && !is_animal(ptr) && !mindless(ptr) && u.ualign.type != A_VOID && !Role_if(PM_ANACHRONONAUT) && !no_anger_index(u.ualign.god)) {
 	//No demon summoning.  Your god just smites you, and sac continues.
 		if (u.ualign.type != A_CHAOTIC && u.ualign.type != A_NONE) {
 			adjalign(-5);
@@ -5275,7 +5284,7 @@ yog_sothoth_drink(struct obj *otmp)
 	if (otmp->oeaten)
 		value = eaten_stat(value, otmp);
 
-	if (your_race(ptr) && !is_animal(ptr) && !mindless(ptr) && u.ualign.type != A_VOID && !Role_if(PM_ANACHRONONAUT) && !philosophy_index(u.ualign.god)) {
+	if (your_race(ptr) && !is_animal(ptr) && !mindless(ptr) && u.ualign.type != A_VOID && !Role_if(PM_ANACHRONONAUT) && !no_anger_index(u.ualign.god)) {
 	//No demon summoning.  Your god just smites you, and sac continues.
 		if (u.ualign.type != A_CHAOTIC && u.ualign.type != A_NONE) {
 			adjalign(-5);
@@ -5352,7 +5361,7 @@ boolean offering;
 	if (otmp && otmp->oeaten)
 		value = eaten_stat(value, otmp);
 
-	if (your_race(ptr) && !is_animal(ptr) && !mindless(ptr) && u.ualign.type != A_VOID && !Role_if(PM_ANACHRONONAUT) && !philosophy_index(u.ualign.god)) {
+	if (your_race(ptr) && !is_animal(ptr) && !mindless(ptr) && u.ualign.type != A_VOID && !Role_if(PM_ANACHRONONAUT) && !no_anger_index(u.ualign.god)) {
 	//No demon summoning.  Your god just smites you, and sac continues.
 		if (u.ualign.type != A_LAWFUL && u.ualign.type != A_NONE) {
 			adjalign(-5);

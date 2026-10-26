@@ -302,7 +302,8 @@ explode_full_threats(int x, int y, int adtyp, int olet, int dam, int color, int 
 
 	remove_location_from_explode_region(x, y, area);
 	remove_nonthreats_from_explode_region(area);
-	do_explode(x, y, area, adtyp, olet, dam, color, dest, yours, pa, special_flags);
+	if (area->nlocations)
+		do_explode(x, y, area, adtyp, olet, dam, color, dest, yours, pa, special_flags);
 	free_explode_region(area);
 }
 

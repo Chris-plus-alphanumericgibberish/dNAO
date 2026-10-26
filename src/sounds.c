@@ -3221,7 +3221,7 @@ int dz;
 				do_earthquake(u.ux, u.uy, 10, 2, FALSE, (struct monst *)0);
 				optr = uwep;
 				uwepgone();
-				if(optr->gifted != GOD_NONE && optr->gifted != GOD_THE_VOID && !philosophy_index(optr->gifted)){
+				if(optr->gifted != GOD_NONE && optr->gifted != GOD_THE_VOID && !no_anger_index(optr->gifted)){
 					gods_angry(optr->gifted);
 					gods_upset(optr->gifted);
 				}
@@ -3266,7 +3266,7 @@ int dz;
 
 				optr = uwep;
 				uwepgone();
-				if(optr->gifted != GOD_NONE && optr->gifted != GOD_THE_VOID && !philosophy_index(optr->gifted)){
+				if(optr->gifted != GOD_NONE && optr->gifted != GOD_THE_VOID && !no_anger_index(optr->gifted)){
 					gods_angry(optr->gifted);
 					gods_upset(optr->gifted);
 				}
@@ -6588,6 +6588,8 @@ int p_skill;
 		if (p_skill == P_KNI_SACRED)
 			return TRUE;
 		if (p_skill == P_KNI_ELDRITCH && (u.role_variant == ART_WINTER_REAPER || u.role_variant == ART_KIKU_ICHIMONJI))
+			return TRUE;
+		if (p_skill == P_KNI_RUNIC && u.role_variant == ART_ANCIENT_RITUAL_SWORD)
 			return TRUE;
 	}
 	return FALSE;

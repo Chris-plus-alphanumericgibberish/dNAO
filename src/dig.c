@@ -294,6 +294,8 @@ dig()
 				IS_DOOR(lev->typ) ? "door" : "wall", verb);
 			return MOVE_CANCELLED;
 		}
+		if (IS_TREES(lev->typ) && six_element_channel(digitem->oartifact, SIXEL_AXE))
+			set_six_element_channel(digitem, SIXEL_METAL|SIXEL_AXE);
 	}
 	if(Fumbling &&
 		/* Can't exactly miss holding a lightsaber to the wall */

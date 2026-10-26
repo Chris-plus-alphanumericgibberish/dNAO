@@ -440,6 +440,29 @@ boolean goodequip;
 */
 }
 
+/* Equips [mtmp] as an aasimar Kensei quest enemy. */
+STATIC_OVL void
+aasimar_kensei_quest_initinv(struct monst *mtmp, int mkobjflags)
+{
+	struct obj *otmp;
+
+	(void) mongets(mtmp, GLOVES, mkobjflags);
+	(void) mongets(mtmp, HIGH_BOOTS, mkobjflags);
+	(void) mongets(mtmp, BANDED_MAIL, mkobjflags);
+	(void) mongets(mtmp, HELMET, mkobjflags);
+	if(rn2(2)){
+		otmp = mksobj(SABER, mkobjflags);
+		set_material_gm(otmp, IRON);
+		fix_object(otmp);
+		(void) mpickobj(mtmp, otmp);
+	}
+	else (void) mongets(mtmp, SPEAR, mkobjflags);
+	if(rn2(2)){
+		(void) mongets(mtmp, BOW, mkobjflags);
+		m_initthrow(mtmp, ARROW, 10, mkobjflags);
+	}
+}
+
 STATIC_OVL void
 yochlol_initinv(struct monst *mtmp, int mkobjflags, int faction, boolean goodequip)
 {
@@ -11313,6 +11336,10 @@ int mmflags;
 				return;
 			break;
 		    case PM_ERINYS:{
+				if(In_quest(&u.uz) && Role_if(PM_KENSEI) && u.role_variant == ART_ANCIENT_RITUAL_SWORD){
+					aasimar_kensei_quest_initinv(mtmp, mkobjflags);
+					break;
+				}
 				if(In_mordor_quest(&u.uz) 
 					&& !In_mordor_forest(&u.uz)
 					&& !Is_ford_level(&u.uz)
@@ -18601,6 +18628,8 @@ peace_minded(struct monst *mon)
 	if ((is_eladrin(mon->data) || mon->mtyp == PM_LILLEND) && u.ualign.record >= 20 && flags.aasimar_type == AASIMAR_TYPE_CLOUDFACE) return TRUE;
 	
 	if (is_alabaster_elf(mon->data) && flags.aasimar_type == AASIMAR_TYPE_CLOUDFACE) return TRUE;
+
+	if (is_eladrin(mon->data) && Role_if(PM_KENSEI) && Race_if(PM_AASIMAR) && ual == A_CHAOTIC && u.ualign.record >= 0) return TRUE;
 	
 	//Always hostility, with exception for vampireness and law quest insects
 	if (always_hostile(mon->data) && 

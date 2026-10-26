@@ -235,6 +235,17 @@
 				 (ptr)->mtyp == PM_AMM_KAMEREL || \
 				 (ptr)->mtyp == PM_ARGENTUM_GOLEM)
 #define is_silver_mon(mon)	(is_silver((mon)->data) || has_template(mon, CONSTELLATION))
+#define is_bronze(ptr)	((ptr)->mtyp == PM_CLOCKWORK_SOLDIER || \
+						 (ptr)->mtyp == PM_CLOCKWORK_DWARF || \
+						 (ptr)->mtyp == PM_FABERGE_SPHERE || \
+						 (ptr)->mtyp == PM_FIREWORK_CART || \
+						 (ptr)->mtyp == PM_CLOCKWORK_FACTORY || \
+						 (ptr)->mtyp == PM_JUGGERNAUT || \
+						 (ptr)->mtyp == PM_ID_JUGGERNAUT || \
+						 (ptr)->mtyp == PM_CLOCKWORK_AUTOMATON || \
+						 (ptr)->mtyp == PM_COLOSSAL_CLOCKWORK_WAR_MACHINE || \
+						 (ptr)->mtyp == PM_ARSENAL)
+#define is_metal_pm(ptr)	(is_gold(ptr) || is_iron(ptr) || is_silver(ptr) || is_bronze(ptr))
 #define is_stone(ptr)	((ptr)->mtyp == PM_DUST_VORTEX || \
 				 (ptr)->mtyp == PM_EARTH_ELEMENTAL || \
 				 (ptr)->mtyp == PM_TERRACOTTA_SOLDIER || \

@@ -661,6 +661,36 @@ fixup_special()
 	if(In_quest(&u.uz) && Role_if(PM_KENSEI) && u.role_variant == ART_RINGIL && Is_qlocate(&u.uz)){
 		place_elfhaunt_forest_features();
 	}
+	if(In_quest(&u.uz) && Role_if(PM_KENSEI) && Is_qlocate(&u.uz)
+		&& (u.role_variant == ART_WHIRLING_SWORD || u.role_variant == ART_ANCIENT_RITUAL_SWORD)
+	){
+		/* the fixed maps are laid over random terrain: move anything left inside trees or walls */
+		struct trap *ttmp;
+		int ttyp, tries, tx, ty;
+		for (x = 1; x < COLNO; x++)
+		for (y = 0; y < ROWNO; y++){
+			if (m_at(x, y) && !ZAP_POS(levl[x][y].typ))
+				rloc(m_at(x, y), TRUE);
+			if (OBJ_AT(x, y) && !ZAP_POS(levl[x][y].typ))
+				rlocos_at(x, y);
+			if ((ttmp = t_at(x, y)) && !ZAP_POS(levl[x][y].typ)
+				&& ttmp->ttyp != MAGIC_PORTAL
+			){
+				ttyp = ttmp->ttyp;
+				deltrap(ttmp);
+				for (tries = 0; tries < 200; tries++){
+					tx = rn1(COLNO-2, 1);
+					ty = rn2(ROWNO);
+					if (ACCESSIBLE(levl[tx][ty].typ) && !IS_FURNITURE(levl[tx][ty].typ)
+						&& !t_at(tx, ty) && !is_pool(tx, ty, TRUE) && !is_lava(tx, ty)
+					){
+						(void) maketrap(tx, ty, ttyp);
+						break;
+					}
+				}
+			}
+		}
+	}
 	/* NEUTRAL QUEST: various features */
 	if (In_outlands(&u.uz)){
 		if (!(u.uz.dlevel == spire_level.dlevel || Is_gatetown(&u.uz) || Is_sumall(&u.uz)))

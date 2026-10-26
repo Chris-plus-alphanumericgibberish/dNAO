@@ -476,7 +476,7 @@ char * s;
 
 	SpinCursor(3);
 
-	for (i = 1; i < MAX_GOD; i++) {
+	for (i = 1; i <= MAX_GOD; i++) {
 	    if (god_names[i] && !strcmp(s, god_names[i]))
 		return i;
 	}

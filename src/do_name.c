@@ -849,6 +849,14 @@ const char *name;
 			artinstance[ART_GREEN_DRAGON_CRESCENT_BLAD].GDCBBlessedness |= GDCB_UNBLESSED;
 		}
 
+		if (obj->oartifact == ART_SIX_ELEMENT_SWORD && obj->otyp == LIANQIAO_JIAN) {
+			struct obj *jian;
+			uncreate_contents(obj);
+			jian = mksobj(PANXIN_JIAN, MKOBJ_NOINIT);
+			jian = oname(jian, artiname(ART_BLEEDING_VOID));
+			add_to_container(obj, jian);
+		}
+
 		fix_object(obj);
 
 	    /* can't dual-wield with artifact as secondary weapon */

@@ -1449,7 +1449,7 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 	}
 	/* the deflect grace also lets the hero and intelligent pets block projectiles that weren't redirected */
 	else if (!blaster_proj && !youagr && !(magr && magr->mtame) && grace_empowers(mdef, AAT_GRACE_DEFLECT)
-		&& (youdef ? ((!uwep || !bimanual_mon(uwep, &youmonst)) && rnd(3) < P_SKILL(weapon_type(uwep)))
+		&& (youdef ? ((!uwep || !bimanual_mon(uwep, &youmonst) || is_hero_kensei_weapon(uwep, &youmonst)) && rnd(3) < P_SKILL(weapon_type(uwep)))
 			: (intelligent_mon(mdef) && (MON_WEP(mdef) ? !bimanual_mon(MON_WEP(mdef), mdef) : !nohands(pd))
 				&& rnd(3) < mon_deflect_skill))
 	){

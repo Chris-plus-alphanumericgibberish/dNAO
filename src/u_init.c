@@ -2685,10 +2685,10 @@ u_init()
 				u.role_variant = ART_SUN_S_BOW;
 			}
 			else {
-				Skill_Ken[KENSEI_SKILL].skill = P_TWO_HANDED_SWORD;
+				Skill_Ken[KENSEI_SKILL].skill = P_LONG_SWORD;
 				skill_init(Skill_Ken);
-				skill_add(Skill_Ken_LS);
-				// u.role_variant = ART_WINTER_REAPER;
+				skill_add(Skill_Ken_GW);
+				u.role_variant = ART_ANCIENT_RITUAL_SWORD;
 			}
 			switch (rn2(90) / 30) {
 			case 0: Kensei[KEN_BOOK].trotyp = SPE_SLOW_MONSTER; break;
@@ -3530,11 +3530,13 @@ u_init()
 			}
 			else flags.aasimar_type = rnd(3);
 			if(flags.aasimar_type == AASIMAR_TYPE_ELADRIN){
-				if(rn2(7))
-					flags.aasimar_subtype = rnd(6);
-				else {
-					flags.aasimar_subtype = rnd(LAST_UNCOMMON_ELADRIN_SUBTYPE - LAST_COMMON_ELADRIN_SUBTYPE) + LAST_COMMON_ELADRIN_SUBTYPE;
-				}
+				do {
+					if(rn2(7))
+						flags.aasimar_subtype = rnd(6);
+					else {
+						flags.aasimar_subtype = rnd(LAST_UNCOMMON_ELADRIN_SUBTYPE - LAST_COMMON_ELADRIN_SUBTYPE) + LAST_COMMON_ELADRIN_SUBTYPE;
+					}
+				} while(Role_if(PM_KENSEI) && flags.aasimar_subtype == AASIMAR_SUBTYPE_COURE);
 			}
 			else if(flags.aasimar_type == AASIMAR_TYPE_ARCHON){
 				flags.aasimar_subtype = rn1(LAST_ARCHON_SUBTYPE - FIRST_ARCHON_SUBTYPE + 1, FIRST_ARCHON_SUBTYPE);
@@ -3839,7 +3841,7 @@ register struct trobj *trop;
 				    (objects[otyp].oc_level > 3 ||
 				    restricted_spell_discipline(otyp)))
 				|| (hates_silver(youracedata) && obj->obj_material == SILVER)
-				|| (hates_iron(youracedata) && is_iron_obj(obj))
+				|| (hates_iron(youracedata) && (obj->obj_material == IRON || obj->obj_material == GREEN_STEEL))
 							) {
 				dealloc_obj(obj);
 				obj = mkobj(trop->trclass, FALSE);
@@ -3949,8 +3951,8 @@ register struct trobj *trop;
 						if (objects[otmp->otyp].oc_uses_known) otmp->known = 1;
 					}
 				}
-				if(Role_if(PM_PIRATE) && is_iron_obj(obj)) obj->oerodeproof = 1;
-				if(Role_if(PM_SAMURAI) && obj->oclass == ARMOR_CLASS && is_iron_obj(obj)) obj->oerodeproof = 1;
+				if(Role_if(PM_PIRATE) && (obj->obj_material == IRON || obj->obj_material == GREEN_STEEL)) obj->oerodeproof = 1;
+				if(Role_if(PM_SAMURAI) && obj->oclass == ARMOR_CLASS && (obj->obj_material == IRON || obj->obj_material == GREEN_STEEL)) obj->oerodeproof = 1;
 				if(Role_if(PM_SAMURAI) && obj->otyp == MASK){
 					if(hates_iron(youracedata)){
 						set_material_gm(obj, (RACE_IF_DROW) ? OBSIDIAN_MT : MITHRIL);
@@ -4024,7 +4026,7 @@ register struct trobj *trop;
 				&& (obj->oclass == ARMOR_CLASS || obj->oclass == WEAPON_CLASS)
 				&& !is_ammo(obj)
 			){
-				if(is_iron_obj(obj)){
+				if(obj->obj_material == IRON || obj->obj_material == GREEN_STEEL){
 					set_material_gm(obj, (RACE_IF_DROW) ? OBSIDIAN_MT : MITHRIL);
 				}
 			}

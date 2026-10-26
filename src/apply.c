@@ -2622,10 +2622,14 @@ use_church_weapon(struct obj *obj)
 		You("need to buy it.");
 		return MOVE_CANCELLED;
 	}
-	if(inv_cnt() >= 52 && (
-		obj->otyp == CHURCH_BLADE
-		|| obj->otyp == CHURCH_HAMMER
-	)){
+	if(obj->otyp == LIANQIAO_JIAN && obj->oartifact == ART_SIX_ELEMENT_SWORD){
+		if(u.veil)
+			pline("For some reason, you can't draw the jian.");
+		else
+			pline_The("jian can only be drawn from %s by invoking it.", the(xname(obj)));
+		return MOVE_CANCELLED;
+	}
+	if(inv_cnt() >= 52 && is_composite_weapon(obj)){
 		You("are carrying too much junk to successfully draw your sword.");
 		return MOVE_CANCELLED;
 	}
@@ -2636,6 +2640,10 @@ use_church_weapon(struct obj *obj)
 	if(obj->otyp == CHURCH_BLADE){
 		You("draw the sword from the sheath-blade.");
 		obj->otyp = CHURCH_SHEATH;
+		obj->oclass = TOOL_CLASS;
+	} else if(obj->otyp == LIANQIAO_JIAN){
+		You("draw the jian from the bar.");
+		obj->otyp = BAR_SHEATH;
 		obj->oclass = TOOL_CLASS;
 	} else {
 		You("draw the sword from the stone.");
@@ -2649,6 +2657,10 @@ use_church_weapon(struct obj *obj)
 	else if(obj->otyp == CHURCH_SHEATH){
 		pline("Church blade with no sword inside, recovering from error by creating a new sword.");
 		sword = mksobj(HUNTER_S_LONGSWORD, MKOBJ_NOINIT);
+	}
+	else if(obj->otyp == BAR_SHEATH){
+		pline("Lianqiao jian with no jian inside, recovering from error by creating a new jian.");
+		sword = mksobj(PANXIN_JIAN, MKOBJ_NOINIT);
 	}
 	else {
 		pline("Church hammer with no sword inside, recovering from error by creating a new sword.");
@@ -2681,7 +2693,9 @@ use_church_sword(struct obj *obj)
 		return MOVE_CANCELLED;
 	}
 	struct obj *sheath = 0;
-	int type = obj->otyp == HUNTER_S_LONGSWORD ? CHURCH_SHEATH : CHURCH_BRICK;
+	int type = obj->otyp == HUNTER_S_LONGSWORD ? CHURCH_SHEATH
+			 : obj->otyp == PANXIN_JIAN ? BAR_SHEATH
+			 : CHURCH_BRICK;
 	for(sheath = invent; sheath; sheath = sheath->nobj){
 		if(sheath->otyp == type && !sheath->unpaid)
 			break;
@@ -2699,6 +2713,15 @@ use_church_sword(struct obj *obj)
 		}
 		else
 			You("sheath the sword in the blade.");
+	} else if(sheath->otyp == BAR_SHEATH){
+		sheath->otyp = LIANQIAO_JIAN;
+		if(bimanual_mon(sheath,&youmonst) && (obj == uwep || sheath == uwep) && uarms){
+			You("can't sheath the jian in the bar while wearing a shield.");
+			sheath->otyp = BAR_SHEATH;
+			return MOVE_CANCELLED;
+		}
+		else
+			You("sheath the jian in the bar.");
 	} else {
 		sheath->otyp = CHURCH_HAMMER;
 		if(bimanual_mon(sheath,&youmonst) && (obj == uwep || sheath == uwep) && uarms){
@@ -2731,7 +2754,9 @@ use_church_sheath(struct obj *obj)
 		return MOVE_CANCELLED;
 	}
 	struct obj *sword = 0;
-	int type = obj->otyp == CHURCH_SHEATH ? HUNTER_S_LONGSWORD : HUNTER_S_SHORTSWORD;
+	int type = obj->otyp == CHURCH_SHEATH ? HUNTER_S_LONGSWORD
+			 : obj->otyp == BAR_SHEATH ? PANXIN_JIAN
+			 : HUNTER_S_SHORTSWORD;
 	for(sword = invent; sword; sword = sword->nobj){
 		if(sword->otyp == type && !sword->unpaid)
 			break;
@@ -2749,6 +2774,15 @@ use_church_sheath(struct obj *obj)
 		}
 		else
 			You("sheath the sword in the blade.");
+	} else if(obj->otyp == BAR_SHEATH){
+		obj->otyp = LIANQIAO_JIAN;
+		if(bimanual_mon(obj,&youmonst) && (obj == uwep || sword == uwep) && uarms){
+			You("can't sheath the jian in the bar while wearing a shield.");
+			obj->otyp = BAR_SHEATH;
+			return MOVE_CANCELLED;
+		}
+		else
+			You("sheath the jian in the bar.");
 	} else {
 		obj->otyp = CHURCH_HAMMER;
 		if(bimanual_mon(obj,&youmonst) && (obj == uwep || sword == uwep) && uarms){
@@ -8182,9 +8216,10 @@ use_pole(obj)
 		if (u_pole_pound(mtmp)) {
 			u.uconduct.weaphit++;
 		}
-	} else if(levl[cc.x][cc.y].typ == GRASS){
+	} else if(levl[cc.x][cc.y].typ == GRASS && (attack_mask(obj, 0, 0, &youmonst) & SLASH)){
 		   levl[cc.x][cc.y].typ = SOIL;
-		   if(!rn2(3)) mksobj_at(SHEAF_OF_HAY,cc.x,cc.y,NO_MKOBJ_FLAGS);
+		   if(obj->otyp == SILVERKNIGHT_SCYTHE || obj->otyp == FAUCHARD || obj->otyp == GUISARME || !rn2(3))
+			   mksobj_at(SHEAF_OF_HAY,cc.x,cc.y,NO_MKOBJ_FLAGS);
 		   You("cut away the grass!");
 		   newsym(cc.x,cc.y);
 	} else if(obj->otyp == SILVERKNIGHT_SCYTHE){
@@ -12352,11 +12387,13 @@ doapply()
 		return use_threaded_cane(obj);
 	} else if(obj->otyp == CHIKAGE){
 		return use_chikage(obj);
-	} else if(obj->otyp == CHURCH_HAMMER || obj->otyp == CHURCH_BLADE){
+	} else if(obj->otyp == CHURCH_HAMMER || obj->otyp == CHURCH_BLADE
+		|| (obj->otyp == LIANQIAO_JIAN && !six_element_channel(obj->oartifact, SIXEL_LONG|SIXEL_AXE))
+	){
 		return use_church_weapon(obj);
-	} else if(obj->otyp == HUNTER_S_LONGSWORD || obj->otyp == HUNTER_S_SHORTSWORD){
+	} else if(obj->otyp == HUNTER_S_LONGSWORD || obj->otyp == HUNTER_S_SHORTSWORD || obj->otyp == PANXIN_JIAN){
 		return use_church_sword(obj);
-	} else if(obj->otyp == CHURCH_SHEATH || obj->otyp == CHURCH_BRICK){
+	} else if(obj->otyp == CHURCH_SHEATH || obj->otyp == CHURCH_BRICK || obj->otyp == BAR_SHEATH){
 		return use_church_sheath(obj);
 	} else if(obj->otyp == BEAST_CRUSHER || obj->otyp == BEAST_CUTTER){
 		return use_beast_crusher(obj);

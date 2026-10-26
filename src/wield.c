@@ -940,6 +940,12 @@ register int amount;
 	}
 	uwep->spe += amount;
 	if(amount > 0) uwep->cursed = 0;
+	if(is_composite_weapon(uwep) && uwep->cobj){
+		if(amount > 0 && uwep->cobj->spe < uwep->spe)
+			uwep->cobj->spe = min(uwep->cobj->spe + amount, uwep->spe);
+		else if(amount < 0 && uwep->cobj->spe > uwep->spe)
+			uwep->cobj->spe = max(uwep->cobj->spe + amount, uwep->spe);
+	}
 
 	/*
 	 * Enchantment, which normally improves a weapon, has an
@@ -1263,7 +1269,9 @@ struct monst * mon;
 		return 1.5;
 
 	if (otmp->otyp == ISAMUSEI || otmp->otyp == CHIKAGE || otmp->otyp == KATANA || otmp->otyp == ODACHI
-		|| otmp->otyp == LONG_SWORD || otmp->otyp == CRYSTAL_SWORD || is_vibrosword(otmp))
+		|| otmp->otyp == LONG_SWORD || otmp->otyp == CRYSTAL_SWORD || is_vibrosword(otmp)
+		|| otmp->otyp == LIANQIAO_JIAN || otmp->otyp == PANXIN_JIAN || otmp->otyp == PRACTICE_SWORD
+	)
 		return 1.5;
 	
 	return 1;
@@ -1338,7 +1346,7 @@ bimanual(struct obj * otmp, struct permonst * ptr, boolean base_only, boolean yo
 		return FALSE;
 
 	/* half-sword style requires both hands on the sword, regardless of size */
-	if (yours && is_knight_sword(otmp) && selectedFightingForm(FFORM_HALF_SWORD))
+	if (yours && (is_knight_sword(otmp) || (Role_if(PM_KENSEI) && is_kensei_weapon(otmp))) && selectedFightingForm(FFORM_HALF_SWORD))
 		return TRUE;
 
 	/* bimanual rule: Needs two hands if [object's size] > [wielder's size] by 1 full size */

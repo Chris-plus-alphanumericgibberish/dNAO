@@ -3043,6 +3043,80 @@ long timeout;
 	}
 }
 
+/* Describes the Six-Element Sword [obj] ceasing to channel the elements and modifiers in [ended]. */
+STATIC_OVL void
+six_element_end_message(struct obj *obj, long ended)
+{
+	if (obj->where != OBJ_INVENT || Blind)
+		return;
+	//Wood
+	if ((ended & SIXEL_WOOD) && (ended & SIXEL_ELEC))
+		pline_The("scabbard's swirling etchings no longer flicker with lightning, and the sharp spike crumbles from the chape.");
+	else if (ended & SIXEL_WOOD)
+		pline_The("polished wood onlay and sharp chape-spike crumble from the scabbard.");
+	else if (ended & SIXEL_ELEC)
+		pline_The("scabbard's swirling etchings no longer flicker with lightning.");
+	//Fire
+	if (ended & SIXEL_FIRE)
+		pline_The("scabbard's wavy etchings no longer glow %s-hot.",
+			(ended & SIXEL_FIRE_MODIFIERS) == SIXEL_FIRE_MODIFIERS ? "white" : "red");
+	//Earth
+	if (ended & SIXEL_FIELD)
+		pline_The("green glaze crumbles from the scabbard's broken-line etchings, and the rough glaze from the triangular.");
+	else if (ended & SIXEL_EARTH)
+		pline_The("rough glaze crumbles from the scabbard's triangular etchings.");
+	//Metal
+	if (ended & SIXEL_FROST)
+		pline_The("frost on the scabbard melts and the circular etchings lose much of their luster.");
+	else if (ended & SIXEL_METAL)
+		pline_The("scabbard's circular etchings lose much of their luster.");
+	//Water
+	if (ended & SIXEL_ICE)
+		pline_The("fractal ice blades melt from the scabbard's edges and the curling etchings lose their slick icy sheen.");
+	else if (ended & SIXEL_WATER)
+		pline_The("scabbard's curling etchings lose their watery sheen.");
+}
+
+/* The Six-Element Sword [arg] stops channeling its current element and modifiers. */
+void
+revert_six_element(genericptr_t arg, long timeout)
+{
+	struct obj *obj = (struct obj *) arg;
+	if(obj->oartifact != ART_SIX_ELEMENT_SWORD)
+		return;
+	six_element_end_message(obj, artinstance[ART_SIX_ELEMENT_SWORD].SixElementChannel);
+	artinstance[ART_SIX_ELEMENT_SWORD].SixElementChannel = SIXEL_NONE;
+	if(obj->where == OBJ_INVENT)
+		update_inventory();
+}
+
+/* The Six-Element Sword [obj] starts channeling [element] (which may include modifiers) for 100 turns, keeping only the existing modifiers that belong to [element]. Does nothing on the Spire. */
+void
+set_six_element_channel(struct obj *obj, long element)
+{
+	long *channel = &artinstance[ART_SIX_ELEMENT_SWORD].SixElementChannel;
+
+	if (Is_spire(&u.uz))
+		return;
+	if (element & SIXEL_WOOD)
+		*channel = (*channel & SIXEL_WOOD_MODIFIERS) | element;
+	else if (element & SIXEL_METAL)
+		*channel = (*channel & SIXEL_METAL_MODIFIERS) | element;
+	else if (element & SIXEL_WATER)
+		*channel = (*channel & SIXEL_WATER_MODIFIERS) | element;
+	else if (element & SIXEL_EARTH)
+		*channel = (*channel & SIXEL_EARTH_MODIFIERS) | element;
+	else if (element & SIXEL_FIRE)
+		*channel = (*channel & SIXEL_FIRE_MODIFIERS) | element;
+	else
+		*channel = element;
+	if (obj->timed)
+		(void) stop_timer(REVERT_SIX_ELEMENT, obj->timed);
+	start_timer(100, TIMER_OBJECT, REVERT_SIX_ELEMENT, (genericptr_t)obj);
+	if (obj->where == OBJ_INVENT)
+		update_inventory();
+}
+
 void
 cloud_drift(arg, timeout)
 genericptr_t arg;
@@ -3198,6 +3272,8 @@ static const ttable timeout_funcs[NUM_TIME_FUNCS] = {
 	TTAB(unsuppress_object,	(timeout_proc)0,	"unsuppress_object"),
 	TTAB(relight_mon,		(timeout_proc)0,	"relight_mon"),
 	TTAB(crumble_if_improved,	(timeout_proc)0,	"crumble_if_improved"),
+	TTAB(revert_six_element,	(timeout_proc)0,	"revert_six_element"),
+	TTAB(revert_bleeding_void,	(timeout_proc)0,	"revert_bleeding_void"),
 };
 #undef TTAB
 

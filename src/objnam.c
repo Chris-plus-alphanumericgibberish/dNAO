@@ -1640,6 +1640,10 @@ boolean adjective;
 		/* except for "forked" the wooden wand descriptions are materials (eg pine) */
 		if (obj->oclass == WAND_CLASS && ((s = OBJ_DESCR(objects[obj->otyp])) != (char *)0 && strncmpi(s, "forked", 6)))
 			return OBJ_DESCR(objects[obj->otyp]);
+		else if (obj->otyp == PRACTICE_SWORD)
+			return "bamboo";
+		else if (obj->otyp == RITUAL_SWORD)
+			return "peach wood";
 		else
 			return (adjective ? "wooden" : "wood");
 	case CHITIN:
@@ -2407,6 +2411,26 @@ weapon:
 						Sprintf(eos(buf), " (discordant notes)");
 					break;
 				}
+			}
+			if(obj->oartifact == ART_SIX_ELEMENT_SWORD){
+				if(six_element_channel(obj->oartifact, SIXEL_ELEC))
+					Strcat(buf, " (lightning)");
+				else if(six_element_channel(obj->oartifact, SIXEL_WOOD))
+					Strcat(buf, " (wood)");
+				else if(six_element_channel(obj->oartifact, SIXEL_FIRE))
+					Strcat(buf, " (fire)");
+				else if(six_element_channel(obj->oartifact, SIXEL_FIELD))
+					Strcat(buf, " (field)");
+				else if(six_element_channel(obj->oartifact, SIXEL_EARTH))
+					Strcat(buf, " (earth)");
+				else if(six_element_channel(obj->oartifact, SIXEL_FROST))
+					Strcat(buf, " (frosted)");
+				else if(six_element_channel(obj->oartifact, SIXEL_METAL))
+					Strcat(buf, " (metal)");
+				else if(six_element_channel(obj->oartifact, SIXEL_ICE))
+					Strcat(buf, " (ice)");
+				else if(six_element_channel(obj->oartifact, SIXEL_WATER))
+					Strcat(buf, " (water)");
 			}
 			//#ifdef FIREARMS
 			if (obj->otyp == STICK_OF_DYNAMITE) {

@@ -471,7 +471,7 @@ divine_banishment(void)
 }
 
 void
-cyclone_slash_monsters(boolean full_attack)
+cyclone_slash_monsters(boolean full_attack, boolean single_target)
 {
 	struct monst *mon;
 	int sdx = u.dx;
@@ -482,6 +482,8 @@ cyclone_slash_monsters(boolean full_attack)
 	extern const int clockwisey[8];
 	int offset = rn2(8);
 	int ix, iy;
+	long result;
+	boolean passes;
 	for(int i = 0; i < 8; i++){
 		//Necessary for any knockbacks.
 		u.dx = clockwisex[(offset+i)%8];
@@ -497,7 +499,10 @@ cyclone_slash_monsters(boolean full_attack)
 		if(!mon || (mon->mpeaceful && !Hallucination) || DEADMONSTER(mon))
 			continue;
 		
-		xmeleehity(&youmonst, mon, &weaponhit, &uwep, (VIS_MAGR | VIS_NONE) | (canseemon(mon) ? VIS_MDEF : 0), 0, FALSE, full_attack ? 0 : ATTKFLAG_SHOCKWAVE);
+		passes = single_target && ritual_sword_target(uwep, mon);
+		result = xmeleehity(&youmonst, mon, &weaponhit, &uwep, (VIS_MAGR | VIS_NONE) | (canseemon(mon) ? VIS_MDEF : 0), 0, FALSE, (full_attack ? 0 : ATTKFLAG_SHOCKWAVE)|edge_strike_dmgtype(uwep, &youmonst, mon));
+		if(single_target && ((result & (MM_AGR_DIED | MM_AGR_STOP)) || (!passes && (result & (MM_HIT | MM_DEF_DIED)))))
+			break;
 	}
 	u.dx = sdx;
 	u.dy = sdy;

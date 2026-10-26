@@ -123,6 +123,11 @@ enum {
 #define IS_PUDDLE(typ)	((typ) == PUDDLE)
 #define IS_PUDDLE_OR_POOL(typ)	(IS_PUDDLE(typ) || IS_POOL(typ))
 #define IS_FEATURE(typ)	(IS_FURNITURE(typ) || IS_DRAWBRIDGE(typ))
+/* walkable terrain at x,y that a pit can't be dug in */
+#define undiggable_floor(x,y)	(IS_ALTAR(levl[x][y].typ) || IS_THRONE(levl[x][y].typ) || \
+			 IS_DRAWBRIDGE(levl[x][y].typ) || is_drawbridge_wall(x,y) >= 0 || \
+			 (IS_DOOR(levl[x][y].typ) && artifact_door(x,y)) || \
+			 (t_at(x,y) && (t_at(x,y)->ttyp == MAGIC_PORTAL || !Can_dig_down(&u.uz))))
 
 /*
  * The screen symbols may be the default or defined at game startup time.

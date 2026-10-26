@@ -1354,11 +1354,18 @@ domove()
 	    (glyph_is_invisible(levl[x][y].glyph) && !flags.nopick)) {
 		boolean expl = (Upolyd && attacktype(youracedata, AT_EXPL));
 	    	char buf[BUFSZ];
-		Sprintf(buf,"a vacant spot on the %s", surface(x,y));
-		You("%s %s.",
-		    expl ? "explode at" : "attack",
-		    !Underwater ? "thin air" :
-		    is_pool(x,y, FALSE) ? "empty water" : buf);
+		if(!expl && uwep && is_farm(uwep) && levl[x][y].typ == GRASS){
+			levl[x][y].typ = SOIL;
+			mksobj_at(SHEAF_OF_HAY, x, y, NO_MKOBJ_FLAGS);
+			You("cut away the grass!");
+		}
+		else {
+			Sprintf(buf,"a vacant spot on the %s", surface(x,y));
+			You("%s %s.",
+				expl ? "explode at" : "attack",
+				!Underwater ? "thin air" :
+				is_pool(x,y, FALSE) ? "empty water" : buf);
+		}
 		{
 			struct attack attkbuff = {0};
 			struct attack *attk;

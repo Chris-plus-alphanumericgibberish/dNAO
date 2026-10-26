@@ -6899,6 +6899,10 @@ xkilled(mtmp, dest)
 	if(!mtmp->mcan && attacktype_fordmg(mtmp->data, AT_NONE, AD_MROT)){
 		mummy_curses_x(mtmp, &youmonst);
 	}
+	if(uwep && six_element_channel(uwep->oartifact, SIXEL_FIELD) && !Is_spire(&u.uz)){
+		healup(mtmp->m_lev, 0, FALSE, FALSE);
+		field_grows_grass(x, y);
+	}
 	
 	if (mtmp->mtrapped && (t = t_at(x, y)) != 0 &&
 		(t->ttyp == PIT || t->ttyp == SPIKED_PIT) &&

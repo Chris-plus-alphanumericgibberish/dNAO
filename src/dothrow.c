@@ -413,8 +413,8 @@ hurtle_step(arg, x, y)
     boolean may_pass = TRUE;
     struct trap *ttmp;
 	static long last_messaged = 0L;
-	boolean spiralcloud, passage, nightjar, sakura, path;
-	spiralcloud = passage = nightjar = sakura = path = FALSE;
+	boolean spiralcloud, passage, nightjar, sakura, path, crush, ashfall, whirlpool, snowfall;
+	spiralcloud = passage = nightjar = sakura = path = crush = ashfall = whirlpool = snowfall = FALSE;
 	if(Role_if(PM_KENSEI) && uwep && is_kensei_weapon(uwep)){
 		if(u.role_variant == ART_SKY_REFLECTED || u.role_variant == ART_SILVER_SKY){
 			if(artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_POWER)
@@ -434,6 +434,19 @@ hurtle_step(arg, x, y)
 			}
 			else {
 				passage = TRUE;
+			}
+		}
+		else if(u.role_variant == ART_ANCIENT_RITUAL_SWORD && uwep->oartifact == ART_SIX_ELEMENT_SWORD){
+			if(six_element_channel(uwep->oartifact, SIXEL_WATER)){
+				whirlpool = TRUE;
+				passage = !Is_spire(&u.uz);
+			}
+			else if(six_element_channel(uwep->oartifact, SIXEL_METAL)){
+				snowfall = TRUE;
+			}
+			else {
+				crush = TRUE;
+				ashfall = six_element_channel(uwep->oartifact, SIXEL_FIRE) && !Is_spire(&u.uz);
 			}
 		}
 	}
@@ -510,7 +523,13 @@ hurtle_step(arg, x, y)
 			u.dx = x - u.ux;
 			u.dy = y - u.uy;
 			flags.forcefight = TRUE;
-			if(spiralcloud){
+			if(whirlpool){
+				if(last_messaged < monstermoves){
+					pline("Whirlpool spiral!");
+					last_messaged = monstermoves;
+				}
+			}
+			else if(spiralcloud){
 				if(last_messaged < monstermoves){
 					pline("Spiralcloud passage!");
 					exercise(A_CON, TRUE);
@@ -539,6 +558,20 @@ hurtle_step(arg, x, y)
 					last_messaged = monstermoves;
 				}
 			}
+			else if(snowfall){
+				if(last_messaged < monstermoves){
+					pline("Still snowfall!");
+					last_messaged = monstermoves;
+				}
+				set_six_element_channel(uwep, SIXEL_METAL|SIXEL_FROST);
+			}
+			else if(crush){
+				if(last_messaged < monstermoves){
+					pline(ashfall ? "Ash fall!" : "Crush!");
+					last_messaged = monstermoves;
+				}
+				set_six_element_channel(uwep, SIXEL_EARTH);
+			}
 			if(!Upolyd && Role_if(PM_KENSEI) && u.role_variant == ART_SUN_S_BOW
 				&& uwep && is_kensei_weapon(uwep) && u_can_kick()
 			){
@@ -552,7 +585,15 @@ hurtle_step(arg, x, y)
 			else
 				attack2(mon);
 			flags.forcefight = FALSE;
-			boolean stop = m_at(x, y) || (!passage && !path && partial_action());
+			if(ashfall && m_at(x, y) == mon && !DEADMONSTER(mon)){
+				/* knocked back like a rolling boulder's victim: straight back or off to one side */
+				int tx = sgn(x - u.ux), ty = sgn(y - u.uy), r = rn2(3);
+				int kx = (tx&&!ty) ? tx : (!tx&&ty) ? rn2(3)-1 : (r != 2) ? tx : 0;
+				int ky = (ty&&!tx) ? ty : (!ty&&tx) ? rn2(3)-1 : (r != 1) ? ty : 0;
+				if(kx || ky)
+					mhurtle(mon, kx, ky, 1, TRUE);
+			}
+			boolean stop = m_at(x, y) || (!passage && !path && !ashfall && partial_action());
 			if(stop && m_at(x, y) && nightjar){
 				mon = m_at(x, y);
 				u.dx = x - u.ux;
@@ -569,7 +610,7 @@ hurtle_step(arg, x, y)
 				}
 			}
 			if(spiralcloud)
-				cyclone_slash_monsters(FALSE);
+				cyclone_slash_monsters(FALSE, FALSE);
 			if(stop)
 				return FALSE;
 			exercise(A_INT, TRUE); // for using a special technique, for standard jumps only affects the first monster
@@ -596,6 +637,10 @@ hurtle_step(arg, x, y)
     newsym(ox, oy);		/* update old position */
     vision_recalc(1);		/* update for new position */
     flush_screen(1);
+    if(whirlpool && uwep && uwep->oartifact == ART_SIX_ELEMENT_SWORD && whirlpool_spiral_waves(uwep, last_messaged < monstermoves))
+	last_messaged = monstermoves;
+    if(snowfall && !Is_spire(&u.uz) && uwep && uwep->oartifact == ART_SIX_ELEMENT_SWORD && still_snowfall_cancels(uwep, last_messaged < monstermoves))
+	last_messaged = monstermoves;
     /* FIXME:
      * Each trap should really trigger on the recoil if
      * it would trigger during normal movement. However,
