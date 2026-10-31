@@ -2449,7 +2449,7 @@ register struct obj *o1, *o2;
 			}
 		break;
 		case POT_BLOOD:
-			if(o1->corpsenm == PM_MAID) switch (o2->otyp) {
+			if(o1->corpsenm == PM_NURSE) switch (o2->otyp) {
 			    case POT_BLOOD:
 					if(o2->corpsenm != PM_DEEP_DRAGON && o2->corpsenm != PM_NEWT) break;
 			    case POT_GAIN_LEVEL:
