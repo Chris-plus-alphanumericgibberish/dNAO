@@ -7734,7 +7734,8 @@ boolean printmessages; /* print generic elemental damage messages */
 		}
 		if (spec_dbon_applies && !(otmp->oartifact == ART_BLOODLETTER && artinstance[otmp->oartifact].BLactive < monstermoves)){
 			*truedmgptr += mlev(mdef);
-			IMPURITY_UP(u.uimp_blood);
+			if(youagr || youdef)
+				IMPURITY_UP(u.uimp_blood);
 
 			if(youagr){
 				*plusdmgptr += u.uimpurity/2;
