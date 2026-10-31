@@ -4153,6 +4153,7 @@ commune_with_goat()
 #define FLAMEBOON_SILVER_FLAME_SPIRIT	18
 #define FLAMEBOON_SILVER_FLAME_WRATH	19
 #define FLAMEBOON_SILVER_FLAME_ILLUSION	20
+#define FLAMEBOON_MUTATE	21
 int
 dosflm_menu(greater_boon)
 boolean greater_boon;	/* you have shown devotion enough to ask for a greater boon */
@@ -4212,6 +4213,15 @@ boolean greater_boon;	/* you have shown devotion enough to ask for a greater boo
 			MENU_UNSELECTED);
 	}
 	else inclet+=2;
+	
+	if (uclockwork && metallic_material(u.clk_material) && (greater_boon || u.usfmreforged)){
+		Sprintf(buf, (!u.usfmreforged) ? "Forge yourself anew" : "Forge yourself once more");
+		any.a_int = FLAMEBOON_MUTATE;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			inclet++, 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+
 	if(greater_boon || (check_reanimation(RE_FLAME) && u.umortalgifted)){
 		Sprintf(buf, "Focus the light to reveal mortality");
 		any.a_int = FLAMEBOON_BURN_MORTALITY;
@@ -4325,6 +4335,79 @@ boolean greater_boon;	/* you have shown devotion enough to ask for a greater boo
 	}
 	return 0;
 }
+
+boolean
+sflm_mutation()
+{
+	winid tmpwin;
+	int n, how;
+	char buf[BUFSZ];
+	menu_item *selected;
+	char inclet = 'a';
+	anything any;
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;		/* zero out all bits */
+
+	Sprintf(buf, "Forge yourself:");
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+	*buf = '\0';
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+	
+	int mut;
+	int i;
+	extern const int sflame_mutation_list[];
+	extern const struct mutationtype mutationtypes[];
+	for (mut = 0; sflame_mutation_list[mut]; mut++){
+		if (sflame_mutation_list[mut] >= SMELT_SELF_S && sflame_mutation_list[mut] <= SMELT_SELF_P && !metallic_material(u.clk_material))
+			continue; // no smelting if not metallic
+		if (sflame_mutation_list[mut] >= INERRING_TIMEPIECE && sflame_mutation_list[mut] <= EXPOSED_FURNACE && 
+			!(u.clk_material == SILVER || u.clk_material == PLATINUM || u.clk_material == MITHRIL))
+			continue; // no extra swag if not silver, platinum, or mithril
+		
+		if(sflame_mutation_list[mut] == EXPOSED_FURNACE && !check_mutation(UNBLEMISHED_FOUNDRY))
+			continue; // can't expose a non-existent furnace
+		
+		if (sflame_mutation_list[mut] == SMELT_SELF_S && u.clk_material == SILVER)
+			continue;
+		if (sflame_mutation_list[mut] == SMELT_SELF_P && u.clk_material == PLATINUM)
+			continue;
+		if (sflame_mutation_list[mut] == SMELT_SELF_M && u.clk_material == MITHRIL)
+			continue;
+
+		if(!check_mutation(sflame_mutation_list[mut])) for (i = 0; mutationtypes[i].mutation; i++){
+			if(sflame_mutation_list[mut] == mutationtypes[i].mutation){
+				any.a_int = sflame_mutation_list[mut];
+				add_menu(tmpwin, NO_GLYPH, &any,
+					inclet, 0, ATR_NONE, mutationtypes[i].name,
+					MENU_UNSELECTED);
+				break; //break out of inner loop
+			}
+		}
+		if(inclet == 'z')
+			inclet = 'A';
+		else
+			inclet++;
+	}
+	end_menu(tmpwin, "The light glances off your metallic body...");
+
+	how = PICK_ONE;
+	n = select_menu(tmpwin, how, &selected);
+	destroy_nhwindow(tmpwin);
+	int picked;
+	if(n > 0){
+		picked = selected[0].item.a_int;
+		free(selected);
+	}
+	else return FALSE;
+	
+	pline("You bask in the reflected light of the silver flame.");
+	confer_mutation(picked);
+	u.silver_flame_mutations++;
+	return TRUE;
+}
+
 
 int
 commune_with_silver_flame()
@@ -4609,6 +4692,14 @@ commune_with_silver_flame()
 			u.ucultsval += TIER_D; /*Theory: Most targets here are either already affected by fireball or are already covered by other silver flame upgrades. */
 			break;
 		/* If you were to add all the silver flame invocation boons, the total tier would be two S tiers and an C tier */
+		case FLAMEBOON_MUTATE:
+			cost = 0;
+			int had_reforge = (u.usfmreforged) ? 1 : 0;
+			if(sflm_mutation()){
+				cost = 50;
+				if (!had_reforge) u.ucultsval += TIER_B;
+			}
+			break;
 	}
 	
 	if(!cost)
@@ -5511,7 +5602,25 @@ u_holiness()
 {
 	// 1 is holy, 0 is neutral, -1 is unholy
 	// fallen < -3, blessed > 3. >, not >=
-	switch (gholiness(u.ualign.god)){
+	int your_holiness = gholiness(u.ualign.god);
+
+	// binders are unholy by default. eden or simurgh will make them holy, amon or tenebrous will make them unholy. cancels out 1-1
+	if (your_holiness == VOID_HOLINESS){
+		your_holiness = 0;
+
+		if (u.sealsActive&SEAL_EDEN) your_holiness++;
+		if (u.sealsActive&SEAL_SIMURGH) your_holiness++;
+		if (u.specialSealsActive&SEAL_COSMOS) your_holiness++;
+		if (u.specialSealsActive&SEAL_TWO_TREES) your_holiness++;
+
+		if (u.sealsActive&SEAL_AMON) your_holiness--;
+		if (u.sealsActive&SEAL_TENEBROUS) your_holiness--;
+		if (u.specialSealsActive&SEAL_MISKA) your_holiness--;
+
+		if (your_holiness > 0)  your_holiness = HOLY_HOLINESS;
+		else 					your_holiness = UNHOLY_HOLINESS;
+	}
+	switch (your_holiness){
 		case UNHOLY_HOLINESS:
 		case VOID_HOLINESS:
 			return (u_blessed()) ? UNHOLY_HOLINESS : ((u_fallen()) ? HOLY_HOLINESS : NEUTRAL_HOLINESS);

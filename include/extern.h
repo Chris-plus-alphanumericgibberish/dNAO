@@ -1207,6 +1207,7 @@ E void FDECL(dipfountain, (struct obj *));
 E void FDECL(breakforge, (int, int));
 E void NDECL(drinkforge);
 E void FDECL(dipforge, (struct obj *));
+E void FDECL(dipfoundry, (struct obj *));
 #ifdef SINKS
 E void FDECL(breaksink, (int,int));
 E void NDECL(drinksink);
@@ -2616,6 +2617,7 @@ E void FDECL(u_psi_blast_effects, (struct monst *, int, int));
 E int NDECL(domindblast);
 E int NDECL(dodarken);
 E int NDECL(doandroid);
+E int NDECL(doexposefoundry);
 E int NDECL(doclockspeed);
 E int FDECL(dowords, (int));
 E void FDECL(skinback, (BOOLEAN_P));

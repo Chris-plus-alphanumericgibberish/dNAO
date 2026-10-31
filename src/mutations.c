@@ -47,6 +47,16 @@ const int yog_mutation_list[] = {YOG_GAZE_1,
 					 0
 					};
 
+const int sflame_mutation_list[] = {SMELT_SELF_S,
+					 SMELT_SELF_M,
+					 SMELT_SELF_P,
+					 INERRING_TIMEPIECE,
+					 ANODIC_MIND,
+					 UNBLEMISHED_FOUNDRY,
+					 EXPOSED_FURNACE,
+					 0
+					};
+
 const struct mutationtype mutationtypes[] =
 {
 	{ ABHORRENT_SPORE, -1, "abhorrent spore", "An abhorrent spore has taken root on your body." },
@@ -63,6 +73,13 @@ const struct mutationtype mutationtypes[] =
 	// { BY_THE_SMELL, -1, "bladder of Yog-Sothoth", "A gas-filled bladder swells then vanishes. An unholy stench fills the air!"},
 	{ TWIN_SAVE, -1, "empathic link", "You feel a strong connection to your twin."},
 	{ SHUB_TENTACLES, -1, "tentacle valves", "You have valves in your skull, allowing HER to reach through your mind."},
+	{ SMELT_SELF_S, -1, "smelt yourself silver", "You forge yourself anew."},
+	{ SMELT_SELF_M, -1, "smelt yourself mithril", "You forge yourself anew."},
+	{ SMELT_SELF_P, -1, "smelt yourself platinum", "You forge yourself anew."},
+	{ INERRING_TIMEPIECE, -1, "inerring timepiece", "Your internal timepiece has fallen silent."},
+	{ ANODIC_MIND, -1, "anodic photoreceptors", "Your processors hum with the frequency of Law."},
+	{ UNBLEMISHED_FOUNDRY, -1, "unblemished foundry", "Your internal boiler burns with a silver flame."},
+	{ EXPOSED_FURNACE, -1, "exposed foundry", "An opening on your chest reveals the foundry within."},
 	//Tiefling traits, these use the start forming names and descriptions
 	// Smell Traits
 	{ TT_POISON_CLOUD, SMELL_TRAIT, "stinking clouds", "You can emit stinking clouds.", "corpse stench", "You stink like a rotting corpse."},
@@ -290,6 +307,8 @@ int mutation;
 	int i;
 	if(mutation == SHIFTING_MIND){
 		reset_skills();
+	} else if (mutation == SMELT_SELF_S || mutation == SMELT_SELF_M || mutation == SMELT_SELF_P){
+		u.usfmreforged = TRUE;
 	}
 	else add_mutation(mutation);
 	
@@ -1264,6 +1283,10 @@ mutation_effects(int mutation)
 		rescham();
 		see_monsters();
 	}
+	else if (mutation == SMELT_SELF_S) u.clk_material = SILVER;
+	else if (mutation == SMELT_SELF_M) u.clk_material = MITHRIL;
+	else if (mutation == SMELT_SELF_P) u.clk_material = PLATINUM;
+	
 	if(is_horn_mut(mutation) && check_mutation(mutation)){
 		if(uarmh && !helm_match(&youmonst, uarmh)){
 			Your("%s no longer fits!", xname(uarmh));

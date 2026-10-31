@@ -150,7 +150,8 @@ struct objclass {
 
 /* primary damage: fire/rust/--- */
 /* is_flammable(otmp), is_rottable(otmp) in mkobj.c */
-#define is_rustprone(otmp)	((otmp)->obj_material == IRON || (otmp)->obj_material == GREEN_STEEL)
+#define rustprone_material(mat)	((mat) == IRON || (mat) == GREEN_STEEL)
+#define is_rustprone(otmp)	(rustprone_material((otmp)->obj_material))
 
 /* secondary damage: rot/acid/acid */
 #define is_corrodeable(otmp)	((otmp)->obj_material == COPPER || (otmp)->obj_material == IRON || (otmp)->obj_material == GREEN_STEEL)

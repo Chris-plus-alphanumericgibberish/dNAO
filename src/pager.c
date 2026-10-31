@@ -639,7 +639,7 @@ lookat(x, y, buf, monbuf, shapebuff)
 		    normal++;
 		}
 		/* see invisible */
-		if (useemon && mtmp->minvis)
+		if (useemon && mtmp->minvis && See_invisible(mtmp->mx, mtmp->my))
 		    ways_seen++;
 		/* infravision */
 		if ((!mtmp->minvis || See_invisible(mtmp->mx,mtmp->my)) && see_with_infrared(mtmp))
@@ -652,6 +652,9 @@ lookat(x, y, buf, monbuf, shapebuff)
 		    ways_seen++;
 		/* senseall */
 		if ((!mtmp->minvis || See_invisible(mtmp->mx, mtmp->my)) && see_with_senseall(mtmp))
+		    ways_seen++;
+		/* anodic mind vs. invis guys */
+		if (mtmp->minvis && !See_invisible(mtmp->mx, mtmp->my) && see_with_anodic(mtmp))
 		    ways_seen++;
 		/* earthsense */
 		if (see_with_earthsense(mtmp))
@@ -683,7 +686,7 @@ lookat(x, y, buf, monbuf, shapebuff)
 			/* can't actually be 1 yet here */
 			if (ways_seen-- > 1) Strcat(monbuf, ", ");
 		    }
-		    if (useemon && mtmp->minvis) {
+		    if (useemon && mtmp->minvis && See_invisible(mtmp->mx, mtmp->my)) {
 			Strcat(monbuf, "see invisible");
 			if (ways_seen-- > 1) Strcat(monbuf, ", ");
 		    }
@@ -721,6 +724,10 @@ lookat(x, y, buf, monbuf, shapebuff)
 		    }
 		    if (rlyehian_sensemon(mtmp)) {
 			Strcat(monbuf, "r'lyehian sight");
+			if (ways_seen-- > 1) Strcat(monbuf, ", ");
+		    }
+			if (mtmp->minvis && !See_invisible(mtmp->mx, mtmp->my) && see_with_anodic(mtmp)) {
+			Strcat(monbuf, "anodic photoreceptors");
 			if (ways_seen-- > 1) Strcat(monbuf, ", ");
 		    }
 		    if (useemon && xraydist > 0 &&

@@ -5233,13 +5233,18 @@ struct zapdata * zapdata;
 
 			/* player */
 			if (youdef && !Golded && !(Stone_resistance && youracedata->mtyp != PM_STONE_GOLEM)
-				&& !is_gold(youracedata)
+				&& !is_gold_mon(&youmonst)
 				&& !(poly_when_golded(youracedata) && polymon(PM_GOLD_GOLEM))
 				) {
 				Golded = 9;
 				delayed_killer = "the breath of Mammon";
 				killer_format = KILLED_BY;
 				/* continue on to deal damage */
+			}
+			/* player clockworks turn to gold but don't die */
+			if (youdef && uclockwork && u.clk_material != GOLD) {
+				u.clk_material = GOLD;
+				You("turn to gold!");
 			}
 			/* monster */
 			if (!youdef && !resists_ston(mdef) && !is_gold(mdef->data)) {

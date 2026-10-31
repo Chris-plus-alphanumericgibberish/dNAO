@@ -587,7 +587,13 @@ boolean you_abilities;
 		add_ability('c', "Adjust your clockspeed", MATTK_CLOCK);
 	}
 	if (mon_abilities && uandroid){
-		add_ability('d', "Use Android abilities", MATTK_DROID);
+		add_ability('d', "Use android abilities", MATTK_DROID);
+	}
+	if (mon_abilities && uclockwork && check_mutation(UNBLEMISHED_FOUNDRY)){
+		add_ability('d', "Use internal foundry", MATTK_FOUNDRY);
+	}
+	if (mon_abilities && uclockwork && check_mutation(EXPOSED_FURNACE) && u.ufurnaceexposed <= moves){
+		add_ability('e', "Expose foundry", MATTK_EXPOSE_FOUNDRY);
 	}
 	if (you_abilities && Race_if(PM_HALF_DRAGON) && Role_if(PM_BARD) && u.ulevel >= 14) {
 		add_ability('E', "Sing an Elemental into being", MATTK_U_ELMENTAL);
@@ -749,6 +755,20 @@ boolean you_abilities;
 	case MATTK_MIND: return domindblast();
 	case MATTK_CLOCK: return doclockspeed();
 	case MATTK_DROID: return doandroid();
+	case MATTK_FOUNDRY: {
+		if (u.ufurnaceexposed > moves) {
+			Your("internal foundry needs some time to recover.");
+			return MOVE_CANCELLED;
+		} else {
+			char allowall[2] = { ALL_CLASSES, '\0'};
+			struct obj* otmp;
+			if(!(otmp = getobj(allowall, "place in your foundry"))) return MOVE_CANCELLED;
+			else dipfoundry(otmp);
+			return MOVE_STANDARD;
+		}
+	}
+	break;
+	case MATTK_EXPOSE_FOUNDRY: return doexposefoundry();
 	case MATTK_MUTATION: return domutation();
 	case MATTK_DARK: return dodarken();
 	case MATTK_REPL: {

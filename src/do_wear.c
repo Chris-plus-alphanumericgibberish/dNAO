@@ -3162,6 +3162,7 @@ find_ac()
 	if(u.specialSealsActive&SEAL_DAHLVER_NAR && !Upolyd) uac -=  min(u.ulevel/2,(u.uhpmax - u.uhp)/10);
 	else if(u.specialSealsActive&SEAL_DAHLVER_NAR && Upolyd) uac -=  min(u.ulevel/2,(u.mhmax - u.mh)/10);
 	if(uclockwork) uac -= (u.clockworkUpgrades&ARMOR_PLATING) ? 5 : 2; /*armor bonus for automata*/
+	if(uclockwork && u.clk_material == MITHRIL) uac -= 1;
 	if(uandroid) uac -= 6; /*armor bonus for androids*/
 	if(check_mutation(TT_NA_SCALES)) uac -= u.ulevel >= 30 ? 6 : (u.ulevel >= 14 ? 3 : 1);
 	if(check_mutation(TT_SCALES) || check_mutation(TT_CHITIN)) uac -= u.ulevel >= 30 ? 3 : u.ulevel >= 14 ? 2 : 1;
@@ -3209,6 +3210,7 @@ int base_nat_udr()
 	if(u.specialSealsActive&SEAL_COSMOS) udr += (spiritDsize()+1)/2;
 	if(u.sealsActive&SEAL_ECHIDNA) udr += max((ACURR(A_CON)-9)/4, 0);
 	if(uclockwork && u.clockworkUpgrades&ARMOR_PLATING) udr += 4; /*armor bonus for automata (stacks with the 1 natural DR)*/
+	if(uclockwork && u.clk_material == MITHRIL) udr += 1;
 	if(check_mutation(TT_DR_SCALES)) udr += u.ulevel >= 30 ? 9 : (u.ulevel >= 14 ? 6 : 3); /*natural armor scales*/
 	if(check_mutation(TT_SCALES) || check_mutation(TT_CHITIN)) udr += u.ulevel >= 30 ? 6 : u.ulevel >= 14 ? 3 : 1;
 	

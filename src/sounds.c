@@ -4723,6 +4723,7 @@ int tx,ty;
 					ritual = GOLD_RITUAL;
 				}
 			}
+			if (uclockwork && u.clk_material == GOLD && !ritual) ritual = GOLD_RITUAL; // we are made of gold stuff, or something
 			if(ritual){
 				boolean knowsDwarfBones = (Race_if(PM_DWARF) || Role_if(PM_ARCHEOLOGIST));
 				boolean knowsOldDwarvish = (Race_if(PM_DWARF) && (Role_if(PM_ARCHEOLOGIST) || Role_if(PM_KNIGHT) || Role_if(PM_CAVEMAN) || Role_if(PM_NOBLEMAN)));

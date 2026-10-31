@@ -75,7 +75,14 @@ struct mutationtype {
 #define	BY_THE_SMELL		12
 #define	TWIN_SAVE		13
 #define	SHUB_TENTACLES		14
-#define LAST_CULT_MUTATION		SHUB_TENTACLES
+#define SMELT_SELF_S		15
+#define SMELT_SELF_M		16
+#define SMELT_SELF_P		17
+#define INERRING_TIMEPIECE  18
+#define ANODIC_MIND		19
+#define UNBLEMISHED_FOUNDRY 20
+#define EXPOSED_FURNACE		21
+#define LAST_CULT_MUTATION		EXPOSED_FURNACE
 //Tiefling Traits
 #define	TT_POISON_CLOUD		LAST_CULT_MUTATION+1
 #define	TT_FIRE_BLAST_1		LAST_CULT_MUTATION+2
@@ -265,7 +272,7 @@ struct mutationtype {
 #define AAS_STAGE_GRACE_3	0x0200L
 
 #define check_mutation(mut) (has_mutation(mut) && (mut <= LAST_CULT_MUTATION || !Upolyd))
-#define has_mutation(mut) ((u.mutations[(mut-1)/32]) & (0x1L << ((mut-1)%32)))
+#define has_mutation(mut) (((u.mutations[(mut-1)/32]) & (0x1L << ((mut-1)%32))) != 0)
 #define add_mutation(mut) (u.mutations[(mut-1)/32] |= (0x1L << ((mut-1)%32)))
 #define remove_mutation(mut) (u.mutations[(mut-1)/32] &= ~(0x1L << ((mut-1)%32)))
 

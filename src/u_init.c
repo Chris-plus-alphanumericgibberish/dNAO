@@ -3549,6 +3549,8 @@ u_init()
 		for(int i=0; i<SIZE(mutation_levels); i++){
 			flags.tiefling_level[i] = mutation_levels[i];
 		}
+	} else if (uclockwork){
+		u.clk_material = COPPER;
 	}
 	/* Fix up the alignment quest nemesi */
 	mons[PM_OONA].mcolor = (u.oonaenergy == AD_FIRE) ? CLR_RED 

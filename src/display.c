@@ -900,7 +900,8 @@ newsym(x,y)
 				     || see_with_lifesense(mon) || see_with_senseall(mon))
 				    && mon_visible(mon)) || see_with_earthsense(mon)))
 		     || Detect_monsters
-		     || sense_by_scent(mon))
+		     || sense_by_scent(mon)
+			 || see_with_anodic(mon))
 		 && !is_worm_tail(mon)) {
 	    /* Monsters are printed every time. */
 	    /* This also gets rid of any invisibility glyph */

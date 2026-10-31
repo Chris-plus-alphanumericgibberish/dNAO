@@ -4279,7 +4279,7 @@ int perturn;
 		return 0;
 	}
 	
-	if(turns > 100){
+	if(turns > 100 && !(check_mutation(INERRING_TIMEPIECE) && turns <= 200)){
 		pline("\"That sounds really boring.\"");
 		return 0;
 	}
@@ -4470,10 +4470,12 @@ windclock()
   }
   else {
 	if(victual.reqtime - victual.usedtime >= 10){
-		if(!Race_if(PM_INCANTIFIER)) u.uhunger += 100;
+		if(!Race_if(PM_INCANTIFIER)) 
+			u.uhunger += (check_mutation(INERRING_TIMEPIECE) ? 200 : 100);
 		victual.usedtime += 10;
 	} else {
-		if(!Race_if(PM_INCANTIFIER)) u.uhunger += (victual.reqtime - victual.usedtime) * 10;
+		if(!Race_if(PM_INCANTIFIER)) 
+			u.uhunger += (victual.reqtime - victual.usedtime) * (check_mutation(INERRING_TIMEPIECE) ? 20 : 10);
 		victual.usedtime += (victual.reqtime - victual.usedtime);
 	}
   }

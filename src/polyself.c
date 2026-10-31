@@ -2093,6 +2093,49 @@ doandroid()
 }
 
 int
+doexposefoundry(){
+	struct monst *mon;
+	pline("A pillar of silver fire erupts from your internal foundry!");
+	if (Invis) {
+		HInvis &= ~INTRINSIC;
+		You_feel("paranoid.");
+	}
+	
+	if (u.uboiler > 400) Your("boiler immediately dries up!");
+	u.uboiler = 0;
+
+	if (u.ustove > 10) Your("remaining stove fuel immediately combusts!");
+	u.ustove = 0;
+
+	if (u.utemp < MELTING) Your("chassis glows white-hot!");
+	u.utemp += 10; // straight to MELTING minimum
+
+	for (mon = fmon; mon; mon = mon->nmon) {
+		if (DEADMONSTER(mon) || !clear_path(mon->mx, mon->my, u.ux, u.uy) || distu(mon->mx, mon->my) > 13)
+			continue;
+		if (mon->minvis){
+			mon->perminvis = 0;
+			if (!mon_extrinsic(mon, INVIS)) {
+				mon->minvis = 0;
+				newsym(mon->mx, mon->my);
+			}
+		}
+		if (sflm_target(mon)){
+			if (!resists_blnd(mon)){
+				mon->mblinded = d(1, min(u.ualign.record, 20));
+				mon->mcansee = 0;
+				mon->mstrategy &= ~STRAT_WAITFORU;
+			}
+			mon->mflamemarked = TRUE;
+			mon->myoumarked = TRUE;
+		}
+	}
+	
+	u.ufurnaceexposed = moves + (long)(rnz(100)*(u.upriest ? .8 : 1)); // priests can have that 
+	return MOVE_STANDARD;
+}
+
+int
 dowords(splaction)
 int splaction;
 {

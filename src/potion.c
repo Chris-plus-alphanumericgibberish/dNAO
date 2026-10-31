@@ -74,6 +74,7 @@ boolean talk;
 		    You_feel("less %s now.",
 			Hallucination ? "trippy" : "confused");
 	}
+	if (uclockwork && check_mutation(INERRING_TIMEPIECE) && xtime > 3L) xtime = 3L;
 	if ((xtime && !old) || (!xtime && old)) flags.botl = TRUE;
 
 	set_itimeout(&HConfusion, xtime);
@@ -101,6 +102,7 @@ boolean talk;
 			You("%s...", stagger(&youmonst, "stagger"));
 		}
 	}
+	if (uclockwork && check_mutation(INERRING_TIMEPIECE) && xtime > 3L) xtime = 3L;
 	if ((!xtime && old) || (xtime && !old)) flags.botl = TRUE;
 
 	set_itimeout(&HStun, xtime);
@@ -333,7 +335,7 @@ long mask;	/* nonzero if resistance status should change by mask */
 	message = (!xtime) ? "Everything %s SO boring now." :
 			     "Oh wow!  Everything %s so cosmic!";
 	verb = (!Blind) ? "looks" : "feels";
-
+	if (uclockwork && check_mutation(INERRING_TIMEPIECE) && xtime > 3L) xtime = 3L;
 	if (mask) {
 	    if (HHallucination) changed = TRUE;
 
@@ -1503,7 +1505,7 @@ as_extra_healing:
 		}break;
 	case POT_MIDAS:
 		if (!Golded && !(Stone_resistance && youracedata->mtyp != PM_STONE_GOLEM)
-			&& !is_gold(youracedata)
+			&& !is_gold_mon(&youmonst)
 			&& !(poly_when_golded(youracedata) && polymon(PM_GOLD_GOLEM))
 			) {
 			Golded = 9;
@@ -1769,7 +1771,7 @@ boolean your_fault;
 	break;
 	case POT_MIDAS:
 		if (!Golded && !(Stone_resistance && youracedata->mtyp != PM_STONE_GOLEM)
-			&& !is_gold(youracedata)
+			&& !is_gold_mon(&youmonst)
 			&& !(poly_when_golded(youracedata) && polymon(PM_GOLD_GOLEM))
 			) {
 			Golded = 9;
@@ -2131,7 +2133,7 @@ boolean your_fault;
 		(void) bhitm(mon, obj);
 		break;
 	case POT_MIDAS:
-		if (!resists_ston(mon) && !is_gold(mon->data)) {
+		if (!resists_ston(mon) && !is_gold_mon(mon)) {
 			minstagoldify(mon, TRUE);
 		}
 		break;
@@ -2998,6 +3000,11 @@ dodip()
 //			if (obj->otyp == POT_ACID) useup(obj); //Potential error here
 		    }
 		    return MOVE_STANDARD;
+		}
+	} else if (uclockwork && check_mutation(UNBLEMISHED_FOUNDRY)) {
+		if (yn("Place it inside your internal foundry?") == 'y') {
+			dipfoundry(obj);
+			return MOVE_STANDARD;
 		}
 	}
 

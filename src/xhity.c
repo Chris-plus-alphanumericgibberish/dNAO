@@ -17203,15 +17203,22 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 			}
 		}
 
+		if (hates_lawful(pd)){
+			if(is_platinum_mon(magr)) {
+				// platinumobj |= W_SKIN; silent rn
+				seardmg += d(1, platinum_diesize(mdef));
+			}
+		}
+
 		if (hates_holy_mon(mdef)){
 			if(magr->mtyp == PM_UVUUDAUM){
 				uuvuglory |= W_SKIN;
 				seardmg += d(4, 9);
 			}
-			else if(is_holy_mon(magr) || (youagr && !Upolyd && TIEFLING_FALLEN)) {
+			else if(is_holy_mon(magr) || (youagr && !Upolyd && TIEFLING_FALLEN) || (youagr && uclockwork && u.clk_material == GOLD)) {
 				holyobj |= W_SKIN;
 				seardmg += d(min(3, 1+mlev(magr)/10), 7);
-			} 
+			}
 		}
 		if (hates_unholy_mon(mdef)){
 			if(magr->mtyp == PM_UVUUDAUM){
@@ -17540,6 +17547,7 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 		if (uclockwork && !Fire_res(mdef) && u.utemp) {
 			int heatdie = min(u.utemp, 20);
 			int heatdice = (1 + (u.utemp >= MELTING) + (u.utemp >= MELTED));
+			if (u.clk_material == COPPER) heatdice *= 2;
 			/* unarmed */
 			if (unarmed_punch)
 			{

@@ -68,7 +68,7 @@
  */
 #define mon_visible(mon) (		/* The hero can see the monster     */\
 					/* IF the monster		    */\
-    (!mon->minvis || See_invisible(mon->mx,mon->my)) &&	/* 1. is not invisible AND	    */\
+    (!mon->minvis || See_invisible(mon->mx,mon->my) || see_with_anodic(mon)) &&	/* 1. is not invisible AND	    */\
     (!mon->mundetected) &&		/* 2. not an undetected hider	    */\
     (!(mon->mburied || u.uburied))	/* 3. neither you or it is buried   */\
 )
@@ -130,6 +130,12 @@
 #define see_with_omnisense(mon) (Omnisense && (see_with_infrared(mon) || see_with_bloodsense(mon) \
 	|| see_with_lifesense(mon) || see_with_senseall(mon)) && mon_visible(mon))
 
+/*
+ * see_with_anodic()
+ *
+ * This function is true if the player can see a monster using "anodic processors", whatever those are.
+ */
+#define see_with_anodic(mon) (!Blind && uclockwork && check_mutation(ANODIC_MIND) && hates_lawful_mon(mon) && (couldsee((mon)->mx, (mon)->my) || Omnisense))
 
 /*
  * canseemon()

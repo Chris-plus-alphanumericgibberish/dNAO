@@ -1278,6 +1278,9 @@ resistances_enlightenment()
 		putstr(en_win, 0, "You have used your partial action this round.");
 	
 	if (uclockwork){
+		struct obj obj = {0};
+		obj.obj_material = u.clk_material;
+
 		if(u.ucspeed==HIGH_CLOCKSPEED) putstr(en_win, 0, "Your clock is set to high speed.");
 		if(u.ucspeed==NORM_CLOCKSPEED) putstr(en_win, 0, "Your clock is set to normal speed.");
 		if(u.ucspeed==SLOW_CLOCKSPEED) putstr(en_win, 0, "Your clock is set to low speed.");
@@ -1299,9 +1302,13 @@ resistances_enlightenment()
 		else {
 			if (Fire_resistance)
 				putstr(en_win, 0, "Your thermal sinks are well beyond capacity, but miraculously intact!");
-			else // man, if you manage to see this one i'll be impressed
-				putstr(en_win, 0, "Your internal boiler is nothing but molten bronze.");
+			else { // man, if you manage to see this one i'll be impressed
+				Sprintf(buf, "Your internal boiler is nothing but molten %s.", material_name(&obj, FALSE));
+				putstr(en_win, 0, buf);
+			}
 		}
+		Sprintf(buf, "You are made of %s.", material_name(&obj, FALSE));
+		putstr(en_win, 0, buf);
 	}
 	if (uandroid){
 		if(u.ucspeed==HIGH_CLOCKSPEED) putstr(en_win, 0, "You are set to emergency speed.");

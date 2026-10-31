@@ -1838,6 +1838,105 @@ gdcb_manage_ingots(struct obj *blade)
 }
 
 void
+dipfoundry(struct obj *obj)
+{
+	if (u.ufurnaceexposed > moves){
+		Your("internal foundry needs some time to recover.");
+		return;
+	}
+	
+	boolean forgeable = is_metallic(obj) || (u.ublood_smithing && (!is_flammable(obj) || obj->oerodeproof || obj->oartifact));
+	boolean smith_arti = (obj->oartifact == ART_FIRE_BRAND) || (obj->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD);
+	if(obj->owornmask&(W_WORN & ~(W_RING|W_ARMG))){
+		You("can't exactly manuever your %s into your foundry while wearing it.", xname(obj));
+		return; // rings and gloves you can PROBABLY shove in there
+	}
+
+	if(!forgeable && !smith_arti && yn("Are you sure you want to place that object in your foundry?") != 'y')
+		return;
+
+	/* check if should cleanse or destroy before smithing, since it happens regardless */
+	if (forgeable || smith_arti || (!is_flammable(obj) && !obj->oerodeproof) || obj_resists(obj, 0, 100)) {
+		if(!Blind){
+			if (obj->bknown && (obj->blessed || obj->cursed)) 			// b/c known
+				You("cleanse your %s in the reflected light of the silver flame.", xname(obj));
+			else if (obj->bknown) 										// unc known
+				Your("%s shines bright in the silver light.", xname(obj));
+			else if (obj->blessed || obj->cursed)						// b/c unknown
+				Your("%s is lanced by the silver light.", xname(obj));
+			else														// unc unknown
+				Your("%s shines brilliantly in the silver light.", xname(obj));
+		} else {
+			You("place your %s inside your internal foundry, cleansing it in the light.", xname(obj));
+		}
+		unbless(obj);
+		uncurse(obj);
+		obj->bknown = TRUE;
+
+		if (Punished && obj == uball && uwep && is_hammer(uwep)) {
+			You("place the ball and chain inside the foundry.");
+			pline("Raising your %s, you strike the chain...",
+				xname(uwep));
+			if (!rn2((P_SKILL(P_HAMMER) < P_SKILLED) ? 8 : 2)
+				&& Luck >= 0) { /* training up hammer skill pays off */
+				pline("The chain breaks free!");
+				unpunish();
+			} else {
+				pline("Clang!");
+			}
+			return;
+		}
+		
+		if(obj->otyp == CHIKAGE && (obj_is_material(obj, HEMARGYOS) || check_oprop(obj, OPROP_HAEM))){
+			pline("The blood burns off the sword!");
+			if(check_oprop(obj, OPROP_HAEM)){
+				remove_oprop(obj, OPROP_HAEM);
+			}
+			else {
+				set_material_gm(obj, obj->ovar1_alt_mat);
+				obj->oeroded = access_oeroded(obj->ovar2_alt_erosion);
+				obj->oeroded2 = access_oeroded2(obj->ovar2_alt_erosion);
+				obj->oeroded3 = access_oeroded3(obj->ovar2_alt_erosion);
+				set_object_color(obj);
+			}
+			(void) stop_timer(REVERT_OBJECT, obj->timed);
+			fix_object(obj);
+		}
+
+		/* it's technically possible to have a forgeable fire brand or non-forgeable gdcb (off-mat), which would preclude
+		 * the check for smithing skill */
+		if(obj->oartifact == ART_FIRE_BRAND && (P_RESTRICTED(P_SMITHING) || !forgeable || yn("Reshape Fire Brand?") == 'y')){
+			reshape_brand(obj);
+			if (P_RESTRICTED(P_SMITHING) || !forgeable) return;
+		}
+		if (obj->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD && (P_RESTRICTED(P_SMITHING) || !forgeable || yn("Adjust ballast?") == 'y')) {
+			gdcb_manage_ingots(obj);
+			if (P_RESTRICTED(P_SMITHING) || !forgeable) return;
+		}
+		/* now we can check if we're allowed to smith this */
+		if (!P_RESTRICTED(P_SMITHING) && !Confusion && !Stunned && forgeable){
+			if(!((obj->known || obj->oartifact || !check_oprop(obj, OPROP_NONE)) && obj->rknown && obj->sknown)){
+				obj->known = obj->rknown = obj->sknown = TRUE;
+				pline("You assess the quality of %s.", the(xname(obj)));
+				use_skill(P_SMITHING, 1);
+				exercise(A_INT, TRUE);
+			}
+			if(obj != uwep && uwep && is_hammer(uwep) && !bimanual_mon(uwep, &youmonst)){
+				smithing_object(obj); // we're going to say you can somehow fit your entire arm inside your chest
+			}
+		}
+	} else {
+		if (!Has_contents(obj)) {
+			Your("%s is immediately disintegrated by the silver inferno!", xname(obj));
+			if(obj->where != OBJ_FREE) obj_extract_and_unequip_self(obj);
+			delobj(obj);
+		} else fire_damage(obj, TRUE, u.ux, u.uy);
+	}
+
+	update_inventory();
+}
+
+void
 dipforge(struct obj *obj)
 {
 	if (Levitation) {
@@ -1850,22 +1949,7 @@ dipforge(struct obj *obj)
 	
 	boolean forgeable = (u.ublood_smithing && (!is_flammable(obj) || obj->oerodeproof || obj->oartifact)) || is_metallic(obj);
 
-	if(obj->oartifact == ART_FIRE_BRAND && (P_RESTRICTED(P_SMITHING) || yn("Reshape Fire Brand?") == 'y')){
-		if(obj->owornmask&W_ARMOR){
-			You("can't reshape fire brand while wearing it.");
-			return;
-		}
-		reshape_brand(obj);
-		return;
-	}
-	if (obj->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD) {
-		gdcb_manage_ingots(obj);
-		return;
-	}
-	/* Dipping something you're still wearing into a forge filled with
-	 * lava, probably not the smartest thing to do. This is gonna hurt.
-	 * Non-metallic objects are handled by lava_damage().
-	 */
+	/* chikage first, it happens regardless */
 	if(obj->otyp == CHIKAGE && (obj_is_material(obj, HEMARGYOS) || check_oprop(obj, OPROP_HAEM))){
 		pline("The blood burns off the sword!");
 		if(check_oprop(obj, OPROP_HAEM)){
@@ -1882,6 +1966,23 @@ dipforge(struct obj *obj)
 		fix_object(obj);
 		update_inventory();
 	}
+	/* it's technically possible to have a forgeable fire brand or non-forgeable gdcb (off-mat), which would preclude
+	 * the check for smithing skill. otherwise, allow reshape/prying and smithing in the same action 
+	 * note this still cannot ever trigger "are you sure about non metal" check */
+	if(obj->oartifact == ART_FIRE_BRAND && (P_RESTRICTED(P_SMITHING) || !forgeable || yn("Reshape Fire Brand?") == 'y')){
+		if(obj->owornmask&W_ARMOR){
+			You("can't reshape fire brand while wearing it.");
+		} else reshape_brand(obj);
+		if (P_RESTRICTED(P_SMITHING) || !forgeable) return;
+	}
+	if (obj->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD && (P_RESTRICTED(P_SMITHING) || yn("Adjust ballast?") == 'y')) {
+		gdcb_manage_ingots(obj);
+		if (P_RESTRICTED(P_SMITHING) || !forgeable) return;
+	}
+	/* Dipping something you're still wearing into a forge filled with
+	 * lava, probably not the smartest thing to do. This is gonna hurt.
+	 * Non-metallic objects are handled by lava_damage().
+	 */
 	if(!P_RESTRICTED(P_SMITHING) && !forgeable){
 		if(yn("Are you sure you want to forge a non-metal object?") != 'y')
 			return;

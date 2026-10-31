@@ -2535,6 +2535,7 @@ int vis;
 		!(weapon && check_oprop(weapon, OPROP_SFLMW)) &&
 		!(youagr && u.ustuck && u.ustuck == mdef) &&
 		!(youagr && u.uswallow) &&
+		!(youagr && uclockwork && check_mutation(ANODIC_MIND) && hates_lawful_mon(mdef)) &&
 		!(has_passthrough_displacement(mdef->data) && hits_insubstantial(magr, mdef, attk, weapon)) &&
 		rn2(2)
 		) {

@@ -273,7 +273,8 @@ struct monst *magr;
 			tmp += 2;
 	}
 
-	if(youagr && (check_mutation(TT_CLOCKWORK_EYES) || u.seraph_eyes >= SE_FUTURE) && mon && canseemon_eyes(mon)){
+	if(youagr && (u.seraph_eyes >= SE_FUTURE ||
+			check_mutation(TT_CLOCKWORK_EYES) || (uclockwork && check_mutation(ANODIC_MIND))) && mon && canseemon_eyes(mon)){
 		if(is_chaotic_mon(magr))
 			tmp += rnd(4);
 		else if(is_lawful_mon(magr))
@@ -281,7 +282,8 @@ struct monst *magr;
 		else
 			tmp += rnd(10);
 	}
-	else if(mon == &youmonst && (check_mutation(TT_CLOCKWORK_EYES) || u.seraph_eyes >= SE_FUTURE) && magr && canseemon_eyes(magr)){
+	else if(mon == &youmonst && (u.seraph_eyes >= SE_FUTURE ||
+			check_mutation(TT_CLOCKWORK_EYES) || (uclockwork && check_mutation(ANODIC_MIND))) && magr && canseemon_eyes(magr)){
 		if(is_chaotic_mon(magr))
 			tmp -= rnd(4);
 		else if(is_lawful_mon(magr))

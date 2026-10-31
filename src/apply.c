@@ -5147,7 +5147,9 @@ use_smithing_hammer(struct obj *obj)
 		MASS_OF_STUFF, SCRAP, HELLFIRE_COMPONENT, BROKEN_ANDROID, BROKEN_GYNOID,
 	0};
 
-    if(!IS_FORGE(levl[u.ux][u.uy].typ)) {
+	if (uclockwork && check_mutation(UNBLEMISHED_FOUNDRY)) {
+		Your("internal foundry roars to life, ready to forge.");
+	} else if(!IS_FORGE(levl[u.ux][u.uy].typ)) {
 		pline("You'll need a forge to use this!");
 		return MOVE_CANCELLED;
 	}
