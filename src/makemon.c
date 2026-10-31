@@ -11497,6 +11497,9 @@ int mmflags;
 					fix_object(otmp);
 					(void) mpickobj(mtmp, otmp);
 				}
+				else if(In_quest(&u.uz) && Role_if(PM_KENSEI) && u.role_variant == ART_WHIRLING_SWORD){
+					aasimar_kensei_quest_initinv(mtmp, mkobjflags);
+				}
 				else if(In_quest(&u.uz) && Role_if(PM_CONVICT)){
 					if(rn2(2)){
 						otmp = mksobj(BALL, mkobjflags|MKOBJ_NOINIT);

@@ -2758,6 +2758,10 @@ makelevel()
 				Sprintf(fillname, "%s-locj", urole.filecode);
 			else if(u.role_variant == ART_KIKU_ICHIMONJI)
 				Sprintf(fillname, "%s-lock", urole.filecode);
+			else if(u.role_variant == ART_WHIRLING_SWORD)
+				Sprintf(fillname, "%s-locl", urole.filecode);
+			else if(u.role_variant == ART_SUN_S_BOW)
+				Sprintf(fillname, "%s-locm", urole.filecode);
 			else if(u.role_variant == ART_ANCIENT_RITUAL_SWORD)
 				Sprintf(fillname, "%s-locn", urole.filecode);
 			else 

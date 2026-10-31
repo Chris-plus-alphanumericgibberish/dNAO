@@ -2799,6 +2799,12 @@ role_edit()
 		else if(u.role_variant == ART_RINGIL){
 			urole.enemy1sym = S_WRAITH;
 		}
+		else if(u.role_variant == ART_WHIRLING_SWORD){
+			urole.enemy2num = PM_LILITU;
+		}
+		else if(u.role_variant == ART_SUN_S_BOW){
+			urole.enemy1sym = S_NAGA;
+		}
 		else if(u.role_variant == ART_ANCIENT_RITUAL_SWORD){
 			urole.enemy2num = PM_ERINYS;
 		}
