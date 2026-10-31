@@ -27196,7 +27196,7 @@ perform_monk_move(int moveID, int *move_cost)
 		case SPIN_CRANE:
 			if(circle_monk_target(TRUE)){
 				pline("%s!", move_name(moveID));
-				u.uspin_crane = 1;
+				u.uspin_crane = 2;
 				return TRUE;
 			}
 		break;

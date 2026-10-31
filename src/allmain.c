@@ -1001,7 +1001,8 @@ you_calc_movement()
 	
 	if(In_fog_cloud(&youmonst)) moveamt = max(moveamt/3, 1);
 	/* defensive monk stances last only for the remainder of the turn */
-	u.uspin_crane = 0;
+	if(u.uspin_crane)
+		u.uspin_crane--;
 	u.upray_mantis = 0;
 	u.ureceptive_field = 0;
 	youmonst.movement += moveamt;

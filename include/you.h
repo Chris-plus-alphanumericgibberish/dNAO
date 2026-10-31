@@ -469,7 +469,7 @@ struct you {
 	Bitfield(uavoid_theft,1);
 	Bitfield(uno_auto_attacks,1);
 	Bitfield(uavoid_urpassives,1);
-	Bitfield(uspin_crane,1);	/* redirect the next attack aimed at you */
+	Bitfield(uspin_crane,2);	/* redirect the next attack aimed at you */
 	Bitfield(upray_mantis,1);	/* block one limbed attack from each attacker */
 	Bitfield(ureceptive_field,1);	/* attackers heal you */
 #define DIVE_KICK  1

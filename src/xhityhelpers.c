@@ -601,7 +601,7 @@ mattacku(struct monst *mtmp)
 {
 	struct monst *redirect;
 
-	if (u.uspin_crane && (redirect = crane_redirect_target(mtmp))) {
+	if (activeFightingForm(FFORM_MNK_CRANE) && (u.uspin_crane || mtmp->mstun || mtmp->mconf) && (redirect = crane_redirect_target(mtmp))) {
 		if (canseemon(mtmp) || canseemon(redirect))
 			You("spin aside, and %s strikes %s!", mon_nam(mtmp), mon_nam(redirect));
 		return xattacky(mtmp, redirect, x(redirect), y(redirect), 0L);
