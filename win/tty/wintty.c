@@ -173,6 +173,7 @@ STATIC_DCL void FDECL(erase_menu_or_text, (winid, struct WinDesc *, BOOLEAN_P));
 STATIC_DCL void FDECL(free_window_info, (struct WinDesc *, BOOLEAN_P));
 STATIC_DCL void FDECL(dmore,(struct WinDesc *, const char *));
 STATIC_DCL void FDECL(set_item_state, (winid, int, tty_menu_item *));
+STATIC_DCL boolean FDECL(toggle_menu_curr, (winid, tty_menu_item *, int, BOOLEAN_P, BOOLEAN_P, long));
 STATIC_DCL void FDECL(set_all_on_page, (winid,tty_menu_item *,tty_menu_item *));
 STATIC_DCL void FDECL(unset_all_on_page, (winid,tty_menu_item *,tty_menu_item *));
 STATIC_DCL void FDECL(invert_all_on_page, (winid,tty_menu_item *,tty_menu_item *, CHAR_P));
@@ -1294,13 +1295,8 @@ int *color, *attr;
 }
 #endif /* MENU_COLOR */
 
-boolean
-toggle_menu_curr(window, curr, lineno, in_view, counting, count)
-winid window;
-tty_menu_item *curr;
-int lineno;
-boolean in_view, counting;
-long count;
+STATIC_OVL boolean
+toggle_menu_curr(winid window, tty_menu_item *curr, int lineno, int in_view, int counting, long count)
 {
     if (curr->selected) {
 	if (counting && count > 0) {
@@ -1629,16 +1625,16 @@ struct WinDesc *cw;
 		if (cw->how == PICK_ANY)
 		    invert_all(window, page_start, page_end, 0);
 		break;
-		case MENU_SEARCH:
+	    case MENU_SEARCH:
 		if (cw->how == PICK_NONE) {
 		    tty_nhbell();
 		    break;
 		} else {
-		    char searchbuf[BUFSZ], tmpbuf[BUFSZ];
+		    char searchbuf[BUFSZ + 2], tmpbuf[BUFSZ];
 		    boolean on_curr_page = FALSE;
 		    int lineno = 0;
 		    tty_getlin("Search for:", tmpbuf);
-		    if (!tmpbuf || tmpbuf[0] == '\033') break;
+		    if (!tmpbuf[0] || tmpbuf[0] == '\033') break;
 		    Sprintf(searchbuf, "*%s*", tmpbuf);
 		    for (curr = cw->mlist; curr; curr = curr->next) {
 			if (on_curr_page) lineno++;
@@ -1655,6 +1651,7 @@ struct WinDesc *cw;
 			}
 		    }
 		}
+		break;
 	    default:
 		if (cw->how == PICK_NONE || !index(resp, morc)) {
 		    /* unacceptable input received */
@@ -1673,27 +1670,7 @@ struct WinDesc *cw;
 			curr != page_end;
 			n++, curr = curr->next)
 		    if (morc == curr->selector) {
-			if (curr->selected) {
-			    if (counting && count > 0) {
-				curr->count = count;
-				set_item_state(window, n, curr);
-			    } else { /* change state */
-				curr->selected = FALSE;
-				curr->count = -1L;
-				set_item_state(window, n, curr);
-			    }
-			} else {	/* !selected */
-			    if (counting && count > 0) {
-				curr->count = count;
-				curr->selected = TRUE;
-				set_item_state(window, n, curr);
-			    } else if (!counting) {
-				curr->selected = TRUE;
-				set_item_state(window, n, curr);
-			    }
-			    /* do nothing counting&&count==0 */
-			}
-
+			toggle_menu_curr(window, curr, n, TRUE, counting, count);
 			if (cw->how == PICK_ONE) finished = TRUE;
 			break;	/* from `for' loop */
 		    }
