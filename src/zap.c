@@ -5244,6 +5244,7 @@ struct zapdata * zapdata;
 			/* player clockworks turn to gold but don't die */
 			if (youdef && uclockwork && u.clk_material != GOLD) {
 				u.clk_material = GOLD;
+				find_ac();
 				You("turn to gold!");
 			}
 			/* monster */

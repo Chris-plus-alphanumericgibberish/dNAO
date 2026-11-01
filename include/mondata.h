@@ -220,29 +220,47 @@
 				 (ptr)->mtyp == PM_AURUMACH_RILMANI || \
 				 (ptr)->mtyp == PM_ARA_KAMEREL || \
 				 (ptr)->mtyp == PM_ACERERAK || \
-				 (ptr)->mtyp == PM_RADIANT_PYRAMID)
-#define is_gold_mon(mon)	(is_gold((mon)->data) || \
-							(mon == &youmonst && uclockwork && (u.clk_material == GOLD)))
-#define is_iron(ptr)	((ptr)->mtyp == PM_IRON_PIERCER || \
+				 (ptr)->mtyp == PM_RADIANT_PYRAMID || \
+				 (ptr)->mtyp == PM_GEVURAH_SEPHIRAH || \
+				 (ptr)->mtyp == PM_DAAT_SEPHIRAH)
+#define is_gold_mon(mon)	((mon) == &youmonst ? \
+							(uclockwork ? (u.clk_material == GOLD) : is_gold(youracedata)) : \
+							is_gold((mon)->data))
+#define is_iron(ptr)	((ptr)->mtyp == PM_SCRAP_TITAN || \
+				 (ptr)->mtyp == PM_HELLFIRE_COLOSSUS || \
+				 (ptr)->mtyp == PM_RAGE_WALKER || \
+				 (ptr)->mtyp == PM_NETZACH_SEPHIRAH || \
+				 (ptr)->mtyp == PM_BINAH_SEPHIRAH || \
+				 (ptr)->mtyp == PM_DAAT_SEPHIRAH || \
+				 integral_iron(ptr))
+#define integral_iron(ptr)	((ptr)->mtyp == PM_IRON_PIERCER || \
 				 (ptr)->mtyp == PM_IRON_GOLEM || \
 				 (ptr)->mtyp == PM_GREEN_STEEL_GOLEM || \
 				 (ptr)->mtyp == PM_CHAIN_GOLEM || \
-				 (ptr)->mtyp == PM_SCRAP_TITAN || \
-				 (ptr)->mtyp == PM_HELLFIRE_COLOSSUS || \
 				 (ptr)->mtyp == PM_HELLFIRE_ORB || \
-				 (ptr)->mtyp == PM_RAGE_WALKER || \
 				 (ptr)->mtyp == PM_FERRUMACH_RILMANI)
-#define is_iron_mon(mon)	(is_iron((mon)->data) || \
-							(mon == &youmonst && uclockwork && (u.clk_material == IRON || u.clk_material == GREEN_STEEL)))
+#define vulnerable_to_rust(ptr)	(is_iron(ptr) && \
+				 (ptr)->mtyp != PM_SCRAP_TITAN && \
+				 (ptr)->mtyp != PM_NETZACH_SEPHIRAH)
+#define is_iron_mon(mon)	((mon) == &youmonst ? \
+							(uclockwork ? (u.clk_material == IRON || u.clk_material == GREEN_STEEL) : is_iron(youracedata)) : \
+							is_iron((mon)->data))
 #define is_silver(ptr)	((ptr)->mtyp == PM_ARGENACH_RILMANI || \
 				 (ptr)->mtyp == PM_AMM_KAMEREL || \
-				 (ptr)->mtyp == PM_ARGENTUM_GOLEM)
-#define is_silver_mon(mon)	(is_silver((mon)->data) || \
-							has_template(mon, CONSTELLATION) || \
-							(mon == &youmonst && uclockwork && (u.clk_material == SILVER)))
-#define is_platinum(ptr)	FALSE
-#define is_platinum_mon(mon)	(is_platinum((mon)->data) || \
-							(mon == &youmonst && uclockwork && (u.clk_material == PLATINUM)))
+				 (ptr)->mtyp == PM_ARGENTUM_GOLEM || \
+				 (ptr)->mtyp == PM_HOD_SEPHIRAH || \
+				 (ptr)->mtyp == PM_RHOMBOHEDROID || \
+				 (ptr)->mtyp == PM_DAAT_SEPHIRAH)
+#define is_silver_mon(mon)	(((mon) == &youmonst ? \
+							(uclockwork ? (u.clk_material == SILVER) : is_silver(youracedata)) : \
+							is_silver((mon)->data)) || \
+							has_template(mon, CONSTELLATION))
+#define is_platinum(ptr)	((ptr)->mtyp == PM_ARCADIAN_AVENGER || \
+				 (ptr)->mtyp == PM_DAMAGED_ARCADIAN_AVENGER || \
+				 (ptr)->mtyp == PM_DAAT_SEPHIRAH)
+#define is_platinum_mon(mon)	((mon) == &youmonst ? \
+							(uclockwork ? (u.clk_material == PLATINUM) : is_platinum(youracedata)) : \
+							is_platinum((mon)->data))
 #define is_bronze(ptr)	((ptr)->mtyp == PM_CLOCKWORK_SOLDIER || \
 						 (ptr)->mtyp == PM_CLOCKWORK_DWARF || \
 						 (ptr)->mtyp == PM_FABERGE_SPHERE || \
@@ -252,8 +270,48 @@
 						 (ptr)->mtyp == PM_ID_JUGGERNAUT || \
 						 (ptr)->mtyp == PM_CLOCKWORK_AUTOMATON || \
 						 (ptr)->mtyp == PM_COLOSSAL_CLOCKWORK_WAR_MACHINE || \
-						 (ptr)->mtyp == PM_ARSENAL)
-#define is_metal_pm(ptr)	(is_gold(ptr) || is_iron(ptr) || is_silver(ptr) || is_platinum(ptr) || is_bronze(ptr))
+						 (ptr)->mtyp == PM_ARSENAL || \
+						 (ptr)->mtyp == PM_CUPRILACH_RILMANI || \
+						 (ptr)->mtyp == PM_DAAT_SEPHIRAH)
+#define is_bronze_mon(mon)	((mon) == &youmonst ? \
+							(uclockwork ? (u.clk_material == COPPER) : is_bronze(youracedata)) : \
+							is_bronze((mon)->data))
+#define is_brass(ptr)	((ptr)->mtyp == PM_MONOTON || \
+						 (ptr)->mtyp == PM_DUTON || \
+						 (ptr)->mtyp == PM_TRITON || \
+						 (ptr)->mtyp == PM_QUATON || \
+						 (ptr)->mtyp == PM_QUINON || \
+						 (ptr)->mtyp == PM_AXUS || \
+						 (ptr)->mtyp == PM_CUBOID || \
+						 (ptr)->mtyp == PM_MALKUTH_SEPHIRAH || \
+						 (ptr)->mtyp == PM_DAAT_SEPHIRAH)
+#define is_brass_mon(mon)	((mon) == &youmonst ? \
+							(uclockwork ? FALSE : is_brass(youracedata)) : \
+							is_brass((mon)->data))
+#define is_mithril(ptr)	((ptr)->mtyp == PM_CHOKHMAH_SEPHIRAH || \
+						 (ptr)->mtyp == PM_DAAT_SEPHIRAH)
+#define is_mithril_mon(mon)	((mon) == &youmonst ? \
+							(uclockwork ? (u.clk_material == MITHRIL) : is_mithril(youracedata)) : \
+							is_mithril((mon)->data))
+/* adamantine isn't a material yet; should list chokhmah and the Adamach rilmani */
+#define is_adamantine(ptr)	FALSE
+#define is_lead(ptr)	((ptr)->mtyp == PM_PLUMACH_RILMANI || \
+						 (ptr)->mtyp == PM_DAAT_SEPHIRAH)
+#define is_lead_mon(mon)	((mon) == &youmonst ? \
+							(uclockwork ? (u.clk_material == LEAD) : is_lead(youracedata)) : \
+							is_lead((mon)->data))
+/* the METAL material: tin, or an unspecified metal */
+#define is_generic_metal(ptr)	((ptr)->mtyp == PM_STANNUMACH_RILMANI || \
+								 (ptr)->mtyp == PM_YESOD_SEPHIRAH || \
+								 (ptr)->mtyp == PM_DAAT_SEPHIRAH)
+#define is_generic_metal_mon(mon)	((mon) == &youmonst ? \
+							(uclockwork ? (u.clk_material == METAL) : is_generic_metal(youracedata)) : \
+							is_generic_metal((mon)->data))
+#define is_metal_pm(ptr)	(is_gold(ptr) || is_iron(ptr) || is_silver(ptr) || is_platinum(ptr) || is_bronze(ptr) || is_brass(ptr) || \
+							 is_mithril(ptr) || is_adamantine(ptr) || is_lead(ptr) || is_generic_metal(ptr))
+#define is_metal_mon(mon)	((mon) == &youmonst ? \
+							(uclockwork ? metallic_material(u.clk_material) : is_metal_pm(youracedata)) : \
+							is_metal_pm((mon)->data))
 #define is_stone(ptr)	((ptr)->mtyp == PM_DUST_VORTEX || \
 				 (ptr)->mtyp == PM_EARTH_ELEMENTAL || \
 				 (ptr)->mtyp == PM_TERRACOTTA_SOLDIER || \

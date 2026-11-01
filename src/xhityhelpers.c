@@ -2418,7 +2418,7 @@ struct obj * weapon;
 			return 2; Currently unused, unclear what conditions it should check exactly
 		*/
 
-		if ((flaming(mdef->data) || is_iron(mdef->data)) &&
+		if ((flaming(mdef->data) || vulnerable_to_rust(mdef->data)) &&
 			attk && attk->adtyp == AD_WET)
 			return 2;
 

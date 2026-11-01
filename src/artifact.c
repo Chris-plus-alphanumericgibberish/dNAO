@@ -4155,7 +4155,7 @@ voidPen_hit(struct monst *magr, struct monst *mdef, struct obj *pen, int *dmgptr
 						pline("The layer of grease on your %s dissolves.", xname(uarmc));
 					}
 				} else {
-					int mult = (flaming(youracedata) || is_iron(youracedata)) ? 2 : 1;
+					int mult = (flaming(youracedata) || vulnerable_to_rust(youracedata)) ? 2 : 1;
 					
 					*dmgptr += d(dnum,4)*mult;
 					if(youracedata->mtyp == PM_GREMLIN && rn2(3))
@@ -4171,7 +4171,7 @@ voidPen_hit(struct monst *magr, struct monst *mdef, struct obj *pen, int *dmgptr
 						if(canseemon(mdef)) pline("The layer of grease on %s's %s dissolves.", mon_nam(mdef), xname(cloak));
 					}
 				} else {
-					int mult = (flaming(mdef->data) || is_iron(mdef->data))  ? 2 : 1;
+					int mult = (flaming(mdef->data) || vulnerable_to_rust(mdef->data))  ? 2 : 1;
 				
 					*dmgptr += d(dnum,4)*mult;
 					if(mdef->mtyp == PM_GREMLIN && rn2(3)){
@@ -4931,7 +4931,7 @@ astra_dbon(struct obj *otmp, struct monst *magr, struct monst *mdef, int basedmg
 		else if(!(youdef ? Waterproof : mon_resistance(mdef, WATERPROOF))){
 			int water_dmg = d(3, 6) + otmp->spe;
 			if(water_dmg > 0)
-				*truedmgptr += water_dmg * ((flaming(pd) || is_iron(pd)) ? 2 : 1);
+				*truedmgptr += water_dmg * ((flaming(pd) || vulnerable_to_rust(pd)) ? 2 : 1);
 		}
 	}
 	return *truedmgptr != original_truedmgptr;
@@ -5025,7 +5025,7 @@ int * truedmgptr;
 				if(canseemon(mdef)) pline("The layer of grease on %s's %s dissolves.", mon_nam(mdef), xname(cloak));
 			}
 		} else if (!(youdef && Waterproof) && !(!youdef && mon_resistance(mdef, WATERPROOF))){
-			int mult = (flaming(pd) || is_iron(pd)) ? 2 : 1;
+			int mult = (flaming(pd) || vulnerable_to_rust(pd)) ? 2 : 1;
 
 			if(check_oprop(otmp, OPROP_WATRW)){
 				*truedmgptr += basedmg*mult;
@@ -8947,7 +8947,7 @@ boolean printmessages; /* print generic elemental damage messages */
 				if(canseemon(mdef)) pline("The layer of grease on %s's %s dissolves.", mon_nam(mdef), xname(cloak));
 			}
 		} else if (!(youdef && Waterproof) && !(!youdef && mon_resistance(mdef, WATERPROOF))){
-			int mult = (flaming(pd) || is_iron(pd)) ? 2 : 1;
+			int mult = (flaming(pd) || vulnerable_to_rust(pd)) ? 2 : 1;
 
 			if(otmp->oartifact == ART_STORM_CURSE)
 				*truedmgptr += rnd(4)*mult;
@@ -9637,7 +9637,7 @@ boolean printmessages; /* print generic elemental damage messages */
 
 	if (oartifact == ART_SIX_ELEMENT_SWORD && !Is_spire(&u.uz)) {
 		if (six_element_channel(oartifact, SIXEL_FIRE)) {
-			if (!Fire_res(mdef) || is_metal_pm(pd)){
+			if (!Fire_res(mdef) || is_metal_mon(mdef)){
 				*truedmgptr += elemental_dmg_resistance(mdef, magr, max(0, d(six_element_fire_dice(), 6) + otmp->spe), AD_FIRE);
 			}
 			if (!UseInvFire_res(mdef)) {
@@ -9672,7 +9672,7 @@ boolean printmessages; /* print generic elemental damage messages */
 				}
 			}
 			else if (!(youdef && Waterproof) && !(!youdef && mon_resistance(mdef, WATERPROOF))) {
-				int mult = (flaming(pd) || is_iron(pd)) ? 2 : 1;
+				int mult = (flaming(pd) || vulnerable_to_rust(pd)) ? 2 : 1;
 				*truedmgptr += mult * max(0, d(1, 6) + otmp->spe/2);
 				if (pd->mtyp == PM_GREMLIN && rn2(3))
 					(void)split_mon(mdef, (struct monst *)0);

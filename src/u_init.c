@@ -2010,6 +2010,9 @@ u_init()
 
 	u.inherited = 0;
 
+	/* non-clockwork PCs can polymorph into clockworks */
+	u.clk_material = COPPER;
+
 	u.uaesh = 0;
 	u.uaesh_duration = 0;
 	u.ukrau = 0;
@@ -3549,8 +3552,6 @@ u_init()
 		for(int i=0; i<SIZE(mutation_levels); i++){
 			flags.tiefling_level[i] = mutation_levels[i];
 		}
-	} else if (uclockwork){
-		u.clk_material = COPPER;
 	}
 	/* Fix up the alignment quest nemesi */
 	mons[PM_OONA].mcolor = (u.oonaenergy == AD_FIRE) ? CLR_RED 

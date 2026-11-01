@@ -7486,7 +7486,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 		/* no special effect if cancelled */
 		if (notmcan){
 			/* instakills */
-			if (is_iron(pd)) {
+			if (integral_iron(pd)) {
 				if (youdef) {
 					You("rust!");
 					/* KMH -- this is okay with unchanging */
@@ -7509,6 +7509,13 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 						pline("May %s rust in peace.", mon_nam(mdef));
 					return (MM_HIT | MM_DEF_DIED | (youagr || grow_up(magr, mdef) ? 0 : MM_AGR_DIED));
 				}
+			}
+			else if (vulnerable_to_rust(pd)) {
+				if (youdef)
+					You("rust!");
+				else if (vis&VIS_MDEF)
+					pline("%s rusts!", Monnam(mdef));
+				dmg += d(max(1, min(MAX_BONUS_DICE, mlev(magr)/3)), 6);
 			}
 
 			/* rust armor */
@@ -12585,7 +12592,7 @@ int vis;
 			result = xdamagey(magr, mdef, attk, dmg);
 		}
 		else {
-			if (is_iron(pd)) {
+			if (integral_iron(pd)) {
 				if (youdef) {
 					You("are laden with moisture and rust away!");
 					/* KMH -- this is okay with unchanging */
@@ -17203,7 +17210,7 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 			}
 		}
 
-		if (hates_lawful(pd)){
+		if (hates_lawful_mon(mdef)){
 			if(is_platinum_mon(magr)) {
 				// platinumobj |= W_SKIN; silent rn
 				seardmg += d(1, platinum_diesize(mdef));
@@ -22721,7 +22728,7 @@ hurt_by_water(struct monst * mon)
 
 	if (mon == &youmonst ? Waterproof : mon_resistance(mon, WATERPROOF))
 		return FALSE;
-	return (is_iron(ptr) || ptr->mtyp == PM_FLAMING_SPHERE);
+	return (vulnerable_to_rust(ptr) || ptr->mtyp == PM_FLAMING_SPHERE);
 }
 
 /* Return the mantle damage type that a four-seasons mantle acts as in season

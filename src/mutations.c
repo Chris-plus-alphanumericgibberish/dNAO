@@ -1283,10 +1283,15 @@ mutation_effects(int mutation)
 		rescham();
 		see_monsters();
 	}
-	else if (mutation == SMELT_SELF_S) u.clk_material = SILVER;
-	else if (mutation == SMELT_SELF_M) u.clk_material = MITHRIL;
-	else if (mutation == SMELT_SELF_P) u.clk_material = PLATINUM;
-	
+	else if(mutation == SMELT_SELF_S || mutation == SMELT_SELF_M || mutation == SMELT_SELF_P){
+		u.clk_material = (mutation == SMELT_SELF_S) ? SILVER : (mutation == SMELT_SELF_M) ? MITHRIL : PLATINUM;
+		/* becoming or ceasing to be mithril changes AC and DR */
+		find_ac();
+	}
+	else if(mutation == ANODIC_MIND){
+		see_monsters();
+	}
+
 	if(is_horn_mut(mutation) && check_mutation(mutation)){
 		if(uarmh && !helm_match(&youmonst, uarmh)){
 			Your("%s no longer fits!", xname(uarmh));

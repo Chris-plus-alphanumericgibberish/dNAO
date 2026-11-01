@@ -3951,7 +3951,7 @@ passive_max_dmg(struct monst *mdef, struct monst *magr, struct attack *attk, int
 			harms = (attk->aatyp == AT_MNTL && hates_holy(magr->data));
 			break;
 		case AD_WET:
-			harms = (attk->aatyp == AT_MNTL && is_iron(magr->data));
+			harms = (attk->aatyp == AT_MNTL && vulnerable_to_rust(magr->data));
 			break;
 		case AD_BLND:
 			harms = (attk->aatyp == AT_MNTL && !nonliving(magr->data) && !breathless_mon(magr)

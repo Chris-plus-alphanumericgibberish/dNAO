@@ -2132,7 +2132,7 @@ doexposefoundry(){
 	}
 	
 	u.ufurnaceexposed = moves + (long)(rnz(100)*(u.upriest ? .8 : 1)); // priests can have that 
-	return MOVE_STANDARD;
+	return MOVE_PARTIAL;
 }
 
 int

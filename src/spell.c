@@ -2886,7 +2886,7 @@ spiriteffects(power, atme)
 							water_damage(mon->minvent, FALSE, FALSE, FALSE, mon);
 						}
 					}
-					if(flaming(mon->data) || mon->mtyp == PM_EARTH_ELEMENTAL || is_iron(mon)) dmg *= 2;
+					if(flaming(mon->data) || mon->mtyp == PM_EARTH_ELEMENTAL || vulnerable_to_rust(mon)) dmg *= 2;
 					if(mon->mtyp == PM_GREMLIN && rn2(3)){
 						(void)split_mon(mon, (struct monst *)0);
 					}

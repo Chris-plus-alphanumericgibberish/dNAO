@@ -1179,7 +1179,7 @@ unsigned trflags;
 		    pline("Water gushes around you!");
 			break;
 		}
-		if (is_iron(youracedata)) {
+		if (integral_iron(youracedata)) {
 		    int dam = u.mhmax;
 
 		    pline("%s you!", A_gush_of_water_hits);
@@ -1245,6 +1245,10 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst, FALSE);
 			    (void) rust_dmg(uarmu, "shirt", 1, TRUE, &youmonst, FALSE);
 			// else if (uarmw)
 			    // (void) rust_dmg(uarmu, "shirt", 1, TRUE, &youmonst, FALSE);
+		}
+		if (vulnerable_to_rust(youracedata)) {
+			You("rust!");
+			losehp(reduce_dmg(&youmonst, d(6, 6), TRUE, FALSE), "rusting away", KILLED_BY);
 		}
 		update_inventory();
 		nomul(0, NULL);
@@ -2463,7 +2467,7 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 #endif
 			    }
 			}
-			if (is_iron(mptr)) {
+			if (integral_iron(mptr)) {
 				if (in_sight)
 				    pline("%s falls to pieces!", Monnam(mtmp));
 				else if(mtmp->mtame)
@@ -2472,6 +2476,17 @@ glovecheck:		    target = which_armor(mtmp, W_ARMG);
 				mondied(mtmp);
 				if (mtmp->mhp <= 0)
 					trapkilled = TRUE;
+			} else if (vulnerable_to_rust(mptr)) {
+				if (in_sight)
+				    pline("%s rusts!", Monnam(mtmp));
+				mtmp->mhp -= reduce_dmg(mtmp, d(6, 6), TRUE, FALSE);
+				if (mtmp->mhp <= 0) {
+					if (in_sight)
+					    pline("%s falls to pieces!", Monnam(mtmp));
+					mondied(mtmp);
+					if (mtmp->mhp <= 0)
+						trapkilled = TRUE;
+				}
 			} else if (mptr->mtyp == PM_FLAMING_SPHERE) {
 				if (in_sight)
 				    pline("%s is extinguished!", Monnam(mtmp));
@@ -4161,7 +4176,7 @@ drown()
 
 	if (u.umonnum == PM_GREMLIN && rn2(3))
 	    (void)split_mon(&youmonst, (struct monst *)0);
-	else if (is_iron(youracedata) && !(u.sealsActive&SEAL_EDEN)) {
+	else if (vulnerable_to_rust(youracedata) && !(u.sealsActive&SEAL_EDEN)) {
 	    You("rust!");
 	    i = d(2,6);
 	    if (u.mhmax > i) u.mhmax -= i;

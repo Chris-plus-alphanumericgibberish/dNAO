@@ -1551,7 +1551,7 @@ register struct monst *mtmp;
 		if (inpool) water_damage(mtmp->minvent, FALSE, FALSE, level.flags.lethe, mtmp);
 		return (0);	/* gremlins in water */
 	}
-	else if (is_iron(mtmp) && ((inpool && !rn2(5)) || inshallow)) {
+	else if (vulnerable_to_rust(mtmp) && ((inpool && !rn2(5)) || inshallow)) {
 		/* rusting requires oxygen and water, so it's faster for shallow water */
 		int dam = d(2, 6);
 		if (cansee(mtmp->mx, mtmp->my))
@@ -3551,7 +3551,7 @@ mfndpos(mon, poss, info, flag)
 	noortho = diagonal_mover(mdat);
 	wantpool = !!(mdat->mflagsm&MM_AQUATIC);
 	wantdry = !(mdat->mflagsm&MM_AQUATIC);
-	puddleispool = (wantpool && mdat->msize == MZ_TINY) || (wantdry && is_iron(mon));
+	puddleispool = (wantpool && mdat->msize == MZ_TINY) || (wantdry && vulnerable_to_rust(mon));
 
 	/* nexttry can reset some of the above booleans, but recalculates the ones below. */
 	/* eels prefer the water, but if there is no water nearby, they will crawl over land */

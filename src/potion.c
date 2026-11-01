@@ -1919,10 +1919,10 @@ boolean your_fault;
 		    angermon = FALSE;
 		    (void)split_mon(mon, (struct monst *)0);
 		} else if(mon->mtyp == PM_FLAMING_SPHERE ||
-			is_iron(mon)) {
+			vulnerable_to_rust(mon)) {
 		    if (canseemon(mon))
 			pline("%s %s.", Monnam(mon),
-				is_iron(mon) ?
+				vulnerable_to_rust(mon) ?
 				"rusts" : "flickers");
 		    mon->mhp -= d(1,6);
 		    if (mon->mhp < 1) {
@@ -1951,10 +1951,10 @@ boolean your_fault;
 		    angermon = FALSE;
 		    (void)split_mon(mon, (struct monst *)0);
 		} else if(mon->mtyp == PM_FLAMING_SPHERE ||
-			is_iron(mon)) {
+			vulnerable_to_rust(mon)) {
 		    if (canseemon(mon))
 			pline("%s %s.", Monnam(mon),
-				is_iron(mon) ?
+				vulnerable_to_rust(mon) ?
 				"rusts" : "flickers");
 		    mon->mhp -= d(1,6);
 		    if (mon->mhp < 1) {
@@ -1977,7 +1977,7 @@ boolean your_fault;
 		case PM_GREEN_STEEL_GOLEM:
 		case PM_CHAIN_GOLEM:
 		    if (canseemon(mon)) pline("%s %s.", Monnam(mon),
-			    is_iron(mon) ?
+			    vulnerable_to_rust(mon) ?
 			    "rusts" : "flickers");
 		    mon->mhp -= d(1,6);
 		    if (mon->mhp < 1)
@@ -2305,7 +2305,7 @@ register struct obj *obj;
 		else if(u.umonnum == PM_FLAMING_SPHERE) {
 		    You("flicker!");
 		    losehp(d(1,6),"potion of amnesia", KILLED_BY_AN);
-		} else if(is_iron(youracedata)) {
+		} else if(vulnerable_to_rust(youracedata)) {
 		    You("rust!");
 		    losehp(d(1,6),"potion of amnesia", KILLED_BY_AN);
 		}

@@ -29,7 +29,7 @@ STATIC_DCL struct obj * FDECL(all_items, (boolean, int *, boolean));
 #define BAD_PUDDLE ((!u.usteed &&\
 		((uarmf && is_rustprone(uarmf) && !uarmf->oerodeproof && uarmf->oeroded != MAX_ERODE) ||\
 		(verysmall(youracedata) && !Waterproof))) ||\
-	(u.umonnum == PM_GREMLIN) || (is_iron(youracedata) && (!uarmf || strncmp(OBJ_DESCR(objects[uarmf->otyp]), "mud ", 4))))
+	(u.umonnum == PM_GREMLIN) || (vulnerable_to_rust(youracedata) && (!uarmf || strncmp(OBJ_DESCR(objects[uarmf->otyp]), "mud ", 4))))
 
 #ifdef OVL2
 
@@ -2161,7 +2161,7 @@ stillinwater:;
 
 			if(u.umonnum == PM_GREMLIN)
 				(void)split_mon(&youmonst, (struct monst *)0);
-			else if (is_iron(youracedata) &&
+			else if (vulnerable_to_rust(youracedata) &&
 				/* mud boots keep the feet dry */
 				(!uarmf || strncmp(OBJ_DESCR(objects[uarmf->otyp]), "mud ", 4))
 			) {
