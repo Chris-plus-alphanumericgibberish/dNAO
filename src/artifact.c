@@ -9143,7 +9143,7 @@ boolean printmessages; /* print generic elemental damage messages */
 				else
 					explode_full(x, y, AD_PHYS, 0, d(6,6), EXPL_MUDDY, 1, 4, FALSE, (struct permonst *) 0, 0L);
 				
-				x = cc.x+rnd(3)-1; y = cc.y+rnd(3)-1;
+				x = cc.x+rnd(3)-2; y = cc.y+rnd(3)-2;
 				if (!isok(x,y)) {
 					/* Spell is reflected back to center */
 					x = cc.x;
@@ -11951,13 +11951,10 @@ arti_invoke(obj)
 		verbalize("Even Stars Fall.");
 		for (; starfall > 0; starfall--){
 			if(needLoc){
-				x = rn2(COLNO-2)+1;
-				y = rn2(ROWNO-2)+1;
-				if(!isok(x,y) || !ACCESSIBLE(levl[x][y].typ) || distmin(u.ux, u.uy, x, y) < 3){
-					if(tries++ < 1000){
-						continue;
-					}
-				}
+				do {
+					x = rn2(COLNO-2)+1;
+					y = rn2(ROWNO-2)+1;
+				} while((!isok(x,y) || !ACCESSIBLE(levl[x][y].typ) || distmin(u.ux, u.uy, x, y) < 3) && tries++ < 1000);
 				needLoc = FALSE;
 			}
 			cc.x=x;cc.y=y; // spell drifts slightly between iterations
@@ -11967,7 +11964,7 @@ arti_invoke(obj)
 				if (rn2(2)) explode_sound(x, y, AD_FIRE, 0, d(6,6), EXPL_FIERY, 1, 4);
 				else 		explode_sound(x, y, AD_PHYS, 0, d(6,6), EXPL_MUDDY, 1, 4);
 				
-				x = cc.x+rnd(3)-1; y = cc.y+rnd(3)-1;
+				x = cc.x+rnd(3)-2; y = cc.y+rnd(3)-2;
 				if (!isok(x,y)) {
 					/* Spell is reflected back to center */
 					x = cc.x;
