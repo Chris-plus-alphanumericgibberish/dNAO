@@ -265,7 +265,20 @@ obj_to_glyph(obj)
 	return corpsenm + GLYPH_BODY_OFF;
     }
     int ocolor = Hallucination ? rn2(16) : object_color(obj);
-    return (otyp << 4) + ocolor + GLYPH_OBJ_OFF;
+    int obgcolor = 0;
+    if (obj->where == OBJ_FLOOR) {
+        int ox = obj->ox, oy = obj->oy;
+        struct trap *trap = t_at(ox, oy);
+        if (trap && trap->tseen && trap->ttyp != MAGIC_PORTAL
+                && iflags.hilite_hidden_traps)
+            obgcolor = CLR_CYAN;
+        else if (otyp != BOULDER && level.objects[ox][oy]
+                && level.objects[ox][oy]->nexthere
+                && iflags.hilite_obj_piles)
+            obgcolor = CLR_BLUE;
+    }
+    return (otyp << GLYPH_OBJ_OTYP_SHIFT) + (obgcolor << GLYPH_OBJ_BGCOLOR_SHIFT)
+           + ocolor + GLYPH_OBJ_OFF;
 }
 
 
@@ -314,7 +327,7 @@ boolean new;
 		if (level.flags.hero_memory)
 		    levl[x][y].glyph = GLYPH_INVISIBLE;
 		show_glyph(x, y, GLYPH_INVISIBLE);
-		if(new && u.umadness&MAD_PARANOIA && !BlockableClearThoughts && NightmareAware_Sanity < 80+rnd(20)){
+		if(new && u.umadness&MAD_PARANOIA && !BlockableClearThoughts && NightmareAware_Sanity + madness_adjust_san(MAD_PARANOIA) < 80+rnd(20)){
 			int x2, y2;
 			x2 = u.ux + (u.ux-x);
 			y2 = u.uy + (u.uy-y);
@@ -636,7 +649,7 @@ feel_location(x, y)
 	     * We could also just display what is currently on the top of the
 	     * object stack (if anything).
 	     */
-	    if (lev->glyph == objnum_to_glyph(BOULDER)) {
+	    if (glyph_to_obj(lev->glyph) == BOULDER) {
 		if (lev->typ != ROOM && lev->seenv) {
 		    map_background(x, y, 1);
 		} else {
@@ -1512,6 +1525,20 @@ show_glyph(x,y,glyph)
     }
 }
 
+/*
+ * Force a cell to be repainted on the next flush even if the glyph integer
+ * hasn't changed.  Use when per-instance state (e.g. mstance) affects how
+ * mapglyph renders the cell but doesn't alter the glyph value itself.
+ */
+void
+mark_glyph_dirty(int x, int y)
+{
+    if (!isok(x, y)) return;
+    gbuf[y][x].new = 1;
+    if (gbuf_start[y] > x) gbuf_start[y] = x;
+    if (gbuf_stop[y]  < x) gbuf_stop[y]  = x;
+}
+
 
 /*
  * Reset the changed glyph borders so that none of the 3rd screen has
@@ -1639,7 +1666,7 @@ int glyph;
     } else if ((offset = (glyph - GLYPH_CMAP_OFF)) >= 0) {	/* cmap */
 	ch = defsyms[offset].sym;
     } else if ((offset = (glyph - GLYPH_OBJ_OFF)) >= 0) {	/* object */
-	ch = def_oc_syms[(int)objects[offset >> 4].oc_class];
+	ch = def_oc_syms[(int)objects[offset >> GLYPH_OBJ_OTYP_SHIFT].oc_class];
     } else if ((offset = (glyph - GLYPH_RIDDEN_OFF)) >= 0) { /* mon ridden */
 	ch = def_monsyms[(int)mons[offset].mlet];
     } else if ((offset = (glyph - GLYPH_BODY_OFF)) >= 0) {	/* a corpse */
@@ -1796,6 +1823,10 @@ back_to_glyph(x,y)
 	    if (ptr->doormask) {
 		if (ptr->doormask & D_BROKEN)
 		    idx = S_ndoor;
+		else if (ptr->doormask & D_BARRED)
+		    idx = (ptr->doormask & D_ISOPEN)
+			? (ptr->horizontal ? S_hobardoor : S_vobardoor)
+			: (ptr->horizontal ? S_hcbardoor : S_vcbardoor);
 		else if (ptr->doormask & D_ISOPEN)
 		    idx = (ptr->horizontal) ? S_hodoor : S_vodoor;
 		else			/* else is closed */

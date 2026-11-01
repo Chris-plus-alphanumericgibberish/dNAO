@@ -135,6 +135,7 @@ STATIC_PTR int FDECL(ability_menu, (boolean, boolean));
 STATIC_PTR int NDECL(domountattk);
 STATIC_PTR int NDECL(hasfightingforms);
 STATIC_PTR int NDECL(doMysticForm);
+STATIC_PTR int NDECL(doMartialForm);
 STATIC_PTR int NDECL(doLightsaberForm);
 STATIC_PTR int NDECL(doKnightForm);
 STATIC_PTR int NDECL(dofightingform);
@@ -597,7 +598,7 @@ boolean you_abilities;
 	if (you_abilities && hasfightingforms() > 0) {	/* I can't wait until fighting forms are mainstream */
 		add_ability('F', "Pick a fighting form", MATTK_U_STYLE);
 	}
-	if (mon_abilities && (attacktype(youracedata, AT_GAZE) || (!Upolyd && check_vampire(VAMPIRE_GAZE)) || (!Upolyd && TIEFLING_GAZE))) {
+	if (mon_abilities && (attacktype(youracedata, AT_GAZE) || (!Upolyd && check_vampire(VAMPIRE_GAZE)) || (!Upolyd && (TIEFLING_GAZE || AASIMAR_GAZE)))) {
 		add_ability('g', "Gaze at something", MATTK_GAZE);
 	}
 	if (mon_abilities && (!Upolyd && MISC_TIEFLING_ABILITY)){
@@ -992,8 +993,33 @@ use_reach_attack()
 	return MOVE_STANDARD;
 }
 
+/* A slot with no move at all is listed, but is neither tagged active/disabled
+ * nor given a letter to toggle it by. */
+static char
+add_mystic_move(winid tmpwin, char incntlet, const char *arrow, int moveID)
+{
+	char buf[BUFSZ];
+	anything any;
+
+	any.a_void = 0;		/* zero out all bits */
+	if (!moveID) {
+		Sprintf(buf, "%s%s %s", arrow, forward_arrow(), move_name(moveID));
+		add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, buf, MENU_UNSELECTED);
+		return (incntlet != 'z') ? (incntlet+1) : 'A';
+	}
+
+	Sprintf(buf, "%s%s %s (%s)", arrow, forward_arrow(), move_name(moveID),
+		monk_style_active(moveID) ? "active" : "disabled");
+	any.a_int = moveID;
+	add_menu(tmpwin, NO_GLYPH, &any,
+		incntlet, 0, ATR_NONE, buf,
+		MENU_UNSELECTED);
+
+	return (incntlet != 'z') ? (incntlet+1) : 'A';
+}
+
 int
-doMysticForm()
+doMysticForm(void)
 {
 	winid tmpwin;
 	int n, how;
@@ -1006,61 +1032,13 @@ doMysticForm()
 	any.a_void = 0;		/* zero out all bits */
 	Sprintf(buf,	"Known Techniques");
 	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
-	if(monk_style_active(forward_move())) {
-		Sprintf(buf,	"%s%s %s (active)", forward_arrow(), forward_arrow(), move_name(forward_move()));
-	} else {
-		Sprintf(buf,	"%s%s %s (disabled)", forward_arrow(), forward_arrow(), move_name(forward_move()));
-	}
-	any.a_int = forward_move();
-	add_menu(tmpwin, NO_GLYPH, &any,
-		incntlet, 0, ATR_NONE, buf,
-		MENU_UNSELECTED);
 
-	incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
-	if(monk_style_active(bent_move())) {
-		Sprintf(buf,	"%s%s %s (active)", bent_arrow(), forward_arrow(), move_name(bent_move()));
-	} else {
-		Sprintf(buf,	"%s%s %s (disabled)", bent_arrow(), forward_arrow(), move_name(bent_move()));
-	}
-	any.a_int = bent_move();
-	add_menu(tmpwin, NO_GLYPH, &any,
-		incntlet, 0, ATR_NONE, buf,
-		MENU_UNSELECTED);
+	incntlet = add_mystic_move(tmpwin, incntlet, forward_arrow(), forward_move());
+	incntlet = add_mystic_move(tmpwin, incntlet, bent_arrow(), bent_move());
+	incntlet = add_mystic_move(tmpwin, incntlet, up_arrow(), hook_move());
+	incntlet = add_mystic_move(tmpwin, incntlet, uturn_arrow(), uturn_move());
+	incntlet = add_mystic_move(tmpwin, incntlet, backward_arrow(), alternated_move());
 
-	incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
-	if(monk_style_active(hook_move())) {
-		Sprintf(buf,	"%s%s %s (active)", up_arrow(), forward_arrow(), move_name(hook_move()));
-	} else {
-		Sprintf(buf,	"%s%s %s (disabled)", up_arrow(), forward_arrow(), move_name(hook_move()));
-	}
-	any.a_int = hook_move();
-	add_menu(tmpwin, NO_GLYPH, &any,
-		incntlet, 0, ATR_NONE, buf,
-		MENU_UNSELECTED);
-
-	incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
-	if(monk_style_active(uturn_move())) {
-		Sprintf(buf,	"%s%s %s (active)", uturn_arrow(), forward_arrow(), move_name(uturn_move()));
-	} else {
-		Sprintf(buf,	"%s%s %s (disabled)", uturn_arrow(), forward_arrow(), move_name(uturn_move()));
-	}
-	any.a_int = uturn_move();
-	add_menu(tmpwin, NO_GLYPH, &any,
-		incntlet, 0, ATR_NONE, buf,
-		MENU_UNSELECTED);
-
-	incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
-	if(monk_style_active(alternated_move())) {
-		Sprintf(buf,	"%s%s %s (active)", backward_arrow(), forward_arrow(), move_name(alternated_move()));
-	} else {
-		Sprintf(buf,	"%s%s %s (disabled)", backward_arrow(), forward_arrow(), move_name(alternated_move()));
-	}
-	any.a_int = alternated_move();
-	add_menu(tmpwin, NO_GLYPH, &any,
-		incntlet, 0, ATR_NONE, buf,
-		MENU_UNSELECTED);
-
-	incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
 
 	if(Role_if(PM_KENSEI) && u.role_variant == ART_SKY_REFLECTED && (artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_FOCUS)){
 		incntlet = (incntlet != 'z') ? (incntlet+1) : 'A';
@@ -1130,6 +1108,77 @@ doMysticForm()
 	}
 
 }
+
+#define TIGER_FORM	(LAST_FFORM + 1)	/* menu entry for the monk's default (no form) */
+
+int
+doMartialForm(void)
+{
+	winid tmpwin;
+	int n, how, i;
+	char buf[BUFSZ];
+	menu_item *selected;
+	anything any;
+	boolean anyform = FALSE;
+
+	for (i = FIRST_MNK_FFORM; i <= LAST_MNK_FFORM; i++) {
+		if (selectedFightingForm(i))
+			anyform = TRUE;
+	}
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;		/* zero out all bits */
+
+	Sprintf(buf, "Known Martial Arts Forms");
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+
+	Strcpy(buf, "Tiger style");
+	if (!anyform)
+		Strcat(buf, " (active)");
+	any.a_int = TIGER_FORM;	/* must be non-zero */
+	add_menu(tmpwin, NO_GLYPH, &any,
+		'a', 0, ATR_NONE, buf,
+		MENU_UNSELECTED);
+
+	for (i = FIRST_MNK_FFORM; i <= LAST_MNK_FFORM; i++) {
+		if (!knownMartialForm(i))
+			continue;
+
+		Strcpy(buf, nameOfFightingForm(i));
+		if (selectedFightingForm(i))
+			Strcat(buf, " (active)");
+
+		any.a_int = i;	/* must be non-zero */
+		add_menu(tmpwin, NO_GLYPH, &any,
+			'b' + (i - FIRST_MNK_FFORM), 0, ATR_NONE, buf,
+			MENU_UNSELECTED);
+	}
+	end_menu(tmpwin, "Choose preferred martial arts form:");
+
+	how = PICK_ONE;
+	n = select_menu(tmpwin, how, &selected);
+	destroy_nhwindow(tmpwin);
+
+	if (n <= 0)
+		return MOVE_CANCELLED;
+
+	i = selected[0].item.a_int;
+	free(selected);
+
+	if (i == TIGER_FORM) {
+		if (!anyform)
+			return MOVE_CANCELLED;
+		unSetFightingForm(FIRST_MNK_FFORM);
+		return MOVE_INSTANT;
+	} else if (selectedFightingForm(i)) {
+		return MOVE_CANCELLED;
+	}
+	setFightingForm(i);
+	return MOVE_INSTANT;
+}
+
+#undef TIGER_FORM
 
 int
 doLightsaberForm()
@@ -1404,7 +1453,7 @@ doKnightForm()
 	if(n <= 0){
 		return MOVE_CANCELLED;
 	} else if ((selected[0].item.a_int == FFORM_HALF_SWORD || activeFightingForm(FFORM_HALF_SWORD)) &&
-				(!freehand() || (uwep && is_knight_sword(uwep) && welded(uwep)))){
+				(!freehand() || (uwep && (is_knight_sword(uwep) || (Role_if(PM_KENSEI) && is_kensei_weapon(uwep))) && welded(uwep)))){
 		free(selected);
 		pline("You need a free hand to adjust your grip!");
 		return MOVE_CANCELLED;
@@ -1693,7 +1742,7 @@ doEtechForm()
 	}
 }
 
-#define MONK_FORMS			0x0001L
+#define MYSTIC_FORMS		0x0001L
 #define LIGHTSABER_FORMS	0x0002L
 #define KNIGHT_FORMS		0x0004L
 #define AVOID_PASSIVES		0x0008L
@@ -1708,6 +1757,7 @@ doEtechForm()
 #define BOREAL_FORMS		0x1000L
 #define AVOID_URPASSIVES	0x2000L
 #define STORM_FORMS			0x4000L
+#define MARTIAL_ARTS_FORMS	0x8000L
 
 int
 hasfightingforms(){
@@ -1732,14 +1782,16 @@ hasfightingforms(){
 		|| uring_art(ART_STAR_EMPEROR_S_RING)
 		|| check_rot(ROT_CENT)
 		|| check_rot(ROT_STING)
-		|| (!Upolyd && (TIEFLING_AUTOATTACKS || storm_aasimar(flags.aasimar_subtype) || Race_if(PM_DOKKIMAR)))
+		|| (!Upolyd && (TIEFLING_AUTOATTACKS || storm_aasimar(flags.aasimar_subtype) || flags.aasimar_type == AASIMAR_TYPE_IKSH_NA))
 		//Tiefling and aasimar
 	)
 		formmask |= AUTO_ATTKS;
 
 	/* forms relevant due to situation/role are shown, even if you're bad at them (if applicable) */
 	if(Role_if(PM_MONK) || Role_if(PM_KENSEI))
-		formmask |= MONK_FORMS;
+		formmask |= MYSTIC_FORMS;
+	if(Role_if(PM_MONK))
+		formmask |= MARTIAL_ARTS_FORMS;
 	if(Role_if(PM_KNIGHT) || Role_if(PM_KENSEI))
 		formmask |= KNIGHT_FORMS;
 	if((uwep && is_lightsaber(uwep)) || (uswapwep && is_lightsaber(uswapwep)))
@@ -1773,7 +1825,7 @@ hasfightingforms(){
 			!is_null_attk(attk);
 			attk = getattk(&youmonst, (struct monst *) 0, res, &indexnum, &prev_attk, FALSE, subout, &tohitmod)
 		){
-			if(attk->aatyp == AT_NONE) formmask |= AVOID_URPASSIVES;
+			if(attk->aatyp == AT_NONE || attk->aatyp == AT_MNTL) formmask |= AVOID_URPASSIVES;
 		}
 	}
 	if (u.uavoid_msplcast)
@@ -1890,7 +1942,7 @@ dofightingform()
 	tmpwin = create_nhwindow(NHW_MENU);
 	start_menu(tmpwin);
 	any.a_void = 0;		/* zero out all bits */
-#define	MONK_FORM	1
+#define	MYST_FORM	1
 #define	LGHT_FORM	2
 #define	KNIT_FORM	3
 #define	AVOD_FORM	4
@@ -1905,10 +1957,15 @@ dofightingform()
 #define	BOREAL_FORM	13
 #define	AVOD_PASV	14
 #define	STORM_FORM	15
+#define	MRTL_FORM	16
 
-	if (formmask & MONK_FORMS) {
-		any.a_int = MONK_FORM;
+	if (formmask & MYSTIC_FORMS) {
+		any.a_int = MYST_FORM;
 		add_menu(tmpwin, NO_GLYPH, &any, 'm', 0, ATR_NONE, "Select Mystic Forms", MENU_UNSELECTED);
+	}
+	if (formmask & MARTIAL_ARTS_FORMS) {
+		any.a_int = MRTL_FORM;
+		add_menu(tmpwin, NO_GLYPH, &any, 'f', 0, ATR_NONE, "Select Martial Arts Forms", MENU_UNSELECTED);
 	}
 	if (formmask & KNIGHT_FORMS) {
 		any.a_int = KNIT_FORM;
@@ -2004,8 +2061,10 @@ dofightingform()
 	}
 
 	switch (n){
-		case MONK_FORM:
+		case MYST_FORM:
 			return doMysticForm();
+		case MRTL_FORM:
+			return doMartialForm();
 		case LGHT_FORM:
 			return doLightsaberForm();
 		case KNIT_FORM:
@@ -2049,7 +2108,7 @@ dofightingform()
 	return MOVE_CANCELLED;
 }
 
-#undef	MONK_FORM
+#undef	MYST_FORM
 #undef	LGHT_FORM
 #undef	KNIT_FORM
 #undef	AVOD_FORM
@@ -2062,8 +2121,10 @@ dofightingform()
 #undef	AVOD_THFT
 #undef	AVOD_PASV
 #undef	STORM_FORM
+#undef	MRTL_FORM
 
-#undef MONK_FORMS
+#undef MYSTIC_FORMS
+#undef MARTIAL_ARTS_FORMS
 #undef LIGHTSABER_FORMS
 #undef KNIGHT_FORMS
 #undef AVOID_PASSIVES
@@ -2246,23 +2307,460 @@ wiz_mutate()
 	return MOVE_CANCELLED;
 }
 
-STATIC_PTR int
-wiz_research()
+struct research_bit {
+	long bit;
+	const char *name;
+};
+
+static const struct research_bit reanimation_bits[] = {
+	{RE_BOLT_RES,			"Lightning resistance"},
+	{RE_WATER_RES,			"Water resistance"},
+	{RE_CLAIR,				"Clairvoyance"},
+	{RE_CLONE_SELF,			"Blood clone"},
+	{ANTENNA_ERRANT,		"Antennae: errant thoughts"},
+	{ANTENNA_BOLT,			"Antennae: electrical static"},
+	{ANTENNA_REJECT,		"Antennae: rejecting forces"},
+	{LAMP_PHASE,			"Reveal the insubstantial world"},
+	{RE_FLAME,				"Catoptrics of the Silver rays"},
+	{0L, (const char *)0}
+};
+
+static const struct research_bit preservation_bits[] = {
+	{PRESERVE_REDUCE_HUNGER,	"Slowed metabolism"},
+	{PRESERVE_PREVENT_ABUSE,	"Body resistant to decay"},
+	{PRESERVE_GAIN_DR,			"Tough skin"},
+	{PRESERVE_COLD_RES,			"Cold resistance"},
+	{PRESERVE_SLEEP_RES,		"Sleep resistance"},
+	{PRESERVE_GAIN_DR_2,		"Tougher skin"},
+	{PRESERVE_DEAD_TRUCE,		"Uninteresting to the undead"},
+	{0L, (const char *)0}
+};
+
+static const struct research_bit vampire_bits[] = {
+	{VAMPIRE_THRALLS,		"Better control your spawn"},
+	{VAMPIRE_MASTERY,		"Improve your spawns' attacks"},
+	{VAMPIRE_BLOOD_RIP,		"Manipulate the blood of your victims"},
+	{VAMPIRE_BLOOD_SPIKES,	"Improve your blood-bullets"},
+	{VAMPIRE_GAZE,			"Hypnotic gaze"},
+	{VAMPIRE_SHUB,			"Blood of Shub-Nugganoth"},
+	{0L, (const char *)0}
+};
+
+static const struct research_bit rot_bits[] = {
+	{ROT_VOMIT,			"Vomit rot"},
+	{ROT_WINGS,			"Wings of rot"},
+	{ROT_CLONE,			"Phantom butterfly duplicates"},
+	{ROT_TRUCE,			"Uninteresting to the beings of rot"},
+	{ROT_KIN,			"Followed by the kindred of rot"},
+	{ROT_FEAST,			"Feast on injury and destruction"},
+	{ROT_CENT,			"Saprovorous immortality"},
+	{ROT_STING,			"Rot stinger"},
+	{ROT_SPORES,		"Rot spores"},
+	{ROT_SHUB,			"Rot of Shub-Nugganoth"},
+	{ROT_EXHULT,		"Exhultation of Rot"},
+	{ROT_WINGSWORD,		"Wings of ruin"},
+	{ROT_CRICKET,		"Chorus of destruction"},
+	{ROT_FORAGE,		"Gifts of the forager brood"},
+	{0L, (const char *)0}
+};
+
+static const struct research_bit parasitology_bits[] = {
+	{PARISITE_WINDOWS,	"Visions of Yog-Sothoth"},
+	{0L, (const char *)0}
+};
+
+static const struct research_bit research_glyph_bits[] = {
+	{ROTTEN_EYES,	"Rotten eyes (reanimation)"},
+	{LUMEN,			"Lumen (parasitology)"},
+	{DEFILEMENT,	"Defilement"},
+	{0L, (const char *)0}
+};
+
+/* count the bits of <bits> currently held in <current> */
+STATIC_OVL int
+research_count_mask(const struct research_bit *bits, long current)
 {
-	if (!wizard)
-		return MOVE_CANCELLED;
+	int i, count = 0;
+
+	for (i = 0; bits[i].name; i++) {
+		if (current & bits[i].bit)
+			count++;
+	}
+	return count;
+}
+
+/* offer every bit of <bits>, preselecting the held ones, and return the mask
+ * the player confirmed.  Cancelling leaves <current> untouched; confirming an
+ * empty selection clears the mask.
+ */
+STATIC_OVL long
+research_edit_mask(const char *prompt, const struct research_bit *bits, long current)
+{
 	winid tmpwin;
-	int n, how;
-	char buf[BUFSZ];
 	menu_item *selected;
-	char inclet = 'a';
 	anything any;
+	char inclet = 'a';
+	long newmask = 0L;
+	int i, n;
 
 	tmpwin = create_nhwindow(NHW_MENU);
 	start_menu(tmpwin);
 	any.a_void = 0;		/* zero out all bits */
 
+	for (i = 0; bits[i].name; i++) {
+		any.a_int = i + 1;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			inclet, 0, ATR_NONE, bits[i].name,
+			(current & bits[i].bit) ? MENU_SELECTED : MENU_UNSELECTED);
+		if (inclet == 'z')
+			inclet = 'A';
+		else if (inclet == 'Z')
+			inclet = 'a';
+		else
+			inclet++;
+	}
+	end_menu(tmpwin, prompt);
 
+	n = select_menu(tmpwin, PICK_ANY, &selected);
+	destroy_nhwindow(tmpwin);
+	if (n < 0)
+		return current;		/* cancelled */
+	for (i = 0; i < n; i++)
+		newmask |= bits[selected[i].item.a_int - 1].bit;
+	if (n > 0)
+		free(selected);
+	return newmask;
+}
+
+/* apply the intrinsics and one-shot effects that the real upgrade paths grant
+ * alongside the bit itself
+ */
+STATIC_OVL void
+research_reanimation_effects(long gained, long lost)
+{
+	if (gained & RE_BOLT_RES)
+		u.uprops[SHOCK_RES].intrinsic |= W_UPGRADE;
+	if (lost & RE_BOLT_RES)
+		u.uprops[SHOCK_RES].intrinsic &= ~W_UPGRADE;
+	if (gained & RE_WATER_RES) {
+		HWaterproof |= W_UPGRADE;
+		HSwimming |= W_UPGRADE;
+	}
+	if (lost & RE_WATER_RES) {
+		HWaterproof &= ~W_UPGRADE;
+		HSwimming &= ~W_UPGRADE;
+	}
+	if (gained & RE_CLAIR)
+		HClairvoyant |= W_UPGRADE;
+	if (lost & RE_CLAIR)
+		HClairvoyant &= ~W_UPGRADE;
+}
+
+STATIC_OVL void
+research_preservation_effects(long gained, long lost)
+{
+	if (gained & PRESERVE_COLD_RES)
+		u.uprops[COLD_RES].intrinsic |= W_UPGRADE;
+	if (lost & PRESERVE_COLD_RES)
+		u.uprops[COLD_RES].intrinsic &= ~W_UPGRADE;
+	if (gained & PRESERVE_SLEEP_RES)
+		HSleep_resistance |= W_UPGRADE;
+	if (lost & PRESERVE_SLEEP_RES)
+		HSleep_resistance &= ~W_UPGRADE;
+}
+
+STATIC_OVL void
+research_rot_effects(long gained, long lost)
+{
+	if (gained & ROT_WINGS) {
+		HFlying |= FROMOUTSIDE;
+		float_up();
+		spoteffects(FALSE);
+	}
+	/* note: this can also clear an unrelated source of FROMOUTSIDE flight */
+	if (lost & ROT_WINGS) {
+		HFlying &= ~FROMOUTSIDE;
+		(void) float_down(0L, 0L);
+	}
+	if ((gained | lost) & ROT_KIN)
+		reset_rndmonst(NON_PM);
+}
+
+#define RES_REANIM_PTS		1
+#define RES_REANIM_BANK		2
+#define RES_PARA_PTS		3
+#define RES_PARA_BANK		4
+#define RES_DEFILE_PTS		5
+#define RES_DEFILE_BANK		6
+#define RES_REANIM_UP		7
+#define RES_PRESERVE_UP		8
+#define RES_VAMPIRE_UP		9
+#define RES_ROT_UP			10
+#define RES_PARA_UP			11
+#define RES_TUNE_WEAPON		12
+#define RES_ANTENNAE		13
+#define RES_BRAINSUCKERS	14
+#define RES_MM_UP			15
+#define RES_EXPLOSION_UP	16
+#define RES_JELLYFISH		17
+#define RES_CUCKOO			18
+#define RES_GLYPHS			19
+#define RES_VEIL			20
+#define RES_IMPURITY		21
+#define RES_MENTAL			22
+
+STATIC_PTR int
+wiz_research(void)
+{
+	winid tmpwin;
+	char buf[BUFSZ];
+	menu_item *selected;
+	anything any;
+	long oldmask, newmask;
+	int i, n, picked, newval;
+
+	if (!wizard) {
+		pline("Unavailable command.");
+		return MOVE_CANCELLED;
+	}
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;		/* zero out all bits */
+
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, "Research progress:", MENU_UNSELECTED);
+
+	any.a_int = RES_REANIM_PTS;
+	Sprintf(buf, "Reanimation points: %d%s", u.ureanimation_research,
+		reanimation_research_ok() ? " (upgrade ready)" : "");
+	add_menu(tmpwin, NO_GLYPH, &any, 'a', 0, ATR_NONE, buf, MENU_UNSELECTED);
+
+	any.a_int = RES_REANIM_BANK;
+	add_menu(tmpwin, NO_GLYPH, &any, 'b', 0, ATR_NONE,
+		"Bank enough points for the next reanimation upgrade", MENU_UNSELECTED);
+
+	any.a_int = RES_PARA_PTS;
+	Sprintf(buf, "Parasitology points: %d%s", u.uparasitology_research,
+		parasite_research_ok() ? " (upgrade ready)" : "");
+	add_menu(tmpwin, NO_GLYPH, &any, 'c', 0, ATR_NONE, buf, MENU_UNSELECTED);
+
+	any.a_int = RES_PARA_BANK;
+	add_menu(tmpwin, NO_GLYPH, &any, 'd', 0, ATR_NONE,
+		"Bank enough points for the next parasitology upgrade", MENU_UNSELECTED);
+
+	any.a_int = RES_DEFILE_PTS;
+	Sprintf(buf, "Defilement points: %d%s", u.udefilement_research,
+		defile_research_ok() ? " (upgrade ready)" : "");
+	add_menu(tmpwin, NO_GLYPH, &any, 'e', 0, ATR_NONE, buf, MENU_UNSELECTED);
+
+	any.a_int = RES_DEFILE_BANK;
+	add_menu(tmpwin, NO_GLYPH, &any, 'f', 0, ATR_NONE,
+		"Bank enough points for the next defilement upgrade", MENU_UNSELECTED);
+
+	any.a_int = 0;
+	Sprintf(buf, "Upgrades (reanimation %d, parasitology %d, defilement %d; 6 completes a philosophy):",
+		reanimation_count(), parasite_count(), defile_count());
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+
+	any.a_int = RES_REANIM_UP;
+	Sprintf(buf, "Reanimation upgrades (%d of %d held)",
+		research_count_mask(reanimation_bits, u.ureanimation_upgrades),
+		research_count_mask(reanimation_bits, ~0L));
+	add_menu(tmpwin, NO_GLYPH, &any, 'g', 0, ATR_NONE, buf, MENU_UNSELECTED);
+
+	any.a_int = RES_PRESERVE_UP;
+	Sprintf(buf, "Preservation upgrades (%d of %d held)",
+		research_count_mask(preservation_bits, u.upreservation_upgrades),
+		research_count_mask(preservation_bits, ~0L));
+	add_menu(tmpwin, NO_GLYPH, &any, 'h', 0, ATR_NONE, buf, MENU_UNSELECTED);
+
+	any.a_int = RES_VAMPIRE_UP;
+	Sprintf(buf, "Vampire upgrades (%d of %d held)",
+		research_count_mask(vampire_bits, u.uvampire_upgrades),
+		research_count_mask(vampire_bits, ~0L));
+	add_menu(tmpwin, NO_GLYPH, &any, 'i', 0, ATR_NONE, buf, MENU_UNSELECTED);
+
+	any.a_int = RES_ROT_UP;
+	Sprintf(buf, "Rot upgrades (%d of %d held)",
+		research_count_mask(rot_bits, u.urot_upgrades),
+		research_count_mask(rot_bits, ~0L));
+	add_menu(tmpwin, NO_GLYPH, &any, 'j', 0, ATR_NONE, buf, MENU_UNSELECTED);
+
+	any.a_int = RES_PARA_UP;
+	Sprintf(buf, "Parasitology upgrades (%d of %d held)",
+		research_count_mask(parasitology_bits, u.uparasitology_upgrades),
+		research_count_mask(parasitology_bits, ~0L));
+	add_menu(tmpwin, NO_GLYPH, &any, 'k', 0, ATR_NONE, buf, MENU_UNSELECTED);
+
+	if (uwep && !check_oprop(uwep, OPROP_ANTAW)) {
+		any.a_int = RES_TUNE_WEAPON;
+		add_menu(tmpwin, NO_GLYPH, &any, 'l', 0, ATR_NONE,
+			"Tune your weapon to conduct the arcane (needed by the antennae upgrades)",
+			MENU_UNSELECTED);
+	}
+
+	any.a_int = RES_ANTENNAE;
+	Sprintf(buf, "Antennae upgrades: %d", u.antennae_upgrades);
+	add_menu(tmpwin, NO_GLYPH, &any, 'm', 0, ATR_NONE, buf, MENU_UNSELECTED);
+
+	any.a_int = 0;
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, "Parasite placements:", MENU_UNSELECTED);
+
+	any.a_int = RES_BRAINSUCKERS;
+	Sprintf(buf, "Brain-sucking parasites: %d", (int)u.brainsuckers);
+	add_menu(tmpwin, NO_GLYPH, &any, 'n', 0, ATR_NONE, buf, MENU_UNSELECTED);
+
+	any.a_int = RES_MM_UP;
+	Sprintf(buf, "Ray and beam parasites: %d", (int)u.mm_up);
+	add_menu(tmpwin, NO_GLYPH, &any, 'o', 0, ATR_NONE, buf, MENU_UNSELECTED);
+
+	any.a_int = RES_EXPLOSION_UP;
+	Sprintf(buf, "Explosive spell parasites: %d", (int)u.explosion_up);
+	add_menu(tmpwin, NO_GLYPH, &any, 'p', 0, ATR_NONE, buf, MENU_UNSELECTED);
+
+	any.a_int = RES_JELLYFISH;
+	Sprintf(buf, "Stinging parasites: %d", (int)u.jellyfish);
+	add_menu(tmpwin, NO_GLYPH, &any, 'q', 0, ATR_NONE, buf, MENU_UNSELECTED);
+
+	any.a_int = RES_CUCKOO;
+	Sprintf(buf, "Charm spell parasites: %d", (int)u.cuckoo);
+	add_menu(tmpwin, NO_GLYPH, &any, 'r', 0, ATR_NONE, buf, MENU_UNSELECTED);
+
+	any.a_int = 0;
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, "Research gating:", MENU_UNSELECTED);
+
+	any.a_int = RES_GLYPHS;
+	Sprintf(buf, "Thought glyphs (Insight %d, these glyphs activate at %d)",
+		Insight, glyph_insight(ROTTEN_EYES));
+	add_menu(tmpwin, NO_GLYPH, &any, 's', 0, ATR_NONE, buf, MENU_UNSELECTED);
+
+	any.a_int = RES_VEIL;
+	add_menu(tmpwin, NO_GLYPH, &any, 't', 0, ATR_NONE,
+		u.veil ? "Lift the veil" : "Restore the veil", MENU_UNSELECTED);
+
+	any.a_int = RES_IMPURITY;
+	Sprintf(buf, "Impurity: %d%s", u.uimpurity, impurity_ok() ? "" : " (too clean for defilement)");
+	add_menu(tmpwin, NO_GLYPH, &any, 'u', 0, ATR_NONE, buf, MENU_UNSELECTED);
+
+	any.a_int = RES_MENTAL;
+	Sprintf(buf, "Mental scores lost: %d", u.mental_scores_down);
+	add_menu(tmpwin, NO_GLYPH, &any, 'v', 0, ATR_NONE, buf, MENU_UNSELECTED);
+
+	end_menu(tmpwin, "Select one:");
+
+	n = select_menu(tmpwin, PICK_ONE, &selected);
+	destroy_nhwindow(tmpwin);
+	if (n > 0) {
+		picked = selected[0].item.a_int;
+		free(selected);
+	}
+	else return MOVE_CANCELLED;
+
+#define set_research_value(str, val)		newval = getvalue(str);\
+			if (newval < 0) {\
+				pline1(Never_mind);\
+			}\
+			else {\
+				val = newval;\
+			}
+
+	switch (picked) {
+		case RES_REANIM_PTS:
+			set_research_value("Set reanimation research points to what?", u.ureanimation_research);
+		break;
+		case RES_REANIM_BANK:
+			while (!reanimation_research_ok())
+				u.ureanimation_research++;
+		break;
+		case RES_PARA_PTS:
+			set_research_value("Set parasitology research points to what?", u.uparasitology_research);
+		break;
+		case RES_PARA_BANK:
+			while (!parasite_research_ok())
+				u.uparasitology_research++;
+		break;
+		case RES_DEFILE_PTS:
+			set_research_value("Set defilement research points to what?", u.udefilement_research);
+		break;
+		case RES_DEFILE_BANK:
+			while (!defile_research_ok())
+				u.udefilement_research++;
+		break;
+		case RES_REANIM_UP:
+			oldmask = u.ureanimation_upgrades;
+			newmask = research_edit_mask("Reanimation upgrades:", reanimation_bits, oldmask);
+			u.ureanimation_upgrades = newmask;
+			research_reanimation_effects(newmask & ~oldmask, oldmask & ~newmask);
+		break;
+		case RES_PRESERVE_UP:
+			oldmask = u.upreservation_upgrades;
+			newmask = research_edit_mask("Preservation upgrades:", preservation_bits, oldmask);
+			u.upreservation_upgrades = newmask;
+			research_preservation_effects(newmask & ~oldmask, oldmask & ~newmask);
+		break;
+		case RES_VAMPIRE_UP:
+			u.uvampire_upgrades = research_edit_mask("Vampire upgrades:", vampire_bits, u.uvampire_upgrades);
+		break;
+		case RES_ROT_UP:
+			oldmask = u.urot_upgrades;
+			newmask = research_edit_mask("Rot upgrades:", rot_bits, oldmask);
+			u.urot_upgrades = newmask;
+			research_rot_effects(newmask & ~oldmask, oldmask & ~newmask);
+		break;
+		case RES_PARA_UP:
+			u.uparasitology_upgrades = research_edit_mask("Parasitology upgrades:", parasitology_bits, u.uparasitology_upgrades);
+		break;
+		case RES_TUNE_WEAPON:
+			if (uwep) {
+				You("tune your weapon.");
+				add_oprop(uwep, OPROP_ANTAW);
+			}
+		break;
+		case RES_ANTENNAE:
+			set_research_value("Set antennae upgrades to what?", u.antennae_upgrades);
+		break;
+		case RES_BRAINSUCKERS:
+			set_research_value("Set brain-sucking parasites to what?", u.brainsuckers);
+		break;
+		case RES_MM_UP:
+			set_research_value("Set ray and beam parasites to what?", u.mm_up);
+		break;
+		case RES_EXPLOSION_UP:
+			set_research_value("Set explosive spell parasites to what?", u.explosion_up);
+		break;
+		case RES_JELLYFISH:
+			set_research_value("Set stinging parasites to what?", u.jellyfish);
+		break;
+		case RES_CUCKOO:
+			set_research_value("Set charm spell parasites to what?", u.cuckoo);
+		break;
+		case RES_GLYPHS:
+			oldmask = u.thoughts & (ROTTEN_EYES | LUMEN | DEFILEMENT);
+			newmask = research_edit_mask("Thought glyphs:", research_glyph_bits, oldmask);
+			for (i = 0; research_glyph_bits[i].name; i++) {
+				if ((newmask & ~oldmask) & research_glyph_bits[i].bit)
+					give_thought(research_glyph_bits[i].bit);
+				else if ((oldmask & ~newmask) & research_glyph_bits[i].bit)
+					remove_thought(research_glyph_bits[i].bit);
+			}
+		break;
+		case RES_VEIL:
+			if (u.veil) {
+				lift_veil();
+			}
+			else {
+				u.veil = TRUE;
+			}
+		break;
+		case RES_IMPURITY:
+			set_research_value("Set impurity to what?", u.uimpurity);
+		break;
+		case RES_MENTAL:
+			set_research_value("Set mental scores lost to what?", u.mental_scores_down);
+		break;
+	}
+#undef set_research_value
+	flags.botl = 1;
 	return MOVE_CANCELLED;
 }
 
@@ -3200,6 +3698,7 @@ struct ext_func_tab extcmdlist[] = {
 	{(char *)0, (char *)0, donull, TRUE}, /* #wizbind */
 	{(char *)0, (char *)0, donull, TRUE}, /* #wizmutate */
 	{(char *)0, (char *)0, donull, TRUE}, /* #wizcult */
+	{(char *)0, (char *)0, donull, TRUE}, /* #wizresearch */
 #endif
 	{(char *)0, (char *)0, donull, TRUE}	/* sentinel */
 };
@@ -3231,6 +3730,7 @@ static struct ext_func_tab debug_extcmdlist[] = {
 	{"wizbind", "grants knowledge of all seals and binds one", wiz_bind, IFBURIED, AUTOCOMPLETE},
 	{"wizcult", "manipulate cult variables", wiz_cult, IFBURIED, AUTOCOMPLETE},
 	{"wizmutate", "applies a mutation", wiz_mutate, IFBURIED, AUTOCOMPLETE},
+	{"wizresearch", "manipulate undead hunter research variables", wiz_research, IFBURIED, AUTOCOMPLETE},
 	{"dump_map", "dump map glyphs into a file", wiz_mk_mapglyphdump, IFBURIED, AUTOCOMPLETE},
 #ifdef DEBUG
 	{"wizdebug", "wizard debug command", wiz_debug_cmd, IFBURIED, AUTOCOMPLETE},
@@ -4382,7 +4882,11 @@ char sym;
 	u.dx = xdir[dp-sdp];
 	u.dy = ydir[dp-sdp];
 	u.dz = zdir[dp-sdp];
-	if (u.dx && u.dy && (u.umonnum == PM_GRID_BUG || u.umonnum == PM_BEBELITH)) {
+	if (u.dx && u.dy && orthogonal_mover(&youmonst)) {
+		u.dx = u.dy = 0;
+		return 0;
+	}
+	if ((u.dx || u.dy) && (!u.dx || !u.dy) && diagonal_mover(&youmonst)) {
 		u.dx = u.dy = 0;
 		return 0;
 	}
@@ -4501,20 +5005,34 @@ const char *msg;
 		putstr(win, 0, "");
 	    }
 	}
-	if (iflags.num_pad && (u.umonnum == PM_GRID_BUG || u.umonnum == PM_BEBELITH)) {
+	if (iflags.num_pad && orthogonal_mover(&youmonst)) {
 	    putstr(win, 0, "Valid direction keys in your current form (with number_pad on) are:");
 	    putstr(win, 0, "             8   ");
 	    putstr(win, 0, "             |   ");
 	    putstr(win, 0, "          4- . -6");
 	    putstr(win, 0, "             |   ");
 	    putstr(win, 0, "             2   ");
-	} else if (u.umonnum == PM_GRID_BUG || u.umonnum == PM_BEBELITH) {
+	} else if (orthogonal_mover(&youmonst)) {
 	    putstr(win, 0, "Valid direction keys in your current form are:");
 	    putstr(win, 0, "             k   ");
 	    putstr(win, 0, "             |   ");
 	    putstr(win, 0, "          h- . -l");
 	    putstr(win, 0, "             |   ");
 	    putstr(win, 0, "             j   ");
+	} else if (iflags.num_pad && diagonal_mover(&youmonst)) {
+	    putstr(win, 0, "Valid direction keys in your current form (with number_pad on) are:");
+	    putstr(win, 0, "          7     9");
+	    putstr(win, 0, "           \\   / ");
+	    putstr(win, 0, "             .    ");
+	    putstr(win, 0, "           /   \\ ");
+	    putstr(win, 0, "          1     3");
+	} else if (diagonal_mover(&youmonst)) {
+	    putstr(win, 0, "Valid direction keys in your current form are:");
+	    putstr(win, 0, "          y     u");
+	    putstr(win, 0, "           \\   / ");
+	    putstr(win, 0, "             .    ");
+	    putstr(win, 0, "           /   \\ ");
+	    putstr(win, 0, "          b     n");
 	} else if (iflags.num_pad) {
 	    putstr(win, 0, "Valid direction keys (with number_pad on) are:");
 	    putstr(win, 0, "          7  8  9");
@@ -4550,7 +5068,8 @@ confdir()
 	register int x;
 	if(u.udrunken >= 3 && rn2(u.udrunken/3 + 1))
 		return;
-	x = (u.umonnum == PM_GRID_BUG || u.umonnum == PM_BEBELITH) ? 2*rn2(4) : rn2(8);
+	x = orthogonal_mover(&youmonst) ? 2*rn2(4) :
+	    diagonal_mover(&youmonst) ? 2*rn2(4)+1 : rn2(8);
 	u.dx = xdir[x];
 	u.dy = ydir[x];
 	return;

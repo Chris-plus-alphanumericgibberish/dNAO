@@ -7,6 +7,7 @@
 #include "hack.h"
 #include "lev.h"
 #include "artifact.h"
+#include "qtext.h"
 
 #ifdef SINKS
 # ifdef OVLB
@@ -1058,6 +1059,12 @@ doup()
 			obfree(pseudo, (struct obj *)0);	/* now, get rid of it */
 			artinstance[ART_ROD_OF_SEVEN_PARTS].RoSPflights--;
 		}
+		else if (youmonst.mprone && mon_enough_legs_to_stand(&youmonst)) {
+			You("climb to your %s.", makeplural(body_part(FOOT)));
+			youmonst.mprone = 0;
+			flags.botl = 1;
+			return MOVE_STANDARD;
+		}
 		else{
 			if(levl[u.ux][u.uy].typ == STAIRS){
 				if(levl[u.ux][u.uy].ladder != LA_UP){
@@ -1273,7 +1280,7 @@ int portal;
 		pline("A mysterious force prevents you from descending.");
 		return;
 	}
-	if(u.silverknight_mire && u.uz.dnum == oracle_level.dnum && newdungeon){
+	if(u.silverknight_mire && In_dungeons_of_doom(&u.uz) && newdungeon){
 		if (newlevel->dnum != qstart_level.dnum) {
 			pline("A mysterious force prevents you from %s.", portal ? "leaving" : up ? "climbing" : "descending");
 			return;
@@ -1570,8 +1577,9 @@ remake:
 					u_on_dnstairs();
 				}
 			}
+			update_proneness(&youmonst);
 			/* Remove bug which crashes with levitation/punishment  KAA */
-			if (Punished && uball->oartifact != ART_IRON_BALL_OF_LEVITATION && !Levitation) {
+			if (((Punished && uball->oartifact != ART_IRON_BALL_OF_LEVITATION) || youmonst.mprone) && !Levitation) {
 				pline("With great effort you climb the %s.",
 				at_ladder ? "ladder" : "stairs");
 			} else if (at_ladder)
@@ -1597,9 +1605,9 @@ remake:
 				(near_capacity() > UNENCUMBERED || (Punished && uball->oartifact != ART_IRON_BALL_OF_LEVITATION &&
 				((uwep != uball) || ((P_SKILL(P_FLAIL) < P_BASIC))
 				|| !Role_if(PM_CONVICT)))
-				 || Fumbling)
+				 || Fumbling || youmonst.mprone)
 	#else
-				(near_capacity() > UNENCUMBERED || Punished || Fumbling)
+				(near_capacity() > UNENCUMBERED || Punished || Fumbling || youmonst.mprone)
 	#endif /* CONVICT */
 			) {
 				You("fall down the %s.", at_ladder ? "ladder" : "stairs");
@@ -1733,6 +1741,10 @@ misc_levelport:
 	    }
 	}
 
+	/* The PC can end up moving between parity worlds as a result of stairs etc. */
+	if(diagonal_mover(&youmonst))
+		youmonst.mvar1_seaParity = 1 + ((u.ux + u.uy) % 2);
+
 	/* initial movement of bubbles just before vision_recalc */
 	if (Is_waterlevel(&u.uz))
 		movebubbles();
@@ -1807,7 +1819,7 @@ misc_levelport:
 #endif
 	/* Final confrontation */
 	if (In_endgame(&u.uz) && newdungeon && u.uhave.amulet){
-		if(Role_if(PM_MADMAN) && Race_if(PM_ELF)){
+		if(STAR_ELF_MADMAN){
 			makemon(&mons[flags.initgend ? PM_PUPPET_EMPEROR_XELETH : PM_PUPPET_EMPRESS_XEDALLI], u.ux, u.uy, MM_ADJACENTOK);
 			verbalize("Why won't you JUST. STAY. DEAD!?");
 			makemon(&mons[PM_FLAXEN_STAR_PHANTOM], u.ux, u.uy, MM_ADJACENTOK);
@@ -1873,9 +1885,9 @@ misc_levelport:
 			}
 		} else {
 			if (u.uevent.qcalled) {
-				com_pager(Role_if(PM_ROGUE) ? 4 : 3);
+				com_pager(Role_if(PM_ROGUE) ? QT_COMMON_QCALL_AGAIN_ROGUE : QT_COMMON_QCALL_AGAIN);
 			} else {
-				com_pager(2);
+				com_pager(QT_COMMON_QCALL);
 				u.uevent.qcalled = TRUE;
 			}
 		}
@@ -1959,7 +1971,7 @@ final_level()
 		(void) makemon(&mons[PM_ANCIENT_OF_ICE], u.ux, u.uy, MM_ADJACENTOK);
 /*		for(host = 0; host < 10; host++ )*/ (void) makemon(&mons[PM_FALLEN_ANGEL], u.ux, u.uy, MM_ADJACENTOK);
 	}
-	if(Role_if(PM_MADMAN) && Race_if(PM_ELF)){
+	if(STAR_ELF_MADMAN){
 		makemon(&mons[PM_FLAXEN_STAR_PHANTOM], 0, 0, MM_ADJACENTOK);
 		makemon(&mons[PM_FLAXEN_STAR_PHANTOM], 0, 0, MM_ADJACENTOK);
 		makemon(&mons[PM_FLAXEN_STAR_PHANTOM], 0, 0, MM_ADJACENTOK);
@@ -2957,7 +2969,7 @@ wipeoff()
 {
 	if(u.ucreamed < 4)	u.ucreamed = 0;
 	else			u.ucreamed -= 4;
-	if (Blinded < 4)	Blinded = 0;
+	if (BlindedTimeout < 4)	Blinded &= ~TIMEOUT;
 	else			Blinded -= 4;
 	if (!Blinded) {
 		pline("You've got the glop off.");

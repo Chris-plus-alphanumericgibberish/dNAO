@@ -78,11 +78,11 @@ const struct innate {
 		     {  14, &(HSearching), "perceptive", "unaware" },
 		     {	16, &(HSee_invisible), "your vision sharpen", "your vision blur" },
 		     {  18, &(HWarning), "sensitive", "insensitive" },
-		     {  20, &(HFire_resistance), "cool", "warmer" },
-		     {  21, &(HCold_resistance), "warm", "cooler" },
-		     {  22, &(HShock_resistance), "insulated", "conductive" },
+		     {  20, &(u.uprops[FIRE_RES].intrinsic), "cool", "warmer" },
+		     {  21, &(u.uprops[COLD_RES].intrinsic), "warm", "cooler" },
+		     {  22, &(u.uprops[SHOCK_RES].intrinsic), "insulated", "conductive" },
 		     {  23, &(HTeleport_control), "controlled","uncontrolled" },
-		     {  24, &(HAcid_resistance), "thick-skinned","soft-skinned" },
+		     {  24, &(u.uprops[ACID_RES].intrinsic), "thick-skinned","soft-skinned" },
 		     {  25, &(HWwalking), "light on your feet","heavy" },
 		     {  26, &(HSick_resistance), "immunized","immunocompromised" },
 		     {  27, &(HDisint_resistance), "firm","less firm" },
@@ -98,11 +98,11 @@ const struct innate {
 		     {   5, &(HStealth), "stealthy", "noisy" },
 		     {   7, &(HWarning), "sensitive", "insensitive" },
 		     {   9, &(HSearching), "perceptive", "unaware" },
-		     {  11, &(HFire_resistance), "cool", "warmer" },
-		     {  13, &(HCold_resistance), "warm", "cooler" },
-		     {  15, &(HShock_resistance), "insulated", "conductive" },
+		     {  11, &(u.uprops[FIRE_RES].intrinsic), "cool", "warmer" },
+		     {  13, &(u.uprops[COLD_RES].intrinsic), "warm", "cooler" },
+		     {  15, &(u.uprops[SHOCK_RES].intrinsic), "insulated", "conductive" },
 		     {  17, &(HTeleport_control), "controlled","uncontrolled" },
-		     {  19, &(HAcid_resistance), "thick-skinned","soft-skinned" },
+		     {  19, &(u.uprops[ACID_RES].intrinsic), "thick-skinned","soft-skinned" },
 		     {  21, &(HWwalking), "light on your feet","heavy" },
 		     {  23, &(HSick_resistance), "immunized","immunocompromised" },
 		     {  25, &(HDisint_resistance), "firm","less firm" },
@@ -119,7 +119,7 @@ const struct innate {
 
 	elnob_abil[] = { {	 7, &(HFast), "quick", "slow" },
 			{	15, &(HWarning), "sensitive", "" },
-		     {  20, &(HFire_resistance), "cool", "warmer" },
+		     {  20, &(u.uprops[FIRE_RES].intrinsic), "cool", "warmer" },
 		     {	 0, 0, 0, 0 } },
 
 	pir_abil[] = {	{1, &(HSwimming), "", ""  },
@@ -128,7 +128,7 @@ const struct innate {
 		     {	 0, 0, 0, 0 } },
 
 	pri_abil[] = { {	15, &(HWarning), "sensitive", "" },
-		     {  20, &(HFire_resistance), "cool", "warmer" },
+		     {  20, &(u.uprops[FIRE_RES].intrinsic), "cool", "warmer" },
 		     {	 0, 0, 0, 0 } },
 
 	ran_abil[] = { {   1, &(HSearching), "", "" },
@@ -154,9 +154,11 @@ const struct innate {
 		     {  21, &(HSearching), "perceptive", "" },
 		     {	 0, 0, 0, 0 } },
 
-	val_abil[] = { {	 1, &(HCold_resistance), "", "" },
+	val_abil[] = { {	 1, &(u.uprops[COLD_RES].intrinsic), "", "" },
 		     {	 1, &(HStealth), "", "" },
 		     {   7, &(HFast), "quick", "slow" },
+			 {	14, &(u.uprops[HELL_COLD_RES].intrinsic), "even warmer", "not as warm" },
+			 {	21, &(u.uprops[HOLY_COLD_RES].intrinsic), "the warmth of enlightenment", "not as enlightened" },
 		     {	 0, 0, 0, 0 } },
 
 	wiz_abil[] = { {	15, &(HWarning), "sensitive", "" },
@@ -174,23 +176,23 @@ const struct innate {
 	clk_abil[] = { {	1, &(HPoison_resistance), "", "" },
 		     {	 1, &(HSick_resistance), "", "" },
 		     {	 1, &(HStone_resistance), "", "" },
-		     {	 5, &(HShock_resistance), "shock resistant", "less shock resistant" },
-		     {	 10, &(HCold_resistance), "cold resistant", "less cold resistant" },
-		     {	 15, &(HFire_resistance), "heat resistant", "less heat resistant" },
+		     {	 5, &(u.uprops[SHOCK_RES].intrinsic), "shock resistant", "less shock resistant" },
+		     {	 10, &(u.uprops[COLD_RES].intrinsic), "cold resistant", "less cold resistant" },
+		     {	 15, &(u.uprops[FIRE_RES].intrinsic), "heat resistant", "less heat resistant" },
 		     {	 0, 0, 0, 0 } },
 
 	and_abil[] = { {	1, &(HPoison_resistance), "", "" },
 		     {	 1, &(HSick_resistance), "", "" },
 		     {	 1, &(HStone_resistance), "", "" },
-		     {	 1, &(HCold_resistance), "", "" },
+		     {	 1, &(u.uprops[COLD_RES].intrinsic), "", "" },
 		     {   5, &(HStealth), ">Initiating short-range camouflage<", ">Short-range camouflage damaged<" },
-		     {  10, &(HShock_resistance), ">Initiating ion-channel re-direction<", ">Ion-channel re-direction non-operational<" },
-		     {  15, &(HFire_resistance), ">Activating asymmetrical heat sink<", ">Asymmetrical heat sink destroyed<" },
+		     {  10, &(u.uprops[SHOCK_RES].intrinsic), ">Initiating ion-channel re-direction<", ">Ion-channel re-direction non-operational<" },
+		     {  15, &(u.uprops[FIRE_RES].intrinsic), ">Activating asymmetrical heat sink<", ">Asymmetrical heat sink destroyed<" },
 		     {	 0, 0, 0, 0 } },
 
 	vam_abil[] = { {	1, &(HPoison_resistance), "", "" },
 			 {	 1, &(HSleep_resistance), "", "" },
-			 {	11, &(HCold_resistance), "the chill of the grave", "the warmth of life" },
+			 {	11, &(u.uprops[HELL_COLD_RES].intrinsic), "the chill of the grave", "the warmth of life" },
 		     {	 21, &(HPolymorph_control), "in control", "out of control" },
 		     {	 0, 0, 0, 0 } },
 
@@ -231,45 +233,51 @@ const struct innate {
 			  {	15, &(HSee_invisible), "your vision sharpen", "your vision blur" },
 			  {	 0, 0, 0, 0 } },
 
-	yki_abil[] = { {	1, &(HCold_resistance), "", "" },
-		     {  11, &(HFire_resistance), "cool", "warmer" },
+	yki_abil[] = { {	1, &(u.uprops[HOLY_COLD_RES].intrinsic), "", "" },
+		     {  11, &(u.uprops[FIRE_RES].intrinsic), "cool", "warmer" },
 		     {	 0, 0, 0, 0 } },
 
 	inc_abil[] = { {	1, &(HAntimagic), "", "" },
 		     {	 0, 0, 0, 0 } },
 	
 	aasi_abil[] = { 
-			 {	 1, &(HShock_resistance), "", "" },
+			 {	 1, &(u.uprops[HOLY_SHOCK_RES].intrinsic), "", "" },
 		     {	 0, 0, 0, 0 } },
 
 	aasi_archon_abil[] = { 
-			 {	 1, &(HShock_resistance), "", "" },
+			 {	 1, &(u.uprops[HOLY_SHOCK_RES].intrinsic), "", "" },
+			 {	14, &(HFlying), "your aura form into wings", "your aura lose cohesion" },
+		     {	 0, 0, 0, 0 } },
+
+	aasi_surya_abil[] = { 
+			 {	 1, &(u.uprops[HOLY_SHOCK_RES].intrinsic), "", "" },
+			 {	 7, &(u.uprops[HOLY_FIRE_RES].intrinsic), "sun-touched", "less radiant" },
 			 {	14, &(HFlying), "your aura form into wings", "your aura lose cohesion" },
 		     {	 0, 0, 0, 0 } },
 
 	aasi_deva_abil[] = { 
-			 {	 1, &(HShock_resistance), "", "" },
+			 {	 1, &(u.uprops[HOLY_SHOCK_RES].intrinsic), "", "" },
 			 {	14, &(HNo_prop), "your aura form into arms", "your aura lose cohesion" },
 		     {	 0, 0, 0, 0 } },
 
 	aasi_storm_abil[] = { 
-			 {	 1, &(HShock_resistance), "", "" },
+			 {	 1, &(u.uprops[HOLY_SHOCK_RES].intrinsic), "", "" },
 			 {	14, &(HNo_prop), "your aura destabilize", "your aura stabilize" },
 		     {	 0, 0, 0, 0 } },
 
 	aasi_coure_abil[] = { 
-			 {	 1, &(HShock_resistance), "", "" },
+			 {	 1, &(u.uprops[HOLY_SHOCK_RES].intrinsic), "", "" },
 			 {	14, &(HNo_prop), "your aura form into blades of starlight", "your aura lose cohesion" },
 		     {	 0, 0, 0, 0 } },
 
 	aasi_gae_abil[] = { 
-			 {	 1, &(HShock_resistance), "", "" },
+			 {	 1, &(u.uprops[HOLY_SHOCK_RES].intrinsic), "", "" },
 			 {	14, &(HNo_prop), "your aura form into reaching vines", "your aura lose cohesion" },
 		     {	 0, 0, 0, 0 } },
 
 	aasi_prim_abil[] = { 
-			 {	 1, &(HShock_resistance), "", "" },
-			 {   7, &(HAcid_resistance), "thick-skinned","soft-skinned" },
+			 {	 1, &(u.uprops[HOLY_SHOCK_RES].intrinsic), "", "" },
+			 {   7, &(u.uprops[HOLY_ACID_RES].intrinsic), "thick-skinned","soft-skinned" },
 			 {	14, &(HStone_resistance), "", "stiff" },
 		     {	 0, 0, 0, 0 } },
 
@@ -283,14 +291,14 @@ const struct innate {
 		     {	 0, 0, 0, 0 } },
 
 	aasi_drow_abil[] = {
-			 {	 1, &(HShock_resistance), "", "" },
+			 {	 1, &(u.uprops[HOLY_SHOCK_RES].intrinsic), "", "" },
 			 {	 4, &(HSleep_resistance), "awake", "tired" },
 		     {	 0, 0, 0, 0 } },
 
 	frm_abil[] = { 
-			 {   3, &(HFire_resistance), "heat resistant", "less heat resistant" },
+			 {   3, &(u.uprops[FIRE_RES].intrinsic), "heat resistant", "less heat resistant" },
 			 {	 5, &(HPoison_resistance), "healthy", "sickly" },
-			 {   9, &(HAcid_resistance), "thick-skinned","soft-skinned" },
+			 {   9, &(u.uprops[ACID_RES].intrinsic), "thick-skinned","soft-skinned" },
 		     {	 0, 0, 0, 0 } },
 
 	cen_abil[] = { {	14, &(HJumping), "you feel light on your feet", "you feel heavier" },
@@ -558,7 +566,8 @@ boolean	inc_or_dec;
 	if(check_preservation(PRESERVE_PREVENT_ABUSE) && !inc_or_dec)
 		return;
 
-	if(abs(AEXE(i)) < AVAL) {
+	/* a deprived upbringing halves both the cap and the chance of gain */
+	if(abs(AEXE(i)) < (u.udeprived ? AVAL/2 : AVAL)) {
 		/*
 		 *	Law of diminishing returns (Part I):
 		 *
@@ -568,9 +577,12 @@ boolean	inc_or_dec;
 		 *
 		 *	Note: *YES* ACURR is the right one to use.
 		 */
-		AEXE(i) += (inc_or_dec)
-			? ((rn2(19) > ACURR(i)) || (AEXE(i) < 0 && rn2(AEXE(i)*-1 + 1)))
-			: -rn2(2);
+		if(inc_or_dec){
+			if(!u.udeprived || rn2(2))
+				AEXE(i) += ((rn2(19) > ACURR(i)) || (AEXE(i) < 0 && rn2(AEXE(i)*-1 + 1)));
+		}
+		else
+			AEXE(i) -= rn2(2);
 #ifdef DEBUG
 		pline("%s, %s AEXE = %d",
 			(i == A_STR) ? "Str" : (i == A_WIS) ? "Wis" :
@@ -1018,6 +1030,8 @@ int oldlevel, newlevel;
 	case PM_AASIMAR:
 		if(flags.aasimar_type == AASIMAR_TYPE_ARCHON || flags.aasimar_type == AASIMAR_TYPE_SERAPH)
 			rabil = aasi_archon_abil;
+		else if(flags.aasimar_type == AASIMAR_TYPE_SURYA)
+			rabil = aasi_surya_abil;
 		else if(flags.aasimar_type == AASIMAR_TYPE_DEVA)
 			rabil = aasi_deva_abil;
 		else if(flags.aasimar_type == AASIMAR_TYPE_ELADRIN){
@@ -1456,6 +1470,7 @@ struct monst *mon;
 	struct obj *armg = (is_player ? uarmg : which_armor(mon, W_ARMG));
 	struct obj *arms = (is_player ? uarms : which_armor(mon, W_ARMS));
 	struct obj *armh = (is_player ? uarmh : which_armor(mon, W_ARMH));
+	struct obj *armw = (is_player ? uarmw : which_armor(mon, W_ARMW));
 	struct obj *belt = (is_player ? ubelt : which_armor(mon, W_BELT));
 	struct obj *wep = (is_player ? uwep : MON_WEP(mon));
 	struct obj *swapwep = (is_player ? uswapwep : MON_SWEP(mon));
@@ -1524,6 +1539,7 @@ struct monst *mon;
 		}
 	}
 	if (x == A_STR) {
+		boolean weakened = (belt && belt->otyp == BELT_OF_WEAKNESS) || (armw && armw->otyp == WING_GUARDS_OF_WEAKNESS);
 		if(is_player && Race_if(PM_ORC)){
 			tmp += u.ulevel/3;
 			if(tmp > 18) tmp = STR19(tmp);
@@ -1543,8 +1559,8 @@ struct monst *mon;
 			// (swapwep && swapwep->oartifact == ART_STORMBRINGER) ||
 			(swapwep && swapwep->oartifact == ART_OGRESMASHER) ||
 			(arms && arms->oartifact == ART_GOLDEN_KNIGHT)
-		) return((belt && belt->otyp == BELT_OF_WEAKNESS) ? 14 : STR19(25));
-		else if(belt && belt->otyp == BELT_OF_WEAKNESS) return 3;
+		) return(weakened ? 14 : STR19(25));
+		else if(weakened) return 3;
 		else return((schar)((tmp >= STR19(25)) ? STR19(25) : (tmp <= 3) ? 3 : tmp));
 	} else if (x == A_CON) {
 		if (
@@ -1619,6 +1635,8 @@ boolean check;
 	int nightmare_starting_sanity = NightmareAware_Sanity;
 	int starting_sanity = u.usanity;
 	int starting_insanity = NightmareAware_Insanity;
+	if(FEARLESSNESS_MUDRA)
+		check = FALSE;
 	if(discover || wizard)
 		pline("Sanity change: %d + %d", u.usanity, delta);
 	u.usanity += delta;
@@ -1718,6 +1736,18 @@ int delta;
 	if(discover || wizard)
 		pline("= %d", u.uinsight);
 
+	/* insight-gated limbs just became perceptible (or stopped being) */
+	{
+		struct monst *mtmp;
+
+		for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
+			if (DEADMONSTER(mtmp))
+				continue;
+			mon_refresh_visible_bodyparts(mtmp);
+		}
+		mon_refresh_visible_bodyparts(&youmonst);
+	}
+
 	/* possibly (de)activate glyphs */
 	long int thought;
 	for (thought = 1L; thought <= u.thoughts; thought = thought << 1) {
@@ -1801,6 +1831,28 @@ count_madnesses()
 		if(u.umadness&(0x1LL<<i))
 			count++;
 	}
+	return count;
+}
+
+int
+madness_adjust_san(long long int madness)
+{
+	int pm = madness_source(madness);
+	if(pm != NON_PM){
+		return pm_adjust_san(pm);
+	}
+	return 0;
+}
+
+int
+pm_adjust_san(int pm)
+{
+	if(mvitals[pm].died > 0){
+		if(ClearThoughts && Nightmare)
+			return 5;
+		else if(!ClearThoughts)
+			return 50;
+	}
 	return 0;
 }
 
@@ -1821,11 +1873,16 @@ roll_madness(long long int madness)
 	if(!(u.umadness&madness))
 		return 0;
 	
-	sanlevel = (int)(((float)rand()/(float)(RAND_MAX)) * ((float)rand()/(float)(RAND_MAX)) * 100);
+	if(madness == MAD_PALE_NIGHT)
+		sanlevel = (int)(((float)rand()/(float)(RAND_MAX)) * 100);
+	else
+		sanlevel = (int)(((float)rand()/(float)(RAND_MAX)) * ((float)rand()/(float)(RAND_MAX)) * 100);
 	
 	//Note: Clear Thoughts plus Walking Nightmare yields partial resistance rather than complete.
 	if(madness != MAD_GOAT_RIDDEN)
 		usan = NightmareAware_Sanity;
+	
+	usan += madness_adjust_san(madness);
 
 	if(usan < sanlevel)
 		return 1;
@@ -1852,6 +1909,8 @@ mad_turn(long long int madness)
 	if(madness != MAD_GOAT_RIDDEN && madness != MAD_CANNIBALISM)
 		usan = NightmareAware_Sanity;
 
+	usan += madness_adjust_san(madness);
+
 	if(usan < sanlevel)
 		return 1;
 	return 0;
@@ -1874,6 +1933,8 @@ flat_mad_turn(long long int madness)
 	//Note: Clear Thoughts plus Walking Nightmare yields partial resistance rather than complete.
 	if(madness != MAD_GOAT_RIDDEN && madness != MAD_CANNIBALISM)
 		usan = NightmareAware_Sanity;
+
+	usan += madness_adjust_san(madness);
 
 	if(usan < hashed%100)
 		return 1;
@@ -1899,6 +1960,8 @@ mad_monster_turn(struct monst *mon, long long int madness)
 	//Note: Clear Thoughts plus Walking Nightmare yields partial resistance rather than complete.
 	if(madness != MAD_GOAT_RIDDEN)
 		usan = NightmareAware_Sanity;
+
+	usan += madness_adjust_san(madness);
 
 	if(usan < sanlevel)
 		return 1;
@@ -1941,10 +2004,8 @@ roll_av_frigophobia()
 }
 
 void
-give_madness(mon)
-struct monst *mon;
+pm_give_madness(int mm)
 {
-	int mm = monsndx(mon->data);
 	switch(mm){
 		case PM_WALKING_DELIRIUM:
 			u.umadness |= MAD_DELUSIONS;
@@ -2027,6 +2088,158 @@ struct monst *mon;
 		break;
 	}
 	check_madman_trophy();
+}
+
+void
+give_madness(struct monst *mon)
+{
+	int mm = monsndx(mon->data);
+	pm_give_madness(mm);
+	check_madman_trophy();
+}
+
+void
+confer_gehennom_madnesses()
+{
+	switch(dungeon_topology.abyss_variant){
+		case JUIBLEX_LEVEL:
+			pm_give_madness(PM_JUIBLEX);
+		break;
+		case ZUGGTMOY_LEVEL:
+			pm_give_madness(PM_ZUGGTMOY);
+		break;
+		case YEENOGHU_LEVEL:
+			pm_give_madness(PM_YEENOGHU);
+		break;
+		case BAPHOMET_LEVEL:
+			pm_give_madness(PM_BAPHOMET);
+		break;
+		case NIGHT_LEVEL:
+			/* Pale Night confers no madness */
+		break;
+		case KOSTCH_LEVEL:
+			pm_give_madness(PM_KOSTCHTCHIE);
+		break;
+	}
+
+	switch(dungeon_topology.abys2_variant){
+		case ORCUS_LEVEL:
+			pm_give_madness(PM_ORCUS);
+		break;
+		case MALCANTHET_LEVEL:
+			pm_give_madness(PM_MALCANTHET);
+		break;
+		case GRAZ_ZT_LEVEL:
+			pm_give_madness(PM_GRAZ_ZT);
+		break;
+		case LOLTH_LEVEL:
+			pm_give_madness(PM_AVATAR_OF_LOLTH);
+		break;
+	}
+
+	// switch(dungeon_topology.brine_variant){
+	// 	case DEMOGORGON_LEVEL:
+	// 		pm_give_madness(PM_DEMOGORGON);
+	// 	break;
+	// 	case DAGON_LEVEL:
+	// 		pm_give_madness(PM_DAGON);
+	// 	break;
+	// 	case LAMASHTU_LEVEL:
+	// 		pm_give_madness(PM_LAMASHTU);
+	// 	break;
+	// }
+}
+
+int
+madness_source(int madness)
+{
+	switch(madness){
+		//Non unique-source madnesses 
+		// case MAD_DELUSIONS:
+		// 	return PM_WALKING_DELIRIUM;
+		// break;
+		// case MAD_VERMIN:
+		// 	return PM_VERMIURGE;//You are stung by vermin
+		// break;
+		// case MAD_FORMICATION:
+		// 	return PM_AKKABISH_TANNIN;
+		// break;
+		// case MAD_HOST:
+		// 	return PM_SHALOSH_TANNAH;
+		// break;
+		// case MAD_SCIAPHILIA:
+		// 	return PM_NACHASH_TANNIN;
+		// break;
+		// case MAD_FORGETFUL:
+		// 	return PM_KHAAMNUN_TANNIN;
+		// break;
+		// case MAD_TOO_BIG:
+		// 	return PM_RAGLAYIM_TANNIN;
+		// break;
+		// case MAD_ROTTING:
+		// 	return PM_SARTAN_TANNIN;
+		// break;
+		//Unique-source madnesses 
+		case MAD_REAL_DELUSIONS:
+			return PM_ALDINACH;
+		break;
+		case MAD_SANCTITY:
+			return PM_ALRUNES;
+		break;
+		case MAD_GLUTTONY:
+			return PM_JUIBLEX;
+		break;
+		case MAD_SPORES:
+			return PM_ZUGGTMOY;
+		break;
+		case MAD_FRIGOPHOBIA:
+			return PM_KOSTCHTCHIE;
+		break;
+		case MAD_RAGE:
+			return PM_BAPHOMET;
+		break;
+		case MAD_CANNIBALISM:
+			return PM_YEENOGHU;
+		break;
+		case MAD_NUDIST:
+			return PM_MALCANTHET;
+		break;
+		case MAD_OPHIDIOPHOBIA:
+			return PM_SHAKTARI;
+		break;
+		case MAD_ARACHNOPHOBIA:
+			return PM_AVATAR_OF_LOLTH;
+		break;
+		case MAD_ARGENT_SHEEN:
+			return PM_GRAZ_ZT;
+		break;
+		case MAD_SUICIDAL:
+			return PM_ORCUS;
+		break;
+		case MAD_THALASSOPHOBIA:
+			return PM_DAGON;
+		break;
+		case MAD_ENTOMOPHOBIA:
+			return PM_OBOX_OB;
+		break;
+		case MAD_TALONS:
+			return PM_LAMASHTU;
+		break;
+		case MAD_PARANOIA:
+			return PM_DEMOGORGON;
+		break;
+		// Can't be killed
+		// case MAD_HELMINTHOPHOBIA:
+		// 	return PM_ELDER_PRIEST;
+		// break;
+		// Also can't be killed but can be dispelled once to make you feel better about things.
+		case MAD_DREAMS:
+		case MAD_NON_EUCLID:
+		case MAD_SPIRAL:
+			return PM_GREAT_CTHULHU;
+		break;
+	}
+	return NON_PM;
 }
 
 /* A monster has seen/whatever you and may contract madnesses
@@ -2134,6 +2347,17 @@ struct monst *mon;
 					else if(madflag == MAD_VERMIN){
 						mon->mvermin = 1;
 					}
+					else if(madflag == MAD_PALE_NIGHT){
+						if(!(is_great_old_one(mon->data) || is_dnoble(mon->data) || (is_chaotic_mon(mon) && is_demon(mon->data)))){
+							// mon->mpale_night = 1;
+							if(resist(mon, WEAPON_CLASS, 0, NOTELL)){
+								m_losehp(mon, d(3,10), TRUE, "bad memories");
+							}
+							else {
+								xkilled(mon, 1);
+							}
+						}
+					}
 					// MAD_HOST:
 					// MAD_COLD_NIGHT:
 					// MAD_OVERLORD:
@@ -2188,7 +2412,7 @@ int fform;
 {
 	int i, first, last;
 	if(fform > LAST_FFORM || fform < 0)
-		impossible("Attempting to set fighting form number %d?", fform);
+		impossible("Attempting to unset fighting form number %d?", fform);
 	
 	if (fform >= FIRST_LS_FFORM && fform <= LAST_LS_FFORM){
 		first = FIRST_LS_FFORM;
@@ -2199,13 +2423,18 @@ int fform;
 	} else if (fform >= FIRST_ADV_KNI_FFORM && fform <= LAST_ADV_KNI_FFORM){
 		first = FIRST_ADV_KNI_FFORM;
 		last = LAST_ADV_KNI_FFORM;
+	} else if (fform >= FIRST_MNK_FFORM && fform <= LAST_MNK_FFORM){
+		first = FIRST_MNK_FFORM;
+		last = LAST_MNK_FFORM;
 	} else {
+		/* overbroad, but the only safe default for a batch with no range arm */
+		if (wizard)
+			impossible("No unSetFightingForm() range covers form %d; clearing ALL fighting forms.", fform);
 		first = 0;
-		last = FFORM_LISTSIZE*16;
+		last = FFORM_LISTSIZE*FFORM_BATCH_SIZE;
 	}
 
-	/* this code assumes that each batch of 16 fighting forms are mutually exclusive, but not with other batches of 16 */
-	for(i=first/16; i <= last/16; i++)
+	for(i=FFORM_WORD(first); i <= FFORM_WORD(last); i++)
 		u.fightingForm[i] = 0L;
 
 }
@@ -2214,9 +2443,9 @@ void
 setFightingForm(fform)
 int fform;
 {
-	/* this code assumes that each batch of 16 fighting forms are mutually exclusive, but not with other batches of 16 */
+	/* clearing the batch first is what makes forms within it mutually exclusive */
 	unSetFightingForm(fform);
-	u.fightingForm[(fform-1)/16] |= (0x1L << ((fform-1)%16));
+	u.fightingForm[FFORM_WORD(fform)] |= FFORM_BIT(fform);
 }
 
 boolean
@@ -2263,7 +2492,7 @@ int fform;
 		return TRUE; //Found no fighting forms, return TRUE
 	}
 	
-	return !!(u.fightingForm[(fform-1)/16] & (0x1L << ((fform-1)%16)));
+	return !!(u.fightingForm[FFORM_WORD(fform)] & FFORM_BIT(fform));
 }
 
 int
@@ -2316,6 +2545,12 @@ int fform;
 		case FFORM_KNI_ELDRITCH:
 			return P_KNI_ELDRITCH;
 		break;
+		case FFORM_MNK_KIRIN:
+		case FFORM_MNK_CRANE:
+		case FFORM_MNK_SNAKE:
+		case FFORM_MNK_MANTIS:
+			return P_MARTIAL_ARTS;
+		break;
 		default:
 			impossible("Attempting to get skill of fighting form number %d?", fform);
 			return P_NONE;
@@ -2345,6 +2580,10 @@ int fform;
 		case FFORM_KNI_SACRED:	return "Sacred style";
 		case FFORM_KNI_RUNIC:	return "Runic style";
 		case FFORM_KNI_ELDRITCH:return "Eldritch style";
+		case FFORM_MNK_KIRIN:	return "Ki-rin style";
+		case FFORM_MNK_CRANE:	return "Crane style";
+		case FFORM_MNK_SNAKE:	return "Snake style";
+		case FFORM_MNK_MANTIS:	return "Mantis style";
 		default:
 			impossible("bad fform %d", fform);
 	}
@@ -2410,6 +2649,52 @@ validateLightsaberForm()
 	else setFightingForm(FFORM_SHII_CHO);
 }
 
+void
+init_martial_forms(void)
+{
+	int i, j, tmp;
+
+	for(i = 0; i < MNK_FFORM_COUNT; i++)
+		u.umartial_form_order[i] = FIRST_MNK_FFORM + i;
+
+	for(i = MNK_FFORM_COUNT - 1; i > 0; i--){
+		j = rn2(i + 1);
+		tmp = u.umartial_form_order[i];
+		u.umartial_form_order[i] = u.umartial_form_order[j];
+		u.umartial_form_order[j] = tmp;
+	}
+
+	u.umartial_forms_known = 0L;
+}
+
+boolean
+knownMartialForm(int fform)
+{
+	if(fform < FIRST_MNK_FFORM || fform > LAST_MNK_FFORM)
+		return FALSE;
+
+	return !!(u.umartial_forms_known & FFORM_BIT(fform));
+}
+
+/* one form per martial arts advance past basic, in the order rolled at game start */
+void
+unlock_martial_forms(void)
+{
+	int i, fform, learned;
+
+	if(!Role_if(PM_MONK))
+		return;
+
+	learned = min(OLD_P_SKILL(P_MARTIAL_ARTS) - P_BASIC, MNK_FFORM_COUNT);
+	for(i = 0; i < learned; i++){
+		fform = u.umartial_form_order[i];
+		if(!knownMartialForm(fform)){
+			u.umartial_forms_known |= FFORM_BIT(fform);
+			You("have mastered %s martial arts!", nameOfFightingForm(fform));
+		}
+	}
+}
+
 /* returns TRUE if fform is blocked by currently worn armor */
 boolean
 blockedFightingForm(fform)
@@ -2418,6 +2703,10 @@ int fform;
 	switch (fform) {
 		/* always available */
 		case NO_FFORM:
+		case FFORM_MNK_KIRIN:
+		case FFORM_MNK_CRANE:
+		case FFORM_MNK_SNAKE:
+		case FFORM_MNK_MANTIS:
 			return FALSE;
 		case FFORM_SHII_CHO:
 		case FFORM_KNI_SACRED:

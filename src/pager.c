@@ -39,7 +39,7 @@ extern void NDECL(port_help);
 #endif
 
 extern const int monstr[];
-extern struct attack noattack;
+extern const struct attack noattack;
 
 
 /* Returns "true" for characters that could represent a monster's stomach. */
@@ -182,6 +182,7 @@ flag_to_word(flag, category)
 			case MM_WEBRIP: return "tear webs";
 			case MM_DOORBUST: return "break down doors";
 			case MM_AQUATIC: return "lives underwater";
+			case MM_STANDOFF: return "keep their distance";
 		}
 	break;
 	case MT_FLAG:
@@ -613,6 +614,8 @@ lookat(x, y, buf, monbuf, shapebuff)
 			", being held" : ", holding you");
 	    if (mtmp->mleashed)
 		Strcat(buf, ", leashed to you");
+		if (mtmp->mprone)
+			Strcat(buf, ", prone");
 
 	    if (mtmp->mtrapped && cansee(mtmp->mx, mtmp->my)) {
 		struct trap *t = t_at(mtmp->mx, mtmp->my);
@@ -1479,8 +1482,11 @@ do_look(quick)
 			}
 			// check if they specified an artifact
 			else if ((x_str = artifact_name(out_str, &otyp, &oartifact))) {
+				struct obj *lookup = (struct obj *)0;
+				if (oartifact == ART_BLEEDING_VOID)
+					lookup = inventory_bleeding_void();
 				putstr(datawin, 0, x_str);
-				describe_item(NULL, otyp, oartifact, &datawin);
+				describe_item(lookup, otyp, oartifact, &datawin);
 			}
 			// check encyclopedia
 			if(checkfile(out_str, pm, (mntmp==NON_PM && otyp==STRANGE_OBJECT), TRUE, &datawin) || mntmp != NON_PM || otyp != STRANGE_OBJECT)
@@ -1531,8 +1537,9 @@ do_look(quick)
 			sym = monsyms[(int)mons[glyph_to_mon(glyph)].mlet];
 			if(iflags.pokedex & POKEDEX_SHOW_ENCYC){
 				struct monst *mtmp = m_at(cc.x,cc.y);
-				if(!Hallucination && mtmp)
-					Sprintf(name, "%s", mtmp->data->mname);
+				if(!Hallucination && mtmp && !Delusion(mtmp))
+					Sprintf(name, "%s", (mtmp->m_ap_type == M_AP_MONSTER) ?
+							mons[mtmp->mappearance].mname : mtmp->data->mname);
 				else
 					Sprintf(name, "%s", mons[glyph_to_mon(glyph)].mname);
 			}
@@ -2025,6 +2032,7 @@ get_mm_description_of_monster_type(struct monst * mtmp, char * description)
 	int many = 0;
 	many = append(description, notonline(ptr)			, "avoids you"			, many);
 	many = append(description, fleetflee(ptr)			, "flees"				, many);
+	many = append(description, standoff(ptr)			, "keeps distance"	    , many);
 	many = append(description, species_flies(ptr)		, "flies"				, many);
 	many = append(description, species_floats(ptr)		, "floats"				, many);
 	many = append(description, is_clinger(ptr)			, "clings to ceilings"	, many);
@@ -2322,7 +2330,9 @@ get_description_of_attack_type(uchar id)
 	switch (id){
 	//case AT_ANY: return "fake attack; dmgtype_fromattack wildcard";
 	case AT_NONE: return "passive";
+	case AT_MNTL: return "mantle";
 	case AT_CLAW: return "claw";
+	case AT_WING: return "wing buffet";
 	case AT_BITE: return "bite";
 	case AT_OBIT: return "bite";
 	case AT_WBIT: return "bite";
@@ -2371,6 +2381,7 @@ get_description_of_attack_type(uchar id)
 	case AT_WEAP: return "weapon";
 	case AT_MAGC: return "uses magic spell(s)";
 	case AT_REND: return "extra effect for previous attacks";
+	case AT_SQUZ: return "crushing grip";
 	default:
 			impossible("bug in get_description_of_attack_type(%d)", id);
 			return "<MISSING DECRIPTION, THIS IS A BUG>";
@@ -2470,6 +2481,7 @@ get_description_of_damage_type(uchar id)
 	case AD_SPOR: return "generate spore";
 	case AD_FNEX: return "fern spore explosion";
 	case AD_SSUN: return "reflected sunlight";
+	case AD_LGHT: return "light";
 	case AD_MAND: return "mandrake shriek";
 	case AD_BARB: return "retaliatory physical";
 	case AD_LUCK: return "drains luck";
@@ -2560,6 +2572,9 @@ get_description_of_damage_type(uchar id)
 	case AD_UHCD: return "unholy ice";
 	case AD_GMLD: return "gray mold spores";
 	case AD_SONC: return "sonic blast";
+	case AD_SMOK: return "smoke cloud";
+	case AD_SLWC: return "slowing cold cloud";
+	case AD_HELL: return "hellish energy";
 	default:
 			impossible("bug in get_description_of_damage_type(%d)", id);
 			return "<MISSING DESCRIPTION, THIS IS A BUG>";
@@ -2614,7 +2629,7 @@ get_description_of_attack(struct attack *mattk, char *main_temp_buf, struct mons
 				strength = STR19(25);
 			}
 			else {
-				strength = default_strongmonst_strength(mtmp->data->msize);
+				strength = default_strongmonst_strength(mtmp->data);
 			}
 			strength = strscore_dbon(strength);
 			if(strength > 0)

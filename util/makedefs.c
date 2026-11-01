@@ -22,6 +22,7 @@
 
 #include "artilist.h"
 #include "godlist.h"
+#include "atkbpnames.h"
 
 /* version information */
 #ifdef SHORT_FILENAMES
@@ -61,6 +62,7 @@ static	const char	SCCS_Id[] = "@(#)makedefs.c\t3.4\t2002/02/03";
 #define MONST_FILE	"pm.h"
 #define GODS_FILE	"gnames.h"
 #define ONAME_FILE	"onames.h"
+#define ATKBPBITS_FILE	"atkbpbits.h"
 #define VERINFO_FILE	"verinfo.h"
 #ifndef OPTIONS_FILE
 #define OPTIONS_FILE	"options"
@@ -161,6 +163,7 @@ void FDECL(do_date, (int));
 void NDECL(do_options);
 void NDECL(do_monstr);
 void NDECL(do_permonst);
+void NDECL(do_atkbpbits);
 void NDECL(do_gods);
 void NDECL(do_questtxt);
 void NDECL(do_rumors);
@@ -315,6 +318,9 @@ char	*options;
 				break;
 		case 'p':
 		case 'P':	do_permonst();
+				break;
+		case 'k':
+		case 'K':	do_atkbpbits();
 				break;
 		case 'g':
 		case 'G':	do_gods();
@@ -1530,6 +1536,62 @@ do_permonst()
 	}
 	Fprintf(ofp,"\n\n#define\tNUMMONS\t%d\n", i);
 	Fprintf(ofp,"\n#endif /* PM_H */\n");
+	Fclose(ofp);
+	return;
+}
+
+/* generates include/atkbpbits.h: the ATKBP_WORD_ / ATKBP_BIT_ #defines,
+ * positionally assigned from util/atkbpnames.c's atkbp_name_list[] (see
+ * include/atkbpnames.h).
+ *
+ * ATKBP_NWORDS itself is NOT generated here -- it's a hand-maintained
+ * constant in atkbpnames.h to avoid circular dependency with the permonst struct.
+ * All this function does with it is validate that the real word count
+ * atkbp_name_list[] needs still fits -- if a vocabulary addition ever needs
+ * more words than the hand-maintained ceiling provides, fail loudly with an
+ * actionable message.
+ */
+void
+do_atkbpbits(void)
+{
+	int	i;
+	char	*c, *nam;
+
+	atkbp_assign_bits();
+
+	if (atkbp_nwords > ATKBP_NWORDS) {
+		fprintf(stderr,
+			"makedefs: atkbp_name_list[] now needs %d words, but "
+			"ATKBP_NWORDS in include/atkbpnames.h is only %d -- "
+			"bump ATKBP_NWORDS there to at least %d and rebuild.\n",
+			atkbp_nwords, ATKBP_NWORDS, atkbp_nwords);
+		exit(EXIT_FAILURE);
+	}
+
+	filename[0]='\0';
+#ifdef FILE_PREFIX
+	Strcat(filename, file_prefix);
+#endif
+	Sprintf(eos(filename), INCLUDE_TEMPLATE, ATKBPBITS_FILE);
+	if (!(ofp = fopen(filename, WRTMODE))) {
+		perror(filename);
+		exit(EXIT_FAILURE);
+	}
+	Fprintf(ofp,"%s",Dont_Edit_Code);
+	Fprintf(ofp,"#ifndef ATKBPBITS_H\n#define ATKBPBITS_H\n");
+
+	for (i = 0; atkbp_name_list[i].name; i++) {
+		SpinCursor(3);
+
+		nam = tmpdup(atkbp_name_list[i].name);
+		for (c = nam; *c; c++)
+		    if (*c >= 'a' && *c <= 'z') *c -= (char)('a' - 'A');
+		Fprintf(ofp,"\n#define\tATKBP_WORD_%s\t%d", nam,
+			atkbp_name_list[i].word);
+		Fprintf(ofp,"\n#define\tATKBP_BIT_%s\t0x%08lxL", nam,
+			atkbp_name_list[i].bit);
+	}
+	Fprintf(ofp,"\n\n#endif /* ATKBPBITS_H */\n");
 	Fclose(ofp);
 	return;
 }

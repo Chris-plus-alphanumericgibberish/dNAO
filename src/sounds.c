@@ -3,6 +3,8 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
+#include "mattkbp.h"
+#include "qtext.h"
 
 #ifdef USER_SOUNDS
 # ifdef USER_SOUNDS_REGEX
@@ -307,6 +309,71 @@ dosounds()
 		else		pline(throne_msg[2], uhis());
 		return;
 	    }
+	}
+    }
+    if (level.flags.has_prison && !rn2(200)) {
+	struct mkroom *sroom;
+	int x, y;
+	boolean prisoner = FALSE, guard = FALSE;
+
+	/* prisoners are shackled, in a prison or in the cells around it;
+	   guards are any other intelligent monsters in the prison itself */
+	for (sroom = rooms; sroom->hx > 0; sroom++) {
+	    if (sroom->rtype != PRISON) continue;
+	    for (x = sroom->lx-2; x <= sroom->hx+2; x++)
+		for (y = sroom->ly-2; y <= sroom->hy+2; y++) {
+		    if (!isok(x, y) || !(mtmp = m_at(x, y)) || DEADMONSTER(mtmp))
+			continue;
+		    if (mtmp->entangled_otyp == SHACKLES)
+			prisoner = TRUE;
+		    else if (x >= sroom->lx && x <= sroom->hx
+			&& y >= sroom->ly && y <= sroom->hy
+			&& intelligent_mon(mtmp)
+		    )
+			guard = TRUE;
+		}
+	}
+	if (prisoner || guard) {
+		static const char * const guard_msg[4] = {
+			"loud snoring.",
+			"dice rolling.",
+			"cruel laughter.",
+			"guards killing time!",
+		};
+		static const char * const guard_no_prisoner_msg[5] = {
+			"angry shouting.",
+			"dark oaths.",
+			"furious searching.",
+			"the sound of nobody being found!",
+			"someone turning the dungeon upside down!",
+		};
+		static const char * const prisoner_msg[4] = {
+			"faint moaning.",
+			"chains rattling.",
+			"metal scraping on metal.",
+			"someone tunneling with a teaspoon!",
+		};
+		static const char * const both_msg[4] = {
+			"a whip crack.",
+			"a cell door crash shut.",
+			"a guard shouting.",
+			"a captive audience applauding!",
+		};
+		if(prisoner && guard){
+			//50%
+			if(rn2(2))
+			    You_hear("%s", both_msg[rn2(3) + hallu]);
+			//25% each
+			else if(rn2(2))
+			    You_hear("%s", guard_msg[rn2(3) + hallu]);
+			else
+			    You_hear("%s", prisoner_msg[rn2(3) + hallu]);
+		}
+		else if(prisoner)
+		    You_hear("%s", prisoner_msg[rn2(3) + hallu]);
+		else if(guard)
+		    You_hear("%s", guard_no_prisoner_msg[rn2(3) + 2*hallu]);
+	    return;
 	}
     }
     if (level.flags.has_garden && !rn2(200)) {
@@ -1134,7 +1201,7 @@ asGuardian:
 			}
 			if(!mtmp->mpeaceful && mtmp->mux != 0){
 				make_stunned(HStun + mtmp->mhp/10, TRUE);
-				struct attack fakesummonspell = { AT_MAGC, AD_CLRC, 0, 6 };
+				struct attack fakesummonspell = { AT_MAGC, AD_CLRC, 0, 6, .bodypart = ATKBP(NONE) };
 				cast_spell(mtmp, (struct monst *)0, &fakesummonspell, !rn2(4) ? SUMMON_ANGEL : SUMMON_MONS, 0, 0);
 			}
 			if(uwep && uwep->oartifact == ART_SINGING_SWORD){
@@ -1171,17 +1238,7 @@ asGuardian:
 		if(mtmp->mvar_dreadPrayer_progress){
 			if(mtmp->mvar_dreadPrayer_progress < moves){
 				mtmp->mvar_dreadPrayer_progress = 0;
-				mtmp->mhp = mtmp->mhpmax;
-				mtmp->mspec_used = 0;
-				set_mcan(mtmp, FALSE);
-				mtmp->mflee = 0; mtmp->mfleetim = 0;
-				mtmp->mcrazed = 0; mtmp->mberserk = 0; mtmp->mdisrobe = 0;
-				mtmp->mcansee = 1; mtmp->mblinded = 0;
-				mtmp->mcanmove = 1; mtmp->mfrozen = 0;
-				mtmp->mnotlaugh = 1; mtmp->mlaughing = 0;
-				mtmp->msleeping = 0;
-				mtmp->mstun = 0; mtmp->mconf = 0;
-				mtmp->mpunctured = 0;
+				mon_fix_troubles(mtmp, MFT_HEAL|MFT_UNCANCEL|MFT_COOLDOWN|MFT_MADNESS|MFT_TRAPPED);
 				untame(mtmp, 0);
 				
 				u.ustdy = mtmp->m_lev;
@@ -1329,7 +1386,7 @@ asGuardian:
 						/* maketrap() clears doormask, so it should be NODOOR */
 					continue;
 						}
-						switch (((int)door->doormask) & ~D_TRAPPED) {
+						switch (((int)door->doormask) & ~(D_TRAPPED|D_BARRED)) {
 							case D_CLOSED:
 							if (key)
 								msg = "The door closes!";
@@ -1357,11 +1414,12 @@ asGuardian:
 							break;
 						}
 						if(res){
-							block_point(ix, iy);
+							if (does_block(ix,iy,door))
+								block_point(ix, iy);
 							if (key)
-								door->doormask = D_CLOSED | (door->doormask & D_TRAPPED);
+								door->doormask = D_CLOSED | (door->doormask & (D_TRAPPED|D_BARRED));
 							else
-								door->doormask = D_LOCKED | (door->doormask & D_TRAPPED);
+								door->doormask = D_LOCKED | (door->doormask & (D_TRAPPED|D_BARRED));
 							newsym(ix,iy);
 						}
 					}
@@ -1377,7 +1435,8 @@ asGuardian:
 		struct monst *tmpm;
 		struct trap *ttmp;
 		int ix, iy, i;
-		boolean inrange = FALSE;
+		/* restless voices sing regardless of whether anyone's around to hear it */
+		boolean inrange = (mtmp->mtyp == PM_RESTLESS_VOICE);
 		if(noactions(mtmp)) break;
 		if((ptr->mtyp == PM_INTONER && !rn2(5)) || ptr->mtyp == PM_BLACK_FLOWER){
 			if (!canspotmon(mtmp))
@@ -1402,7 +1461,7 @@ asGuardian:
 					if(!Blind){
 						Your("vision fills with grasping roots!");
 						
-						make_blinded(Blinded+(long)rnd(20),FALSE);
+						make_blinded(BlindedTimeout+(long)rnd(20),FALSE);
 						if (!Blind) Your1(vision_clears);
 					}
 				break;
@@ -1741,6 +1800,7 @@ asGuardian:
 							break;
 						}
 						dmg = reduce_dmg(&youmonst,dmg,FALSE,TRUE);
+						dmg = elemental_dmg_resistance(&youmonst, mtmp, dmg, u.oonaenergy);
 						if(dmg) dmg = min(dmg,Upolyd ? (u.mh - 1) : (u.uhp - 1));
 						if(dmg) mdamageu(mtmp,dmg);
 					}
@@ -2418,7 +2478,7 @@ humanoid_sound:
 													 : "Greetings, little brother. How fare you on your quest for the Amulet?";
 						}
 						else {
-							com_pager(226);
+							com_pager(QT_COMMON_DROW_HEALER_AMULET);
 						}
 					}
 				break;
@@ -2661,7 +2721,7 @@ humanoid_sound:
 		}
 	    if (uwep && (uwep->oclass == WEAPON_CLASS || is_weptool(uwep)))
 			verbl_msg = "Put that weapon away before you hurt someone!";
-	    else if (uarmc || uarm || uarmh || uarms || uarmg || uarmf)
+	    else if (uarmc || uarm || uarmh || uarms || uarmg || uarmf || uarmw)
 			verbl_msg = Role_if(PM_HEALER) ?
 			  "Doc, I can't help you unless you cooperate." :
 			  "Please undress so I can examine you.";
@@ -3125,7 +3185,7 @@ int dz;
 		if(strcmp(buf, "Mellon") == 0){
 			register struct rm *here;
 			here = &levl[tx][ty];
-			here->doormask = D_ISOPEN;
+			here->doormask = D_ISOPEN | (here->doormask & D_BARRED);
 			unblock_point(tx,ty);
 			newsym(tx,ty);
 		}
@@ -3161,7 +3221,7 @@ int dz;
 				do_earthquake(u.ux, u.uy, 10, 2, FALSE, (struct monst *)0);
 				optr = uwep;
 				uwepgone();
-				if(optr->gifted != GOD_NONE && optr->gifted != GOD_THE_VOID && !philosophy_index(optr->gifted)){
+				if(optr->gifted != GOD_NONE && optr->gifted != GOD_THE_VOID && !no_anger_index(optr->gifted)){
 					gods_angry(optr->gifted);
 					gods_upset(optr->gifted);
 				}
@@ -3206,7 +3266,7 @@ int dz;
 
 				optr = uwep;
 				uwepgone();
-				if(optr->gifted != GOD_NONE && optr->gifted != GOD_THE_VOID && !philosophy_index(optr->gifted)){
+				if(optr->gifted != GOD_NONE && optr->gifted != GOD_THE_VOID && !no_anger_index(optr->gifted)){
 					gods_angry(optr->gifted);
 					gods_upset(optr->gifted);
 				}
@@ -3389,7 +3449,7 @@ int dz;
 			pline("%s seems not to notice you.", Monnam(mtmp));
 		return MOVE_INSTANT;
     }
-    if (is_deaf(mtmp) && !mtmp->mcansee) {
+    if (is_deaf(mtmp) && is_blind(mtmp)) {
 		/* If it is unseen, the player can't tell the difference between
 		   not noticing him and just not existing, so skip the message. */
 		if (canspotmon(mtmp))
@@ -4624,8 +4684,11 @@ int tx,ty;
 						destroyedForge = TRUE;
 					} else {
 						pline("Molten lava surges up and splashes all over you!");
-						if(!Fire_resistance)
-							losehp(d(6, 6), "conducting a ritual at a forge", KILLED_BY);
+						if(!Fire_resistance) {
+							int fire_dmg = d(6, 6);
+							fire_dmg = elemental_dmg_resistance(&youmonst, (struct monst *)0, fire_dmg, AD_FIRE);
+							losehp(fire_dmg, "conducting a ritual at a forge", KILLED_BY);
+						}
 					}
 				}
 				else {
@@ -5401,6 +5464,7 @@ int tx,ty;
 					otmp->corpsenm != PM_LICHEN && 
 					otmp->corpsenm != PM_LIZARD && 
 					otmp->corpsenm != PM_BEHOLDER && 
+					otmp->corpsenm != PM_DEATH_BEHOLDER &&
 					(monstermoves - peek_at_iced_corpse_age(otmp))/(10L) > 5L &&
 					poisonous(&mons[otmp->corpsenm])
 				){
@@ -5749,7 +5813,7 @@ int floorID;
 		break;
 	case AMON:
 		propchain[i++] = EXTRAMISSION;
-		propchain[i++] = COLD_RES;
+		propchain[i++] = HOLY_COLD_RES;
 		break;
 	case ANDREALPHUS:
 		propchain[i++] = WARN_OF_MON;
@@ -5759,7 +5823,7 @@ int floorID;
 		break;
 	case ASTAROTH:
 		propchain[i++] = MAGICAL_BREATHING;
-		propchain[i++] = SHOCK_RES;
+		propchain[i++] = HOLY_SHOCK_RES;
 		break;
 	case BALAM:
 		propchain[i++] = HALF_SPDAM;
@@ -5775,7 +5839,7 @@ int floorID;
 		propchain[i++] = TELEPAT;
 		break;
 	case ECHIDNA:
-		propchain[i++] = ACID_RES;
+		propchain[i++] = HOLY_ACID_RES;
 		break;
 	case EDEN:
 		propchain[i++] = REFLECTING;
@@ -5793,7 +5857,7 @@ int floorID;
 		break;
 	case MAEGERA:
 		propchain[i++] = INFRAVISION;
-		propchain[i++] = FIRE_RES;
+		propchain[i++] = HOLY_FIRE_RES;
 		break;
 	case HUGINN_MUNINN:
 		propchain[i++] = WARNING;
@@ -6398,7 +6462,7 @@ int p_skill;
 boolean inc_penalties;
 {
 	int curskill = OLD_P_SKILL(p_skill),
-		maxskill = P_MAX_SKILL(p_skill);
+		maxskill = P_MAX_SKILL_CORE(p_skill, inc_penalties);
 	
 	/* Fine motor control drops to 0 while panicking */
 	if(inc_penalties && p_skill == P_WAND_POWER && Panicking){
@@ -6524,6 +6588,8 @@ int p_skill;
 		if (p_skill == P_KNI_SACRED)
 			return TRUE;
 		if (p_skill == P_KNI_ELDRITCH && (u.role_variant == ART_WINTER_REAPER || u.role_variant == ART_KIKU_ICHIMONJI))
+			return TRUE;
+		if (p_skill == P_KNI_RUNIC && u.role_variant == ART_ANCIENT_RITUAL_SWORD)
 			return TRUE;
 	}
 	return FALSE;

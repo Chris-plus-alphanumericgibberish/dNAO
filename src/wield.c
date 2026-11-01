@@ -52,6 +52,8 @@
 
 
 STATIC_DCL int FDECL(ready_weapon, (struct obj *, boolean));
+STATIC_DCL int FDECL(wielder_eff_size, (struct permonst *, boolean, boolean));
+STATIC_DCL int FDECL(weapon_eff_size, (struct obj *));
 
 /* used by will_weld() */
 /* probably should be renamed */
@@ -797,7 +799,7 @@ boolean fade_scrolls;
 		    if (victim == &youmonst)
 			Your("%s.", aobjnam(target, "fade"));
 		    else if (vismon)
-			pline("%s's %s.", Monnam(victim),
+			pline("%s%s.", mon_obj_possessive(victim, target, TRUE),
 			      aobjnam(target, "fade"));
 		    else if (visobj)
 			pline_The("%s.", aobjnam(target, "fade"));
@@ -812,7 +814,7 @@ boolean fade_scrolls;
 		if (victim == &youmonst)
 		    Your("%s not affected.", aobjnam(target, "are"));
 		else if (vismon)
-		    pline("%s's %s not affected.", Monnam(victim),
+		    pline("%s%s not affected.", mon_obj_possessive(victim, target, TRUE),
 			aobjnam(target, "are"));
 		/* no message if not carried */
 	    }
@@ -823,7 +825,7 @@ boolean fade_scrolls;
 		    erosion+1 == MAX_ERODE ? " completely" :
 		    erosion ? " further" : "");
 	    else if (vismon)
-		pline("%s's %s%s!", Monnam(victim),
+		pline("%s%s%s!", mon_obj_possessive(victim, target, TRUE),
 		    aobjnam(target, acid_dmg ? "corrode" : "rust"),
 		    erosion+1 == MAX_ERODE ? " completely" :
 		    erosion ? " further" : "");
@@ -843,7 +845,7 @@ boolean fade_scrolls;
 			aobjnam(target, Blind ? "feel" : "look"),
 			acid_dmg ? "corroded" : "rusty");
 		else if (vismon)
-		    pline("%s's %s completely %s.", Monnam(victim),
+		    pline("%s%s completely %s.", mon_obj_possessive(victim, target, TRUE),
 			aobjnam(target, "look"),
 			acid_dmg ? "corroded" : "rusty");
 		else if (visobj)
@@ -938,6 +940,12 @@ register int amount;
 	}
 	uwep->spe += amount;
 	if(amount > 0) uwep->cursed = 0;
+	if(is_composite_weapon(uwep) && uwep->cobj){
+		if(amount > 0 && uwep->cobj->spe < uwep->spe)
+			uwep->cobj->spe = min(uwep->cobj->spe + amount, uwep->spe);
+		else if(amount < 0 && uwep->cobj->spe > uwep->spe)
+			uwep->cobj->spe = max(uwep->cobj->spe + amount, uwep->spe);
+	}
 
 	/*
 	 * Enchantment, which normally improves a weapon, has an
@@ -985,6 +993,211 @@ register struct obj *obj;
 		return 1;
 	}
 	return 0;
+}
+
+/* Strips otmp (wielded by mdef) on behalf of magr, at the already-rolled
+ * where_to (a WHIPDISARM_ATTACKERFEET/DEFENDERFEET/ATTACKERINV constant).
+ * Applies defender-side resistances (weld, Glamdring, Dirge + tendril hair)
+ * and hated-material/avoid-theft downgrades, which can override where_to,
+ * then moves the item. Returns the outcome actually applied. */
+int
+whip_disarm(struct monst *magr, struct monst *mdef, struct obj *otmp, int where_to)
+{
+	int result;
+
+	if (mdef == &youmonst ? welded(otmp)
+			       : (otmp->cursed && !is_weldproof_mon(mdef))) {
+		result = WHIPDISARM_WELD;
+	} else if (otmp->oartifact == ART_GLAMDRING) {
+		result = WHIPDISARM_GLAMDRING;
+	} else if (otmp->oartifact == ART_DIRGE && mdef == &youmonst
+			&& check_mutation(TENDRIL_HAIR)) {
+		result = WHIPDISARM_DIRGE;
+	} else {
+		result = where_to;
+		if (result == WHIPDISARM_ATTACKERINV) {
+			if (magr == &youmonst) {
+				if (u.uavoid_theft)
+					result = WHIPDISARM_ATTACKERFEET;
+			} else if ((hates_silver(magr->data) && obj_is_material(otmp, SILVER))
+					|| (hates_iron(magr->data) && is_iron_obj(otmp))
+					|| (hates_unholy_mon(magr) && obj_is_material(otmp, GREEN_STEEL))
+					|| (hates_unholy_mon(magr) && is_unholy(otmp))
+					|| (hates_unblessed_mon(magr) && is_unblessed(otmp))
+					|| (hates_holy_mon(magr) && is_holy(otmp))) {
+				result = WHIPDISARM_DEFENDERFEET;
+			}
+		}
+
+		if (mdef == &youmonst) {
+			freeinv(otmp);
+			uwepgone();
+		} else {
+			obj_extract_self(otmp);
+			possibly_unwield(mdef, FALSE);
+			setmnotwielded(mdef, otmp);
+		}
+
+		switch (result) {
+		case WHIPDISARM_ATTACKERFEET:
+			if (magr == &youmonst) {
+				dropy(otmp);
+			} else {
+				place_object(otmp, magr->mx, magr->my);
+				stackobj(otmp);
+			}
+			break;
+		case WHIPDISARM_DEFENDERFEET:
+			if (mdef == &youmonst) {
+				dropy(otmp);
+			} else {
+				place_object(otmp, mdef->mx, mdef->my);
+				stackobj(otmp);
+			}
+			break;
+		case WHIPDISARM_ATTACKERINV:
+			if (magr == &youmonst) {
+				if (otmp->otyp == CORPSE
+						&& touch_petrifies(&mons[otmp->corpsenm])
+						&& !uarmg && !Stone_resistance
+						&& !(poly_when_stoned(youracedata)
+						     && polymon(PM_STONE_GOLEM))) {
+					char kbuf[BUFSZ];
+
+					Sprintf(kbuf, "%s corpse",
+						an(mons[otmp->corpsenm].mname));
+					pline("Snatching %s is a fatal mistake.", kbuf);
+					instapetrify(kbuf);
+				}
+				(void) hold_another_object(otmp, "You drop %s!",
+							   doname(otmp), (const char *)0);
+			} else {
+				(void) mpickobj(magr, otmp);
+			}
+			break;
+		}
+	}
+
+	if (mdef != &youmonst)
+		wakeup(mdef, TRUE);
+	return result;
+}
+
+/* Attempts to knock mdef prone on behalf of magr, using proficient.
+ * Returns a TRIP_ constant. */
+int
+trip_attempt(struct monst *magr, struct monst *mdef, int proficient)
+{
+	int size_diff = wielder_size(mdef) - wielder_size(magr);
+
+	if (size_diff > 0) {
+		proficient -= size_diff;
+		if (proficient < 0) proficient = 0;
+		if (!rn2(proficient + 2))
+			return TRIP_FAIL;
+	}
+
+	if (mdef == &youmonst)
+		make_prone(TRUE);
+	else
+		make_mon_prone(mdef, TRUE);
+	return TRIP_SUCCESS;
+}
+
+/* A monster (magr) attempts a whip trick -- disarm or trip -- against mdef,
+ * who may be the player or another monster. obj is whichever whip-like
+ * weapon mdef is currently wielding, or NULL if mdef isn't wielding one (in
+ * which case only tripping can apply). Returns 1 if magr made an attempt of
+ * some kind (whether or not it succeeded), 0 if nothing happened at all. */
+int
+mon_whip_tricks(struct monst *magr, struct monst *mdef, struct obj *obj)
+{
+	boolean youdef = (mdef == &youmonst);
+	boolean vismagr = canseemon(magr);
+	boolean trippable = could_trip(magr, mdef);
+	boolean disarm_possible = obj && !rn2(5);
+	boolean trip = (disarm_possible && trippable) ? (boolean) rn2(2) : trippable;
+	int proficient;
+
+	if (!disarm_possible && !trip)
+		return 0;
+
+	proficient = m_martial_skill(magr->data) - P_UNSKILLED;
+	if (proficient < 0) proficient = 0;
+	if (proficient > 3) proficient = 3;
+
+	if (trip) {
+		if (vismagr)
+			pline("%s flicks a whip towards %s %s!", Monnam(magr),
+			    youdef ? "your" : s_suffix(mon_nam(mdef)), mbodypart(mdef, LEG));
+		if (trip_attempt(magr, mdef, proficient) == TRIP_FAIL)
+			pline("But the whip slips free!");
+		return 1;
+	}
+
+	{
+	const char *The_whip = vismagr ? "The whip" : "A whip";
+	int where_to = rn2(4);
+	const char *hand = mbodypart(mdef, HAND);
+	char the_weapon[BUFSZ];
+
+	Strcpy(the_weapon, the(xname(obj)));
+	if (bimanual_mon(obj, mdef)) hand = makeplural(hand);
+
+	if (vismagr)
+		pline("%s flicks a whip towards %s %s!", Monnam(magr),
+		    youdef ? "your" : s_suffix(mon_nam(mdef)), hand);
+
+	if (obj->otyp == BALL) {
+		pline("%s fails to wrap around %s.", The_whip, the_weapon);
+		return 1;
+	}
+
+	if (youdef) {
+		if (obj->oartifact)
+			pline("%s wraps around your wielded %s!", The_whip, the_weapon);
+		else
+			pline("%s wraps around %s you're wielding!", The_whip, the_weapon);
+	} else {
+		pline("%s wraps around %s %s!", The_whip, s_suffix(mon_nam(mdef)), the_weapon);
+	}
+
+	if (where_to) {
+		int result = whip_disarm(magr, mdef, obj, where_to);
+
+		switch (result) {
+		case WHIPDISARM_WELD:
+			pline("%s welded to %s %s%c", !is_plural(obj) ? "It is" : "They are",
+			    youdef ? "your" : s_suffix(mon_nam(mdef)), hand,
+			    !obj->bknown ? '!' : '.');
+			break;
+		case WHIPDISARM_GLAMDRING:
+			pline("Glamdring resists being ripped out of %s %s!",
+			    youdef ? "your" : s_suffix(mon_nam(mdef)), hand);
+			break;
+		case WHIPDISARM_DIRGE:
+			pline("Dirge holds onto your hands!");
+			break;
+		case WHIPDISARM_ATTACKERFEET:
+			pline("%s yanks %s from %s %s!", Monnam(magr), the_weapon,
+			    youdef ? "your" : s_suffix(mon_nam(mdef)), hand);
+			break;
+		case WHIPDISARM_DEFENDERFEET:
+			pline("%s yanks %s to the %s!", Monnam(magr), the_weapon,
+			    surface(youdef ? u.ux : mdef->mx, youdef ? u.uy : mdef->my));
+			break;
+		case WHIPDISARM_ATTACKERINV:
+			pline("%s snatches %s!", Monnam(magr), the_weapon);
+			break;
+		}
+		if (result < 0) where_to = 0;
+	}
+
+	if (!where_to) {
+		pline_The("whip slips free.");  /* not `The_whip' */
+	}
+	}
+	return 1;
 }
 
 void
@@ -1056,42 +1269,40 @@ struct monst * mon;
 		return 1.5;
 
 	if (otmp->otyp == ISAMUSEI || otmp->otyp == CHIKAGE || otmp->otyp == KATANA || otmp->otyp == ODACHI
-		|| otmp->otyp == LONG_SWORD || is_vibrosword(otmp))
+		|| otmp->otyp == LONG_SWORD || otmp->otyp == CRYSTAL_SWORD || is_vibrosword(otmp)
+		|| otmp->otyp == LIANQIAO_JIAN || otmp->otyp == PANXIN_JIAN || otmp->otyp == PRACTICE_SWORD
+	)
 		return 1.5;
 	
 	return 1;
 }
 
-boolean
-bimanual(struct obj * otmp, struct permonst * ptr, boolean base_only, boolean yours)
+/* Return the effective size (MZ_*) of a wielder of form ptr (MZ_MEDIUM if ptr
+ * is null) when comparing it against weapon sizes. Unless base_only, includes
+ * the hero's size bonuses if yours.
+ */
+STATIC_OVL int
+wielder_eff_size(struct permonst * ptr, boolean base_only, boolean yours)
 {
-	int wielder_size;	/* uses standard MZ_ values */
-	int eff_size;		/* uses standard MZ_ values */
-	int size_mod;		/* otyp's size modifier; halve */
+	int wielder_size = (ptr ? ptr->msize : MZ_MEDIUM);	/* uses standard MZ_ values */
 
-	/* we *need* an object to get its size */
-	if (!otmp)
-		return FALSE;
-	/* only weapons and tools are valid twohanded weapons */
-	if (otmp->oclass != WEAPON_CLASS && otmp->oclass != TOOL_CLASS)
-		return FALSE;
-	/* get wielder's size -- optional, will assume medium (human) */
-	wielder_size = (ptr ? ptr->msize : MZ_MEDIUM);
-	
 	if (yours && !base_only) {
 		if (Role_if(PM_CAVEMAN))
 			wielder_size += 1;
 		if (u.sealsActive&SEAL_YMIR)
 			wielder_size += 1;
 	}
+	return wielder_size;
+}
 
-	/* Some creatures are specifically always able to wield any weapon in one hand */
-	if (ptr && always_one_hand_mtyp(ptr) && !base_only)
-		return FALSE;
-
-	/* half-sword style requires both hands on the sword, regardless of size */
-	if (yours && is_knight_sword(otmp) && selectedFightingForm(FFORM_HALF_SWORD))
-		return TRUE;
+/* Return the effective size (MZ_*) of weapon or tool otmp: its own size,
+ * adjusted by half its type's size relative to MZ_MEDIUM.
+ */
+STATIC_OVL int
+weapon_eff_size(struct obj * otmp)
+{
+	int eff_size;		/* uses standard MZ_ values */
+	int size_mod;		/* otyp's size modifier; halve */
 
 	/* get object size */
 	size_mod = objects[otmp->otyp].oc_size - MZ_MEDIUM;
@@ -1113,9 +1324,59 @@ bimanual(struct obj * otmp, struct permonst * ptr, boolean base_only, boolean yo
 		eff_size = MZ_GIGANTIC;
 	if (eff_size > MZ_HUGE && eff_size != MZ_GIGANTIC)
 		eff_size = MZ_HUGE;
+	return eff_size;
+}
+
+boolean
+bimanual(struct obj * otmp, struct permonst * ptr, boolean base_only, boolean yours)
+{
+	int wielder_size;	/* uses standard MZ_ values */
+
+	/* we *need* an object to get its size */
+	if (!otmp)
+		return FALSE;
+	/* only weapons and tools are valid twohanded weapons */
+	if (otmp->oclass != WEAPON_CLASS && otmp->oclass != TOOL_CLASS)
+		return FALSE;
+	/* get wielder's size -- optional, will assume medium (human) */
+	wielder_size = wielder_eff_size(ptr, base_only, yours);
+
+	/* Some creatures are specifically always able to wield any weapon in one hand */
+	if (ptr && always_one_hand_mtyp(ptr) && !base_only)
+		return FALSE;
+
+	/* half-sword style requires both hands on the sword, regardless of size */
+	if (yours && (is_knight_sword(otmp) || (Role_if(PM_KENSEI) && is_kensei_weapon(otmp))) && selectedFightingForm(FFORM_HALF_SWORD))
+		return TRUE;
 
 	/* bimanual rule: Needs two hands if [object's size] > [wielder's size] by 1 full size */
-	return (eff_size > wielder_size);
+	return (weapon_eff_size(otmp) > wielder_size);
+}
+
+/* Return TRUE if weapon or tool otmp is light for a wielder of form ptr
+ * (MZ_MEDIUM if ptr is null): its effective size is smaller than the wielder's.
+ * Unless base_only, includes the hero's size bonuses if yours.
+ */
+boolean
+light_weapon(struct obj * otmp, struct permonst * ptr, boolean base_only, boolean yours)
+{
+	if (!otmp)
+		return FALSE;
+	if (otmp->oclass != WEAPON_CLASS && otmp->oclass != TOOL_CLASS)
+		return FALSE;
+	return (weapon_eff_size(otmp) < wielder_eff_size(ptr, base_only, yours));
+}
+
+/* Return TRUE if weapon or tool otmp is light for mon: its effective size is
+ * smaller than mon's, including the hero's size bonuses if mon is the hero.
+ * The hero's off-hand weapon must also be within the hero's off-hand weight limit.
+ */
+boolean
+light_weapon_mon(struct obj * otmp, struct monst * mon)
+{
+	if (mon == &youmonst && u.twoweap && otmp == uswapwep && otmp->owt > max_offhand_weight())
+		return FALSE;
+	return light_weapon(otmp, mon->data, FALSE, mon == &youmonst);
 }
 
 boolean

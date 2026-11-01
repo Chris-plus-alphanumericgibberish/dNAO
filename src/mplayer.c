@@ -1294,7 +1294,7 @@ boolean special;
 		if(tryct > 50) return;
 
 		mtmp = mk_mplayer(&mons[pm], (xchar)x, (xchar)y, special ? MM_GOODEQUIP : NO_MM_FLAGS);
-		if(mtmp)
+		if(mtmp && Role_if(PM_UNDEAD_HUNTER) && quest_status.moon_close && Is_astralevel(&u.uz))
 			set_template(mtmp, TONGUE_PUPPET);
 		num--;
 	}

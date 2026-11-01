@@ -267,7 +267,7 @@ char c;
 			break;
 	    case 'r':	str = rank_of(u.ulevel, Role_switch, flags.female);
 			break;
-	    case 'R':	str = rank_of(MIN_QUEST_LEVEL, Role_switch,
+	    case 'R':	str = rank_of(ROLE_MIN_QUEST_LEVEL, Role_switch,
 	    			flags.female);
 			break;
 	    case 's':	str = (flags.female) ? "sister" : "brother";
@@ -431,7 +431,7 @@ int	msgnum;
 	
 	(void) dlb_fseek(msg_file, qt_msg->offset, SEEK_SET);
 	if (qt_msg->delivery == 'p') deliver_by_pline(qt_msg);
-	else if (msgnum == 1 || msgnum == 199) deliver_by_window(qt_msg, NHW_MENU);
+	else if (msgnum == QT_COMMON_LEGACY || msgnum == QT_COMMON_LEGACY_CONVICT) deliver_by_window(qt_msg, NHW_MENU);
 	else		     deliver_by_window(qt_msg, NHW_TEXT);
 	return;
 }
@@ -1013,6 +1013,10 @@ chaos2_montype()
 		else
 			return !(mvitals[PM_NOVIERE_ELADRIN].mvflags & G_GONE) ? &mons[PM_NOVIERE_ELADRIN] : mkclass(S_CHA_ANGEL, G_NOHELL);
 	} else if(In_mithardir_desert(&u.uz)){
+		if(G_C_INST(mons[PM_BEREFT].geno) < Insight && !rn2(20)){
+			if(!toostrong(PM_BEREFT, diff+5))
+				return &mons[PM_BEREFT];
+		}
 		if(G_C_INST(mons[PM_DESERT_SEER].geno) < Insight && !rn2(10)){
 			if(!toostrong(PM_DESERT_SEER, diff+5))
 				return &mons[PM_DESERT_SEER];
@@ -1032,6 +1036,14 @@ chaos2_montype()
 		else 
 			return !(mvitals[PM_LIVING_MIRAGE].mvflags & G_GONE) ? &mons[PM_LIVING_MIRAGE] : mkclass(S_PUDDING, G_NOHELL);
 	} else if(In_mithardir_catacombs(&u.uz)){
+		if(G_C_INST(mons[PM_BEREFT].geno) < Insight && !rn2(20)){
+			if(!toostrong(PM_BEREFT, diff+5))
+				return &mons[PM_BEREFT];
+		}
+		if(G_C_INST(mons[PM_LEADEN_ANCESTOR].geno) < Insight && !rn2(10)){
+			if(!toostrong(PM_LEADEN_ANCESTOR, diff+5))
+				return &mons[PM_LEADEN_ANCESTOR];
+		}
 		if(rn2(2))
 			return mkclass(S_BLOB, G_NOHELL);
 		else if(rn2(3))

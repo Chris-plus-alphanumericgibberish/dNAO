@@ -6,10 +6,12 @@
 
 #include "horrordata.h"
 #include "mondata.h"
+#include "mattkbp.h"
 #include "xhity.h"
 
 /*	These routines provide basic data for any type of monster. */
 STATIC_DCL void FDECL(set_template_data, (struct permonst *, struct permonst *, int));
+STATIC_DCL int FDECL(passive_max_dmg, (struct monst *, struct monst *, struct attack *, int));
 
 char * nameless_horror_name;
 
@@ -47,7 +49,7 @@ boolean state;
 		mon->m_insight_level += 35;
 		mon->mvar1_tettigon_uncancel = TRUE;
 	}
-	set_mon_data_core(mon, mon->data);
+	set_mon_data_core(mon, mon->data, FALSE);
 	weap_attack = mon_attacktype(mon, AT_WEAP) ? TRUE : FALSE;
 	xwep_attack = mon_attacktype(mon, AT_XWEP) ? TRUE : FALSE;
 	if(weap_attack && !MON_WEP(mon)){
@@ -65,15 +67,15 @@ boolean state;
 	}
 }
 
-/* 
+/*
  * Safely sets mon->data from an mtyp, including mon's template.
  * Gets and/or allocates (via permonst_of) memory for mon's data field
  * Calling `set_mon_data(mon, mon->mtyp)` is always ok.
+ *
+ * new_form: see set_mon_data_core().
  */
-void
-set_mon_data(mon, mtyp)
-struct monst *mon;
-int mtyp;
+static void
+set_mon_data_flagged(struct monst *mon, int mtyp, boolean new_form)
 {
 	struct permonst * bas;
 	struct permonst * ptr;
@@ -104,8 +106,493 @@ int mtyp;
 		bas = &mons[mtyp];
 	}
 	/* set monster data */
-	set_mon_data_core(mon, ptr);
+	set_mon_data_core(mon, ptr, new_form);
 	return;
+}
+
+/*
+ * Body parts a monster of this type has at the given level, over and above
+ * what its permonst lists -- the parts mon_bodyparts() cannot see because
+ * they depend on the individual. Its permonst-side counterpart is
+ * mon_insight_hidden_bits() (src/mattkbp.c).
+ *
+ * Takes the level rather than reading mlev(mon) so that a level change can
+ * be applied as a difference between two calls (mon_relevel_bodyparts()).
+ */
+static struct atkbp_set
+mon_extra_bodyparts(struct monst *mon, int lev)
+{
+	/* An Iksh'na deva at max level swings a million arms in place of her
+	 * weapon (getattk(), src/xhity.c) -- nothing in her stat block hints
+	 * at it. */
+	if (mon->mtyp == PM_IKSH_NA_DEVA && lev >= 45)
+		return ATKBP(ARM);
+	return ATKBP(NONE);
+}
+
+/* Drop injuries to parts mon no longer has. */
+static void
+prune_injuries(struct monst *mon)
+{
+	mon->minjuries = atkbp_and(mon->minjuries, mon->mbodyparts_full);
+	return;
+}
+
+/*
+ * Recompute which of mon's body parts the PC can currently perceive, by
+ * veiling the insight-gated ones. Derived from mbodyparts_full, not
+ * recomputed from the permonst.
+ *
+ * Deliberately leaves minjuries alone: a hidden limb is still there and can
+ * still be hurt, so injuries outlive their limb's visibility.
+ */
+void
+mon_refresh_visible_bodyparts(struct monst *mon)
+{
+	/* change_uinsight() can fire during u_init(), before init_uasmon() has
+	 * given youmonst a permonst to read a body plan out of */
+	if (!mon->data)
+		return;
+	mon->mbodyparts = atkbp_diff(mon->mbodyparts_full,
+				     mon_insight_veil(mon->data, Insight));
+	return;
+}
+
+/*
+ * Rebuild mon's whole body plan from its form, discarding whatever it held.
+ * Only for creation and for taking on a new form: everywhere else the full
+ * plan is the monster's own record, and may legitimately differ from its
+ * form's by parts it has gained or lost as an individual.
+ */
+void
+mon_refresh_bodyparts(struct monst *mon)
+{
+	if (!mon->data)
+		return;
+	mon->mbodyparts_full = atkbp_union(mon->data->bodyparts,
+					   mon_extra_bodyparts(mon, mlev(mon)));
+	prune_injuries(mon);
+	mon_refresh_visible_bodyparts(mon);
+	return;
+}
+
+/* A leg mon has lost is still counted -- it is a leg it ought to have and does
+ * not, which is what mon_injured_leg_count() below reports it as. */
+int
+mon_body_leg_count(struct monst *mon)
+{
+	if (!mon->data)
+		return atkbp_leg_count(mon->mbodyparts_full);
+	return atkbp_leg_count(atkbp_union(mon->mbodyparts_full, mon->data->bodyparts));
+}
+
+/* How many of those legs are unusable: injured, or missing outright. */
+int
+mon_injured_leg_count(struct monst *mon)
+{
+	struct atkbp_set missing;
+
+	if (!mon->data)
+		return atkbp_leg_count(mon->minjuries);
+	missing = atkbp_diff(mon->data->bodyparts, mon->mbodyparts_full);
+	return atkbp_leg_count(atkbp_union(mon->minjuries, missing));
+}
+
+boolean
+mon_enough_legs_to_stand(struct monst *mon)
+{
+	int full = mon_body_leg_count(mon);
+
+	return full > 0 && 2 * (full - mon_injured_leg_count(mon)) > full;
+}
+
+/* True if magr could theoretically trip mdef with a tripping attack. */
+boolean
+could_trip(struct monst *magr, struct monst *mdef)
+{
+	// mdef must be trippable at all
+	if (mdef->mprone || !is_trippable(mdef) || !could_stand_in_square(mdef))
+		return FALSE;
+	// mdef must not have a stance too stable to upset 
+	//  (many-legged arachnids/insects/lizards: splayed-out legs and low center of gravity)
+	if (mon_body_leg_count(mdef) > 2
+			&& (is_arachnid(mdef->data) || is_insectoid(mdef->data)
+			    || mdef->data->mlet == S_LIZARD))
+		return FALSE;
+	// mdef must not tower too far above magr in size
+	if (wielder_size(mdef) - wielder_size(magr) > 2)
+		return FALSE;
+	return TRUE;
+}
+
+/* Injuries are dealt against this set, not mbodyparts_full: hurting a limb
+ * must never be what reveals it. */
+int
+mon_visible_leg_count(struct monst *mon)
+{
+	return atkbp_leg_count(mon->mbodyparts);
+}
+
+/* The parts of `family` an injury could still land on: perceivable, and not
+ * already hurt. */
+static struct atkbp_set
+mon_injurable_parts(struct monst *mon, struct atkbp_set family)
+{
+	return atkbp_diff(atkbp_and(mon->mbodyparts, family), mon->minjuries);
+}
+
+static struct atkbp_set
+mon_injurable_legs(struct monst *mon)
+{
+	return mon_injurable_parts(mon, ATKBP_LEG_ORDINALS_MASK());
+}
+
+/* True when injure_random_legs() below would find nothing to hurt. Legless
+ * monsters and monsters whose legs are all insight-hidden read as wounded
+ * here. */
+boolean
+all_visible_legs_wounded(struct monst *mon)
+{
+	return atkbp_is_none(mon_injurable_legs(mon));
+}
+
+/* No-op when the arm was empty, so callers can hand over MON_WEP()/MON_SWEP()
+ * unchecked. */
+static void
+mon_drop_wielded(struct monst *mon, struct obj *wep)
+{
+	if (!wep)
+		return;
+
+	if (canseemon(mon))
+		pline("%s drops %s %s!", Monnam(mon), mhis(mon), xname(wep));
+	obj_extract_and_unequip_self(wep);
+	mdrop_obj(mon, wep, FALSE);
+}
+
+/* `how` is the trailing phrase of the message -- "by the spears", or "" for no
+ * qualifier. `plural` names the family for a multi-part injury; it is copied up
+ * front because the callers build it out of the rotating name buffers.
+ * Returns how many parts were newly hurt. */
+static int
+injure_random_parts(struct monst *mon, struct atkbp_set family, int count,
+	const char *how, const char *plural)
+{
+	struct atkbp_set hurt = ATKBP(NONE), pick;
+	char plurbuf[BUFSZ];
+	int avail, n = 0;
+	const char *part;
+
+	Strcpy(plurbuf, plural);
+	while (count-- > 0) {
+		struct atkbp_set parts = atkbp_diff(mon_injurable_parts(mon, family), hurt);
+
+		avail = atkbp_bit_count(parts);
+		if (!avail)
+			break;
+		pick = atkbp_nth_bit(parts, rn2(avail));
+		hurt = atkbp_union(hurt, pick);
+		n++;
+	}
+	if (!n)
+		return 0;
+	mon->minjuries = atkbp_union(mon->minjuries, hurt);
+
+	if (canseemon(mon)) {
+		part = (n == 1) ? atkbp_bodypart_name(pick, mon->data) : plurbuf;
+		pline("%s %s %s injured%s%s!", s_suffix(Monnam(mon)), part,
+			(n == 1) ? "is" : "are", *how ? " " : "", how);
+	}
+	if (atkbp_intersects(hurt, ATKBP(ARM_DOMINANT)))
+		mon_drop_wielded(mon, MON_WEP(mon));
+	if (atkbp_intersects(hurt, ATKBP(ARM_OFFHAND)))
+		mon_drop_wielded(mon, MON_SWEP(mon));
+	if (!mon_enough_legs_to_stand(mon)) {
+		if (mon == &youmonst)
+			make_prone(TRUE);
+		else
+			make_mon_prone(mon, TRUE);
+	}
+	return n;
+}
+
+int
+injure_random_limbs(struct monst *mon, int count, const char *how)
+{
+	return injure_random_parts(mon, ATKBP_LIMB_MASK(), count, how, "limbs");
+}
+
+/* TRUE when `attk` is made with a limb that could still be hurt. */
+boolean
+attack_limb_injurable(struct monst *mon, struct attack *attk)
+{
+	struct atkbp_set limbs = atkbp_and(attk->bodypart, ATKBP_LIMB_MASK());
+
+	return !atkbp_is_none(mon_injurable_parts(mon, limbs));
+}
+
+int
+injure_attack_limb(struct monst *mon, struct attack *attk, const char *how)
+{
+	struct atkbp_set limbs = atkbp_and(attk->bodypart, ATKBP_LIMB_MASK());
+
+	if (atkbp_is_none(limbs))
+		return 0;
+	return injure_random_parts(mon, limbs, 1, how, "limbs");
+}
+
+int
+injure_random_legs(struct monst *mon, int count, const char *how)
+{
+	return injure_random_parts(mon, ATKBP_LEG_ORDINALS_MASK(), count, how,
+		makeplural(mbodypart(mon, LEG)));
+}
+
+/* Judged against the body mon has rather than the body the PC can see: walking
+ * is a fact about the monster. */
+boolean
+mon_hobbled(struct monst *mon)
+{
+	int hurt = mon_injured_leg_count(mon);
+	int legs;
+
+	if (!hurt)
+		return FALSE;
+	legs = mon_body_leg_count(mon);
+	return legs > 0 && hurt * 2 >= legs;
+}
+
+/* Injuries knit on their own only once mon is otherwise whole. Each is rolled
+ * independently, so a turn may mend none of them or all of them. */
+void
+mon_heal_injuries_natural(struct monst *mon)
+{
+	struct atkbp_set healed = ATKBP(NONE);
+	int i;
+
+	if (mon->mhp < mon->mhpmax || atkbp_is_none(mon->minjuries))
+		return;
+	for (i = atkbp_bit_count(mon->minjuries) - 1; i >= 0; i--)
+		if (!rn2(60))
+			healed = atkbp_union(healed, atkbp_nth_bit(mon->minjuries, i));
+	mon->minjuries = atkbp_diff(mon->minjuries, healed);
+	return;
+}
+
+/* Returns how many injuries were mended. */
+int
+mon_heal_injuries(struct monst *mon, int count)
+{
+	int avail, n = 0;
+
+	while (count == HEAL_ALL_INJURIES || count-- > 0) {
+		avail = atkbp_bit_count(mon->minjuries);
+		if (!avail)
+			break;
+		mon->minjuries = atkbp_diff(mon->minjuries,
+					    atkbp_nth_bit(mon->minjuries, rn2(avail)));
+		n++;
+	}
+	return n;
+}
+
+/* Cure mon of all its madnesses (not spores, which are the effects of a physical infection). */
+void
+mon_cure_madnesses(struct monst *mon)
+{
+	mon->mcrazed = 0;
+	mon->mdisrobe = 0;
+	mon->mnotlaugh = 1;
+	mon->mlaughing = 0;
+	mon->msanctity = 0;
+	mon->mgluttony = 0;
+	mon->mfrigophobia = 0;
+	mon->mcannibal = 0;
+	mon->mrage = 0;
+	mon->margent = 0;
+	mon->msuicide = 0;
+	mon->mnudist = 0;
+	mon->mophidio = 0;
+	mon->marachno = 0;
+	mon->mentomo = 0;
+	mon->mthalasso = 0;
+	mon->mhelmintho = 0;
+	mon->mparanoid = 0;
+	mon->mtalons = 0;
+	mon->mdreams = 0;
+	mon->msciaphilia = 0;
+	mon->mforgetful = 0;
+	mon->mapostasy = 0;
+	mon->mtoobig = 0;
+	mon->mrotting = 0;
+	mon->mformication = 0;
+	mon->mscorpions = 0;
+	mon->mvermin = 0;
+	mon->mcaterpillars = 0;
+}
+
+/* Fix mon's temporary troubles (status effects, curses, positive study, and injuries if at full HP); mft_flags (MFT_*) selects additional fixes. */
+void
+mon_fix_troubles(struct monst *mon, int mft_flags)
+{
+	if(mft_flags & MFT_HEAL)
+		mon->mhp = mon->mhpmax;
+	if(mon->mhp >= mon->mhpmax)
+		mon_heal_injuries(mon, HEAL_ALL_INJURIES);
+	if(mft_flags & MFT_STUDY)
+		mon->ustdym = 0;
+	if(mft_flags & MFT_UNCANCEL)
+		set_mcan(mon, FALSE);
+	if(mft_flags & MFT_COOLDOWN)
+		mon->mspec_used = 0;
+	if(mft_flags & MFT_MADNESS){
+		mon_cure_madnesses(mon);
+		mon->mspores = 0;
+	}
+	if(mft_flags & MFT_TRAPPED){
+		mon->mtrapped = 0;
+		mon->entangled_otyp = 0;
+		mon->entangled_oid = 0;
+	}
+
+	if(mon->mstdy > 0)
+		mon->mstdy = 0;
+	mon->mflee = 0;
+	mon->mfleetim = 0;
+	mon->mberserk = 0;
+	mon->mcansee = 1;
+	mon->mblinded = 0;
+	mon->mcanhear = 1;
+	mon->mdeafened = 0;
+	mon->mcanmove = 1;
+	mon->mfrozen = 0;
+	mon->msleeping = 0;
+	mon->mstun = 0;
+	mon->mconf = 0;
+	mon->mpunctured = 0;
+	mon->mbleed = 0;
+	mon->mgmld_throat = 0;
+	mon->mgmld_skin = 0;
+	mon->owrk = 0;
+	mon->ruh = 0;
+	mon->shey = 0;
+	mon->luahv = 0;
+	mon->nean = 0;
+	mon->nooh = 0;
+}
+
+/*
+ * Two things stop an attack: a part that has been injured, and a part mon's
+ * form has that mon itself does not -- missing stops an attack the same way
+ * wrecked does. A part the attack names that mon's form never had does not
+ * block, since that comes of a borrowed attack (a lillend wearing another
+ * monster's mask); the body plan used here is mon's own, not the mask's.
+ */
+boolean
+injuries_block(struct monst *mon, struct attack *attk)
+{
+	struct permonst *ptr = (mon == &youmonst) ? youracedata : mon->data;
+	struct atkbp_set missing;
+
+	if (!ptr)
+		return FALSE;
+	missing = atkbp_diff(ptr->bodyparts, mon->mbodyparts_full);
+	return injuries_would_block_attk(ptr, attk, atkbp_union(mon->minjuries, missing));
+}
+
+/*
+ * Move mon's body plan from the parts oldlev granted to the ones newlev
+ * does, touching nothing else -- so a part gained or lost as an individual
+ * survives a level change.
+ */
+void
+mon_relevel_bodyparts(struct monst *mon, int oldlev, int newlev)
+{
+	struct atkbp_set old_extra, new_extra, lost;
+
+	if (!mon->data)
+		return;
+	old_extra = mon_extra_bodyparts(mon, oldlev);
+	new_extra = mon_extra_bodyparts(mon, newlev);
+	/* a part the form itself provides is not the level's to take back */
+	lost = atkbp_diff(atkbp_diff(old_extra, new_extra), mon->data->bodyparts);
+	mon->mbodyparts_full = atkbp_union(atkbp_diff(mon->mbodyparts_full, lost), new_extra);
+	prune_injuries(mon);
+	mon_refresh_visible_bodyparts(mon);
+	return;
+}
+
+/* mon is taking on mtyp as a new form -- the ordinary case. */
+void
+set_mon_data(struct monst *mon, int mtyp)
+{
+	set_mon_data_flagged(mon, mtyp, TRUE);
+	return;
+}
+
+/* Re-point a restored monster's data field, which is the one part of it
+ * that can't be saved. */
+void
+restore_mon_data(struct monst *mon, int mtyp)
+{
+	set_mon_data_flagged(mon, mtyp, FALSE);
+	/* Insight may have moved while this monster's level was unloaded */
+	mon_refresh_visible_bodyparts(mon);
+	return;
+}
+
+int
+hell_dice()
+{
+	if (u.uz.dnum != dungeon_topology.d_hell1_level.dnum
+	    || u.uz.dlevel <= dungeon_topology.d_hell1_level.dlevel)
+		return 1;
+	if (u.uz.dlevel <= dungeon_topology.d_hell2_level.dlevel)
+		return 4;
+	return !mvitals[PM_ASMODEUS].died ? 9 : 4;
+}
+
+int
+choose_hellish_energy()
+{
+	int variant;
+	static const int chroma_types[] = { AD_FIRE, AD_ACID, AD_ELEC, AD_COLD, AD_DRCO };
+
+	if (u.uz.dnum != dungeon_topology.d_hell1_level.dnum
+	    || u.uz.dlevel < dungeon_topology.d_hell1_level.dlevel)
+		variant = 1;
+	else if (u.uz.dlevel < dungeon_topology.d_hell2_level.dlevel)
+		variant = 2;
+	else
+		variant = 3;
+
+	switch (variant) {
+	case 1:
+		switch (dungeon_topology.hell1_variant) {
+		case BAEL_LEVEL:     return AD_FIRE;
+		case DISPATER_LEVEL: return AD_FIRE;
+		case MAMMON_LEVEL:   return AD_ACID;
+		case BELIAL_LEVEL:   return AD_FIRE;
+		case CHROMA_LEVEL:   return chroma_types[rn2(5)];
+		default:             return AD_FIRE;
+		}
+	case 2:
+		switch (dungeon_topology.hell2_variant) {
+		case LEVIATHAN_LEVEL:      return AD_COLD;
+		case LILITH_LEVEL:         return AD_ACID;
+		case BAALZEBUB_LEVEL:      return AD_ELEC;
+		case MEPHISTOPHELES_LEVEL: return rn2(2) ? AD_FIRE : rn2(8) ? AD_COLD : AD_ECLD;
+		default:                   return AD_COLD;
+		}
+	default: { /* Asmodeus: 3/9 fire, 3/9 cold, 1/9 each phys/acid/elec */
+		int r = rn2(9);
+		if (r < 3) return AD_FIRE;
+		if (r < 6) return AD_COLD;
+		if (r < 7) return AD_DRLI;
+		if (r < 8) return AD_ACID;
+		return AD_ELEC;
+	}
+	}
 }
 
 void
@@ -114,29 +601,58 @@ struct monst *mon;
 int oldpm;
 int newpm;
 {
-	//set mvar1
-	if(is_vectored_mtyp(newpm)){
-		if(!is_vectored_mtyp(oldpm))
-			mon->mvar_vector = rn2(8);
-		//else same as old
-	}
-	else if(is_half_dragon(&mons[newpm])){
-		if(!is_half_dragon(&mons[oldpm])){
-			static const int half_dragon_types[] = { AD_COLD, AD_FIRE, AD_SLEE, AD_ELEC, AD_DRST, AD_ACID };
+	//set melement
+	if(is_half_dragon(&mons[newpm])){
+		static const int half_dragon_types[] = { AD_COLD, AD_FIRE, AD_SLEE, AD_ELEC, AD_DRST, AD_ACID };
+		boolean already_valid = FALSE;
+		for(int i = 0; i < SIZE(half_dragon_types); i++){
+			if(mon->mvar_hdBreath == half_dragon_types[i]){
+				already_valid = TRUE;
+				break;
+			}
+		}
+		if(!already_valid){
 			mon->mvar_hdBreath = half_dragon_types[rn2(6)];
 		}
 	}
 	else if(is_boreal_dragoon(&mons[newpm])){
 		if(!is_boreal_dragoon(&mons[oldpm])){
 			static const int boreal_dragon_types[] = { AD_COLD, AD_FIRE, AD_MAGM, AD_PHYS };
-			if (!mon->mvar_hdBreath)
+			boolean already_valid = FALSE;
+			for(int i = 0; i < SIZE(boreal_dragon_types); i++){
+				if(mon->mvar_hdBreath == boreal_dragon_types[i]){
+					already_valid = TRUE;
+					break;
+				}
+			}
+			if(!already_valid){
 				mon->mvar_hdBreath = boreal_dragon_types[rn2(4)];
+			}
 		}
+	}
+	else if(is_hellish_wielder(&mons[newpm])){
+		if(!is_hellish_wielder(&mons[oldpm]))
+			mon->melement = choose_hellish_energy();
+		/* else keep existing energy across poly forms */
+	}
+	//else leave as-is. May as well stay consistent between forms, if possib
+	//set mvar1
+	if(is_vectored_mtyp(newpm)){
+		if(!is_vectored_mtyp(oldpm))
+			mon->mvar_vector = rn2(8);
+		//else same as old
 	}
 	else if(has_sunflask(newpm)){
 		if(!has_sunflask(oldpm)){
 			mon->mvar_flask_charges = MAX_FLASK_CHARGES(mon);
 		}
+	}
+	else if(diagonal_mover(&mons[newpm])){
+		/* a diagonal_mover is permanently confined to the parity it's on
+		 * when it becomes one; see shared_world() and goodpos(). Stored as
+		 * 1+parity so that 0 unambiguously means "never established". */
+		mon->mvar1_seaParity = 1 + ((mon == &youmonst) ? ((u.ux + u.uy) % 2)
+						: ((mon->mx + mon->my) % 2));
 	}
 	else switch(newpm){
 		case PM_PALE_NIGHT:
@@ -155,7 +671,8 @@ int newpm;
 				mon->mvar_huskID = 0;
 		break;
 		case PM_ALABASTER_MUMMY:
-			if(oldpm != PM_ALABASTER_MUMMY){
+		case PM_SHRIEKING_SHADOW:
+			if(!has_syllable(&mons[oldpm])){
 				switch(rnd(6)){
 					case 1:
 						mon->mvar_syllable = SYLLABLE_OF_STRENGTH__AESH;
@@ -219,6 +736,7 @@ int newpm;
 			//mon->mvar_star_vampire_blood = 0;
 			//mon->mvar_spellweaver_count = 0;
 			//mon->mvar1_tettigon_uncancel = 0;
+			//mon->mvar1_summonerID = 0;
 			mon->mvar1 = 0;
 		break;
 	}
@@ -236,22 +754,32 @@ int newpm;
 	// mvar_spellweaver_last_cast = 0
 
 	mon->mvar3 = 0;
+
+	/* a stance is species-scoped; a form change invalidates the old one */
+	mon->mstance = MSTANCE_DEFAULT;
 }
 
 /*
  * Safely sets mon->data from an existing data pointer.
- * Calling `set_mon_data_core(mon, mon->data)` is always ok.
+ * Calling `set_mon_data_core(mon, mon->data, FALSE)` is always ok.
+ *
+ * new_form: mon is taking on ptr as a new form, so its body plan should be
+ * re-read from it. FALSE for the callers that only want intrinsics
+ * recalculated against the form mon already has (set_mcan(),
+ * give_mintrinsic()).
  */
 void
-set_mon_data_core(mon, ptr)
-struct monst *mon;
-struct permonst * ptr;
+set_mon_data_core(struct monst *mon, struct permonst *ptr, boolean new_form)
 {
 	int i;
+	int oldpm = mon->mtyp;
 
 	/* data and type */
 	mon->data = ptr;
 	mon->mtyp = ptr->mtyp;
+
+	if (new_form)
+		mon_refresh_bodyparts(mon);
 
 	/* zero out intrinsics to be set now */
 	for(i = 0; i < MPROP_SIZE; i++){
@@ -259,8 +787,8 @@ struct permonst * ptr;
 	}
 
 	/*Updates monster mvar*/
-	if(mon->mtyp != ptr->mtyp)
-		update_mon_mvar(mon, mon->mtyp, ptr->mtyp);
+	if(new_form && oldpm != ptr->mtyp)
+		update_mon_mvar(mon, oldpm, ptr->mtyp);
 
 	/* resistances */
 	mon->mintrinsics[0] = (ptr->mresists & MR_MASK);
@@ -311,6 +839,9 @@ struct permonst * ptr;
 			case AD_PHYS:
 			break;
 		}
+	} else if(is_hellish_wielder(ptr)){
+		if (!mon->melement)
+			mon->melement = choose_hellish_energy();
 	}
 #define set_mintrinsic(ptr_condition, intrinsic) \
 	if ((ptr_condition))	{ mon->mintrinsics[((intrinsic)-1)/32] |=  (1L<<((intrinsic)-1)%32); } \
@@ -320,9 +851,39 @@ struct permonst * ptr;
 	if ((ptr_condition) && !mon->mcan)	{ mon->mintrinsics[((intrinsic)-1)/32] |=  (1L<<((intrinsic)-1)%32); } \
 	else								{ mon->mintrinsics[((intrinsic)-1)/32] &= ~(1L<<((intrinsic)-1)%32); }
 
+	/* resistances */
+	if(ptr->mresists & MR_FIRE){
+		set_mintrinsic(TRUE, FIRE_RES);
+		set_mintrinsic(is_demon(ptr) || is_undead(ptr), HELL_FIRE_RES);
+		set_mintrinsic(is_angel(ptr) || is_elemental(ptr), HOLY_FIRE_RES);
+	}
+	if(ptr->mresists & MR_COLD){
+		set_mintrinsic(TRUE, COLD_RES);
+		set_mintrinsic(is_demon(ptr) || is_undead(ptr), HELL_COLD_RES);
+		set_mintrinsic(is_angel(ptr) || is_elemental(ptr), HOLY_COLD_RES);
+	}
+	set_mintrinsic(ptr->mresists & MR_SLEEP, SLEEP_RES);
+	set_mintrinsic(ptr->mresists & MR_DISINT, DISINT_RES);
+	if(ptr->mresists & MR_ELEC){
+		set_mintrinsic(TRUE, SHOCK_RES);
+		set_mintrinsic(is_demon(ptr) || is_undead(ptr), HELL_SHOCK_RES);
+		set_mintrinsic(is_angel(ptr) || is_elemental(ptr), HOLY_SHOCK_RES);
+	}
+	set_mintrinsic(ptr->mresists & MR_POISON, POISON_RES);
+	if(ptr->mresists & MR_ACID){
+		set_mintrinsic(TRUE, ACID_RES);
+		set_mintrinsic(is_demon(ptr) || is_undead(ptr), HELL_ACID_RES);
+		set_mintrinsic(is_angel(ptr) || is_elemental(ptr), HOLY_ACID_RES);
+	}
+	set_mintrinsic(ptr->mresists & MR_STONE, STONE_RES);
+	set_mintrinsic(ptr->mresists & MR_DRAIN, DRAIN_RES);
+	set_mintrinsic(ptr->mresists & MR_SICK, SICK_RES);
+	set_mintrinsic(ptr->mresists & MR_MAGIC, ANTIMAGIC);
+	set_mintrinsic(ptr->mresists & MR_REFLECT, REFLECTING);
+
 	/* other intrinsics */
 	set_mintrinsic(species_swims(mon->data), SWIMMING);
-	set_mintrinsic((species_flies(mon->data) && (!mon->mcan || has_wings(mon->data))), FLYING);
+	set_mintrinsic((species_flies(mon->data) && (!mon->mcan || has_wings_mon(mon))), FLYING);
 	set_mintrinsic_cancelable(species_floats(mon->data), LEVITATION);
 	set_mintrinsic_cancelable(species_displaces(mon->data), DISPLACED);
 	set_mintrinsic_cancelable(species_passes_walls(mon->data), PASSES_WALLS);
@@ -331,6 +892,33 @@ struct permonst * ptr;
 	set_mintrinsic_cancelable(species_teleports(mon->data), TELEPORT);
 	set_mintrinsic_cancelable(species_controls_teleports(mon->data), TELEPORT_CONTROL);
 	set_mintrinsic_cancelable(species_is_telepathic(mon->data), TELEPAT);
+	if(is_hellish_wielder(ptr)){
+		switch(mon->melement){
+		case AD_FIRE:
+			set_mintrinsic(TRUE, FIRE_RES);
+			set_mintrinsic(TRUE, HELL_FIRE_RES);
+		break;
+		case AD_COLD:
+		case AD_ECLD:
+			set_mintrinsic(TRUE, COLD_RES);
+			set_mintrinsic(TRUE, HELL_COLD_RES);
+		break;
+		case AD_ELEC:
+			set_mintrinsic(TRUE, SHOCK_RES);
+			set_mintrinsic(TRUE, HELL_SHOCK_RES);
+		break;
+		case AD_ACID:
+			set_mintrinsic(TRUE, ACID_RES);
+			set_mintrinsic(TRUE, HELL_ACID_RES);
+		break;
+		case AD_DRCO:
+			set_mintrinsic(TRUE, POISON_RES);
+		break;
+		case AD_DRLI:
+			set_mintrinsic(TRUE, DRAIN_RES);
+		break;
+		}
+	}
 #undef set_mintrinsic
 #undef set_mintrinsic_cancelable
 	for(i = 0; i < MPROP_SIZE; i++){
@@ -345,7 +933,7 @@ struct monst * mon;
 long intrinsic;
 {
 	mon->acquired_trinsics[((intrinsic)-1)/32] |=  (1L<<((intrinsic)-1)%32);
-	set_mon_data_core(mon, mon->data);
+	set_mon_data_core(mon, mon->data, FALSE);
 }
 
 void
@@ -354,7 +942,7 @@ struct monst * mon;
 long intrinsic;
 {
 	mon->acquired_trinsics[((intrinsic)-1)/32] &= ~(1L<<((intrinsic)-1)%32);
-	set_mon_data_core(mon, mon->data);
+	set_mon_data_core(mon, mon->data, FALSE);
 }
 
 //Note: intended to be mental things relating to a faction a monster belongs to
@@ -722,6 +1310,8 @@ int template;
 		ptr->nac += 6;
 		/* resists: */
 		ptr->mresists |= (MR_FIRE | MR_COLD | MR_SLEEP | MR_POISON | MR_STONE | MR_DRAIN | MR_SICK | MR_MAGIC);
+		/* misc: */
+		ptr->msound = MS_SILENT;
 		break;
 	case YITH:
 		/*Yith are lawful*/
@@ -733,6 +1323,7 @@ int template;
 		if(!(ptr->mflagsw&MW_EYE_OF_YGG)){
 			ptr->mflagsw |= MW_ELDER_SIGN;
 		}
+		ptr->mflagsm |= (MM_STANDOFF);
 		break;
 	case CRANIUM_RAT:
 		/* defense: */
@@ -750,6 +1341,7 @@ int template;
 		ptr->spe_hdr += 6;
 		ptr->spe_bdr += 6;
 		ptr->spe_gdr += 6;
+		ptr->spe_wdr += 6;
 		ptr->spe_ldr += 6;
 		ptr->spe_fdr += 6;
 		ptr->mflagst &= ~(MT_ANIMAL|MT_MINDLESS);
@@ -810,6 +1402,7 @@ int template;
 			AVG_AC(pac)
 			ptr->spe_bdr += 4;
 			ptr->spe_gdr += 2;
+			ptr->spe_wdr += 2;
 			ptr->spe_ldr += 2;
 		}
 		break;
@@ -895,6 +1488,7 @@ int template;
 		ptr->spe_hdr += 3;
 		ptr->spe_bdr += 3;
 		ptr->spe_gdr += 3;
+		ptr->spe_wdr += 3;
 		ptr->spe_ldr += 3;
 		ptr->spe_fdr += 3;
 		ptr->mflagst |= (MT_HOSTILE | MT_STALK);
@@ -934,6 +1528,7 @@ int template;
 		ptr->spe_hdr += 4;
 		ptr->spe_bdr += 4;
 		ptr->spe_gdr += 4;
+		ptr->spe_wdr += 4;
 		ptr->spe_ldr += 4;
 		ptr->spe_fdr += 4;
 		ptr->msound = MS_SCREAM;
@@ -984,6 +1579,7 @@ int template;
 			ptr->spe_hdr = 0;
 			ptr->spe_bdr = 0;
 			ptr->spe_gdr = 0;
+			ptr->spe_wdr = 0;
 			ptr->spe_ldr = 0;
 			ptr->spe_fdr = 0;
 			ptr->mflagst |= MT_BOLD|MT_HOSTILE;
@@ -1009,6 +1605,7 @@ int template;
 			ptr->spe_hdr = 0;
 			ptr->spe_bdr = 0;
 			ptr->spe_gdr = 0;
+			ptr->spe_wdr = 0;
 			ptr->spe_ldr = 0;
 			ptr->spe_fdr = 0;
 			ptr->mmove = 0;
@@ -1075,6 +1672,7 @@ int template;
 		ptr->spe_gdr = 8;
 		ptr->spe_ldr = 8;
 		ptr->spe_fdr = 8;
+		ptr->spe_wdr = 8;
 		/* resists: */
 		ptr->mresists |= (MR_POISON|MR_STONE|MR_COLD|MR_MAGIC);
 		/* misc: */
@@ -1090,7 +1688,7 @@ int template;
 #undef MT_ITEMS
 
 	/* adjust attacks in the permonst */
-	extern struct attack noattack;
+	extern const struct attack noattack;
 	boolean special = FALSE;
 	boolean special_2 = FALSE;
 	boolean special_3 = FALSE;
@@ -1275,39 +1873,18 @@ int template;
 			}
 		}
 
-		/* mindless monsters don't use weapons */
-		if ((template == MINDLESS) && 
-			(
-			attk->aatyp == AT_HODS ||
-			attk->aatyp == AT_DEVA ||
-			attk->aatyp == AT_JUGL ||
-			attk->aatyp == AT_SRPR ||
-			attk->aatyp == AT_XSPR ||
-			attk->aatyp == AT_MSPR ||
-			attk->aatyp == AT_DSPR ||
-			attk->aatyp == AT_MARI ||
-			attk->aatyp == AT_WEAP ||
-			attk->aatyp == AT_XWEP
-			)
-		){
-			if(attk->aatyp == AT_XWEP || attk->aatyp == AT_XSPR)
-				attk->offhand = 1;
-			attk->aatyp = AT_CLAW;
-			attk->damn = max(attk->damn, ptr->mlevel / 10 + 1);
-			attk->damd = max(attk->damd, max(ptr->msize * 2, 4));
-		}
 		/* some templates want to adjust existing attacks, or add additional attacks */
 #define insert_okay(specvar) (!(specvar) && (is_null_attk(attk) || \
 		((attk->aatyp > AT_HUGS && !weapon_aatyp(attk->aatyp) \
 			&& !(attk->aatyp == AT_BREA && ptr->mlet == S_DRAGON)) || attk->aatyp == AT_NONE)) \
 	&& (insert = TRUE))
-#define end_insert_okay(specvar) (!(specvar) && (is_null_attk(attk) || attk->aatyp == AT_NONE) && (insert = TRUE))
+#define end_insert_okay(specvar) (!(specvar) && (is_null_attk(attk) || attk->aatyp == AT_NONE || attk->aatyp == AT_MNTL) && (insert = TRUE))
 #define maybe_insert() if(insert) {for(j=NATTK-i-1;j>0;j--)attk[j]=attk[j-1];*attk=noattack;insert=FALSE;}
 		/* zombies/skeletons get a melee attack if they don't have any (likely due to disallowed aatyp) */
 		if ((template == ZOMBIFIED || template == ROT_ZOMBIE || template == SPORE_ZOMBIE || template == SKELIFIED || template == SPARK_SKELETON || template == MINDLESS) && (
 			i == 0 && (!nolimbs(ptr) || has_head(ptr)) && (
 			is_null_attk(attk) ||
-			(attk->aatyp == AT_NONE || attk->aatyp == AT_BOOM)
+			(attk->aatyp == AT_NONE || attk->aatyp == AT_MNTL || attk->aatyp == AT_BOOM)
 			) && (insert = TRUE)
 			)
 		){
@@ -1454,19 +2031,6 @@ int template;
 			attk->damd = max(4, max(ptr->msize * 2, attk->damd));
 			special = TRUE;
 		}
-		/* pseudonatural's bites become int-draining tentacles */
-		if (template == PSEUDONATURAL && (
-			(attk->aatyp == AT_BITE)
-			|| insert_okay(special)
-			))
-		{
-			maybe_insert();
-			attk->aatyp = AT_TENT;
-			attk->adtyp = AD_DRIN;
-			attk->damn = 1;
-			attk->damd = 4;
-			special = TRUE;
-		}
 		/* Cordyceps always have the same attacks */
 		if(template == CORDYCEPS){
 			if(i==0){
@@ -1574,7 +2138,9 @@ int template;
 			))
 		{
 			maybe_insert();
-			attk->aatyp = !attacktype(ptr, AT_WEAP) ? AT_SRPR : !attacktype(ptr, AT_XWEP) ? AT_XSPR : AT_ESPR;
+			attk->aatyp = nohands(ptr) ? AT_ESPR
+				: !attacktype(ptr, AT_WEAP) ? AT_SRPR
+				: !attacktype(ptr, AT_XWEP) ? AT_XSPR : AT_ESPR;
 			attk->adtyp = AD_SHDW;
 			attk->damn = 2; //4-6 with undead bonus.
 			attk->damd = 8;
@@ -1670,32 +2236,10 @@ int template;
 			attk->damd = 1;
 			special = TRUE;
 		}
-		if (template == DREAM_LEECH && (
-			end_insert_okay(special)
-			))
-		{
-			maybe_insert();
-			attk->aatyp = AT_TUCH;
-			attk->adtyp = AD_DRIN;
-			attk->damn = 1;
-			attk->damd = 5;
-			special = TRUE;
-		}
 		if (template == MAD_TEMPLATE && !is_null_attk(attk) && attk->adtyp != AD_DISN && attk->adtyp != AD_SURY){
 			if(attk->adtyp == AD_PHYS)
 				attk->damn++;
 			attk->damd += 4;
-		}
-		if (template == FALLEN_TEMPLATE && (
-			end_insert_okay(special)
-			))
-		{
-			maybe_insert();
-			attk->aatyp = AT_NONE;
-			attk->adtyp = AD_FIRE;
-			attk->damn = 0;
-			attk->damd = 9;
-			special = TRUE;
 		}
 		if (template == MOLY_TEMPLATE && (
 			end_insert_okay(special)
@@ -1777,9 +2321,110 @@ int template;
 			special_2 = TRUE;
 		}
 	}
+
+	/* pass 3: derive .bodypart for every finalized real attack via the
+	 * standard attribution rules. */
+	{
+		struct atkbp_set resolved[NATTK];
+		int nattk = attk_bodyparts_all(ptr, resolved, (boolean *)0);
+
+		for (i = 0; i < nattk; i++)
+			ptr->mattk[i].bodypart = resolved[i];
+	}
+
+	/* pass 4: attack adjustments with nonstandard attribution rules */
+	for (i = 0; i < NATTK; i++) {
+		attk = &(ptr->mattk[i]);
+		if (is_null_attk(attk))
+			break;
+
+		/* Standard limb, but no longer skillfully used */
+		if ((template == MINDLESS) &&
+			(
+			attk->aatyp == AT_HODS ||
+			attk->aatyp == AT_DEVA ||
+			attk->aatyp == AT_JUGL ||
+			attk->aatyp == AT_SRPR ||
+			attk->aatyp == AT_XSPR ||
+			attk->aatyp == AT_MSPR ||
+			attk->aatyp == AT_DSPR ||
+			attk->aatyp == AT_MARI ||
+			attk->aatyp == AT_WEAP ||
+			attk->aatyp == AT_XWEP
+			)
+		){
+			if(attk->aatyp == AT_XWEP || attk->aatyp == AT_XSPR)
+				attk->offhand = 1;
+			attk->aatyp = AT_CLAW;
+			attk->damn = max(attk->damn, ptr->mlevel / 10 + 1);
+			attk->damd = max(attk->damd, max(ptr->msize * 2, 4));
+		}
+
+		/* Mouth-tentacles */
+		if (template == PSEUDONATURAL && (
+			(attk->aatyp == AT_BITE)
+			|| insert_okay(special)
+			))
+		{
+			maybe_insert();
+			attk->aatyp = AT_TENT;
+			attk->adtyp = AD_DRIN;
+			attk->damn = 1;
+			attk->damd = 4;
+			attk->bodypart = has_head(ptr)
+				? atkbp_or((struct atkbp_set[]){ ATKBP(HEAD), ATKBP(TENTACLE_GENERIC), ATKBP(NONE) })
+				: ATKBP(TENTACLE_GENERIC);
+			special = TRUE;
+		}
+
+		/* Mind parasite */
+		if (template == DREAM_LEECH && (
+			end_insert_okay(special)
+			))
+		{
+			maybe_insert();
+			attk->aatyp = AT_TUCH;
+			attk->adtyp = AD_DRIN;
+			attk->damn = 1;
+			attk->damd = 5;
+			attk->bodypart = has_head(ptr)
+				? atkbp_or((struct atkbp_set[]){ ATKBP(OTHER_APPENDAGE), ATKBP(HEAD), ATKBP(PHASED), ATKBP(HITS_INSUBSTANTIAL), ATKBP(NONE) })
+				: atkbp_or((struct atkbp_set[]){ ATKBP(OTHER_APPENDAGE), ATKBP(PHASED), ATKBP(HITS_INSUBSTANTIAL), ATKBP(NONE) });
+			special = TRUE;
+		}
+
+		if (template == FALLEN_TEMPLATE && (
+			end_insert_okay(special)
+			))
+		{
+			maybe_insert();
+			attk->aatyp = AT_NONE;
+			attk->adtyp = AD_FIRE;
+			attk->damn = 0;
+			attk->damd = 9;
+			attk->bodypart = ATKBP(HALO);
+			special = TRUE;
+		}
+
+		/* Mistweavers cast with their tentacles, not their arms */
+		if (template == MISTWEAVER && attk->aatyp == AT_MMGC && attk->adtyp == AD_CLRC)
+			attk->bodypart = ATKBP(TENTACLE_GENERIC);
+
+		/* A tomb herd strikes with the statue it is piloting, not with a
+		 * body of its own -- every attack keeps its ordinary identity, but
+		 * the limb making contact is the statue's */
+		if (template == TOMB_HERD)
+			attk->bodypart = atkbp_or((struct atkbp_set[]){
+				attk->bodypart, ATKBP(ARMOR_SKIN), ATKBP(NONE) });
+	}
 #undef insert_okay
 #undef end_insert_okay
 #undef maybe_insert
+
+	/* pass 5: summarize the finished body plan. Runs after pass 4, not
+	 * with pass 3, so that the overrides above are part of the summary. */
+	ptr->bodyparts = mon_bodyparts(ptr, INSIGHT_ALL);
+
 	/*Adjust the name*/
 	/* horrors are disallowed out of caution - they definitely break if this is enabled */
 	if(!is_horror(&mons[mtyp])){
@@ -2001,13 +2646,14 @@ int level_bonus;
 		horror->spe_gdr = 0;
 		horror->spe_ldr = 0;
 		horror->spe_fdr = 0;
+		horror->spe_wdr = 0;
 
 		horror->mr = rn2(11) * 10;				/* varying amounts of MR */
 		horror->maligntyp = d(2, 9) - 10;			/* any alignment */
 
 		/* attacks...?  */
 		horrorattacks = 0;
-		extern struct attack noattack;
+		extern const struct attack noattack;
 		for (i = 0; i < NATTK; i++) {
 			horror->mattk[i] = noattack;
 		}
@@ -2340,6 +2986,19 @@ int level_bonus;
 	if (horror->mtyp == PM_NAMELESS_HORROR)
 		monstr[PM_NAMELESS_HORROR] = 40;
 
+	/* derive .bodypart for every finalized attack via the standard
+	 * attribution rules -- NULL for the validation-error out-param since a
+	 * malformed horror should not crash the game.
+	 */
+	{
+		struct atkbp_set resolved[NATTK];
+		int nattk = attk_bodyparts_all(horror, resolved, (boolean *)0);
+
+		for (i = 0; i < nattk; i++)
+			horror->mattk[i].bodypart = resolved[i];
+		horror->bodyparts = mon_bodyparts(horror, INSIGHT_ALL);
+	}
+
 #undef get_random_of
 	return;
 }
@@ -2399,11 +3058,46 @@ struct monst *magr;
 		!is_null_attk(attk);
 		attk = getattk(magr, (struct monst *) 0, res, &indexnum, &prev_attk, FALSE, subout, &tohitmod)
 	){
-		if(attk->aatyp != AT_NONE && attk->aatyp != AT_SPIT && attk->aatyp != AT_BREA
+		if(attk->aatyp != AT_NONE && attk->aatyp != AT_MNTL && attk->aatyp != AT_SPIT && attk->aatyp != AT_BREA
 		&& attk->aatyp != AT_BOOM && attk->aatyp != AT_GAZE && attk->aatyp != AT_ARRW
 		&& attk->aatyp != AT_TNKR && attk->aatyp != AT_WDGZ && attk->aatyp != AT_REND
 		)
 			return TRUE;
+	}
+
+    return FALSE;
+}
+
+boolean
+has_multi_or_nonweapon_nonkick_attk(struct monst *magr)
+{
+	struct attack *attk;
+	struct attack prev_attk = {0};
+	int real_attk_count = 0;
+	int	indexnum = 0,	/* loop counter */
+		subout[SUBOUT_ARRAY_SIZE] = {0},	/* remembers what attack substitutions have been made for [magr]'s attack chain */
+		tohitmod = 0,	/* flat accuracy modifier for a specific attack */
+		res[4];		/* results of previous 2 attacks ([0] -> current attack, [1] -> 1 ago, [2] -> 2 ago) -- this is dynamic! */
+
+	/* zero out res[] */
+	res[0] = MM_MISS;
+	res[1] = MM_MISS;
+	res[2] = MM_MISS;
+	res[3] = MM_MISS;
+	
+	for(attk = getattk(magr, (struct monst *) 0, res, &indexnum, &prev_attk, FALSE, subout, &tohitmod);
+		!is_null_attk(attk);
+		attk = getattk(magr, (struct monst *) 0, res, &indexnum, &prev_attk, FALSE, subout, &tohitmod)
+	){
+		if(attk->aatyp != AT_NONE && attk->aatyp != AT_MNTL && attk->aatyp != AT_SPIT && attk->aatyp != AT_BREA
+		&& attk->aatyp != AT_BOOM && attk->aatyp != AT_GAZE && attk->aatyp != AT_ARRW
+		&& attk->aatyp != AT_TNKR && attk->aatyp != AT_WDGZ && attk->aatyp != AT_REND
+		&& attk->aatyp != AT_KICK
+		){
+			real_attk_count++;
+			if((attk->aatyp != AT_WEAP) || real_attk_count > 1)
+				return TRUE;
+		}
 	}
 
     return FALSE;
@@ -2619,8 +3313,25 @@ resists_fire(mon)
 	
 	if(mon_vulnerability(mon, FIRE_RES))
 		return FALSE;
-	
-	return (species_resists_fire(mon) || mon_resistance(mon, FIRE_RES) || (mon == u.usteed && u.sealsActive&SEAL_BERITH && Fire_resistance));
+
+	if(!mon->mpeaceful)
+		return (species_resists_fire(mon) || mon_resistance(mon, FIRE_RES) ||
+		        mon_resistance(mon, HELL_FIRE_RES) || mon_resistance(mon, HOLY_FIRE_RES) ||
+		        ward_at(mon->mx, mon->my) == SIGIL_OF_CTHUGHA);
+
+	if(mon_resistance(mon, HOLY_FIRE_RES) || (mon == u.usteed && u.sealsActive&SEAL_BERITH && Fire_resistance))
+		return TRUE;
+
+	if(mon_resistance(mon, HELL_FIRE_RES) && !In_endgame(&u.uz))
+		return TRUE;
+
+	if((species_resists_fire(mon) || mon_resistance(mon, FIRE_RES)) && !Inhell && !In_endgame(&u.uz))
+		return TRUE;
+
+	if(ward_at(mon->mx, mon->my) == SIGIL_OF_CTHUGHA)
+		return TRUE;
+
+	return FALSE;
 }
 
 boolean
@@ -2631,10 +3342,25 @@ resists_cold(mon)
 	
 	if(mon_vulnerability(mon, COLD_RES))
 		return FALSE;
-	
-	return (species_resists_cold(mon) || mon_resistance(mon, COLD_RES) || 
-		(has_template(mon, VAMPIRIC) && mon->m_lev > 10) ||  
-		(mon == u.usteed && u.sealsActive&SEAL_BERITH && Cold_resistance));
+
+	if(!mon->mpeaceful)
+		return (species_resists_cold(mon) || mon_resistance(mon, COLD_RES) ||
+		        mon_resistance(mon, HELL_COLD_RES) || mon_resistance(mon, HOLY_COLD_RES) ||
+		        ward_at(mon->mx, mon->my) == BRAND_OF_ITHAQUA);
+
+	if(mon_resistance(mon, HOLY_COLD_RES) || (mon == u.usteed && u.sealsActive&SEAL_BERITH && Cold_resistance))
+		return TRUE;
+
+	if(mon_resistance(mon, HELL_COLD_RES) && !In_endgame(&u.uz))
+		return TRUE;
+
+	if((species_resists_cold(mon) || mon_resistance(mon, COLD_RES)) && !Inhell && !In_endgame(&u.uz))
+		return TRUE;
+
+	if(ward_at(mon->mx, mon->my) == BRAND_OF_ITHAQUA)
+		return TRUE;
+
+	return FALSE;
 }
 
 boolean
@@ -2670,8 +3396,25 @@ resists_elec(mon)
 	
 	if(mon_vulnerability(mon, SHOCK_RES))
 		return FALSE;
-	
-	return (species_resists_elec(mon) || mon_resistance(mon, SHOCK_RES) || (mon == u.usteed && u.sealsActive&SEAL_BERITH && Shock_resistance));
+
+	if(!mon->mpeaceful)
+		return (species_resists_elec(mon) || mon_resistance(mon, SHOCK_RES) ||
+		        mon_resistance(mon, HELL_SHOCK_RES) || mon_resistance(mon, HOLY_SHOCK_RES) ||
+		        ward_at(mon->mx, mon->my) == TRACERY_OF_KARAKAL);
+
+	if(mon_resistance(mon, HOLY_SHOCK_RES) || (mon == u.usteed && u.sealsActive&SEAL_BERITH && Shock_resistance))
+		return TRUE;
+
+	if(mon_resistance(mon, HELL_SHOCK_RES) && !In_endgame(&u.uz))
+		return TRUE;
+
+	if((species_resists_elec(mon) || mon_resistance(mon, SHOCK_RES)) && !Inhell && !In_endgame(&u.uz))
+		return TRUE;
+
+	if(ward_at(mon->mx, mon->my) == TRACERY_OF_KARAKAL)
+		return TRUE;
+
+	return FALSE;
 }
 
 boolean
@@ -2695,8 +3438,121 @@ resists_acid(mon)
 	
 	if(mon_vulnerability(mon, ACID_RES))
 		return FALSE;
-	
-	return (species_resists_acid(mon) || mon_resistance(mon, ACID_RES) || (mon == u.usteed && u.sealsActive&SEAL_BERITH && Acid_resistance));
+
+	if(!mon->mpeaceful)
+		return (species_resists_acid(mon) || mon_resistance(mon, ACID_RES) ||
+		        mon_resistance(mon, HELL_ACID_RES) || mon_resistance(mon, HOLY_ACID_RES));
+
+	if(mon_resistance(mon, HOLY_ACID_RES) || (mon == u.usteed && u.sealsActive&SEAL_BERITH && Acid_resistance))
+		return TRUE;
+
+	if(mon_resistance(mon, HELL_ACID_RES) && !In_endgame(&u.uz))
+		return TRUE;
+
+	if((species_resists_acid(mon) || mon_resistance(mon, ACID_RES)) && !Inhell && !In_endgame(&u.uz))
+		return TRUE;
+
+	return FALSE;
+}
+
+boolean
+resists_hellfire(mon)
+	struct monst *mon;
+{
+	if (!mon) return FALSE;
+	if (mon_vulnerability(mon, FIRE_RES)) return FALSE;
+	if (!mon->mpeaceful)
+		return (mon_resistance(mon, HELL_FIRE_RES) || mon_resistance(mon, HOLY_FIRE_RES) ||
+		        ward_at(mon->mx, mon->my) == SIGIL_OF_CTHUGHA);
+	if (mon_resistance(mon, HOLY_FIRE_RES)) return TRUE;
+	if (mon_resistance(mon, HELL_FIRE_RES) && !In_endgame(&u.uz)) return TRUE;
+	if (ward_at(mon->mx, mon->my) == SIGIL_OF_CTHUGHA) return TRUE;
+	return FALSE;
+}
+
+boolean
+resists_hellcold(mon)
+	struct monst *mon;
+{
+	if (!mon) return FALSE;
+	if (mon_vulnerability(mon, COLD_RES)) return FALSE;
+	if (!mon->mpeaceful)
+		return (mon_resistance(mon, HELL_COLD_RES) || mon_resistance(mon, HOLY_COLD_RES) ||
+		        ward_at(mon->mx, mon->my) == BRAND_OF_ITHAQUA);
+	if (mon_resistance(mon, HOLY_COLD_RES)) return TRUE;
+	if (mon_resistance(mon, HELL_COLD_RES) && !In_endgame(&u.uz)) return TRUE;
+	if (ward_at(mon->mx, mon->my) == BRAND_OF_ITHAQUA) return TRUE;
+	return FALSE;
+}
+
+boolean
+resists_hellelec(mon)
+	struct monst *mon;
+{
+	if (!mon) return FALSE;
+	if (mon_vulnerability(mon, SHOCK_RES)) return FALSE;
+	if (!mon->mpeaceful)
+		return (mon_resistance(mon, HELL_SHOCK_RES) || mon_resistance(mon, HOLY_SHOCK_RES) ||
+		        ward_at(mon->mx, mon->my) == TRACERY_OF_KARAKAL);
+	if (mon_resistance(mon, HOLY_SHOCK_RES)) return TRUE;
+	if (mon_resistance(mon, HELL_SHOCK_RES) && !In_endgame(&u.uz)) return TRUE;
+	if (ward_at(mon->mx, mon->my) == TRACERY_OF_KARAKAL) return TRUE;
+	return FALSE;
+}
+
+boolean
+resists_hellacid(mon)
+	struct monst *mon;
+{
+	if (!mon) return FALSE;
+	if (mon_vulnerability(mon, ACID_RES)) return FALSE;
+	if (!mon->mpeaceful)
+		return (mon_resistance(mon, HELL_ACID_RES) || mon_resistance(mon, HOLY_ACID_RES));
+	if (mon_resistance(mon, HOLY_ACID_RES)) return TRUE;
+	if (mon_resistance(mon, HELL_ACID_RES) && !In_endgame(&u.uz)) return TRUE;
+	return FALSE;
+}
+
+boolean
+resists_holyfire(mon)
+	struct monst *mon;
+{
+	if (!mon) return FALSE;
+	if (mon_vulnerability(mon, FIRE_RES)) return FALSE;
+	if (mon_resistance(mon, HOLY_FIRE_RES)) return TRUE;
+	if (ward_at(mon->mx, mon->my) == SIGIL_OF_CTHUGHA) return TRUE;
+	return FALSE;
+}
+
+boolean
+resists_holycold(mon)
+	struct monst *mon;
+{
+	if (!mon) return FALSE;
+	if (mon_vulnerability(mon, COLD_RES)) return FALSE;
+	if (mon_resistance(mon, HOLY_COLD_RES)) return TRUE;
+	if (ward_at(mon->mx, mon->my) == BRAND_OF_ITHAQUA) return TRUE;
+	return FALSE;
+}
+
+boolean
+resists_holyelec(mon)
+	struct monst *mon;
+{
+	if (!mon) return FALSE;
+	if (mon_vulnerability(mon, SHOCK_RES)) return FALSE;
+	if (mon_resistance(mon, HOLY_SHOCK_RES)) return TRUE;
+	if (ward_at(mon->mx, mon->my) == TRACERY_OF_KARAKAL) return TRUE;
+	return FALSE;
+}
+
+boolean
+resists_holyacid(mon)
+	struct monst *mon;
+{
+	if (!mon) return FALSE;
+	if (mon_vulnerability(mon, ACID_RES)) return FALSE;
+	return mon_resistance(mon, HOLY_ACID_RES);
 }
 
 boolean
@@ -2893,6 +3749,7 @@ struct obj *obj;		/* aatyp == AT_WEAP, AT_SPIT */
 	    break;
 
 	case AT_CLAW:
+	case AT_WING:
 	    /* e.g. raven: all ublindf, including LENSES, protect */
 	    if (is_you && ublindf)
 		return FALSE;
@@ -3024,34 +3881,13 @@ struct monst * mtmp;
 	return FALSE;
 }
 
-/* number of horns this type of monster has on its head */
 int
 num_horns(struct monst *mon)
 {
 	if(mon == &youmonst){
 		if (check_mutation(TT_UNICORN_HORN)) return 1;
 	}
-    switch (monsndx(mon->data)) {
-	case PM_DRACAE_ELADRIN:
-	case PM_FIERNA:
-	case PM_GRAZ_ZT:
-	return 6;
-	case PM_MUSIMON:
-	return 6;
-	case PM_TRICERATOPS:
-	return 3;
-    // case PM_HORNED_DEVIL:	/* ? "more than one" */
-	case PM_TITANOTHERE:
-    case PM_WHITE_UNICORN:
-    case PM_GRAY_UNICORN:
-    case PM_BLACK_UNICORN:
-    case PM_NIGHTMARE:
-    case PM_KI_RIN:
-    case PM_ANCIENT_OF_CORRUPTION:
-	return 1;
-    }
-    // default:
-	return 2;
+	return mon_horn_count(mon->data);
 }
 
 struct attack *
@@ -3076,32 +3912,125 @@ int dtyp;
     return dmgtype_fromattack(ptr, dtyp, AT_ANY) ? TRUE : FALSE;
 }
 
-/* returns the maximum damage a defender can do to the attacker via
- * a passive defense */
-int
-max_passive_dmg(mdef, magr)
-    register struct monst *mdef, *magr;
+/* Return the most damage mdef's passive attack attk, acting as damage type adtyp, could do to magr in one retaliation (0 if it can't harm magr). */
+STATIC_OVL int
+passive_max_dmg(struct monst *mdef, struct monst *magr, struct attack *attk, int adtyp)
 {
-    int	i, dmg = 0;
-    uchar adtyp;
+	int dmg, extra = 0;
+	boolean harms, vulnerable = FALSE;
+	struct obj *otmp;
+	boolean shemagh, towel;
 
-    for(i = 0; i < NATTK; i++)
-	if(mdef->data->mattk[i].aatyp == AT_NONE ||
-		mdef->data->mattk[i].aatyp == AT_BOOM) {
-	    adtyp = mdef->data->mattk[i].adtyp;
-	    if ((adtyp == AD_ACID && !resists_acid(magr)) ||
-		    (adtyp == AD_COLD && !resists_cold(magr)) ||
-		    (adtyp == AD_FIRE && !resists_fire(magr)) ||
-		    (adtyp == AD_ELEC && !resists_elec(magr)) ||
-		    adtyp == AD_PHYS) {
-		dmg = mdef->data->mattk[i].damn;
-		if(!dmg) dmg = mdef->data->mlevel+1;
-		dmg *= mdef->data->mattk[i].damd;
-	    } else dmg = 0;
-
-	    return dmg;
+	otmp = which_armor(magr, W_ARMH);
+	shemagh = (otmp && otmp->otyp == SHEMAGH);
+	otmp = which_armor(magr, W_TOOL);
+	towel = (otmp && otmp->otyp == TOWEL);
+	switch(adtyp){
+		case AD_ACID:
+			harms = !resists_acid(magr);
+			break;
+		case AD_COLD:
+			harms = !resists_cold(magr);
+			vulnerable = (attk->aatyp == AT_MNTL && cold_vulnerable(magr));
+			break;
+		case AD_FIRE:
+			harms = !resists_fire(magr);
+			vulnerable = (attk->aatyp == AT_MNTL && fire_vulnerable(magr));
+			break;
+		case AD_ELEC:
+			harms = !resists_elec(magr);
+			vulnerable = (attk->aatyp == AT_MNTL && shock_vulnerable(magr));
+			break;
+		case AD_PHYS:
+			harms = TRUE;
+			break;
+		case AD_STAR:
+			harms = (attk->aatyp == AT_MNTL && hates_silver(magr->data));
+			break;
+		case AD_HOLY:
+			harms = (attk->aatyp == AT_MNTL && hates_holy(magr->data));
+			break;
+		case AD_WET:
+			harms = (attk->aatyp == AT_MNTL && is_iron(magr->data));
+			break;
+		case AD_BLND:
+			harms = (attk->aatyp == AT_MNTL && !nonliving(magr->data) && !breathless_mon(magr)
+				&& !shemagh && !towel);
+			if(harms && In_mithardir_quest(&u.uz))
+				extra = !resists_sickness(magr) ? 5 + magr->m_lev
+					: !is_anhydrous(magr->data) ? 5 : 0;
+			break;
+		case AD_PYCL:
+			harms = (attk->aatyp == AT_MNTL);
+			vulnerable = (harms && !resists_cold(magr) && cold_vulnerable(magr) && !towel);
+			break;
+		case AD_DRLI:
+			harms = (attk->aatyp == AT_MNTL && !resists_drli(magr));
+			break;
+		default:
+			harms = FALSE;
+			break;
 	}
-    return 0;
+	if(!harms)
+		return 0;
+	dmg = attk->damn;
+	if(!dmg)
+		dmg = mdef->data->mlevel+1;
+	dmg *= attk->damd;
+	if(vulnerable)
+		dmg = dmg * 3 / 2;
+	/* a leaf mantle's first drain in a chain takes a hit die's worth of max HP, and kills level-0 monsters outright */
+	if(adtyp == AD_DRLI){
+		dmg = max(dmg, hd_size(magr->data));
+		if(magr->m_lev == 0)
+			dmg = max(dmg, magr->mhp);
+	}
+	return dmg + extra;
+}
+
+/* Return the most damage mdef's passive defenses (AT_NONE and AT_BOOM passives,
+ * and AT_MNTL mantles) could do to magr in one retaliation: the largest maximum
+ * roll (half again more against an element magr is vulnerable to, plus anything
+ * a passive adds on top of its roll) among the passives that could harm it.
+ * Elemental passives and mantles don't harm attackers resisting their element;
+ * mantles of silver stars only harm silver-haters, aurora mantles only
+ * holy-haters, and water mantles only iron
+ * creatures. Dust mantles only harm living, breathing attackers without a
+ * shemagh or towel, and in Mithardir their dust may also carry spores (5 +
+ * magr's level more damage, unless magr resists sickness) or salt (5 more,
+ * unless magr is anhydrous). Ash mantles can always scour, and freeze for half
+ * again more if magr is vulnerable to cold, doesn't resist it, and has no towel.
+ * Leaf mantles only harm attackers that don't resist level drain: they drain up
+ * to magr's hit die size of max HP once per attack chain and do their rolled
+ * damage after that, counted as the larger of the two, and kill level-0
+ * attackers (counted as at least magr's current HP).
+ * A four-seasons mantle counts as the most harmful of the mantles its seasons act
+ * as, since which season it's in can't be seen.
+ */
+int
+max_passive_dmg(struct monst *mdef, struct monst *magr)
+{
+	int i, season, dmg, maxdmg = 0;
+	struct attack *attk;
+
+	for(i = 0; i < NATTK; i++){
+		attk = &mdef->data->mattk[i];
+		if(attk->aatyp != AT_NONE && attk->aatyp != AT_BOOM && attk->aatyp != AT_MNTL)
+			continue;
+		if(attk->aatyp == AT_MNTL && attk->adtyp == AD_SESN){
+			for(season = SEASON_WINTER; season <= SEASON_FALL; season++){
+				dmg = passive_max_dmg(mdef, magr, attk, mantle_adtyp_for_season(season));
+				if(dmg > maxdmg)
+					maxdmg = dmg;
+			}
+		}
+		else {
+			dmg = passive_max_dmg(mdef, magr, attk, attk->adtyp);
+			if(dmg > maxdmg)
+				maxdmg = dmg;
+		}
+	}
+	return maxdmg;
 }
 
 #endif /* OVL1 */
@@ -3482,6 +4411,18 @@ struct monst *mtmp;
     else return(mtmp->data);
 }
 
+/*
+ * Other than has_wings(youmonst.data)
+ */
+boolean
+u_variable_wings()
+{
+	if(Race_if(PM_HALF_DRAGON) && (HFlying&FROMRACE)) return TRUE;
+	if(TIEFLING_WING_SLOT) return TRUE;
+
+	return FALSE;
+}
+
 static const char *levitate[4]	= { "float", "Float", "wobble", "Wobble" };
 static const char *flys[4]	= { "fly", "Fly", "flutter", "Flutter" };
 static const char *flyl[4]	= { "fly", "Fly", "stagger", "Stagger" };
@@ -3787,7 +4728,7 @@ struct permonst *ptr;
 	int size = 8;
 	if(ptr->mtyp == PM_ZHI_REN_MONK)
 		size = 4;
-	else if(ptr->mtyp == PM_ANCIENT_OF_DEATH)
+	else if(ptr->mtyp == PM_ANCIENT_OF_DEATH || ptr->mtyp == PM_BAALPHEGOR)
 		size = 20;
 	else if(ptr->mtyp == PM_TETTIGON_LEGATUS || ptr->mtyp == PM_UNMASKED_TETTIGON || ptr->mtyp == PM_TRANSCENDENT_TETTIGON)
 		size = 16;

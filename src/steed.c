@@ -98,6 +98,19 @@ use_saddle(otmp)
 	    return 0;
 	}
 	if (!u.dx && !u.dy) {
+	    if (generic_saddle(youracedata)) {
+		if (usaddle) {
+		    You("are already wearing a saddle.");
+		    return 1;
+		}
+		if (otmp->oartifact && !touch_artifact(otmp, &youmonst, FALSE))
+		    return 1;
+		if (otmp->owornmask) remove_worn_item(otmp, FALSE);
+		setworn(otmp, W_SADDLE);
+		Saddle_on();
+		You("put on the saddle.");
+		return 1;
+	    }
 	    pline("Saddle yourself?  Very funny...");
 	    return 0;
 	}
@@ -229,8 +242,17 @@ rider_mounts_you(struct monst *mtmp)
 		You("are stuck here for now.");
 		return FALSE;
 	}
+	if (youmonst.mprone) {
+	    You_cant("be ridden while lying down.");
+	    return FALSE;
+	}
+
 	if(!mtmp){
 		pline("You're already being ridden by a patch of empty %s.", Underwater ? "water" : "air");
+		return FALSE;
+	}
+	if(mtmp->mprone){
+		pline("%s is lying down and can't mount you.", Monnam(mtmp));
 		return FALSE;
 	}
 	if(!humanoid(mtmp->data) || verysmall(mtmp->data) || mtmp->data->msize > youracedata->msize || slithy(mtmp->data)){
@@ -322,6 +344,11 @@ mount_steed(mtmp, force)
 		return rider_mounts_you(mtmp);
 	}
 
+	if (youmonst.mprone) {
+	    You_cant("mount up while lying down.");
+	    return (FALSE);
+	}
+
 	/* Is the player in the right form? */
 	if (Hallucination && !force) {
 	    pline("Maybe you should find a designated driver.");
@@ -349,6 +376,11 @@ mount_steed(mtmp, force)
 
 	if (!mtmp) {
 	    pline("I see nobody there.");
+	    return (FALSE);
+	}
+
+	if (mtmp->mprone) {
+	    pline("%s is lying down and can't be mounted.", Monnam(mtmp));
 	    return (FALSE);
 	}
 
@@ -684,7 +716,7 @@ dismount_steed(reason)
 	   unless we're in the midst of creating a bones file. */
 	if (reason == DISMOUNT_BONES) {
 	    /* move the steed to an adjacent square */
-	    if (enexto(&cc, u.ux, u.uy, mtmp->data))
+	    if (enexto_mon(&cc, u.ux, u.uy, mtmp))
 		rloc_to(mtmp, cc.x, cc.y);
 	    else	/* evidently no room nearby; move steed elsewhere */
 		(void) rloc(mtmp, FALSE);
@@ -744,7 +776,7 @@ dismount_steed(reason)
 			(void) mintrap(mtmp);
 		}
 	    /* Couldn't... try placing the steed */
-	    } else if (enexto(&cc, u.ux, u.uy, mtmp->data)) {
+	    } else if (enexto_mon(&cc, u.ux, u.uy, mtmp)) {
 		/* Keep player here, move the steed to cc */
 		rloc_to(mtmp, cc.x, cc.y);
 		/* Player stays put */
@@ -775,21 +807,23 @@ rider_dismounts_you(int reason)
 {
 	struct monst *mtmp = u.urider;
 	coord cc;
-	const char *verb = "fell";
+	const char *verb = "falls";
 
 	mtmp = u.urider;		/* make a copy of rider pointer */
 	/* Sanity check */
 	if (!mtmp)		/* Just return silently */
 	    return;
 
-	boolean have_spot = enexto(&cc, u.ux, u.uy, mtmp->data);
+	boolean have_spot = enexto_mon(&cc, u.ux, u.uy, mtmp);
 
 	/* Check the reason for dismounting */
 	switch(reason){
 		case DISMOUNT_THROWN:
-			verb = "thrown";
+			verb = "is thrown";
+			/* fall through */
 		case DISMOUNT_FELL:
-			pline("%s %s off of you!", Monnam(mtmp), verb);
+			pline("%s %s off of your back!", Monnam(mtmp), verb);
+			break;
 		case DISMOUNT_VANISHED:
 			break;
 		case DISMOUNT_POLY:

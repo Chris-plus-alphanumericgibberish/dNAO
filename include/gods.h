@@ -32,7 +32,8 @@ struct crowning {
 #define is_sarnath_god(godnum)	(godnum == GOD_TAMASH || godnum == GOD_LOBON || godnum == GOD_ZO_KALAR)
 #define hell_safe_prayer(p_god)	(galign(p_god) == A_VOID || p_god == GOD_LOLTH || (u.ualign.god == p_god && uarmh && uarmh->oartifact == ART_MITRE_OF_HOLINESS))
 #define philosophy_index(god_index) ((god_index) == GOD_THE_COLLEGE || (god_index) == GOD_THE_CHOIR || (god_index) == GOD_DEFILEMENT)
-#define no_altar_index(god_index) (philosophy_index(god_index) || (god_index) == GOD_THE_BLACK_MOTHER)
+#define no_anger_index(god_index) (philosophy_index(god_index) || (god_index) == GOD_AN_UNKNOWN_DEITY)
+#define no_altar_index(god_index) (philosophy_index(god_index) || (god_index) == GOD_THE_BLACK_MOTHER || (god_index) == GOD_AN_UNKNOWN_DEITY)
 
 #define Amnesty (u.ugodbase[UGOD_CURRENT] == GOD_HUEHUETEOTL && (Amnesty_hand(uwep) || Amnesty_hand(uswapwep)))
 #define Amnesty_hand(obj) ((obj && obj->oartifact == ART_TECPATL_OF_HUEHUETEOTL))

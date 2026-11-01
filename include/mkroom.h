@@ -86,7 +86,9 @@ extern NEARDATA struct altar altars[ALTARMAX];
 #define ELSHAROOM	22	/* Generic Elshava room.  Couple of sea folk */
 #define JOINEDROOM	23  /* is actually 2+ ordinary rooms joined together, and should have fewer corridors leading to it */
 #define HELL_VAULT	24	/* This room has a hellish seal in it */
-#define SHOPBASE	25	/* everything above this is a shop */
+#define GRYMLDROOM	25	/* contains gray mold */
+#define PRISON		26	/* jail cells beyond its walls */
+#define SHOPBASE	27	/* everything above this is a shop */
 #define GENERALSHOP	SHOPBASE	/* specific shop defines for level compiler */
 #define ARMORSHOP	SHOPBASE+1	
 #define SCROLLSHOP	SHOPBASE+2

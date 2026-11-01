@@ -2331,7 +2331,7 @@ donamelevel()
 boolean
 check_msgod(mapseen *mptr, int godnum)
 {
-	if(godnum >= MAX_GOD || godnum < 1){
+	if(godnum > MAX_GOD || godnum < 1){
 		impossible("Attempting to check god number %d in mapseen?", godnum);
 		return FALSE;
 	}
@@ -2341,7 +2341,7 @@ check_msgod(mapseen *mptr, int godnum)
 void
 add_msgod(mapseen *mptr, int godnum)
 {
-	if(godnum >= MAX_GOD || godnum < 1){
+	if(godnum > MAX_GOD || godnum < 1){
 		impossible("Attempting to set god number %d in mapseen?", godnum);
 	}
 	mptr->feat.msgods[(godnum-1)/16] |= (0x1L << ((godnum-1)%16));
@@ -2987,7 +2987,7 @@ boolean printdun;
 		/* and print out altar's god if they are all to one god */
 		if ((mptr->feat.ntemple || mptr->feat.naltar) && count_msgods(mptr) == 1) {
 			int godnum;
-			for (godnum = 1; godnum < MAX_GOD; godnum++)
+			for (godnum = 1; godnum <= MAX_GOD; godnum++)
 				if (check_msgod(mptr, godnum))
 					break;
 			Sprintf(eos(buf), " to %s", godname(godnum));

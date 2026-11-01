@@ -267,7 +267,7 @@ struct Role roles[] = {
 	PM_HERMIT_MASTER, PM_DISCIPLE, PM_BLUE_EYED_FOX,
 	PM_FOX, PM_ORC_CAPTAIN, S_OGRE, S_NYMPH,
 	ART_EYE_OF_JIROSHIN,
-	SA_GITH|SA_HUMAN|SA_ELF|SA_YUKI_ONNA, ROLE_MALE|ROLE_FEMALE |
+	SA_GITH|SA_HUMAN|SA_ELF|SA_YUKI_ONNA|SA_AASIMAR, ROLE_MALE|ROLE_FEMALE |
 	  ROLE_LAWFUL|ROLE_NEUTRAL|ROLE_CHAOTIC,
 	/* Str Int Wis Dex Con Cha */
 	{  13,  7, 13, 10, 10, 13 },
@@ -2799,6 +2799,15 @@ role_edit()
 		else if(u.role_variant == ART_RINGIL){
 			urole.enemy1sym = S_WRAITH;
 		}
+		else if(u.role_variant == ART_WHIRLING_SWORD){
+			urole.enemy2num = PM_LILITU;
+		}
+		else if(u.role_variant == ART_SUN_S_BOW){
+			urole.enemy1sym = S_NAGA;
+		}
+		else if(u.role_variant == ART_ANCIENT_RITUAL_SWORD){
+			urole.enemy2num = PM_ERINYS;
+		}
 		else if(Race_if(PM_INCANTIFIER)){
 			urole.enemy2num = PM_MIRKWOOD_SPIDER;
 			urole.enemy2sym = S_SPIDER;
@@ -2959,9 +2968,9 @@ give_ascension_trophy()
 		set_trophy(YUKI_ASC);
 	else if(Race_if(PM_CENTAUR) || Race_if(PM_FORMIAN) || Race_if(PM_DRIDER))
 		set_trophy(CEN_ASC);
-	else if(Race_if(PM_TIEFLING) || Race_if(PM_DARK_FEY_RI))
+	else if(RACE_IF_TIEFLING)
 		set_trophy(TIE_ASC);
-	else if(Race_if(PM_AASIMAR) || Race_if(PM_DOKKIMAR))
+	else if(RACE_IF_AASIMAR)
 		set_trophy(AAS_ASC);
 	else if(Race_if(PM_SILVERMAN))
 		set_trophy(SIL_ASC);

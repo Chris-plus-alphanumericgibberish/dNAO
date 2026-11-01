@@ -33,6 +33,7 @@ STATIC_DCL void NDECL(dounpaid);
 STATIC_DCL struct obj *FDECL(find_unpaid,(struct obj *,struct obj **));
 STATIC_DCL void FDECL(menu_identify, (int));
 STATIC_DCL boolean FDECL(tool_in_use, (struct obj *));
+STATIC_DCL void FDECL(describe_expert_traits, (struct obj *, winid *));
 #endif /* OVLB */
 STATIC_DCL char FDECL(obj_to_let,(struct obj *));
 STATIC_PTR int FDECL(u_material_next_to_skin,(int));
@@ -705,9 +706,8 @@ register struct obj *obj;
 	else if (obj == uarmh) setnotworn(obj);
 	else if (obj == uarms) setnotworn(obj);
 	else if (obj == uarmg) setnotworn(obj);
-#ifdef TOURIST
 	else if (obj == uarmu) setnotworn(obj);
-#endif
+	else if (obj == uarmw) setnotworn(obj);
 	else if (obj == uarmf) setnotworn(obj);
 
 	update_map = (obj->where == OBJ_FLOOR);
@@ -856,6 +856,10 @@ carrying_applyable_gem()
 	for(otmp = invent; otmp; otmp = otmp->nobj)
 		if(otmp->otyp == ANTIMAGIC_RIFT
 		|| otmp->otyp == CATAPSI_VORTEX
+		|| otmp->otyp == SANCTIFIED_EMBER
+		|| otmp->otyp == SANCTIFIED_SPARK
+		|| otmp->otyp == SANCTIFIED_ICE_CRYSTAL
+		|| otmp->otyp == SANCTIFIED_CALCITE_CRYSTAL
 		|| (Role_if(PM_ANACHRONONAUT) && !otmp->oartifact && otmp->otyp == DILITHIUM_CRYSTAL)
 		)
 			return TRUE;
@@ -1186,12 +1190,10 @@ register const char *let,*word;
 
 		/* ugly check: remove inappropriate things */
 		if ((taking_off(word) &&
-		    (!(otmp->owornmask & (W_ARMOR | W_RING | W_AMUL | W_SADDLE | W_TOOL | W_BELT))
+		    (!(otmp->owornmask & (W_ARMOR | W_RING | W_AMUL | W_SADDLE | W_TOOL | W_BELT | W_ARMW))
 		     || (otmp==uarmc && usaddle)
 		     || (otmp==uarm && ((uarmc && arm_blocks_upper_body(uarm->otyp)) || usaddle))
-#ifdef TOURIST
 		     || (otmp==uarmu && ((uarm && arm_blocks_upper_body(uarm->otyp)) || uarmc || usaddle))
-#endif
 		    ))
 		|| (putting_on(word) &&
 		     (otmp->owornmask & (W_ARMOR | W_RING | W_AMUL | W_SADDLE | W_BELT | W_TOOL)))
@@ -1329,6 +1331,7 @@ register const char *let,*word;
 			  otmp->otyp != TONITRUS &&
 			  otmp->otyp != HUNTER_S_LONGSWORD && otmp->otyp != CHURCH_BLADE && otmp->otyp != CHURCH_SHEATH &&
 			  otmp->otyp != HUNTER_S_SHORTSWORD && otmp->otyp != CHURCH_HAMMER && otmp->otyp != CHURCH_BRICK &&
+			  otmp->otyp != PANXIN_JIAN && otmp->otyp != LIANQIAO_JIAN && otmp->otyp != BAR_SHEATH &&
 			  otmp->otyp != BEAST_CRUSHER && otmp->otyp != BEAST_CUTTER && otmp->otyp != DEVIL_FIST &&
 			  otmp->otyp != DEMON_CLAW && otmp->otyp != CHURCH_SHORTSWORD &&
 			  otmp->otyp != SMITHING_HAMMER &&
@@ -1418,6 +1421,15 @@ register const char *let,*word;
 			!sflm_smeltable_mithril(otmp))
 		|| (!strcmp(word, "burn in the silver flame") && 
 			!(otmp->blessed || otmp->cursed))
+		|| (!strcmp(word, "have repaired by the smith") &&
+		    (!is_metallic(otmp) || (!otmp->oeroded && !otmp->oeroded2)))
+		|| (!strcmp(word, "have repaired by the treesinger") &&
+		    ((otmp->obj_material != WOOD && otmp->obj_material != CLOTH) || (!otmp->oeroded && !otmp->oeroded2)))
+		|| (!strcmp(word, "armor piece to receive sanction") &&
+		    (!is_suit(otmp) && !is_cloak(otmp)))
+		|| (!strcmp(word, "item to receive sanctified gem") &&
+		    (!is_suit(otmp) && !is_cloak(otmp) && !is_helmet(otmp) &&
+		     !is_gloves(otmp) && !is_boots(otmp)))
 		|| (!strcmp(word, "armor piece to repair") &&
 		    (!is_imperial_elven_armor(otmp)))
 		|| (!strcmp(word, "repair the helm with") &&
@@ -1705,9 +1717,7 @@ boolean
 wearing_armor()
 {
 	return((boolean)(uarm || uarmc || uarmf || uarmg || uarmh || uarms
-#ifdef TOURIST
-		|| uarmu
-#endif
+		|| uarmu || uarmw
 		));
 }
 
@@ -2448,6 +2458,8 @@ struct obj *obj;
 				"Latch or unlatch your rapier", MENU_UNSELECTED);
 	else if (obj->otyp == CHURCH_HAMMER || obj->otyp == HUNTER_S_SHORTSWORD || obj->otyp == CHURCH_BRICK
 		|| obj->otyp == CHURCH_BLADE || obj->otyp == HUNTER_S_LONGSWORD || obj->otyp == CHURCH_SHEATH
+		|| (obj->otyp == LIANQIAO_JIAN && !six_element_channel(obj->oartifact, SIXEL_LONG|SIXEL_AXE))
+		|| obj->otyp == PANXIN_JIAN || obj->otyp == BAR_SHEATH
 		|| obj->otyp == CHIKAGE
 	)
 		add_menu(win, NO_GLYPH, &any, 'a', 0, ATR_NONE,
@@ -2504,7 +2516,8 @@ struct obj *obj;
 			"Drop this item", MENU_UNSELECTED);
 	/* e: eat item; eat.c provides is_edible to check */
 	any.a_void = (genericptr_t)doeat;
-	if (obj->otyp == TIN && uwep && uwep->otyp == TIN_OPENER)
+	if (obj->otyp == TIN && uwep && (uwep->otyp == TIN_OPENER ||
+	    (uwep->otyp == PEST_GLAIVE && (uwep->ovar1_pestglaive_props & PG_TIN_OPENER))))
 		add_menu(win, NO_GLYPH, &any, 'e', 0, ATR_NONE,
 				"Open and eat this tin with your tin opener", MENU_UNSELECTED);
 	else if (obj->otyp == TIN)
@@ -2525,11 +2538,9 @@ struct obj *obj;
 			obj->oclass == GEM_CLASS || obj->oclass == RING_CLASS)
 		add_menu(win, NO_GLYPH, &any, 'E', 0, ATR_NONE,
 				"Write on the floor with this object", MENU_UNSELECTED);
-	/* I: describe item, works on any items whose actual name is known */
 	any.a_void = (genericptr_t)dotypeinv;
-	if (objects[obj->otyp].oc_name_known)
-		add_menu(win, NO_GLYPH, &any, 'I', 0, ATR_NONE,
-				"Describe this item", MENU_UNSELECTED);
+	add_menu(win, NO_GLYPH, &any, 'I', 0, ATR_NONE,
+			"Describe this item", MENU_UNSELECTED);
 	/* p: pay for unpaid items */
 	any.a_void = (genericptr_t)dopay;
 	if ((mtmp = shop_keeper(*in_rooms(u.ux, u.uy, SHOPBASE))) &&
@@ -2822,8 +2833,88 @@ etrait_description(long flag, long context_traits, boolean past)
 	case ETRAIT_BLADEDANCE:
 		return past ? "delivered powerful blows when moving and striking erratically"
 		            : "delivers powerful blows when moving and striking erratically";
+	case ETRAIT_WHIP_TRICKS:
+		return past ? "performed whip tricks when attacking"
+		            : "can perform whip tricks when attacking";
+	case ETRAIT_ANTI_UNDEAD:
+		return past ? "was particularly effective against the rotted flesh and bones of the undead"
+		            : "is particularly effective against the rotted flesh and bones of the undead";
 	default:
 		return (const char *)0;
+	}
+}
+
+/*
+ * describe_expert_traits()
+ *
+ * Prints the expert-traits section of an item's description to the passed
+ * nhwindow.
+ *
+ * A trait is listed as "active" when the wielder can currently make use of it
+ * (CHECK_ETRAIT) -- this is shown whether or not the item type is identified,
+ * so that a sufficiently skilled character can sense the capabilities of an
+ * unidentified weapon.  Traits the item bears but that the wielder isn't yet
+ * skilled enough to use are listed separately as "inactive", but only when the
+ * item type is identified (otherwise it would leak information about an
+ * unidentified item).
+ */
+STATIC_OVL void
+describe_expert_traits(struct obj *obj, winid *datawin)
+{
+	char buf[BUFSZ], inactivebuf[BUFSZ], buf2[BUFSZ];
+	boolean type_known = objects[obj->otyp].oc_name_known;
+
+	buf[0] = '\0';
+	inactivebuf[0] = '\0';
+#define EXPERTTRAITS(trait, string)                                       \
+	if (CHECK_ETRAIT(obj, &youmonst, (trait))) {                          \
+		if (buf[0]) { Strcat(buf, ", "); }                                \
+		Strcat(buf, (string));                                            \
+	} else if (type_known && HAS_ETRAIT(obj, &youmonst, (trait))) {       \
+		if (inactivebuf[0]) { Strcat(inactivebuf, ", "); }                \
+		Strcat(inactivebuf, (string));                                    \
+	}
+	if (obj->expert_traits) {
+		EXPERTTRAITS(ETRAIT_HEW, "can deliver powerful-but-strenuous overhead blows");
+		EXPERTTRAITS(ETRAIT_FELL, "can disrupt enemy movement");
+		EXPERTTRAITS(ETRAIT_KNOCK_BACK, (obj->expert_traits&ETRAIT_KNOCK_BACK_CHARGE) ? "can charge and knock enemies back" : "can knock enemies back");
+		EXPERTTRAITS(ETRAIT_FOCUS_FIRE, "can target gaps in enemy armor");
+		EXPERTTRAITS(ETRAIT_STUNNING_STRIKE, "can deliver powerful stunning blows");
+		EXPERTTRAITS(ETRAIT_GRAZE, "may graze foes on a near miss");
+		EXPERTTRAITS(ETRAIT_STRIKING, "skilled users can strike more accurately");
+		EXPERTTRAITS(ETRAIT_STOP_THRUST, "can harness enemy momentum to deliver powerful blows");
+		EXPERTTRAITS(ETRAIT_PENETRATE_ARMOR, "penetrates enemy armor");
+		EXPERTTRAITS(ETRAIT_LONG_SLASH, "deals extra damage against lightly-armored enemies");
+		EXPERTTRAITS(ETRAIT_BLEED, "may deliver bleeding wounds");
+		EXPERTTRAITS(ETRAIT_CLEAVE, (CHECK_ETRAIT(obj, &youmonst, ETRAIT_HEW) ? "cleaves through slain enemies when not using hewing strikes" : "cleaves through slain enemies"));
+		EXPERTTRAITS(ETRAIT_PUNCTURE, "successive hits may deal increased damage");
+		EXPERTTRAITS(ETRAIT_LUNGE, "can be used for lunging attacks");
+		EXPERTTRAITS(ETRAIT_QUICK, "strikes quickly");
+		EXPERTTRAITS(ETRAIT_SECOND, "when wielded in the off-hand strikes a second foe after killing the first");
+		EXPERTTRAITS(ETRAIT_CREATE_OPENING, "creates openings for sneak attacks");
+		EXPERTTRAITS(ETRAIT_BRACED, "delivers powerful counterattacks");
+		EXPERTTRAITS(ETRAIT_BLADESONG, "delivers powerful blows when combined with songs or spells");
+		EXPERTTRAITS(ETRAIT_BLADEDANCE, "delivers powerful blows when moving and striking erratically");
+		EXPERTTRAITS(ETRAIT_WHIP_TRICKS, "can perform whip tricks when attacking");
+		EXPERTTRAITS(ETRAIT_ANTI_UNDEAD, "particularly effective against the rotted flesh and bones of the undead");
+	}
+#undef EXPERTTRAITS
+
+	if (buf[0] != '\0') {
+		Sprintf(buf2, "Expert traits: %s.", buf);
+		putstr(*datawin, ATR_NONE, buf2);
+	}
+	if (inactivebuf[0] != '\0') {
+		Sprintf(buf2, "Inactive expert traits: %s.", inactivebuf);
+		putstr(*datawin, ATR_NONE, buf2);
+	}
+	/* Summary lines only make sense once the item type is identified; for an
+	   unidentified item we stay silent unless the wielder senses active traits. */
+	if (type_known && buf[0] == '\0' && inactivebuf[0] == '\0') {
+		if (obj->expert_traits)
+			putstr(*datawin, ATR_NONE, "No expert traits unlocked.");
+		else
+			putstr(*datawin, ATR_NONE, "No expert traits.");
 	}
 }
 
@@ -2881,6 +2972,10 @@ winid *datawin;
 	if (obj && !oc.oc_name_known)
 	{
 		OBJPUTSTR("You don't know much about this item yet.");
+		/* a sufficiently skilled wielder can still sense the item's active
+		   expert traits even without identifying the item type */
+		if (obj->expert_traits)
+			describe_expert_traits(obj, datawin);
 		return;
 	}
 
@@ -3148,6 +3243,7 @@ winid *datawin;
 					case AD_HLUH: Strcat(buf, "corrupted holy damage"); break;
 					case AD_STAR: Strcat(buf, "silver damage"); break;
 					case AD_SLEE: Strcat(buf, "sleep damage"); break;
+					case AD_DISN: Strcat(buf, "disintegration damage"); break;
 					case AD_PHYS: Strcat(buf, "damage"); break;
 					default: break;
 				}
@@ -3282,17 +3378,17 @@ winid *datawin;
 				int lflat = (Insight >= 50) ? ldamd : 0;
 				int sflat = (Insight >= 50) ? sdamd : 0;
 
-				if(u.ualign.record < -3 && Insanity > 50){
+				if((u_holiness() == UNHOLY_HOLINESS) && Insanity > 50){
 					lflat += ldamd*(50-u.usanity)/50;
 					sflat += sdamd*(50-u.usanity)/50;
 				}
-				else if(u.ualign.record > 3 && u.usanity > 90){
+				else if(u_holiness() == HOLY_HOLINESS && u.usanity > 90){
 					lflat += ldamd*(10-Insanity)/10;
 					sflat += sdamd*(10-Insanity)/10;
 				}
 
 				Sprintf(buf2, "Deals +%dd%d%s %senergy damage versus small and +%dd%d%s versus large.",
-					dice, sdamd, (sflat ? sitoa(sflat) : ""), (u.ualign.record < -3) ? "unholy " : ((u.ualign.record > 3) ? "holy " : ""), 
+					dice, sdamd, (sflat ? sitoa(sflat) : ""), (u_holiness() == UNHOLY_HOLINESS) ? "unholy " : ((u_holiness() == HOLY_HOLINESS) ? "holy " : ""), 
 					dice, ldamd, (lflat ? sitoa(lflat) : ""));
 				OBJPUTSTR(buf2);
 			}
@@ -3569,6 +3665,29 @@ winid *datawin;
 #undef dbon_to_word
 #undef atr_to_word
 	}
+	/* Six-Element Sword channeled elements */
+	if (oartifact == ART_SIX_ELEMENT_SWORD && !Is_spire(&u.uz)) {
+		if (six_element_channel(oartifact, SIXEL_FIRE)) {
+			Sprintf(buf, "Deals %dd6 + enchantment bonus fire damage, even to fire-resistant metal creatures.", six_element_fire_dice());
+			OBJPUTSTR(buf);
+		}
+		else if (six_element_channel(oartifact, SIXEL_METAL)) {
+			if (six_element_channel(oartifact, SIXEL_FROST))
+				OBJPUTSTR("Deals 1d8 + half enchantment bonus cold damage, and may cancel its target.");
+			else
+				OBJPUTSTR("Deals 1d6 + half enchantment bonus cold damage.");
+		}
+		else if (six_element_channel(oartifact, SIXEL_WATER))
+			OBJPUTSTR("Deals 1d6 + half enchantment bonus water damage.");
+		if (six_element_channel(oartifact, SIXEL_ICE))
+			OBJPUTSTR("Deals 2d6 + enchantment bonus cold damage.");
+		if (six_element_channel(oartifact, SIXEL_ELEC))
+			OBJPUTSTR("Deals 1d8 + enchantment bonus lightning damage.");
+		if (six_element_channel(oartifact, SIXEL_EARTH))
+			OBJPUTSTR("Deals 1d20 + enchantment bonus damage to watery creatures.");
+		if (six_element_channel(oartifact, SIXEL_FIELD))
+			OBJPUTSTR("Harvests slain monsters to heal the wielder.");
+	}
 	/* object properties (objects only) */
 	if(!check_oprop(obj, OPROP_NONE)){
 		/* holy/unholy bonus damage */
@@ -3822,36 +3941,39 @@ winid *datawin;
 			Sprintf(buf2, "Conducts arcane forces.");
 			OBJPUTSTR(buf2);
 		}
+		if (obj && (is_suit(obj) || is_cloak(obj)) && obj->known) {
+			buf[0] = '\0';
+			ADDCLASSPROP(check_oprop(obj, OPROP_FIRE_SNCT), "hellfire resistance");
+			ADDCLASSPROP(check_oprop(obj, OPROP_COLD_SNCT), "hellrime resistance");
+			ADDCLASSPROP(check_oprop(obj, OPROP_ELEC_SNCT), "hellvolt resistance");
+			ADDCLASSPROP(check_oprop(obj, OPROP_ACID_SNCT), "hellacid resistance");
+			if (buf[0]) {
+				Sprintf(buf2, "Sanctions: %s.", buf);
+				OBJPUTSTR(buf2);
+			}
+		}
+		if (obj && (is_suit(obj) || is_cloak(obj) || is_helmet(obj) ||
+		            is_gloves(obj) || is_boots(obj)) && obj->known) {
+			if (check_oprop(obj, OPROP_FIRE_HOLY_SNCT)) {
+				Sprintf(buf2, "Bears a sanctified ember, conferring holy fire resistance upon its wearer.");
+				OBJPUTSTR(buf2);
+			}
+			if (check_oprop(obj, OPROP_COLD_HOLY_SNCT)) {
+				Sprintf(buf2, "Bears a sanctified ice crystal, conferring holy cold resistance upon its wearer.");
+				OBJPUTSTR(buf2);
+			}
+			if (check_oprop(obj, OPROP_ELEC_HOLY_SNCT)) {
+				Sprintf(buf2, "Bears a sanctified spark, conferring holy shock resistance upon its wearer.");
+				OBJPUTSTR(buf2);
+			}
+			if (check_oprop(obj, OPROP_ACID_HOLY_SNCT)) {
+				Sprintf(buf2, "Bears a hexagon of sanctified calcite, conferring holy acid resistance upon its wearer.");
+				OBJPUTSTR(buf2);
+			}
+		}
 	}
-	if(obj && obj->expert_traits){
-		buf[0] = '\0';
-#define	EXPERTTRAITS(trait, string)	\
-	ADDCLASSPROP(CHECK_ETRAIT(obj, &youmonst, trait), string);
-		EXPERTTRAITS(ETRAIT_HEW, "can deliver powerful-but-strenuous overhead blows");
-		EXPERTTRAITS(ETRAIT_FELL, "can disrupt enemy movement");
-		EXPERTTRAITS(ETRAIT_KNOCK_BACK, (obj->expert_traits&ETRAIT_KNOCK_BACK_CHARGE) ? "can charge and knock enemies back" : "can knock enemies back");
-		EXPERTTRAITS(ETRAIT_FOCUS_FIRE, "can target gaps in enemy armor");
-		EXPERTTRAITS(ETRAIT_STUNNING_STRIKE, "can deliver powerful stunning blows");
-		EXPERTTRAITS(ETRAIT_GRAZE, "may graze foes on a near miss");
-		EXPERTTRAITS(ETRAIT_STRIKING, "skilled users can strike more accurately");
-		EXPERTTRAITS(ETRAIT_STOP_THRUST, "can harness enemy momentum to deliver powerful blows");
-		EXPERTTRAITS(ETRAIT_PENETRATE_ARMOR, "penetrates enemy armor");
-		EXPERTTRAITS(ETRAIT_LONG_SLASH, "deals extra damage against lightly-armored enemies");
-		EXPERTTRAITS(ETRAIT_BLEED, "may deliver bleeding wounds");
-		EXPERTTRAITS(ETRAIT_CLEAVE, (CHECK_ETRAIT(obj, &youmonst, ETRAIT_HEW) ? "cleaves through slain enemies when not using hewing strikes" : "cleaves through slain enemies"));
-		EXPERTTRAITS(ETRAIT_PUNCTURE, "successive hits may deal increased damage");
-		EXPERTTRAITS(ETRAIT_LUNGE, "can be used for lunging attacks");
-		EXPERTTRAITS(ETRAIT_QUICK, "strikes quickly");
-		EXPERTTRAITS(ETRAIT_SECOND, "when wielded in the off-hand strikes a second foe after killing the first");
-		EXPERTTRAITS(ETRAIT_CREATE_OPENING, "creates openings for sneak attacks");
-		EXPERTTRAITS(ETRAIT_BRACED, "delivers powerful counterattacks");
-		EXPERTTRAITS(ETRAIT_BLADESONG, "delivers powerful blows when combined with songs or spells");
-		EXPERTTRAITS(ETRAIT_BLADEDANCE, "delivers powerful blows when moving and striking erratically");
-		if(buf[0] != '\0')
-			Sprintf(buf2, "Expert traits: %s.", buf);
-		else
-			Sprintf(buf2, "No expert traits unlocked.");
-		OBJPUTSTR(buf2);
+	if (obj) {
+		describe_expert_traits(obj, datawin);
 	}
 	else {
 		Sprintf(buf2, "No expert traits.");
@@ -3874,10 +3996,18 @@ winid *datawin;
 			OBJPUTSTR(buf2);
 		}
 		buf[0] = '\0';
-		ADDCLASSPROP(check_oprop(obj, OPROP_FIRE), "fire resistance");
-		ADDCLASSPROP(check_oprop(obj, OPROP_COLD), "cold resistance");
-		ADDCLASSPROP(check_oprop(obj, OPROP_ELEC), "shock resistance");
-		ADDCLASSPROP(check_oprop(obj, OPROP_ACID), "acid resistance");
+		ADDCLASSPROP(check_oprop(obj, OPROP_FIRE_HOLY), "sanctified fire resistance");
+		ADDCLASSPROP(check_oprop(obj, OPROP_FIRE_HELL) && !check_oprop(obj, OPROP_FIRE_HOLY), "hellfire resistance");
+		ADDCLASSPROP(check_oprop(obj, OPROP_FIRE) && !check_oprop(obj, OPROP_FIRE_HELL) && !check_oprop(obj, OPROP_FIRE_HOLY), "fire resistance");
+		ADDCLASSPROP(check_oprop(obj, OPROP_COLD_HOLY), "sanctified cold resistance");
+		ADDCLASSPROP(check_oprop(obj, OPROP_COLD_HELL) && !check_oprop(obj, OPROP_COLD_HOLY), "hellrime resistance");
+		ADDCLASSPROP(check_oprop(obj, OPROP_COLD) && !check_oprop(obj, OPROP_COLD_HELL) && !check_oprop(obj, OPROP_COLD_HOLY), "cold resistance");
+		ADDCLASSPROP(check_oprop(obj, OPROP_ELEC_HOLY), "sanctified shock resistance");
+		ADDCLASSPROP(check_oprop(obj, OPROP_ELEC_HELL) && !check_oprop(obj, OPROP_ELEC_HOLY), "hellvolt resistance");
+		ADDCLASSPROP(check_oprop(obj, OPROP_ELEC) && !check_oprop(obj, OPROP_ELEC_HELL) && !check_oprop(obj, OPROP_ELEC_HOLY), "shock resistance");
+		ADDCLASSPROP(check_oprop(obj, OPROP_ACID_HOLY), "sanctified acid resistance");
+		ADDCLASSPROP(check_oprop(obj, OPROP_ACID_HELL) && !check_oprop(obj, OPROP_ACID_HOLY), "hellacid resistance");
+		ADDCLASSPROP(check_oprop(obj, OPROP_ACID) && !check_oprop(obj, OPROP_ACID_HELL) && !check_oprop(obj, OPROP_ACID_HOLY), "acid resistance");
 		if (buf[0]) {
 			Sprintf(buf2, "Confers while wielded: %s.", buf);
 			OBJPUTSTR(buf2);
@@ -3890,6 +4020,8 @@ winid *datawin;
 		ADDCLASSPROP((obj->ovar1_pestglaive_props&PG_AXE), "can cut trees");
 		ADDCLASSPROP((obj->ovar1_pestglaive_props&PG_CROOK), "has a shepherd's crook");
 		ADDCLASSPROP((obj->ovar1_pestglaive_props&PG_SPEARTHROWER), "can launch spears");
+		ADDCLASSPROP((obj->ovar1_pestglaive_props&PG_ATHAME), "can engrave");
+		ADDCLASSPROP((obj->ovar1_pestglaive_props&PG_TIN_OPENER), "can open tins");
 		if (buf[0]) {
 			Sprintf(buf2, "Additional traits: %s.", buf);
 			OBJPUTSTR(buf2);
@@ -4693,6 +4825,8 @@ winid *datawin;
 	if (otyp == MUMMY_WRAPPING || otyp == PRAYER_WARDED_WRAPPING)	OBJPUTSTR("Prevents invisibility.");
 	if (otyp == RIN_GAIN_STRENGTH)				OBJPUTSTR("Increases STR by its enchantment.");
 	if (otyp == GAUNTLETS_OF_DEXTERITY)		OBJPUTSTR("Increases DEX by its enchantment.");
+	if (otyp == DEXTEROUS_WING_GUARDS)			OBJPUTSTR("Increases DEX by its enchantment.");
+	if (otyp == WINGLETS_OF_ADORNMENT)			OBJPUTSTR("Increases CHA by its enchantment.");
 	if (otyp == RIN_GAIN_CONSTITUTION)			OBJPUTSTR("Increases CON by its enchantment.");
 	if (otyp == HELM_OF_BRILLIANCE)			OBJPUTSTR("Increases INT and WIS by its enchantment.");
 	if (otyp == RIN_INCREASE_DAMAGE)			OBJPUTSTR("Increases your weapon damage.");
@@ -4708,6 +4842,7 @@ winid *datawin;
 		oartifact == ART_WRAPPINGS_OF_THE_SACRED_FI ||
 		oartifact == ART_SPELL_WARDED_WRAPPINGS_OF_ ||
 		oartifact == ART_SEVEN_STAR_SWORD ||
+		oartifact == ART_ANCIENT_RITUAL_SWORD ||
 		oartifact == ART_MAGICBANE)			OBJPUTSTR("Protects your inventory from being cursed.");
 
 	/* Effects based on the base description of the item -- only one will apply, so an if-else chain is appropriate */
@@ -4950,7 +5085,9 @@ dump_pestglaive_props(struct obj *obj)
 		{ PG_JOUST,        "jousting tip"      },
 		{ PG_AXE,          "axe blade"         },
 		{ PG_CROOK,        "crook head"        },
-		{ PG_SPEARTHROWER, "spearthrower loop" },
+		{ PG_SPEARTHROWER, "spearthrower notch" },
+		{ PG_ATHAME,       "athame queue"       },
+		{ PG_TIN_OPENER,   "tin-opening hook"  },
 		{ 0, 0 }
 	};
 	char buf[LONGBUFSZ];
@@ -5672,11 +5809,18 @@ char *buf;
 	static char altbuf[BUFSZ];
 
 	if (IS_DOOR(ltyp)) {
-	    switch (lev->doormask) {
+	    switch (DOOR_BASE_STATE(lev->doormask)) {
 	    case D_NODOOR:	cmap = S_ndoor; break;	/* "doorway" */
-	    case D_ISOPEN:	cmap = S_vodoor; break;	/* "open door" */
+	    case D_ISOPEN:
+		cmap = (lev->doormask & D_BARRED) ? S_vobardoor : S_vodoor;
+		break;
 	    case D_BROKEN:	dfeature = "broken door"; break;
-	    default:	cmap = S_vcdoor; break;	/* "closed door" */
+	    default:
+		if (lev->doormask & D_BARRED)
+		    dfeature = "barred door";
+		else
+		    cmap = S_vcdoor;		/* "closed door" */
+		break;
 	    }
 	    /* override door description for open drawbridge */
 	    if (is_drawbridge_wall(x, y) >= 0)
@@ -6084,15 +6228,14 @@ doprarm()
 #endif
 		register int ct = 0;
 
-#ifdef TOURIST
 		if(uarmu) lets[ct++] = obj_to_let(uarmu);
-#endif
 		if(uarm) lets[ct++] = obj_to_let(uarm);
 		if(uarmc) lets[ct++] = obj_to_let(uarmc);
 		if(uarmh) lets[ct++] = obj_to_let(uarmh);
 		if(uarms) lets[ct++] = obj_to_let(uarms);
 		if(uarmg) lets[ct++] = obj_to_let(uarmg);
 		if(uarmf) lets[ct++] = obj_to_let(uarmf);
+		if(uarmw) lets[ct++] = obj_to_let(uarmw);
 		lets[ct] = 0;
 		(void) display_inventory(lets, FALSE);
 	}
@@ -6216,7 +6359,7 @@ STATIC_VAR NEARDATA const char *names[] = { 0,
 	"Tools", "Comestibles", "Potions", "Scrolls", "Spellbooks",
 	"Wands", "Coins", "Gems", "Boulders/Statues", "Iron balls",
 	"Scrap", "Venoms", "Tiles", "Furnature", "Strange coins",
-	"Belts"
+	"Belts", "Sanctions"
 };
 
 STATIC_VAR NEARDATA const char *bogusclasses[] = {
@@ -6848,6 +6991,7 @@ u_breath_penalty()
 			|| uarmc->otyp == SMOKY_VIOLET_FACELESS_ROBE
 			|| uarmc->otyp == ROBE
 		)
+		&& !check_omod(uarmc, OMOD_SHOULDER_BARING)
 	)
 		count++;
 	return count;
@@ -6886,6 +7030,9 @@ u_clothing_discomfort()
 		count++;
 		if(uarmg->otyp == LONG_GLOVES)
 			count++;
+	}
+	if(uarmw){
+		count++;
 	}
 	if(uarmf){
 		count++;
@@ -6959,6 +7106,10 @@ int material;
 	if(curarm && curarm->obj_material == material && !hasshirt && !marm_blocks_ub)
 		count++;
 
+	curarm = which_armor(mon, W_ARMW);
+	if(curarm && curarm->obj_material == material)
+		count++;
+
 	curarm = which_armor(mon, W_ARMH);
 	if(curarm && curarm->obj_material == material)
 		count++;
@@ -7027,6 +7178,10 @@ int bcu;
 	if(curarm && bcu(curarm) == bcu && !hasshirt && !marm_blocks_ub)
 		count++;
 
+	curarm = which_armor(mon, W_ARMW);
+	if(curarm && bcu(curarm) == bcu)
+		count++;
+
 	curarm = which_armor(mon, W_ARMH);
 	if(curarm && bcu(curarm) == bcu)
 		count++;
@@ -7078,6 +7233,8 @@ int material;
 		count++;
 	if(uarm && uarm->obj_material == material && !uarmu)
 		count++;
+	if(uarmw && uarmw->obj_material == material)
+		count++;
 	if(uarmc && uarmc->obj_material == material && !uarmu && !(uarm && arm_blocks_upper_body(uarm->otyp)))
 		count++;
 	if(uarmh && uarmh->obj_material == material)
@@ -7124,6 +7281,8 @@ int bcu;
 	if(uwep && bcu(uwep) == bcu && !uarmg)
 		count++;
 	if(uarm && bcu(uarm) == bcu && !uarmu)
+		count++;
+	if(uarmw && bcu(uarmw) == bcu)
 		count++;
 	if(uarmc && bcu(uarmc) == bcu && !uarmu && !(uarm && arm_blocks_upper_body(uarm->otyp)))
 		count++;

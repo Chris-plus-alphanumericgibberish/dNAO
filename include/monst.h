@@ -7,6 +7,7 @@
 
 #include "prop.h"
 #include "attrib.h"
+#include "atkbpnames.h"
 
 /* The weapon_check flag is used two ways:
  * 1) When calling mon_wield_item, is 2-6 depending on what is desired.
@@ -70,6 +71,7 @@ struct monst {
 	int mpeacetime;		/* level of peacefulness, implies peaceful, ignored if tame */
 	unsigned long int mintrinsics[MPROP_SIZE];
 	unsigned long int mextrinsics[MPROP_SIZE];
+	unsigned long int mblocked[MPROP_SIZE];	/* per-monster analog of u.uprops[].blocked */
 	unsigned long int acquired_trinsics[MPROP_SIZE];
 	unsigned long int acquired_weaknesses[MPROP_SIZE];
 	int mspec_used;		/* monster's special ability attack timeout */
@@ -192,44 +194,65 @@ struct monst {
 	Bitfield(mspores,1); /* monster is being consumed by Zuggutmoy's spores */ /*118*/
 	Bitfield(mformication,1); /* monster is covered in imaginary insects */ /*119*/
 	Bitfield(mscorpions,1); /* monster is covered in stinging scorpions */ /*120*/
-	Bitfield(mvermin,1); /* monster is swarmed by stinging vermin */ /*120*/
-	Bitfield(mamnesia,1); /* monster is about to forget it hates the PC */ /*121*/
+	Bitfield(mvermin,1); /* monster is swarmed by stinging vermin */ /*121*/
+	Bitfield(mamnesia,1); /* monster is about to forget it hates the PC */ /*122*/
 	
-	Bitfield(deadmonster,2); /* is DEADMONSTER */ /*122*/
+	Bitfield(deadmonster,2); /* is DEADMONSTER */ /*124*/
 #define DEADMONSTER_DEAD	0x1
 #define DEADMONSTER_PURGE	0x2
 #define DEADMONSTER(mon)	((mon) != &youmonst && (mon)->deadmonster)
-	Bitfield(mnoise,1); /* made noise in the last turn (dochug) */ /*124*/
-	Bitfield(marriving,1); /* monster is arriving on the level and should be placed when there's space */ /*125*/
-	Bitfield(brainblooms,1);/* should rise as brainblossom */ /*126*/
-	Bitfield(mibitemarked,1); /* monster was damaged by the ibite arm and will be sacced if they die */ /*127*/
-	Bitfield(mpassive,1); /* if tame, won't attack monsters ever */ /*128*/
-	Bitfield(mwounded_legs,1);/* wounded legs */ /*129*/
-	Bitfield(mopen,2);/* open to sneak attacks */ /*131*/
-	
-	Bitfield(mequipping,7); /*146*/
+	Bitfield(mnoise,1); /* made noise in the last turn (dochug) */ /*126*/
+	Bitfield(marriving,1); /* monster is arriving on the level and should be placed when there's space */ /*127*/
+	Bitfield(brainblooms,1);/* should rise as brainblossom */ /*128*/
+	Bitfield(mibitemarked,1); /* monster was damaged by the ibite arm and will be sacced if they die */ /*129*/
+	Bitfield(mpassive,1); /* if tame, won't attack monsters ever */ /*130*/
+	Bitfield(mopen,2);/* open to sneak attacks */
 
-	Bitfield(mironmarked,1);/* recently hit by an iron weapon (elves/fey/rage-walker) */ /*147*/
-	Bitfield(mcaterpillars,1); /* monster is covered in rot scorpions */ /*148*/
-	Bitfield(momud,1); /* monster is covered in orc-mud */ /*148*/
-	Bitfield(mubled,1); /* You inflicted bleed damage on this monster and will be blamed if it dies */ /*149*/
-	Bitfield(mtecpatlmarked,1); /* the Tecpatl of Huehueteotl can sacrifice low-enough-health monsters */ /*150*/
-	Bitfield(mpunctured,4); /* This monster may take double damage from puncture attacks */ /*154*/
-	Bitfield(mprobed,1); /* monster has been probed by Magicbane et al, will display at end of attack if it lives */ /*155*/
-	Bitfield(mmired,1); /* monster was created in the mire */ /*156*/
-	Bitfield(mnopickup,1); /* pet will leave items on the ground */ /*157*/
+	Bitfield(mequipping,7);
+	/*139*/
+
+	Bitfield(mironmarked,1);/* recently hit by an iron weapon (elves/fey/rage-walker) */
+	/*140*/
+	Bitfield(mcaterpillars,1); /* monster is covered in rot scorpions */
+	Bitfield(momud,1); /* monster is covered in orc-mud */
+	Bitfield(mubled,1); /* You inflicted bleed damage on this monster and will be blamed if it dies */
+	Bitfield(mtecpatlmarked,1); /* the Tecpatl of Huehueteotl can sacrifice low-enough-health monsters */
+	Bitfield(mpunctured,4); /* This monster may take double damage from puncture attacks */
+	/*148*/
+	Bitfield(mprobed,1); /* monster has been probed by Magicbane et al, will display at end of attack if it lives */
+	Bitfield(mmired,1); /* monster was created in the mire */
+	/*150*/
+	Bitfield(mnopickup,1); /* pet will leave items on the ground */
+	Bitfield(mcombat,1); /* pet is currently engaged in combat */
+	Bitfield(mgroup_summoned,1); /* monster has used its group summon ability */
+	Bitfield(mprone,1); /* monster is prone after being knocked down */
+	Bitfield(mrecruitable,1); /* monster can be recruited for quest reasons */
+	/*155*/
+	Bitfield(mastral_hits,2); /* weapon hits toward the hero's astral astra's next stunning strike */
+	Bitfield(mwhirling_sword_marked,1); /* struck by the whirling sword */
+	/*157*/
 
 	unsigned long long int 	seenmadnesses;	/* monster has seen these madnesses */
 	
 	char mbdrown;	/* drowning in blood */
 	char mtaneggs;	/* tannin eggs */
 	char munburn;	/* silverknight buff */
+	uchar mstance;	/* MSTANCE_* engagement preference */
+#define MSTANCE_DEFAULT	0	/* normal behavior */
+#define MSTANCE_MELEE	1	/* prefer to close; actively approaches */
+#define MSTANCE_MAGIC	2	/* prefer distance; use spellcasting when adjacent */
+#define MSTANCE_VOMIT	3	/* silverknight: committed to a vomit attack */
+#define MSTANCE_PUSH	4	/* silverknight: committed to a push attack */
+#define MSTANCE_BAEL1	5	/* Bael: committed to the sword archon attack chain */
+#define MSTANCE_BAEL2	6	/* Bael: committed to the marilith-hands attack chain */
+#define non_weapon_stance(mon)	((mon)->mstance != MSTANCE_DEFAULT && (mon)->mstance != MSTANCE_MELEE)
 	long mwait;/* if tame, won't follow between levels (turn last ordered to wait on) */
 	int encouraged;	/* affected by Encourage song */
 	int mfell;	/* slowed by fell expert trait */
 	int mbleed; /* bleed damage per round */
 	int mgmld_skin; /* mold spores in skin */
 	int mgmld_throat; /* mold spores in throat */
+	unsigned char owrk, ruh, shey, luahv, nean, nooh; /* active anti-syllable counters */
 	coord mprev_dir;		/* previous movement direction (stop thrust etc) */
 	coord mprev_attk;	/* previous attack direction (braced etc) */
 	long mlast_movement;/* turn on which it most recently moved (clear stop thrust) */
@@ -296,7 +319,9 @@ struct monst {
 #define	MOON_FACTION		FACTION_PADDING+14	/* Undead Hunter lycanthrope faction */
 #define	ROT_FACTION			FACTION_PADDING+15	/* Rot monster faction */
 #define	NUNCIO_FACTION		FACTION_PADDING+16	/* Nuncio from the far reaches */
-
+#define	HELL_FACTION		FACTION_PADDING+17	/* Hell faction */
+#define	ABYSS_FACTION		FACTION_PADDING+18	/* Generic Abyss faction */
+	
 /* template applied to monster to create a new-ish monster */
 	int mtemplate;
 #define	ZOMBIFIED		1	/* zombies */
@@ -349,6 +374,8 @@ struct monst {
 	//	time:  AT_LARVA+x, where x=time, and AT_LARVA is large, 10000 or so.
 	//utype = PM_HATCHLING_NAME
 	//inventory
+	int melement; //Element for chosen for a monster's variable-element attacks
+#define	mvar_hdBreath	melement
 	long mvar1;
 #define	mvar_paleWarning	mvar1
 #define	mvar_witchID	mvar1
@@ -357,7 +384,6 @@ struct monst {
 #define	mvar_syllable	mvar1
 #define	mvar_vector	mvar1
 #define	mvar_spList_1	mvar1
-#define	mvar_hdBreath	mvar1
 #define	mvar_dreadPrayer_cooldown	mvar1
 #define	mvar_dracaePreg	mvar1
 #define	mvar_dollTypes	mvar1
@@ -395,18 +421,41 @@ struct monst {
 #define	mvar1_tettigon_uncancel	mvar1
 #define	mvar1_afreet_lastsaw	mvar1
 #define mvar1_halo_sec_element	mvar1
+#define	mvar1_summon_ID			mvar1
+#define	mvar_mammon_dive_x		mvar1
+#define	mvar1_seaParity			mvar1
+#define mvar1_bereft_syllable	mvar1
+#define mvar1_sword_moved		mvar1
 	long mvar2;
 #define	mvar_dracaePregTimer	mvar2
 #define	mvar_spList_2	mvar2
 #define	mvar_dreadPrayer_progress	mvar2
-#define	mvar_attack_pm	mvar2
+#define	mvar_attack_pm			mvar2
 #define	mvar_elfwraith_spell	mvar2
 #define	mvar_spellweaver_seed	mvar2
+#define	mvar_mammon_dive_y		mvar2
+#define	mvar2_bereft_target		mvar2
 	long mvar3;
 #define	mvar_conversationTracker	mvar3
 #define	mvar_lifesigns	mvar3
+#define	mvar_mammon_dive_turn	mvar3
 #define	mvar_spellweaver_last_cast	mvar3
 #define has_lifesigns(mon)	(mon->mtyp != PM_SPELLWEAVER && mon->mtyp != PM_SPELLWEAVER_GODDESS_MOCKER && mon->mtyp != PM_CHAOS && mon->mvar_lifesigns)
+
+	/* seeded from data->bodyparts, but tracked per-monster: an individual
+	 * can have parts others of its form do not, and a few monsters can
+	 * only be partially perceived by the PC */
+	struct atkbp_set mbodyparts_full;	/* every body part it has */
+	struct atkbp_set mbodyparts;		/* those the PC can perceive */
+	struct atkbp_set minjuries;			/* those that have been injured */
+#define HEAL_ALL_INJURIES	(-1)	/* mon_heal_injuries() count: mend everything */
+/* mon_fix_troubles() flags */
+#define MFT_HEAL		0x01	/* restore HP to maximum */
+#define MFT_STUDY		0x02	/* clear the hero's study of the monster (ustdym) */
+#define MFT_UNCANCEL	0x04	/* remove cancellation */
+#define MFT_COOLDOWN	0x08	/* reset special-ability cooldown (mspec_used) */
+#define MFT_MADNESS		0x10	/* cure madnesses and spores */
+#define MFT_TRAPPED		0x20	/* free from traps and entanglement */
 
 	struct ls_t * light;
 
@@ -439,6 +488,10 @@ struct monst {
 #define MON_SWEP(mon)	((mon)->msw)
 #define MON_NOSWEP(mon)	((mon)->msw = (struct obj *)0)
 
-#define MIGRATINGMONSTER(mon)	((mon) != &youmonst && !(mon)->mx && !(mon)->my)
+/* a vault guard that has finished its job is parked at (0,0) until its
+ * fake corridor is removed; it is still on the level, not migrating */
+#define PARKEDGUARD(mon)	((mon)->isgd && get_mx(mon, MX_EVGD) && EVGD(mon)->gddone)
+#define MIGRATINGMONSTER(mon)	((mon) != &youmonst && !(mon)->mx && !(mon)->my \
+				 && !PARKEDGUARD(mon))
 
 #endif /* MONST_H */

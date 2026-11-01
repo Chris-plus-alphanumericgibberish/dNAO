@@ -200,7 +200,8 @@ does_block(x,y,lev)
 
     /* Features that block . . */
     if (IS_ROCK(lev->typ) || lev->typ == TREE || (IS_DOOR(lev->typ) &&
-			    (lev->doormask & (D_CLOSED|D_LOCKED|D_TRAPPED) )))
+			    (lev->doormask & (D_CLOSED|D_LOCKED|D_TRAPPED)) &&
+			    !(lev->doormask & D_BARRED)))
 	return 1;
 
     if (lev->typ == CLOUD || //lev->typ == WATER ||
@@ -597,7 +598,7 @@ vision_recalc(control)
     else {
 		/* determine night vision range */
 		indark = (dimness_func(u.ux, u.uy) > 0);
-		darksight = ((Catsight && indark) || (Darksight));
+		darksight = (Catsight ? indark : Darksight);
 		if (Blind || LightBlind) nv_range = 0;
 		else if (Elfsight) nv_range = 3;
 		else if (Lowlightsight) nv_range = 2;
@@ -707,7 +708,7 @@ vision_recalc(control)
     viz_array = next_array;
 	/* determine night vision range */
 	indark = (dimness_func(u.ux, u.uy) > 0);
-	darksight = ((Catsight && indark) || (Darksight));
+	darksight = (Catsight ? indark : Darksight);
 	if (Blind || LightBlind) nv_range = 0;
 	else if (Elfsight) nv_range = 3;
 	else if (Lowlightsight) nv_range = 2;

@@ -1009,7 +1009,7 @@ struct monst *priest;
 	troom = &rooms[roomno - ROOMOFFSET];
 
 	int godnum = god_at_altar(ax, ay);
-	if(philosophy_index(godnum)
+	if(no_anger_index(godnum)
 		|| godnum == GOD_BOKRUG__THE_WATER_LIZARD
 		|| godnum == GOD_THE_VOID
 	)

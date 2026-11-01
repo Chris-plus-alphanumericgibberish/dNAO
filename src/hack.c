@@ -65,7 +65,7 @@ const char *msg;
 	    (is_rider(&mons[otmp->corpsenm]) ||
 	     otmp->corpsenm == PM_WIZARD_OF_YENDOR)) {
 	    /* move any living monster already at that location */
-	    if((mtmp = m_at(x,y)) && enexto(&cc, x, y, mtmp->data))
+	    if((mtmp = m_at(x,y)) && enexto_mon(&cc, x, y, mtmp))
 		rloc_to(mtmp, cc.x, cc.y);
 	    if(msg) Norep("%s", msg);
 	    revived = revive_corpse(otmp, REVIVE_MONSTER);
@@ -76,7 +76,7 @@ const char *msg;
     if (revived) {
 	mtmp = m_at(x,y);
 	if (mtmp && !goodpos(x, y, mtmp, 0) &&
-	    enexto(&cc, x, y, mtmp->data)) {
+	    enexto_mon(&cc, x, y, mtmp)) {
 	    rloc_to(mtmp, cc.x, cc.y);
 	}
 	/* else impossible? */
@@ -388,7 +388,7 @@ still_chewing(x,y)
 	    (IS_ROCK(lev->typ) && !IS_TREES(lev->typ) ? 30 : 60) + u.udaminc + aeshbon();
 	You("start chewing %s.",
 	    boulder ? (boulder_at(x,y))->otyp==STATUE ? "on a statue" : "on a boulder" :
-	    lev->typ == IRONBARS ? "on the iron bars" :
+	    IS_BARS(x,y) ? "on the iron bars" :
 	    IS_TREES(lev->typ) ? "on a tree" :
 	    IS_ROCK(lev->typ) ? "a hole in the rock" :
 	    "a hole in the door");
@@ -399,7 +399,7 @@ still_chewing(x,y)
 	    You("%s chewing on the %s.",
 		digging.chew ? "continue" : "begin",
 		boulder ? "boulder" :
-		lev->typ == IRONBARS ? "bars" :
+		IS_BARS(x,y) ? "bars" :
 		IS_TREES(lev->typ) ? "tree" :
 		IS_ROCK(lev->typ) ? "rock" : "door");
 	digging.chew = TRUE;
@@ -456,6 +456,10 @@ still_chewing(x,y)
 	    lev->doormask = D_BROKEN;
 	}
 	lev->typ = DOOR;
+
+    } else if (IS_BARS(x,y)) {
+		digtxt = "chew through the iron bars.";
+		break_iron_bars(x, y, FALSE);
 
     } else if (IS_DOOR(lev->typ)) {
 	if (*in_rooms(x, y, SHOPBASE)) {
@@ -682,9 +686,20 @@ int mode;
 		    }
 		}
 		return FALSE;
-	    }	    if (Passes_walls)
-		;	/* do nothing */
-	    else if (can_ooze(&youmonst)) {
+	    }
+		if (Passes_walls)
+			;	/* do nothing */
+	    else if ((tmpr->doormask & D_BARRED) && !Is_illregrd(&u.uz) &&
+		     mode == DO_MOVE &&
+		     (dmgtype(youracedata, AD_RUST) || dmgtype(youracedata, AD_CORR))
+		) {
+			You("eat through the iron bars.");
+			dissolve_bars(x, y);
+			if (youracedata->mtyp == PM_RUST_MONSTER)
+				lesshungry(objects[BAR].oc_nutrition);
+	    } else if ((tmpr->doormask & D_BARRED) && passes_bars(&youmonst)) {
+			if (mode == DO_MOVE) You("slip through the iron bars.");
+	    } else if (can_ooze(&youmonst)) {
 		if (mode == DO_MOVE) You("ooze under the door.");
 	    } else if (tunnels(youracedata) && !needspick(youracedata)) {
 		/* Eat the door. */
@@ -714,16 +729,20 @@ int mode;
 	    }
 	} else {
 	testdiag:
-	    if (dx && dy && !Passes_walls
-		&& ((tmpr->doormask & ~D_BROKEN)
+	    if (dx && dy && !Passes_walls) {
+			boolean bars_exempt = (tmpr->doormask & D_BARRED) &&
+						passes_bars(&youmonst);
+			if (((tmpr->doormask & ~D_BROKEN) && !bars_exempt)
 #ifdef REINCARNATION
-		    || Is_rogue_level(&u.uz)
+			    || Is_rogue_level(&u.uz)
 #endif
-		    || block_door(x,y))) {
-		/* Diagonal moves into a door are not allowed. */
-		if (Blind && mode == DO_MOVE)
-		    feel_location(x,y);
-		return FALSE;
+				|| block_door(x,y)
+			) {
+				/* Diagonal moves into a door are not allowed. */
+				if (Blind && mode == DO_MOVE)
+				feel_location(x,y);
+				return FALSE;
+			}
 	    }
 	}
     }
@@ -774,15 +793,21 @@ int mode;
     ust = &levl[ux][uy];
 
     /* Now see if other things block our way . . */
-    if (dx && dy && !Passes_walls
-		     && (IS_DOOR(ust->typ) && ((ust->doormask & ~D_BROKEN)
+    {
+		boolean ust_bars_exempt = (ust->doormask & D_BARRED) &&
+					passes_bars(&youmonst);
+		if (dx && dy && !Passes_walls
+			&& (IS_DOOR(ust->typ) &&
+				(((ust->doormask & ~D_BROKEN) && !ust_bars_exempt)
 #ifdef REINCARNATION
-			     || Is_rogue_level(&u.uz)
+					|| Is_rogue_level(&u.uz)
 #endif
-			     || block_entry(x, y))
-			 )) {
-	/* Can't move at a diagonal out of a doorway with door. */
-	return FALSE;
+					|| block_entry(x, y))
+			)
+		) {
+			/* Can't move at a diagonal out of a doorway with door. */
+			return FALSE;
+		}
     }
 
     if (boulder_at(x,y) && (In_sokoban(&u.uz) || !Passes_walls)) {
@@ -874,10 +899,11 @@ boolean guess;
 		int x = travelstepx[set][i];
 		int y = travelstepy[set][i];
 		static int ordered[] = { 0, 2, 4, 6, 1, 3, 5, 7 };
-		/* no diagonal movement for grid bugs */
-		int dirmax = (u.umonnum == PM_GRID_BUG || u.umonnum == PM_BEBELITH) ? 4 : 8;
+		/* no diagonal movement for grid bugs; no orthogonal movement for sea people */
+		int dirmin = diagonal_mover(&youmonst) ? 4 : 0;
+		int dirmax = orthogonal_mover(&youmonst) ? 4 : 8;
 
-		for (dir = 0; dir < dirmax; ++dir) {
+		for (dir = dirmin; dir < dirmax; ++dir) {
 		    int nx = x+xdir[ordered[dir]];
 		    int ny = y+ydir[ordered[dir]];
 
@@ -1328,11 +1354,18 @@ domove()
 	    (glyph_is_invisible(levl[x][y].glyph) && !flags.nopick)) {
 		boolean expl = (Upolyd && attacktype(youracedata, AT_EXPL));
 	    	char buf[BUFSZ];
-		Sprintf(buf,"a vacant spot on the %s", surface(x,y));
-		You("%s %s.",
-		    expl ? "explode at" : "attack",
-		    !Underwater ? "thin air" :
-		    is_pool(x,y, FALSE) ? "empty water" : buf);
+		if(!expl && uwep && is_farm(uwep) && levl[x][y].typ == GRASS){
+			levl[x][y].typ = SOIL;
+			mksobj_at(SHEAF_OF_HAY, x, y, NO_MKOBJ_FLAGS);
+			You("cut away the grass!");
+		}
+		else {
+			Sprintf(buf,"a vacant spot on the %s", surface(x,y));
+			You("%s %s.",
+				expl ? "explode at" : "attack",
+				!Underwater ? "thin air" :
+				is_pool(x,y, FALSE) ? "empty water" : buf);
+		}
 		{
 			struct attack attkbuff = {0};
 			struct attack *attk;
@@ -1388,7 +1421,7 @@ domove()
 					result |= hit_with_tonguesnake(&youmonst, x, y, 0);
 				}
 				/* Dancers hit additional targets */
-				if(!(result&(MM_AGR_DIED|MM_AGR_STOP)) && is_dancer(&youmonst)){
+				if(!(result&(MM_AGR_DIED|MM_AGR_STOP)) && (is_dancer(&youmonst) || grace_empowers(&youmonst, AAT_GRACE_DANCE))){
 					result |= hit_with_dance(&youmonst, otmp, x, y, 0, attk);
 				}
 				/* Rejection antennae hit additional targets (last) */
@@ -1983,6 +2016,8 @@ domove()
 	    invocation_message();
 	}
 
+	update_proneness(&youmonst);
+
 	if (Punished){				/* put back ball and chain */
 	    move_bc(0,bc_control,ballx,bally,chainx,chainy);
 	}
@@ -1996,7 +2031,10 @@ domove()
 	/* delay next move because of ball dragging */
 	/* must come after we finished picking up, in spoteffects() */
 	if (cause_delay) {
-	    nomul(-2, "dragging an iron ball");
+	    char buf[BUFSZ];
+	    Sprintf(buf, "%s ball", material_name(uball, TRUE));
+	    Sprintf(buf, "dragging %s", an(buf));
+	    nomul(-2, buf);
 	    nomovemsg = "";
 	}
 
@@ -2153,17 +2191,7 @@ stillinwater:;
 			zap_over_floor(u.ux, u.uy, AD_COLD, WAND_CLASS, FALSE, NULL);
 		}
 	}
-	if(!Levitation && !Flying && In_quest(&u.uz) && urole.neminum == PM_BLIBDOOLPOOLP__GRAVEN_INTO_FLESH && levl[u.ux][u.uy].typ == AIR){
-		if(on_level(&u.uz, &qstart_level) && !ok_to_quest()){
-			pline("A mysterious force prevents you from falling.");
-		} else {
-			struct d_level target_level;
-			target_level.dnum = u.uz.dnum;
-			target_level.dlevel = qlocate_level.dlevel+1;
-			int dist = qlocate_level.dlevel+1 - u.uz.dlevel;
-			schedule_goto(&target_level, FALSE, TRUE, FALSE, "You plummet through the cavern air!", "You slam into the rocky floor!", d(dist*5,6), 0);
-		}
-	}
+	(void) quest_air_fall();
 	check_special_room(FALSE);
 #ifdef SINKS
 	if(IS_SINK(levl[u.ux][u.uy].typ) && Levitation)
@@ -2449,6 +2477,11 @@ register boolean newlev;
 			rt = 0;
 			wake = TRUE;
 	    break;
+		case PRISON:
+		    You("enter a dingy prison!");
+			rt = 0;
+			wake = TRUE;
+	    break;
 		case LEPREHALL:
 		    You("enter a leprechaun hall!");
 			rt = 0;
@@ -2659,7 +2692,14 @@ lookaround()
 
     /* Grid bugs stop if trying to move diagonal, even if blind.  Maybe */
     /* they polymorphed while in the middle of a long move. */
-    if ((u.umonnum == PM_GRID_BUG || u.umonnum == PM_BEBELITH) && u.dx && u.dy) {
+    if (orthogonal_mover(&youmonst) && u.dx && u.dy) {
+	nomul(0, NULL);
+	return;
+    }
+
+    /* Sea people stop if trying to move orthogonally, even if blind.  Maybe */
+    /* they polymorphed while in the middle of a long move. */
+    if (diagonal_mover(&youmonst) && (u.dx || u.dy) && (!u.dx || !u.dy)) {
 	nomul(0, NULL);
 	return;
     }
@@ -2668,7 +2708,9 @@ lookaround()
     for(x = u.ux-1; x <= u.ux+1; x++) for(y = u.uy-1; y <= u.uy+1; y++) {
 	if(!isok(x,y)) continue;
 
-	if((u.umonnum == PM_GRID_BUG || u.umonnum == PM_BEBELITH) && x != u.ux && y != u.uy) continue;
+	if(orthogonal_mover(&youmonst) && x != u.ux && y != u.uy) continue;
+
+	if(diagonal_mover(&youmonst) && (x == u.ux) != (y == u.uy)) continue;
 
 	if(x == u.ux && y == u.uy) continue;
 
@@ -3163,6 +3205,8 @@ inv_weight()
 	int objwt;
 	boolean nymph = youracedata->mlet == S_NYMPH;
 	boolean silverknight = Race_if(PM_SILVERKNIGHT) || youracedata->mtyp == PM_SILVERKNIGHT;
+	/* the crystal grace never switches off, since a sudden weight gain could be fatal */
+	boolean crystal = has_mutation(AAT_GRACE_CRYSTAL);
 	int wtmod = mlev(&youmonst)*5;
 
 #ifndef GOLDOBJ
@@ -3180,7 +3224,11 @@ inv_weight()
 		//Correct artifact weights before adding them.  Because that code isn't being run.
 		if(otmp->oartifact) otmp->owt = weight(otmp);
 #ifndef GOLDOBJ
-		if (!is_boulder(otmp) || !(throws_rocks(youracedata) || u.sealsActive&SEAL_YMIR))
+		if(otmp->oartifact == ART_IRON_BALL_OF_LEVITATION)
+			wt -= otmp->owt;
+		else if(otmp->oartifact == ART_FLOATING_STONE)
+			wt -= 2*otmp->owt;
+		else if (!is_boulder(otmp) || !(throws_rocks(youracedata) || u.sealsActive&SEAL_YMIR))
 #else
 		if (otmp->oclass == COIN_CLASS){
 			objwt = (int)(((long)otmp->quan + 50L) / 100L);
@@ -3188,23 +3236,29 @@ inv_weight()
 				objwt = max(0, objwt - wtmod);
 			wt += objwt;
 		}
+		else if(otmp->oartifact == ART_IRON_BALL_OF_LEVITATION)
+			wt -= otmp->owt;
+		else if(otmp->oartifact == ART_FLOATING_STONE)
+			wt -= 2*otmp->owt;
 		else if (!is_boulder(otmp) || !(throws_rocks(youracedata) || u.sealsActive&SEAL_YMIR))
 #endif
 		{
 			if(otmp->otyp == BELT_OF_WEIGHT && otmp == ubelt)
 				wt += 500;
+			else if(otmp->otyp == CONSTRICTING_WING_GUARDS && otmp == uarmw)
+				wt += 200;
 			else {
 				objwt = otmp->owt;
 				if(nymph)
 					objwt = max(0, objwt - wtmod);
 				if(silverknight && otmp->obj_material == SILVER)
 					objwt = max(0, objwt - wtmod);
+				if(crystal && (otmp->obj_material == GLASS || is_crystal_armor(otmp) || is_crystal_weapon(otmp)))
+					objwt = max(0, objwt - wtmod);
 				wt += objwt;
 			}
 		}
 
-		if(otmp->oartifact == ART_IRON_BALL_OF_LEVITATION)
-			wt -= 2*otmp->owt;
 		
 		if(u.uleadamulet && (otmp->otyp == AMULET_OF_YENDOR || otmp->otyp == FAKE_AMULET_OF_YENDOR))
 			wt += 24*otmp->owt; /* Same as loadstone by default. Only affects fake amulets in open inventory */

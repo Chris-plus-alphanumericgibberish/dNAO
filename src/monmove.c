@@ -8,13 +8,15 @@
 #include "xhity.h"
 
 extern boolean notonhead;
-extern struct attack noattack;
+extern const struct attack noattack;
 
 #ifdef OVL0
 
 STATIC_DCL int FDECL(disturb,(struct monst *));
 STATIC_DCL void FDECL(distfleeck,(struct monst *,int *,int *,int *));
 STATIC_DCL int FDECL(m_arrival, (struct monst *));
+STATIC_DCL struct monst * FDECL(mon_expert_move_target, (struct monst *));
+STATIC_DCL int FDECL(mon_perform_expert_move, (struct monst *));
 STATIC_DCL void FDECL(watch_on_duty,(struct monst *));
 void FDECL(ford_rises,(struct monst *));
 boolean FDECL(check_shore,(int, int));
@@ -123,6 +125,8 @@ dochugw(mtmp)
 	}
 #endif /* 0 */
 
+	if(mtmp->mcombat)
+		subout_stance(mtmp);
 	if(mtmp->mtyp == PM_CHORISTER_JELLY && mtmp->m_insight_level == 0){
 		mtmp->m_insight_level = 33 + rnd(11);
 	}
@@ -531,7 +535,7 @@ boolean digest_meal;
 		mon->munburn--;
 	}
 
-	if(is_alabaster_mummy(mon->data) 
+	if(has_syllable(mon->data)
 		&& mon->mvar_syllable == SYLLABLE_OF_LIFE__HOON
 	){
 		mon->mhp += 10;
@@ -540,6 +544,12 @@ boolean digest_meal;
 	}
 	
 	if (mon->mspec_used) mon->mspec_used--;
+
+	/* Anti-syllable cooldown interference: can increment
+	 * the cooldown and prevent special ability use even if
+	 * if it started the turn at 0. 
+	 */
+	if (mon->nean) mon->mspec_used += rn2(2);
 
 	if(mon->mspec_used && uring_art(ART_LOMYA)){
 		mon->mspec_used--;
@@ -672,6 +682,16 @@ boolean digest_meal;
 		m_losehp(mon, 1, FALSE, "light");
 		degenerating = TRUE;
 	}
+	/*Anti-syllable degeneration*/
+	if(!DEADMONSTER(mon) && mon->nooh){
+		m_losehp(mon, 10, FALSE, "unmaking");
+		degenerating = TRUE;
+	}
+	/*The tomb herd degenerate without a statue to pilot*/
+	if(!DEADMONSTER(mon) && has_template(mon, TOMB_HERD) && !tomb_herd_statue(mon)){
+		m_losehp(mon, 1, FALSE, "dissipation");
+		degenerating = TRUE;
+	}
 	/*Bleeding out*/
 	if(!DEADMONSTER(mon) && mon->mbleed > 0){
 		m_losehp(mon, mon->mbleed, mon->mubled, "bleeding wound");
@@ -770,6 +790,10 @@ boolean digest_meal;
 		if(mon_resistance(mon,REGENERATION)){
 			if(mon->mtyp == PM_ROTTING_MONK && !mon->mcan)
 				mon->mhp+=10;
+			else if(mon->mtyp == PM_NESSIAN_PIT_FIEND && !mon->mcan)
+				mon->mhp+=mon->m_lev*3;
+			else if(mon->mtyp == PM_PIT_FIEND && !mon->mcan)
+				mon->mhp+=mon->m_lev*2;
 			else
 				mon->mhp+=1;
 		}
@@ -1076,6 +1100,19 @@ mvm_widegaze(struct monst *gazemon, struct monst *mtmp)
 	return 0;
 }
 
+/* peaceful monster that whispers Demonic Blackmail (see dochug()) rather
+ * than just standing there -- prison guards use MS_BRIBE for their own
+ * unrelated extortion and are excluded */
+STATIC_OVL boolean
+bribe_seeking_peaceful(struct monst *mtmp)
+{
+	return mtmp->data->msound == MS_BRIBE
+#ifdef CONVICT
+		&& monsndx(mtmp->data) != PM_PRISON_GUARD
+#endif
+		&& mtmp->mpeaceful && !mtmp->mtame;
+}
+
 /* returns 1 if monster died moving, 0 otherwise */
 /* The whole dochugw/m_move/distfleeck/mfndpos section is serious spaghetti
  * code. --KAA
@@ -1218,13 +1255,19 @@ register struct monst *mtmp;
 		}
 	}
 
-   if (mdat->mtyp != PM_GIANT_TURTLE || !mtmp->mflee)
-	if (!(mtmp->mcanmove && mtmp->mnotlaugh && !mtmp->mequipping) || (mtmp->mstrategy & STRAT_WAITMASK)) {
-	    if (Hallucination) newsym(mtmp->mx,mtmp->my);
-	    if (mtmp->mcanmove && mtmp->mnotlaugh && !mtmp->mequipping && (mtmp->mstrategy & STRAT_CLOSE) &&
-	       !mtmp->msleeping && monnear(mtmp, u.ux, u.uy))
-		quest_talk(mtmp);	/* give the leaders a chance to speak */
-	    return(0);	/* other frozen monsters can't do anything */
+	if (check_mutation(AAT_PANAKEIAN_AURA) && mtmp->mtame && in_beast_mastery_range(mtmp)) {
+		mon_fix_troubles(mtmp, 0);
+	}
+
+	if (mdat->mtyp != PM_GIANT_TURTLE || !mtmp->mflee){
+		if (!(mtmp->mcanmove && mtmp->mnotlaugh && !mtmp->mequipping) || (mtmp->mstrategy & STRAT_WAITMASK)) {
+			if (Hallucination) newsym(mtmp->mx,mtmp->my);
+			if (mtmp->mcanmove && mtmp->mnotlaugh && !mtmp->mequipping && (mtmp->mstrategy & STRAT_CLOSE)
+				&& !mtmp->msleeping && monnear(mtmp, u.ux, u.uy)
+			)
+				quest_talk(mtmp);	/* give the leaders a chance to speak */
+			return(0);	/* other frozen monsters can't do anything */
+		}
 	}
 
 	/* there is a chance we will wake it */
@@ -1244,10 +1287,18 @@ register struct monst *mtmp;
 	if (mtmp->mdisrobe && !rn2(50)) mtmp->mdisrobe = 0;
 	if (mtmp->menvy && !rn2(999)) mtmp->menvy = 0;
 	if (mtmp->mdoubt && !rn2(300)) mtmp->mdoubt = 0;
-	if (mtmp->mwounded_legs && !rn2(60)) mtmp->mwounded_legs = 0;
+	mon_heal_injuries_natural(mtmp);
 	if (mtmp->mscorpions && !rn2(20)) mtmp->mscorpions = 0;
 	if (mtmp->mcaterpillars && !rn2(20)) mtmp->mcaterpillars = 0;
-	
+
+	/* anti-syllable curses count down */
+	if (mtmp->owrk) mtmp->owrk--;
+	if (mtmp->ruh) mtmp->ruh--;
+	if (mtmp->shey) mtmp->shey--;
+	if (mtmp->luahv) mtmp->luahv--;
+	if (mtmp->nean) mtmp->nean--;
+	if (mtmp->nooh) mtmp->nooh--;
+
 	if(mtmp->msleeping && (mtmp->mformication || mtmp->mscorpions || mtmp->mcaterpillars) && rn2(mtmp->m_lev)){
 		//Awakens from the bugs. High level is good for it here.
 		mtmp->msleeping = 0;
@@ -1286,6 +1337,12 @@ register struct monst *mtmp;
 		mtmp->encouraged = max(mtmp->encouraged, min(20, monstr[mtmp->mtyp]));
 	}
 	
+	/* stunned monsters get un-stunned with larger probability */
+	if (mtmp->mstun && !rn2(10)) mtmp->mstun = 0;
+
+	/* may reduce pucture-chance */
+	if (mtmp->mpunctured > 0 && rn2(2)) mtmp->mpunctured--;
+
 	if(mtmp->mdisrobe){
 		if(mon_throw_armor(mtmp))
 			return 0;
@@ -1300,26 +1357,6 @@ register struct monst *mtmp;
 			mtmp->mlaughing=rnd(5);
 		}
 	}
-	
-	if(mtmp->mtyp == PM_QUIVERING_BLOB && !mtmp->mflee){
-		if(!rn2(20)){
-			monflee(mtmp, 0, TRUE, TRUE);
-		}
-	}
-	if(mtmp->mtyp == PM_GRUE){
-		if(!mtmp->mflee && !isdark(mtmp->mx, mtmp->my)){
-			monflee(mtmp, 0, TRUE, TRUE);
-		} else if(mtmp->mflee && isdark(mtmp->mx, mtmp->my)){
-			mtmp->mflee = 0;
-			mtmp->mfleetim = 0;
-		}
-	}
-	
-	/* stunned monsters get un-stunned with larger probability */
-	if (mtmp->mstun && !rn2(10)) mtmp->mstun = 0;
-
-	/* may reduce pucture-chance */
-	if (mtmp->mpunctured > 0 && rn2(2)) mtmp->mpunctured--;
 
 	/* some monsters teleport */
 	if (mon_resistance(mtmp,TELEPORT)
@@ -1332,6 +1369,21 @@ register struct monst *mtmp;
 	) {
 		if (rloc(mtmp, TRUE))
 			return(0);
+	}
+	
+	/* Some monsters may flee */
+	if(mtmp->mtyp == PM_QUIVERING_BLOB && !mtmp->mflee){
+		if(!rn2(20)){
+			monflee(mtmp, 0, TRUE, TRUE);
+		}
+	}
+	if(mtmp->mtyp == PM_GRUE){
+		if(!mtmp->mflee && !isdark(mtmp->mx, mtmp->my)){
+			monflee(mtmp, 0, TRUE, TRUE);
+		} else if(mtmp->mflee && isdark(mtmp->mx, mtmp->my)){
+			mtmp->mflee = 0;
+			mtmp->mfleetim = 0;
+		}
 	}
 	
 	if(mtmp->mtyp == PM_DRACAE_ELADRIN){
@@ -1455,8 +1507,40 @@ register struct monst *mtmp;
 			}
 		}
 	}
-	
-	
+	//True demons
+	if((mtmp->mtyp == PM_BALROG || mtmp->mtyp == PM_SHAYATEEN) && mtmp->mgroup_summoned && (monstermoves%10 == 0)) {
+		mtmp->mgroup_summoned = FALSE;
+	}
+	if(mtmp->mtyp == PM_MARILITH && mtmp->mgroup_summoned && (monstermoves%10 == 0) && rn2(100) < 35) {
+		mtmp->mgroup_summoned = FALSE;
+	}
+	if(is_greater_demon(mtmp->data) && spotted && !mtmp->mpeaceful && !mtmp->mgroup_summoned && !mtmp->mcan
+		&& distmin(mtmp->mx, mtmp->my, u.ux, u.uy) <= BOLT_LIM
+		&& !DimensionalLock
+	){
+		mcall_group(mtmp, u.ux, u.uy, 3);
+		return 0;
+	}
+	//Pit fiend per round
+	if(Inhell && (mtmp->mtyp == PM_PIT_FIEND || mtmp->mtyp == PM_NESSIAN_PIT_FIEND) && spotted && !mtmp->mpeaceful && !mtmp->mcan
+		&& !(uwep && uwep->oartifact && arti_worn_prop(uwep, ARTP_NOCALL))
+		&& distmin(mtmp->mx, mtmp->my, u.ux, u.uy) <= 9
+		&& !DimensionalLock
+	)
+		mcall_pit_fiend(mtmp, u.ux, u.uy, 3);
+	if(Inhell && (mtmp->mtyp == PM_BAEL) && spotted && !mtmp->mpeaceful && !mtmp->mcan
+		&& !(uwep && uwep->oartifact && arti_worn_prop(uwep, ARTP_NOCALL))
+		&& distmin(mtmp->mx, mtmp->my, u.ux, u.uy) <= 9
+		&& !DimensionalLock
+	)
+		mcall_bael(mtmp, u.ux, u.uy, 3);
+	//Alkilith per round
+	if(mtmp->mtyp == PM_ALKILITH && !mtmp->mpeaceful && !mtmp->mcan
+		&& !(uwep && uwep->oartifact && arti_worn_prop(uwep, ARTP_NOCALL))
+		&& !DimensionalLock
+	)
+		mcall_alkilith(mtmp, mtmp->mx, mtmp->my, 1);
+
 	if(mdat->mtyp == PM_OONA && !mtmp->mspec_used){
 		nearby = FALSE;
 		struct monst *tmpm;
@@ -1530,20 +1614,22 @@ register struct monst *mtmp;
 
 	/* Monsters that want to acquire things */
 	/* may teleport, so do it before inrange is set */
-	if(is_covetous(mdat) && (mdat->mtyp!=PM_DEMOGORGON || !rn2(3)) 
-		&& mdat->mtyp!=PM_ELDER_PRIEST /*&& mdat->mtyp!=PM_SHAMI_AMOURAE*/
-		&& mdat->mtyp!=PM_LEGION /*&& mdat->mtyp!=PM_SHAMI_AMOURAE*/
-		&& !(noactions(mtmp))
-		&& !(mtmp->mpeaceful && !mtmp->mtame) /*Don't telespam the player if peaceful*/
+	if(!(noactions(mtmp))
 		&& !(mtmp == u.usteed) /*Steeds can't use tactics*/
 		&& !(mtmp == u.urider)
-	) (void) tactics(mtmp);
-	
+	){
+		if(covetous_warping(mdat)
+			&& !(mtmp->mpeaceful && !mtmp->mtame) /*Don't telespam the player if peaceful, but do find your target*/
+		) (void) tactics(mtmp);
+		else if(is_covetous(mdat))
+			find_goal(mtmp);
+	}
+
 	if(mdat->mtyp == PM_GREAT_CTHULHU && !rn2(20)){
 		if(tactics(mtmp))
 			return 0;
 	}
-	
+
 	/* check distance and scariness of attacks */
 	distfleeck(mtmp,&inrange,&nearby,&scared);
 	/* summoned monster was abjured as a result of wards etc. */
@@ -1774,12 +1860,8 @@ register struct monst *mtmp;
 	}
 
 	/* Demonic Blackmail! */
-	if(nearby && mdat->msound == MS_BRIBE &&
-#ifdef CONVICT
-       (monsndx(mdat) != PM_PRISON_GUARD) &&
-#endif /* CONVICT */
-       !no_upos(mtmp) &&
-	   mtmp->mpeaceful && !mtmp->mtame && !u.uswallow) {
+	if(nearby && bribe_seeking_peaceful(mtmp) &&
+       !no_upos(mtmp) && !u.uswallow) {
 		if (mtmp->mux != u.ux || mtmp->muy != u.uy) {
 			pline("%s whispers at thin air.", Monnam(mtmp));
 
@@ -1791,7 +1873,7 @@ register struct monst *mtmp;
 			    Snprintf(prompt, BUFSZ, "Tell %s your real location?", mon_nam(mtmp));
 			    if (yn(prompt) == 'y') {
 				coord cc;
-				enexto(&cc, u.ux, u.uy, mtmp->data);
+				enexto_mon(&cc, u.ux, u.uy, mtmp);
 			        rloc_to(mtmp, cc.x, cc.y);
 				mtmp->mux = u.ux;
 				mtmp->muy = u.uy;
@@ -2248,6 +2330,7 @@ register struct monst *mtmp;
 		}
 	}
 
+	switch_stance(mtmp, TRUE);
 	if(!mtarget_adjacent(mtmp)){ /* don't fight at range if there's a melee target */
 		/* Look for other monsters to fight (at a distance) */
 		struct monst *mtmp2 = mfind_target(mtmp, FALSE, TRUE);
@@ -2347,8 +2430,7 @@ register struct monst *mtmp;
 		    case 3:	/* absolutely no movement */
 				/* for pets, case 0 and 3 are equivalent */
 			/* vault guard might have vanished */
-			if (mtmp->isgd && (mtmp->mhp < 1 ||
-					    (mtmp->mx == 0 && mtmp->my == 0)))
+			if (mtmp->isgd && mtmp->mx == 0 && mtmp->my == 0)
 			    return 1;	/* behave as if it died */
 			/* During hallucination, monster appearance should
 			 * still change - even if it doesn't move.
@@ -2504,7 +2586,7 @@ struct monst *guardian;
 static NEARDATA const char practical[] = { WEAPON_CLASS, ARMOR_CLASS, GEM_CLASS, FOOD_CLASS, 0 };
 static NEARDATA const char magical[] = {
 	AMULET_CLASS, POTION_CLASS, SCROLL_CLASS, WAND_CLASS, RING_CLASS,
-	SPBOOK_CLASS, TILE_CLASS, SCOIN_CLASS, BELT_CLASS, 0 };
+	SPBOOK_CLASS, TILE_CLASS, SCOIN_CLASS, BELT_CLASS, SANCTION_CLASS, 0 };
 static NEARDATA const char indigestion[] = { BALL_CLASS, ROCK_CLASS, 0 };
 static NEARDATA const char boulder_class[] = { ROCK_CLASS, 0 };
 static NEARDATA const char gem_class[] = { GEM_CLASS, 0 };
@@ -2553,12 +2635,127 @@ register struct monst *smith;
 	return(move_special(smith,FALSE,TRUE,FALSE,avoid,omx,omy,gx,gy));
 }
 
+/* Displacement of another monster is a last resort, used only when it's
+ * on the way to the goal; if there's a route that avoids the monster
+ * entirely, that is preferred instead. */
+boolean
+should_displace(struct monst *mtmp, coord *poss, long *info, int cnt, xchar ggx, xchar ggy)
+{
+	int shortest_with_displacing = -1;
+	int shortest_without_displacing = -1;
+	int count_without_displacing = 0;
+	int i, nx, ny, ndist;
+
+	for (i = 0; i < cnt; i++) {
+		nx = poss[i].x;
+		ny = poss[i].y;
+		ndist = dist2(nx, ny, ggx, ggy);
+		if (MON_AT(nx, ny) && (info[i] & ALLOW_MDISP) && !(info[i] & ALLOW_M)) {
+			if (shortest_with_displacing == -1 || ndist < shortest_with_displacing)
+				shortest_with_displacing = ndist;
+		} else {
+			if (shortest_without_displacing == -1 || ndist < shortest_without_displacing)
+				shortest_without_displacing = ndist;
+			count_without_displacing++;
+		}
+	}
+	if (shortest_with_displacing > -1
+		&& (shortest_with_displacing < shortest_without_displacing
+			|| !count_without_displacing))
+		return TRUE;
+	return FALSE;
+}
+
 /* Return values:
  * 0: did not move, but can still attack and do other stuff.
  * 1: moved, possibly can attack.
  * 2: monster died.
  * 3: did not move, and can't do anything else either.
  */
+/* Return the creature magr, which just moved, would strike with an expert move
+ * on the next square in its direction of travel, or null if there is none it's
+ * willing to attack in melee.
+ */
+STATIC_OVL struct monst *
+mon_expert_move_target(struct monst *magr)
+{
+	int x = magr->mx + magr->mprev_dir.x;
+	int y = magr->my + magr->mprev_dir.y;
+	struct monst *mdef;
+	long mmflag;
+
+	if (!magr->mprev_dir.x && !magr->mprev_dir.y)
+		return (struct monst *)0;
+	if (!isok(x, y))
+		return (struct monst *)0;
+	if (x == u.ux && y == u.uy) {
+		if (u.uswallow || magr->mtame || (magr->mpeaceful && !magr->mberserk))
+			return (struct monst *)0;
+		if (magr->mux != u.ux || magr->muy != u.uy)
+			return (struct monst *)0;
+		return &youmonst;
+	}
+	mdef = m_at(x, y);
+	if (!mdef || DEADMONSTER(mdef))
+		return (struct monst *)0;
+	if (magr->mtame)
+		return (!mdef->mtame && acceptable_pet_target(magr, mdef, FALSE)) ? mdef : (struct monst *)0;
+	mmflag = mm_aggression(magr, mdef);
+	if (!(mmflag & ALLOW_M) || (mdef->mtame && !(mmflag & ALLOW_TM)))
+		return (struct monst *)0;
+	return mdef;
+}
+
+/* Let magr, which just moved, make any expert move its wielded weapon allows
+ * (a lunge or a knock-back charge) at what lies ahead of it. Returns the
+ * combined result of the attacks made (0 if none).
+ */
+STATIC_OVL int
+mon_perform_expert_move(struct monst *magr)
+{
+	struct obj *wep = MON_WEP(magr);
+	struct monst *mdef;
+	struct attack hit;
+	boolean messaged = FALSE;
+	int vis;
+	int result = 0;
+
+	if (!wep || DEADMONSTER(magr) || (u.uswallow && magr == u.ustuck))
+		return 0;
+	if (CHECK_ETRAIT(wep, magr, ETRAIT_LUNGE)
+		&& ROLL_ETRAIT(wep, magr, TRUE, rn2(2))
+		&& (mdef = mon_expert_move_target(magr))
+	) {
+		vis = getvis(magr, mdef, 0, 0);
+		if (wizard && (vis&VIS_MAGR))
+			pline("Lunge!");
+		else if (vis&VIS_MAGR) {
+			pline("%s charges %s.", Monnam(magr), mdef == &youmonst ? "you" : mon_nam(mdef));
+			messaged = TRUE;
+		}
+		hit = wielded_weapon_attack(magr, wep);
+		result |= xmeleehity(magr, mdef, &hit, &wep, vis, 0, FALSE, 0);
+		if (result & (MM_AGR_DIED|MM_AGR_STOP))
+			return result;
+	}
+	wep = MON_WEP(magr);
+	if (wep && CHECK_ETRAIT(wep, magr, ETRAIT_KNOCK_BACK_CHARGE)
+		&& ROLL_ETRAIT(wep, magr, TRUE, rn2(2))
+		&& (wep->o_e_trait&ETRAIT_KNOCK_BACK)
+		&& (mdef = mon_expert_move_target(magr))
+	) {
+		vis = getvis(magr, mdef, 0, 0);
+		if (wizard && (vis&VIS_MAGR))
+			pline("Push!");
+		else if (!messaged && (vis&VIS_MAGR))
+			pline("%s charges %s.", Monnam(magr), mdef == &youmonst ? "you" : mon_nam(mdef));
+		hit = wielded_weapon_attack(magr, wep);
+		hit.adtyp = AD_PSH1;
+		result |= xmeleehity(magr, mdef, &hit, &wep, vis, 0, FALSE, 0);
+	}
+	return result;
+}
+
 int
 m_move(mtmp, after)
 register struct monst *mtmp;
@@ -2572,6 +2769,7 @@ register int after;
 	boolean can_open=0, can_unlock=0, doorbuster=0;
 	boolean uses_items=0, setlikes=0;
 	boolean avoid=FALSE;
+	boolean better_with_displacing;
 	struct permonst *ptr;
 	struct monst *mtoo;
 	schar mmoved = 0;	/* not strictly nec.: chi >= 0 will do */
@@ -2623,6 +2821,10 @@ register int after;
 	    goto postmov;
 	}
 
+	/* Combat AI may be left on for a few turns. */
+	if (!rn2(3))
+		mtmp->mcombat = FALSE;
+
 	/* likewise for shopkeeper */
 	if(mtmp->isshk) {
 	    mmoved = shk_move(mtmp);
@@ -2640,7 +2842,7 @@ register int after;
 	}
 
 	/* and the acquisitive monsters get special treatment */
-	if(is_covetous(ptr)) {
+	if(covetous_warping(ptr)) {
 	    xchar tx = STRAT_GOALX(mtmp->mstrategy),
 		  ty = STRAT_GOALY(mtmp->mstrategy);
 	    struct monst *intruder = m_at(tx, ty);
@@ -2651,15 +2853,10 @@ register int after;
 	    if((dist2(mtmp->mx, mtmp->my, tx, ty) < 2) &&
 	       intruder && (intruder != mtmp)) {
 			notonhead = (intruder->mx != tx || intruder->my != ty);
+			mtmp->mcombat = TRUE;
 			if(mattackm(mtmp, intruder)&(MM_AGR_DIED)) return(2);
 			mmoved = 1;
 			goto postmov;
-		} else if(mtmp->mtyp != PM_DEMOGORGON 
-			   && mtmp->mtyp!=PM_ELDER_PRIEST
-			   /*&& mtmp->mtyp!=PM_SHAMI_AMOURAE*/
-			   ){
-			mmoved = 0;
-		    goto postmov;
 		}
 //	    goto postmov;
 	}
@@ -2721,7 +2918,7 @@ not_special:
 		
 		if ((youmonst.m_ap_type == M_AP_OBJECT && youmonst.mappearance == STRANGE_OBJECT) || u.uundetected ||
 		    (youmonst.m_ap_type == M_AP_OBJECT && youmonst.mappearance == GOLD_PIECE && !likes_gold(ptr)) ||
-		    (mtmp->mpeaceful && !mtmp->isshk) ||  /* allow shks to follow */
+		    (mtmp->mpeaceful && !mtmp->isshk && !bribe_seeking_peaceful(mtmp)) ||  /* allow shks to follow, and MS_BRIBE demons to close in for blackmail */
 		    ((monsndx(ptr) == PM_STALKER || is_bat(ptr) || monsndx(ptr) == PM_HUNTING_HORROR ||
 		      ptr->mlet == S_LIGHT) && !rn2(3)))
 			appr = 0;
@@ -2739,7 +2936,7 @@ not_special:
 			appr = -1;
 
 		/* monsters can track you */
-		if (!should_see && (goodsmeller(ptr) || (mtmp)->mcansee)) {
+		if (!should_see && (goodsmeller(ptr) || !is_blind(mtmp))) {
 			register coord *cp;
 			/* good trackers can follow your trail up to 200 turns, others just for your few most recent steps */
 			cp = gettrack(omx, omy, can_track(ptr) ? 0 : rnd(ACURR_MON(A_INT, mtmp)/3));
@@ -2749,9 +2946,21 @@ not_special:
 			}
 		}
 	}
+
+	/* MT_WANTS* monsters without MM_COVETOUS still steer toward
+	 * find_goal()'s square via ordinary movement */
+	if (appr == 1 && is_covetous(ptr) && !covetous_warping(ptr) &&
+		(mtmp->mstrategy & STRAT_STRATMASK) != STRAT_NONE) {
+		gx = STRAT_GOALX(mtmp->mstrategy);
+		gy = STRAT_GOALY(mtmp->mstrategy);
+	}
+
 	/* if monster has no idea where you could be, set appr to 0 */
 	if (gx == 0 && gy == 0)
 		appr = 0;
+
+	if (!mtmp->mpeaceful && appr != 0 && gx == mtmp->mux && gy == mtmp->muy)
+		mtmp->mcombat = TRUE;
 
 	if (( !mtmp->mpeaceful || mtmp->mtyp == PM_MAID || !rn2(10) )
 #ifdef REINCARNATION
@@ -2776,7 +2985,7 @@ not_special:
 				/* look for gold or jewels nearby */
 				likegold = (likes_gold(ptr) && pctload < 95);
 				likegems = (likes_gems(ptr) && pctload < 85);
-				uses_items = (!mindless_mon(mtmp) && !is_animal(ptr)
+				uses_items = (intelligent_mon(mtmp)
 					&& pctload < 75);
 				likeobjs = (!mad_no_armor(mtmp) && likes_objs(ptr) && pctload < 75);
 				likemagic = (likes_magic(ptr) && pctload < 85);
@@ -2973,9 +3182,14 @@ not_special:
 					leader_target = FALSE;
 					gx = m2->mx;
 					gy = m2->my;
-					mtmp->mux = m2->mx;
-					mtmp->muy = m2->my;
-					appr = 1;
+					mtmp->mcombat = TRUE;
+					if(standoff(mtmp->data) && distminbest <= 4 && distminbest > 1)
+						; /* already at standoff range; wander rather than close in */
+					else {
+						mtmp->mux = m2->mx;
+						mtmp->muy = m2->my;
+						appr = 1;
+					}
 				}
 			}//End target closest hostile
 			
@@ -3075,10 +3289,15 @@ not_special:
 			}
 		}
 		
+	    better_with_displacing = should_displace(mtmp, poss, info, cnt, gx, gy);
+
 	    for(i=0; i < cnt; i++) {
 			if (avoid && (info[i] & NOTONL)) continue;
 			nx = poss[i].x;
 			ny = poss[i].y;
+
+			if (MON_AT(nx, ny) && (info[i] & ALLOW_MDISP)
+				&& !(info[i] & ALLOW_M) && !better_with_displacing) continue;
 
 			if (appr != 0) {
 				mtrk = &mtmp->mtrack[0];
@@ -3184,6 +3403,19 @@ not_special:
 		return 3;
 	    }
 
+	    if ((info[chi] & ALLOW_MDISP) != 0) {
+		struct monst *mtmp2;
+		int mstatus;
+
+		mtmp2 = m_at(nix, niy); /* ALLOW_MDISP implies m_at() is !Null */
+		mstatus = mdisplacem(mtmp, mtmp2, FALSE);
+		if (mstatus & MM_AGR_DIED)
+		    return 2;
+		if (mstatus & MM_HIT)
+		    return 1;
+		return 3;
+	    }
+
 	    if (!m_in_out_region(mtmp,nix,niy))
 	        return 3;
 	    remove_monster(omx, omy);
@@ -3214,7 +3446,9 @@ not_special:
 		}
 	    /* Place a segment at the old position. */
 	    if (mtmp->wormno) worm_move(mtmp);
-		
+
+	    update_proneness(mtmp);
+
 	} else {
 	    if(is_unicorn(ptr) && rn2(2) && !tele_restrict(mtmp) && !noactions(mtmp))
 		{
@@ -3239,6 +3473,8 @@ postmov:
 		if(IS_DOOR(levl[mtmp->mx][mtmp->my].typ)
 			&& !mon_resistance(mtmp,PASSES_WALLS) /* doesn't need to open doors */
 			&& !can_tunnel /* taken care of below */
+			&& (amorphous_mon(mtmp) || can_open || can_unlock ||
+			    !IS_BARS(mtmp->mx,mtmp->my))
 		      ) {
 		    struct rm *here = &levl[mtmp->mx][mtmp->my];
 		    boolean btrapped = (here->doormask & D_TRAPPED);
@@ -3307,11 +3543,12 @@ postmov:
 			if (*in_rooms(mtmp->mx, mtmp->my, SHOPBASE))
 			    add_damage(mtmp->mx, mtmp->my, 0L);
 		    }
-		} else if (levl[mtmp->mx][mtmp->my].typ == IRONBARS && !Is_illregrd(&u.uz)) {
+		} else if (IS_BARS(mtmp->mx,mtmp->my) && !Is_illregrd(&u.uz)) {
 		    if ( (dmgtype(ptr,AD_RUST) && ptr->mtyp != PM_NAIAD) || dmgtype(ptr,AD_CORR) || ptr->mtyp == PM_GELATINOUS_CUBE) {
 				if (canseemon(mtmp)) {
-					pline("%s eats through the iron bars.", 
-					Monnam(mtmp)); 
+					pline("%s eats through the %s.", Monnam(mtmp),
+					      IS_DOOR(levl[mtmp->mx][mtmp->my].typ) ?
+						"barred door" : "iron bars");
 				}
 				dissolve_bars(mtmp->mx, mtmp->my);
 				if(mtmp->mtyp == PM_RUST_MONSTER && get_mx(mtmp, MX_EDOG)){
@@ -3342,6 +3579,9 @@ postmov:
 		    swallowed(0);
 		} else
 		newsym(mtmp->mx,mtmp->my);
+
+		if (mon_perform_expert_move(mtmp) & MM_AGR_DIED)
+			return(2);
 	    }
 	    if(OBJ_AT(mtmp->mx, mtmp->my) && mtmp->mcanmove && mtmp->mnotlaugh && !mtmp->mequipping) {
 		/* recompute the likes tests, in case we polymorphed
@@ -3353,7 +3593,7 @@ postmov:
 		    /* look for gold or jewels nearby */
 		    likegold = (likes_gold(ptr) && pctload < 95);
 		    likegems = (likes_gems(ptr) && pctload < 85);
-		    uses_items = (!mindless_mon(mtmp) && !is_animal(ptr)
+		    uses_items = (intelligent_mon(mtmp)
 				  && pctload < 75);
 		    likeobjs = (!mad_no_armor(mtmp) && likes_objs(ptr) && pctload < 75);
 		    likemagic = (likes_magic(ptr) && pctload < 85);
@@ -3422,21 +3662,22 @@ postmov:
 
 /* break iron bars at the given location */
 void
-break_iron_bars(x, y, heard)
-int x, y;			/* coordinates of iron bars */
-boolean heard;		/* print You_hear() message? */
+break_iron_bars(int x, int y, boolean heard)
 {
 	int numbars;
 	struct obj *obj;
+	boolean wasdoor = IS_DOOR(levl[x][y].typ);
 
-	if (levl[x][y].typ != IRONBARS) {
+	if (!wasdoor && levl[x][y].typ != IRONBARS) {
 		impossible("Breaking non-existant iron bars @ (%d,%d)", x, y);
 		return;
 	}
 
 	if (heard)
-		You_hear("a sharp crack!");
+		You_hear(wasdoor ? "a barred door shatter!" : "a sharp crack!");
 	levl[x][y].typ = (Is_special(&u.uz) || *in_rooms(x, y, 0)) ? ROOM : CORR;
+	if (wasdoor)
+		levl[x][y].doormask = 0;
 
 	for (numbars = d(2, 4) - 1; numbars > 0; numbars--){
 		obj = mksobj_at(BAR, x, y, MKOBJ_NOINIT);
@@ -3450,11 +3691,14 @@ boolean heard;		/* print You_hear() message? */
 
 //Malcolm Ryan's bar eating patch
 void
-dissolve_bars(x, y)
-register int x, y;
+dissolve_bars(int x, int y)
 {
-    levl[x][y].typ = (Is_special(&u.uz) || *in_rooms(x,y,0)) ? ROOM : CORR; 
-    newsym(x, y);    
+    boolean wasdoor = IS_DOOR(levl[x][y].typ);
+
+    levl[x][y].typ = (Is_special(&u.uz) || *in_rooms(x,y,0)) ? ROOM : CORR;
+    if (wasdoor)
+	levl[x][y].doormask = 0;
+    newsym(x, y);
 }
 
 
@@ -3524,6 +3768,11 @@ register struct monst *mtmp;
 			/*x goes from 1 to colno-1, y goes from 0 to rowno-1*/
 			mtmp->mux = rnd(COLNO-1);
 			mtmp->muy = rn2(ROWNO);
+			/* sea people can't wander toward a goal in another world */
+			if(!shared_world(mtmp, mtmp->mux, mtmp->muy)){
+				if(mtmp->muy < ROWNO-1) mtmp->muy++;
+				else mtmp->muy--;
+			}
 		}
 		/* Otherwise, don't change the current */
 		return;
@@ -3555,7 +3804,8 @@ register struct monst *mtmp;
 		      !mon_resistance(mtmp,PASSES_WALLS) &&
 		      (!ACCESSIBLE(levl[mx][my].typ) ||
 		       (closed_door(mx, my) && !can_ooze(mtmp))))
-		  || !couldsee(mx, my));
+		  || !couldsee(mx, my)
+		  || !shared_world(mtmp, mx, my));
 	} else {
 found_you:
 	    mx = u.ux;

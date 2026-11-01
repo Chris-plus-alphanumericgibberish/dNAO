@@ -5,6 +5,8 @@
 #ifndef PERMONST_H
 #define PERMONST_H
 
+#include "atkbpnames.h"
+
 /*	This structure covers all attack forms.
  *	aatyp is the gross attack type (eg. claw, bite, breath, ...)
  *	adtyp is the damage type (eg. physical, fire, cold, spell, ...)
@@ -25,6 +27,7 @@ struct attack {
 	boolean		polywep;	/*This attack is changed to a weapon attack if you're poly'd into this form and wielding a weapon.*/
 	uchar		ins_req;	/*The PC must have reached X insight for the attacker to get this attack.*/
 	char		san_req;	/*The PC must have fallen below or risen above X sanity for the attacker to get this attack.*/
+	struct atkbp_set	bodypart;	/*Which body part(s) this attack comes from (include/mattkbp.h).*/
 };
 #define is_null_attk(attk)	((attk) && ((attk)->aatyp == 0 && (attk)->adtyp == 0 && (attk)->damn == 0 && (attk)->damd == 0))
 
@@ -46,6 +49,7 @@ struct attack {
 #define WT_ELF		1200
 #define WT_HUMAN	1450
 #define WT_MEDIUM	1500
+#define WT_LRG_ELF	2400
 #define WT_LARGE   	3000
 #define WT_HUGE		4500
 #define WT_DRAGON 	4500
@@ -88,12 +92,14 @@ struct permonst {
 			gdr,
 			ldr,
 			fdr, 
+			wdr, 
 			/* (special) dr values for head/body/gloves/legs/feet */
 			spe_hdr,
 			spe_bdr,
 			spe_gdr,
 			spe_ldr,
-			spe_fdr;
+			spe_fdr,
+			spe_wdr;
 	struct	attack	mattk[NATTK];		/* attacks matrix */
 	unsigned short	cwt,			/* weight of corpse */
 					cnutrit;		/* its nutritional value */
@@ -117,6 +123,7 @@ struct permonst {
 	uchar		mcolor;			/* color to use */
 # endif
 	int				mtyp;			/* Index number of this permonst entry */
+	struct atkbp_set	bodyparts;	/*Every body part this form is known to have (include/mattkbp.h).*/
 };
 
 extern NEARDATA struct permonst

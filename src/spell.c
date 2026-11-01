@@ -6,6 +6,7 @@
 #include <math.h>
 
 #include "hack.h"
+#include "mattkbp.h"
 #include "artifact.h"
 
 static NEARDATA schar delay;		/* moves left for this spell */
@@ -186,7 +187,7 @@ STATIC_OVL boolean cursed_book(struct obj *bp){
 			aggravate();
 			break;
 		case 2:
-			make_blinded(Blinded + rn1(100,250),TRUE);
+			make_blinded(BlindedTimeout + rn1(100,250),TRUE);
 			break;
 		case 3:
 			pline_The("book develops a huge set of teeth and bites you!");
@@ -313,7 +314,7 @@ struct obj *book2;
 			 arti_cursed = FALSE;
 
 	if(book2->cursed) {
-	    pline_The("runes appear scrambled.  You can't read them!");
+	    pline_The("runes %s scrambled.  You can't read them!", Blind ? "feel" : "appear");
 	    return;
 	}
 
@@ -444,6 +445,10 @@ learn()
 	}
 	exercise(A_WIS, TRUE);		/* you're studying. */
 	booktype = book->otyp;
+	if(booktype == SPE_BLANK_PAPER) {
+		book = 0;
+		return MOVE_FINISHED_OCCUPATION;
+	}
 	if(booktype == SPE_BOOK_OF_THE_DEAD) {
 	    deadbook(book);
 		book = 0;
@@ -1601,6 +1606,7 @@ int atype;
 	case AD_STAR:
 	case AD_HLUH:
 	case AD_MADF:
+	case AD_SFLM:
 		return P_ATTACK_SPELL;
 	case AD_DRST:
 	case AD_ACID:
@@ -1780,13 +1786,14 @@ cast_protection()
 	}
 }
 
-/* Attempts to abjure all adjacent summoned creatures 
+/* Attempts to abjure all adjacent summoned creatures, or only the hostile ones
+ * if hostile_only is TRUE.
  * Monsters may roll to resist.
  * If they fail, they are immediately dispelled.
  * If they suceeed, non-permanent summons' durations are halved.
  */
 void
-cast_abjuration()
+cast_abjuration(boolean hostile_only)
 {
 	struct monst * mtmp;
 	int i, x, y;
@@ -1796,7 +1803,7 @@ cast_abjuration()
 	for (i=0; i<8; i++) {
 		x = u.ux + xdir[i];
 		y = u.uy + ydir[i];
-		if ((mtmp = m_at(x, y)) && get_mx(mtmp, MX_ESUM)) {
+		if ((mtmp = m_at(x, y)) && get_mx(mtmp, MX_ESUM) && !(hostile_only && mtmp->mpeaceful)) {
 			resisted = resist(mtmp, SPBOOK_CLASS, 0, TRUE);
 			dur = timer_duration_remaining(get_timer(mtmp->timed, DESUMMON_MON));
 			if (!resisted)
@@ -2154,6 +2161,25 @@ stargate()
 	return MOVE_INSTANT;
 }
 
+/* mhurtle() can drop a monster through a hole to another level, so nothing may
+ * touch it again without checking. */
+static void
+exhalation_blast(struct monst *mon, int range, boolean inline_target, int dsize)
+{
+	mhurtle(mon, u.dx, u.dy, range, inline_target);
+	if (DEADMONSTER(mon) || MIGRATINGMONSTER(mon))
+		return;
+
+	mon->mhp -= inline_target ? d(5, dsize) : d(rnd(5), dsize);
+	if (mon->mhp <= 0) {
+		mon->mhp = 0;
+		xkilled(mon, 1);
+	} else {
+		pline("%s is flung back by the wind.", Monnam(mon));
+		setmangry(mon);
+	}
+}
+
 int
 spiriteffects(power, atme)
 	int power;
@@ -2456,7 +2482,7 @@ spiriteffects(power, atme)
 				}
 			}
 			You("feel your eyes freeze and pop!");
-			make_blinded(Blinded+5L,FALSE);
+			make_blinded(BlindedTimeout+5L,FALSE);
 		}break;
 		case PWR_BALAM_S_ANOINTING:{
 			//thick-skinned creatures loose their eyes
@@ -2472,7 +2498,7 @@ spiriteffects(power, atme)
 					You("need a free hand to make a touch attack!");
 					return MOVE_CANCELLED;
 				}
-				struct attack basictouch = { AT_TUCH, AD_PHYS, 0, 0 };
+				struct attack basictouch = { AT_TUCH, AD_PHYS, 0, 0, .bodypart = find_freehand_set() };
 				int dieroll = rnd(20);
 				if (tohitval(&youmonst, mon, &basictouch, (struct obj *)0, (void *)0, HMON_WHACK, 0, (int *) 0) <= dieroll && dieroll != 1){
 					You("miss.");
@@ -2616,7 +2642,7 @@ spiriteffects(power, atme)
 				
 				You("recover.");
 				if (Sick) make_sick(0L, (char *) 0, TRUE, SICK_ALL);
-				if (Blinded > (long)u.ucreamed) make_blinded((long)u.ucreamed, TRUE);
+				if (BlindedTimeout > (long)u.ucreamed) make_blinded((long)u.ucreamed, TRUE);
 				if (HHallucination) (void) make_hallucinated(0L, TRUE, 0L);
 				if (Vomiting) make_vomiting(0L, TRUE);
 				if (HConfusion) make_confused(0L, TRUE);
@@ -2828,7 +2854,7 @@ spiriteffects(power, atme)
 				if(mon){
 					struct obj* boots;
 					boots = which_armor(mon, W_ARMF);
-					struct attack basichit = { AT_CLAW, AD_PHYS, 0, 0 };
+					struct attack basichit = { AT_CLAW, AD_PHYS, 0, 0, .bodypart = ATKBP(NONE) };
 					int dieroll = rnd(20);
 					if (tohitval(&youmonst, mon, &basichit, (struct obj *)0, (void *)0, HMON_WHACK, 0, (int *) 0) <= dieroll && dieroll != 1){
 						if(boots && boots->otyp == WATER_WALKING_BOOTS){
@@ -3436,103 +3462,41 @@ spiriteffects(power, atme)
 					i++;
 					mon = m_at(sx, sy);
 					if(mon){
-						mhurtle(mon, u.dx, u.dy, range+i, TRUE);
-						mon->mhp -= d(5,dsize);
 						setmangry(mon);
-						if (mon->mhp <= 0){
-							mon->mhp = 0;
-							xkilled(mon, 1);
-						} else {
-							pline("%s is flung back by the wind.",Monnam(mon));
-							setmangry(mon);
-						}
+						exhalation_blast(mon, range+i, TRUE, dsize);
 					}
 					if(!u.dx){
 						if(isok(sx+1,sy)){
 							mon = m_at(sx+1, sy);
-							if(mon){
-								mhurtle(mon, u.dx, u.dy, range+i, FALSE);
-								mon->mhp -= d(rnd(5),dsize);
-								if (mon->mhp <= 0){
-									mon->mhp = 0;
-									xkilled(mon, 1);
-								} else {
-									pline("%s is flung back by the wind.",Monnam(mon));
-									setmangry(mon);
-								}
-							}
+							if(mon)
+								exhalation_blast(mon, range+i, FALSE, dsize);
 						}
 						if(isok(sx-1,sy)){
 							mon = m_at(sx-1, sy);
-							if(mon){
-								mhurtle(mon, u.dx, u.dy, range+i, FALSE);
-								mon->mhp -= d(rnd(5),dsize);
-								if (mon->mhp <= 0){
-									mon->mhp = 0;
-									xkilled(mon, 1);
-								} else {
-									pline("%s is flung back by the wind.",Monnam(mon));
-									setmangry(mon);
-								}
-							}
+							if(mon)
+								exhalation_blast(mon, range+i, FALSE, dsize);
 						}
 					} else if(!u.dy){
 						if(isok(sx,sy+1)){
 							mon = m_at(sx, sy+1);
-							if(mon){
-								mhurtle(mon, u.dx, u.dy, range+i, FALSE);
-								mon->mhp -= d(rnd(5),dsize);
-								if (mon->mhp <= 0){
-									mon->mhp = 0;
-									xkilled(mon, 1);
-								} else {
-									pline("%s is flung back by the wind.",Monnam(mon));
-									setmangry(mon);
-								}
-							}
+							if(mon)
+								exhalation_blast(mon, range+i, FALSE, dsize);
 						}
 						if(isok(sx,sy-1)){
 							mon = m_at(sx, sy-1);
-							if(mon){
-								mhurtle(mon, u.dx, u.dy, range+i, FALSE);
-								mon->mhp -= d(rnd(5),dsize);
-								if (mon->mhp <= 0){
-									mon->mhp = 0;
-									xkilled(mon, 1);
-								} else {
-									pline("%s is flung back by the wind.",Monnam(mon));
-									setmangry(mon);
-								}
-							}
+							if(mon)
+								exhalation_blast(mon, range+i, FALSE, dsize);
 						}
 					} else {
 						if(isok(sx,sy-u.dy)){
 							mon = m_at(sx, sy-u.dy);
-							if(mon){
-								mhurtle(mon, u.dx, u.dy, range+i, FALSE);
-								mon->mhp -= d(rnd(5),dsize);
-								if (mon->mhp <= 0){
-									mon->mhp = 0;
-									xkilled(mon, 1);
-								} else {
-									pline("%s is flung back by the wind.",Monnam(mon));
-									setmangry(mon);
-								}
-							}
+							if(mon)
+								exhalation_blast(mon, range+i, FALSE, dsize);
 						}
 						if(isok(sx-u.dx,sy)){
 							mon = m_at(sx-u.dx, sy);
-							if(mon){
-								mhurtle(mon, u.dx, u.dy, range+i, FALSE);
-								mon->mhp -= d(rnd(5),dsize);
-								if (mon->mhp <= 0){
-									mon->mhp = 0;
-									xkilled(mon, 1);
-								} else {
-									pline("%s is flung back by the wind.",Monnam(mon));
-									setmangry(mon);
-								}
-							}
+							if(mon)
+								exhalation_blast(mon, range+i, FALSE, dsize);
 						}
 					}
 					sx -= u.dx;
@@ -3589,7 +3553,7 @@ spiriteffects(power, atme)
 				} 
 				struct attack basicattack = {
 					((uarmg && arti_phasing(uarmg)) || u.sealsActive&SEAL_CHUPOCLOPS) ? AT_TUCH : AT_CLAW,
-					AD_PHYS, 0, 0 };
+					AD_PHYS, 0, 0, .bodypart = ATKBP(ARM) };
 				
 				int dieroll = rnd(20);
 				if (tohitval(&youmonst, mon, &basicattack, (struct obj *)0, (void *)0, HMON_WHACK, 0, (int *) 0) <= dieroll && dieroll != 1){
@@ -3751,7 +3715,7 @@ spiriteffects(power, atme)
 				You("need a free hand to make a touch attack!");
 				return MOVE_CANCELLED;
 			}
-			struct attack basictouch = { AT_TUCH, AD_PHYS, 0, 0 };
+			struct attack basictouch = { AT_TUCH, AD_PHYS, 0, 0, .bodypart = find_freehand_set() };
 			int dieroll = rnd(20);
 			if (tohitval(&youmonst, mon, &basictouch, (struct obj *)0, (void *)0, HMON_WHACK, 0, (int *) 0) <= dieroll && dieroll != 1){
 				You("miss.");
@@ -4887,6 +4851,7 @@ dothrowspell:
 							break;
 						}
 					}
+					if(youmonst.owrk) dam = (dam+1)/2;
 					explode_spell(u.dx, u.dy, adtype, 0, dam, color, rad, spell_flags);
 				}
 			}
@@ -5032,7 +4997,7 @@ dothrowspell:
 			pline1(nothing_happens);
 		break;
 	case SPE_ABJURATION:
-		cast_abjuration();
+		cast_abjuration(FALSE);
 		break;
 	case SPE_MASS_HEALING:
 		cast_mass_healing(pseudo);
@@ -6050,7 +6015,9 @@ int spell;
 	int chance, splcaster, special, statused, casting_stat = base_casting_stat();
 	int difficulty;
 	int skill;
+	int caster_level;
 	
+	if(!spellev(spell)) return 0;
 	if(Deadmagic && casting_stat == A_INT) return 0;
 	if(Catapsi && casting_stat == A_CHA) return 0;
 	if(Misotheism && casting_stat == A_WIS) return 0;
@@ -6131,6 +6098,16 @@ int spell;
 			 || u.upriest
 			 || Role_if(PM_MONK)
 			 || Role_if(PM_HEALER)
+			) cast_bon += 2;
+			if (uwep->oartifact)
+				cast_bon *= 2;
+			splcaster -= urole.spelarmr * cast_bon / 3;
+		}
+
+		if(uwep->otyp == HAMMER_OF_ETERNITY) {
+			cast_bon = 0;
+			if(spell_skilltype(spellid(spell)) == P_CLERIC_SPELL
+			 || spell_skilltype(spellid(spell)) == P_MATTER_SPELL
 			) cast_bon += 2;
 			if (uwep->oartifact)
 				cast_bon *= 2;
@@ -6227,6 +6204,13 @@ int spell;
 				cast_bon *= 2;
 			splcaster -= urole.spelarmr * cast_bon / 3;
 		}
+
+		if (uwep->otyp == PEST_GLAIVE && (uwep->ovar1_pestglaive_props & PG_ATHAME)) {
+			cast_bon = 0;
+			if (spell_skilltype(spellid(spell)) == P_ATTACK_SPELL || spell_skilltype(spellid(spell)) == P_ENCHANTMENT_SPELL)
+				cast_bon += 1;
+			splcaster -= urole.spelarmr * cast_bon / 3;
+		}
 		
 		if(uwep && uwep->oartifact == ART_CALLANDOR && !flags.initgend){	// sa'angreal
 			cast_bon = 2;
@@ -6310,7 +6294,12 @@ int spell;
 			splcaster += uarmfbon;
 	}
 
-	if (uarms) {
+	if (uarmw) {
+		if (metal_blocks_spellcasting(uarmw))
+			splcaster += uarmfbon;
+	}
+
+	if (uarms && !check_mutation(AAT_SHIELD_AURA)) {
 		splcaster += casting_stat == A_CHA ? 0 : urole.spelshld;
 	}
 
@@ -6365,7 +6354,15 @@ int spell;
 	 */
 	skill = P_SKILL(spell_skilltype(spellid(spell)));
 	skill = max(skill,P_UNSKILLED) - 1;	/* unskilled => 0 */
-	difficulty= (spellev(spell)-1) * 4 - ((skill * 6) + (u.ulevel/3) + 1);
+	caster_level = u.ulevel;
+	// Pre-difficulty adjustments based on mutations
+	if(CLARITY_MUDRA){
+		skill += 1;
+		caster_level += caster_level/3;
+		splcaster -= urole.spelarmr;
+		chance += 44;
+	}
+	difficulty= (spellev(spell)-1) * 4 - ((skill * 6) + (caster_level/3) + 1);
 	if(check_mutation(TT_EXTRA_FINGERS)){
 		splcaster -= urole.spelarmr;
 		difficulty -= 3;
@@ -6401,7 +6398,7 @@ int spell;
 	if(size_adjust < 1)
 		size_adjust = 1;
 	else size_adjust += 1;
-	if (uarms && casting_stat != A_CHA && ((metal_blocks_spellcasting(uarms)) || weight(uarms) > ((int) objects[BUCKLER].oc_weight)*size_adjust)) {
+	if (uarms && casting_stat != A_CHA && !check_mutation(AAT_SHIELD_AURA) && ((metal_blocks_spellcasting(uarms)) || weight(uarms) > ((int) objects[BUCKLER].oc_weight)*size_adjust)) {
 		if (spellid(spell) == urole.spelspec) {
 			chance /= 2;
 		} else {
@@ -6458,7 +6455,7 @@ int spell;
 	//Parasitology, uh, upgrades
 	chance += (u.mm_up + u.explosion_up + u.cuckoo)*5;
 	if(active_glyph(LUMEN)){
-		if(skill == P_ENCHANTMENT_SPELL)
+		if(spell_skilltype(spellid(spell)) == P_ENCHANTMENT_SPELL)
 			chance += u.cuckoo*5;
 	}
 
@@ -6472,7 +6469,7 @@ int spell;
 			}
 		}
 		chance = min(100, chance);
-		if(dist < 100) chance -= 100-dist;
+		if(dist > 0 && dist < 100) chance -= 100-dist;
 	}
 	
 	//Panic can be overcome by Naen
@@ -6832,7 +6829,7 @@ dopseudonatural()
 {
 	struct monst *mon, *nmon;
 	int tmp, weptmp, tchtmp;
-	struct attack symbiote = { AT_TENT, AD_PHYS, 5, spiritDsize() };
+	struct attack symbiote = { AT_TENT, AD_PHYS, 5, spiritDsize(), .bodypart = ATKBP(TENTACLE_GENERIC) };
 	for(mon = fmon;mon;mon = nmon){
 		nmon = mon->nmon;
 		if(!mon || mon->mtame || !rn2(5))
@@ -6859,7 +6856,7 @@ dodestruction()
 	extern const int clockwisex[8];
 	extern const int clockwisey[8];
 	int i = rnd(8),j, lim=0;
-	struct attack destruction = { AT_NONE, AD_FIRE, 6, 6 };
+	struct attack destruction = { AT_NONE, AD_FIRE, 6, 6, .bodypart = ATKBP(WHOLE_BODY) };
 	if(!rn2(3))
 		destruction.adtyp = AD_COLD;
 	else if(!rn2(4))

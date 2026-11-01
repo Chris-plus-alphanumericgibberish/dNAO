@@ -17,6 +17,15 @@ struct trobj {
 STATIC_DCL void FDECL(ini_inv, (struct trobj *));
 STATIC_DCL void FDECL(knows_class,(CHAR_P));
 STATIC_DCL boolean FDECL(restricted_spell_discipline, (int));
+STATIC_DCL boolean FDECL(exempt_starting_obj, (struct obj *));
+STATIC_DCL boolean FDECL(keep_starting_obj, (struct obj *));
+STATIC_DCL void NDECL(pauper_reinit);
+STATIC_DCL void FDECL(learn_object, (int));
+STATIC_DCL int FDECL(race_inv_sub, (int));
+STATIC_DCL int NDECL(kensei_starting_weapon);
+
+/* TRUE while u_init() is setting up a new character */
+static boolean in_u_init = FALSE;
 
 #define UNDEF_TYP	0
 #define UNDEF_SPE	'\177'
@@ -703,6 +712,13 @@ static struct trobj Phial[] = {
 	{ 0, 0, 0, 0, 0 }
 };
 
+static struct trobj KenseiArrows[] = {
+#define KEN_TWO_ARROWS	0
+	{ YA, 2, WEAPON_CLASS, 50, UNDEF_BLESS },
+#define KEN_ZERO_ARROWS	1
+	{ YA, 0, WEAPON_CLASS, 30, UNDEF_BLESS },
+	{ 0, 0, 0, 0, 0 }
+};
 static struct trobj BlackTorches[] = {
 	{ SHADOWLANDER_S_TORCH, 0, TOOL_CLASS, 3, 0 },
 	{ 0, 0, 0, 0, 0 }
@@ -1807,8 +1823,18 @@ void
 knows_object(obj)
 register int obj;
 {
-	discover_object(obj,TRUE,FALSE);
-	objects[obj].oc_pre_discovered = 1;	/* not a "discovery" */
+	if (u.uroleplay.pauper && in_u_init)
+		return;
+	learn_object(obj);
+}
+
+/* Make object type 'otyp' known to the hero, without it counting as a
+   discovery. */
+STATIC_OVL void
+learn_object(int otyp)
+{
+	discover_object(otyp, TRUE, FALSE);
+	objects[otyp].oc_pre_discovered = 1;
 }
 
 /* Know ordinary (non-magical) objects of a certain class,
@@ -1863,7 +1889,7 @@ int count;
                objects[obj].oc_class == WAND_CLASS ||
                objects[obj].oc_class == AMULET_CLASS))
             {
-              knows_object(obj);
+              learn_object(obj);
               count--;
             }
         }
@@ -1875,6 +1901,10 @@ void
 u_init()
 {
 	register int i;
+	struct u_roleplay tmpuroleplay = u.uroleplay; /* set by rcfile options */
+
+	if (tmpuroleplay.pauper)
+		tmpuroleplay.nudist = TRUE;	/* pauper implies nudist */
 
 	flags.female = flags.initgend;
 	flags.beginner = 1;
@@ -1884,6 +1914,11 @@ u_init()
 	(void) memset((genericptr_t)&u, 0, sizeof(u));
 	u.ustuck = (struct monst *)0;
 
+	u.uroleplay = tmpuroleplay; /* restore options set via rcfile */
+	u.uroleplay.blind_start = u.uroleplay.blind;
+	u.uroleplay.nudist_start = u.uroleplay.nudist;
+	in_u_init = TRUE;
+
 	u.uavoid_passives = 0;		// by default, allow passive-triggering attacks
 	u.uavoid_msplcast = 0;		// by default, allow mspellcasting
 	u.uavoid_grabattk = 0;		// by default, allow grabbing attacks
@@ -1891,7 +1926,8 @@ u_init()
 	u.uavoid_unsafetouch = 1;	// by default, avoid touching potentally unsafe monsters
 	u.uavoid_theft = 0;			// by default, allow theft attacks
 	u.uavoid_urpassives = 0;	// by default, allow passive attacks
-	u.umystic = ~0;				// by default, all monk style attacks are active
+	(void) memset((genericptr_t)u.umystic, 0xFF, sizeof u.umystic);	// by default, all monk style attacks are active
+	init_martial_forms();
 
 	u.summonMonster = FALSE;
 	u.uleadamulet = FALSE;
@@ -1919,9 +1955,8 @@ u_init()
 // #if 0	/* documentation of more zero values as desirable */
 	// u.usick_cause[0] = 0;
 	// u.uluck  = u.moreluck = 0;
-// # ifdef TOURIST
 	// uarmu = 0;
-// # endif
+	// uarmw = 0;
 	// uarm = uarmc = uarmh = uarms = uarmg = uarmf = 0;
 	// uwep = uball = uchain = uleft = uright = urope = 0;
 	// uswapwep = uquiver = 0;
@@ -2362,6 +2397,7 @@ u_init()
         skill_init(Skill_Con);
 		u.hod += 6;
 		u.ualign.sins += 16; /* You have sinned */
+		u.udeprived = TRUE;
         /* On the verge of hungry */
 		if(Race_if(PM_INCANTIFIER)){
 			u.uen = 600;
@@ -2377,10 +2413,10 @@ u_init()
 		u.veil = FALSE;
 		u.umaniac = TRUE;
         ini_inv(Madman);
-		if(Race_if(PM_VAMPIRE)){
+		if(Race_if(PM_VAMPIRE) && !u.uroleplay.pauper && !u.uroleplay.nudist){
 			ini_inv(Ironmask);
 		}
-		if(Race_if(PM_AASIMAR) && flags.initalign == INITALIGN_CHAOTIC){
+		if(RACE_IF_AASIMAR && flags.initalign == INITALIGN_CHAOTIC){
 			ini_inv(Hood);
 		}
         knows_object(SKELETON_KEY);
@@ -2414,7 +2450,9 @@ u_init()
 		u.usanity = 75; /* Your sanity is not so hot */
 		u.umadness |= MAD_DELUSIONS; /* Your sanity is not so hot */
 		u.udrunken = 30; /* Your sanity is not so hot (and you may have once been more powerful) */
-		if(Race_if(PM_ELF)){
+		if(u.uroleplay.pauper)
+			u.udeprived = TRUE;
+		if(STAR_ELF_MADMAN){
 			u.gevurah += 4;//cheated death.
 		}
 
@@ -2431,14 +2469,18 @@ u_init()
 				// u.umoney0 = rn1(100, 1001);
 				u.umoney0 = 0;
 #endif
-				Blinded |= TIMEOUT_INF;
+				if (!u.uroleplay.pauper)
+					Blinded |= TIMEOUT_INF;
 				// HTelepat |= FROMOUTSIDE;
 				ini_inv(Healer_Drow);
-				initialforgotspell(SPE_DRAIN_LIFE);
-				initialforgotspell(SPE_CREATE_FAMILIAR);
-				initialforgotpriestspells(2);
+				if (!u.uroleplay.pauper) {
+					initialforgotspell(SPE_DRAIN_LIFE);
+					initialforgotspell(SPE_CREATE_FAMILIAR);
+					initialforgotpriestspells(2);
+				}
 				skill_init(Skill_Dro_F_H);
-				u.upriest = TRUE;
+				if (!u.uroleplay.pauper)
+					u.upriest = TRUE;
 			}
 			else {
 #ifndef GOLDOBJ
@@ -2448,16 +2490,22 @@ u_init()
 				// u.umoney0 = rn1(100, 101);
 				u.umoney0 = 0;
 #endif
-				Blinded |= TIMEOUT_INF;
+				if (!u.uroleplay.pauper)
+					Blinded |= TIMEOUT_INF;
 				// HTelepat |= FROMOUTSIDE;
 				ini_inv(Healer_Hedrow);
-				initialforgotspell(SPE_FORCE_BOLT);
-				initialforgotwizardspells(3);
+				if (!u.uroleplay.pauper) {
+					initialforgotspell(SPE_FORCE_BOLT);
+					initialforgotwizardspells(3);
+				}
 				skill_init(Skill_Dro_M_H);
-				u.uwizard = TRUE;
+				if (!u.uroleplay.pauper)
+					u.uwizard = TRUE;
 			}
 			knows_object(POT_HEALING);
 			knows_object(POT_EXTRA_HEALING);
+			if (u.uroleplay.pauper)
+				quest_status.qvar1_healer_pet_level = rnd(4);
 		} else {
 #ifndef GOLDOBJ
 			u.ugold = u.ugold0 = rn1(1000, 1001);
@@ -2502,7 +2550,6 @@ u_init()
 				Skill_Ken[KENSEI_SKILL].skill = P_CLUB;
 				skill_init(Skill_Ken);
 				u.role_variant = ART_BOREAL_SCEPTER;
-				Kensei[KEN_WEAPON].trotyp = MACUAHUITL;
 				skill_add(Skill_Ken_GW);
 			}
 			else if(u.ualign.type == A_NEUTRAL){
@@ -2514,7 +2561,6 @@ u_init()
 			else {
 				Skill_Ken[KENSEI_SKILL].skill = P_BROAD_SWORD;
 				skill_init(Skill_Ken);
-				Kensei[KEN_WEAPON].trotyp = BROADSWORD;
 				u.role_variant = ART_MALICE;
 			}
 			switch (rn2(90) / 30) {
@@ -2528,20 +2574,17 @@ u_init()
 				Skill_Ken[KENSEI_SKILL].skill = P_SHORT_SWORD;
 				skill_init(Skill_Ken);
 				u.role_variant = ART_ANSERMEE;
-				Kensei[KEN_WEAPON].trotyp = SHORT_SWORD;
 			}
 			else if(u.ualign.type == A_NEUTRAL){
 				Skill_Ken[KENSEI_SKILL].skill = P_MACE;
 				skill_init(Skill_Ken);
 				skill_add(Skill_Ken_SBR_Nonstandard);
 				u.role_variant = ART_KISHIN_MIRROR;
-				Kensei[KEN_WEAPON].trotyp = MACE;
 			}
 			else {
 				skill_init(Skill_Ken);
 				skill_add(Skill_Ken_SBR_Standard);
 				u.role_variant = ART_EPITAPH_OF_WONGAS;
-				Kensei[KEN_WEAPON].trotyp = ROD_OF_FORCE;
 			}
 			switch (rn2(90) / 30) {
 			case 0: Kensei[KEN_BOOK].trotyp = SPE_SLOW_MONSTER; break;
@@ -2554,7 +2597,6 @@ u_init()
 			skill_init(Skill_Ken);
 			skill_add(Skill_Ken_GW);
 			u.role_variant = ART_RINGIL;
-			Kensei[KEN_WEAPON].trotyp = HIGH_ELVEN_WARSWORD;
 			switch (rn2(90) / 30) {
 			case 0: Kensei[KEN_BOOK].trotyp = SPE_SLEEP; break;
 			case 1: Kensei[KEN_BOOK].trotyp = SPE_EXTRA_HEALING; break;
@@ -2566,7 +2608,6 @@ u_init()
 			skill_init(Skill_Ken);
 			skill_add(Skill_Ken_GW);
 			u.role_variant = ART_ANGUIREL;
-			Kensei[KEN_WEAPON].trotyp = DROVEN_GREATSWORD;
 			switch (rn2(90) / 30) {
 			case 0: Kensei[KEN_BOOK].trotyp = SPE_SLOW_MONSTER; break;
 			case 1: Kensei[KEN_BOOK].trotyp = SPE_INVISIBILITY; break;
@@ -2579,7 +2620,6 @@ u_init()
 			skill_add(Skill_Ken_GW);
 			skill_add(Skill_Ken_LS);
 			u.role_variant = ART_SILVER_SKY;
-			Kensei[KEN_WEAPON].trotyp = TWO_HANDED_SWORD;
 			switch (rn2(90) / 30) {
 			case 0: Kensei[KEN_BOOK].trotyp = SPE_FORCE_BOLT; break;
 			case 1: Kensei[KEN_BOOK].trotyp = SPE_PROTECTION; break;
@@ -2591,7 +2631,6 @@ u_init()
 			skill_init(Skill_Ken);
 			skill_add(Skill_Ken_GW);
 			u.role_variant = ART_SKY_REFLECTED;
-			Kensei[KEN_WEAPON].trotyp = KATANA;
 			switch (rn2(90) / 30) {
 			case 0: Kensei[KEN_BOOK].trotyp = SPE_SLOW_MONSTER; break;
 			case 1: Kensei[KEN_BOOK].trotyp = SPE_PROTECTION; break;
@@ -2602,20 +2641,17 @@ u_init()
 			if(u.ualign.type == A_LAWFUL){
 				skill_init(Skill_Ken);
 				u.role_variant = ART_KIKU_ICHIMONJI;
-				Kensei[KEN_WEAPON].trotyp = KATANA;
 			}
 			else if(u.ualign.type == A_NEUTRAL){
 				Skill_Ken[KENSEI_SKILL].skill = P_TWO_HANDED_SWORD;
 				skill_init(Skill_Ken);
 				u.role_variant = ART_SEVEN_STAR_SWORD;
-				Kensei[KEN_WEAPON].trotyp = NAGAMAKI;
 			}
 			else {
 				Skill_Ken[KENSEI_SKILL].skill = P_SABER;
 				skill_init(Skill_Ken);
 				skill_add(Skill_Ken_LS);
 				u.role_variant = ART_WINTER_REAPER;
-				Kensei[KEN_WEAPON].trotyp = RAPIER;
 			}
 			skill_add(Skill_Ken_GW);
 			switch (rn2(90) / 30) {
@@ -2624,9 +2660,51 @@ u_init()
 			case 2: Kensei[KEN_BOOK].trotyp = SPE_INVISIBILITY; break;
 			}
 		}
+		else if(Race_if(PM_AASIMAR)){
+			if(u.ualign.type == A_LAWFUL){
+				Skill_Ken[KENSEI_SKILL].skill = P_LONG_SWORD;
+				skill_init(Skill_Ken);
+				skill_add(Skill_Ken_LS);
+				skill_add(Skill_Ken_GW);
+				u.role_variant = ART_WHIRLING_SWORD;
+			}
+			else if(u.ualign.type == A_NEUTRAL){
+				struct def_skill AltSkill_Ken[] = {
+					{ P_BOW, P_EXPERT },
+					{ P_SHURIKEN, P_EXPERT },		{ P_DAGGER, P_EXPERT },
+					{ P_DART, P_EXPERT },			{ P_BOOMERANG, P_EXPERT },
+					{ P_ATTACK_SPELL, P_SKILLED },
+					{ P_HEALING_SPELL, P_EXPERT },	{ P_DIVINATION_SPELL, P_EXPERT },
+					{ P_ENCHANTMENT_SPELL, P_BASIC },{ P_CLERIC_SPELL, P_EXPERT }, 
+					{ P_ESCAPE_SPELL, P_EXPERT },	{ P_MATTER_SPELL, P_BASIC },
+					{ P_MARTIAL_ARTS, P_GRAND_MASTER },	{ P_TWO_WEAPON_COMBAT, P_GRAND_MASTER },
+					{ P_BEAST_MASTERY, P_EXPERT },
+					{ P_NONE, 0 }
+				};
+				skill_init(AltSkill_Ken);
+				u.role_variant = ART_SUN_S_BOW;
+			}
+			else {
+				Skill_Ken[KENSEI_SKILL].skill = P_LONG_SWORD;
+				skill_init(Skill_Ken);
+				skill_add(Skill_Ken_GW);
+				u.role_variant = ART_ANCIENT_RITUAL_SWORD;
+			}
+			switch (rn2(90) / 30) {
+			case 0: Kensei[KEN_BOOK].trotyp = SPE_SLOW_MONSTER; break;
+			case 1: Kensei[KEN_BOOK].trotyp = SPE_PROTECTION; break;
+			case 2: Kensei[KEN_BOOK].trotyp = SPE_INVISIBILITY; break;
+			}
+		}
+		Kensei[KEN_WEAPON].trotyp = kensei_starting_weapon();
 		knows_class(WEAPON_CLASS);
 		knows_class(ARMOR_CLASS);
 		ini_inv(Kensei);
+		if(Race_if(PM_AASIMAR) && u.ualign.type == A_NEUTRAL){
+			KenseiArrows[KEN_TWO_ARROWS].trquan = rn1(10, 50);
+			KenseiArrows[KEN_ZERO_ARROWS].trquan = rn1(10, 30);
+			ini_inv(KenseiArrows);
+		}
 		if(RACE_IF_DROW){
 			ini_inv(BlackTorches);
 		}
@@ -2711,7 +2789,7 @@ u_init()
 		Pirate[PIR_BULLETS].trquan += rn2(Pirate[PIR_BULLETS].trquan/2);
 		if(rn2(100)<50)	Pirate[PIR_JEWELRY].trotyp = RIN_ADORNMENT;
 		ini_inv(Pirate);
-		if(RACE_IF_DROW){
+		if(RACE_IF_DROW && !u.uroleplay.pauper){
 			struct obj *otmp;
 			otmp = mksobj(CROSSBOW_BOLT, NO_MKOBJ_FLAGS);
 			otmp->quan = rn1(12, 16);
@@ -2821,7 +2899,7 @@ u_init()
 		break;
 #endif
 	case PM_UNDEAD_HUNTER:
-		if(Race_if(PM_VAMPIRE) || Race_if(PM_AASIMAR)){
+		if(Race_if(PM_VAMPIRE) || RACE_IF_AASIMAR){
 			switch(rn2(5)){
 			case 0:
 				//UndeadHunter[U_WEAPON].trotyp = CANE;
@@ -3033,7 +3111,8 @@ u_init()
 			u.ualign.type = A_NEUTRAL;
 			u.ualign.god = u.ugodbase[UGOD_CURRENT] = u.ugodbase[UGOD_ORIGINAL] = align_to_god(u.ualign.type);
 			flags.initalign = INITALIGN_NEUTRAL;
-			change_luck(-10);
+			if (!u.uroleplay.pauper)
+				change_luck(-10);
 		} else if(!Role_if(PM_EXILE) && !Role_if(PM_CONVICT)){
 			if(!Role_if(PM_MADMAN))
 				ini_inv(DrovenCloak);
@@ -3231,6 +3310,8 @@ u_init()
 		break;
 	}
 
+	pauper_reinit();
+
 	if (discover)
 		ini_inv(Wishing);
 
@@ -3385,7 +3466,7 @@ u_init()
 			}
 			else {
 				flags.HDbreath = AD_COLD;
-				HCold_resistance |= (FROMRACE|FROMOUTSIDE);
+				u.uprops[COLD_RES].intrinsic |= (FROMRACE|FROMOUTSIDE);
 			}
 		} else if(Role_if(PM_MADMAN)){
 			if(flags.initgend){
@@ -3393,16 +3474,16 @@ u_init()
 			}
 			else {
 				flags.HDbreath = AD_FIRE;
-				HFire_resistance |= (FROMRACE|FROMOUTSIDE);
+				u.uprops[FIRE_RES].intrinsic |= (FROMRACE|FROMOUTSIDE);
 			}
 		} else switch(rnd(6)){
 			case 1:
 				flags.HDbreath = AD_COLD;
-				HCold_resistance |= (FROMRACE|FROMOUTSIDE);
+				u.uprops[COLD_RES].intrinsic |= (FROMRACE|FROMOUTSIDE);
 			break;
 			case 2:
 				flags.HDbreath = AD_FIRE;
-				HFire_resistance |= (FROMRACE|FROMOUTSIDE);
+				u.uprops[FIRE_RES].intrinsic |= (FROMRACE|FROMOUTSIDE);
 			break;
 			case 3:
 				flags.HDbreath = AD_SLEE;
@@ -3410,16 +3491,16 @@ u_init()
 			break;
 			case 4:
 				flags.HDbreath = AD_ELEC;
-				HShock_resistance |= (FROMRACE|FROMOUTSIDE);
+				u.uprops[SHOCK_RES].intrinsic |= (FROMRACE|FROMOUTSIDE);
 				HBlind_res |= (FROMRACE|FROMOUTSIDE);
 			break;
 			case 5:
 				flags.HDbreath = AD_DRST;
-				HPoison_resistance |= (FROMRACE|FROMOUTSIDE);
+				u.uprops[POISON_RES].intrinsic |= (FROMRACE|FROMOUTSIDE);
 			break;
 			case 6:
 				flags.HDbreath = AD_ACID;
-				HAcid_resistance |= (FROMRACE|FROMOUTSIDE);
+				u.uprops[ACID_RES].intrinsic |= (FROMRACE|FROMOUTSIDE);
 			break;
 		}
 	}
@@ -3436,17 +3517,33 @@ u_init()
 			}
 		}
 		else {
-			flags.aasimar_type = rnd(3);
-			if(flags.aasimar_type == AASIMAR_TYPE_ELADRIN){
-				if(rn2(7))
-					flags.aasimar_subtype = rnd(6);
-				else {
-					flags.aasimar_subtype = rnd(LAST_UNCOMMON_ELADRIN_SUBTYPE - LAST_COMMON_ELADRIN_SUBTYPE) + LAST_COMMON_ELADRIN_SUBTYPE;
+			if(Role_if(PM_KENSEI)){
+				if(flags.initalign == INITALIGN_LAWFUL){
+					flags.aasimar_type = AASIMAR_TYPE_ARCHON;
 				}
+				else if(flags.initalign == INITALIGN_NEUTRAL){
+					flags.aasimar_type = AASIMAR_TYPE_SURYA;
+				}
+				else { // == INITALIGN_CHAOTIC
+					flags.aasimar_type = AASIMAR_TYPE_ELADRIN;
+				}
+			}
+			else flags.aasimar_type = rnd(3);
+			if(flags.aasimar_type == AASIMAR_TYPE_ELADRIN){
+				do {
+					if(rn2(7))
+						flags.aasimar_subtype = rnd(6);
+					else {
+						flags.aasimar_subtype = rnd(LAST_UNCOMMON_ELADRIN_SUBTYPE - LAST_COMMON_ELADRIN_SUBTYPE) + LAST_COMMON_ELADRIN_SUBTYPE;
+					}
+				} while(Role_if(PM_KENSEI) && flags.aasimar_subtype == AASIMAR_SUBTYPE_COURE);
+			}
+			else if(flags.aasimar_type == AASIMAR_TYPE_ARCHON){
+				flags.aasimar_subtype = rn1(LAST_ARCHON_SUBTYPE - FIRST_ARCHON_SUBTYPE + 1, FIRST_ARCHON_SUBTYPE);
 			}
 		}
 	}
-	else if(Race_if(PM_TIEFLING) || Race_if(PM_DARK_FEY_RI)){
+	else if(RACE_IF_TIEFLING){
 		// int mutation_levels[] = {3,10,14,18,22,26};
 		int mutation_levels[] = {3,7,11,15,19,23,27};
 		for(int i=0; i<SIZE(mutation_levels); i++){
@@ -3460,6 +3557,12 @@ u_init()
 						 : CLR_WHITE;
 	/* set default Brand otyp as unset */
 	u.brand_otyp = STRANGE_OBJECT;
+
+	if (u.uroleplay.blind)
+		Blinded |= FROMOUTSIDE;
+
+	u.uroleplay.nudist = tmpuroleplay.nudist;
+	in_u_init = FALSE;
 	return;
 }
 
@@ -3514,7 +3617,7 @@ ini_inv(trop)
 register struct trobj *trop;
 {
 	struct obj *obj;
-	int otyp, i;
+	int otyp;
 
 	while (trop->trclass) {
 		if (trop->trotyp != UNDEF_TYP) {
@@ -3529,15 +3632,7 @@ register struct trobj *trop;
 				trop++;
 				continue;
 			}
-			if (urace.malenum != PM_HUMAN) {
-			    /* substitute specific items for generic ones */
-			    for (i = 0; inv_subs[i].race_pm != NON_PM; ++i)
-				if (inv_subs[i].race_pm == urace.malenum &&
-					otyp == inv_subs[i].item_otyp) {
-				    otyp = inv_subs[i].subs_otyp;
-				    break;
-				}
-			}
+			otyp = race_inv_sub(otyp);
 			if(Role_if(PM_UNDEAD_HUNTER) && otyp == LONG_SWORD){
 				obj = mksartifact(ART_HOLY_MOONLIGHT_SWORD);
 				fully_identify_obj(obj);
@@ -3556,6 +3651,10 @@ register struct trobj *trop;
 				else if(Race_if(PM_HUMAN) && otyp == LONG_SWORD){
 					obj = mksobj(otyp, NO_MKOBJ_FLAGS);
 					set_material_gm(obj, METAL);
+				}
+				else if(Race_if(PM_AASIMAR) && u.role_variant == ART_WHIRLING_SWORD && otyp == LONG_SWORD){
+					obj = mksobj(otyp, NO_MKOBJ_FLAGS);
+					set_material_gm(obj, SILVER);
 				}
 				else if(Race_if(PM_YUKI_ONNA) && otyp == RAPIER){
 					obj = mksobj(otyp, NO_MKOBJ_FLAGS);
@@ -3614,7 +3713,7 @@ register struct trobj *trop;
 				set_material_gm(obj, MITHRIL);
 			}
 			if(Role_if(PM_UNDEAD_HUNTER)){
-				if((Race_if(PM_VAMPIRE) || Race_if(PM_AASIMAR)) && obj->otyp != HIGH_BOOTS){
+				if((Race_if(PM_VAMPIRE) || RACE_IF_AASIMAR) && obj->otyp != HIGH_BOOTS){
 					if(obj->obj_material == LEATHER || obj->otyp == TRICORN){
 						set_material_gm(obj, CLOTH);
 						if(obj->otyp == GLOVES)
@@ -3742,7 +3841,7 @@ register struct trobj *trop;
 				    (objects[otyp].oc_level > 3 ||
 				    restricted_spell_discipline(otyp)))
 				|| (hates_silver(youracedata) && obj->obj_material == SILVER)
-				|| (hates_iron(youracedata) && is_iron_obj(obj))
+				|| (hates_iron(youracedata) && (obj->obj_material == IRON || obj->obj_material == GREEN_STEEL))
 							) {
 				dealloc_obj(obj);
 				obj = mkobj(trop->trclass, FALSE);
@@ -3750,15 +3849,7 @@ register struct trobj *trop;
 				set_material_gm(obj, objects[otyp].oc_material);
 			}
 
-			if (urace.malenum != PM_HUMAN) {
-				/* substitute specific items for generic ones */
-				for (i = 0; inv_subs[i].race_pm != NON_PM; ++i)
-				if (inv_subs[i].race_pm == urace.malenum &&
-					otyp == inv_subs[i].item_otyp) {
-					otyp = inv_subs[i].subs_otyp;
-					break;
-				}
-			}
+			otyp = race_inv_sub(otyp);
 			if(otyp != obj->otyp){
 				obj = poly_obj(obj, otyp);
 				otyp = obj->otyp;
@@ -3860,8 +3951,8 @@ register struct trobj *trop;
 						if (objects[otmp->otyp].oc_uses_known) otmp->known = 1;
 					}
 				}
-				if(Role_if(PM_PIRATE) && is_iron_obj(obj)) obj->oerodeproof = 1;
-				if(Role_if(PM_SAMURAI) && obj->oclass == ARMOR_CLASS && is_iron_obj(obj)) obj->oerodeproof = 1;
+				if(Role_if(PM_PIRATE) && (obj->obj_material == IRON || obj->obj_material == GREEN_STEEL)) obj->oerodeproof = 1;
+				if(Role_if(PM_SAMURAI) && obj->oclass == ARMOR_CLASS && (obj->obj_material == IRON || obj->obj_material == GREEN_STEEL)) obj->oerodeproof = 1;
 				if(Role_if(PM_SAMURAI) && obj->otyp == MASK){
 					if(hates_iron(youracedata)){
 						set_material_gm(obj, (RACE_IF_DROW) ? OBSIDIAN_MT : MITHRIL);
@@ -3935,7 +4026,7 @@ register struct trobj *trop;
 				&& (obj->oclass == ARMOR_CLASS || obj->oclass == WEAPON_CLASS)
 				&& !is_ammo(obj)
 			){
-				if(is_iron_obj(obj)){
+				if(obj->obj_material == IRON || obj->obj_material == GREEN_STEEL){
 					set_material_gm(obj, (RACE_IF_DROW) ? OBSIDIAN_MT : MITHRIL);
 				}
 			}
@@ -3945,7 +4036,7 @@ register struct trobj *trop;
 					obj->obj_color = CLR_WHITE;
 				}
 			}
-			if(Role_if(PM_HEALER) && (RACE_IF_DROW)){
+			if((Role_if(PM_HEALER) && (RACE_IF_DROW)) || u.uroleplay.blind){
 				if(obj->oclass == SPBOOK_CLASS){
 					add_oprop(obj, OPROP_TACTB);
 				}
@@ -3953,9 +4044,16 @@ register struct trobj *trop;
 #ifdef GOLDOBJ
 		}
 #endif
+		if (!keep_starting_obj(obj)) {
+			obfree(obj, (struct obj *)0);
+			trop++;
+			continue;
+		}
 		/* defined after setting otyp+quan + blessedness */
 		obj->owt = weight(obj);
 		obj = addinv(obj);
+		if (exempt_starting_obj(obj))
+			start_timer(1, TIMER_OBJECT, CRUMBLE_IMPROVED, (genericptr_t)obj);
 
 		/* Make the type known if necessary */
 		if (OBJ_DESCR(objects[otyp]) && obj->known && !Role_if(PM_EXILE))
@@ -3990,10 +4088,10 @@ register struct trobj *trop;
 				setworn(obj, W_ARMH);
 			else if (is_gloves(obj) && !uarmg)
 				setworn(obj, W_ARMG);
-#ifdef TOURIST
 			else if (is_shirt(obj) && !uarmu)
 				setworn(obj, W_ARMU);
-#endif
+			else if (is_wingguard(obj) && !uarmw)
+				setworn(obj, W_ARMW);
 			else if (is_cloak(obj) && !uarmc)
 				setworn(obj, W_ARMC);
 			else if (is_boots(obj) && !uarmf)
@@ -4028,6 +4126,154 @@ register struct trobj *trop;
 #endif
 		trop++;
 	}
+}
+
+/* Return whether a newly made starting item is one the pauper or nudist
+   option would remove, but which is kept anyway because it's harmful
+   (cursed gear a non-Weldproof hero is stuck with). */
+STATIC_OVL boolean
+exempt_starting_obj(struct obj *obj)
+{
+	if (!obj->cursed || Weldproof)
+		return FALSE;
+	/* pauper drow healers aren't ritually blinded */
+	if (u.uroleplay.pauper && Role_if(PM_HEALER) && RACE_IF_DROW
+		&& obj->otyp == BLINDFOLD
+	)
+		return FALSE;
+	return u.uroleplay.pauper
+		|| (u.uroleplay.nudist && obj->oclass == ARMOR_CLASS);
+}
+
+/* Return whether a newly made starting item should go into the hero's
+   inventory under the pauper and nudist options: paupers get nothing and
+   nudists get no armor, except for exempt harmful items. */
+STATIC_OVL boolean
+keep_starting_obj(struct obj *obj)
+{
+	if (exempt_starting_obj(obj))
+		return TRUE;
+	if (u.uroleplay.pauper)
+		return FALSE;
+	if (u.uroleplay.nudist && obj->oclass == ARMOR_CLASS)
+		return FALSE;
+	return TRUE;
+}
+
+/* Remove most beneficial knowledge, refund a bit of potential. */
+STATIC_OVL void
+pauper_reinit(void)
+{
+	int skill, preknown = STRANGE_OBJECT;
+
+	if (!u.uroleplay.pauper)
+		return;
+
+	for (skill = 0; skill < P_NUM_SKILLS; skill++)
+		if (OLD_P_SKILL(skill) > P_UNSKILLED) {
+			OLD_P_SKILL(skill) = P_UNSKILLED;
+			P_ADVANCE(skill) = 0;
+		}
+	// "Refund" potential: two skill slots
+	u.weapon_slots = 2;
+
+#ifndef GOLDOBJ
+	u.ugold = u.ugold0 = 0;
+#else
+	u.umoney0 = 0;
+#endif
+	u.wardsknown = 0;
+
+	switch (Role_switch) {
+	case PM_HEALER:
+		preknown = SPE_HEALING;
+		break;
+	case PM_PRIEST:
+	case PM_KNIGHT:
+	case PM_MONK:
+		preknown = SPE_PROTECTION;
+		break;
+	case PM_WIZARD:
+		preknown = SPE_FORCE_BOLT;
+		break;
+	case PM_ARCHEOLOGIST:
+		preknown = TOUCHSTONE;
+		break;
+	case PM_CAVEMAN:
+		preknown = FLINT;
+		break;
+	case PM_ROGUE:
+	case PM_TOURIST:
+		preknown = SACK;
+		break;
+	case PM_SAMURAI:
+		/* put "gunyoki" on the discoveries list */
+		preknown = FOOD_RATION;
+		break;
+	case PM_MADMAN:
+		preknown = SCR_REMOVE_CURSE;
+		break;
+	case PM_PIRATE:
+		preknown = OILSKIN_SACK;
+		break;
+	case PM_KENSEI:
+		if (!Race_if(PM_GITHYANKI) && !Race_if(PM_GITHZERAI))
+			preknown = race_inv_sub(kensei_starting_weapon());
+		break;
+	default:
+		break;
+	}
+	if (preknown != STRANGE_OBJECT)
+		learn_object(preknown);
+}
+
+/* Return the hero's race-specific version of starting item 'otyp' (e.g. an
+   elven short sword for an elf), or 'otyp' itself if there is none. */
+STATIC_OVL int
+race_inv_sub(int otyp)
+{
+	int i;
+
+	if (urace.malenum == PM_HUMAN)
+		return otyp;
+	for (i = 0; inv_subs[i].race_pm != NON_PM; ++i)
+		if (inv_subs[i].race_pm == urace.malenum
+			&& otyp == inv_subs[i].item_otyp
+		)
+			return inv_subs[i].subs_otyp;
+	return otyp;
+}
+
+/* Return the weapon a Kensei of the hero's race and alignment starts with,
+   before race_inv_sub() is applied. */
+STATIC_OVL int
+kensei_starting_weapon(void)
+{
+	if (Race_if(PM_HUMAN))
+		return u.ualign.type == A_LAWFUL ? MACUAHUITL
+			: u.ualign.type == A_NEUTRAL ? LONG_SWORD
+			: BROADSWORD;
+	if (Race_if(PM_INCANTIFIER))
+		return u.ualign.type == A_LAWFUL ? SHORT_SWORD
+			: u.ualign.type == A_NEUTRAL ? MACE
+			: ROD_OF_FORCE;
+	if (Race_if(PM_ELF))
+		return HIGH_ELVEN_WARSWORD;
+	if (Race_if(PM_DROW))
+		return DROVEN_GREATSWORD;
+	if (Race_if(PM_GITHYANKI))
+		return TWO_HANDED_SWORD;
+	if (Race_if(PM_GITHZERAI))
+		return KATANA;
+	if (Race_if(PM_YUKI_ONNA))
+		return u.ualign.type == A_LAWFUL ? KATANA
+			: u.ualign.type == A_NEUTRAL ? NAGAMAKI
+			: RAPIER;
+	if (Race_if(PM_AASIMAR))
+		return u.ualign.type == A_LAWFUL ? LONG_SWORD
+			: u.ualign.type == A_NEUTRAL ? YUMI
+			: PRACTICE_SWORD;
+	return LONG_SWORD;
 }
 
 void

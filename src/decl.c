@@ -181,9 +181,8 @@ NEARDATA struct obj *invent = (struct obj *)0,
 	*uwep = (struct obj *)0, *uarm = (struct obj *)0,
 	*uswapwep = (struct obj *)0,
 	*uquiver = (struct obj *)0, /* quiver */
-#ifdef TOURIST
 	*uarmu = (struct obj *)0, /* under-wear, so to speak */
-#endif
+	*uarmw = (struct obj *)0, /* wing-guards */
 	*ubelt = (struct obj *)0,
 	*usaddle = (struct obj *)0,
 	*uskin = (struct obj *)0, /* dragon armor, if a dragon */
@@ -410,6 +409,9 @@ boolean curses_stupid_hack = 1;
 /* Some arrays to help walk in a circle */
 const int clockwisex[8] = { 0, 1, 1, 1, 0,-1,-1,-1};
 const int clockwisey[8] = {-1,-1, 0, 1, 1, 1, 0,-1};
+
+const int clockwise2x[16] = { 0, 1, 2, 2, 2, 2, 2, 1, 0,-1,-2,-2,-2,-2,-2,-1};
+const int clockwise2y[16] = {-2,-2,-2,-1, 0, 1, 2, 2, 2, 2, 2, 1, 0,-1,-2,-2};
 
 coord save_d = {0};
 

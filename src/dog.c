@@ -214,7 +214,7 @@ boolean quietly;
 			/* 0,1,2:  b=80%,10,10; nc=10%,80,10; c=10%,10,80 */
 			if (chance > 0 && 
 				!(Role_if(PM_BARD) && rnd(20) < ACURR(A_CHA) && 
-					!(is_animal(mtmp->data) || mindless_mon(mtmp)))
+					intelligent_mon(mtmp))
 			){
 				untame(mtmp, 1);	/* not tame after all */
 				if (chance == 2) { /* hostile (cursed figurine) */
@@ -252,6 +252,7 @@ makedog()
 	static int petname_used = 0;
 
 	if (preferred_pet == 'n' || Role_if(PM_ANACHRONONAUT) || Role_if(PM_UNDEAD_HUNTER) || u.silverknight_mire) return((struct monst *) 0);
+	if (u.uroleplay.pauper && Role_if(PM_HEALER) && RACE_IF_DROW) return((struct monst *) 0);
 
 	pettype = pet_type();
 	if (pettype == PM_LITTLE_DOG)
@@ -297,7 +298,7 @@ makedog()
 	    if(Role_if(PM_CONVICT)) petname = "Nicodemus"; /* Rats of NIMH */
     }
 #endif /* CONVICT */
-	mtmp = makemon(&mons[pettype], u.ux, u.uy, pettype == PM_SECRET_WHISPERER ? MM_ADJACENTOK|NO_MINVENT|MM_NOCOUNTBIRTH|MM_EDOG|MM_ESUM : MM_ADJACENTOK|MM_EDOG);
+	mtmp = makemon(&mons[pettype], u.ux, u.uy, pettype == PM_SECRET_WHISPERER ? MM_ADJACENTOK|NO_MINVENT|MM_NOCOUNTBIRTH|MM_EDOG|MM_ESUM : MM_ADJACENTOK|MM_EDOG|(u.uroleplay.pauper ? NO_MINVENT : 0));
 
 	if(!mtmp) return((struct monst *) 0); /* pets were genocided */
 	
@@ -319,38 +320,40 @@ makedog()
 		struct obj *obj;
 		mtmp->m_lev = 1;
 		remove_mintrinsic(mtmp, FAST);
-		obj = mongets(mtmp, CRAM_RATION, MKOBJ_NOINIT);
-		if(obj){
-			obj->quan = 3;
-			fix_object(obj);
+		if(!u.uroleplay.pauper){
+			obj = mongets(mtmp, CRAM_RATION, MKOBJ_NOINIT);
+			if(obj){
+				obj->quan = 3;
+				fix_object(obj);
+				fully_identify_obj(obj);
+			}
+			obj = mongets(mtmp, FOOD_RATION, MKOBJ_NOINIT);
+			if(obj){
+				obj->quan = 1;
+				fix_object(obj);
+				fully_identify_obj(obj);
+			}
+			obj = mongets(mtmp, HIGH_BOOTS, MKOBJ_NOINIT);
+			if(obj) fully_identify_obj(obj);
+			obj = mongets(mtmp, CHAIN_MAIL, MKOBJ_NOINIT);
+			if(obj) fully_identify_obj(obj);
+			obj = mongets(mtmp, GAUNTLETS, MKOBJ_NOINIT);
+			if(obj) fully_identify_obj(obj);
+			obj = mongets(mtmp, AMULET_OF_NULLIFY_MAGIC, MKOBJ_NOINIT);
 			fully_identify_obj(obj);
+			obj = mongets(mtmp, HELMET, MKOBJ_NOINIT);
+			if(obj) fully_identify_obj(obj);
+			obj = mongets(mtmp, KITE_SHIELD, MKOBJ_NOINIT);
+			if(obj) fully_identify_obj(obj);
+			obj = mongets(mtmp, LONG_SWORD, MKOBJ_NOINIT);
+			if(obj){
+				bless(obj);
+				obj->spe = 1;
+				fully_identify_obj(obj);
+			}
+			m_dowear(mtmp, TRUE);
+			init_mon_wield_item(mtmp);
 		}
-		obj = mongets(mtmp, FOOD_RATION, MKOBJ_NOINIT);
-		if(obj){
-			obj->quan = 1;
-			fix_object(obj);
-			fully_identify_obj(obj);
-		}
-		obj = mongets(mtmp, HIGH_BOOTS, MKOBJ_NOINIT);
-		if(obj) fully_identify_obj(obj);
-		obj = mongets(mtmp, CHAIN_MAIL, MKOBJ_NOINIT);
-		if(obj) fully_identify_obj(obj);
-		obj = mongets(mtmp, GAUNTLETS, MKOBJ_NOINIT);
-		if(obj) fully_identify_obj(obj);
-		obj = mongets(mtmp, AMULET_OF_NULLIFY_MAGIC, MKOBJ_NOINIT);
-		fully_identify_obj(obj);
-		obj = mongets(mtmp, HELMET, MKOBJ_NOINIT);
-		if(obj) fully_identify_obj(obj);
-		obj = mongets(mtmp, KITE_SHIELD, MKOBJ_NOINIT);
-		if(obj) fully_identify_obj(obj);
-		obj = mongets(mtmp, LONG_SWORD, MKOBJ_NOINIT);
-		if(obj){
-			bless(obj);
-			obj->spe = 1;
-			fully_identify_obj(obj);
-		}
-		m_dowear(mtmp, TRUE);
-		init_mon_wield_item(mtmp);
 	}
 
 	if(Role_if(PM_HEALER)){
@@ -370,6 +373,7 @@ makedog()
 #ifdef STEED
 	/* Horses already wear a saddle */
 	if ((pettype == PM_PONY || pettype == PM_GIANT_SPIDER || pettype == PM_SMALL_CAVE_LIZARD || pettype == PM_RIDING_PSEUDODRAGON)
+		&& !u.uroleplay.pauper
 		&& !!(otmp = mksobj(SADDLE, 0))
 	) {
 	    if (mpickobj(mtmp, otmp))
@@ -427,6 +431,7 @@ losedogs()
 		    && !(mtmp->mtyp == PM_STRANGER && !quest_status.touched_artifact)
 		    && !((mtmp->mtyp == PM_PUPPET_EMPEROR_XELETH || mtmp->mtyp == PM_PUPPET_EMPRESS_XEDALLI) && mtmp->mvar_yellow_lifesaved)
 		    && !(mtmp->mtyp == PM_TWIN_SIBLING && (mtmp->mvar_twin_lifesaved || !(u.specialSealsActive&SEAL_YOG_SOTHOTH)))
+		    && !(mtmp->mtyp == PM_MAMMON && mtmp->mvar_mammon_dive_x)
 		) {
 			mon_extract_from_list(mtmp, &migrating_mons);
 		    mon_arrive(mtmp, FALSE);
@@ -476,6 +481,8 @@ boolean with_you;
 	mtmp->nmon = fmon;
 	mtmp->marriving = FALSE;
 	fmon = mtmp;
+	/* Insight may have moved while this monster was in limbo */
+	mon_refresh_visible_bodyparts(mtmp);
 	if (mtmp->isshk)
 	    set_residency(mtmp, FALSE);
 	if(mtmp->m_ap_type == M_AP_MONSTER && (BlockableClearThoughts || (!mtmp->iswiz && !(u.umadness&MAD_DELUSIONS)))){
@@ -520,10 +527,13 @@ boolean with_you;
 	       goto_level(do.c) decides who ends up at your target spot
 	       when there is a monster there too. */
 	    if (!MON_AT(u.ux, u.uy) &&
+		    shared_world(mtmp, u.ux, u.uy) &&
 		    !rn2(mtmp->mtame ? 10 : mtmp->mpeaceful ? 5 : 2)
 		)
 			rloc_to(mtmp, u.ux, u.uy);
 	    else
+			/* mnexto()'s own goodpos() check keeps a diagonal_mover
+			 * on its own parity even when the stairway isn't */
 			mnexto(mtmp);
 		if(mtmp->mx == 0){
 			if(wizard) pline("no room for buddy! Arriving later.");
@@ -773,6 +783,22 @@ long nmv;		/* number of moves */
 #endif /* OVLB */
 #ifdef OVL2
 
+/* Return the hero's beast mastery range (a distmin() distance), based on beast mastery skill. */
+int
+beast_mastery_range(void)
+{
+	int range = max(P_SKILL(P_BEAST_MASTERY), 1);
+	if(has_crook(uwep))
+		range++;
+	return range;
+}
+
+boolean
+in_beast_mastery_range(struct monst *mtmp)
+{
+	return distmin(mtmp->mx, mtmp->my, u.ux, u.uy) <= beast_mastery_range();
+}
+
 /* called when you move to another level */
 void
 keepdogs(pets_only, newlev, portal)
@@ -785,12 +811,8 @@ boolean portal;
 	int num_segs;
 	boolean stay_behind;
 	boolean all_pets = FALSE;
-	int pet_dist = P_SKILL(P_BEAST_MASTERY);
+	int pet_dist = beast_mastery_range();
 	int follow_dist;
-	if(pet_dist < 1)
-		pet_dist = 1;
-	if(has_crook(uwep))
-		pet_dist++;
 	if(u.specialSealsActive&SEAL_COSMOS ||
 		(uarmh && uarmh->oartifact == ART_CROWN_OF_THE_SAINT_KING) ||
 		(uarmh && uarmh->oartifact == ART_HELM_OF_THE_DARK_LORD)
@@ -816,7 +838,8 @@ boolean portal;
 				follow_dist++;
 			}
 		}
-	    if (((monnear(mtmp, u.ux, u.uy) && levl_follower(mtmp)) || 
+	    if (((monnear(mtmp, u.ux, u.uy) && levl_follower(mtmp)
+			&& shared_world(mtmp, u.ux, u.uy)) ||
 			(mtmp->mtame && (all_pets ||
 							(distmin(mtmp->mx, mtmp->my, u.ux, u.uy) <= follow_dist)
 							|| (get_mx(mtmp, MX_EDOG) && EDOG(mtmp)->dominated) //Crystal skull monsters always follow
@@ -1037,148 +1060,147 @@ migrate_to_level(mtmp, tolev, xyloc, cc)
 /* return quality of food; the lower the better */
 /* fungi will eat even tainted food */
 int
-dogfood(mon,obj)
-struct monst *mon;
-register struct obj *obj;
+dogfood(struct monst *mon, struct obj *obj)
 {
 	boolean carni = carnivorous(mon->data);
 	boolean herbi = herbivorous(mon->data);
+	boolean intel = intelligent_mon(mon);
 	boolean starving;
 
 	if (is_quest_artifact(obj) || obj_resists(obj, 0, 100))
-	    return (obj->cursed ? TABU : APPORT);
+		return (obj->cursed ? TABU : APPORT);
 
 	switch(obj->oclass) {
 	case FOOD_CLASS:
-	    if (obj->otyp == CORPSE &&
+		if (obj->otyp == CORPSE &&
 		((touch_petrifies(&mons[obj->corpsenm]) && !resists_ston(mon))
 		 || is_rider(&mons[obj->corpsenm])))
-		    return TABU;
+			return TABU;
 
-	    /* Ghouls only eat old corpses... yum! */
-	    if (mon->mtyp == PM_GHOUL){
+		/* Ghouls only eat old corpses... yum! */
+		if (mon->mtyp == PM_GHOUL){
 		return (obj->otyp == CORPSE && obj->corpsenm != PM_ACID_BLOB &&
 		  peek_at_iced_corpse_age(obj) + 5*rn1(20,10) <= monstermoves) ?
 			DOGFOOD : TABU;
-	    }
-	    /* vampires only "eat" very fresh corpses ... 
-	     * Assume meat -> blood
-	     */
-	    if (is_vampire(mon->data)) {
+		}
+		/* vampires only "eat" very fresh corpses ... 
+		 * Assume meat -> blood
+		 */
+		if (is_vampire(mon->data)) {
 		return (obj->otyp == CORPSE &&
 		  has_blood(&mons[obj->corpsenm]) && !obj->oeaten &&
-	    	  peek_at_iced_corpse_age(obj) + 5 >= monstermoves) ?
+			  peek_at_iced_corpse_age(obj) + 5 >= monstermoves) ?
 				DOGFOOD : TABU;
-	    }
+		}
 
-	    if (!carni && !herbi)
-		    return (obj->cursed ? UNDEF : APPORT);
+		if (!carni && !herbi)
+			return (obj->cursed ? UNDEF : APPORT);
 
-	    /* a starving pet will eat almost anything */
-	    starving = (get_mx(mon, MX_EDOG) && EDOG(mon)->mhpmax_penalty);
+		/* a starving pet will eat almost anything */
+		starving = (get_mx(mon, MX_EDOG) && EDOG(mon)->mhpmax_penalty);
 
-	    switch (obj->otyp) {
+		switch (obj->otyp) {
 		case TRIPE_RATION:
 		case MEATBALL:
 		case MEAT_RING:
 		case MEAT_STICK:
 		case MASSIVE_CHUNK_OF_MEAT:
-		    return (carni ? DOGFOOD : MANFOOD);
+			return (carni ? (intel ? CADAVER : DOGFOOD) : MANFOOD);
 		case EGG:
-		    if (obj->corpsenm != NON_PM && touch_petrifies(&mons[obj->corpsenm]) && !resists_ston(mon))
-			return POISON;
-		    return (carni ? CADAVER : MANFOOD);
+			if (obj->corpsenm != NON_PM && touch_petrifies(&mons[obj->corpsenm]) && !resists_ston(mon))
+				return POISON;
+			return (carni ? CADAVER : MANFOOD);
 		case CORPSE:
 rock:
 		   if ((peek_at_iced_corpse_age(obj) + 50L <= monstermoves
-					    && obj->corpsenm != PM_LIZARD
-					    && obj->corpsenm != PM_BABY_CAVE_LIZARD
-					    && obj->corpsenm != PM_SMALL_CAVE_LIZARD
-					    && obj->corpsenm != PM_CAVE_LIZARD
-					    && obj->corpsenm != PM_LARGE_CAVE_LIZARD
-					    && obj->corpsenm != PM_LICHEN
-					    && obj->corpsenm != PM_BEHOLDER
-					    && mon->data->mlet != S_FUNGUS) ||
-			(mons[obj->corpsenm].mflagsa == mon->data->mflagsa && !(mindless_mon(mon) || is_animal(mon->data))) ||
-			(polyfodder(obj) && !resists_poly(mon->data) && (!(mindless_mon(mon) || is_animal(mon->data)) || goodsmeller(mon->data))) ||
+						&& obj->corpsenm != PM_LIZARD
+						&& obj->corpsenm != PM_BABY_CAVE_LIZARD
+						&& obj->corpsenm != PM_SMALL_CAVE_LIZARD
+						&& obj->corpsenm != PM_CAVE_LIZARD
+						&& obj->corpsenm != PM_LARGE_CAVE_LIZARD
+						&& obj->corpsenm != PM_LICHEN
+						&& obj->corpsenm != PM_BEHOLDER
+						&& obj->corpsenm != PM_DEATH_BEHOLDER
+						&& mon->data->mlet != S_FUNGUS) ||
+			(mons[obj->corpsenm].mflagsa == mon->data->mflagsa && intel) ||
+			(polyfodder(obj) && !resists_poly(mon->data) && (intel || goodsmeller(mon->data))) ||
 			(acidic(&mons[obj->corpsenm]) && !resists_acid(mon)) ||
 			(freezing(&mons[obj->corpsenm]) && !resists_cold(mon)) ||
 			(burning(&mons[obj->corpsenm]) && !resists_fire(mon)) ||
 			(poisonous(&mons[obj->corpsenm]) &&
 						!resists_poison(mon))||
 			 (touch_petrifies(&mons[obj->corpsenm]) &&
-			  !resists_ston(mon)))
-			return POISON;
-		    else if (vegan(&mons[obj->corpsenm]))
-			return (herbi ? CADAVER : MANFOOD);
-		    else return (carni ? CADAVER : MANFOOD);
+			  !resists_ston(mon))
+			)
+				return POISON;
+			else if (vegan(&mons[obj->corpsenm]))
+				return (herbi ? ((intel && mon_benificial_corpse(mon, obj->corpsenm)) ? DOGFOOD : CADAVER) : MANFOOD);
+			else return (carni ? ((intel && mon_benificial_corpse(mon, obj->corpsenm)) ? DOGFOOD : CADAVER) : MANFOOD);
 		case CLOVE_OF_GARLIC:
-		    return (is_undead(mon->data) ? TABU :
-			    ((herbi || starving) ? ACCFOOD : MANFOOD));
+			return (is_undead(mon->data) ? TABU :
+				((herbi || starving) ? ACCFOOD : MANFOOD));
 		case TIN:
-		    return (metallivorous(mon->data) ? ACCFOOD : TABU);
+			return (metallivorous(mon->data) ? ACCFOOD : TABU);
 		case APPLE:
 		case CARROT:
-		    return (herbi ? DOGFOOD : starving ? ACCFOOD : MANFOOD);
+			return (herbi ? (intel ? CADAVER : DOGFOOD) : starving ? ACCFOOD : MANFOOD);
 		case BANANA:
-		    return ((mon->data->mlet == S_YETI) ? DOGFOOD :
-			    ((herbi || starving) ? ACCFOOD : MANFOOD));
+			return ((mon->data->mlet == S_YETI) ? DOGFOOD :
+				((herbi || starving) ? ACCFOOD : MANFOOD));
 
-                case K_RATION:
+		case K_RATION:
 		case C_RATION:
-                case CRAM_RATION:
+		case CRAM_RATION:
 		case LEMBAS_WAFER:
 		case FOOD_RATION:
-		    if (is_human(mon->data) ||
-		        is_elf(mon->data) ||
-			is_dwarf(mon->data) ||
-			is_gnome(mon->data) ||
-			is_orc(mon->data))
-		        return ACCFOOD; 
+			if (intel)
+				return ACCFOOD; 
 
 		default:
-		    if (starving) return ACCFOOD;
-		    return (obj->otyp > SLIME_MOLD ?
-			    (carni ? ACCFOOD : MANFOOD) :
-			    (herbi ? ACCFOOD : MANFOOD));
-	    }
+			if (starving) return ACCFOOD;
+			if(obj->obj_material == FLESH)
+				return carni ? ACCFOOD : MANFOOD;
+			if(obj->obj_material == VEGGY)
+				return herbi ? ACCFOOD : MANFOOD;
+			return TABU;
+		}
 	default:
-	    if (obj->otyp == AMULET_OF_STRANGULATION ||
+		if (obj->otyp == AMULET_OF_STRANGULATION ||
 			obj->otyp == RIN_SLOW_DIGESTION)
 			return TABU;
-	    if (hates_silver(mon->data) &&
+		if (hates_silver(mon->data) &&
 		obj_is_material(obj, SILVER))
 			return(TABU);
-	    if (hates_iron(mon->data) &&
+		if (hates_iron(mon->data) &&
 		is_iron_obj(obj))
 			return(TABU);
-	    if (hates_unholy_mon(mon) &&
+		if (hates_unholy_mon(mon) &&
 		is_unholy(obj))
 			return(TABU);
-	    if (hates_unholy_mon(mon) &&
+		if (hates_unholy_mon(mon) &&
 		obj_is_material(obj, GREEN_STEEL))
 			return(TABU);
-	    if (hates_unblessed_mon(mon) &&
+		if (hates_unblessed_mon(mon) &&
 		(is_unblessed(obj)))
 			return(TABU);
 		if (is_vampire(mon->data) &&
 		obj->otyp == POT_BLOOD && !((touch_petrifies(&mons[obj->corpsenm]) && !resists_ston(mon)) || is_rider(&mons[obj->corpsenm])))
 			return DOGFOOD;
-	    if (herbi && !carni && (obj->otyp == SHEAF_OF_HAY || obj->otyp == SEDGE_HAT))
+		if (herbi && !carni && (obj->otyp == SHEAF_OF_HAY || obj->otyp == SEDGE_HAT))
 			return CADAVER;
-	    if ((mon->mtyp == PM_GELATINOUS_CUBE || mon->mtyp == PM_ANCIENT_OF_CORRUPTION) && is_organic(obj))
+		if ((mon->mtyp == PM_GELATINOUS_CUBE || mon->mtyp == PM_ANCIENT_OF_CORRUPTION) && is_organic(obj))
 			return(ACCFOOD);
-	    if (metallivorous(mon->data) && is_metallic(obj) && (is_rustprone(obj) || mon->mtyp != PM_RUST_MONSTER)) {
+		if (metallivorous(mon->data) && is_metallic(obj) && (is_rustprone(obj) || mon->mtyp != PM_RUST_MONSTER)) {
 		/* Non-rustproofed ferrous based metals are preferred. */
 		return((is_rustprone(obj) && !obj->oerodeproof) ? DOGFOOD :
 			ACCFOOD);
-	    }
-	    if(!obj->cursed && obj->oclass != BALL_CLASS &&
+		}
+		if(!obj->cursed && obj->oclass != BALL_CLASS &&
 						obj->oclass != CHAIN_CLASS)
 		return(APPORT);
-	    /* fall into next case */
+		/* fall into next case */
 	case ROCK_CLASS:
-	    return(UNDEF);
+		return(UNDEF);
 	}
 }
 
@@ -1259,6 +1281,7 @@ rock:
 				&& obj->corpsenm != PM_LARGE_CAVE_LIZARD
 				&& obj->corpsenm != PM_LICHEN
 				&& obj->corpsenm != PM_BEHOLDER
+				&& obj->corpsenm != PM_DEATH_BEHOLDER
 				&& mon->data->mlet != S_FUNGUS
 			)
 				return 0;
@@ -1443,7 +1466,7 @@ struct monst *
 tamedog_core(struct monst *mtmp, struct obj *obj, int td_flags)
 {
 	boolean enhanced = td_flags & TD_ENHANCED;
-	boolean loyal = td_flags & TD_LOYAL;
+	boolean loyal = (td_flags & TD_LOYAL) || mtmp->mrecruitable;
 	struct monst *curmon, *weakdog = (struct monst *) 0;
 	/* The Wiz, Medusa and the quest nemeses aren't even made peaceful. || mtmp->mtyp == PM_MEDUSA */
 	if (is_untamable(mtmp->data) || mtmp->notame || mtmp->iswiz

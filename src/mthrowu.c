@@ -6,6 +6,7 @@
 #include "mfndpos.h" /* ALLOW_M */
 
 //STATIC_DCL int FDECL(drop_throw,(struct monst *, struct obj *,BOOLEAN_P,int,int));
+STATIC_DCL struct monst *FDECL(bereft_locked_target, (struct monst *));
 
 #define URETREATING(x,y) (distmin(u.ux,u.uy,x,y) > distmin(u.ux0,u.uy0,x,y))
 
@@ -45,8 +46,7 @@ struct obj *obj;
 #ifdef OVL1
 
 boolean
-mtarget_adjacent(magr)
-struct monst *magr;
+mtarget_adjacent(struct monst *magr)
 {
 	int i,j, ix, jy;
 	int x = magr->mx, y = magr->my;
@@ -60,13 +60,8 @@ struct monst *magr;
 			jy = y + j;
 			if(!isok(ix,jy))
 				continue;
-			if(!(mtmp = m_u_at(ix, jy)))
+			if(!(mtmp = m_at(ix, jy)))
 				continue;
-			if(mtmp == &youmonst){
-				if(magr->mpeaceful)
-					continue;
-				else return TRUE;
-			}
 			if(!mm_aggression(magr, mtmp))
 				continue;
 			if(magr->mtame && !acceptable_pet_target(magr, mtmp, FALSE))
@@ -74,10 +69,56 @@ struct monst *magr;
 			return TRUE;
 		}
 	}
+	if(!magr->mpeaceful){
+		if(magr->mux != 0 && magr->muy != 0){
+			if(distmin(magr->mx, magr->my, magr->mux, magr->muy) <= 1)
+				return TRUE;
+		}
+	}
 	return FALSE;
 }
 
 extern int monstr[];
+
+/* Returns the target a mid-curse bereft already registered
+ * (magr->mvar2_bereft_target, by m_id -- 0 means the player), if it's still
+ * a valid one to attack, otherwise (struct monst *)0 so the caller falls
+ * back to its normal target-selection logic. Caller is responsible for only
+ * calling this once magr is confirmed to be a bereft past Owrk (spell #0). */
+STATIC_OVL struct monst *
+bereft_locked_target(magr)
+struct monst *magr;
+{
+	struct monst *mdef;
+	int tarx, tary;
+
+	if (magr->mvar2_bereft_target == 0) {
+		if (no_upos(magr))
+			return (struct monst *)0;
+		mdef = &youmonst;
+		tarx = magr->mux;
+		tary = magr->muy;
+	} else {
+		for (mdef = fmon; mdef; mdef = mdef->nmon)
+			if (!DEADMONSTER(mdef) && mdef->m_id == (unsigned)magr->mvar2_bereft_target)
+				break;
+		if (!mdef)
+			return (struct monst *)0;
+		tarx = mdef->mx;
+		tary = mdef->my;
+	}
+
+	if (mdef != &youmonst && !(mm_aggression(magr, mdef) & ALLOW_M))
+		return (struct monst *)0;
+	if (!clear_path(magr->mx, magr->my, tarx, tary))
+		return (struct monst *)0;
+	if (distmin(magr->mx, magr->my, tarx, tary) > BOLT_LIM)
+		return (struct monst *)0;
+
+	if (!linedup(tarx, tary, magr->mx, magr->my))
+		tbx = tby = 0;
+	return mdef;
+}
 
 /* Find a target for a ranged attack. */
 /* needs to set tbx, tby */
@@ -104,7 +145,16 @@ boolean use_find_offensive;	/* if TRUE, we have some offensive item ready that w
 		|| (magr->mberserk);
 
 	boolean dogbesafe = ((magr->mtame || magr->mpeaceful) && !(magr->mconf && !rn2(8)) && !conflicted);
-	
+
+	/* a bereft mid-word will keep going after its already-
+	 * registered target; fall through to normal targeting if that target
+	 * isn't a valid choice, or if the bereft hasn't cast Owrk yet */
+	if (monsndx(magr->data) == PM_BEREFT && magr->mvar1_bereft_syllable) {
+		struct monst *locked_target = bereft_locked_target(magr);
+		if (locked_target)
+			return locked_target;
+	}
+
 	struct obj *mrwep = (struct obj *)0;
 	if (!(mindless(magr->data) && is_undead(magr->data) && !(
 			magr->mtyp == PM_SKELETAL_PIRATE ||

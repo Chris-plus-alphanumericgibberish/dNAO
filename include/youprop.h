@@ -30,19 +30,49 @@
 /* With intrinsics and extrinsics */
 #define HNo_prop		u.uprops[NO_PROP].intrinsic
 
-#define HFire_resistance	u.uprops[FIRE_RES].intrinsic
-#define EFire_resistance	u.uprops[FIRE_RES].extrinsic
-#define Fire_resistance		(HFire_resistance || EFire_resistance || \
-				 (species_resists_fire(&youmonst) && !(Race_if(PM_ANDROID) && !Upolyd)) || \
+#define BaseHFire_resistance	(u.uprops[FIRE_RES].intrinsic && !Inhell && !In_endgame(&u.uz))
+#define BaseEFire_resistance	(u.uprops[FIRE_RES].extrinsic && !Inhell && !In_endgame(&u.uz))
+#define BaseFire_resistance		((u.uprops[FIRE_RES].intrinsic || u.uprops[FIRE_RES].extrinsic || \
+				 (species_resists_fire(&youmonst) && !(Race_if(PM_ANDROID) && !Upolyd))) && !Inhell && !In_endgame(&u.uz))
+
+#define BaseHellHFire_resistance	(u.uprops[HELL_FIRE_RES].intrinsic && !In_endgame(&u.uz))
+#define BaseHellEFire_resistance	(u.uprops[HELL_FIRE_RES].extrinsic && !In_endgame(&u.uz))
+#define BaseHellFire_resistance		((u.uprops[HELL_FIRE_RES].intrinsic || u.uprops[HELL_FIRE_RES].extrinsic) && !In_endgame(&u.uz))
+
+#define BaseHolyHFire_resistance	(u.uprops[HOLY_FIRE_RES].intrinsic && !In_endgame(&u.uz))
+#define BaseHolyEFire_resistance	(u.uprops[HOLY_FIRE_RES].extrinsic && !In_endgame(&u.uz))
+#define BaseHolyFire_resistance		((u.uprops[HOLY_FIRE_RES].intrinsic || u.uprops[HOLY_FIRE_RES].extrinsic))
+
+#define HFire_resistance	(BaseHFire_resistance || BaseHellHFire_resistance || BaseHolyHFire_resistance)
+#define EFire_resistance	(BaseEFire_resistance || BaseHellEFire_resistance || BaseHolyEFire_resistance)
+#define Fire_resistance		(BaseFire_resistance || BaseHellFire_resistance || BaseHolyFire_resistance || \
 				 ward_at(u.ux,u.uy) == SIGIL_OF_CTHUGHA )
 #define InvFire_resistance	(EFire_resistance || Preservation || ward_at(u.ux,u.uy) == SIGIL_OF_CTHUGHA)
+#define HellFire_resistance	(BaseHellFire_resistance || BaseHolyFire_resistance || ward_at(u.ux,u.uy) == SIGIL_OF_CTHUGHA)
+#define HolyFire_resistance	(BaseHolyFire_resistance || ward_at(u.ux,u.uy) == SIGIL_OF_CTHUGHA)
 
-#define HCold_resistance	u.uprops[COLD_RES].intrinsic
-#define ECold_resistance	u.uprops[COLD_RES].extrinsic
+#define BaseHCold_resistance	(u.uprops[COLD_RES].intrinsic && !Inhell && !In_endgame(&u.uz))
+#define BaseECold_resistance	(u.uprops[COLD_RES].extrinsic && !Inhell && !In_endgame(&u.uz))
+#define BaseCold_resistance		((u.uprops[COLD_RES].intrinsic || u.uprops[COLD_RES].extrinsic || \
+				 species_resists_cold(&youmonst)) && !Inhell && !In_endgame(&u.uz))
+
+#define BaseHellHCold_resistance	(u.uprops[HELL_COLD_RES].intrinsic && !In_endgame(&u.uz))
+#define BaseHellECold_resistance	(u.uprops[HELL_COLD_RES].extrinsic && !In_endgame(&u.uz))
+#define BaseHellCold_resistance		((u.uprops[HELL_COLD_RES].intrinsic || u.uprops[HELL_COLD_RES].extrinsic) && !In_endgame(&u.uz))
+
+#define BaseHolyHCold_resistance	(u.uprops[HOLY_COLD_RES].intrinsic && !In_endgame(&u.uz))
+#define BaseHolyECold_resistance	(u.uprops[HOLY_COLD_RES].extrinsic && !In_endgame(&u.uz))
+#define BaseHolyCold_resistance		((u.uprops[HOLY_COLD_RES].intrinsic || u.uprops[HOLY_COLD_RES].extrinsic))
+
 #define NCold_resistance		(species_resists_cold(&youmonst) || \
 				 ward_at(u.ux,u.uy) == BRAND_OF_ITHAQUA)
-#define Cold_resistance		(HCold_resistance || ECold_resistance || NCold_resistance)
+#define HCold_resistance	(BaseHCold_resistance || BaseHellHCold_resistance || BaseHolyHCold_resistance)
+#define ECold_resistance	(BaseECold_resistance || BaseHellECold_resistance || BaseHolyECold_resistance)
+#define Cold_resistance		(BaseCold_resistance || BaseHellCold_resistance || BaseHolyCold_resistance || \
+				 ward_at(u.ux,u.uy) == BRAND_OF_ITHAQUA)
 #define InvCold_resistance	(ECold_resistance || Preservation || ward_at(u.ux,u.uy) == BRAND_OF_ITHAQUA)
+#define HellCold_resistance	(BaseHellCold_resistance || BaseHolyCold_resistance || ward_at(u.ux,u.uy) == BRAND_OF_ITHAQUA)
+#define HolyCold_resistance	(BaseHolyCold_resistance || ward_at(u.ux,u.uy) == BRAND_OF_ITHAQUA)
 
 #define HSleep_resistance	u.uprops[SLEEP_RES].intrinsic
 #define ESleep_resistance	u.uprops[SLEEP_RES].extrinsic
@@ -54,12 +84,26 @@
 #define Disint_resistance	(HDisint_resistance || EDisint_resistance || \
 				 species_resists_disint(&youmonst))
 
-#define HShock_resistance	u.uprops[SHOCK_RES].intrinsic
-#define EShock_resistance	u.uprops[SHOCK_RES].extrinsic
-#define Shock_resistance	(HShock_resistance || EShock_resistance || \
-				 (species_resists_elec(&youmonst) && !(Race_if(PM_ANDROID) && !Upolyd)) || \
+#define BaseHShock_resistance	(u.uprops[SHOCK_RES].intrinsic && !Inhell && !In_endgame(&u.uz))
+#define BaseEShock_resistance	(u.uprops[SHOCK_RES].extrinsic && !Inhell && !In_endgame(&u.uz))
+#define BaseShock_resistance	((u.uprops[SHOCK_RES].intrinsic || u.uprops[SHOCK_RES].extrinsic || \
+				 (species_resists_elec(&youmonst) && !(Race_if(PM_ANDROID) && !Upolyd))) && !Inhell && !In_endgame(&u.uz))
+
+#define BaseHellHShock_resistance	(u.uprops[HELL_SHOCK_RES].intrinsic && !In_endgame(&u.uz))
+#define BaseHellEShock_resistance	(u.uprops[HELL_SHOCK_RES].extrinsic && !In_endgame(&u.uz))
+#define BaseHellShock_resistance	((u.uprops[HELL_SHOCK_RES].intrinsic || u.uprops[HELL_SHOCK_RES].extrinsic) && !In_endgame(&u.uz))
+
+#define BaseHolyHShock_resistance	(u.uprops[HOLY_SHOCK_RES].intrinsic && !In_endgame(&u.uz))
+#define BaseHolyEShock_resistance	(u.uprops[HOLY_SHOCK_RES].extrinsic && !In_endgame(&u.uz))
+#define BaseHolyShock_resistance	((u.uprops[HOLY_SHOCK_RES].intrinsic || u.uprops[HOLY_SHOCK_RES].extrinsic))
+
+#define HShock_resistance	(BaseHShock_resistance || BaseHellHShock_resistance || BaseHolyHShock_resistance)
+#define EShock_resistance	(BaseEShock_resistance || BaseHellEShock_resistance || BaseHolyEShock_resistance)
+#define Shock_resistance	(BaseShock_resistance || BaseHellShock_resistance || BaseHolyShock_resistance || \
 				 ward_at(u.ux,u.uy) == TRACERY_OF_KARAKAL )
-#define InvShock_resistance	(EShock_resistance || Preservation || ward_at(u.ux,u.uy) == TRACERY_OF_KARAKAL || (HShock_resistance&FROMRACE && (Race_if(PM_ANDROID) || Race_if(PM_PARASITIZED_ANDROID))))
+#define InvShock_resistance	(EShock_resistance || Preservation || ward_at(u.ux,u.uy) == TRACERY_OF_KARAKAL || (u.uprops[SHOCK_RES].intrinsic&FROMRACE && (Race_if(PM_ANDROID) || Race_if(PM_PARASITIZED_ANDROID))))
+#define HellShock_resistance	(BaseHellShock_resistance || BaseHolyShock_resistance || ward_at(u.ux,u.uy) == TRACERY_OF_KARAKAL)
+#define HolyShock_resistance	(BaseHolyShock_resistance || ward_at(u.ux,u.uy) == TRACERY_OF_KARAKAL)
 
 #define HPoison_resistance	u.uprops[POISON_RES].intrinsic
 #define EPoison_resistance	u.uprops[POISON_RES].extrinsic
@@ -67,11 +111,25 @@
 				 species_resists_poison(&youmonst) || \
 				 (ward_at(u.ux,u.uy) == WINGS_OF_GARUDA && num_wards_at(u.ux, u.uy) > rn2(7)))
 
-#define HAcid_resistance	u.uprops[ACID_RES].intrinsic
-#define EAcid_resistance	u.uprops[ACID_RES].extrinsic
-#define Acid_resistance		(HAcid_resistance || EAcid_resistance ||\
-							 species_resists_acid(&youmonst))
+#define BaseHAcid_resistance	(u.uprops[ACID_RES].intrinsic && !Inhell && !In_endgame(&u.uz))
+#define BaseEAcid_resistance	(u.uprops[ACID_RES].extrinsic && !Inhell && !In_endgame(&u.uz))
+#define BaseAcid_resistance		((u.uprops[ACID_RES].intrinsic || u.uprops[ACID_RES].extrinsic || \
+				 species_resists_acid(&youmonst)) && !Inhell && !In_endgame(&u.uz))
+
+#define BaseHellHAcid_resistance	(u.uprops[HELL_ACID_RES].intrinsic && !In_endgame(&u.uz))
+#define BaseHellEAcid_resistance	(u.uprops[HELL_ACID_RES].extrinsic && !In_endgame(&u.uz))
+#define BaseHellAcid_resistance		((u.uprops[HELL_ACID_RES].intrinsic || u.uprops[HELL_ACID_RES].extrinsic) && !In_endgame(&u.uz))
+
+#define BaseHolyHAcid_resistance	(u.uprops[HOLY_ACID_RES].intrinsic && !In_endgame(&u.uz))
+#define BaseHolyEAcid_resistance	(u.uprops[HOLY_ACID_RES].extrinsic && !In_endgame(&u.uz))
+#define BaseHolyAcid_resistance		((u.uprops[HOLY_ACID_RES].intrinsic || u.uprops[HOLY_ACID_RES].extrinsic))
+
+#define HAcid_resistance	(BaseHAcid_resistance || BaseHellHAcid_resistance || BaseHolyHAcid_resistance)
+#define EAcid_resistance	(BaseEAcid_resistance || BaseHellEAcid_resistance || BaseHolyEAcid_resistance)
+#define Acid_resistance		(BaseAcid_resistance || BaseHellAcid_resistance || BaseHolyAcid_resistance)
 #define InvAcid_resistance	(EAcid_resistance || Preservation)
+#define HellAcid_resistance	(BaseHellAcid_resistance || BaseHolyAcid_resistance)
+#define HolyAcid_resistance	BaseHolyAcid_resistance
 
 #define HDrain_resistance	u.uprops[DRAIN_RES].intrinsic
 #define EDrain_resistance	u.uprops[DRAIN_RES].extrinsic
@@ -156,6 +214,30 @@
 #define EYogSpell		u.uprops[YOG_SPELLS].extrinsic
 #define YogSpell		(HYogSpell || EYogSpell)
 
+#define HSilverInvoke		u.uprops[SFLM_SPELLS].intrinsic
+#define ESilverInvoke		u.uprops[SFLM_SPELLS].extrinsic
+#define SilverInvoke		(HSilverInvoke || ESilverInvoke)
+
+#define HSilverInvokeMortal	u.uprops[SFLM_MORTAL_SPELLS].intrinsic
+#define ESilverInvokeMortal	u.uprops[SFLM_MORTAL_SPELLS].extrinsic
+#define SilverInvokeMortal	(HSilverInvokeMortal || ESilverInvokeMortal)
+
+#define HSilverInvokeUndeath	u.uprops[SFLM_UNDEATH_SPELLS].intrinsic
+#define ESilverInvokeUndeath	u.uprops[SFLM_UNDEATH_SPELLS].extrinsic
+#define SilverInvokeUndeath	(HSilverInvokeUndeath || ESilverInvokeUndeath)
+
+#define HSilverInvokeSpirit	u.uprops[SFLM_SPIRIT_SPELLS].intrinsic
+#define ESilverInvokeSpirit	u.uprops[SFLM_SPIRIT_SPELLS].extrinsic
+#define SilverInvokeSpirit	(HSilverInvokeSpirit || ESilverInvokeSpirit)
+
+#define HSilverInvokeWrath	u.uprops[SFLM_WRATH_SPELLS].intrinsic
+#define ESilverInvokeWrath	u.uprops[SFLM_WRATH_SPELLS].extrinsic
+#define SilverInvokeWrath	(HSilverInvokeWrath || ESilverInvokeWrath)
+
+#define HSilverInvokeIllusion	u.uprops[SFLM_ILLUSION_SPELLS].intrinsic
+#define ESilverInvokeIllusion	u.uprops[SFLM_ILLUSION_SPELLS].extrinsic
+#define SilverInvokeIllusion	(HSilverInvokeIllusion || ESilverInvokeIllusion)
+
 #define HFocusAura		u.uprops[FOCUS_AURA].intrinsic
 #define EFocusAura		u.uprops[FOCUS_AURA].extrinsic
 #define FocusAura		(HFocusAura || EFocusAura)
@@ -208,7 +290,7 @@
 					|| (uarmc && FacelessCloak(uarmc) && is_opaque(uarmc)) \
 				)
 
-#define save_vs_sanloss()	((uwep && uwep->oartifact == ART_NODENSFORK) || (rnd(30) < (ACURR(A_WIS) + (uring_art(ART_NARYA) ? narya() : 0))))
+#define save_vs_sanloss()	(FEARLESSNESS_MUDRA || (uwep && uwep->oartifact == ART_NODENSFORK) || (rnd(30) < (ACURR(A_WIS) + (uring_art(ART_NARYA) ? narya() : 0))))
 
 #define HDark_res		u.uprops[DARK_RES].intrinsic
 #define EDark_res		u.uprops[DARK_RES].extrinsic
@@ -229,10 +311,14 @@
 #define HDoubt		u.uprops[DOUBT].intrinsic
 #define Doubt		(HDoubt || EDoubt)
 
-#define LightBlind		((Darksight && !Is_waterlevel(&u.uz) && !Extramission) &&\
+#define LightBlind		((Darksight && !Catsight && !Is_waterlevel(&u.uz) && !Extramission) &&\
 						(dimness(u.ux,u.uy) <= 0) &&\
 						!(ublindf && !Blindfolded))
 #define Blinded			u.uprops[BLINDED].intrinsic
+#define BlindedTimeout	(Blinded & TIMEOUT)
+#define PermaBlind		((Blinded & FROMOUTSIDE) != 0L) /* OPTIONS:blind */
+		/* permanent, or lasting until specifically cured */
+#define LongtermBlind	(PermaBlind || (Blinded & TIMEOUT_INF) != 0L)
 #define HBlind_res		u.uprops[BLIND_RES].intrinsic
 #define EBlind_res		u.uprops[BLIND_RES].extrinsic
 #define Blind_res		(HBlind_res || EBlind_res)
@@ -335,15 +421,34 @@
 #define Normalvision		((HNormalvision || ENormalvision || \
 				 normalvision(youracedata)) && !DarksightOnly)
 
+/* Senses granted by mutations and by a seraph's recovered eyes. Suppressed by polymorph. */
+#define Seraph_eye(n)		(flags.aasimar_type == AASIMAR_TYPE_SERAPH && !Upolyd && u.seraph_eyes >= (n))
+#define Lowlightsight_mutation	(check_mutation(TT_LIGHT))
+#define Elfsight_mutation	(check_mutation(AAT_DEVA_SIGHT))
+#define Catsight_mutation	(check_mutation(AAT_ELADRIN_SIGHT))
+#define Extramission_mutation	(check_mutation(TT_EXTRAMISSION_1) || check_mutation(TT_EXTRAMISSION_2) \
+				 || check_mutation(AAT_EXTRAMISSION_1) || check_mutation(AAT_EXTRAMISSION_2) || Seraph_eye(SE_ALL))
+#define See_invisible_mutation	(check_mutation(AAT_IKSH_NA_SIGHT) || check_mutation(AAT_INVIS_1) \
+				 || check_mutation(AAT_INVIS_2) || check_mutation(AAT_INVIS_3) || Seraph_eye(SE_INVIS))
+#define Echolocation_mutation	(check_mutation(TT_ECHOLOCATION))
+#define Infravision_mutation	(check_mutation(TT_INFRAVISION_1) || check_mutation(AAT_ELADRIN_SIGHT) \
+				 || check_mutation(AAT_CLOUDFACE_INFRAVISION))
+#define Bloodsense_mutation	(check_mutation(AAT_CLOUDFACE_BLOODSENSE))
+#define Lifesense_mutation	(check_mutation(AAT_DEVA_SIGHT) || check_mutation(AAT_IKSH_NA_SIGHT) \
+				 || check_mutation(AAT_CLOUDFACE_LIFESENSE))
+#define Omnisense_mutation	(check_mutation(AAT_CLOUDFACE_INFRAVISION) || check_mutation(AAT_CLOUDFACE_BLOODSENSE) \
+				 || check_mutation(AAT_CLOUDFACE_LIFESENSE))
+#define Telepat_mutation	(check_mutation(AAT_DEVA_SIGHT) || check_mutation(AAT_IKSH_NA_SIGHT))
+
 #define HLowlightsight		u.uprops[LOWLIGHTSIGHT].intrinsic
 #define ELowlightsight		u.uprops[LOWLIGHTSIGHT].extrinsic
 #define Lowlightsight		((HLowlightsight || ELowlightsight || \
-				 lowlightsight2(youracedata)) && !DarksightOnly)
+				 lowlightsight2(youracedata) || Lowlightsight_mutation) && !DarksightOnly)
 
 #define HElfsight		u.uprops[ELFSIGHT].intrinsic
 #define EElfsight		u.uprops[ELFSIGHT].extrinsic
 #define Elfsight		((HElfsight || EElfsight || \
-				 lowlightsight3(youracedata)) && !DarksightOnly)
+				 lowlightsight3(youracedata) || Elfsight_mutation) && !DarksightOnly)
 
 #define HDarksight		u.uprops[DARKSIGHT].intrinsic
 #define EDarksight		u.uprops[DARKSIGHT].extrinsic
@@ -353,12 +458,12 @@
 #define HCatsight		u.uprops[CATSIGHT].intrinsic
 #define ECatsight		u.uprops[CATSIGHT].extrinsic
 #define Catsight		((HCatsight || ECatsight || \
-				 catsight(youracedata)) && !DarksightOnly)
+				 catsight(youracedata) || Catsight_mutation) && !DarksightOnly)
 
 #define HExtramission		u.uprops[EXTRAMISSION].intrinsic
 #define EExtramission		u.uprops[EXTRAMISSION].extrinsic
 #define Extramission		((HExtramission || EExtramission || \
-				 extramission(youracedata)) && !DarksightOnly)
+				 extramission(youracedata) || Extramission_mutation) && !DarksightOnly)
 
 #define HXray_vision	u.uprops[XRAY_VISION].intrinsic
 #define EXray_vision	u.uprops[XRAY_VISION].extrinsic
@@ -367,28 +472,28 @@
 #define HSee_invisible		u.uprops[SEE_INVIS].intrinsic
 #define ESee_invisible		u.uprops[SEE_INVIS].extrinsic
 #define See_invisible_old	(HSee_invisible || ESee_invisible || \
-				 species_perceives(youracedata))
+				 species_perceives(youracedata) || See_invisible_mutation)
 #define See_invisible(X,Y)	(ESee_invisible || (See_invisible_old && dist2(u.ux, u.uy, X, Y)<13))
 
 #define HEcholocation		u.uprops[ECHOLOCATION].intrinsic
 #define EEcholocation		u.uprops[ECHOLOCATION].extrinsic
 #define Echolocation		(HEcholocation || EEcholocation || \
-				  echolocation(youracedata))
+				  echolocation(youracedata) || Echolocation_mutation)
 
 #define HInfravision		u.uprops[INFRAVISION].intrinsic
 #define EInfravision		u.uprops[INFRAVISION].extrinsic
 #define Infravision		((HInfravision || EInfravision || \
-				  infravision(youracedata)) && !DarksightOnly)
+				  infravision(youracedata) || Infravision_mutation) && !DarksightOnly)
 
 #define HBloodsense		u.uprops[BLOODSENSE].intrinsic
 #define EBloodsense		u.uprops[BLOODSENSE].extrinsic
 #define Bloodsense		((HBloodsense || EBloodsense || \
-				  bloodsense(youracedata)) && !DarksightOnly)
+				  bloodsense(youracedata) || Bloodsense_mutation) && !DarksightOnly)
 
 #define HLifesense		u.uprops[LIFESENSE].intrinsic
 #define ELifesense		u.uprops[LIFESENSE].extrinsic
 #define Lifesense		((HLifesense || ELifesense || \
-				  lifesense(youracedata)) && !DarksightOnly)
+				  lifesense(youracedata) || Lifesense_mutation) && !DarksightOnly)
 
 #define HSenseall		u.uprops[SENSEALL].intrinsic
 #define ESenseall		u.uprops[SENSEALL].extrinsic
@@ -398,7 +503,7 @@
 #define HOmnisense		u.uprops[OMNISENSE].intrinsic
 #define EOmnisense		u.uprops[OMNISENSE].extrinsic
 #define Omnisense		(HOmnisense || EOmnisense || \
-				  omnisense(youracedata))
+				  omnisense(youracedata) || Omnisense_mutation)
 
 #define HEarthsense		u.uprops[EARTHSENSE].intrinsic
 #define EEarthsense		u.uprops[EARTHSENSE].extrinsic
@@ -412,7 +517,7 @@
 #define HTelepat		u.uprops[TELEPAT].intrinsic
 #define ETelepat		u.uprops[TELEPAT].extrinsic
 #define Blind_telepat		(HTelepat || ETelepat || \
-				 species_is_telepathic(youracedata))
+				 species_is_telepathic(youracedata) || Telepat_mutation)
 #define Unblind_telepat		(ETelepat || (Blind_telepat && uarmh && uarmh->oartifact == ART_ENFORCED_MIND))
 #define Tele_blind		(!Blind_telepat && uarmh && uarmh->oartifact == ART_ENFORCED_MIND)
 
@@ -483,6 +588,10 @@
 #define HJumping		u.uprops[JUMPING].intrinsic
 #define EJumping		u.uprops[JUMPING].extrinsic
 #define Jumping			(HJumping || EJumping)
+
+#define HJumpAttk		u.uprops[AERIAL_COMBAT].intrinsic
+#define EJumpAttk		u.uprops[AERIAL_COMBAT].extrinsic
+#define JumpAttk			(HJumpAttk || EJumpAttk)
 
 #define HTeleportation		u.uprops[TELEPORT].intrinsic
 #define ETeleportation		u.uprops[TELEPORT].extrinsic
@@ -710,6 +819,11 @@
 
 #define Straitjacketed	(u.uentangled_oid || (uarm && uarm->otyp == STRAITJACKET && uarm->cursed))
 
+/* Every hand stuck to the wielded weapon, extra arms included. */
+#define Hands_welded	(uwep && welded(uwep) \
+							&& (bimanual_mon(uwep, &youmonst) || (uarms && uarms->cursed)) \
+							&& !has_extra_arms(&youmonst))
+
 #define ELBERETH_HIGH_POWER	(Race_if(PM_ELF) \
 								|| (u.ugodbase[UGOD_CURRENT] >= GOD_OROME && u.ugodbase[UGOD_CURRENT] <= GOD_LORIEN) \
 								|| u.ugodbase[UGOD_CURRENT] == GOD_PEN_A \
@@ -724,5 +838,8 @@
 								|| u.ugodbase[UGOD_CURRENT] == GOD_PEN_A \
 								|| u.ugodbase[UGOD_CURRENT] == GOD_THE_DEEP_BLUE_SEA \
 								) && Race_if(PM_DROW) && !flags.stag)
+
+#define AerialCombat \
+    (JumpAttk || ((Role_if(PM_MONK) || (Role_if(PM_KENSEI) && ((uwep && is_kensei_weapon(uwep)) || !uwep)) || has_mutation(AAT_PRIMINAL)) && !Upolyd) || activeFightingForm(FFORM_ATARU))
 
 #endif /* YOUPROP_H */

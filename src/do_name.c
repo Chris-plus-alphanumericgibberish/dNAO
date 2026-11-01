@@ -735,6 +735,12 @@ const char *name;
 		if (obj->oartifact == ART_ANGUIREL)
 			add_oprop(obj, OPROP_WRTHW);
 		
+		if (obj->oartifact == ART_WHIRLING_SWORD)
+			add_oprop(obj, OPROP_FIREW);
+		
+		if (obj->oartifact == ART_SUN_S_BOW)
+			add_oprop(obj, OPROP_SAMOW);
+		
 		/* symbol */
 		if (obj->oartifact == ART_LOMYA)
 			obj->oward = LOLTH_SYMBOL;
@@ -775,7 +781,7 @@ const char *name;
 							REVERT_MERC, (genericptr_t)obj);
 			}
 			if(Role_if(PM_KENSEI) && u.role_variant == ART_SKY_REFLECTED){
-				expert_weapon_skill(objects[obj->otyp].oc_skill);
+				expert_weapon_skill(abs(objects[obj->otyp].oc_skill));
 				if(is_knight_sword(obj)){
 					expert_weapon_skill(P_GENERIC_KNIGHT_FORM);
 				}
@@ -796,6 +802,9 @@ const char *name;
 		else if(obj->oartifact == ART_EYE_OF_THE_OVERWORLD){
 			set_material_gm(obj, GEMSTONE);
 			obj->sub_material = MORGANITE;
+		}
+		else if(obj->oartifact == ART_WHIRLING_SWORD){
+			obj->sub_material = SAPPHIRE;
 		}
 		else if(obj->oartifact == ART_IBITE_ARM){
 			obj->obj_color = CLR_BRIGHT_GREEN;
@@ -838,6 +847,14 @@ const char *name;
 			add_to_container(obj, ingots);
 			artinstance[ART_GREEN_DRAGON_CRESCENT_BLAD].GDCBMaterials   |= AMAT_IRON;
 			artinstance[ART_GREEN_DRAGON_CRESCENT_BLAD].GDCBBlessedness |= GDCB_UNBLESSED;
+		}
+
+		if (obj->oartifact == ART_SIX_ELEMENT_SWORD && obj->otyp == LIANQIAO_JIAN) {
+			struct obj *jian;
+			uncreate_contents(obj);
+			jian = mksobj(PANXIN_JIAN, MKOBJ_NOINIT);
+			jian = oname(jian, artiname(ART_BLEEDING_VOID));
+			add_to_container(obj, jian);
 		}
 
 		fix_object(obj);
@@ -1285,7 +1302,7 @@ boolean called;
 					}
 			}
 		}
-		if(is_alabaster_mummy(mdat) && mtmp->mvar_syllable >= SYLLABLE_OF_STRENGTH__AESH && mtmp->mvar_syllable <= SYLLABLE_OF_SPIRIT__VAUL){
+		if(has_syllable(mdat) && mtmp->mvar_syllable >= SYLLABLE_OF_STRENGTH__AESH && mtmp->mvar_syllable <= SYLLABLE_OF_SPIRIT__VAUL){
 			Sprintf(eos(buf), "%sed ", OBJ_DESCR(objects[mtmp->mvar_syllable]));
 			name_at_start = FALSE;
 		}
@@ -1301,7 +1318,7 @@ boolean called;
 		if(has_template(mtmp, SPARK_SKELETON)){
 			Strcat(buf, "reanimated ");
 		}
-		else
+		else if(mtmp->mtyp != PM_SUMMONING_VORTEX)
 			Strcat(buf, "summoned ");
 	}
 	if (do_invis)
@@ -1353,7 +1370,7 @@ boolean called;
 						}
 				}
 			}
-			if(is_alabaster_mummy(mdat) && mtmp->mvar_syllable >= SYLLABLE_OF_STRENGTH__AESH && mtmp->mvar_syllable <= SYLLABLE_OF_SPIRIT__VAUL){
+			if(has_syllable(mdat) && mtmp->mvar_syllable >= SYLLABLE_OF_STRENGTH__AESH && mtmp->mvar_syllable <= SYLLABLE_OF_SPIRIT__VAUL){
 				Sprintf(eos(buf), "%sed ", OBJ_DESCR(objects[mtmp->mvar_syllable]));
 				name_at_start = FALSE;
 			}
@@ -1419,7 +1436,7 @@ boolean called;
 					}
 			}
 		}
-		if(is_alabaster_mummy(mdat) && mtmp->mvar_syllable >= SYLLABLE_OF_STRENGTH__AESH && mtmp->mvar_syllable <= SYLLABLE_OF_SPIRIT__VAUL){
+		if(has_syllable(mdat) && mtmp->mvar_syllable >= SYLLABLE_OF_STRENGTH__AESH && mtmp->mvar_syllable <= SYLLABLE_OF_SPIRIT__VAUL){
 			Sprintf(eos(buf), "%sed ", OBJ_DESCR(objects[mtmp->mvar_syllable]));
 			name_at_start = FALSE;
 		}

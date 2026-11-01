@@ -53,12 +53,14 @@ typedef struct {
 typedef struct {
 	xchar x, y, mask;
 	short arti_text;		/* Index of the text string for this (artifact) door */
+	xchar barred;		/* explicit .des 'barred' keyword; never set by random mask */
 } door;
 
 typedef struct {
 	xchar wall, pos, secret, mask;
 //	short arti_key;		/* Index (ART_) of key for this door */
 	short arti_text;	/* Index of the text string for this door */
+	xchar barred;		/* explicit .des 'barred' keyword; never set by random mask */
 } room_door;
 
 typedef struct {
@@ -70,7 +72,7 @@ typedef struct {
 	short id;
 	aligntyp align;
 	xchar x, y, chance, class, appear;
-	schar peaceful, asleep;
+	schar peaceful, asleep, prisoner;
 } monster;
 
 typedef struct {
@@ -78,7 +80,7 @@ typedef struct {
 	int   corpsenm;
 	short id, spe;
 	xchar x, y, chance, class, containment;
-	schar curse_state;
+	schar curse_state, prison_chest;
 } object;
 
 typedef struct {

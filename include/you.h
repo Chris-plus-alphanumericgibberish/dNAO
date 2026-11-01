@@ -69,8 +69,9 @@ struct u_event {
 	Bitfield(ascended,1);			/*34 has offered the Amulet */
 	Bitfield(knoxmade,1);			/*35 Portal to Ludios has been made in the main dungeon, teleport ok */
 	Bitfield(qrecalled,1);			/*36 Quest re-opened */
+	Bitfield(gehennom_madnesses,1);	/*37 Gehennom madnesses */
 	
-	Bitfield(padding, 9);			/*45 reseve another bitfield in event. */
+	Bitfield(padding, 8);			/*45 reseve another bitfield in event. */
 };
 
 /* KMH, conduct --
@@ -95,6 +96,23 @@ struct u_conduct {		/* number of times... */
 	long	shopID;		/* number of items id by shopkeepers */
 	long	IDs;		/* number of items id by magic or shopkeepers */
 				/* genocides already listed at end of game */
+};
+
+/*
+ * Challenges selected via options before the game starts.  Unlike
+ * u_conduct these are flags, set at the start and possibly voided later.
+ */
+struct u_roleplay {
+	boolean	blind;		/* permanently blind */
+	boolean	blind_start;	/* blind was set when the game started */
+	boolean	nudist;		/* has not worn any armor, ever */
+	boolean	nudist_start;	/* nudist was set when the game started */
+	boolean	deaf;		/* reserved: permanently deaf (not yet supported) */
+	boolean	pauper;		/* no starting inventory */
+	boolean	reserved1;
+	boolean	reserved2;
+	boolean	reserved3;
+	boolean	reserved4;
 };
 
 /*** Unified structure containing role information ***/
@@ -270,8 +288,13 @@ extern struct Race urace;
 #define youracedata	(maybe_polyd(youmonst.data, &mons[urace.malenum]))
 /* All drow-derived player races: update this macro when adding a new drow variant */
 #define RACE_IF_DROW	(Race_if(PM_DROW) || Race_if(PM_DRIDER) || Race_if(PM_DARK_FEY_RI) || Race_if(PM_DOKKIMAR))
+#define STAR_ELF_MADMAN	(Role_if(PM_MADMAN) && Race_if(PM_ELF) && !u.uroleplay.pauper)
 /* Drow variants with the drow myrkalfr branch included */
 #define RACE_IF_DROW_MYRKALFR	(Race_if(PM_DROW) || Race_if(PM_MYRKALFR) || Race_if(PM_DRIDER) || Race_if(PM_DARK_FEY_RI) || Race_if(PM_DOKKIMAR))
+/* All aasimar-derived player races */
+#define RACE_IF_AASIMAR	(Race_if(PM_AASIMAR) || Race_if(PM_DOKKIMAR))
+/* All tiefling-derived player races */
+#define RACE_IF_TIEFLING	(Race_if(PM_TIEFLING) || Race_if(PM_DARK_FEY_RI))
 #define Humanoid_half_dragon(role)	(Role_if(PM_MADMAN) || (Role_if(PM_NOBLEMAN) && flags.initgend))
 
 /*** Unified structure specifying gender information ***/
@@ -433,9 +456,11 @@ struct you {
 #define DEFAULT_HMAX	2000
 	unsigned uhs;		/* hunger state - see eat.c */
 
-#define FFORM_LISTSIZE	(LAST_FFORM/16 + 1)
+#define FFORM_LISTSIZE	(LAST_FFORM/FFORM_BATCH_SIZE + 1)
 	unsigned long int fightingForm[FFORM_LISTSIZE];/* special properties */
 	int ueldritch_style;
+	xchar umartial_form_order[MNK_FFORM_COUNT];	/* order the monk's forms unlock in, rolled at game start */
+	unsigned long int umartial_forms_known;		/* FFORM_BIT() of each monk form learned so far */
 	Bitfield(uavoid_passives,1);
 	Bitfield(uavoid_msplcast,1);
 	Bitfield(uavoid_grabattk,1);
@@ -444,10 +469,9 @@ struct you {
 	Bitfield(uavoid_theft,1);
 	Bitfield(uno_auto_attacks,1);
 	Bitfield(uavoid_urpassives,1);
-	unsigned long long int umystic;	/*Monk mystic attacks active*/
-#define monk_style_active(style) (style > 0 && u.umystic & (1ULL << (style-1)))
-#define toggle_monk_style(style) (u.umystic  = u.umystic ^ (1ULL << (style-1)))
-
+	Bitfield(uspin_crane,2);	/* redirect the next attack aimed at you */
+	Bitfield(upray_mantis,1);	/* block one limbed attack from each attacker */
+	Bitfield(ureceptive_field,1);	/* attackers heal you */
 #define DIVE_KICK  1
 #define AURA_BOLT  2
 #define BIRD_KICK  3
@@ -490,6 +514,7 @@ struct you {
 #define MORTAL_D  40
 #define DRAIN_L   41
 #define REPULSE   42
+#define TAP       43
 #define HATRED    44
 #define COMMAND_S 45
 #define MAGE_S	  46
@@ -499,11 +524,49 @@ struct you {
 #define CHAIN_MAG 50
 #define STEAL_S   51
 #define STRONG_P  52
-#define MAX_MYSTIC_FORMS 52
+#define CHI_SEVER 53
+#define FLY_KICKS 54
+#define HOLY_A    55
+#define PIERCE_C  56
+#define SPIN_CRANE 57
+#define PRAY_MANTIS 58
+#define SNAKE_S   59
+#define CLAP      60
+#define LIGHTNING_S 61
+#define BURN_CYC  62
+#define QUICKSHOT 63
+#define DOUBLE_SH 64
+#define THUNDER_V 65
+#define LAY_REST  66
+#define FALLING_SKY 67
+#define INFERNO   68
+#define IMPALE    69
+#define WAVE      70
+#define LIGHTNING_K 71
+#define SPLIT_STRK 72
+#define EARTH_AVAL 73
+#define FLICKER_F 74
+#define QUICK_T 75
+#define ICE_STORM_K 76
+#define REACH_FLAME 77
+#define GROW_SHOOT 78
+#define RECEPT_F 79
+#define MAX_MYSTIC_FORMS 79
 
 #define MFORM_STREAM MAX_MYSTIC_FORMS+1
 #define MFORM_CHAINS MAX_MYSTIC_FORMS+2
 #define MFORM_KINSTL MAX_MYSTIC_FORMS+3
+
+	/* Monk mystic attacks active: one bit per move ID */
+#define MYSTIC_FORM_WORDS ((MAX_MYSTIC_FORMS + 63) / 64)
+	unsigned long long int umystic[MYSTIC_FORM_WORDS];
+#define valid_monk_style(style) ((style) > 0 && (style) <= MAX_MYSTIC_FORMS)
+#define monk_style_bit(style) (1ULL << (((style)-1) % 64))
+#define monk_style_active(style) (valid_monk_style(style) && (u.umystic[((style)-1) / 64] & monk_style_bit(style)))
+#define toggle_monk_style(style) (valid_monk_style(style) ? (u.umystic[((style)-1) / 64] ^= monk_style_bit(style)) : 0)
+
+#define u_blessed()	(u.ualign.record > 3)
+#define u_fallen()	(u.ualign.record < -3)
 
 	// long laststruck;
 	long lastmoved;
@@ -515,6 +578,10 @@ struct you {
 	int uhouse; /* drow house info */
 	int start_house; /* starting drow house info */
 	int inherited; /* what you inherited at the start, if anything */
+/* negative values of u.inherited indicate non-artifact inheritances */
+#define INHERITED_SERAPH_BLOOD    -1
+#define INHERITED_PRIMINAL_BLOOD  -2
+#define INHERITED_CLOUDFACE_BLOOD -3
 	struct prop uprops[LAST_PROP+1];
 	int rift_count;
 	int vortex_count;
@@ -661,7 +728,9 @@ struct you {
 	Bitfield(uiearepairs,1);	/* Knows how to repair Imperial Elven Armor */
 	Bitfield(upriest,1);	/* Knows some priestly skills */
 	Bitfield(uwizard,1);	/* Knows some arcane secrets */
-	/* 9 free bits */
+	Bitfield(udeprived,1);	/* Suffers less from starvation, benefits less from exercise */
+	Bitfield(uurchin,1);	/* Street urchin background (rogue-lite) */
+	/* 7 free bits */
 	
 	int oonaenergy;				/* Record the energy type used by Oona in your game. (Worm that Walks switches?) */
 	int brand_otyp;				/* Record the otyp of Fire and Frost Brand in this game */
@@ -672,6 +741,7 @@ struct you {
 	struct u_event	uevent;		/* certain events have happened */
 	struct u_have	uhave;		/* you're carrying special objects */
 	struct u_conduct uconduct;	/* KMH, conduct */
+	struct u_roleplay uroleplay;	/* challenges set via options */
 	struct attribs	acurr,		/* your current attributes (eg. str)*/
 			aexe,		/* for gain/loss via "exercise" */
 			abon,		/* your bonus attributes (eg. str) */
@@ -819,7 +889,8 @@ struct you {
 #define	MAD_REACHER			0x0000000200000000LL
 #define	MAD_SCORPIONS		0x0000000400000000LL
 #define	MAD_VERMIN			0x0000000800000000LL
-#define	LAST_MADNESS		MAD_SCORPIONS
+#define	MAD_PALE_NIGHT		0x0000001000000000LL
+#define	LAST_MADNESS		MAD_PALE_NIGHT
 	int 	uinsight;	/* to record level of insight */
 	/*Insight rate calculation: 40: "high insight" 300: "Approximate per-turn WoYendor intervention rate" 5: "total number of harmful effects" */
 #define INSIGHT_RATE (40*300*5)
@@ -1141,6 +1212,9 @@ struct you {
 	long mutations[MUTATION_LISTSIZE];
 	int next_tiefling_mutation;
 	int next_mutation_level;
+	int next_aasimar_mutation;		/* aasimar mutation currently forming, 0 if none */
+	int next_aasimar_mutation_level;	/* level at which next_aasimar_mutation activates */
+	long aasimar_mutation_stages;		/* AAS_STAGE_* flags for aasimar mutation stages begun */
 	char seraph_eyes;
 #define SE_SUN 1
 #define SE_INVIS 2

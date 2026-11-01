@@ -8,6 +8,7 @@
 /*	       - generalized for 3.1 (mike@bullns.on01.bull.ca) */
 
 #include "hack.h"
+#include "mattkbp.h"
 #include "qtext.h"
 #include "xhity.h"
 
@@ -22,6 +23,7 @@ STATIC_DCL boolean FDECL(rightful_owner, (struct monst *,SHORT_P, struct monst *
 STATIC_DCL struct obj *FDECL(on_ground, (SHORT_P));
 STATIC_DCL boolean FDECL(you_have, (long int));
 STATIC_DCL long FDECL(target_on, (long int,struct monst *));
+STATIC_DCL long FDECL(covet_target, (struct monst *));
 STATIC_DCL long FDECL(strategy, (struct monst *));
 STATIC_DCL void FDECL(wizgush, (int, int, genericptr_t));
 STATIC_DCL void NDECL(dowizgush);
@@ -279,55 +281,27 @@ target_on(mask, mtmp)
 
 	otyp = which_arti(mask);
 	if(!mon_has_arti(mtmp, otyp)) {
-	    if(you_have(mask))
-		return(STRAT(STRAT_PLAYER, u.ux, u.uy, mask));
-	    else if((otmp = on_ground(otyp))){
-			return(STRAT(STRAT_GROUND, otmp->ox, otmp->oy, mask));
-	    } else if((mtmp2 = other_mon_has_arti(mtmp, otyp)) && !rightful_owner(mtmp2, otyp, mtmp))
-		return(STRAT(STRAT_MONSTR, mtmp2->mx, mtmp2->my, mask));
+	    /* a diagonal_mover can't covet a target it can never reach */
+	    if(you_have(mask)){
+		if(shared_world(mtmp, u.ux, u.uy))
+		    return(STRAT(STRAT_PLAYER, u.ux, u.uy, mask));
+	    } else if((otmp = on_ground(otyp))){
+			if(shared_world(mtmp, otmp->ox, otmp->oy))
+				return(STRAT(STRAT_GROUND, otmp->ox, otmp->oy, mask));
+	    } else if((mtmp2 = other_mon_has_arti(mtmp, otyp)) && !rightful_owner(mtmp2, otyp, mtmp)){
+		if(shared_world(mtmp, mtmp2->mx, mtmp2->my))
+		    return(STRAT(STRAT_MONSTR, mtmp2->mx, mtmp2->my, mask));
+	    }
 	}
 	return(STRAT_NONE);
 }
 
+/* find whichever tracked item mtmp currently covets, in priority order */
 STATIC_OVL long
-strategy(mtmp)
-	register struct monst *mtmp;
+covet_target(struct monst *mtmp)
 {
-	long strat, dstrat;
+	long strat;
 
-	if (!(is_covetous(mtmp->data) || mtmp->mtyp == PM_GREAT_CTHULHU) ||
-		/* perhaps a shopkeeper has been polymorphed into a master
-		   lich; we don't want it teleporting to the stairs to heal
-		   because that will leave its shop untended */
-		(mtmp->isshk && inhishop(mtmp)))
-	    return STRAT_NONE;
-
-	switch((mtmp->mhp*3)/mtmp->mhpmax) {	/* 0-3 */
-
-	   default:
-	    case 0:	/* panic time - mtmp is almost snuffed */
-			return(STRAT_HEAL);
-
-	    case 1:	/* the wiz is less cautious */
-			if(mtmp->mtyp != PM_WIZARD_OF_YENDOR)
-			    return(STRAT_HEAL);
-			/* else fall through */
-
-	    case 2:	dstrat = STRAT_HEAL;
-			break;
-
-	    case 3:	dstrat = STRAT_NONE;
-			break;
-	}
-	
-	//I don't think the MT_ matters (other than it can't be 0), but the bell is thematic for Cthulhu anyway
-	if(mtmp->mtyp == PM_GREAT_CTHULHU){
-		if(rn2(4) && rn2(mtmp->mhpmax) < mtmp->mhp)
-			return STRAT(STRAT_PLAYER, u.ux, u.uy, MT_WANTSBELL);
-		else
-			return dstrat;
-	}
-	
 	if(flags.made_amulet)
 	    if((strat = target_on(MT_WANTSAMUL, mtmp)) != STRAT_NONE)
 			return(strat);
@@ -353,6 +327,50 @@ strategy(mtmp)
 	    if((strat = target_on(MT_WANTSARTI, mtmp)) != STRAT_NONE)
 			return(strat);
 	}
+	return(STRAT_NONE);
+}
+
+STATIC_OVL long
+strategy(struct monst *mtmp)
+{
+	long strat, dstrat;
+
+	if (!(covetous_warping(mtmp->data) || mtmp->mtyp == PM_GREAT_CTHULHU) ||
+		/* perhaps a shopkeeper has been polymorphed into a master
+		   lich; we don't want it teleporting to the stairs to heal
+		   because that will leave its shop untended */
+		(mtmp->isshk && inhishop(mtmp)))
+	    return STRAT_NONE;
+
+	switch((mtmp->mhp*3)/mtmp->mhpmax) {	/* 0-3 */
+
+	   default:
+	    case 0:	/* panic time - mtmp is almost snuffed */
+			return(STRAT_HEAL);
+
+	    case 1:	/* the wiz is less cautious */
+			if(mtmp->mtyp != PM_WIZARD_OF_YENDOR)
+			    return(STRAT_HEAL);
+			/* else fall through */
+
+	    case 2:	dstrat = STRAT_HEAL;
+			break;
+
+	    case 3:	dstrat = STRAT_NONE;
+			break;
+	}
+
+	//I don't think the MT_ matters (other than it can't be 0), but the bell is thematic for Cthulhu anyway
+	if(mtmp->mtyp == PM_GREAT_CTHULHU){
+		if(rn2(4) && rn2(mtmp->mhpmax) < mtmp->mhp)
+			return STRAT(STRAT_PLAYER, u.ux, u.uy, MT_WANTSBELL);
+		else
+			return dstrat;
+	}
+
+	if((strat = covet_target(mtmp)) != STRAT_NONE)
+		return(strat);
+
 	return(dstrat);
 }
 
@@ -519,7 +537,7 @@ tactics(mtmp)
 				attacktype_fordmg(mtmp->data, AT_SPIT, AD_ANY) ||
 				attacktype_fordmg(mtmp->data, AT_ARRW, AD_ANY) ||
 				attacktype_fordmg(mtmp->data, AT_BEAM, AD_ANY) )
-				&& !mtmp->mcan && !mtmp->mspec_used
+				&& !mtmp->mcan && (!mtmp->mspec_used || standoff(mtmp->data))
 			){
 				if(attacktype_fordmg(mtmp->data, AT_ARRW, AD_SLVR)
 					&& !has_object_type(mtmp->minvent, ARROW)
@@ -540,7 +558,7 @@ tactics(mtmp)
 				if(!mon_can_see_you(mtmp) || !couldsee(mtmp->mx, mtmp->my)) mnexto(mtmp);
 			} else if((attacktype_fordmg(mtmp->data, AT_MMGC, AD_ANY) ||
 				attacktype_fordmg(mtmp->data, AT_MAGC, AD_ANY) )
-				&& !mtmp->mcan && !mtmp->mspec_used
+				&& !mtmp->mcan && (!mtmp->mspec_used || standoff(mtmp->data))
 			){
 				mofflin(mtmp);
 				if(!mon_can_see_you(mtmp) || !couldsee(mtmp->mx, mtmp->my)) mnexto(mtmp);
@@ -612,7 +630,7 @@ tactics(mtmp)
 				attacktype_fordmg(mtmp->data, AT_SPIT, AD_ANY) ||
 				attacktype_fordmg(mtmp->data, AT_ARRW, AD_ANY) ||
 				attacktype_fordmg(mtmp->data, AT_BEAM, AD_ANY) )
-				&& !mtmp->mcan && !mtmp->mspec_used
+				&& !mtmp->mcan && (!mtmp->mspec_used || standoff(mtmp->data))
 			){
 				if(attacktype_fordmg(mtmp->data, AT_ARRW, AD_SLVR)
 					&& !has_object_type(mtmp->minvent, ARROW)
@@ -633,7 +651,7 @@ tactics(mtmp)
 				if(!mon_can_see_you(mtmp) || !couldsee(mtmp->mx, mtmp->my)) mnexto(mtmp);
 			} else if((attacktype_fordmg(mtmp->data, AT_MMGC, AD_ANY) ||
 				attacktype_fordmg(mtmp->data, AT_MAGC, AD_ANY) )
-				&& !mtmp->mcan && !mtmp->mspec_used
+				&& !mtmp->mcan && (!mtmp->mspec_used || standoff(mtmp->data))
 			){
 				mofflin(mtmp);
 				if(!mon_can_see_you(mtmp) || !couldsee(mtmp->mx, mtmp->my)) mnexto(mtmp);
@@ -670,6 +688,18 @@ tactics(mtmp)
 	}
 	/*NOTREACHED*/
 	return(0);
+}
+
+/* records mtmp's covetous goal without acting on it */
+void
+find_goal(struct monst *mtmp)
+{
+	mtmp->mstrategy = (mtmp->mstrategy & STRAT_WAITMASK) | covet_target(mtmp);
+	if((mtmp->mstrategy & STRAT_STRATMASK) == STRAT_PLAYER){
+		//The monster learns your location
+		mtmp->mux = STRAT_GOALX(mtmp->mstrategy);
+		mtmp->muy = STRAT_GOALY(mtmp->mstrategy);
+	}
 }
 
 void
@@ -956,7 +986,7 @@ yellow_smite()
 {
 	int dmg;
 	struct monst *magr;
-	struct attack attkbuff = {AT_MAGC, AD_CLRC, 0, 6};
+	struct attack attkbuff = {AT_MAGC, AD_CLRC, 0, 6, .bodypart = ATKBP(NONE)};
 	for(magr = fmon; magr; magr = magr->nmon){
 		if(magr->mpeaceful
 			|| nonthreat(magr)
@@ -983,8 +1013,9 @@ yellow_smite()
 				punish((struct obj *)0);
 			}
 			else {
-				Your("iron ball gets heavier!");
-				uball->owt += 160;
+				Your("%s ball gets heavier!", material_name(uball, TRUE));
+				uball->ovar1_heavy_ball += 160;
+				uball->owt = weight(uball);
 			}
 		break;
 		case 2:

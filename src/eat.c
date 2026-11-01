@@ -61,7 +61,7 @@ STATIC_OVL NEARDATA const char offerables[] = { FOOD_CLASS, TOOL_CLASS, 0 };
 STATIC_OVL NEARDATA const char allobj[] = {
 	COIN_CLASS, WEAPON_CLASS, ARMOR_CLASS, POTION_CLASS, SCROLL_CLASS, TILE_CLASS,
 	WAND_CLASS, RING_CLASS, AMULET_CLASS, FOOD_CLASS, TOOL_CLASS,
-	GEM_CLASS, ROCK_CLASS, BALL_CLASS, CHAIN_CLASS, SPBOOK_CLASS, BED_CLASS, SCOIN_CLASS, BELT_CLASS, 0 };
+	GEM_CLASS, ROCK_CLASS, BALL_CLASS, CHAIN_CLASS, SPBOOK_CLASS, BED_CLASS, SCOIN_CLASS, BELT_CLASS, SANCTION_CLASS, 0 };
 
 STATIC_OVL boolean force_save_hs = FALSE;
 
@@ -724,7 +724,7 @@ maybe_cannibal(pm, allowmsg)
 int pm;
 boolean allowmsg;
 {
-	if((your_race(&mons[pm]) || Race_if(PM_SILVERMAN)) && !is_animal(&mons[pm]) && !mindless(&mons[pm])){
+	if((your_race(&mons[pm]) || Race_if(PM_SILVERMAN)) && intelligent(&mons[pm])){
 		if (!CANNIBAL_ALLOWED()) {
 			if (allowmsg) {
 				if (Upolyd)
@@ -1374,6 +1374,7 @@ BOOLEAN_P tin, nobadeffects, drained;
 			if (HConfusion > 2)  make_confused(2L,FALSE);
 		break;
 		case PM_BEHOLDER:
+		case PM_DEATH_BEHOLDER:
 			if(!drained || !rn2(5)) {
 				You(Hallucination ? "can see your own insides!"
 					: "feel as though you can see the world from a whole new angle!");
@@ -1532,7 +1533,7 @@ opentin()		/* called during each move whilst opening a tin */
 	    if (r == ROTTEN_TIN && (tin.tin->corpsenm == PM_LIZARD || tin.tin->corpsenm == PM_SMALL_CAVE_LIZARD ||
 			tin.tin->corpsenm == PM_CAVE_LIZARD || tin.tin->corpsenm == PM_BABY_CAVE_LIZARD || 
 			tin.tin->corpsenm == PM_LARGE_CAVE_LIZARD ||
-			tin.tin->corpsenm == PM_LICHEN || tin.tin->corpsenm == PM_BEHOLDER))
+			tin.tin->corpsenm == PM_LICHEN || tin.tin->corpsenm == PM_BEHOLDER || tin.tin->corpsenm == PM_DEATH_BEHOLDER))
 		r = DRIED_TIN;		/* lizards don't rot */
 	    else if (tin.tin->spe == -1 && !tin.tin->blessed && !rn2(7))
 		r = ROTTEN_TIN;			/* some homemade tins go bad */
@@ -1628,7 +1629,7 @@ opentin()		/* called during each move whilst opening a tin */
 		}
 
 		char buf[BUFSZ];
-		if(tin.tin->corpsenm > NON_PM && tin.tin->spe != 1 && your_race(&mons[tin.tin->corpsenm]) && !is_animal(&mons[tin.tin->corpsenm]) && !mindless(&mons[tin.tin->corpsenm])
+		if(tin.tin->corpsenm > NON_PM && tin.tin->spe != 1 && your_race(&mons[tin.tin->corpsenm]) && intelligent(&mons[tin.tin->corpsenm])
 			&& !CANNIBAL_ALLOWED() && (u.ualign.record >= 20 || ACURR(A_WIS) >= 20 || u.ualign.record >= rnd(20-ACURR(A_WIS))))
 			Sprintf(buf, "You feel a deep sense of kinship to the tin!  Eat it anyway?");
 		else
@@ -1794,6 +1795,12 @@ start_tin(otmp)		/* called when starting to open a tin */
 		case TIN_OPENER:
 			tmp = 1;
 			break;
+		case PEST_GLAIVE:
+			if (uwep->ovar1_pestglaive_props & PG_TIN_OPENER) {
+				tmp = 1;
+				break;
+			}
+			goto no_opener;
 		case DAGGER:
 		case ELVEN_DAGGER:
 		case ORCISH_DAGGER:
@@ -1908,7 +1915,7 @@ eatcorpse(otmp)		/* called when a corpse is selected as food */
 	}
 
 	if (mtyp != PM_LIZARD && mtyp != PM_SMALL_CAVE_LIZARD && mtyp != PM_CAVE_LIZARD 
-		&& mtyp != PM_LARGE_CAVE_LIZARD && mtyp != PM_LICHEN && mtyp != PM_BEHOLDER
+		&& mtyp != PM_LARGE_CAVE_LIZARD && mtyp != PM_LICHEN && mtyp != PM_BEHOLDER && mtyp != PM_DEATH_BEHOLDER
 	) {
 		long age = peek_at_iced_corpse_age(otmp);
 
@@ -1998,17 +2005,23 @@ eatcorpse(otmp)		/* called when a corpse is selected as food */
 	} else if (acidic(&mons[mtyp]) && !Acid_resistance) {
 		tp++;
 		You("have a very bad case of stomach acid."); /* not body_part() */
-		losehp(rnd(15), "acidic corpse", KILLED_BY_AN);
+		int acid_dmg = rnd(15);
+		acid_dmg = elemental_dmg_resistance(&youmonst, (struct monst *)0, acid_dmg, AD_ACID);
+		losehp(acid_dmg, "acidic corpse", KILLED_BY_AN);
 	} if (freezing(&mons[mtyp]) && !Cold_resistance) {
 		tp++;
 		You("feel your stomach freeze!"); /* not body_part() */
 		roll_frigophobia();
-		losehp(d(2, 12), "cryonic corpse", KILLED_BY_AN);
+		int cold_dmg = d(2, 12);
+		cold_dmg = elemental_dmg_resistance(&youmonst, (struct monst *)0, cold_dmg, AD_COLD);
+		losehp(cold_dmg, "cryonic corpse", KILLED_BY_AN);
 	}
 	if (burning(&mons[mtyp]) && !Fire_resistance) {
 		tp++;
 		You("feel your stomach boil!"); /* not body_part() */
-		losehp(rnd(20), "boiling hot corpse", KILLED_BY_AN);
+		int fire_dmg = rnd(20);
+		fire_dmg = elemental_dmg_resistance(&youmonst, (struct monst *)0, fire_dmg, AD_FIRE);
+		losehp(fire_dmg, "boiling hot corpse", KILLED_BY_AN);
 	}
 	if (poisonous(&mons[mtyp]) && rn2(5)) {
 		tp++;
@@ -2032,7 +2045,7 @@ eatcorpse(otmp)		/* called when a corpse is selected as food */
 	if (otmp->odrained) victual.reqtime = (u.sealsActive&SEAL_AHAZU) ? 1 : rounddiv(victual.reqtime, 5);
 
 	if (!tp && mtyp != PM_LIZARD && mtyp != PM_SMALL_CAVE_LIZARD && mtyp != PM_CAVE_LIZARD 
-		&& mtyp != PM_LARGE_CAVE_LIZARD && mtyp != PM_LICHEN && mtyp != PM_BEHOLDER &&
+		&& mtyp != PM_LARGE_CAVE_LIZARD && mtyp != PM_LICHEN && mtyp != PM_BEHOLDER && mtyp != PM_DEATH_BEHOLDER &&
 			(otmp->orotten || !rn2(7))) {
 	    if ( (monstermoves - peek_at_iced_corpse_age(otmp)) > 5 && rottenfood(otmp)) {
 		otmp->orotten = TRUE;
@@ -2149,7 +2162,7 @@ struct obj *otmp;
 		       for deciding whether to be sickened by this meal */
 		    if (rn2(2) && !CANNIBAL_ALLOWED())
 #ifdef CONVICT
-		    if (!Role_if(PM_CONVICT))
+		    if (!u.udeprived)
 #endif /* CONVICT */
 			make_vomiting((long)rn1(victual.reqtime, 14), FALSE);
 		}
@@ -2195,7 +2208,7 @@ struct obj *otmp;
 		if (otmp->otyp == EGG && stale_egg(otmp)) {
 		    pline("Ugh.  Rotten egg.");	/* perhaps others like it */
 #ifdef CONVICT
-		if (Role_if(PM_CONVICT) && (rn2(8) > u.ulevel)) {
+		if (u.udeprived && (rn2(8) > u.ulevel)) {
 		    You_feel("a slight stomach ache.");	/* prisoners are used to bad food */
 		} else
 #endif /* CONVICT */
@@ -2607,7 +2620,7 @@ register struct obj *otmp;
 		}
 		break;
 	    case BRAINROOT:
-			if(mvitals[PM_BRAINBLOSSOM_PATCH].insight_gained < 3){
+			if(!u.veil && mvitals[PM_BRAINBLOSSOM_PATCH].insight_gained < 3){
 				pline("Alien impulses assault your mind!");
 				if(mvitals[PM_BRAINBLOSSOM_PATCH].insight_gained == 0 || !rn2(mvitals[PM_BRAINBLOSSOM_PATCH].insight_gained+1)){
 					mvitals[PM_BRAINBLOSSOM_PATCH].insight_gained++;
@@ -2680,7 +2693,7 @@ struct obj *otmp;
 		    stoneorslime = !Slime_res(&youmonst);
 
 		if (cadaver && mtyp != PM_LIZARD && mtyp != PM_SMALL_CAVE_LIZARD && mtyp != PM_CAVE_LIZARD 
-		&& mtyp != PM_LARGE_CAVE_LIZARD && mtyp != PM_LICHEN && mtyp != PM_BEHOLDER ) {
+		&& mtyp != PM_LARGE_CAVE_LIZARD && mtyp != PM_LICHEN && mtyp != PM_BEHOLDER && mtyp != PM_DEATH_BEHOLDER ) {
 			long age = peek_at_iced_corpse_age(otmp);
 			/* worst case rather than random
 			   in this calculation to force prompt */
@@ -2886,7 +2899,7 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 	    You_cant("eat %s you're wearing.", something);
 	    return MOVE_CANCELLED;
 	}
-	if(otmp->otyp == CORPSE && your_race(&mons[otmp->corpsenm]) && !is_animal(&mons[otmp->corpsenm]) && !mindless(&mons[otmp->corpsenm])
+	if(otmp->otyp == CORPSE && your_race(&mons[otmp->corpsenm]) && intelligent(&mons[otmp->corpsenm])
 		&& !CANNIBAL_ALLOWED() && (u.ualign.record >= 20 || ACURR(A_WIS) >= 20 || u.ualign.record >= rnd(20-ACURR(A_WIS)))
 	){
 		char buf[BUFSZ];
@@ -3807,7 +3820,9 @@ doeat()		/* generic "eat" command funtion (see cmd.c) */
 			}
 			if((otmp->opoisoned & OPOISON_ACID) && !Acid_resistance){
 				You("have a very bad case of stomach acid."); /* not body_part() */
-				losehp(rnd(15), "acidic meal", KILLED_BY_AN);
+				int acid_dmg = rnd(15);
+				acid_dmg = elemental_dmg_resistance(&youmonst, (struct monst *)0, acid_dmg, AD_ACID);
+				losehp(acid_dmg, "acidic meal", KILLED_BY_AN);
 			}
 			if((otmp->opoisoned & OPOISON_SILVER) && hates_silver(youracedata)){
 				pline("The silver sears the inside of your mouth!"); /* not body_part() */
@@ -4029,8 +4044,9 @@ gethungry()	/* as time goes by - called by moveloop() and domove() */
 	}
 	
 	if(u.usleep) hungermod *= 10; /* slow metabolic rate while asleep */
-	/* Monks and Convicts can last twice as long at hungry and below. Convicts last 5x as long at weak or lower. */
-	if(Role_if(PM_CONVICT)){
+	/* Monks and the deprived can last twice as long at hungry and below.
+	   The deprived last 5x as long at weak or lower. */
+	if(u.udeprived){
 		if(u.uhs == HUNGRY) hungermod *= 2;
 		else if(u.uhs > HUNGRY) hungermod *=5;	/* WEAK or hungrier */
 	}
@@ -4487,11 +4503,11 @@ sync_hunger()
 	if(is_fainted()) {
 		flags.soundok = 0;
 		if(get_uhungersizemod() > 1){
-			if(Role_if(PM_CONVICT)) nomul(-1+( YouHunger/(20*get_uhungersizemod())), "fainted from lack of food");
+			if(u.udeprived) nomul(-1+( YouHunger/(20*get_uhungersizemod())), "fainted from lack of food");
 			else nomul(-10+( YouHunger/(10*get_uhungersizemod())), "fainted from lack of food");
 		}
 		else {
-			if(Role_if(PM_CONVICT)) nomul(-1+( YouHunger/20), "fainted from lack of food");
+			if(u.udeprived) nomul(-1+( YouHunger/20), "fainted from lack of food");
 			else nomul(-10+( YouHunger/10), "fainted from lack of food");
 		}
 		nomovemsg = "You regain consciousness.";
@@ -4566,7 +4582,7 @@ boolean incr;
 	            } else {
 					You("faint from lack of food.");
 					flags.soundok = 0;
-					if(Role_if(PM_CONVICT)) nomul(-1+YouHunger/20, "fainted from lack of food");
+					if(u.udeprived) nomul(-1+YouHunger/20, "fainted from lack of food");
 					else nomul(-10+YouHunger/10, "fainted from lack of food");
 					nomovemsg = "You regain consciousness.";
 					afternmv = unfaint;

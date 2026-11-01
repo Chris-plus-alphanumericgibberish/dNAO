@@ -1018,8 +1018,9 @@ menu_display_page(nhmenu *menu, WINDOW * win, int page_num)
         }
         if (menu_item_ptr->glyph != NO_GLYPH && iflags.use_menu_glyphs) {
             unsigned bgcolor;   /*notused */
+            int dummy_attr = GLYPH_ATR_NONE;
             glyph_t curglyph = (glyph_t)curletter;//Note: a glyph is a long int
-            mapglyph(menu_item_ptr->glyph, &curglyph, &color, &bgcolor, u.ux, u.uy);
+            mapglyph(menu_item_ptr->glyph, &curglyph, &color, &bgcolor, &dummy_attr, u.ux, u.uy);
             curletter = (int)curglyph;//This seems bad, but it makes explicit what this code was always doing...
             nethack_char nch;
             nch.ch = curletter;

@@ -312,9 +312,9 @@ struct obj *otmp;
 	}
 	if(otmp->otyp == KAMEREL_VAJRA){
 		if(otmp->oartifact == ART_KISHIN_MIRROR){
-			if(u.ualign.record < -3)
+			if(u_holiness() == UNHOLY_HOLINESS)
 				return "black ash-bladed";
-			if(u.ualign.record > 3)
+			if(u_holiness() == HOLY_HOLINESS)
 				return "white sun-bladed";
 		}
 		return "lightning bladed";
@@ -444,6 +444,9 @@ register int otyp;
 		break;
 	case SCROLL_CLASS:
 		Strcpy(buf, "scroll");
+		break;
+	case SANCTION_CLASS:
+		Strcpy(buf, "sanction");
 		break;
 	case TILE_CLASS:
 		Strcpy(buf, "shard");
@@ -1046,14 +1049,30 @@ boolean dofull;
 			Strcat(buf, "magic-resistant ");
 		if(check_oprop(obj, OPROP_REFL))
 			Strcat(buf, "reflective ");
-		if(obj->otyp != PEST_GLAIVE){
-			if(check_oprop(obj, OPROP_FIRE) && obj->known)
+		if(obj->otyp != PEST_GLAIVE && obj->known){
+			if(check_oprop(obj, OPROP_FIRE_HOLY))
+				Strcat(buf, "sanctified flameproof ");
+			else if(check_oprop(obj, OPROP_FIRE_HELL))
+				Strcat(buf, "hellfire-proof ");
+			else if(check_oprop(obj, OPROP_FIRE))
 				Strcat(buf, "flameproof ");
-			if(check_oprop(obj, OPROP_COLD) && obj->known)
+			if(check_oprop(obj, OPROP_COLD_HOLY))
+				Strcat(buf, "sanctified coldproof ");
+			else if(check_oprop(obj, OPROP_COLD_HELL))
+				Strcat(buf, "hellrime-proof ");
+			else if(check_oprop(obj, OPROP_COLD))
 				Strcat(buf, "coldproof ");
-			if(check_oprop(obj, OPROP_ELEC) && obj->known)
+			if(check_oprop(obj, OPROP_ELEC_HOLY))
+				Strcat(buf, "sanctified voltproof ");
+			else if(check_oprop(obj, OPROP_ELEC_HELL))
+				Strcat(buf, "hellvolt-proof ");
+			else if(check_oprop(obj, OPROP_ELEC))
 				Strcat(buf, "voltproof ");
-			if(check_oprop(obj, OPROP_ACID) && obj->known)
+			if(check_oprop(obj, OPROP_ACID_HOLY))
+				Strcat(buf, "sanctified acidproof ");
+			else if(check_oprop(obj, OPROP_ACID_HELL))
+				Strcat(buf, "hellacid-proof ");
+			else if(check_oprop(obj, OPROP_ACID))
 				Strcat(buf, "acidproof ");
 		}
 		if(check_oprop(obj, OPROP_DISN) && obj->known)
@@ -1607,7 +1626,7 @@ boolean adjective;
 		if (check_oprop(obj, OPROP_WOOL))
 			return (adjective ? "woolen" : "wool");
 		/* overly fancy clothing */
-		else if (obj->otyp == GENTLEMAN_S_SUIT || obj->otyp == GENTLEWOMAN_S_DRESS)
+		else if (obj->otyp == GENTLEMAN_S_SUIT || obj->otyp == GENTLEWOMAN_S_SUIT || obj->otyp == GENTLEWOMAN_S_DRESS)
 			return "silk";
 		else if (obj->oartifact == ART_SPIDERSILK)
 			return "spidersilk";
@@ -1621,6 +1640,10 @@ boolean adjective;
 		/* except for "forked" the wooden wand descriptions are materials (eg pine) */
 		if (obj->oclass == WAND_CLASS && ((s = OBJ_DESCR(objects[obj->otyp])) != (char *)0 && strncmpi(s, "forked", 6)))
 			return OBJ_DESCR(objects[obj->otyp]);
+		else if (obj->otyp == PRACTICE_SWORD)
+			return "bamboo";
+		else if (obj->otyp == RITUAL_SWORD)
+			return "peach wood";
 		else
 			return (adjective ? "wooden" : "wood");
 	case CHITIN:
@@ -1801,7 +1824,7 @@ add_material_words(obj, buf)
 struct obj *obj;
 char *buf;
 {
-	if (obj->otyp == BALL && (obj->owt > objects[BALL].oc_weight)) {
+	if (obj->otyp == BALL && obj->ovar1_heavy_ball) {
 		Strcat(buf, "very ");
 	}
 	if(obj->otyp == BALL){
@@ -2137,7 +2160,8 @@ boolean getting_obj_base_desc;
 				typ == SUNGLASSES ||
 				typ == HAWAIIAN_SHORTS ||
 				is_boots(obj) ||
-				is_gloves(obj)
+				is_gloves(obj) ||
+				is_wingguard(obj)
 				) {
 				Strcat(buf, "pair of ");
 			}
@@ -2280,6 +2304,12 @@ boolean getting_obj_base_desc;
 		else
 			Strcat(buf, " of light");
 	}
+	if(check_oprop(obj, OPROP_SAMOW) && obj->oartifact != ART_SUN_S_BOW && obj->known){
+		if(strstr(buf, " of "))
+			Strcat(buf, " and the sun");
+		else
+			Strcat(buf, " of the sun");
+	}
 	
 	if (!(obj->oartifact && undiscovered_artifact(obj->oartifact) && oart->desc)
 		|| (iflags.force_artifact_names && !getting_obj_base_desc && obj->oartifact != ART_FLUORITE_OCTAHEDRON)) {
@@ -2381,6 +2411,26 @@ weapon:
 						Sprintf(eos(buf), " (discordant notes)");
 					break;
 				}
+			}
+			if(obj->oartifact == ART_SIX_ELEMENT_SWORD){
+				if(six_element_channel(obj->oartifact, SIXEL_ELEC))
+					Strcat(buf, " (lightning)");
+				else if(six_element_channel(obj->oartifact, SIXEL_WOOD))
+					Strcat(buf, " (wood)");
+				else if(six_element_channel(obj->oartifact, SIXEL_FIRE))
+					Strcat(buf, " (fire)");
+				else if(six_element_channel(obj->oartifact, SIXEL_FIELD))
+					Strcat(buf, " (field)");
+				else if(six_element_channel(obj->oartifact, SIXEL_EARTH))
+					Strcat(buf, " (earth)");
+				else if(six_element_channel(obj->oartifact, SIXEL_FROST))
+					Strcat(buf, " (frosted)");
+				else if(six_element_channel(obj->oartifact, SIXEL_METAL))
+					Strcat(buf, " (metal)");
+				else if(six_element_channel(obj->oartifact, SIXEL_ICE))
+					Strcat(buf, " (ice)");
+				else if(six_element_channel(obj->oartifact, SIXEL_WATER))
+					Strcat(buf, " (water)");
 			}
 			//#ifdef FIREARMS
 			if (obj->otyp == STICK_OF_DYNAMITE) {
@@ -2578,6 +2628,8 @@ weapon:
 				}
 				else Sprintf(eos(buf), " (%d:%d)", (int)obj->recharged, obj->spe);
 			}
+			else if (KNOWS_ENCHANTMENT)
+				Sprintf(eos(buf), " (%d)", obj->spe);
 			else if (obj->spe <= 0 && KNOWS_MAGIC)
 				Sprintf(eos(buf), " (empty)");
 			break;
@@ -3345,13 +3397,13 @@ static const char *wrp[] = {
 	"wand", "ring", "potion", "scroll", "shard", "wage", "strange coin", "gem", "amulet",
 	"spellbook", "spell book",
 	/* for non-specific wishes */
-	"weapon", "armor", "armour", "tool", "food", "comestible","belt",
+	"weapon", "armor", "armour", "tool", "food", "comestible","belt", "sanction"
 };
 static const char wrpsym[] = {
 	WAND_CLASS, RING_CLASS, POTION_CLASS, SCROLL_CLASS, TILE_CLASS, SCOIN_CLASS, SCOIN_CLASS, GEM_CLASS,
 	AMULET_CLASS, SPBOOK_CLASS, SPBOOK_CLASS,
 	WEAPON_CLASS, ARMOR_CLASS, ARMOR_CLASS, TOOL_CLASS, FOOD_CLASS,
-	FOOD_CLASS, BELT_CLASS
+	FOOD_CLASS, BELT_CLASS, SANCTION_CLASS
 };
 
 #endif /* OVLB */
@@ -3765,7 +3817,8 @@ const char *oldstr;
 
 			/* note: nurses, axes but boxes */
 			if (!BSTRCMP(bp, p-5, "boxes") ||
-			    !BSTRCMP(bp, p-4, "ches")) {
+			    !BSTRCMP(bp, p-4, "ches") ||
+			    !BSTRCMPI(bp, p-9, "cutlasses")) {
 				p[-2] = '\0';
 				return bp;
 			}
@@ -3776,6 +3829,7 @@ const char *oldstr;
 			    !BSTRCMP(bp, p-9, "soul-lens") ||
 			    !BSTRCMPI(bp, p-8, "shackles") ||
 			    !BSTRCMP(bp, p-5, "shoes") ||
+			    !BSTRCMPI(bp, p-6, "drapes") ||
 				!BSTRCMPI(bp, p-9, "vs curses") ||
 				!BSTRCMPI(bp, p-13, "versus curses") ||
 			    !BSTRCMPI(bp, p-12, "vs evil eyes") ||
@@ -3792,6 +3846,9 @@ const char *oldstr;
 			   !BSTRCMPI(bp, p-4, "mass") ||
 			   !BSTRCMPI(bp, p-7, "sandals") ||
 			   !BSTRCMPI(bp, p-9, "gauntlets") ||
+			   !BSTRCMPI(bp, p-6, "guards") ||
+			   !BSTRCMPI(bp, p-6, "covers") ||
+			   !BSTRCMPI(bp, p-7, "cutlass") ||
 			   !BSTRCMPI(bp, p-5, "bands") ||
 			   !BSTRCMPI(bp, p-6, "tricks") ||
 			   !BSTRCMPI(bp, p-9, "paralysis") ||
@@ -4728,14 +4785,62 @@ int wishflags;
 		} else if (!strncmpi(bp, "magic-resistant ", l=16)) {
 			add_oprop_list(oprop_list, OPROP_MAGC);
 
+		} else if (!strncmpi(bp, "sanctified flameproof ", l=22)) {
+			add_oprop_list(oprop_list, OPROP_FIRE_HOLY);
+
+		} else if (!strncmpi(bp, "hellfire-proof ", l=15)) {
+			add_oprop_list(oprop_list, OPROP_FIRE_HELL);
+
+		} else if (!strncmpi(bp, "fire-sanctioned ", l=16)) {
+			add_oprop_list(oprop_list, OPROP_FIRE_SNCT);
+
 		} else if (!strncmpi(bp, "flameproof ", l=11)) {
 			add_oprop_list(oprop_list, OPROP_FIRE);
+
+		} else if (!strncmpi(bp, "sanctified coldproof ", l=21)) {
+			add_oprop_list(oprop_list, OPROP_COLD_HOLY);
+
+		} else if (!strncmpi(bp, "hellrime-proof ", l=15)) {
+			add_oprop_list(oprop_list, OPROP_COLD_HELL);
+
+		} else if (!strncmpi(bp, "cold-sanctioned ", l=16)) {
+			add_oprop_list(oprop_list, OPROP_COLD_SNCT);
 
 		} else if (!strncmpi(bp, "coldproof ", l=10)) {
 			add_oprop_list(oprop_list, OPROP_COLD);
 
+		} else if (!strncmpi(bp, "sanctified voltproof ", l=21)) {
+			add_oprop_list(oprop_list, OPROP_ELEC_HOLY);
+
+		} else if (!strncmpi(bp, "hellvolt-proof ", l=15)) {
+			add_oprop_list(oprop_list, OPROP_ELEC_HELL);
+
+		} else if (!strncmpi(bp, "shock-sanctioned ", l=17)) {
+			add_oprop_list(oprop_list, OPROP_ELEC_SNCT);
+
 		} else if (!strncmpi(bp, "voltproof ", l=10)) {
 			add_oprop_list(oprop_list, OPROP_ELEC);
+
+		} else if (!strncmpi(bp, "sanctified acidproof ", l=21)) {
+			add_oprop_list(oprop_list, OPROP_ACID_HOLY);
+
+		} else if (!strncmpi(bp, "hellacid-proof ", l=15)) {
+			add_oprop_list(oprop_list, OPROP_ACID_HELL);
+
+		} else if (!strncmpi(bp, "acid-sanctioned ", l=16)) {
+			add_oprop_list(oprop_list, OPROP_ACID_SNCT);
+
+		} else if (!strncmpi(bp, "fire-sanctified ", l=16)) {
+			add_oprop_list(oprop_list, OPROP_FIRE_HOLY_SNCT);
+
+		} else if (!strncmpi(bp, "cold-sanctified ", l=16)) {
+			add_oprop_list(oprop_list, OPROP_COLD_HOLY_SNCT);
+
+		} else if (!strncmpi(bp, "shock-sanctified ", l=17)) {
+			add_oprop_list(oprop_list, OPROP_ELEC_HOLY_SNCT);
+
+		} else if (!strncmpi(bp, "acid-sanctified ", l=16)) {
+			add_oprop_list(oprop_list, OPROP_ACID_HOLY_SNCT);
 
 		} else if (!strncmpi(bp, "acidproof ", l=10)) {
 			add_oprop_list(oprop_list, OPROP_ACID);
@@ -6409,8 +6514,8 @@ typfnd:
 			consume_oeaten(otmp, -amt);
 		}
 	}
+	if (very && otmp->otyp == BALL) otmp->ovar1_heavy_ball += 160;
 	fix_object(otmp);
-	if (very && otmp->otyp == BALL) otmp->owt += 160;
 
 	*wishreturn = WISH_SUCCESS;
 	return(otmp);
@@ -6479,6 +6584,26 @@ struct monst *mtmp;
 		return obj_descr[idx].oc_name;
 	}
 	return "whatcha-may-callit";
+}
+
+/* Returns the possessive subject for mon's obj, with a trailing space: for a dancing sword's
+ * own wielded weapon, "The " (or nothing, if the weapon's name is a proper name), else "Mon's "
+ * (capitalized if upper).
+ */
+char *
+mon_obj_possessive(struct monst *mon, struct obj *obj, boolean upper)
+{
+	static char buf[BUFSZ];
+
+	if (mon != &youmonst && mon->mtyp == PM_DANCING_SWORD && obj && obj == MON_WEP(mon)) {
+		if (!strncmp(the(xname(obj)), "the ", 4))
+			Strcpy(buf, upper ? "The " : "the ");
+		else
+			buf[0] = '\0';
+	}
+	else
+		Sprintf(buf, "%s ", s_suffix(upper ? Monnam(mon) : mon_nam(mon)));
+	return buf;
 }
 #endif /* OVLB */
 

@@ -151,6 +151,7 @@ struct esum {
 #define FCSIZ	(ROWNO+COLNO)
 struct fakecorridor {
 	xchar fx,fy,ftyp;
+	uchar fflags;	/* original levl[fx][fy].flags */
 };
 
 struct evgd {

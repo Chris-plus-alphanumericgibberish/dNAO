@@ -97,6 +97,82 @@ MONSTER: '@',"peasant",(27,02),peaceful
 MONSTER: '@',"peasant",(28,09),peaceful
 MONSTER: '@',"peasant",(29,11),peaceful
 #
+#	The "start" level for pauper Noblemen.
+#
+MAZE: "Nob-paup",'.'
+FLAGS: noteleport,hardfloor
+INIT_MAP: 'e' , 'P' , false , true , lit , false
+GEOMETRY:center,center
+#0         1         2         3
+#0123456789012345678901234567890
+MAP
+0PPeeeeeeeeeeePPPPPPPPPPPPPPPPPP
+1PeePPPeeeeeeeeeeeeP-----P.PPPPP
+2PeePPPPPPPPPPPPPPPP|...|PPPeePP
+3eeeeP-----.......|--...--|PeePP
+4eeeeP|...|-|-----|.......|PeeeP
+5eeeeP--|+-.|.....+.......|PeeeP
+6eeeePPP|.|.+.....|.......|Peeee
+7eeeeeeP|.-----+--|--...--|Peeee
+8eeeeeeP|.|.........|...|PPPeeee
+9eeeeeeP|.+.........--S--PPeeeee
+0PeeeeeP|.|..........|.|PPPeeeee
+1PeeeeeP|.|----++----|-|PPPeeeee
+2PeeePPP|.|............|PPPeeeee
+3PPeeP--|+-----++-----+|--PeeeeP
+4PPeeP|...|PPPP..PPPP|...|PeeeeP
+5PPPPP-----PPPPPPPPPP-----PeeePP
+6PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP
+ENDMAP
+#0123456789012345678901234567890
+#0         1         2         3
+# Dungeon Description
+REGION:(00,00,30,16),lit,"ordinary"
+# Portal arrival point
+BRANCH:(00,00,30,16),(06,02,24,14)
+# Stairs
+STAIR:(21,10),down
+# Doors
+# Outside Doors
+DOOR:locked,(14,13)
+DOOR:locked,(15,13)
+# Inside Doors
+DOOR:closed,(14,11)
+DOOR:closed,(15,11)
+DOOR:closed,(08,13)
+DOOR:closed,(21,13)
+DOOR:closed,(14,07)
+DOOR:closed,(11,06)
+DOOR:closed,(08,05)
+DOOR:closed,(17,05)
+DOOR:closed,(09,09)
+
+# Fortuneteller
+MONSTER:'@',"old fortune teller",(12,05)
+
+OBJECT:'\\',"bed",(10,05)
+CONTAINER:'(',"writing desk",(21,05)
+
+# servant guards for the audience chamber
+MONSTER:'@',"servant",(13,06)
+MONSTER:'@',"servant",(16,05)
+MONSTER:'@',"servant",(08,12)
+
+# Monsters on siege duty.
+MONSTER: '@',"sergeant",(01,01),hostile
+MONSTER: '@',"soldier",(01,01),hostile
+MONSTER: '@',"soldier",(01,01),hostile
+MONSTER: '@',"soldier",(01,01),hostile
+MONSTER: '@',"peasant",(01,09),hostile
+MONSTER: '@',"peasant",(03,08),hostile
+MONSTER: '@',"peasant",(10,00),hostile
+MONSTER: '@',"peasant",(02,12),hostile
+MONSTER: '@',"peasant",(03,14),hostile
+
+MONSTER: '@',"peasant",(27,02),peaceful
+MONSTER: '@',"peasant",(28,09),peaceful
+MONSTER: '@',"peasant",(29,11),peaceful
+#
 #	The "locate" level for the quest.
 #
 #	Here you have to find your way to the Isle of Glass to go

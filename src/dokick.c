@@ -4,6 +4,7 @@
 
 #include "hack.h"
 #include "xhity.h"
+#include "mattkbp.h"
 
 
 #define is_bigfoot(x)	((x) == &mons[PM_SASQUATCH])
@@ -15,7 +16,7 @@ static NEARDATA const char *gate_str;
 
 extern boolean notonhead;	/* for long worms */
 
-STATIC_DCL void FDECL(kick_monster, (XCHAR_P, XCHAR_P));
+STATIC_DCL boolean kick_lands(struct monst *, struct attack *, boolean, xchar, xchar, int);
 STATIC_DCL int FDECL(kick_object, (XCHAR_P, XCHAR_P));
 STATIC_DCL char *FDECL(kickstr, (char *));
 STATIC_DCL void FDECL(otransit_msg, (struct obj *, BOOLEAN_P, long));
@@ -25,6 +26,16 @@ static NEARDATA struct obj *kickobj;
 
 static struct attack basickick = { AT_KICK, AD_PHYS, 0, 0 };
 
+/* basickick with its attribution: some leg, no telling which. */
+static struct attack
+basic_kick(void)
+{
+	struct attack kick = basickick;
+
+	kick.bodypart = ATKBP(LEG);
+	return kick;
+}
+
 //definition of an extern in you.h
 boolean onlykicks = FALSE;
 
@@ -33,6 +44,7 @@ kickdmg(mon, clumsy)
 register struct monst *mon;
 register boolean clumsy;
 {
+	struct attack kick = basic_kick();
 	int mdx, mdy;
 	struct permonst *mdat = mon->data;
 	/*Note: currently these are actually the same skill, but....*/
@@ -48,8 +60,8 @@ register boolean clumsy;
 	}
 	check_caitiff(mon);
 
-	result = xmeleehity(&youmonst, mon, &basickick, (struct obj **)0, -1, 1000, FALSE, 0);
-	result = xpassivey(&youmonst, mon, &basickick, (struct obj *)0, -1, result, mdat, TRUE);
+	result = xmeleehity(&youmonst, mon, &kick, (struct obj **)0, -1, 1000, FALSE, 0);
+	result = xpassivey(&youmonst, mon, &kick, (struct obj **)0, -1, result, mdat, TRUE, (boolean *)0);
 
 	if (result) {
 		/* a good kick exercises your dex */
@@ -76,10 +88,66 @@ register boolean clumsy;
 	}
 }
 
-STATIC_OVL void
-kick_monster(x, y)
-register xchar x, y;
+/*
+ * Whether a kick against mon, standing at (x,y), connects. evade_move_thresh
+ * is the mon->movement needed to attempt an evasive hop.
+ *
+ * Returns TRUE if the kick connects (caller should call kickdmg()); FALSE
+ * if it was blocked or evaded.
+ */
+STATIC_OVL boolean
+kick_lands(struct monst *mon, struct attack *kick, boolean clumsy, xchar x, xchar y, int evade_move_thresh)
 {
+	if(!(!is_blind(mon) && !(mon->mtrapped || mon->entangled_oid) && !thick_skinned(mon->data) &&
+	   mon->data->mlet != S_EEL && haseyes(mon->data) && mon->mcanmove &&
+	   !mon->mstun && !mon->mconf && !mon->msleeping && !mindless_mon(mon) &&
+	   mon->data->mmove >= 12))
+		return TRUE;
+
+	if(!nohands(mon->data) && !rn2(martial() ? 5 : 3) && mon->movement >= 0) {
+		pline("%s blocks your %skick.", Monnam(mon),
+			clumsy ? "clumsy " : "");
+		xpassivey(&youmonst, mon, kick, (struct obj **)0, -1, MM_MISS, mon->data, TRUE, (boolean *)0);
+		mon->movement -= 6; //Note, may end up with up to -6 move points
+		return FALSE;
+	}
+	if(!rn2(martial() ? 50 : clumsy ? 3 : 4) && (clumsy || !bigmonst(mon->data)) && mon->movement >= evade_move_thresh){
+		coord mm;
+		char buffnam[BUFSZ];
+		Sprintf(buffnam, "%s", Monnam(mon));
+		if(mon_resistance(mon,TELEPORT))
+			mnexto(mon);
+		else if(enexto_mon(&mm, mon->mx, mon->my, mon) && abs(mm.x - mon->mx) <= 1 && abs(mm.y - mon->my) <= 1
+			&& (!orthogonal_mover(mon) || !((mm.x - mon->mx) && (mm.y - mon->my)))
+			&& (!diagonal_mover(mon) || ((mm.x - mon->mx) && (mm.y - mon->my)))
+		)
+			rloc_to(mon, mm.x, mm.y);
+
+		if(mon->mx != x || mon->my != y) {
+			mon->movement -= 12; //Note, may end up with up to -12 move points
+			if(glyph_is_invisible(levl[x][y].glyph)) {
+				unmap_object(x, y);
+				newsym(x, y);
+			}
+			pline("%s %s, %s evading your %skick.", buffnam,
+				(mon_resistance(mon,TELEPORT) ? "teleports" :
+				 mon_resistance(mon,LEVITATION) ? "floats" :
+				 mon_resistance(mon,FLYING) ? "swoops" :
+				 (nolimbs(mon->data) || slithy(mon->data)) ?
+					"slides" : "jumps"),
+				clumsy ? "easily" : "nimbly",
+				clumsy ? "clumsy " : "");
+			xpassivey(&youmonst, mon, kick, (struct obj **)0, -1, MM_MISS, mon->data, TRUE, (boolean *)0);
+			return FALSE;
+		}
+	}
+	return TRUE;
+}
+
+void
+kick_monster(xchar x, xchar y)
+{
+	struct attack kick = basic_kick();
 	register boolean clumsy = FALSE;
 	register struct monst *mon = (u.ustuck && u.uswallow) ? u.ustuck : m_at(x, y);
 	register int i, j;
@@ -110,7 +178,7 @@ register xchar x, y;
 	   !mon_resistance(mon,FLYING)) {
 		pline("Floating in the air, you miss wildly!");
 		exercise(A_DEX, FALSE);
-		xpassivey(&youmonst, mon, &basickick, (struct obj *)0, -1, MM_MISS, mon->data, TRUE);
+		xpassivey(&youmonst, mon, &kick, (struct obj **)0, -1, MM_MISS, mon->data, TRUE, (boolean *)0);
 		return;
 	}
 
@@ -122,7 +190,7 @@ register xchar x, y;
 			clumsy = TRUE;
 			if(martial()) goto doit;
 			Your("clumsy kick does no damage.");
-			xpassivey(&youmonst, mon, &basickick, (struct obj *)0, -1, MM_MISS, mon->data, TRUE);
+			xpassivey(&youmonst, mon, &kick, (struct obj **)0, -1, MM_MISS, mon->data, TRUE, (boolean *)0);
 			return;
 		}
 		if(i < j/10) clumsy = TRUE;
@@ -134,46 +202,8 @@ register xchar x, y;
 		clumsy = TRUE;
 doit:
 	//You("kick %s.", mon_nam(mon));
-	if(!is_blind(mon) && !(mon->mtrapped || mon->entangled_oid) && !thick_skinned(mon->data) &&
-	   mon->data->mlet != S_EEL && haseyes(mon->data) && mon->mcanmove &&
-	   !mon->mstun && !mon->mconf && !mon->msleeping && !mindless_mon(mon) &&
-	   mon->data->mmove >= 12) {
-		if(!nohands(mon->data) && !rn2(martial() ? 5 : 3) && mon->movement >= 0) {
-		    pline("%s blocks your %skick.", Monnam(mon),
-				clumsy ? "clumsy " : "");
-			xpassivey(&youmonst, mon, &basickick, (struct obj *)0, -1, MM_MISS, mon->data, TRUE);
-			mon->movement -= 6; //Note, may end up with up to -6 move points
-		    return;
-		} else if(!rn2(martial() ? 50 : clumsy ? 3 : 4) && (clumsy || !bigmonst(mon->data)) && mon->movement >= 6){
-			coord mm;
-			char buffnam[BUFSZ];
-			Sprintf(buffnam, "%s", Monnam(mon));
-			if(mon_resistance(mon,TELEPORT))
-				mnexto(mon);
-			else if(enexto(&mm, mon->mx, mon->my, mon->data) && abs(mm.x - mon->mx) <= 1 && abs(mm.y - mon->my) <= 1
-				&& (!(mon->mtyp == PM_GRID_BUG || mon->mtyp == PM_BEBELITH) || !((mm.x - mon->mx) && (mm.y - mon->my)))
-			)
-				rloc_to(mon, mm.x, mm.y);
-
-		    if(mon->mx != x || mon->my != y) {
-				mon->movement -= 12; //Note, may end up with up to -12 move points
-				if(glyph_is_invisible(levl[x][y].glyph)) {
-					unmap_object(x, y);
-					newsym(x, y);
-				}
-				pline("%s %s, %s evading your %skick.", buffnam,
-					(mon_resistance(mon,TELEPORT) ? "teleports" :
-					 mon_resistance(mon,LEVITATION) ? "floats" :
-					 mon_resistance(mon,FLYING) ? "swoops" :
-					 (nolimbs(mon->data) || slithy(mon->data)) ?
-						"slides" : "jumps"),
-					clumsy ? "easily" : "nimbly",
-					clumsy ? "clumsy " : "");
-				xpassivey(&youmonst, mon, &basickick, (struct obj *)0, -1, MM_MISS, mon->data, TRUE);
-				return;
-		    }
-		}
-	}
+	if(!kick_lands(mon, &kick, clumsy, x, y, 6))
+		return;
 	kickdmg(mon, clumsy);
 }
 
@@ -181,6 +211,7 @@ void
 dive_kick_monster(mon)
 struct monst *mon;
 {
+	struct attack kick = basic_kick();
 	int i = -inv_weight();
 	int j = weight_cap();
 	boolean clumsy = FALSE;
@@ -203,7 +234,7 @@ struct monst *mon;
 		if(!nohands(mon->data) && !rn2(martial() ? 5 : 3) && mon->movement >= 0) {
 		    pline("%s blocks your %skick.", Monnam(mon),
 				clumsy ? "clumsy " : "");
-			xpassivey(&youmonst, mon, &basickick, (struct obj *)0, -1, MM_MISS, mon->data, TRUE);
+			xpassivey(&youmonst, mon, &kick, (struct obj **)0, -1, MM_MISS, mon->data, TRUE, (boolean *)0);
 			mon->movement -= 6; //Note, may end up with up to -6 move points
 		    return;
 		}
@@ -213,9 +244,73 @@ struct monst *mon;
 		kickdmg(mon, clumsy);
 }
 
+/* one kick to the square ahead and one to the square behind */
+boolean
+flying_kick_monsters(void)
+{
+	struct attack kick = basic_kick();
+	struct monst *mon;
+	int i = -inv_weight();
+	int j = weight_cap();
+	boolean clumsy = FALSE;
+	boolean messaged = FALSE;
+	int sdx = u.dx;
+	int sdy = u.dy;
+	int ix, iy, k;
+
+	if(Fumbling) clumsy = TRUE;
+	else if(i < (j*3)/10) {
+		if(!rn2((i < j/10) ? 2 : (i < j/5) ? 3 : 4)) {
+			clumsy = TRUE;
+		}
+		else if(i < j/10) clumsy = TRUE;
+		else if(!rn2((i < j/5) ? 2 : 3)) clumsy = TRUE;
+	}
+	else if(uarm && !is_light_armor(uarm) && !is_medium_armor(uarm) && ACURR(A_DEX) < rnd(25))
+		clumsy = TRUE;
+
+	for(k = 0; k < (!clumsy ? 4 : 2); k++){
+		//Necessary so that the kicking functions can knock the monster in the right direction.
+		u.dx = (k%2 ? -sdx : sdx);
+		u.dy = (k%2 ? -sdy : sdy);
+		ix = u.ux + u.dx;
+		iy = u.uy + u.dy;
+		if(!isok(ix, iy))
+			continue;
+		mon = m_at(ix, iy);
+		if(!mon || DEADMONSTER(mon) || !peace_check_move(mon))
+			continue;
+		if((touch_petrifies(mon->data)
+			|| mon->mtyp == PM_MEDUSA)
+		 && !(Stone_resistance || uarmf))
+			continue;
+		if(!messaged){
+			pline("%s!", move_name(FLY_KICKS));
+			messaged = TRUE;
+		}
+		if(!is_blind(mon) && !(mon->mtrapped || mon->entangled_oid) && !thick_skinned(mon->data) &&
+		   mon->data->mlet != S_EEL && haseyes(mon->data) && mon->mcanmove &&
+		   !mon->mstun && !mon->mconf && !mon->msleeping && !mindless_mon(mon) &&
+		   mon->data->mmove >= 12) {
+			if(!nohands(mon->data) && !rn2(martial() ? 5 : 3) && mon->movement >= 0) {
+				pline("%s blocks your %skick.", Monnam(mon),
+					clumsy ? "clumsy " : "");
+				xpassivey(&youmonst, mon, &kick, (struct obj **)0, -1, MM_MISS, mon->data, TRUE, (boolean *)0);
+				mon->movement -= 6; //Note, may end up with up to -6 move points
+				continue;
+			}
+		}
+		kickdmg(mon, clumsy);
+	}
+	u.dx = sdx;
+	u.dy = sdy;
+	return messaged;
+}
+
 void
 bird_kick_monsters()
 {
+	struct attack kick = basic_kick();
 	struct monst *mon;
 	int i = -inv_weight();
 	int j = weight_cap();
@@ -262,42 +357,8 @@ bird_kick_monsters()
 			 && !(Stone_resistance || uarmf))
 				continue;
 			//You("kick %s.", mon_nam(mon));
-			if(!is_blind(mon) && !(mon->mtrapped || mon->entangled_oid) && !thick_skinned(mon->data) &&
-			   mon->data->mlet != S_EEL && haseyes(mon->data) && mon->mcanmove &&
-			   !mon->mstun && !mon->mconf && !mon->msleeping && !mindless_mon(mon) &&
-			   mon->data->mmove >= 12) {
-				if(!nohands(mon->data) && !rn2(martial() ? 5 : 3) && mon->movement >= 0) {
-					pline("%s blocks your %skick.", Monnam(mon),
-						clumsy ? "clumsy " : "");
-					xpassivey(&youmonst, mon, &basickick, (struct obj *)0, -1, MM_MISS, mon->data, TRUE);
-					mon->movement -= 6; //Note, may end up with up to -6 move points
-					return;
-				} else if(!rn2(martial() ? 50 : clumsy ? 3 : 4) && (clumsy || !bigmonst(mon->data)) && mon->movement >= 0){
-					coord mm;
-					if(mon_resistance(mon,TELEPORT))
-						mnexto(mon);
-					else if(enexto(&mm, mon->mx, mon->my, mon->data))
-						rloc_to(mon, mm.x, mm.y);
-
-					if(mon->mx != ix || mon->my != iy) {
-						mon->movement -= 12; //Note, may end up with up to -12 move points
-						if(glyph_is_invisible(levl[ix][iy].glyph)) {
-							unmap_object(ix, iy);
-							newsym(ix, iy);
-						}
-						pline("%s %s, %s evading your %skick.", Monnam(mon),
-							(mon_resistance(mon,TELEPORT) ? "teleports" :
-							 mon_resistance(mon,LEVITATION) ? "floats" :
-							 mon_resistance(mon,FLYING) ? "swoops" :
-							 (nolimbs(mon->data) || slithy(mon->data)) ?
-								"slides" : "jumps"),
-							clumsy ? "easily" : "nimbly",
-							clumsy ? "clumsy " : "");
-						xpassivey(&youmonst, mon, &basickick, (struct obj *)0, -1, MM_MISS, mon->data, TRUE);
-						return;
-					}
-				}
-			}
+			if(!kick_lands(mon, &kick, clumsy, ix, iy, 0))
+				return;
 			// You("kick %s", mon_nam(mon));
 			kickdmg(mon, clumsy);
 		}
@@ -350,18 +411,79 @@ wing_storm_monsters()
 	u.dy = sdy;
 }
 
+/* A chiropteran's flying kicks are a gust instead. */
+boolean
+divine_banishment(void)
+{
+	struct monst *mon;
+	int i, range = BOLT_LIM;
+	int sx, sy;
+	boolean messaged = FALSE;
+	boolean holy = u_blessed();
+
+	if(u.uswallow){
+		if(u.ustuck && is_whirly(u.ustuck->data)){
+			mon = u.ustuck;
+			pline("%s blows apart in the wind.",Monnam(mon));
+			xdamagey(&youmonst, mon, (struct attack *)0, u.ulevel*10);
+			if(DEADMONSTER(mon)) expels(mon, mon->data, TRUE);
+			return TRUE;
+		}
+		return FALSE;
+	}
+
+	/* find the far end of the gust */
+	sx = u.ux;
+	sy = u.uy;
+	for(i = range; i > 0; i--){
+		sx += u.dx;
+		sy += u.dy;
+		if(!isok(sx, sy) || !ZAP_POS(levl[sx][sy].typ)){
+			sx -= u.dx;
+			sy -= u.dy;
+			break;
+		}
+	}
+	/* work back toward yourself, so each target has somewhere to be flung */
+	while(sx != u.ux || sy != u.uy){
+		i++;
+		mon = m_at(sx, sy);
+		if(mon && !DEADMONSTER(mon) && peace_check_move(mon)){
+			if(!messaged){
+				pline("%s!", move_name(FLY_KICKS));
+				messaged = TRUE;
+			}
+			if(is_whirly(mon->data) || (holy && banish_kill_mon(mon)))
+				xdamagey(&youmonst, mon, (struct attack *)0, u.ulevel*10);
+			if(holy && hates_holy_mon(mon) && !DEADMONSTER(mon)
+				&& !resist(mon, '\0', 0, TELL)
+			)
+				set_mcan(mon, TRUE);
+			if(!DEADMONSTER(mon) && !MIGRATINGMONSTER(mon)){
+				mhurtle(mon, u.dx, u.dy, range+i, TRUE);
+				setmangry(mon);
+			}
+		}
+		sx -= u.dx;
+		sy -= u.dy;
+	}
+	return messaged;
+}
+
 void
-cyclone_slash_monsters(boolean full_attack)
+cyclone_slash_monsters(boolean full_attack, boolean single_target)
 {
 	struct monst *mon;
 	int sdx = u.dx;
 	int sdy = u.dy;
-	static struct attack weaponhit =	{ AT_WEAP, AD_PHYS, 0, 0 };
+	struct attack weaponhit = wielded_weapon_attack(&youmonst, uwep);
 
 	extern const int clockwisex[8];
 	extern const int clockwisey[8];
 	int offset = rn2(8);
 	int ix, iy;
+	long result;
+	boolean passes;
 	for(int i = 0; i < 8; i++){
 		//Necessary for any knockbacks.
 		u.dx = clockwisex[(offset+i)%8];
@@ -377,7 +499,10 @@ cyclone_slash_monsters(boolean full_attack)
 		if(!mon || (mon->mpeaceful && !Hallucination) || DEADMONSTER(mon))
 			continue;
 		
-		xmeleehity(&youmonst, mon, &weaponhit, &uwep, (VIS_MAGR | VIS_NONE) | (canseemon(mon) ? VIS_MDEF : 0), 0, FALSE, full_attack ? 0 : ATTKFLAG_SHOCKWAVE);
+		passes = single_target && ritual_sword_target(uwep, mon);
+		result = xmeleehity(&youmonst, mon, &weaponhit, &uwep, (VIS_MAGR | VIS_NONE) | (canseemon(mon) ? VIS_MDEF : 0), 0, FALSE, (full_attack ? 0 : ATTKFLAG_SHOCKWAVE)|edge_strike_dmgtype(uwep, &youmonst, mon));
+		if(single_target && ((result & (MM_AGR_DIED | MM_AGR_STOP)) || (!passes && (result & (MM_HIT | MM_DEF_DIED)))))
+			break;
 	}
 	u.dx = sdx;
 	u.dy = sdy;
@@ -731,6 +856,8 @@ char *buf;
 	const char *what;
 
 	if (kickobj) what = distant_name(kickobj,doname);
+	else if (IS_DOOR(maploc->typ) && (maploc->doormask & D_BARRED))
+	    what = "a barred door";
 	else if (IS_DOOR(maploc->typ)) what = "a door";
 	else if (IS_TREE(maploc->typ)) what = "a tree";
 	else if (IS_STWALL(maploc->typ)) what = "a wall";
@@ -758,6 +885,22 @@ dokick()
 	return dokick_core(0,0);
 }
 
+/* Returns TRUE if the hero is currently physically able to kick */
+boolean
+u_can_kick(void)
+{
+	if (nokicks(youracedata) || verysmall(youracedata) || Wounded_legs
+		|| near_capacity() > SLT_ENCUMBER || youracedata->mlet == S_LIZARD
+		|| u.uentangled_oid || u.utrap
+	)
+		return FALSE;
+#ifdef STEED
+	if (u.usteed)
+		return FALSE;
+#endif
+	return TRUE;
+}
+
 int
 dokick_core(dx,dy)
 int dx, dy;
@@ -768,61 +911,59 @@ int dx, dy;
 	boolean no_kick = FALSE;
 	char buf[BUFSZ];
 
-	if ((nolimbs(youracedata) || slithy(youracedata)) && !humanoid_feet(youracedata)) {
-		You("have no legs to kick with.");
-		no_kick = TRUE;
-	} else if (verysmall(youracedata)) {
-		You("are too small to do any kicking.");
-		no_kick = TRUE;
+	if (!u_can_kick()) {
+		if (nokicks(youracedata)) {
+			You("have no legs to kick with.");
+		} else if (verysmall(youracedata)) {
+			You("are too small to do any kicking.");
 #ifdef STEED
-	} else if (u.usteed) {
-		if (!dx && !dy && yn_function("Kick your steed?", ynchars, 'y') == 'y') {
-		    You("kick %s.", mon_nam(u.usteed));
-		    kick_steed();
-		    return MOVE_STANDARD;
-		} else {
-			if(dx || dy)
-				You("can't kick while riding!");
-		    return MOVE_CANCELLED;
-		}
+		} else if (u.usteed) {
+			if (!dx && !dy && yn_function("Kick your steed?", ynchars, 'y') == 'y') {
+			    You("kick %s.", mon_nam(u.usteed));
+			    kick_steed();
+			    return MOVE_STANDARD;
+			} else {
+				if(dx || dy)
+					You("can't kick while riding!");
+			    return MOVE_CANCELLED;
+			}
 #endif
-	} else if (Wounded_legs) {
-		/* note: jump() has similar code */
-		long wl = (EWounded_legs & BOTH_SIDES);
-		const char *bp = body_part(LEG);
+		} else if (Wounded_legs) {
+			/* note: jump() has similar code */
+			long wl = (EWounded_legs & BOTH_SIDES);
+			const char *bp = body_part(LEG);
 
-		if (wl == BOTH_SIDES) bp = makeplural(bp);
-		Your("%s%s %s in no shape for kicking.",
-		     (wl == LEFT_SIDE) ? "left " :
-			(wl == RIGHT_SIDE) ? "right " : "",
-		     bp, (wl == BOTH_SIDES) ? "are" : "is");
-		no_kick = TRUE;
-	} else if (near_capacity() > SLT_ENCUMBER) {
-		Your("load is too heavy to balance yourself for a kick.");
-		no_kick = TRUE;
-	} else if (youracedata->mlet == S_LIZARD) {
-		Your("legs cannot kick effectively.");
+			if (wl == BOTH_SIDES) bp = makeplural(bp);
+			Your("%s%s %s in no shape for kicking.",
+			     (wl == LEFT_SIDE) ? "left " :
+				(wl == RIGHT_SIDE) ? "right " : "",
+			     bp, (wl == BOTH_SIDES) ? "are" : "is");
+		} else if (near_capacity() > SLT_ENCUMBER) {
+			Your("load is too heavy to balance yourself for a kick.");
+		} else if (youracedata->mlet == S_LIZARD) {
+			Your("legs cannot kick effectively.");
+		} else if (u.uentangled_oid) {
+			You_cant("move your %s!", body_part(LEG));
+		} else if (u.utrap) {
+			switch (u.utraptype) {
+			    case TT_PIT:
+				pline("There's not enough room to kick down here.");
+				break;
+			    case TT_WEB:
+			    case TT_BEARTRAP:
+			    case TT_LAVA:
+			    case TT_SALIVA:
+				You_cant("move your %s!", body_part(LEG));
+				break;
+			    default:
+				break;
+			}
+		} else {
+			You_cant("kick!");
+		}
 		no_kick = TRUE;
 	} else if (u.uinwater && !rn2(2)) {
 		Your("slow motion kick doesn't hit anything.");
-		no_kick = TRUE;
-	} else if (u.uentangled_oid) {
-		You_cant("move your %s!", body_part(LEG));
-		no_kick = TRUE;
-	} else if (u.utrap) {
-		switch (u.utraptype) {
-		    case TT_PIT:
-			pline("There's not enough room to kick down here.");
-			break;
-		    case TT_WEB:
-		    case TT_BEARTRAP:
-		    case TT_LAVA:
-		    case TT_SALIVA:
-			You_cant("move your %s!", body_part(LEG));
-			break;
-		    default:
-			break;
-		}
 		no_kick = TRUE;
 	} else if (!rn2(2) && IS_PUDDLE(levl[u.ux][u.uy].typ) &&
 		    !Levitation && !Flying && !Wwalking &&
@@ -968,6 +1109,7 @@ int dx, dy;
 
 	if(!IS_DOOR(maploc->typ)) {
 		if(maploc->typ == SDOOR) {
+		    if (maploc->doormask & D_BARRED) goto ouch;
 		    if(!Levitation && rn2(30) < avrg_attrib) {
 			cvt_sdoor_to_door(maploc);	/* ->typ = DOOR */
 			pline("Crash!  %s a secret door!",
@@ -1087,7 +1229,9 @@ int dx, dy;
 						pline("Molten lava from the forge splashes onto your boots.");
 					}
 					if(is_metallic(uarmf) && !Fire_resistance){
-						losehp(d(2,8), "red hot boots", KILLED_BY);
+						int fire_dmg = d(2,8);
+						fire_dmg = elemental_dmg_resistance(&youmonst, (struct monst *)0, fire_dmg, AD_FIRE);
+						losehp(fire_dmg, "red hot boots", KILLED_BY);
 					}
 				}
 				else {
@@ -1097,14 +1241,16 @@ int dx, dy;
 					}
 					else {
 						pline("It burns!");
-						losehp(d(6,6), "splash of molten lava", KILLED_BY_AN);
+						int fire_dmg = d(6,6);
+						fire_dmg = elemental_dmg_resistance(&youmonst, (struct monst *)0, fire_dmg, AD_FIRE);
+						losehp(fire_dmg, "splash of molten lava", KILLED_BY_AN);
 					}
 				}
 			}
             exercise(A_DEX, TRUE);
             return 1;
         }
-		if(IS_GRAVE(maploc->typ) || maploc->typ == IRONBARS)
+		if(IS_GRAVE(maploc->typ) || IS_BARS(x,y))
 		    goto ouch;
 		if(IS_TREE(maploc->typ)) {
 		    struct obj *treefruit;
@@ -1511,9 +1657,9 @@ ouch:
 		goto dumb;
 	}
 
-	if(maploc->doormask == D_ISOPEN ||
-	   maploc->doormask == D_BROKEN ||
-	   maploc->doormask == D_NODOOR) {
+	if(DOOR_BASE_STATE(maploc->doormask) == D_ISOPEN ||
+	   DOOR_BASE_STATE(maploc->doormask) == D_BROKEN ||
+	   DOOR_BASE_STATE(maploc->doormask) == D_NODOOR) {
 dumb:
 		exercise(A_DEX, FALSE);
 		if (martial() || ACURR(A_DEX) >= 16 || rn2(3)) {
@@ -1532,6 +1678,8 @@ dumb:
 
 	/* Ali - artifact doors from slashem*/
 	if (artifact_door(x, y)) goto ouch;
+
+	if (IS_BARS(x,y)) goto ouch;
 
 	/* not enough leverage to kick open doors while levitating */
 	if(Levitation) goto ouch;

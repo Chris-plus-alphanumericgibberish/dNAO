@@ -354,6 +354,29 @@ struct artinstance{
 #define GDCB_BLESSED	0x00000001L
 #define GDCB_CURSED		0x00000002L
 #define GDCB_UNBLESSED	0x00000004L
+#define SixElementChannel avar1
+#define SIXEL_NONE		0x00000000L
+#define SIXEL_WOOD		0x00000001L
+#define SIXEL_FIRE		0x00000002L
+#define SIXEL_EARTH		0x00000004L
+#define SIXEL_METAL		0x00000008L
+#define SIXEL_WATER		0x00000010L
+#define SIXEL_ELEC		0x00000020L
+#define SIXEL_LONG		0x00000040L
+#define SIXEL_AXE		0x00000080L
+#define SIXEL_ICE		0x00000100L
+#define SIXEL_FROST		0x00000200L
+#define SIXEL_FIELD		0x00000400L
+#define SIXEL_FIRE_1	0x00000800L
+#define SIXEL_FIRE_2	0x00001000L
+#define SIXEL_FIRE_3	0x00002000L
+#define SIXEL_RAGING	0x00004000L
+#define SIXEL_ELEMENT_MASK	(SIXEL_WOOD|SIXEL_FIRE|SIXEL_EARTH|SIXEL_METAL|SIXEL_WATER)
+#define SIXEL_FIRE_MODIFIERS	(SIXEL_FIRE_1|SIXEL_FIRE_2|SIXEL_FIRE_3|SIXEL_RAGING)
+#define SIXEL_WOOD_MODIFIERS	(SIXEL_ELEC|SIXEL_LONG)
+#define SIXEL_METAL_MODIFIERS	(SIXEL_AXE|SIXEL_FROST)
+#define SIXEL_WATER_MODIFIERS	(SIXEL_ICE)
+#define SIXEL_EARTH_MODIFIERS	(SIXEL_FIELD)
 	long avar2;
 #define SnSd2 avar2
 #define RoSPflights avar2
@@ -403,6 +426,8 @@ struct artinstance{
 		(((o)&&(o)->oartifact) ? &artilist[(o)->oartifact] : 0)
 
 extern struct artinstance * artinstance;
+
+#define six_element_channel(oartifact, elem)	((oartifact) == ART_SIX_ELEMENT_SWORD && (artinstance[ART_SIX_ELEMENT_SWORD].SixElementChannel & (elem)) != 0)
 extern struct artifact * artilist;
 
 /* invoked properties with special powers */
@@ -504,7 +529,9 @@ extern struct artifact * artilist;
 #define SCORPION_UPGRADES (LAST_PROP+96)
 #define MORTAL_DRAW     (LAST_PROP+97)
 #define BOREAL_INVOKE   (LAST_PROP+98)
-#define CHSELF_OMNI     (LAST_PROP+99)
+#define WISDOM_DANCE    (LAST_PROP+99)
+#define DRAW_BLEEDING_VOID	(LAST_PROP+100)
+#define CHSELF_OMNI     (LAST_PROP+101)
 
 #define MASTERY_ARTIFACT_LEVEL 20
 

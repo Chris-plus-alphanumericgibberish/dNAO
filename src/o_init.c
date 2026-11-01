@@ -6,7 +6,7 @@
 #include "lev.h"	/* save & restore info */
 
 STATIC_DCL void FDECL(setgemprobs, (d_level*));
-STATIC_DCL void FDECL(shuffle,(int,int,BOOLEAN_P));
+STATIC_DCL void FDECL(shuffle,(int,int,boolean,boolean));
 STATIC_DCL void NDECL(shuffle_all);
 STATIC_DCL int FDECL(find_otyp_of_desc, (const char *, const char **, int, int, boolean(*)(int)));
 STATIC_DCL void NDECL(randomize_nonmatwands);
@@ -74,9 +74,7 @@ d_level *dlev;
 
 /* shuffle descriptions on objects o_low to o_high */
 STATIC_OVL void
-shuffle(o_low, o_high, domaterial)
-	int o_low, o_high;
-	boolean domaterial;
+shuffle(int o_low, int o_high, boolean domaterial, boolean doarmor)
 {
 	int i, j, num_to_shuffle;
 	short sw;
@@ -106,6 +104,19 @@ shuffle(o_low, o_high, domaterial)
 			sw = objects[j].oc_material;
 			objects[j].oc_material = objects[i].oc_material;
 			objects[i].oc_material = sw;
+		}
+
+		/* shuffle armor class, damage reduction, and cancellation */
+		if (doarmor) {
+			sw = objects[j].a_ac;
+			objects[j].a_ac = objects[i].a_ac;
+			objects[i].a_ac = sw;
+			sw = objects[j].a_dr;
+			objects[j].a_dr = objects[i].a_dr;
+			objects[i].a_dr = sw;
+			sw = objects[j].a_can;
+			objects[j].a_can = objects[i].a_can;
+			objects[i].a_can = sw;
 		}
 	}
 }
@@ -175,6 +186,56 @@ register char oclass;
 #endif
 }
 
+static const char *syllable_glyph_text[] = {
+	"bipartite glyph",	/* SYLLABLE_OF_STRENGTH__AESH's default text */
+	"xed glyph",	/* SYLLABLE_OF_POWER__KRAU: crossed glyph */
+	"knotted glyph",	/* SYLLABLE_OF_LIFE__HOON's default text */
+	"multilinear glyph",	/* SYLLABLE_OF_GRACE__UUR's default text */
+	"dotted glyph",		/* SYLLABLE_OF_THOUGHT__NAEN's default text */
+	"rising glyph",	/* SYLLABLE_OF_SPIRIT__VAUL: hanging glyph */
+};
+char anti_syllable_buffer[BUFSZ];
+
+const char *
+anti_syllable_appearance(spellnum)
+int spellnum;
+{
+	int otyp, home;
+
+	switch (spellnum) {
+	case OWRK:	otyp = SYLLABLE_OF_POWER__KRAU;		break;
+	case RUH:	otyp = SYLLABLE_OF_GRACE__UUR;			break;
+	case SHEY:	otyp = SYLLABLE_OF_STRENGTH__AESH;		break;
+	case LUAHV:	otyp = SYLLABLE_OF_SPIRIT__VAUL;		break;
+	case NEAN:	otyp = SYLLABLE_OF_THOUGHT__NAEN;		break;
+	case NOOH:	otyp = SYLLABLE_OF_LIFE__HOON;			break;
+	default:
+		impossible("anti_syllable_appearance: spell %d is not a standard anti-syllable", spellnum);
+		return "glyph";
+	}
+
+	home = objects[otyp].oc_descr_idx;
+	switch (home) {
+	case SYLLABLE_OF_STRENGTH__AESH:
+		Sprintf(anti_syllable_buffer, "%s%s", objects[otyp].oc_name_known ? "inverted " : "", syllable_glyph_text[0]);
+		return anti_syllable_buffer;
+	case SYLLABLE_OF_POWER__KRAU:		return syllable_glyph_text[1];
+	case SYLLABLE_OF_LIFE__HOON:		
+		Sprintf(anti_syllable_buffer, "%s%s", objects[otyp].oc_name_known ? "inverted " : "", syllable_glyph_text[2]);
+		return anti_syllable_buffer;
+	case SYLLABLE_OF_GRACE__UUR:
+		Sprintf(anti_syllable_buffer, "%s%s", objects[otyp].oc_name_known ? "inverted " : "", syllable_glyph_text[3]);
+		return anti_syllable_buffer;
+	case SYLLABLE_OF_THOUGHT__NAEN:	
+		Sprintf(anti_syllable_buffer, "%s%s", objects[otyp].oc_name_known ? "inverted " : "", syllable_glyph_text[4]);
+		return anti_syllable_buffer;
+	case SYLLABLE_OF_SPIRIT__VAUL:		return syllable_glyph_text[5];
+	default:
+		impossible("anti_syllable_appearance: unexpected descr_idx %d for syllable %d", home, otyp);
+		return "glyph";
+	}
+}
+
 STATIC_OVL void
 shuffle_all()
 {
@@ -221,7 +282,7 @@ shuffle_all()
 			 * and one-of-a-kind magical artifacts at the end of
 			 * their class in objects[] have fixed descriptions.
 			 */
-			shuffle(first, j, TRUE);
+			shuffle(first, j, TRUE, FALSE);
 		}
 	}
 	
@@ -234,21 +295,24 @@ shuffle_all()
 	   signetring== RIN_POLYMORPH ||
 	   signetring== RIN_POLYMORPH_CONTROL
 	){
-		shuffle(RIN_ADORNMENT, RIN_PROTECTION_FROM_SHAPE_CHAN, TRUE);
+		shuffle(RIN_ADORNMENT, RIN_PROTECTION_FROM_SHAPE_CHAN, TRUE, FALSE);
 		signetring = find_signet_ring();
 	}
 	
 	/* shuffle the helmets */
-	shuffle(HELMET, HELM_OF_DRAIN_RESISTANCE, TRUE);
-	
+	shuffle(HELMET, HELM_OF_DRAIN_RESISTANCE, TRUE, FALSE);
+
 	/* shuffle the gloves */
-	shuffle(GLOVES, GAUNTLETS_OF_DEXTERITY, FALSE);
+	shuffle(GLOVES, GAUNTLETS_OF_DEXTERITY, FALSE, FALSE);
 
 	/* shuffle the cloaks */
-	shuffle(CLOAK_OF_PROTECTION, CLOAK_OF_DISPLACEMENT, FALSE);
+	shuffle(CLOAK_OF_PROTECTION, CLOAK_OF_DISPLACEMENT, FALSE, FALSE);
 
 	/* shuffle the boots [if they change, update find_skates() below] */
-	shuffle(SPEED_BOOTS, FLYING_BOOTS, FALSE);
+	shuffle(SPEED_BOOTS, FLYING_BOOTS, FALSE, FALSE);
+
+	/* shuffle the wing-guards, including material, AC, DR, and cancellation */
+	shuffle(WING_GUARDS_OF_SPEED, WING_GUARDS_OF_BUMBLING, TRUE, TRUE);
 }
 
 /* called on init and restore
@@ -722,6 +786,24 @@ find_pcloth()
 		return i;
 	else
 		impossible("could not find piece of cloth");
+	return 0;
+}
+
+/* find the object index for the "diaphanous wing-covers" appearance;
+ * used to force that item to always generate with cloth material
+ * (see material_list() in mkobj.c) regardless of which wing-guard
+ * otyp the shuffle happens to attach the appearance to */
+int
+find_dwingcovers()
+{
+	static int i = -1;
+	register const char *s;
+	if (i != -1) return i;
+
+	if ((i = find_otyp_of_desc("diaphanous wing-covers", 0, WING_GUARDS_OF_SPEED, WING_GUARDS_OF_BUMBLING, 0)) != -1)
+		return i;
+	else
+		impossible("could not find diaphanous wing-covers");
 	return 0;
 }
 
@@ -1450,12 +1532,12 @@ struct obj *otmp;
 	}
 
 	/* plumed helmets and etched helmets get fancy colors, but only if their material is boring (iron/metal) */
-	if ((is_iron_obj(otmp) || otmp->obj_material == METAL)
+	if ((otmp->obj_material == IRON || otmp->obj_material == METAL)
 		&& ((s = OBJ_DESCR(objects[otmp->otyp])) != (char *)0 && !strncmpi(s, "plumed", 6))){
 		otmp->obj_color = CLR_RED;
 		return;
 	}
-	if ((is_iron_obj(otmp) || otmp->obj_material == METAL)
+	if ((otmp->obj_material == IRON || otmp->obj_material == METAL)
 		&& ((s = OBJ_DESCR(objects[otmp->otyp])) != (char *)0 && !strncmpi(s, "etched", 6))){
 		otmp->obj_color = CLR_BRIGHT_GREEN;
 		return;
@@ -1650,7 +1732,7 @@ fix_etraits(struct obj *otmp)
 		otmp->expert_traits = ETRAIT_FOCUS_FIRE|ETRAIT_HEW|ETRAIT_STUNNING_STRIKE;
 	}
 	else if(otmp->oartifact == ART_RUINOUS_DESCENT_OF_STARS){
-		otmp->expert_traits = ETRAIT_KNOCK_BACK|ETRAIT_KNOCK_BACK_CHARGE;
+		otmp->expert_traits |= ETRAIT_KNOCK_BACK|ETRAIT_KNOCK_BACK_CHARGE;
 	}
 
 	if(otmp->oartifact == ART_RUYI_JINGU_BANG){

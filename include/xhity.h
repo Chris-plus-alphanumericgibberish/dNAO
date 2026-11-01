@@ -8,6 +8,11 @@
 #define MELEEHURT_DOUBLE_DAMAGE		0x00000080L
 #define MELEEHURT_SHOVE				0x00000100L
 #define MELEEHURT_SHOCKWAVE			0x00000200L
+#define MELEEHURT_BYPASS_RESIST		0x00000400L
+#define MELEEHURT_HALF_DAMAGE		0x00000800L
+#define MELEEHURT_WHACK				0x00001000L
+#define MELEEHURT_PIERCE			0x00002000L
+#define MELEEHURT_SLASH				0x00004000L
 
 /* macros to unify player and monster */
 #define x(mon)				((mon)==&youmonst ? u.ux : (mon)->mx)
@@ -28,6 +33,14 @@
 #define UseInvShock_res(mon)	(InvShock_res(mon) || check_res_engine(mon, AD_ELEC))
 #define Acid_res(mon)		((mon)==&youmonst ? Acid_resistance : resists_acid((mon)))
 #define InvAcid_res(mon)	((mon)==&youmonst ? InvAcid_resistance : resists_acid((mon)))
+#define HellFire_res(mon)	((mon)==&youmonst ? HellFire_resistance  : resists_hellfire((mon)))
+#define HellCold_res(mon)	((mon)==&youmonst ? HellCold_resistance  : resists_hellcold((mon)))
+#define HellShock_res(mon)	((mon)==&youmonst ? HellShock_resistance : resists_hellelec((mon)))
+#define HellAcid_res(mon)	((mon)==&youmonst ? HellAcid_resistance  : resists_hellacid((mon)))
+#define HolyFire_res(mon)	((mon)==&youmonst ? HolyFire_resistance  : resists_holyfire((mon)))
+#define HolyCold_res(mon)	((mon)==&youmonst ? HolyCold_resistance  : resists_holycold((mon)))
+#define HolyShock_res(mon)	((mon)==&youmonst ? HolyShock_resistance : resists_holyelec((mon)))
+#define HolyAcid_res(mon)	((mon)==&youmonst ? HolyAcid_resistance  : resists_holyacid((mon)))
 #define UseInvAcid_res(mon)	(InvAcid_res(mon) || check_res_engine(mon, AD_ACID))
 #define Sleep_res(mon)		((mon)==&youmonst ? Sleep_resistance : resists_sleep((mon)))
 #define Disint_res(mon)		((mon)==&youmonst ? Disint_resistance : resists_disint((mon)))
@@ -45,6 +58,7 @@
 #define Water_res(mon)		((mon)==&youmonst ? Waterproof : mon_resistance((mon), WATERPROOF))
 #define Gaze_res(mon)		((mon)==&youmonst ? Gaze_immune : mon_resistance((mon), GAZE_RES))
 #define Focused_aura(mon)		((mon)==&youmonst ? FocusAura : mon_resistance((mon), FOCUS_AURA))
+#define Focused_aura_wep(mon, obj)	(Focused_aura(mon) || ((mon) != &youmonst && (mon)->mtyp == PM_DANCING_SWORD && (mon)->mtame && (obj) == MON_WEP(mon) && FocusAura))
 #define ProtectItems(mon)		((mon)==&youmonst ? ProtItems : mon_resistance((mon), PROT_ITEMS))
 #define creature_at(x,y)	(isok(x,y) ? MON_AT(x, y) ? level.monsters[x][y] : (x==u.ux && y==u.uy) ? &youmonst : (struct monst *)0 : (struct monst *)0)
 
@@ -109,8 +123,37 @@
 #define SUBOUT_A_MAR_4  49	/* Aasimar extra arm 4 */
 #define SUBOUT_A_ACID_TOUCH 50	/* Aasimar acidic touch attack */
 #define SUBOUT_A_SUCK  51	/* Aasimar priminal sucking attack */
-#define MAX_SUBOUT		51
+#define SUBOUT_SQUZ_ALLOW 52	/* target was already grabbed at the start of this attack chain */
+#define SUBOUT_T_WING_BUFFET 53	/* Tiefling steel-feathered wing buffet attack */
+#define SUBOUT_T_WING_CLAW_1 54	/* Tiefling giant wing-claw attack */
+#define SUBOUT_T_WING_CLAW_2 55	/* Tiefling skeletal wing-claw attack */
+#define SUBOUT_T_WING_CLAW_3A_1 56	/* Tiefling doubt wing-sting attack */
+#define SUBOUT_T_WING_CLAW_3A_2 57	/* Tiefling doubt wing-sting attack */
+#define SUBOUT_T_WING_CLAW_3A_3 58	/* Tiefling doubt wing-sting attack */
+#define SUBOUT_T_WING_CLAW_3B 59	/* Tiefling doubt wing-sting attack */
+#define SUBOUT_KICKING_BOOTS 60	/* kicking boots attack */
+#define SUBOUT_KICK	61	/* set whenever ANY finalized attack in the chain is AT_KICK, from any source */
+#define SUBOUT_DEATHEYE_BITES 62	/* Death Eye: using its bite/tongue attacks this round */
+#define SUBOUT_DEATHEYE_DEATH 63	/* Death Eye: using its death gaze this round */
+#define SUBOUT_ASTRA_GAZE 64	/* Monadic astra elemental gaze attack */
+#define SUBOUT_ASTRA_ARROW 65	/* Surya astra arrow of slaying attack */
+#define SUBOUT_GRACE_MANTLE 66	/* Eladrin mantle grace passive */
+#define SUBOUT_GRACE_EXTRA 67	/* Eladrin extra-attack grace bonus weapon attack */
+#define MAX_SUBOUT		SUBOUT_GRACE_EXTRA
 #define SUBOUT_ARRAY_SIZE (MAX_SUBOUT/(sizeof(int)*8)+1)
+
+/* mantle weight classes: buffeting winds roll one of these (or a miss) against a weaponless attacker's weight */
+#define MWT_TINY	1	/* WT_TINY */
+#define MWT_SMALL	2	/* WT_SMALL */
+#define MWT_MEDIUM	3	/* WT_MEDIUM */
+#define MWT_LARGE	4	/* WT_LARGE */
+#define MWT_HUGE	5	/* WT_HUGE */
+
+/* the four seasons a Gae eladrin's nature presents */
+#define SEASON_WINTER	0
+#define SEASON_SPRING	1
+#define SEASON_SUMMER	2
+#define SEASON_FALL	3
 
 #define ATTKFLAG_FORCE_BLEED		0x00000001L
 #define ATTKFLAG_FORCE_CHECK_JOUST	0x00000002L
@@ -118,6 +161,14 @@
 #define ATTKFLAG_DOUBLE_DAMAGE		0x00000008L
 #define ATTKFLAG_SHOVE				0x00000010L
 #define ATTKFLAG_SHOCKWAVE			0x00000020L
+#define ATTKFLAG_BYPASS_RESIST		0x00000040L
+#define ATTKFLAG_HALF_DAMAGE		0x00000080L
+#define ATTKFLAG_FORCE_CRIT		0x00000100L
+#define ATTKFLAG_WHACK				0x00000200L
+#define ATTKFLAG_PIERCE			0x00000400L
+#define ATTKFLAG_SLASH				0x00000800L
 
 #define XYATKFLAG_MIRROR_ATK		0x00000001L
+
+#define ZFOCUS(otmp) (otmp && (otmp->obj_material == MERCURIAL) && (artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_FOCUS) && (BlockableClearThoughts || (u.usanity-80) > rnd(10)))
 #endif

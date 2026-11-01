@@ -155,18 +155,19 @@ xchar x, y;
 		(ispick||is_saber||is_seismic) && sobj_at(BOULDER, x, y) ? DIGTYP_BOULDER :
 		(ispick||is_saber||is_seismic) && sobj_at(MASSIVE_STONE_CRATE, x, y) ? DIGTYP_CRATE :
 		(ispick||is_saber||is_seismic) && sobj_at(MASS_OF_STUFF, x, y) ? DIGTYP_MS_O_STF :
+		IS_BARS(x, y) ?
+			((is_saber || is_seismic) ? DIGTYP_BARS : DIGTYP_UNDIGGABLE) :
 		(closed_door(x, y) ||
 			levl[x][y].typ == SDOOR) ? DIGTYP_DOOR :
 		IS_TREES(levl[x][y].typ) ?
 			((ispick && !(is_axe || is_saber || is_seismic)) ? DIGTYP_UNDIGGABLE : DIGTYP_TREE) :
 		(ispick || is_seismic) && IS_ROCK(levl[x][y].typ) &&
 			(!level.flags.arboreal || IS_WALL(levl[x][y].typ)) ?
-			DIGTYP_ROCK : 
+			DIGTYP_ROCK :
 		is_saber && (levl[x][y].typ == DRAWBRIDGE_DOWN || is_drawbridge_wall(x, y) >= 0) ?
-			DIGTYP_BRIDGE : 
+			DIGTYP_BRIDGE :
 		is_saber && IS_WALL(levl[x][y].typ) ?
-			DIGTYP_ROCK : 
-		(is_saber || is_seismic) && levl[x][y].typ == IRONBARS ? DIGTYP_BARS : 
+			DIGTYP_ROCK :
 			DIGTYP_UNDIGGABLE);
 }
 
@@ -293,6 +294,8 @@ dig()
 				IS_DOOR(lev->typ) ? "door" : "wall", verb);
 			return MOVE_CANCELLED;
 		}
+		if (IS_TREES(lev->typ) && six_element_channel(digitem->oartifact, SIXEL_AXE))
+			set_six_element_channel(digitem, SIXEL_METAL|SIXEL_AXE);
 	}
 	if(Fumbling &&
 		/* Can't exactly miss holding a lightsaber to the wall */
@@ -535,6 +538,12 @@ dig()
 			digtxt = "You break through a secret door!";
 			if(!(lev->doormask & D_TRAPPED))
 				lev->doormask = D_BROKEN;
+		} else if(IS_BARS(dpx, dpy)) {
+			if(digitem->otyp == SEISMIC_HAMMER)
+				digtxt = "You shatter the barred door.";
+			else
+				digtxt = "You cut through the barred door.";
+			break_iron_bars(dpx, dpy, FALSE);
 		} else if(closed_door(dpx, dpy)) {
 			digtxt = "You break through the door.";
 			if(!(lev->doormask&D_LOCKED) && u.sealsActive&SEAL_OTIAX) unbind(SEAL_OTIAX, TRUE);
@@ -1607,7 +1616,7 @@ int x, y, type;
 	container->olocked = TRUE;
 	container->otrapped = TRUE;
 	for(int i = d(9,4); i > 0; i--)
-		mkhellvaultitem_cnt(container, type, TRUE);
+		mkhellvaultitem_cnt(container, type);
 	bury_an_obj(container);
 }
 
@@ -1633,7 +1642,7 @@ struct monst *levi;
 	otmp = mksobj(WAGE_OF_PRIDE, MKOBJ_NOINIT);
 	add_to_container(container, otmp);
 	for(int i = 3*9; i > 0; i--)
-		mkhellvaultitem_cnt(container, VN_N_PIT_FIEND, FALSE);
+		mkhellvaultitem_cnt(container, VN_N_PIT_FIEND);
 	if(levi->mtyp == PM_LEVIATHAN) mpickobj(levi, container);
 	else place_object(container, x, y);
 }
@@ -2179,7 +2188,7 @@ struct obj *obj;
 					nomul(-d(2,2), "entangled in a web");
 					nomovemsg = "You pull free.";
 				}
-			} else if (lev->typ == IRONBARS) {
+			} else if (IS_BARS(rx,ry)) {
 			    pline("Clang!");
 			    wake_nearby_noisy();
 			} else if (IS_TREES(lev->typ))
@@ -2872,7 +2881,7 @@ long timeout;	/* unused */
 				}
 			}
 		}
-		if((active_glyph(LUMEN) || (!u.veil && u.ualign.god == GOD_THE_CHOIR)) && !obj->researched && !mindless(&mons[obj->corpsenm]) && !is_animal(&mons[obj->corpsenm])){
+		if((active_glyph(LUMEN) || (!u.veil && u.ualign.god == GOD_THE_CHOIR)) && !obj->researched && intelligent(&mons[obj->corpsenm])){
 			int out_of = 100;
 			if(active_glyph(EYE_THOUGHT) && active_glyph(LUMEN))
 				out_of = 33;
@@ -2918,7 +2927,7 @@ long timeout;	/* unused */
 		if(u.silvergrubs && !u.silverknight_mire && !rn2(20)){
 			set_silvergrubs(FALSE);
 		}
-		if(check_rot(ROT_KIN) && !mindless(&mons[obj->corpsenm]) && !is_animal(&mons[obj->corpsenm]) && (u.silvergrubs || !rn2(100)) && !(mvitals[PM_SILVERGRUB].mvflags&G_GONE && !In_quest(&u.uz))){
+		if(check_rot(ROT_KIN) && intelligent(&mons[obj->corpsenm]) && (u.silvergrubs || !rn2(100)) && !(mvitals[PM_SILVERGRUB].mvflags&G_GONE && !In_quest(&u.uz))){
 			set_silvergrubs(TRUE);
 			makemon(&mons[PM_SILVERGRUB], x, y, NO_MM_FLAGS);
 		}

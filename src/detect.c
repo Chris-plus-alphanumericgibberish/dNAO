@@ -1212,7 +1212,7 @@ use_crystal_ball(struct obj **optr)
 		break;
 	case 3 : if (!resists_blnd(&youmonst)) {
 		pline("%s your vision!", Tobjnam(obj, "damage"));
-		make_blinded(Blinded + rnd(100),FALSE);
+		make_blinded(BlindedTimeout + rnd(100),FALSE);
 		if (!Blind) Your1(vision_clears);
 		} else {
 		pline("%s your vision.", Tobjnam(obj, "assault"));
@@ -1484,9 +1484,12 @@ genericptr_t num;
 				   (flags.soundok ? "hear" :
 						"feel the shock of"));
 			wake_nearto_noisy(zx, zy, 11*11);
-			levl[zx][zy].doormask = D_NODOOR;
+			if (IS_BARS(zx, zy))
+				break_iron_bars(zx, zy, FALSE);
+			else
+				levl[zx][zy].doormask = D_NODOOR;
 		} else
-			levl[zx][zy].doormask = D_ISOPEN;
+			levl[zx][zy].doormask = D_ISOPEN | (levl[zx][zy].doormask & D_BARRED);
 		unblock_point(zx, zy);
 		newsym(zx, zy);
 		(*(int*)num)++;
@@ -1591,7 +1594,7 @@ register int aflag;
 			arti_worn_prop(uwep, ARTP_SEEK)) ?
 			uwep->spe : 0;
 		if(u.sealsActive&SEAL_OTIAX) fund += spiritDsize();
-		if(Role_if(PM_ROGUE)){
+		if(Role_if(PM_ROGUE) || u.uurchin){
 			fund += 2;
 			if(u.ulevel > 13)
 				fund += 3;
@@ -1675,7 +1678,7 @@ register int aflag;
 				newsym(x,y);
 			}
 
-			if ((trap = t_at(x,y)) && !trap->tseen && rnl(100) < 22) {
+			if ((trap = t_at(x,y)) && !trap->tseen && rnl(100) < 22+fund) {
 				nomul(0, NULL);
 
 				if (trap->ttyp == STATUE_TRAP) {

@@ -304,6 +304,7 @@ boolean expdrain; /* attack drains exp as well */
 		/* remove intrinsic abilities */
 		adjabil(u.ulevel + 1, u.ulevel);
 		reset_rndmonst(NON_PM);	/* new monster selection */
+		wingguard_check();
 	} else {
 		if (drainer) {
 			killer_format = KILLED_BY;
@@ -504,6 +505,7 @@ boolean incr;	/* true iff via incremental experience growth */
 	    adjabil(u.ulevel - 1, u.ulevel);	/* give new intrinsics */
 	    reset_rndmonst(NON_PM);		/* new monster selection */
 		check_natural_mutations();
+		wingguard_check();
 	}
 	else {
 		num = newhp();

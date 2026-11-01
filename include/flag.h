@@ -147,6 +147,8 @@ struct flag {
 	char	 end_disclose[NUM_DISCLOSURE_OPTIONS + 1];  /* disclose various info
 								upon exit */
 	char	 menu_style;	/* User interface style setting */
+	uchar	 glyphattr1;	/* rendering choice for GLYPH_ATR_1 (see wintype.h) */
+	uchar	 glyphattr2;	/* rendering choice for GLYPH_ATR_2 (see wintype.h) */
 #ifdef AMII_GRAPHICS
 	int numcols;
 	unsigned short amii_dripens[ 20 ]; /* DrawInfo Pens currently there are 13 in v39 */
@@ -235,6 +237,7 @@ struct flag {
 #define AASIMAR_TYPE_PRIMINAL	5
 #define AASIMAR_TYPE_CLOUDFACE	6
 #define AASIMAR_TYPE_IKSH_NA	7
+#define AASIMAR_TYPE_SURYA		8
 	int aasimar_subtype;
 #define AASIMAR_SUBTYPE_COURE		1
 #define AASIMAR_SUBTYPE_NOVIERE		2
@@ -252,6 +255,20 @@ struct flag {
 
 // #define AASIMAR_SUBTYPE_DRACAE		12
 // #define AASIMAR_SUBTYPE_POLYP		13
+
+#define AASIMAR_SUBTYPE_SHIELD_ARCHON		14
+#define FIRST_ARCHON_SUBTYPE		AASIMAR_SUBTYPE_SHIELD_ARCHON
+#define AASIMAR_SUBTYPE_TRUMPET_ARCHON		15
+#define AASIMAR_SUBTYPE_PANAKEIAN_ARCHON	16
+#define LAST_EARLY_AURA_ARCHON_SUBTYPE		AASIMAR_SUBTYPE_PANAKEIAN_ARCHON
+#define AASIMAR_SUBTYPE_JUSTICE_ARCHON		17
+#define AASIMAR_SUBTYPE_SWORD_ARCHON		18
+#define AASIMAR_SUBTYPE_WARDEN_ARCHON		19
+#define LAST_ARCHON_SUBTYPE		AASIMAR_SUBTYPE_WARDEN_ARCHON
+// #define AASIMAR_SUBTYPE_THRONE_ARCHON	20
+// #define AASIMAR_SUBTYPE_LIGHT_ARCHON		21
+// #define AASIMAR_SUBTYPE_IASOIAN_ARCHON	22
+// #define AASIMAR_SUBTYPE_HYGIEIAN_ARCHON	23
 };
 #define storm_aasimar(subtype) ((subtype) == AASIMAR_SUBTYPE_NOVIERE  \
 							|| (subtype) == AASIMAR_SUBTYPE_BRALANI \
@@ -423,6 +440,7 @@ struct instance_flags {
     boolean notice_walls;
     boolean use_menu_glyphs;
     boolean hilite_hidden_stairs;
+    boolean hilite_hidden_traps;
     boolean hilite_obj_piles;
 	
     boolean role_obj_names;
@@ -514,6 +532,7 @@ struct instance_flags {
 	boolean  lootabc;	/* use "a/b/c" rather than "o/i/b" when looting */
 	boolean  showrace;	/* show hero glyph by race rather than by role */
 	boolean  travelcmd;	/* allow travel command */
+	boolean  cut_level_gen_test;	/* end the current level generation test */
 	int  travelplus;/* how far travel command should attempt to path through the unknown */
 	int	 runmode;	/* update screen display during run moves */
 	int delay_length;	/* length of delay for delay_output */

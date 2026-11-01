@@ -52,9 +52,15 @@ typedef void FDECL((*timeout_proc), (genericptr_t, long));
 #define REVERT_AUREATE	20
 #define GRAY_MOLDY_CORPSE	21
 #define SLOW_WHEEL		22
-#define OMNI_TIME_OUT   23
-#define OMNI_RECHARGE   24
-#define NUM_TIME_FUNCS	25
+#define CLOUD_DRIFT		23
+#define UNSUPPRESS_OBJECT	24
+#define LIGHT_EXHAUSTED	25
+#define CRUMBLE_IMPROVED	26
+#define REVERT_SIX_ELEMENT	27
+#define REVERT_BLEEDING_VOID	28
+#define OMNI_TIME_OUT   29
+#define OMNI_RECHARGE   30
+#define NUM_TIME_FUNCS	31
 
 /* used in timeout.c */
 typedef struct timer {

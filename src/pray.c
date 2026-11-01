@@ -272,7 +272,8 @@ in_trouble()
 	 */
 	if(Punished) return(TROUBLE_PUNISHED);
 	if (Cursed_obj(uarmg, GAUNTLETS_OF_FUMBLING) ||
-		Cursed_obj(uarmf, FUMBLE_BOOTS))
+		Cursed_obj(uarmf, FUMBLE_BOOTS) ||
+		Cursed_obj(uarmw, WING_GUARDS_OF_BUMBLING))
 	    return TROUBLE_FUMBLING;
 	if (worst_cursed_item()) return TROUBLE_CURSED_ITEMS;
 #ifdef STEED
@@ -286,7 +287,7 @@ in_trouble()
 	if (u.uhitinc < 0) return(TROUBLE_TOHIT_CURSED);
 	if (u.uacinc < 0) return(TROUBLE_AC_CURSED);
 	if (u.udaminc < 0) return(TROUBLE_DAMAGE_CURSED);
-	if (Blinded > 1 && haseyes(youracedata)) return(TROUBLE_BLIND);
+	if (BlindedTimeout > 1 && haseyes(youracedata)) return(TROUBLE_BLIND);
 	for(i=0; i<A_MAX; i++)
 	    if(ABASE(i) < AMAX(i)) return(TROUBLE_POISONED);
 	if(Wounded_legs
@@ -335,10 +336,10 @@ worst_cursed_item()
 	otmp = uarmh;
     } else if (uarmf && uarmf->cursed) {		/* boots */
 	otmp = uarmf;
-#ifdef TOURIST
     } else if (uarmu && uarmu->cursed) {		/* shirt */
 	otmp = uarmu;
-#endif
+    } else if (uarmw && uarmw->cursed) {		/* shirt */
+	otmp = uarmw;
     } else if (uamul && uamul->cursed) {		/* amulet */
 	otmp = uamul;
     } else if (ubelt && ubelt->cursed) {		/* belt */
@@ -581,6 +582,8 @@ register int trouble;
 			otmp = uarmg;
 		    else if (Cursed_obj(uarmf, FUMBLE_BOOTS))
 			otmp = uarmf;
+		    else if (Cursed_obj(uarmw, WING_GUARDS_OF_BUMBLING))
+			otmp = uarmw;
 		    goto decurse;
 		    /*NOTREACHED*/
 		    break;
@@ -734,12 +737,10 @@ int godnum;
 	    if (uarm && !(EReflecting & W_ARM) &&
 	    		!(EDisint_resistance & W_ARM) && !uarmc)
 		(void) destroy_arm(uarm);
-#ifdef TOURIST
 	    if (uarmu && 
 			!(EReflecting & W_ARMU) && !(EDisint_resistance & W_ARMU) &&
 			!(uarm && arm_blocks_upper_body(uarm->otyp)) && !uarmc
 		) (void) destroy_arm(uarmu);
-#endif
 	    if (!Disint_resistance)
 		fry_by_god(godnum);
 	    else {
@@ -781,7 +782,7 @@ int godnum;
 	register int	maxanger;
 	char buf[BUFSZ];
 
-	if(godnum == GOD_THE_VOID || godnum == GOD_BOKRUG__THE_WATER_LIZARD || philosophy_index(godnum)) {
+	if(godnum == GOD_THE_VOID || godnum == GOD_BOKRUG__THE_WATER_LIZARD || no_anger_index(godnum)) {
 		/* the void does not get angry */
 		/* Bokrug DOES get angry, but has really bad aim. */
 		/* the various philosophies don't have gods per se. */
@@ -1185,7 +1186,16 @@ pleased(int godnum, boolean altar, int pray_trouble, boolean set_timeout)
 			at_your_feet("An object");
 			/* not yet known spells given preference over already known ones */
 			/* Also, try to grant a spell for which there is a skill slot */
-			otmp = mkobj(SPBOOK_CLASS, TRUE);
+			otmp = (struct obj *)0;
+			do {
+				if (otmp) {
+					//properly uncreate an artifact
+					if (otmp->oartifact)
+						artifact_exists(otmp, ONAME(otmp), FALSE);
+					delobj(otmp);
+				}
+				otmp = mkobj(SPBOOK_CLASS, NO_MKOBJ_FLAGS);
+			} while (otmp->oartifact);
 			while (--trycnt > 0) {
 			if (otmp->otyp != SPE_BLANK_PAPER) {
 				for (sp_no = 0; sp_no < MAXSPELL; sp_no++)
@@ -1300,7 +1310,7 @@ const char *words;
 	quot = "\"";
     else
 	words = "";
-	if(philosophy_index(godnum))
+	if(no_anger_index(godnum))
 		return;
 	
 	if(godnum == GOD_THE_VOID){
@@ -1342,7 +1352,7 @@ void
 gods_upset(godnum)
 int godnum;
 {
-	if(godnum == GOD_THE_VOID || philosophy_index(godnum)) return;
+	if(godnum == GOD_THE_VOID || no_anger_index(godnum)) return;
 
 	IMPURITY_UP(u.uimp_god_anger)
 
@@ -2250,7 +2260,7 @@ dosacrifice()
 			You("sense a conference between %s and %s.",
 				u_gname(), a_gname());
 			pline("But nothing else occurs.");
-		} else if(u.ualign.god == GOD_BOKRUG__THE_WATER_LIZARD || u.ualign.god == GOD_TEZCATLIPOCA || philosophy_index(u.ualign.god)){
+		} else if(u.ualign.god == GOD_BOKRUG__THE_WATER_LIZARD || u.ualign.god == GOD_TEZCATLIPOCA || no_anger_index(u.ualign.god)){
 			You("sense %s prepare for a conflict....",
 				a_gname());
 			pline("But nothing else occurs.");
@@ -2430,6 +2440,14 @@ dosacrifice()
 				unrestrict_weapon_skill(P_WHIP);
 			} else if(otmp->oartifact == ART_HELLRIDER_S_SADDLE){
 				unrestrict_weapon_skill(P_RIDING);
+			} else if(otmp->oartifact == ART_SUN_S_BOW && !art_already_exists(ART_CUTTING_WISDOM)){
+				struct obj *sword = mksartifact(ART_CUTTING_WISDOM);
+				if (sword->spe < 0) sword->spe = 0;
+				if (sword->cursed) uncurse(sword);
+				sword->oerodeproof = TRUE;
+				sword->gifted = u.ualign.god;
+				dropy(sword);
+				discover_artifact(ART_CUTTING_WISDOM);
 			}
 			
 			if(is_shield(otmp)){
@@ -2470,7 +2488,7 @@ boolean praying;	/* false means no messages should be given */
     p_god = on_altar() ? (god_at_altar(u.ux,u.uy)) : u.ualign.god;
     p_trouble = in_trouble();
 
-    if (is_demon(youracedata) && (!Race_if(PM_TIEFLING) && !Race_if(PM_DARK_FEY_RI)) && (galign(p_god) == A_LAWFUL || galign(p_god) == A_NEUTRAL)) {
+    if (is_demon(youracedata) && !RACE_IF_TIEFLING && (galign(p_god) == A_LAWFUL || galign(p_god) == A_NEUTRAL)) {
 	if (praying)
 	    pline_The("very idea of praying to a %s god is repugnant to you.",
 		  godlist[p_god].alignment ? "lawful" : "neutral");
@@ -2607,6 +2625,15 @@ prayer_done()		/* M. Stephenson (1.0.3b) */
 		Your("prayer goes unanswered.");
 		return MOVE_STANDARD; //I think this is meaningless?
 	}
+	if(on_altar() && (p_type == -1 || p_type == 2)
+		&& (no_altar_index(p_god) || p_god == GOD_BOKRUG__THE_WATER_LIZARD)
+	){
+		u.lastprayresult = PRAY_IGNORED;
+		Your("prayer goes unanswered.");
+		if(!no_anger_index(u.ualign.god))
+			adjalign(-1);
+		return MOVE_STANDARD;
+	}
     if(p_type == -1) {
 			godvoice(p_god,
 				gholiness(p_god) == HOLY_HOLINESS ?
@@ -2646,11 +2673,11 @@ prayer_done()		/* M. Stephenson (1.0.3b) */
     }
 
     if (p_type == 0) {
-        if(on_altar() && u.ualign.god != p_god)
+        if(on_altar() && u.ualign.god != p_god && !no_altar_index(p_god) && p_god != GOD_BOKRUG__THE_WATER_LIZARD)
             (void) water_prayer(FALSE);
         angrygods(u.ualign.god);       /* naughty */
     } else if (p_type == 1) {
-		if(on_altar() && u.ualign.god != p_god)
+		if(on_altar() && u.ualign.god != p_god && !no_altar_index(p_god) && p_god != GOD_BOKRUG__THE_WATER_LIZARD)
 			(void) water_prayer(FALSE);
 		if(u.ualign.type != A_VOID){
 			u.ublesscnt += rnz(250);
@@ -3312,6 +3339,7 @@ god_benefit_identify_item(void)
 	else if (uarmc && not_fully_identified(uarmc)) identify(uarmc);
 	else if (uarm && not_fully_identified(uarm)) identify(uarm);
 	else if (uarmu && not_fully_identified(uarmu)) identify(uarmu);
+	else if (uarmw && not_fully_identified(uarmw)) identify(uarmw);
 	else if (uarmh && not_fully_identified(uarmh)) identify(uarmh);
 	else if (uarmg && not_fully_identified(uarmg)) identify(uarmg);
 	else if (uarmf && not_fully_identified(uarmf)) identify(uarmf);
@@ -3426,6 +3454,7 @@ god_benefit_repair_item(void)
 		else if select_item_to_repair_or_erodeproof(uarmc);
 		else if select_item_to_repair_or_erodeproof(uarm);
 		else if select_item_to_repair_or_erodeproof(uarmu);
+		else if select_item_to_repair_or_erodeproof(uarmw);
 		else if select_item_to_repair_or_erodeproof(uarmh);
 		else if select_item_to_repair_or_erodeproof(uarmg);
 		else if select_item_to_repair_or_erodeproof(uarmf);
@@ -4015,7 +4044,7 @@ commune_with_goat()
 				otmp->oeroded = 0;
 				otmp->oeroded2 = 0;
 				otmp->oerodeproof = 1;
-				if(otmp->otyp == CHURCH_BLADE || otmp->otyp == CHURCH_HAMMER){
+				if(is_composite_weapon(otmp)){
 					if(otmp->cobj){
 						add_oprop(otmp->cobj, OPROP_LESSER_ACIDW);
 						otmp->cobj->oeroded = 0;
@@ -4044,7 +4073,7 @@ commune_with_goat()
 				otmp->oeroded = 0;
 				otmp->oeroded2 = 0;
 				otmp->oerodeproof = 1;
-				if(otmp->otyp == CHURCH_BLADE || otmp->otyp == CHURCH_HAMMER){
+				if(is_composite_weapon(otmp)){
 					if(otmp->cobj){
 						remove_oprop(otmp->cobj, OPROP_LESSER_ACIDW);
 						add_oprop(otmp->cobj, OPROP_GOATW);
@@ -4118,6 +4147,12 @@ commune_with_goat()
 #define FLAMEBOON_SHARE_BURDENS	12
 #define FLAMEBOON_RIGHTEOUS_WRATH	13
 #define FLAMEBOON_PRESERVE_LIFE	14
+#define FLAMEBOON_SILVER_FLAME	15
+#define FLAMEBOON_SILVER_FLAME_MORTALITY	16
+#define FLAMEBOON_SILVER_FLAME_UNDEATH	17
+#define FLAMEBOON_SILVER_FLAME_SPIRIT	18
+#define FLAMEBOON_SILVER_FLAME_WRATH	19
+#define FLAMEBOON_SILVER_FLAME_ILLUSION	20
 int
 dosflm_menu(greater_boon)
 boolean greater_boon;	/* you have shown devotion enough to ask for a greater boon */
@@ -4217,8 +4252,67 @@ boolean greater_boon;	/* you have shown devotion enough to ask for a greater boo
 		add_menu(tmpwin, NO_GLYPH, &any,
 			inclet++, 0, ATR_NONE, buf,
 			MENU_UNSELECTED);
+
+		if (!SilverInvoke) {
+			boolean fireball_knower = FALSE;
+
+			update_externally_granted_spells();
+			for (int j = 0; j < MAXSPELL; j++)
+				if (spellid(j) == SPE_FIREBALL && (spellknow(j) > 0 || spellext(j))){
+					fireball_knower = TRUE;
+					break;
+				}
+
+			if (fireball_knower) {
+				Sprintf(buf, "Learn to invoke the Silver Flame");
+				any.a_int = FLAMEBOON_SILVER_FLAME;
+				add_menu(tmpwin, NO_GLYPH, &any,
+					inclet++, 0, ATR_NONE, buf,
+					MENU_UNSELECTED);
+			}
+		}
+
+		if (SilverInvoke && !SilverInvokeMortal) {
+			Sprintf(buf, "Burn the living in the Silver Flame");
+			any.a_int = FLAMEBOON_SILVER_FLAME_MORTALITY;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				inclet++, 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+		}
+
+		if (SilverInvoke && !SilverInvokeUndeath) {
+			Sprintf(buf, "Burn the undead in the Silver Flame");
+			any.a_int = FLAMEBOON_SILVER_FLAME_UNDEATH;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				inclet++, 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+		}
+
+		if (SilverInvoke && !SilverInvokeSpirit) {
+			Sprintf(buf, "Burn the unworthy in the Silver Flame");
+			any.a_int = FLAMEBOON_SILVER_FLAME_SPIRIT;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				inclet++, 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+		}
+
+		if (SilverInvoke && !SilverInvokeWrath) {
+			Sprintf(buf, "Wield the wrath of the Silver Flame");
+			any.a_int = FLAMEBOON_SILVER_FLAME_WRATH;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				inclet++, 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+		}
+
+		if (SilverInvoke && !SilverInvokeIllusion) {
+			Sprintf(buf, "Burn away illusions in the Silver Flame");
+			any.a_int = FLAMEBOON_SILVER_FLAME_ILLUSION;
+			add_menu(tmpwin, NO_GLYPH, &any,
+				inclet++, 0, ATR_NONE, buf,
+				MENU_UNSELECTED);
+		}
 	}
-	
+
 	end_menu(tmpwin, "You stare into the silver flame...");
 
 	how = PICK_ONE;
@@ -4369,7 +4463,7 @@ commune_with_silver_flame()
 					cost = 50;
 					pline("The silver light within %s is focused by your mirror!", doname(otmp));
 					add_oprop(otmp, OPROP_MORTW);
-					if(otmp->otyp == CHURCH_BLADE || otmp->otyp == CHURCH_HAMMER){
+					if(is_composite_weapon(otmp)){
 						if(otmp->cobj){
 							add_oprop(otmp->cobj, OPROP_MORTW);
 						}
@@ -4391,7 +4485,7 @@ commune_with_silver_flame()
 					cost = 50;
 					pline("The silver light within %s is focused by your mirror!", doname(otmp));
 					add_oprop(otmp, OPROP_TDTHW);
-					if(otmp->otyp == CHURCH_BLADE || otmp->otyp == CHURCH_HAMMER){
+					if(is_composite_weapon(otmp)){
 						if(otmp->cobj){
 							add_oprop(otmp->cobj, OPROP_TDTHW);
 						}
@@ -4413,7 +4507,7 @@ commune_with_silver_flame()
 					cost = 50;
 					pline("The silver light within %s is focused by your mirror!", doname(otmp));
 					add_oprop(otmp, OPROP_SFUWW);
-					if(otmp->otyp == CHURCH_BLADE || otmp->otyp == CHURCH_HAMMER){
+					if(is_composite_weapon(otmp)){
 						if(otmp->cobj){
 							add_oprop(otmp->cobj, OPROP_SFUWW);
 						}
@@ -4466,6 +4560,55 @@ commune_with_silver_flame()
 				else pline("Nothing happens.");
 			}
 			break;
+
+		case FLAMEBOON_SILVER_FLAME:
+			cost = 50;
+			HSilverInvoke |= W_UPGRADE;
+			pline("Your %s burn with silver flames.", makeplural(body_part(FINGER)));
+			u.ugifts++;
+			u.ucultsval += TIER_F; /*Theory: This is almost-purely a prerequisite for later silver flame boons. */
+			break;
+
+		case FLAMEBOON_SILVER_FLAME_MORTALITY:
+			cost = 50;
+			HSilverInvokeMortal |= W_UPGRADE;
+			pline("Your %s look thin and frail in the light of the silver flame.", makeplural(body_part(FINGER)));
+			u.ugifts++;
+			u.ucultsval += TIER_B; /*Theory: Adds life drain and makes the fire damage harder to resist, but ultimately does the same damage as a regular fireball. */
+			break;
+
+		case FLAMEBOON_SILVER_FLAME_UNDEATH:
+			cost = 50;
+			HSilverInvokeUndeath |= W_UPGRADE;
+			pline("Your %s look cracked and ruined in the light of the silver flame.", makeplural(body_part(FINGER)));
+			u.ugifts++;
+			u.ucultsval += TIER_D; /*Theory: Nasty stuff like liches and pharaohs are affected, but many are *already* affected by fireball and this adds little extra damage. */
+			break;
+
+		case FLAMEBOON_SILVER_FLAME_SPIRIT:
+			cost = 50;
+			HSilverInvokeSpirit |= W_UPGRADE;
+			pline("The silver flames around your %s burn straight and clear.", makeplural(body_part(FINGER)));
+			u.ugifts++;
+			u.ucultsval += TIER_B; /*Theory: Affects the nastiest late game enemies, but deals standard fire damage *if* it succeeds in destroying the target's armor. */
+			break;
+
+		case FLAMEBOON_SILVER_FLAME_WRATH:
+			cost = 50;
+			HSilverInvokeWrath |= W_UPGRADE;
+			pline("The silver flames around your %s burn hot with wrath.", makeplural(body_part(FINGER)));
+			u.ugifts++;
+			u.ucultsval += TIER_A; /*Theory: Unlike the gloves version, this straight-up doubles damage. Most useful in combination with the other silverflame spells so it's tiered at A instead of S */
+			break;
+
+		case FLAMEBOON_SILVER_FLAME_ILLUSION:
+			cost = 50;
+			HSilverInvokeIllusion |= W_UPGRADE;
+			pline("The silver flames around your %s burn in perfect rhythm.", makeplural(body_part(FINGER)));
+			u.ugifts++;
+			u.ucultsval += TIER_D; /*Theory: Most targets here are either already affected by fireball or are already covered by other silver flame upgrades. */
+			break;
+		/* If you were to add all the silver flame invocation boons, the total tier would be two S tiers and an C tier */
 	}
 	
 	if(!cost)
@@ -4782,7 +4925,7 @@ commune_with_yog()
 				otmp->oeroded = 0;
 				otmp->oeroded2 = 0;
 				otmp->oerodeproof = 1;
-				if(otmp->otyp == CHURCH_BLADE || otmp->otyp == CHURCH_HAMMER){
+				if(is_composite_weapon(otmp)){
 					if(otmp->cobj){
 						add_oprop(otmp->cobj, OPROP_LESSER_MAGCW);
 						otmp->cobj->oeroded = 0;
@@ -4810,7 +4953,7 @@ commune_with_yog()
 				otmp->oeroded = 0;
 				otmp->oeroded2 = 0;
 				otmp->oerodeproof = 1;
-				if(otmp->otyp == CHURCH_BLADE || otmp->otyp == CHURCH_HAMMER){
+				if(is_composite_weapon(otmp)){
 					if(otmp->cobj){
 						remove_oprop(otmp->cobj, OPROP_LESSER_MAGCW);
 						add_oprop(otmp->cobj, OPROP_SOTHW);
@@ -5019,7 +5162,7 @@ int eatflag;
 		value = 1;
 	}
 
-	if (eatflag != GOAT_EAT_PASSIVE && your_race(ptr) && !is_animal(ptr) && !mindless(ptr) && u.ualign.type != A_VOID && !Role_if(PM_ANACHRONONAUT) && !philosophy_index(u.ualign.god)) {
+	if (eatflag != GOAT_EAT_PASSIVE && your_race(ptr) && !is_animal(ptr) && !mindless(ptr) && u.ualign.type != A_VOID && !Role_if(PM_ANACHRONONAUT) && !no_anger_index(u.ualign.god)) {
 	//No demon summoning.  Your god just smites you, and sac continues.
 		if (u.ualign.type != A_CHAOTIC && u.ualign.type != A_NONE) {
 			adjalign(-5);
@@ -5141,7 +5284,7 @@ yog_sothoth_drink(struct obj *otmp)
 	if (otmp->oeaten)
 		value = eaten_stat(value, otmp);
 
-	if (your_race(ptr) && !is_animal(ptr) && !mindless(ptr) && u.ualign.type != A_VOID && !Role_if(PM_ANACHRONONAUT) && !philosophy_index(u.ualign.god)) {
+	if (your_race(ptr) && !is_animal(ptr) && !mindless(ptr) && u.ualign.type != A_VOID && !Role_if(PM_ANACHRONONAUT) && !no_anger_index(u.ualign.god)) {
 	//No demon summoning.  Your god just smites you, and sac continues.
 		if (u.ualign.type != A_CHAOTIC && u.ualign.type != A_NONE) {
 			adjalign(-5);
@@ -5218,7 +5361,7 @@ boolean offering;
 	if (otmp && otmp->oeaten)
 		value = eaten_stat(value, otmp);
 
-	if (your_race(ptr) && !is_animal(ptr) && !mindless(ptr) && u.ualign.type != A_VOID && !Role_if(PM_ANACHRONONAUT) && !philosophy_index(u.ualign.god)) {
+	if (your_race(ptr) && !is_animal(ptr) && !mindless(ptr) && u.ualign.type != A_VOID && !Role_if(PM_ANACHRONONAUT) && !no_anger_index(u.ualign.god)) {
 	//No demon summoning.  Your god just smites you, and sac continues.
 		if (u.ualign.type != A_LAWFUL && u.ualign.type != A_NONE) {
 			adjalign(-5);
@@ -5361,6 +5504,23 @@ gholiness(godnum)
 int godnum;
 {
 	return godlist[godnum].holiness;
+}
+
+int
+u_holiness()
+{
+	// 1 is holy, 0 is neutral, -1 is unholy
+	// fallen < -3, blessed > 3. >, not >=
+	switch (gholiness(u.ualign.god)){
+		case UNHOLY_HOLINESS:
+		case VOID_HOLINESS:
+			return (u_blessed()) ? UNHOLY_HOLINESS : ((u_fallen()) ? HOLY_HOLINESS : NEUTRAL_HOLINESS);
+		case HOLY_HOLINESS:
+		case NEUTRAL_HOLINESS:
+		default:
+			return (u_blessed()) ? HOLY_HOLINESS : ((u_fallen()) ? UNHOLY_HOLINESS : NEUTRAL_HOLINESS);
+	}
+	return 0;
 }
 
 /* transitory function, hopefully, to convert an alignment into the most likely candidate god */

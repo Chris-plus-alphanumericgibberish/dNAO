@@ -105,6 +105,10 @@ register struct obj *pen;
 	if(!paper)
 		return(0);
 	typeword = (paper->oclass == SPBOOK_CLASS) ? "spellbook" : "scroll";
+	if(Blind && paper->oclass == SPBOOK_CLASS) {
+		You_cant("write out a whole spellbook without being able to see it!");
+		return(0);
+	}
 	if(Blind && !paper->dknown) {
 		You("don't know if that %s is blank or not!", typeword);
 		return(1);

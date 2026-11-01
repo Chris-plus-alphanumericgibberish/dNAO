@@ -248,7 +248,7 @@ boolean ghostly, frozen;
 		}
 		if (otmp->bypass) otmp->bypass = 0;
 		//Handle damaged mired objects here
-		if(!u.silverknight_mire && otmp->mired){
+		if(u.uz.dlevel && !u.silverknight_mire && otmp->mired){
 			otmp->oeroded = 0;
 			otmp->oeroded2 = 0;
 			if(otmp->where != OBJ_BURIED)
@@ -311,7 +311,7 @@ boolean ghostly;
 			mtmp->m_id = nid;
 		}
 		if (mtmp->data) {
-			set_mon_data(mtmp, mtmp->mtyp);
+			restore_mon_data(mtmp, mtmp->mtyp);
 		}
 		if (ghostly) {
 			int mndx = monsndx(mtmp->data);
@@ -443,7 +443,20 @@ restgamestate(int fd, unsigned int *stuckid, unsigned int *steedid, unsigned int
 	mread(fd, (genericptr_t) &youmonst, sizeof(struct monst));
 	if (youmonst.light)
 		rest_lightsource(LS_MONSTER, &youmonst, youmonst.light, fd, FALSE);
-	init_uasmon();
+	/* init_uasmon() treats this as taking on a new form, so hold the
+	 * restored body plan and injuries across it. Can't use
+	 * restore_mon_data() instead: the player reaches set_mon_data() through
+	 * set_uasmon(), which several live-play callers share. */
+	{
+		struct atkbp_set restored_full = youmonst.mbodyparts_full;
+		struct atkbp_set restored_bodyparts = youmonst.mbodyparts;
+		struct atkbp_set restored_injuries = youmonst.minjuries;
+
+		init_uasmon();
+		youmonst.mbodyparts_full = restored_full;
+		youmonst.mbodyparts = restored_bodyparts;
+		youmonst.minjuries = restored_injuries;
+	}
 	role_edit();		/* after u is read so that role_variant is set */
 #ifdef CLIPPING
 	cliparound(u.ux, u.uy);
@@ -471,27 +484,6 @@ restgamestate(int fd, unsigned int *stuckid, unsigned int *steedid, unsigned int
 	monstr[PM_NAMELESS_HORROR] = 40;
 	}
 	
-	/* Fix up the highest ranking eladrins */
-	if(dungeon_topology.alt_tulani){
-		unsigned short genotmp = mons[PM_TULANI_ELADRIN].geno;
-		int common_caste;
-		switch(dungeon_topology.alt_tulani){
-			case GAE_CASTE:
-				common_caste = PM_GAE_ELADRIN;
-			break;
-			case BRIGHID_CASTE:
-				common_caste = PM_BRIGHID_ELADRIN;
-			break;
-			case UISCERRE_CASTE:
-				common_caste = PM_UISCERRE_ELADRIN;
-			break;
-			case CAILLEA_CASTE:
-				common_caste = PM_CAILLEA_ELADRIN;
-			break;
-		}
-		mons[PM_TULANI_ELADRIN].geno = mons[common_caste].geno;
-		mons[common_caste].geno = genotmp;
-	}
 	/* Fix up the alignment quest nemesi */
 	mons[PM_OONA].mcolor = (u.oonaenergy == AD_FIRE) ? CLR_RED 
 						 : (u.oonaenergy == AD_COLD) ? CLR_CYAN 
@@ -541,6 +533,30 @@ restgamestate(int fd, unsigned int *stuckid, unsigned int *steedid, unsigned int
 	    unweapon = TRUE;
 
 	restore_dungeon(fd);
+
+	/* Fix up the highest ranking eladrins; must come after restore_dungeon
+	   has loaded the real dungeon_topology.alt_tulani from the save file */
+	if(dungeon_topology.alt_tulani){
+		unsigned short genotmp = mons[PM_TULANI_ELADRIN].geno;
+		int common_caste;
+		switch(dungeon_topology.alt_tulani){
+			case GAE_CASTE:
+				common_caste = PM_GAE_ELADRIN;
+			break;
+			case BRIGHID_CASTE:
+				common_caste = PM_BRIGHID_ELADRIN;
+			break;
+			case UISCERRE_CASTE:
+				common_caste = PM_UISCERRE_ELADRIN;
+			break;
+			case CAILLEA_CASTE:
+				common_caste = PM_CAILLEA_ELADRIN;
+			break;
+		}
+		mons[PM_TULANI_ELADRIN].geno = mons[common_caste].geno;
+		mons[common_caste].geno = genotmp;
+	}
+
 	restlevchn(fd);
 	mread(fd, (genericptr_t) &moves, sizeof moves);
 	mread(fd, (genericptr_t) &monstermoves, sizeof monstermoves);
@@ -696,6 +712,8 @@ register int fd;
 	int ltmp;
 	int rtmp;
 	struct obj *otmp;
+
+	attkbp_init();
 
 #ifdef STORE_PLNAME_IN_FILE
 	mread(fd, (genericptr_t) plname, PL_NSIZ);

@@ -247,7 +247,7 @@ make_blinded(xtime, talk)
 long xtime;
 boolean talk;
 {
-	long old = Blinded;
+	long old = BlindedTimeout;
 	boolean u_could_see, can_see_now;
 	int eyecnt;
 	char buf[BUFSZ];
@@ -255,9 +255,9 @@ boolean talk;
 	/* we need to probe ahead in case the Eye of the Overworld
 	   are or will be overriding blindness */
 	u_could_see = !Blind;
-	Blinded = xtime ? 1L : 0L;
+	set_itimeout(&Blinded, xtime ? 1L : 0L);
 	can_see_now = !Blind;
-	Blinded = old;		/* restore */
+	set_itimeout(&Blinded, old);	/* restore */
 
 	if (u.usleep) talk = FALSE;
 
@@ -271,7 +271,7 @@ boolean talk;
 	} else if (old && !xtime) {
 	    /* clearing temporary blindness without toggling blindness */
 	    if (talk) {
-		if (!haseyes(youracedata)) {
+		if (!haseyes(youracedata) || PermaBlind) {
 		    strange_feeling((struct obj *)0, (char *)0);
 		} else if (Blindfolded) {
 		    Strcpy(buf, body_part(EYE_BP));
@@ -297,7 +297,7 @@ boolean talk;
 	} else if (!old && xtime) {
 	    /* setting temporary blindness without toggling blindness */
 	    if (talk) {
-		if (!haseyes(youracedata)) {
+		if (!haseyes(youracedata) || PermaBlind) {
 		    strange_feeling((struct obj *)0, (char *)0);
 		} else if (Blindfolded) {
 		    Strcpy(buf, body_part(EYE_BP));
@@ -663,6 +663,16 @@ boolean force;
 	case POT_AMNESIA:
 		pline(Hallucination? "This tastes like champagne!" :
 			"This liquid bubbles and fizzes as you drink it.");
+
+		//All amnesia causes you to forget your crisis of faith
+		if(Doubt)
+			You("forget your doubts.");
+		make_doubtful(0L, FALSE);
+		if(u.umadness&MAD_PALE_NIGHT){
+			u.umadness &= ~MAD_PALE_NIGHT;
+			You_feel("something horrible fade from your mind. You find you have no memory of... whatever it was!");
+		}
+
 		forget(otmp->cursed ? 25 : otmp->blessed ? 0 : 10);
 		if (Hallucination)
 		    pline("Hakuna matata!");
@@ -695,10 +705,6 @@ boolean force;
 		    exercise(A_WIS, FALSE);
 		}
 		
-		//All amnesia causes you to forget your crisis of faith
-		if(Doubt)
-			You("forget your doubts.");
-		make_doubtful(0L, FALSE);
 		break;
 	case POT_WATER:
 		if(uclockwork){
@@ -1259,9 +1265,7 @@ as_extra_healing:
 			break;
 		} else {
 			You_feel("completely healed.");
-			healup(enhanced ? 800 : 400, 
-					!(get_ox(otmp, OX_ESUM)) * (enhanced ? 2 : 1) * (4+4*bcsign(otmp)),
-					TRUE, TRUE);
+			healup(enhanced ? 800 : 400, 0, TRUE, TRUE);
 		}
 		/* Restore lost levels */
 		if (u.ulevel < u.ulevelmax) {
@@ -1706,8 +1710,9 @@ boolean your_fault;
 		if (!Acid_resistance) {
 		    pline("This burns%s!", obj->blessed ? " a little" :
 				    obj->cursed ? " a lot" : "");
-		    losehp(d(obj->cursed ? 2 : 1, obj->blessed ? 4 : 8),
-				    "potion of acid", KILLED_BY_AN);
+		    int acid_dmg = d(obj->cursed ? 2 : 1, obj->blessed ? 4 : 8);
+		    acid_dmg = elemental_dmg_resistance(&youmonst, (struct monst *)0, acid_dmg, AD_ACID);
+		    losehp(acid_dmg, "potion of acid", KILLED_BY_AN);
 		}
 		//Kills any skin gray mold
 		youmonst.mgmld_skin = 0;
@@ -1717,20 +1722,23 @@ boolean your_fault;
 		if(acidic(&mons[mtyp]) && !Acid_resistance){
 		    pline("This burns%s!", obj->blessed ? " a little" :
 				    obj->cursed ? " a lot" : "");
-		    losehp(d(obj->cursed ? 2 : 1, obj->blessed ? 4 : 8),
-				    "potion of acidic blood", KILLED_BY_AN);
+		    int acid_dmg = d(obj->cursed ? 2 : 1, obj->blessed ? 4 : 8);
+		    acid_dmg = elemental_dmg_resistance(&youmonst, (struct monst *)0, acid_dmg, AD_ACID);
+		    losehp(acid_dmg, "potion of acidic blood", KILLED_BY_AN);
 		}
 		if(freezing(&mons[mtyp]) && !Cold_resistance){
 		    pline("This burns%s!", obj->blessed ? " a little" :
 				    obj->cursed ? " a lot" : "");
-		    losehp(d(obj->cursed ? 2 : 1, obj->blessed ? 4 : 8),
-				    "potion of cryonic blood", KILLED_BY_AN);
+		    int cold_dmg = d(obj->cursed ? 2 : 1, obj->blessed ? 4 : 8);
+		    cold_dmg = elemental_dmg_resistance(&youmonst, (struct monst *)0, cold_dmg, AD_COLD);
+		    losehp(cold_dmg, "potion of cryonic blood", KILLED_BY_AN);
 		}
 		if(burning(&mons[mtyp]) && !Fire_resistance){
 		    pline("This burns%s!", obj->blessed ? " a little" :
 				    obj->cursed ? " a lot" : "");
-		    losehp(d(obj->cursed ? 2 : 1, obj->blessed ? 4 : 8),
-				    "potion of scalding blood", KILLED_BY_AN);
+		    int fire_dmg = d(obj->cursed ? 2 : 1, obj->blessed ? 4 : 8);
+		    fire_dmg = elemental_dmg_resistance(&youmonst, (struct monst *)0, fire_dmg, AD_FIRE);
+		    losehp(fire_dmg, "potion of scalding blood", KILLED_BY_AN);
 		}
 		if(poisonous(&mons[mtyp]) && !Poison_resistance){
 			if (Upolyd) {
@@ -2441,7 +2449,7 @@ register struct obj *o1, *o2;
 			}
 		break;
 		case POT_BLOOD:
-			if(o1->corpsenm == PM_MAID) switch (o2->otyp) {
+			if(o1->corpsenm == PM_NURSE) switch (o2->otyp) {
 			    case POT_BLOOD:
 					if(o2->corpsenm != PM_DEEP_DRAGON && o2->corpsenm != PM_NEWT) break;
 			    case POT_GAIN_LEVEL:
@@ -2869,52 +2877,64 @@ boolean amnesia;
 	    update_inventory();
 	else {
 	    pline("%s %s wet.", Your_buf, aobjnam(obj,"get"));
-		if(obj->opoisoned && obj->otyp != VIPERWHIP){
-			if(obj->opoisoned&OPOISON_ACID){
-				pline("Its acid coating boils vigorously!");
-				You("are caught in the explosion!");
-				losehp(Acid_resistance ? rnd(2) : rnd(5),
-					   "elementary chemistry", KILLED_BY);
-				obj->opoisoned &= ~OPOISON_ACID;
-			}
-			if(obj->opoisoned&(~OPOISON_AMNES)){
-				if(obj->opoisoned&OPOISON_BASIC && !rn2(10)){
-					pline("The poison coating washes off.");
-					obj->opoisoned &= ~OPOISON_BASIC;
-				}
-				else if(obj->opoisoned&OPOISON_DIRE && !rn2(10)){
-					pline("The poison coating washes off.");
-					obj->opoisoned &= ~OPOISON_DIRE;
-				}
-				if(obj->opoisoned&OPOISON_FILTH && !rn2(10)){
-					pline("The crusted filth washes off.");
-					obj->opoisoned &= ~OPOISON_FILTH;
-				}
-				if(obj->opoisoned&OPOISON_SLEEP && rn2(2)){
-					pline("The drug washes off.");
-					obj->opoisoned &= ~OPOISON_SLEEP;
-				}
-				if(obj->opoisoned&OPOISON_BLIND && rn2(2)){
-					pline("The stain washes off.");
-					obj->opoisoned &= ~OPOISON_BLIND;
-				}
-				if(obj->opoisoned&OPOISON_PARAL && rn2(8)){
-					pline("The venom washes off.");
-					obj->opoisoned &= ~OPOISON_PARAL;
-				}
-				if(obj->opoisoned&OPOISON_SILVER){
-					pline("The silver dew washes off.");
-					obj->opoisoned &= ~OPOISON_SILVER;
-				}
-				if(obj->opoisoned&OPOISON_HALLU && rn2(2)){
-					pline("The hallucinogen washes off.");
-					obj->opoisoned &= ~OPOISON_HALLU;
-				}
-			}
-		}
+		wash_poisons(obj, TRUE, TRUE);
 	}
 
 	return used;
+}
+
+/* Wash coatings off obj, as getting it wet does. If verbose, print messages;
+ * if acid_harms, a boiling acid coating explodes on the hero.
+ */
+void
+wash_poisons(struct obj *obj, boolean verbose, boolean acid_harms)
+{
+	if(!obj->opoisoned || obj->otyp == VIPERWHIP)
+		return;
+	if(obj->opoisoned&OPOISON_ACID){
+		if(verbose)
+			pline("Its acid coating boils vigorously!");
+		if(acid_harms){
+			You("are caught in the explosion!");
+			losehp(Acid_resistance ? rnd(2) : rnd(5),
+				   "elementary chemistry", KILLED_BY);
+		}
+		obj->opoisoned &= ~OPOISON_ACID;
+	}
+	if(obj->opoisoned&(~OPOISON_AMNES)){
+		if(obj->opoisoned&OPOISON_BASIC && !rn2(10)){
+			if(verbose) pline("The poison coating washes off.");
+			obj->opoisoned &= ~OPOISON_BASIC;
+		}
+		else if(obj->opoisoned&OPOISON_DIRE && !rn2(10)){
+			if(verbose) pline("The poison coating washes off.");
+			obj->opoisoned &= ~OPOISON_DIRE;
+		}
+		if(obj->opoisoned&OPOISON_FILTH && !rn2(10)){
+			if(verbose) pline("The crusted filth washes off.");
+			obj->opoisoned &= ~OPOISON_FILTH;
+		}
+		if(obj->opoisoned&OPOISON_SLEEP && rn2(2)){
+			if(verbose) pline("The drug washes off.");
+			obj->opoisoned &= ~OPOISON_SLEEP;
+		}
+		if(obj->opoisoned&OPOISON_BLIND && rn2(2)){
+			if(verbose) pline("The stain washes off.");
+			obj->opoisoned &= ~OPOISON_BLIND;
+		}
+		if(obj->opoisoned&OPOISON_PARAL && rn2(8)){
+			if(verbose) pline("The venom washes off.");
+			obj->opoisoned &= ~OPOISON_PARAL;
+		}
+		if(obj->opoisoned&OPOISON_SILVER){
+			if(verbose) pline("The silver dew washes off.");
+			obj->opoisoned &= ~OPOISON_SILVER;
+		}
+		if(obj->opoisoned&OPOISON_HALLU && rn2(2)){
+			if(verbose) pline("The hallucinogen washes off.");
+			obj->opoisoned &= ~OPOISON_HALLU;
+		}
+	}
 }
 
 int
@@ -3614,7 +3634,9 @@ dodip()
 		}
 		useup(potion);
 		if(!Shock_resistance){
-			losehp(d(3,6) + 3*obj->spe, "discharging sunrod", KILLED_BY_AN);
+			int shock_dmg = d(3,6) + 3*obj->spe;
+			shock_dmg = elemental_dmg_resistance(&youmonst, (struct monst *)0, shock_dmg, AD_ELEC);
+			losehp(shock_dmg, "discharging sunrod", KILLED_BY_AN);
 		}
 		if(!UseInvShock_res(&youmonst)){
 			if (!rn2(3)) destroy_item(&youmonst, WAND_CLASS, AD_ELEC);

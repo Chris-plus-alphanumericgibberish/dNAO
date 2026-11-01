@@ -80,6 +80,8 @@ long long get_status_mask() {
 	}
 	if(youmonst.mbleed > 1)  //Off by one error caused by the way in which bleed procs
 		mask |= BL_MASK_BLEED;
+	if(youmonst.mgmld_skin || youmonst.mgmld_throat)
+		mask |= BL_MASK_GMOLD;
 	if(Blind && !StumbleBlind)
 		mask |= BL_MASK_BLIND;
 	if(Stunned && !StaggerShock)
@@ -118,6 +120,8 @@ long long get_status_mask() {
 		mask |= BL_MASK_FLY;
 	if(u.usteed)
 		mask |= BL_MASK_RIDE;
+	if(youmonst.mprone)
+		mask |= BL_MASK_PRONE;
 	if(TimeStop)
 		mask |= BL_MASK_TIMESTOP;
 	if(BlowingWinds)

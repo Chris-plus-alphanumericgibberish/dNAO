@@ -63,6 +63,19 @@
 #define DISMOUNT_VANISHED	7
 #endif
 
+/* Outcomes from whip_disarm(): negative values mean the defender resisted
+ * (nothing was moved); positive values say where the disarmed item ended up. */
+#define WHIPDISARM_WELD		(-1)
+#define WHIPDISARM_GLAMDRING	(-2)
+#define WHIPDISARM_DIRGE	(-3)
+#define WHIPDISARM_ATTACKERFEET	1
+#define WHIPDISARM_DEFENDERFEET	2
+#define WHIPDISARM_ATTACKERINV	3
+
+/* Outcomes from trip_attempt() */
+#define TRIP_FAIL	0
+#define TRIP_SUCCESS	1
+
 /* Special returns from mapglyph() (note: type is unsigned int) */
 #define MG_CORPSE	0x001
 #define MG_INVIS	0x002
@@ -74,6 +87,7 @@
 #define MG_ZOMBIE	0x080
 #define MG_PEACE	0x100
 #define MG_PORTAL	0x200
+#define MG_TRAP		0x400
 
 /* sellobj_state() states */
 #define SELL_NORMAL	(0)
@@ -183,6 +197,29 @@ NEARDATA extern coord bhitpos;	/* place where throw or zap hits or stops */
 			|| (Role_if(PM_MADMAN) && In_quest(&u.uz) && (levl[u.ux][u.uy].typ == CLOUD)) \
 			|| (!In_endgame(&u.uz) && levl[u.ux][u.uy].typ == AIR))
 
+#define mon_weightless(mon)	(Is_airlevel(&u.uz) || \
+			(Is_lolth_level(&u.uz) && levl[(mon)->mx][(mon)->my].typ == CLOUD) \
+			|| (Role_if(PM_MADMAN) && In_quest(&u.uz) && (levl[(mon)->mx][(mon)->my].typ == CLOUD)) \
+			|| (!In_endgame(&u.uz) && levl[(mon)->mx][(mon)->my].typ == AIR))
+
+/* standing/walking on the bottom of a body of water, as opposed to floating
+   or swimming through it; subject to normal (non-water) movement rules */
+#define On_seafloor	(u.usubwater && !Swimming && !Is_waterlevel(&u.uz))
+
+/* monster equivalent of u.uinwater: true if mon is submerged/wading in a body
+   of water rather than standing above its surface */
+#define mon_in_water(mon)	(is_pool((mon)->mx, (mon)->my, FALSE) && \
+				!mon_resistance((mon), WWALKING) && \
+				!mon_resistance((mon), FLYING) && \
+				!mon_resistance((mon), LEVITATION))
+
+/* monster equivalent of On_seafloor */
+#define mon_on_seafloor(mon)	(mon_in_water(mon) && !mon_resistance((mon), SWIMMING) \
+				&& !Is_waterlevel(&u.uz))
+
+#define could_stand_in_square(mon)	((mon) == &youmonst \
+					? !(Weightless || (u.uinwater && !On_seafloor)) \
+					: !(mon_weightless(mon) || (mon_in_water(mon) && !mon_on_seafloor(mon))))
 #include "trap.h"
 #include "flag.h"
 #include "rm.h"
@@ -228,6 +265,8 @@ NEARDATA extern coord bhitpos;	/* place where throw or zap hits or stops */
 #define MM_ENDGEQUIP        0x00002000    /* do generate endgame equipment */
 #define MM_MALE             0x00004000    /* make monster male */
 #define MM_FEMALE           0x00008000    /* make monster female */
+#define MM_EVEN_PARITY      0x00010000    /* force an unanchored diagonal_mover onto an even (x+y) square */
+#define MM_ODD_PARITY       0x00020000    /* force an unanchored diagonal_mover onto an odd (x+y) square */
 
 /* flags to control mksobj() et al */
 #define NO_MKOBJ_FLAGS	0x00	/* use this rather than plain 0 */
@@ -335,6 +374,7 @@ NEARDATA extern coord bhitpos;	/* place where throw or zap hits or stops */
 
 /* Flags to control menus */
 #define MENUTYPELEN sizeof("traditional ")
+#define GLYPHATTRLEN sizeof("double-underline ")
 #define MENU_TRADITIONAL 0
 #define MENU_COMBINATION 1
 #define MENU_PARTIAL	 2

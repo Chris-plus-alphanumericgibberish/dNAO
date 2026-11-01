@@ -55,6 +55,9 @@
 #define AT_TONG		45	/* Tongue attack */
 #define AT_VOMT		46	/* Vomit attack */
 #define AT_JUGL		47	/* Juggles weapons */
+#define AT_SQUZ		48	/* Squeezes grappled opponent */
+#define AT_WING		49	/* Wing buffet; works like AT_CLAW, but concerns wing-guard armor (W_ARMW) instead of gloves */
+#define AT_MNTL		50	/* mantle: passive like AT_NONE, but may also stop or blunt blows */
 
 #define AT_WEAP		252	/* uses weapon */
 #define AT_XWEP		253	/* uses offhanded weapon */
@@ -76,6 +79,36 @@
 	(aatyp) == AT_MSPR || \
 	(aatyp) == AT_DSPR || \
 	(aatyp) == AT_ESPR \
+	)
+
+/* melee attacks that make contact and whose damage type is resolved by the melee hit code */
+#define melee_contact_at(aatyp)	(\
+		(aatyp) == AT_WEAP\
+		|| (aatyp) == AT_XWEP\
+		|| (aatyp) == AT_MARI\
+		|| (aatyp) == AT_DEVA\
+		|| (aatyp) == AT_JUGL\
+		|| (aatyp) == AT_CLAW\
+		|| (aatyp) == AT_BITE\
+		|| (aatyp) == AT_KICK\
+		|| (aatyp) == AT_BUTT\
+		|| (aatyp) == AT_TUCH\
+		|| (aatyp) == AT_STNG\
+		|| (aatyp) == AT_HUGS\
+		|| (aatyp) == AT_TENT\
+		|| (aatyp) == AT_WHIP\
+		|| (aatyp) == AT_LRCH\
+		|| (aatyp) == AT_LNCK\
+		|| (aatyp) == AT_5SQR\
+		|| (aatyp) == AT_5SBT\
+		|| (aatyp) == AT_REND\
+		|| (aatyp) == AT_VINE\
+		|| (aatyp) == AT_OBIT\
+		|| (aatyp) == AT_WBIT\
+		|| (aatyp) == AT_TAIL\
+		|| (aatyp) == AT_TONG\
+		|| (aatyp) == AT_SQUZ\
+		|| (aatyp) == AT_WING\
 	)
 
 #define is_bite_at(aatyp)	(\
@@ -273,11 +306,14 @@
 #define AD_SONC		165 /* Sonic attack */
 #define AD_SMOK		166 /* Smoke attack */
 #define AD_SLWC		167 /* Slowing cold attack */
+#define AD_HELL		168 /* Hellish energy attack */
+#define AD_SFLM		169 /* Silver Flame cult's silver flame invocation (Silver Flame-upgraded fireball) */
+#define AD_LGHT		170 /* Light */
 
 //#define AD_AHAZU	116 /*  */
 //Amon is a headbutt (AT_BUTT/AD_PHYS)
 //Chupoclops is a poisonous bite (AT_BITE/AD_DRST)
-#define AD_DUNSTAN	168
+#define AD_DUNSTAN	171
 #define AD_IRIS		AD_DUNSTAN+1
 #define AD_NABERIUS	AD_DUNSTAN+2
 #define AD_OTIAX	AD_DUNSTAN+3
@@ -323,5 +359,6 @@
 #define MM_AGR_STOP 0x08	/* aggressor stopped attacking for some reason other than being fully dead */
 #define MM_DEF_LSVD 0x10	/* defender died and was lifesaved */
 #define MM_REFLECT	0x20	/* for projectiles: projectile was reflected. */
+#define MM_MANTLE_BLAST	0x40	/* defender's mantle hit back even though no direct contact was made; cleared after passives */
 
 #endif /* MONATTK_H */

@@ -926,6 +926,10 @@ smithing_object(struct obj *obj)
 					obj->otyp = CHURCH_SHEATH;
 					fix_object(obj);
 				}
+				if(obj->otyp == LIANQIAO_JIAN){
+					obj->otyp = BAR_SHEATH;
+					fix_object(obj);
+				}
 				int mat1 = obj->obj_material;
 				int quan1 = obj->owt;
 				int mat2 = 0;
@@ -1007,7 +1011,7 @@ smithing_object(struct obj *obj)
 					if(Race_if(PM_INCANTIFIER))
 						morehungry(5*INC_BASE_NUTRITION);
 					flags.botl = 1;
-					if(obj->otyp == CHURCH_HAMMER || obj->otyp == CHURCH_BLADE){
+					if(is_composite_weapon(obj)){
 						if(obj->cobj && obj->spe > obj->cobj->spe){
 							/*Note: base obj already incremented*/
 							obj->cobj->spe++;
@@ -1025,7 +1029,7 @@ smithing_object(struct obj *obj)
 						struct obj *crystal = find_blood_smithing_crystal(obj);
 						obj->blood_smithed = TRUE;
 						obj->spe++;
-						if(obj->otyp == CHURCH_HAMMER || obj->otyp == CHURCH_BLADE)
+						if(is_composite_weapon(obj))
 							if(obj->cobj && obj->spe > obj->cobj->spe){ /*Note: base obj already incremented*/
 								obj->cobj->spe++;
 								obj->cobj->blood_smithed = TRUE;
@@ -1584,7 +1588,9 @@ reshape_brand(struct obj *obj)
 			|| objects[i].oc_class == RING_CLASS
 		))
 			continue;
-		if(objects[i].oc_class == WEAPON_CLASS || i == BALL || (objects[i].oc_class == TOOL_CLASS && objects[i].oc_skill != P_NONE)){
+		if(objects[i].oc_class == WEAPON_CLASS || i == BALL || i == CHURCH_SHEATH || i == CHURCH_BRICK
+			 || (objects[i].oc_class == TOOL_CLASS && objects[i].oc_skill != P_NONE)
+		){
 			if(P_SKILL(objects[i].oc_skill < 0 ? -1*objects[i].oc_skill : objects[i].oc_skill) < P_SKILLED && !has_object_type(invent, i))
 				continue;
 		}
@@ -1887,8 +1893,9 @@ dipforge(struct obj *obj)
 			if (!rn2(3))
 				You("may want to remove your %s first...",
 					xname(obj));
-			losehp(d(2, 8),
-				   "dipping a worn object into a forge", KILLED_BY);
+			int fire_dmg = d(2, 8);
+			fire_dmg = elemental_dmg_resistance(&youmonst, (struct monst *)0, fire_dmg, AD_FIRE);
+			losehp(fire_dmg, "dipping a worn object into a forge", KILLED_BY);
 		}
 		else {
 			You("dip your worn %s into the forge.  This is fine.",
@@ -1902,7 +1909,7 @@ dipforge(struct obj *obj)
 
 	/* If punished and wielding a hammer, there's a good chance
 	 * you can use a forge to free yourself */
-	if (Punished && obj->otyp == BALL) {
+	if (Punished && obj == uball) {
 		if ((uwep && !is_hammer(uwep)) || !uwep) { /* sometimes drop a hint */
 			if (!rn2(4))
 				pline("You'll need a hammer to be able to break the chain.");
@@ -2021,8 +2028,11 @@ result:
 				return;
 			} else {
 				pline("Molten lava surges up and splashes all over you!");
-				if(!Fire_resistance)
-					losehp(d(6, 6), "dipping into a forge", KILLED_BY);
+				if(!Fire_resistance) {
+					int fire_dmg = d(6, 6);
+					fire_dmg = elemental_dmg_resistance(&youmonst, (struct monst *)0, fire_dmg, AD_FIRE);
+					losehp(fire_dmg, "dipping into a forge", KILLED_BY);
+				}
 			}
 			break;
 		case 23:

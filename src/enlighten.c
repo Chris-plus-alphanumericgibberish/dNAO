@@ -229,7 +229,7 @@ minimal_enlightenment()
 
 	/* Starting inheritance */
 	if (flags.descendant){
-		Sprintf(buf, fmtstr, "inheritance", artilist[u.inherited].name);
+		Sprintf(buf, fmtstr, "inheritance", inherited_name(u.inherited));
 		add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, buf, FALSE);
 	}
 
@@ -487,7 +487,7 @@ boolean dumping;
 	}
 	
 	if (final && flags.descendant) {
-		enl_msg("You ", "inherited ", "inherited ", artilist[u.inherited].name);
+		enl_msg("You ", "inherited ", "inherited ", inherited_name(u.inherited));
 	}
 	if (wizard || final) {
 		Sprintf(buf, "%ld gold ", u.spawnedGold);
@@ -874,6 +874,9 @@ boolean dumping;
 		if (u.umadness&MAD_REACHER){
 			enl_msg("Sometimes, a lurking thing ", "tries", "tried", " to reach in and grab you");
 		}
+		if (u.umadness&MAD_PALE_NIGHT){
+			enl_msg("There ", "is", "was", " something horrible lurking in your memory");
+		}
 	}
 	
 	if(u.utaneggs){
@@ -884,9 +887,10 @@ boolean dumping;
 	/*** More Troubles ***/
 	if (final) {
 		if (Hallucination) you_are("hallucinating");
+		if (youmonst.mprone) you_are("prone");
 		if (Stunned) you_are("stunned");
 		if (Confusion) you_are("confused");
-		if (Blinded) you_are("blinded");
+		if (Blinded) you_are(PermaBlind ? "permanently blind" : "blinded");
 		if (Sick) {
 			if (u.usick_type & SICK_VOMITABLE)
 				you_are("sick from food poisoning");
@@ -1575,6 +1579,9 @@ resistances_enlightenment()
 		if (u.umadness&MAD_REACHER){
 			putstr(en_win, 0, "You are being stalked by a blasphemous reacher.");
 		}
+		if (u.umadness&MAD_PALE_NIGHT){
+			putstr(en_win, 0, "Your mind is being destroyed by the memory of Pale Night.");
+		}
 		if(messaged){
 			//Clockworks specifically can't get drunk (androids can)
 			if(uclockwork && u.usanity <= 90){
@@ -1881,6 +1888,14 @@ udr_enlightenment()
 		Sprintf(mbuf, "Foot Armor:       %d", dr);
 		putstr(en_win, 0, mbuf);
 	}
+	if(has_wings_mon(&youmonst)){
+		dr = slot_udr(WING_DR, (struct monst *)0, 0, AT_ANY);
+		if(dr > cap)
+		Sprintf(mbuf, "Wing Armor:       %d-%d", cap, dr);
+		else
+		Sprintf(mbuf, "Wing Armor:       %d", dr);
+		putstr(en_win, 0, mbuf);
+	}
 	
 	display_nhwindow(en_win, TRUE);
 	destroy_nhwindow(en_win);
@@ -2171,6 +2186,82 @@ signs_appearance(boolean dumping, boolean mirror)
 			}
 			Sprintf(eos(msgbuf), dumping ? " floated in a column above your brow." : " float in a column above your brow.");
 			p(msgbuf);
+		}
+	}
+#undef PUNCTUTATION
+
+#define PUNCTUTATION	if(count > 0){if(count == 1) Sprintf(eos(msgbuf), "%s and ", comma); else Sprintf(eos(msgbuf), "%s ", comma);}
+	//Active anti-syllables
+	if(show_visual && (youmonst.owrk || youmonst.ruh || youmonst.shey || youmonst.luahv || youmonst.nean || youmonst.nooh)){
+		boolean no_active_syllables = !(u.uaesh_duration || u.ukrau_duration || u.uhoon_duration || u.uuur_duration || u.unaen_duration || u.uvaul_duration);
+		int num, total = 0;
+		count = 0;
+		if(youmonst.owrk)   { count++; total += (youmonst.owrk+9)/10; }
+		if(youmonst.ruh)    { count++; total += (youmonst.ruh+9)/10; }
+		if(youmonst.shey)   { count++; total += (youmonst.shey+9)/10; }
+		if(youmonst.luahv)  { count++; total += (youmonst.luahv+9)/10; }
+		if(youmonst.nean)   { count++; total += (youmonst.nean+9)/10; }
+		if(youmonst.nooh)   { count++; total += (youmonst.nooh+9)/10; }
+
+		if(total == 1 && no_active_syllables){
+			const char *appearance;
+			if(youmonst.owrk)       appearance = anti_syllable_appearance(OWRK);
+			else if(youmonst.ruh)   appearance = anti_syllable_appearance(RUH);
+			else if(youmonst.shey)  appearance = anti_syllable_appearance(SHEY);
+			else if(youmonst.luahv) appearance = anti_syllable_appearance(LUAHV);
+			else if(youmonst.nean)  appearance = anti_syllable_appearance(NEAN);
+			else                    appearance = anti_syllable_appearance(NOOH);
+			Sprintf(msgbuf, "A black %s %s above your brow.", appearance, dumping ? "floated" : "floats");
+			p(msgbuf);
+		} else {
+			if(count > 2) comma = ",";
+			else comma = "";
+			msgbuf[0] = 0;
+			if(youmonst.owrk){
+				num = (youmonst.owrk+9)/10;
+				if(num == 1) Sprintf(eos(msgbuf), "a black %s", anti_syllable_appearance(OWRK));
+				else         Sprintf(eos(msgbuf), "%d black %ss", num, anti_syllable_appearance(OWRK));
+				count--;
+				PUNCTUTATION
+			}
+			if(youmonst.ruh){
+				num = (youmonst.ruh+9)/10;
+				if(num == 1) Sprintf(eos(msgbuf), "a black %s", anti_syllable_appearance(RUH));
+				else         Sprintf(eos(msgbuf), "%d black %ss", num, anti_syllable_appearance(RUH));
+				count--;
+				PUNCTUTATION
+			}
+			if(youmonst.shey){
+				num = (youmonst.shey+9)/10;
+				if(num == 1) Sprintf(eos(msgbuf), "a black %s", anti_syllable_appearance(SHEY));
+				else         Sprintf(eos(msgbuf), "%d black %ss", num, anti_syllable_appearance(SHEY));
+				count--;
+				PUNCTUTATION
+			}
+			if(youmonst.luahv){
+				num = (youmonst.luahv+9)/10;
+				if(num == 1) Sprintf(eos(msgbuf), "a black %s", anti_syllable_appearance(LUAHV));
+				else         Sprintf(eos(msgbuf), "%d black %ss", num, anti_syllable_appearance(LUAHV));
+				count--;
+				PUNCTUTATION
+			}
+			if(youmonst.nean){
+				num = (youmonst.nean+9)/10;
+				if(num == 1) Sprintf(eos(msgbuf), "a black %s", anti_syllable_appearance(NEAN));
+				else         Sprintf(eos(msgbuf), "%d black %ss", num, anti_syllable_appearance(NEAN));
+				count--;
+				PUNCTUTATION
+			}
+			if(youmonst.nooh){
+				num = (youmonst.nooh+9)/10;
+				if(num == 1) Sprintf(eos(msgbuf), "a black %s", anti_syllable_appearance(NOOH));
+				else         Sprintf(eos(msgbuf), "%d black %ss", num, anti_syllable_appearance(NOOH));
+				count--;
+				PUNCTUTATION
+			}
+			Sprintf(eos(msgbuf), dumping ? " drifted around your head." : (total == 1 ? " drifts around your head." : " drift around your head."));
+			msgbuf[0] = highc(msgbuf[0]);
+			if(msgbuf[0]) p(msgbuf);
 		}
 	}
 #undef PUNCTUTATION
@@ -2764,6 +2855,21 @@ boolean dumping;
 	put_enl("Voluntary challenges:");
 	put_enl("");
 
+	if (u.uroleplay.blind)
+	    you_have_been("blind from birth");
+	/* pauper can't be voided; only the phrasing changes once the hero
+	   has picked something up */
+	if (u.uroleplay.pauper) {
+	    boolean have_stuff = (invent != 0);
+#ifndef GOLDOBJ
+	    have_stuff = have_stuff || u.ugold;
+#endif
+	    enl_msg(You_, have_stuff ? "started " : "are ", "started out ",
+		    "without possessions");
+	}
+	if (u.uroleplay.nudist)
+	    you_have_been("faithfully nudist");
+
 	if (!u.uconduct.food)
 	    enl_msg(You_, "have gone", "went", " without food");
 	    /* But beverages are okay */
@@ -2951,6 +3057,14 @@ aasimar_enlightenment_subroutine(boolean dumping)
 			   "Your stolen eyes were not recovered.");
 		break;
 
+	case AASIMAR_TYPE_SURYA:
+		pt("Your blazing halo protects your head.",
+			"Your blazing halo protected your head.");
+		if(u.ulevel >= 14)
+			pt("Your aura has formed into wings, granting you flight.",
+			   "Your aura had formed into wings, granting you flight.");
+		break;
+
 	case AASIMAR_TYPE_DEVA:
 		pt("Your glowing aureola protects your torso.",
 			"Your glowing aureola protected your torso.");
@@ -3028,14 +3142,24 @@ mutations_enlightenment(boolean dumping)
 {
 	int i;
 	extern const struct mutationtype mutationtypes[];
+	boolean any_shown = FALSE;
 	if (!dumping)
 		en_win = create_nhwindow(NHW_MENU);
 	if(flags.aasimar_type){
 		aasimar_enlightenment_subroutine(dumping);
+		any_shown = TRUE;
 	}
 	for(i= 0; mutationtypes[i].mutation; i++){
 		if(u.next_tiefling_mutation == mutationtypes[i].mutation){
 			put_or_dump(mutationtypes[i].start_forming, dumping);
+			any_shown = TRUE;
+			break;
+		}
+	}
+	for(i= 0; mutationtypes[i].mutation; i++){
+		if(u.next_aasimar_mutation == mutationtypes[i].mutation){
+			put_or_dump(mutationtypes[i].start_forming, dumping);
+			any_shown = TRUE;
 			break;
 		}
 	}
@@ -3048,7 +3172,26 @@ mutations_enlightenment(boolean dumping)
 			&& (mutationtypes[i].mutation != TWIN_SAVE || mtyp_on_level(PM_TWIN_SIBLING))
 		){
 			put_or_dump(mutationtypes[i].description, dumping);
+			any_shown = TRUE;
 		}
+	}
+	if(!any_shown){
+		boolean any_held = FALSE;
+		for(i = 0; mutationtypes[i].mutation; i++){
+			if(has_mutation(mutationtypes[i].mutation)){
+				any_held = TRUE;
+				break;
+			}
+		}
+		if(!any_held)
+			put_or_dump(dumping ? "You had no mutations."
+			                    : "You have no mutations.", dumping);
+		else if(Upolyd)
+			put_or_dump(dumping ? "Your mutations were suppressed while polymorphed."
+			                    : "Your mutations are suppressed while polymorphed.", dumping);
+		else
+			put_or_dump(dumping ? "Your mutations were suppressed."
+			                    : "Your mutations are suppressed.", dumping);
 	}
 	if (!dumping) {
 		display_nhwindow(en_win, TRUE);

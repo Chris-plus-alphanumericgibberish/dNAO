@@ -606,6 +606,8 @@ struct obj * obj;
 		obj->otyp == POT_STARLIGHT ||				/* always lit potion */
 		obj->otyp == CHUNK_OF_FOSSIL_DARK ||		/* always dark rock */
 		obj->otyp == SUNLIGHT_MAGGOT ||				/* always lit hat */
+		obj->otyp == SANCTIFIED_EMBER ||				/* always gem */
+		obj->otyp == SANCTIFIED_SPARK ||				/* always gem */
 		(obj->otyp == SUNROD && obj->lamplit)		/* chemical reaction cannot be snuffed */
 		);
 }

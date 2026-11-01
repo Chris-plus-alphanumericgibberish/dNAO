@@ -25,9 +25,8 @@ const struct worn {
 	{ W_ARMS, &uarms },
 	{ W_ARMG, &uarmg },
 	{ W_ARMF, &uarmf },
-#ifdef TOURIST
 	{ W_ARMU, &uarmu },
-#endif
+	{ W_ARMW, &uarmw },
 	{ W_RINGL, &uleft },
 	{ W_RINGR, &uright },
 	{ W_WEP, &uwep },
@@ -46,7 +45,9 @@ const struct worn {
 #define w_blocks(o,m) \
 		((is_mummy_wrap(o) && ((m) & W_ARMC)) ? INVIS : \
 		 (o->otyp == CORNUTHAUM && ((m) & W_ARMH) && \
-			!(u.uwizard || Race_if(PM_INCANTIFIER))) ? CLAIRVOYANT : 0)
+			!(u.uwizard || Race_if(PM_INCANTIFIER))) ? CLAIRVOYANT : \
+		 (o->otyp == CONSTRICTING_WING_GUARDS && ((m) & W_ARMW)) ? FLYING : \
+			0)
 		/* note: monsters don't have clairvoyance, so your role
 		   has no significant effect on their use of w_blocks() */
 
@@ -137,16 +138,48 @@ int otyp;
 				if (check_oprop(obj, OPROP_FIRE) || check_oprop(obj, OPROP_WOOL))
 					got_prop = TRUE;
 				break;
+			case HELL_FIRE_RES:
+				if (check_oprop(obj, OPROP_FIRE_HELL) || check_oprop(obj, OPROP_FIRE_SNCT))
+					got_prop = TRUE;
+				break;
+			case HOLY_FIRE_RES:
+				if (check_oprop(obj, OPROP_FIRE_HOLY) || check_oprop(obj, OPROP_FIRE_HOLY_SNCT))
+					got_prop = TRUE;
+				break;
 			case COLD_RES:
 				if (check_oprop(obj, OPROP_COLD) || check_oprop(obj, OPROP_WOOL))
+					got_prop = TRUE;
+				break;
+			case HELL_COLD_RES:
+				if (check_oprop(obj, OPROP_COLD_HELL) || check_oprop(obj, OPROP_COLD_SNCT))
+					got_prop = TRUE;
+				break;
+			case HOLY_COLD_RES:
+				if (check_oprop(obj, OPROP_COLD_HOLY) || check_oprop(obj, OPROP_COLD_HOLY_SNCT))
 					got_prop = TRUE;
 				break;
 			case SHOCK_RES:
 				if (check_oprop(obj, OPROP_ELEC))
 					got_prop = TRUE;
 				break;
+			case HELL_SHOCK_RES:
+				if (check_oprop(obj, OPROP_ELEC_HELL) || check_oprop(obj, OPROP_ELEC_SNCT))
+					got_prop = TRUE;
+				break;
+			case HOLY_SHOCK_RES:
+				if (check_oprop(obj, OPROP_ELEC_HOLY) || check_oprop(obj, OPROP_ELEC_HOLY_SNCT))
+					got_prop = TRUE;
+				break;
 			case ACID_RES:
 				if (check_oprop(obj, OPROP_ACID))
+					got_prop = TRUE;
+				break;
+			case HELL_ACID_RES:
+				if (check_oprop(obj, OPROP_ACID_HELL) || check_oprop(obj, OPROP_ACID_SNCT))
+					got_prop = TRUE;
+				break;
+			case HOLY_ACID_RES:
+				if (check_oprop(obj, OPROP_ACID_HOLY) || check_oprop(obj, OPROP_ACID_HOLY_SNCT))
 					got_prop = TRUE;
 				break;
 			case ANTIMAGIC:
@@ -394,6 +427,8 @@ long mask;
 		}
 	    }
 	}
+	if (obj && (obj->owornmask & W_ARMOR) != 0L && !restoring)
+		u.uroleplay.nudist = FALSE;
 	if(!restoring) {
 		vision_full_recalc = 1;
 		see_monsters(); //More objects than just artifacts grant warning now, and this is a convienient place to add a failsafe see_monsters check
@@ -534,43 +569,49 @@ boolean verbose;
  * assumes single source of each blocked extrinsic
  */
 void
-mon_block_extrinsic(mon, obj, which, on, silently)
-struct monst *mon;
-struct obj *obj;
-int which;
-boolean on, silently;
+mon_block_extrinsic(struct monst *mon, struct obj *obj, int which, boolean on, boolean silently)
 {
-	if (on) {
-		switch (which)
-		{
-		case INVIS:
-			if (mon->mtyp != PM_HELLCAT){
+	boolean was_airborne = (which == LEVITATION || which == FLYING) &&
+				(mon_resistance(mon,LEVITATION) || mon_resistance(mon,FLYING));
+
+	if (on)
+		mon->mblocked[(which-1)/32] |= (1L << (which-1)%32);
+	else
+		mon->mblocked[(which-1)/32] &= ~(1L << (which-1)%32);
+
+	switch (which)
+	{
+	case INVIS:
+		if (mon->mtyp != PM_HELLCAT){
+			if (on) {
 				mon->invis_blkd = TRUE;
-				update_mon_intrinsic(mon, obj, which, !on, silently);
-			}
-			break;
-		default:
-			update_mon_intrinsic(mon, obj, which, !on, silently);
-			break;
-		}
-	}
-	else { /* off */
-		switch (which)
-		{
-		case INVIS:
-			if (mon->mtyp != PM_HELLCAT){
+				update_mon_intrinsic(mon, obj, which, FALSE, silently);
+			} else {
 				mon->invis_blkd = FALSE;
 				if (mon_gets_extrinsic(mon, which, obj))
-					update_mon_intrinsic(mon, obj, which, !on, silently);
+					update_mon_intrinsic(mon, obj, which, TRUE, silently);
 				if (mon->perminvis)
 					mon->minvis = TRUE;
 			}
-			break;
-		default:
-			if (mon_gets_extrinsic(mon, which, obj))
-				update_mon_intrinsic(mon, obj, which, !on, silently);
-			break;
 		}
+		break;
+	case LEVITATION:
+	case FLYING:
+		if (was_airborne && !mon_resistance(mon,LEVITATION) && !mon_resistance(mon,FLYING)) {
+			if (obj && obj->otyp == CONSTRICTING_WING_GUARDS)
+				m_crash_down(mon, silently);
+			else
+				m_float_down(mon, silently);
+			if (obj && !silently && canseemon(mon))
+				makeknown(obj->otyp);
+		} else if (!was_airborne && (mon_resistance(mon,LEVITATION) || mon_resistance(mon,FLYING))) {
+			m_float_up(mon, silently);
+			if (obj && !silently && canseemon(mon))
+				makeknown(obj->otyp);
+		}
+		break;
+	default:
+		break;	/* CLAIRVOYANT: no monster consumer, bit alone is enough */
 	}
 }
 
@@ -829,13 +870,20 @@ boolean on, silently;
 		newsym(mon->mx, mon->my);
 }
 
+STATIC_OVL boolean
+shield_reach_wep(struct obj *wep)
+{
+	return wep && (objects[wep->otyp].oc_skill == P_SPEAR || objects[wep->otyp].oc_skill == P_POLEARMS
+		|| objects[wep->otyp].oc_skill == P_TRIDENT || objects[wep->otyp].oc_skill == P_LANCE);
+}
+
 int
-shield_ac_mon(mon, obj)
-struct monst *mon;
-struct obj *obj;
+shield_ac_mon(struct monst *mon, struct obj *obj)
 {
 	int shield_ac = 0;
 	shield_ac += max(0, arm_ac_bonus(obj) + (obj->objsize - mon->data->msize));
+	if(shield_reach_wep(MON_WEP(mon)))
+		shield_ac += 2;
 	if(mon_knight(mon) || mon_dark_knight(mon)){
 		if(mon->m_lev >= 28)
 			shield_ac += 8;
@@ -847,11 +895,69 @@ struct obj *obj;
 	return shield_ac;
 }
 
+/* AC mon gets from its Scorpion Carapace's arm shields, or 0 if it has none or wears a real shield */
+int
+carapace_shield_ac_mon(struct monst *mon)
+{
+	struct obj *armor = which_armor(mon, W_ARM);
+
+	if(which_armor(mon, W_ARMS) || !armor || armor->oartifact != ART_SCORPION_CARAPACE || !check_carapace_mod(armor, CPROP_SHIELDS))
+		return 0;
+	return shield_reach_wep(MON_WEP(mon)) ? 4 : 1;
+}
+
+STATIC_OVL int
+hand_protection_ac(struct obj *obj)
+{
+	int spe = (!obj->suppressed && !Is_spire(&u.uz)) ? obj->spe : 0;
+	return 2 + material_def_bonus(obj, 2, TRUE) + spe/2 - min((int)greatest_erosion(obj), 2);
+}
+
+/* AC from mon's hand-protecting wielded weapons, counting only those whose arti_phasing() matches phasing */
+STATIC_OVL int
+mon_hand_protection_ac(struct monst *mon, boolean phasing)
+{
+	struct obj *monwep = MON_WEP(mon);
+	struct obj *monswep = MON_SWEP(mon);
+	boolean wep_protects = monwep && hand_protecting(monwep) && !arti_phasing(monwep) == !phasing;
+	boolean swep_protects = monswep && hand_protecting(monswep) && !arti_phasing(monswep) == !phasing;
+
+	if(mon->mtyp == PM_DANCING_SWORD)
+		return 0;
+	if(wep_protects){
+		if(!monswep)
+			return hand_protection_ac(monwep);
+		else if(swep_protects)
+			return (hand_protection_ac(monwep) + hand_protection_ac(monswep))/2;
+		else
+			return hand_protection_ac(monwep)/2;
+	}
+	else if(swep_protects)
+		return hand_protection_ac(monswep)/2;
+	return 0;
+}
+
+/* AC (ac TRUE) or DR (ac FALSE) a dancing sword gets from the toughness of its wielded weapon */
+STATIC_OVL int
+dancing_sword_def(struct monst *mon, boolean ac)
+{
+	struct obj *monwep = MON_WEP(mon);
+	int spe, def;
+
+	if(mon->mtyp != PM_DANCING_SWORD || !monwep)
+		return 0;
+	spe = (!monwep->suppressed && !Is_spire(&u.uz)) ? monwep->spe : 0;
+	def = 2 + 2*(ac ? materials[monwep->obj_material].flat_ac : materials[monwep->obj_material].flat_dr);
+	def -= min((int)greatest_erosion(monwep), def);
+	def += ac ? spe/2 : (spe+1)/2;
+	return def;
+}
+
 int 
 base_mac(mon)
 struct monst *mon;
 {
-	int base = 10, armac = 0;
+	int base = 10;
 	struct obj *monwep;
 	
 	if(mon->mtyp == PM_OONA || mon->mtyp == PM_PORO_AULON){
@@ -860,6 +966,10 @@ struct monst *mon;
 	else{
 		base -= mon->data->nac;
 	}
+
+	if(mon->ruh)
+		base += 10;
+
 	if(mon->mtyp == PM_CARCOSAN_COURTIER){
 		if(Insight < 25){
 			base -= Insight/5;
@@ -868,10 +978,14 @@ struct monst *mon;
 			base -= 5;
 		}
 	}
-	if(!mon->mcan){
+	if(!mon->mcan && mon->mstance != MSTANCE_MAGIC){
 		base -= mon->data->pac;
 		if(mon->mtyp == PM_CENTER_OF_ALL && Insight < 32)
 			base -= (32-Insight)/2;
+	}
+	if(mon->mstance == MSTANCE_PUSH && mon->mtyp == PM_SILVERKNIGHT){
+		/* arms crossed in front, not holding a weapon, brace the push */
+		base -= 2 - !!MON_WEP(mon) - !!MON_SWEP(mon);
 	}
 	if(mon->mtyp == PM_VERMIURGE && mon->mvar_vermiurge > 0)
 		base -= min(mon->mvar_vermiurge/10, 20);
@@ -883,6 +997,7 @@ struct monst *mon;
 	}
 	
 	if(mon->mtyp == PM_ASMODEUS && base < -9) base = -9 + MONSTER_AC_VALUE(base+9);
+	else if(mon->mtyp == PM_GLASYA && base < -4) base = -4 + MONSTER_AC_VALUE(base+4);
 	else if(mon->mtyp == PM_PALE_NIGHT && base < -6) base = -6 + MONSTER_AC_VALUE(base+6);
 	else if(mon->mtyp == PM_BAALPHEGOR && base < -8) base = -8 + MONSTER_AC_VALUE(base+8);
 	else if(mon->mtyp == PM_ZAPHKIEL && base < -8) base = -8 + MONSTER_AC_VALUE(base+8);
@@ -901,7 +1016,7 @@ struct monst *mon;
 		base -= 6;
 	}
 
-	if(is_alabaster_mummy(mon->data) && mon->mvar_syllable == SYLLABLE_OF_GRACE__UUR)
+	if(has_syllable(mon->data) && mon->mvar_syllable == SYLLABLE_OF_GRACE__UUR)
 		base -= 10;
 	
 	if (mon->mtame){
@@ -921,16 +1036,18 @@ struct monst *mon;
 		if(uring_art(ART_NARYA) && def_narya())
 			base -= sgn(def_narya())*rnd(abs(def_narya()));
 
+		int weapon_spe = (uwep && !uwep->suppressed && !Is_spire(&u.uz)) ? uwep->spe : 0;
+		int swapwep_spe = (uswapwep && !uswapwep->suppressed && !Is_spire(&u.uz)) ? uswapwep->spe : 0;
 		if(uwep){
 			const struct artifact *weap = get_artifact(uwep);
 			if(weap && (weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART) && activeMentalEdge(GSTYLE_DEFENSE)){
-				base -= EDGE_KENSEI ? 3+max(uwep->spe/2,0) : u.usanity < 50 ? 0 : u.usanity < 75 ? max(uwep->spe/2,0) : u.usanity < 90 ? 1+max(uwep->spe/2,0) : 3+max(uwep->spe/2,0);
+				base -= EDGE_KENSEI ? 3+max(weapon_spe/2,0) : u.usanity < 50 ? 0 : u.usanity < 75 ? max(weapon_spe/2,0) : u.usanity < 90 ? 1+max(weapon_spe/2,0) : 3+max(weapon_spe/2,0);
 			}
 		}
 		if(uswapwep){
 			const struct artifact *weap = get_artifact(uswapwep);
 			if(weap && (weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART) && activeMentalEdge(GSTYLE_DEFENSE)){
-				base -= EDGE_KENSEI ? 3+max(uswapwep->spe/2,0) : u.usanity < 50 ? 0 : u.usanity < 75 ? max(uswapwep->spe/2,0) : u.usanity < 90 ? 1+max(uswapwep->spe/2,0) : 3+max(uswapwep->spe/2,0);
+				base -= EDGE_KENSEI ? 3+max(swapwep_spe/2,0) : u.usanity < 50 ? 0 : u.usanity < 75 ? max(swapwep_spe/2,0) : u.usanity < 90 ? 1+max(swapwep_spe/2,0) : 3+max(swapwep_spe/2,0);
 			}
 		}
 		if(artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_STEEL)
@@ -939,11 +1056,12 @@ struct monst *mon;
 
 	monwep = MON_WEP(mon);
 	if(monwep){
-		if(monwep->oartifact == ART_LANCE_OF_LONGINUS) base -= max((monwep->spe+1)/2,0);
+		int monwep_spe = (!monwep->suppressed && !Is_spire(&u.uz)) ? monwep->spe : 0;
+		if(monwep->oartifact == ART_LANCE_OF_LONGINUS) base -= max((monwep_spe+1)/2,0);
 		else if(monwep->oartifact == ART_TENSA_ZANGETSU){
-			base -= max( (monwep->spe+1)/2,0);
-			if(!uarmc || !uarm) base -= max( monwep->spe,0);
-			if(!uarmc && !uarm) base -= max( (monwep->spe+1)/2,0);
+			base -= max( (monwep_spe+1)/2,0);
+			if(!uarmc || !uarm) base -= max( monwep_spe,0);
+			if(!uarmc && !uarm) base -= max( (monwep_spe+1)/2,0);
 		}
 		else if(monwep->oartifact == ART_LASH_OF_THE_COLD_WASTE){
 			if(Insight >= 20)
@@ -982,19 +1100,25 @@ struct monst *mon;
 					base -= 6;
 			}
 		}
-		if((is_rapier(monwep) && arti_phasing(monwep)))
-			armac += mon_weapon_dam_bonus(mon->data, monwep, weapon_type(monwep));
+		if((can_parry_with(monwep, mon) && parries_as_phasing(monwep)))
+			base -= mon_weapon_dam_bonus(mon->data, monwep, weapon_type(monwep));
 	}
+	base -= mon_hand_protection_ac(mon, TRUE);
+	base -= dancing_sword_def(mon, TRUE);
 
 	if (helpless(mon) || mon->msuicide)
 		base += 5;
 	else {
 		struct obj * armor = which_armor(mon, W_ARM);
 		register int mondodgeac = mon->data->dac;
+		if(grace_empowers(mon, AAT_GRACE_TRAPS))
+			mondodgeac = max(3, mondodgeac + mondodgeac*2/3);
 		if(u.ustuck == mon)
 			mondodgeac = min(-5, mondodgeac);
 		else if(mon->permspeed == MSLOW)
 			mondodgeac = min(0, mondodgeac);
+		if(mon->mprone && mondodgeac > 0)
+			mondodgeac /= 2;
 		if ((mondodgeac < 0)						/* penalties have full effect */
 			|| (!armor)								/* no armor = max mobility */
 			|| (armor && is_light_armor(armor))		/* light armor is also fine  */
@@ -1003,6 +1127,8 @@ struct monst *mon;
 		else if (armor && is_medium_armor(armor))	/* medium armor halves dodge AC */
 			base -= mondodgeac/2;
 		/* else no adjustment */
+		if(mon->mprone)
+			base += 3;
 	}
 	
 	return base;
@@ -1063,6 +1189,7 @@ struct monst *mon;
 		}
 		if(uarmh) armac += arm_ac_bonus(uarmh);
 		if(uarmc) armac += arm_ac_bonus(uarmc);
+		if(uarmw) armac += arm_ac_bonus(uarmw);
 		if(armac < 0) armac *= -1;
 	}
 	else for (obj = mon->minvent; obj; obj = obj->nobj) {
@@ -1073,21 +1200,40 @@ struct monst *mon;
 				armac += arm_ac_bonus(obj);
 		}
 	}
+	armac += carapace_shield_ac_mon(mon);
+	//Weapon Stance AC
+	if(mon->mstance == MSTANCE_PUSH && mon->mtyp == PM_SILVERKNIGHT){
+		struct obj *monwep = MON_WEP(mon);
+		struct obj *monswapwep = MON_SWEP(mon);
+		if(monwep){
+			if(monwep->otyp == SILVERKNIGHT_SPEAR){
+				armac += 2;
+			}
+			else armac += 1 + monwep->spe/2;
+		}
+		if(monswapwep){
+			if(monswapwep->otyp == SILVERKNIGHT_SPEAR){
+				armac += 2;
+			}
+			else armac += 1 + monswapwep->spe/2;
+		}
+	}
 	//Weapon AC (primary only)
 	struct obj *monwep = MON_WEP(mon);
 	if(monwep){
-		if((is_rapier(monwep) && !arti_phasing(monwep)))
+		int monwep_spe = (!monwep->suppressed && !Is_spire(&u.uz)) ? monwep->spe : 0;
+		if((can_parry_with(monwep, mon) && !parries_as_phasing(monwep)))
 			armac += mon_weapon_dam_bonus(mon->data, monwep, weapon_type(monwep));
 		if(monwep->oartifact == ART_TOBIUME)
-			armac += max(monwep->spe,0);
+			armac += max(monwep_spe,0);
 		if(monwep->otyp == NAGINATA && !which_armor(mon, W_ARMS)){
 			if(monwep->oartifact == ART_JINJA_NAGINATA)
-				armac += 2+monwep->spe;
+				armac += 2+monwep_spe;
 			else
-				armac += 1+(monwep->spe)/2;
+				armac += 1+(monwep_spe)/2;
 		}
 		if(monwep->otyp == SILVERKNIGHT_SPEAR && !which_armor(mon, W_ARMS)){
-			armac += 1+monwep->spe;
+			armac += 1+monwep_spe;
 			if(mon_knight(mon) || mon_dark_knight(mon)){
 				if(mon->m_lev >= 28)
 					armac += 8;
@@ -1097,7 +1243,10 @@ struct monst *mon;
 					armac += 1;
 			}
 		}
+		if(!which_armor(mon, W_ARMS) && is_elf(mon->data) && CHECK_ETRAIT(monwep, mon, ETRAIT_BLADEDANCE))
+			armac += ROLL_ETRAIT(monwep, mon, 3, 1);
 	}
+	armac += mon_hand_protection_ac(mon, FALSE);
 	if(armac > 11) armac = rnd(armac-10) + 10; /* high armor ac values act like player ac values */
 	
 	if (wizard && (iflags.wizcombatdebug & WIZCOMBATDEBUG_ACCURACY) && WIZCOMBATDEBUG_APPLIES((struct monst *)0, mon)) {
@@ -1133,14 +1282,18 @@ struct monst *mon;
 			base -= 5;
 		}
 	}
-	if(!mon->mcan && !(mon->mtyp == PM_SHADOWSMITH && dimness(mon->mx,mon->my) <= 0)){
+	if(!mon->mcan && mon->mstance != MSTANCE_MAGIC && !(mon->mtyp == PM_SHADOWSMITH && dimness(mon->mx,mon->my) <= 0)){
 		base -= mon->data->pac;
 		if(mon->mtyp == PM_CENTER_OF_ALL && Insight < 32)
 			base -= (32-Insight)/2;
 	}
+	if(mon->mstance == MSTANCE_PUSH && mon->mtyp == PM_SILVERKNIGHT){
+		/* arms crossed in front, not holding a weapon, brace the push */
+		base -= 2 - !!MON_WEP(mon) - !!MON_SWEP(mon);
+	}
 	if(mon->mtyp == PM_VERMIURGE && mon->mvar_vermiurge > 0)
 		base -= min(mon->mvar_vermiurge/10, 20);
-	
+
 	if(Role_if(PM_ANACHRONONAUT) && !quest_status.leader_is_dead && mon->mfaction == QUEST_FACTION && Is_qhome(&u.uz)){
 		if(mon->mtyp != PM_SARA__THE_LAST_ORACLE){
 			base -= min(mon->m_lev, 20);
@@ -1177,7 +1330,7 @@ struct monst *mon;
 		base -= 6;
 	}
 	
-	if(is_alabaster_mummy(mon->data) && mon->mvar_syllable == SYLLABLE_OF_GRACE__UUR)
+	if(has_syllable(mon->data) && mon->mvar_syllable == SYLLABLE_OF_GRACE__UUR)
 		base -= 10;
 	
 	if(mon->mtame){
@@ -1197,16 +1350,18 @@ struct monst *mon;
 		if(uring_art(ART_NARYA))
 			base -= def_narya();
 
+		int weapon_spe = (uwep && !uwep->suppressed && !Is_spire(&u.uz)) ? uwep->spe : 0;
+		int swapwep_spe = (uswapwep && !uswapwep->suppressed && !Is_spire(&u.uz)) ? uswapwep->spe : 0;
 		if(uwep){
 			const struct artifact *weap = get_artifact(uwep);
 			if(weap && (weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART) && activeMentalEdge(GSTYLE_DEFENSE)){
-				base -= EDGE_KENSEI ? 3+max(uwep->spe/2,0) : u.usanity < 50 ? 0 : u.usanity < 75 ? max(uwep->spe/2,0) : u.usanity < 90 ? 1+max(uwep->spe/2,0) : 3+max(uwep->spe/2,0);
+				base -= EDGE_KENSEI ? 3+max(weapon_spe/2,0) : u.usanity < 50 ? 0 : u.usanity < 75 ? max(weapon_spe/2,0) : u.usanity < 90 ? 1+max(weapon_spe/2,0) : 3+max(weapon_spe/2,0);
 			}
 		}
 		if(uswapwep){
 			const struct artifact *weap = get_artifact(uswapwep);
 			if(weap && (weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART) && activeMentalEdge(GSTYLE_DEFENSE)){
-				base -= EDGE_KENSEI ? 3+max(uswapwep->spe/2,0) : u.usanity < 50 ? 0 : u.usanity < 75 ? max(uswapwep->spe/2,0) : u.usanity < 90 ? 1+max(uswapwep->spe/2,0) : 3+max(uswapwep->spe/2,0);
+				base -= EDGE_KENSEI ? 3+max(swapwep_spe/2,0) : u.usanity < 50 ? 0 : u.usanity < 75 ? max(swapwep_spe/2,0) : u.usanity < 90 ? 1+max(swapwep_spe/2,0) : 3+max(swapwep_spe/2,0);
 			}
 		}
 		if(artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_STEEL)
@@ -1223,6 +1378,7 @@ struct monst *mon;
 		}
 		if(uarmh) armac += arm_ac_bonus(uarmh);
 		if(uarmc) armac += arm_ac_bonus(uarmc);
+		if(uarmw) armac += arm_ac_bonus(uarmw);
 		
 		if(armac < 0) armac *= -1;
 	}
@@ -1234,21 +1390,40 @@ struct monst *mon;
 				armac += arm_ac_bonus(obj);
 		}
 	}
+	armac += carapace_shield_ac_mon(mon);
+	//Weapon Stance AC
+	if(mon->mstance == MSTANCE_PUSH && mon->mtyp == PM_SILVERKNIGHT){
+		struct obj *monwep = MON_WEP(mon);
+		struct obj *monswapwep = MON_SWEP(mon);
+		if(monwep){
+			if(monwep->otyp == SILVERKNIGHT_SPEAR){
+				armac += 2;
+			}
+			else armac += 1 + monwep->spe/2;
+		}
+		if(monswapwep){
+			if(monswapwep->otyp == SILVERKNIGHT_SPEAR){
+				armac += 2;
+			}
+			else armac += 1 + monswapwep->spe/2;
+		}
+	}
 	//Weapon AC (primary only)
 	struct obj *monwep = MON_WEP(mon);
 	if(monwep){
-		if((is_rapier(monwep) && !arti_phasing(monwep)))
+		int monwep_spe = (!monwep->suppressed && !Is_spire(&u.uz)) ? monwep->spe : 0;
+		if((can_parry_with(monwep, mon) && !parries_as_phasing(monwep)))
 			armac += mon_weapon_dam_bonus(mon->data, monwep, weapon_type(monwep));
 		if(monwep->oartifact == ART_TOBIUME)
-			armac += max(monwep->spe,0);
+			armac += max(monwep_spe,0);
 		if(monwep->otyp == NAGINATA && !which_armor(mon, W_ARMS)){
 			if(monwep->oartifact == ART_JINJA_NAGINATA)
-				armac += 2+monwep->spe;
+				armac += 2+monwep_spe;
 			else
-				armac += 1+(monwep->spe)/2;
+				armac += 1+(monwep_spe)/2;
 		}
 		if(monwep->otyp == SILVERKNIGHT_SPEAR && !which_armor(mon, W_ARMS)){
-			armac += 1+monwep->spe;
+			armac += 1+monwep_spe;
 			if(mon_knight(mon) || mon_dark_knight(mon)){
 				if(mon->m_lev >= 28)
 					armac += 8;
@@ -1258,7 +1433,11 @@ struct monst *mon;
 					armac += 1;
 			}
 		}
+		if(!which_armor(mon, W_ARMS) && is_elf(mon->data) && CHECK_ETRAIT(monwep, mon, ETRAIT_BLADEDANCE))
+			armac += ROLL_ETRAIT(monwep, mon, 3, 1);
 	}
+	armac += mon_hand_protection_ac(mon, FALSE);
+	base -= dancing_sword_def(mon, TRUE);
 
 	base -= armac;
 	
@@ -1267,10 +1446,14 @@ struct monst *mon;
 	else {
 		struct obj * armor = which_armor(mon, W_ARM);
 		register int mondodgeac = mon->data->dac;
+		if(grace_empowers(mon, AAT_GRACE_TRAPS))
+			mondodgeac = max(3, mondodgeac + mondodgeac*2/3);
 		if(u.ustuck == mon)
-			mondodgeac = -5;
+			mondodgeac = min(-5, mondodgeac);
 		else if(mon->permspeed == MSLOW)
 			mondodgeac = min(0, mondodgeac);
+		if(mon->mprone && mondodgeac > 0)
+			mondodgeac /= 2;
 		if ((mondodgeac < 0)						/* penalties have full effect */
 			|| (!armor)								/* no armor = max mobility */
 			|| (armor && is_light_armor(armor))		/* light armor is also fine  */
@@ -1279,6 +1462,8 @@ struct monst *mon;
 		else if (armor && is_medium_armor(armor))	/* medium armor halves dodge AC */
 			base -= mondodgeac / 2;
 		/* else no adjustment */
+		if(mon->mprone)
+			base += 3;
 	}
 	
 	/* since arm_ac_bonus is positive, subtracting it increases AC */
@@ -1311,6 +1496,7 @@ struct monst *mon;
 		}
 		if(uarmh) armac += arm_ac_bonus(uarmh);
 		if(uarmc) armac += arm_ac_bonus(uarmc);
+		if(uarmw) armac += arm_ac_bonus(uarmw);
 		
 		if(armac < 0) armac *= -1;
 	}
@@ -1322,14 +1508,14 @@ struct monst *mon;
 				armac += arm_ac_bonus(obj);
 		}
 	}
+	armac += carapace_shield_ac_mon(mon);
 	if(is_law_demon(mon->data) && (Inhell || u.uevent.udemigod))
 		armac *= 2;
 	return 10 - armac;
 }
 
 int 
-base_nat_mdr(mon)
-struct monst *mon;
+base_nat_mdr(struct monst *mon)
 {
 	int base = 0;
 	
@@ -1341,6 +1527,8 @@ struct monst *mon;
 	if(mon->mtame){
 		if(u.specialSealsActive&SEAL_COSMOS) base += rnd(spiritDsize());
 	}
+
+	base += dancing_sword_def(mon, FALSE);
 	
 	return base;
 }
@@ -1383,21 +1571,25 @@ struct monst *mon;
 		if(uring_art(ART_LOMYA))
 			base += def_lomya();
 
+		int weapon_spe = (uwep && !uwep->suppressed && !Is_spire(&u.uz)) ? uwep->spe : 0;
+		int swapwep_spe = (uswapwep && !uswapwep->suppressed && !Is_spire(&u.uz)) ? uswapwep->spe : 0;
 		if(uwep){
 			const struct artifact *weap = get_artifact(uwep);
 			if(weap && (weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART) && activeMentalEdge(GSTYLE_DEFENSE)){
-				base += EDGE_KENSEI ? 3+max(uwep->spe/2,0) : u.usanity < 50 ? 0 : u.usanity < 75 ? max(uwep->spe/2,0) : u.usanity < 90 ? 1+max(uwep->spe/2,0) : 3+max(uwep->spe/2,0);
+				base += EDGE_KENSEI ? 3+max(weapon_spe/2,0) : u.usanity < 50 ? 0 : u.usanity < 75 ? max(weapon_spe/2,0) : u.usanity < 90 ? 1+max(weapon_spe/2,0) : 3+max(weapon_spe/2,0);
 			}
 		}
 		if(uswapwep){
 			const struct artifact *weap = get_artifact(uswapwep);
 			if(weap && (weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART) && activeMentalEdge(GSTYLE_DEFENSE)){
-				base += EDGE_KENSEI ? 3+max(uswapwep->spe/2,0) : u.usanity < 50 ? 0 : u.usanity < 75 ? max(uswapwep->spe/2,0) : u.usanity < 90 ? 1+max(uswapwep->spe/2,0) : 3+max(uswapwep->spe/2,0);
+				base += EDGE_KENSEI ? 3+max(swapwep_spe/2,0) : u.usanity < 50 ? 0 : u.usanity < 75 ? max(swapwep_spe/2,0) : u.usanity < 90 ? 1+max(swapwep_spe/2,0) : 3+max(swapwep_spe/2,0);
 			}
 		}
 	}
-	if(is_alabaster_mummy(mon->data) && mon->mvar_syllable == SYLLABLE_OF_SPIRIT__VAUL)
+	if(has_syllable(mon->data) && mon->mvar_syllable == SYLLABLE_OF_SPIRIT__VAUL)
 		base += 10;
+	if(mon->mpeaceful && (check_mutation(AAT_HALO_PROTECTIVE) || check_mutation(AAT_FACE_PROTECTIVE)) && in_halo_light(mon))
+		base += AASIMAR_HALO_DR;
 	
 	return base;
 }
@@ -1433,17 +1625,21 @@ struct monst *mon;
 		if(uring_art(ART_LOMYA))
 			base += def_lomya();
 	}
-	if(is_alabaster_mummy(mon->data) && mon->mvar_syllable == SYLLABLE_OF_SPIRIT__VAUL)
+	if(has_syllable(mon->data) && mon->mvar_syllable == SYLLABLE_OF_SPIRIT__VAUL)
 		base += 10;
+	if(mon->mpeaceful && (check_mutation(AAT_HALO_PROTECTIVE) || check_mutation(AAT_FACE_PROTECTIVE)) && in_halo_light(mon))
+		base += AASIMAR_HALO_DR;
 	
 
-	if(!mon->mcan && !(mon->mtyp == PM_SHADOWSMITH && dimness(mon->mx,mon->my) <= 0)){
+	if(!mon->mcan && mon->mstance != MSTANCE_MAGIC && !(mon->mtyp == PM_SHADOWSMITH && dimness(mon->mx,mon->my) <= 0)){
 		int dr = 0;
+		int count = 7;
 #define m_bdr mon->data->spe_bdr
 #define m_ldr mon->data->spe_ldr
 #define m_hdr mon->data->spe_hdr
 #define m_fdr mon->data->spe_fdr
 #define m_gdr mon->data->spe_gdr
+#define m_wdr mon->data->spe_wdr
 		dr += m_bdr*2;
 		dr += m_ldr*2;
 
@@ -1456,12 +1652,17 @@ struct monst *mon;
 		if (can_wear_gloves(mon->data))	dr += m_gdr;
 		else							dr += m_bdr;
 		
+		if (has_wings_mon(mon)){
+			dr += 2*m_wdr;
+			count += 2;
+		}
 #undef m_bdr
 #undef m_ldr
 #undef m_hdr
 #undef m_fdr
 #undef m_gdr
-		base += (dr / 7);
+#undef m_wdr
+		base += (dr / count);
 		if(mon->mtyp == PM_CENTER_OF_ALL && Insight < 32)
 			base += (33-Insight)/2;
 
@@ -1488,24 +1689,29 @@ roll_mdr_detail(struct monst *mon, struct monst *magr, int slot, int depth, ucha
 	boolean youagr = (magr == &youmonst);
 	struct obj *magr_helm = magr ? (youagr ? uarmh : which_armor(magr, W_ARMH)) : NULL;
 	
-	if(!slot) switch(rn2(7)){
-		case 0:
-		case 1:
-			slot = UPPER_TORSO_DR;
-		break;
-		case 2:
-		case 3:
-			slot = LOWER_TORSO_DR;
-		break;
-		case 4:
-			slot = HEAD_DR;
-		break;
-		case 5:
-			slot = LEG_DR;
-		break;
-		case 6:
-			slot = ARM_DR;
-		break;
+	if(!slot){
+		if(has_wings_mon(mon) && rn2(9) < 2){
+			slot = WING_DR;
+		}
+		else switch(rn2(7)){
+			case 0:
+			case 1:
+				slot = UPPER_TORSO_DR;
+			break;
+			case 2:
+			case 3:
+				slot = LOWER_TORSO_DR;
+			break;
+			case 4:
+				slot = HEAD_DR;
+			break;
+			case 5:
+				slot = LEG_DR;
+			break;
+			case 6:
+				slot = ARM_DR;
+			break;
+		}
 	}
 	
 	mon_slot_dr(mon, magr, slot, &base, &armac, &nat_dr, depth);
@@ -1521,12 +1727,10 @@ roll_mdr_detail(struct monst *mon, struct monst *magr, int slot, int depth, ucha
 	
 	if(armac > 11) armac = rnd(armac-10) + 10; /* high armor dr values act like player ac values */
 	
-	if(nat_dr && armac){
+	if(nat_dr > 0 && armac > 0){
 		base += sqrt(nat_dr*nat_dr + armac*armac);
-	} else if(nat_dr){
-		base += nat_dr;
 	} else {
-		base += armac;
+		base += nat_dr + armac;
 	}
 	
 	return base;
@@ -1562,11 +1766,16 @@ int depth;
 	int agrmoral = 0;
 	int agrimpure = 0;
 	int agrrot = 0;
+	int agrldemon = 0;
 	if(magr){
 		agralign = (magr == &youmonst) ? sgn(u.ualign.type) : sgn(magr->data->maligntyp);
 		agrmoral = calc_agrmoral(magr);
 		agrrot = calc_agrrot(magr);
 		agrimpure = calc_agrimpure(magr);
+		if (magr != &youmonst) {
+			if (is_law_demon(magr->data)) agrldemon = is_dnoble(magr->data) ? 3 : 1;
+			else if (is_cha_demon(magr->data)) agrldemon = -1;
+		}
 	}
 	
 	/* some slots may be unacceptable and must be replaced */
@@ -1580,6 +1789,8 @@ int depth;
 		slot = LOWER_TORSO_DR;
 	if (slot == ARM_DR && !can_wear_gloves(mon->data))
 		slot = UPPER_TORSO_DR;
+	if (slot == WING_DR && !has_wings_mon(mon))
+		slot = UPPER_TORSO_DR;
 	if(mon->mtyp == PM_BLIBDOOLPOOLP_S_MINDGRAVEN_CHAMPION && magr && !depth){
 		if(slot != LEG_DR && rn2(3)){
 			slot = LOWER_TORSO_DR;
@@ -1590,8 +1801,8 @@ int depth;
 	}
 
 	/* DR of worn armor */
-	int marmor[] = { W_ARM,          				W_ARMC,         					  W_ARMF, W_ARMH,  W_ARMG, W_ARMS, W_ARMU };
-	int adfalt[] = { UPPER_TORSO_DR|LOWER_TORSO_DR, UPPER_TORSO_DR|LOWER_TORSO_DR|LEG_DR, LEG_DR, HEAD_DR, ARM_DR, 0,     UPPER_TORSO_DR };
+	int marmor[] = { W_ARM,          				W_ARMC,         					  W_ARMF, W_ARMH,  W_ARMG, W_ARMS, W_ARMU,        W_ARMW };
+	int adfalt[] = { UPPER_TORSO_DR|LOWER_TORSO_DR, UPPER_TORSO_DR|LOWER_TORSO_DR|LEG_DR, LEG_DR, HEAD_DR, ARM_DR, 0,     UPPER_TORSO_DR, WING_DR };
 	int i;
 	struct obj * curarm;
 	int dr_multiplier = (is_law_demon(mon->data) && (Inhell || u.uevent.udemigod)) ? 2 : 1;
@@ -1606,7 +1817,7 @@ int depth;
 							continue;
 					}
 					arm_mdr += arm_dr_bonus(curarm, slot);
-					if (magr) arm_mdr += properties_dr(curarm, slot, agralign, agrmoral, agrimpure, agrrot);
+					if (magr) arm_mdr += properties_dr(curarm, slot, agralign, agrmoral, agrimpure, agrrot, agrldemon);
 					if (slot == HEAD_DR && curarm->bodytypeflag&MB_HORNS && !has_horns_mon(mon)){
 						arm_mdr -= 1;
 					}
@@ -1618,7 +1829,7 @@ int depth;
 			else if(!depth){
 				if (slot&adfalt[i]){
 					arm_mdr += arm_dr_bonus(curarm, slot);
-					if (magr) arm_mdr += properties_dr(curarm, slot, agralign, agrmoral, agrimpure, agrrot);
+					if (magr) arm_mdr += properties_dr(curarm, slot, agralign, agrmoral, agrimpure, agrrot, agrldemon);
 					if (slot == HEAD_DR && curarm->bodytypeflag&MB_HORNS && !has_horns_mon(mon)){
 						arm_mdr -= 1;
 					}
@@ -1628,12 +1839,13 @@ int depth;
 	}
 	/* Tensa Zangetsu adds to worn armor */
 	if(MON_WEP(mon)){
+		int monwep_spe = (!MON_WEP(mon)->suppressed && !Is_spire(&u.uz)) ? MON_WEP(mon)->spe : 0;
 		if (MON_WEP(mon)->oartifact == ART_TENSA_ZANGETSU) {
 			if (!which_armor(mon, W_ARMC) && (slot & CLOAK_DR)) {
-				arm_mdr += max(1 + (MON_WEP(mon)->spe + 1) / 2, 0);
+				arm_mdr += max(1 + (monwep_spe + 1) / 2, 0);
 			}
 			if (!which_armor(mon, W_ARM) && (slot & TORSO_DR)) {
-				arm_mdr += max(1 + (MON_WEP(mon)->spe + 1) / 2, 0);
+				arm_mdr += max(1 + (monwep_spe + 1) / 2, 0);
 			}
 		}
 		else if(MON_WEP(mon)->oartifact == ART_LASH_OF_THE_COLD_WASTE){
@@ -1641,6 +1853,12 @@ int depth;
 				bas_mdr += 5;
 			else if(Insight > 20)
 				bas_mdr += (Insight - 20)/4;
+		}
+		else if(MON_WEP(mon)->oartifact == ART_LANCE_OF_LONGINUS)
+			bas_mdr += max(monwep_spe/2, 0);
+		if(hand_protecting(MON_WEP(mon)) && slot&ARM_DR && mon->mtyp != PM_DANCING_SWORD){
+			if(!MON_SWEP(mon) || hand_protecting(MON_SWEP(mon)))
+				arm_mdr += 4 + material_def_bonus(MON_WEP(mon), 4, FALSE) + (monwep_spe + 1) / 2 - min((int)greatest_erosion(MON_WEP(mon)), 4);
 		}
 	}
 	arm_mdr *= dr_multiplier;
@@ -1657,6 +1875,7 @@ int depth;
 	case HEAD_DR:        slotnatdr = mon->data->hdr; break;
 	case LEG_DR:         slotnatdr = mon->data->fdr; break;
 	case ARM_DR:         slotnatdr = mon->data->gdr; break;
+	case WING_DR:        slotnatdr = mon->data->wdr; break;
 	}
 	if(mon->mtyp == PM_OONA || mon->mtyp == PM_PORO_AULON){
 		slotnatdr = slotnatdr*mon->mhp/mon->mhpmax;
@@ -1670,7 +1889,7 @@ int depth;
 			nat_mdr += 5;
 		}
 	}
-	if (!mon->mcan && !(mon->mtyp == PM_SHADOWSMITH && dimness(mon->mx,mon->my) <= 0)) {
+	if (!mon->mcan && mon->mstance != MSTANCE_MAGIC && !(mon->mtyp == PM_SHADOWSMITH && dimness(mon->mx,mon->my) <= 0)) {
 		switch (slot)
 		{
 		case UPPER_TORSO_DR: bas_mdr += mon->data->spe_bdr; break;
@@ -1678,6 +1897,7 @@ int depth;
 		case HEAD_DR:        bas_mdr += mon->data->spe_hdr; break;
 		case LEG_DR:         bas_mdr += mon->data->spe_fdr; break;
 		case ARM_DR:         bas_mdr += mon->data->spe_gdr; break;
+		case WING_DR:        bas_mdr += mon->data->spe_wdr; break;
 		}
 		if(mon->mtyp == PM_CENTER_OF_ALL && Insight < 32)
 			bas_mdr += (33-Insight)/2;
@@ -1705,8 +1925,10 @@ struct monst *mon;
 	int sum = 0;
 	int base, nat_dr, armac;
 	int slot;
+#define MAX_SLOTS 9
+	int count = MAX_SLOTS;
 	
-	for (i = 0; i < 7; i++){
+	for (i = 0; i < MAX_SLOTS; i++){
 		switch(i){
 			case 0:
 			case 1:
@@ -1725,23 +1947,30 @@ struct monst *mon;
 			case 6:
 				slot = ARM_DR;
 			break;
+			case 7:
+			case 8:
+				if(has_wings_mon(mon))
+					slot = WING_DR;
+				else{
+					count--;
+					continue;
+				}
+			break;
 		}
 		
 		mon_slot_dr(mon, (struct monst *) 0, slot, &base, &armac, &nat_dr, 0);
 
 		if(armac > 11) armac = (armac-10)/2 + 10; /* high armor dr values act like player ac values */
 		
-		if(nat_dr && armac){
+		if(nat_dr > 0 && armac > 0){
 			base += sqrt(nat_dr*nat_dr + armac*armac);
-		} else if(nat_dr){
-			base += nat_dr;
 		} else {
-			base += armac;
+			base += nat_dr + armac;
 		}
 		sum += base;
 	}
 
-	return sum / 7;
+	return sum / count;
 }
 
 int
@@ -1751,11 +1980,13 @@ struct monst * mon;
 	/* only looks at a monster's base stats with minimal adjustment (and no worn armor) */
 	/* used for pokedex entry */
 	int dr = 0;
+	int count = 7;
 #define m_bdr (mon->data->bdr + mon->data->spe_bdr)
 #define m_ldr (mon->data->ldr + mon->data->spe_ldr)
 #define m_hdr (mon->data->hdr + mon->data->spe_hdr)
 #define m_fdr (mon->data->fdr + mon->data->spe_fdr)
 #define m_gdr (mon->data->gdr + mon->data->spe_gdr)
+#define m_wdr (mon->data->wdr + mon->data->spe_wdr)
 
 	dr += m_bdr*2;
 	dr += m_ldr*2;
@@ -1769,13 +2000,18 @@ struct monst * mon;
 	if (can_wear_gloves(mon->data))	dr += m_gdr;
 	else							dr += m_bdr;
 	
+	if (has_wings_mon(mon)){
+		dr += 2*m_wdr;
+		count += 2;
+	}
 #undef m_bdr
 #undef m_ldr
 #undef m_hdr
 #undef m_fdr
 #undef m_gdr
+#undef m_wdr
 
-	return (dr / 7);
+	return (dr / count);
 }
 
 /* weapons are handled separately; rings and eyewear aren't used by monsters */
@@ -1815,13 +2051,12 @@ boolean creation;
 		return;
 
 	m_dowear_type(mon, W_AMUL, creation, FALSE);
-#ifdef TOURIST
 	/* can't put on shirt if already wearing suit */
 	if (!(mon->misc_worn_check & W_ARM) || creation)
 	    m_dowear_type(mon, W_ARMU, creation, FALSE);
-#endif
 	/* treating small as a special case allows
 	   hobbits, gnomes, and kobolds to wear cloaks */
+	m_dowear_type(mon, W_ARMW, creation, FALSE);
 	m_dowear_type(mon, W_ARMC, creation, FALSE);
 	m_dowear_type(mon, W_ARMH, creation, FALSE);
 	if (!MON_WEP(mon) || !bimanual_mon(MON_WEP(mon),mon))
@@ -1881,6 +2116,9 @@ boolean racialexception;
 		    break;
 		case W_ARMU:
 		    if (!is_shirt(obj) || obj->objsize != mon->data->msize || !shirt_match(mon->data,obj)) continue;
+		    break;
+		case W_ARMW:
+		    if (!is_wingguard(obj) || obj->objsize != mon->data->msize || !has_wings_mon(mon)) continue;
 		    break;
 		case W_ARMC:
 			if((mon->mtyp == PM_CATHEZAR || mon->mtyp == PM_CHAIN_DEVIL) && obj->otyp == CHAIN)
@@ -1961,7 +2199,10 @@ outer_break:
 	    update_mon_intrinsics(mon, old, FALSE, creation);
 	mon->misc_worn_check |= flag;
 	best->owornmask |= flag;
-	if(check_oprop(best, OPROP_CURS)){
+	if(check_oprop(best, OPROP_CURS) ||
+			best->otyp == DUNCE_CAP ||
+			best->otyp == HELM_OF_OPPOSITE_ALIGNMENT ||
+			best->otyp == CONSTRICTING_WING_GUARDS){
 		curse(best);
 	}
 	update_mon_intrinsics(mon, best, TRUE, creation);
@@ -2012,7 +2253,7 @@ struct monst *mon;
 	
 	if (mon->mfrozen) return FALSE;
 	
-	do switch(rnd(8)){
+	do switch(rnd(9)){
 		case 1:
 			flag = W_ARM;
 		break;
@@ -2036,6 +2277,9 @@ struct monst *mon;
 		break;
 		case 8:
 			flag = W_BELT;
+		break;
+		case 9:
+			flag = W_ARMW;
 		break;
 	} while(tries-- && !(old = which_armor(mon, flag)));
 
@@ -2067,7 +2311,7 @@ struct monst *mon;
 	if (mon->mfrozen) return FALSE;
 	
 	for(i = 1; i<=7;i++){
-		switch(rnd(8)){
+		switch(rnd(9)){
 			case 1:
 				flag = W_ARM;
 			break;
@@ -2091,6 +2335,9 @@ struct monst *mon;
 			break;
 			case 8:
 				flag = W_BELT;
+			break;
+			case 9:
+				flag = W_ARMW;
 			break;
 		}
 
@@ -2275,6 +2522,15 @@ boolean polyspot;
 			}
 		}
 	}
+	if ((otmp = which_armor(mon, W_ARMW)) != 0) {
+		if(otmp->objsize != mon->data->msize || !has_wings_mon(mon) || is_gaseous_noequip(mon->data) || noncorporeal(mon->data)){
+			if (vis)
+			pline("%s wing-guards %s!", s_suffix(Monnam(mon)), 
+				(!has_wings_mon(mon) || is_gaseous_noequip(mon->data) || noncorporeal(mon->data)) ? "fall away" : "pop off");
+			if (polyspot) bypass_obj(otmp);
+			m_lose_armor(mon, otmp);
+		}
+	}
 	if ((otmp = which_armor(mon, W_ARMG)) != 0) {
 		if(nogloves(mon->data) || nolimbs(mon->data) || otmp->objsize != mon->data->msize || is_gaseous_noequip(mon->data) || noncorporeal(mon->data)){
 			if (vis)
@@ -2387,6 +2643,14 @@ struct obj *obj;
 		/* armor */
 	case EILISTRAN_ARMOR:
 		score += 10;
+		break;
+		/* wing guards */
+	case CONSTRICTING_WING_GUARDS:
+		if (species_flies(mon->data))
+			score += -20;
+		break;
+	case DEXTEROUS_WING_GUARDS:
+		score += (obj->spe / 2);
 		break;
 		/* facewear */
 	case LIVING_MASK:
@@ -2512,6 +2776,9 @@ struct monst *mon;
 	/* armor types for shirt, gloves, shoes, and shield may not currently
 	   provide any magic cancellation but we should be complete */
 	armor = (mon == &youmonst) ? uarmu : which_armor(mon, W_ARMU);
+	if (armor && armpro < objects[armor->otyp].a_can)
+	    armpro = objects[armor->otyp].a_can;
+	armor = (mon == &youmonst) ? uarmw : which_armor(mon, W_ARMW);
 	if (armor && armpro < objects[armor->otyp].a_can)
 	    armpro = objects[armor->otyp].a_can;
 	armor = (mon == &youmonst) ? uarmg : which_armor(mon, W_ARMG);
@@ -2824,6 +3091,57 @@ long timeout;
 	else if (in_invent) update_inventory();
 }
 
+/* Timer callback, run every turn: destroy the object if it has become
+   uncursed or positively enchanted, otherwise check again next turn. */
+void
+crumble_if_improved(genericptr_t arg, long timeout)
+{
+	struct obj *obj = (struct obj *) arg;
+	struct monst *mon;
+	xchar x, y;
+
+	if (obj->cursed && obj->spe <= 0) {
+		start_timer(1, TIMER_OBJECT, CRUMBLE_IMPROVED, arg);
+		return;
+	}
+
+	switch (obj->where) {
+	case OBJ_INVENT:
+		Your("%s %s to dust!", xname(obj), otense(obj, "crumble"));
+		stop_occupation();
+		if (flags.run) nomul(0, NULL);
+		if (obj->owornmask)
+			remove_worn_item(obj, TRUE);
+		useupall(obj);
+		update_inventory();
+		break;
+	case OBJ_FLOOR:
+		x = obj->ox;
+		y = obj->oy;
+		if (cansee(x, y))
+			pline("%s %s to dust.", The(xname(obj)), otense(obj, "crumble"));
+		delobj(obj);
+		newsym(x, y);
+		break;
+	case OBJ_MINVENT:
+		mon = obj->ocarry;
+		if (canseemon(mon))
+			pline("%s %s %s to dust!", s_suffix(Monnam(mon)), xname(obj),
+				otense(obj, "crumble"));
+		obj->quan = 1L;	/* so m_useup() destroys the whole stack */
+		m_useup(mon, obj);
+		break;
+	case OBJ_CONTAINED:
+		obj_extract_self(obj);
+		obfree(obj, (struct obj *)0);
+		break;
+	default:
+		/* buried, migrating, etc.: check again once it's somewhere else */
+		start_timer(1, TIMER_OBJECT, CRUMBLE_IMPROVED, arg);
+		break;
+	}
+}
+
 STATIC_OVL int
 def_beastmastery(struct monst *mon)
 {
@@ -2956,6 +3274,9 @@ default_coverage(int slot, long wornmask)
 		case LEG_DR:
 			return !!(wornmask&(W_ARMF|W_ARMC));
 		break;
+		case WING_DR:
+			return !!(wornmask&(W_ARMW));
+		break;
 	}
 	return FALSE;
 }
@@ -2970,6 +3291,8 @@ next_armor_depth(long depth)
 	if(depth&W_BELT)
 		return W_DRESS_DEPTH;
 	if(depth&W_DRESS_DEPTH)
+		return W_ARMW;
+	if(depth&W_ARMW)
 		return W_ARM;
 	if(depth&W_ARM)
 		return W_ARMH;
@@ -2980,6 +3303,35 @@ next_armor_depth(long depth)
 	if(depth&W_ARMF)
 		return W_ARMU;
 	return 0L;
+}
+
+struct obj *
+outermost_armor_for_slot(struct monst *mon, int slot)
+{
+	long depth = W_ARMS;
+	boolean youmon = (mon == &youmonst);
+	struct obj *otmp;
+
+	while (depth) {
+		for (otmp = youmon ? invent : mon->minvent; otmp; otmp = otmp->nobj) {
+			if (!(otmp->owornmask & (W_ARMOR|W_BELT)))
+				continue;
+			if (armor_depth(otmp, slot) != depth)
+				continue;
+			if (otmp->oclass == ARMOR_CLASS) {
+				if (!(objects[otmp->otyp].oc_dtyp & slot)
+				    && !(!objects[otmp->otyp].oc_dtyp
+				         && default_coverage(slot, otmp->owornmask)))
+					continue;
+			} else {
+				if (!default_coverage(slot, otmp->owornmask))
+					continue;
+			}
+			return otmp;
+		}
+		depth = next_armor_depth(depth);
+	}
+	return (struct obj *)0;
 }
 
 void

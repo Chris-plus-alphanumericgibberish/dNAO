@@ -472,6 +472,7 @@ struct obj *corpse;
 #ifdef WIZARD
  make_bones:
 #endif
+	resheath_bleeding_void();
 	unleash_all();
 	/* in case these characters are not in their home bases */
 	for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {

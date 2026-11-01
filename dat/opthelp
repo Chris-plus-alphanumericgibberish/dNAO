@@ -134,6 +134,12 @@ dumpfile      the name of the file where to dump the disclosure information
               [none]
 fruit         the name of a fruit you enjoy eating  [slime mold]
               (basically a whimsy which NetHack uses from time to time).
+glyphattr1    rendering for monster-stance highlight 1: none, invert, bold,
+              italic, underline, double-underline, slow blink, curly
+              underline, or strikethrough (not all choices are renderable
+              in every windowport/terminal)  [underline]
+glyphattr2    rendering for monster-stance highlight 2, same choices as
+              glyphattr1  [italic]
 menustyle     user interface for selection of multiple objects:
               Traditional -- one object at a time prompting;
               Combination -- prompt for classes of interest, then menu;

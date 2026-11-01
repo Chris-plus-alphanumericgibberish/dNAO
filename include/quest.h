@@ -48,6 +48,10 @@ struct q_score {			/* Quest "scorecard" */
 	long time_doing_quest;
 #define CON_QUEST_INCREMENT	3000
 	unsigned leader_m_id;
+	long qvar1;
+#define qvar1_healer_pet_level qvar1
+	long qvar2;
+#define qvar2_healer_pet_message qvar2
 };
 //Random spawns invade city:
 #define UH_QUEST_TIME_0	16000
@@ -71,6 +75,11 @@ struct q_score {			/* Quest "scorecard" */
 #endif
 #define MIN_QUEST_LEVEL 14	/* at least this u.ulevel to start */
 #define GNOMISH_MIN_QUEST_LEVEL 6	/* at least this u.ulevel to start */
+#define CAVEMAN_MIN_QUEST_LEVEL 18
   /* note: exp.lev. 14 is threshold level for 5th rank (class title, role.c) */
+#define ROLE_MIN_QUEST_LEVEL \
+    (Pantheon_if(PM_GNOME) ? GNOMISH_MIN_QUEST_LEVEL : \
+     Role_if(PM_CAVEMAN)   ? CAVEMAN_MIN_QUEST_LEVEL  : \
+                             MIN_QUEST_LEVEL)
 
 #endif /* QUEST_H */

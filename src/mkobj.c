@@ -81,7 +81,7 @@ const struct icp rogueprobs[] = {
 const struct icp hellprobs[] = {
 {20, WEAPON_CLASS},
 {20, ARMOR_CLASS},
-{ 8, FOOD_CLASS},
+{ 6, FOOD_CLASS},
 { 6, BELT_CLASS},
 {12, TOOL_CLASS},
 {12, GEM_CLASS},
@@ -89,7 +89,22 @@ const struct icp hellprobs[] = {
 { 1, SCROLL_CLASS},
 { 8, WAND_CLASS},
 { 8, RING_CLASS},
-{ 4, AMULET_CLASS}
+{ 5, AMULET_CLASS},
+{ 1, SANCTION_CLASS}
+};
+
+const struct icp hellboxiprobs[] = {
+{23, GEM_CLASS},
+{ 5, BELT_CLASS},
+{ 5, FOOD_CLASS},
+{ 1, POTION_CLASS},
+{14, SCROLL_CLASS},
+{ 9, SANCTION_CLASS},
+{ 2, SPBOOK_CLASS},
+{12, COIN_CLASS},
+{11, WAND_CLASS},
+{10, RING_CLASS},
+{ 8, AMULET_CLASS}
 };
 
 /* Object material probabilities.*/
@@ -376,6 +391,14 @@ int mkflags;
 		oclass = iprobs->iclass;
 	}
 
+	if (oclass == ARMOR_CLASS) {
+		if (Inhell) {
+			if (!rn2(100)) return mkwingguard(mkflags);
+		} else if (In_endgame(&u.uz)) {
+			if (!rn2(10)) return mkwingguard(mkflags);
+		}
+	}
+
 	i = bases[(int)oclass];
 	while((prob -= objects[i].oc_prob) > 0) i++;
 
@@ -383,6 +406,34 @@ int mkflags;
 		panic("probtype error, oclass=%d i=%d", (int) oclass, i);
 
 	return(mksobj(i, mkflags));
+}
+
+/* wing guards all have oc_prob 0, so mkobj() can never roll them normally;
+   the mundane wing-guards are weighted 10x any other individual wing guard */
+struct obj *
+mkwingguard(mkflags)
+int mkflags;
+{
+	int i, nwing, otyp, pick;
+
+	nwing = 0;
+	for (i = bases[ARMOR_CLASS];
+	     i < NUM_OBJECTS && objects[i].oc_class == ARMOR_CLASS; i++)
+		if (objects[i].oc_armcat == ARM_WING) nwing++;
+
+	otyp = WING_GUARDS;
+	pick = rn2((nwing - 1) + 10);
+	for (i = bases[ARMOR_CLASS];
+	     i < NUM_OBJECTS && objects[i].oc_class == ARMOR_CLASS; i++) {
+		if (objects[i].oc_armcat != ARM_WING) continue;
+		pick -= (i == WING_GUARDS) ? 10 : 1;
+		if (pick < 0) {
+			otyp = i;
+			break;
+		}
+	}
+
+	return mksobj(otyp, mkflags);
 }
 
 STATIC_OVL void
@@ -419,24 +470,24 @@ struct obj *box;
 			otmp->age = 0L;
 			stop_corpse_timers(otmp);
 	    } else if(box->otyp == MASSIVE_STONE_CRATE){
-			if (!(otmp = mkobj(FOOD_CLASS, TRUE))) continue;
+			if (!(otmp = mkobj(FOOD_CLASS, MKOBJ_ARTIF))) continue;
 	    } else if(box->otyp == WRITING_DESK){
 			if(rn2(4)){
-				if (!(otmp = mkobj(SCROLL_CLASS, TRUE))) continue;
+				if (!(otmp = mkobj(SCROLL_CLASS, MKOBJ_ARTIF))) continue;
 			}
 			else if(rn2(4)){
 				if (!(otmp = mksobj(SCR_BLANK_PAPER, MKOBJ_NOINIT))) continue;
 			}
 			else {
-				if (!(otmp = mkobj(SPBOOK_CLASS, TRUE))) continue;
+				if (!(otmp = mkobj(SPBOOK_CLASS, MKOBJ_ARTIF))) continue;
 			}
 	    } else {
 		register int tprob;
-		const struct icp *iprobs = boxiprobs;
+		const struct icp *iprobs = Inhell ? hellboxiprobs : boxiprobs;
 
 		for (tprob = rnd(100); (tprob -= iprobs->iprob) > 0; iprobs++)
 		    ;
-		if (!(otmp = mkobj(iprobs->iclass, TRUE))) continue;
+		if (!(otmp = mkobj(iprobs->iclass, MKOBJ_ARTIF))) continue;
 
 		/* handle a couple of special cases */
 		if (otmp->oclass == COIN_CLASS) {
@@ -455,9 +506,9 @@ struct obj *box;
 		}
 		if (box->otyp == BAG_OF_HOLDING) {
 		    if (Is_mbag(otmp)) {
-			otmp->otyp = SACK;
-			otmp->spe = 0;
-			otmp->owt = weight(otmp);
+				otmp->otyp = SACK;
+				otmp->spe = 0;
+				otmp->owt = weight(otmp);
 		    } else while (otmp->otyp == WAN_CANCELLATION)
 			    otmp->otyp = rnd_class(WAN_LIGHT, WAN_LIGHTNING);
 		}
@@ -854,6 +905,10 @@ int mkflags;
 		struct obj *sword = mksobj(HUNTER_S_LONGSWORD, mkflags);
 		add_to_container(otmp, sword);
 	}
+	else if(otmp->otyp == LIANQIAO_JIAN){
+		struct obj *sword = mksobj(PANXIN_JIAN, mkflags);
+		add_to_container(otmp, sword);
+	}
 	else if (otmp->otyp == MASS_SHADOW_PISTOL){
 		struct obj *stone = mksobj(ROCK, NO_MKOBJ_FLAGS);
 		stone->quan = 1;
@@ -1061,6 +1116,9 @@ int mkflags;
 					otmp->olocked = !!(rn2(5));
 					otmp->otrapped = !(rn2(10));
 				}
+			case TROPHY_RELIQUARY:
+				if (otmp->otyp == TROPHY_RELIQUARY)
+					otmp->olocked = !!(rn2(5));
 			case ICE_BOX:
 			case SACK:
 			case OILSKIN_SACK:
@@ -1533,6 +1591,9 @@ int mkflags;
 			if (rn2(10) && (otmp->otyp == FUMBLE_BOOTS ||
 				otmp->otyp == HELM_OF_OPPOSITE_ALIGNMENT ||
 				otmp->otyp == GAUNTLETS_OF_FUMBLING ||
+				otmp->otyp == WING_GUARDS_OF_WEAKNESS ||
+				otmp->otyp == WING_GUARDS_OF_BUMBLING ||
+				otmp->otyp == CONSTRICTING_WING_GUARDS ||
 				!rn2(11))) {
 				curse(otmp);
 				otmp->spe = -rne(3);
@@ -1716,6 +1777,7 @@ int mkflags;
 		case COIN_CLASS:
 		case TILE_CLASS:
 		case SCOIN_CLASS:
+		case SANCTION_CLASS:
 			break;	/* do nothing */
 		default:
 			impossible("impossible mkobj %d, sym '%c'.", otmp->otyp,
@@ -1746,6 +1808,10 @@ int mkflags;
 	    case CORPSE:
 		start_corpse_timeout(otmp);
 		break;
+	    case SANCTIFIED_SPARK:
+		if (Is_airlevel(&u.uz))
+		    start_timer((long)d(7,7), TIMER_OBJECT, CLOUD_DRIFT, (genericptr_t)otmp);
+		break;
 	}
 
 	if(check_oprop(otmp, OPROP_WRTHW))
@@ -1764,6 +1830,12 @@ int mkflags;
 	    flags.made_life = TRUE;
 	if (otyp == WORD_OF_KNOWLEDGE)
 	    flags.made_know = TRUE;
+
+	if ((otmp->oclass == SPBOOK_CLASS || otmp->oclass == SCROLL_CLASS)
+		&& otmp->otyp != SPE_BLANK_PAPER && otmp->otyp != SCR_BLANK_PAPER
+		&& tactile_quest_book(otmp)
+	)
+		add_oprop(otmp, OPROP_TACTB);
 	
 	fix_object(otmp);
 	return(otmp);
@@ -1869,6 +1941,7 @@ start_corpse_timeout(body)
 		|| body->corpsenm == PM_LICHEN
 		|| body->corpsenm == PM_CROW_WINGED_HALF_DRAGON
 		|| body->corpsenm == PM_BEHOLDER
+		|| body->corpsenm == PM_DEATH_BEHOLDER
 		|| body->spe
 	) return;
 	
@@ -2287,6 +2360,7 @@ struct obj* obj;
 		return NULL;
 		/* Any other cases for specific object types go here. */
 	case SARCOPHAGUS:
+	case TROPHY_RELIQUARY:
 	case SHIELD_OF_REFLECTION:
 		return shiny_materials;
 	case BOW:
@@ -2351,6 +2425,11 @@ struct obj* obj;
      * list exists. */
 	if (otyp == find_gcirclet()) {
 		return shiny_materials;
+	}
+	else if (otyp == find_dwingcovers()) {
+		/* diaphanous wing-covers must always be cloth, regardless of
+		 * which wing-guard otyp the shuffle assigns the appearance to */
+		return NULL;
 	}
 	else if (is_firearm(obj) && (default_material == IRON || default_material == METAL)) {
 		return resonant_materials;	// guns and bells are surprisingly similar (see: Wheel of Time)
@@ -2587,6 +2666,7 @@ int mat;
 	int oldmat = obj->obj_material;
 
 	if(mat == obj->obj_material) return; //Already done!
+	if(obj->oartifact == ART_WHIRLING_SWORD) return;
 	if(oldmat == MERCURIAL){
 		start_timer(d(8,8), TIMER_OBJECT,
 					REVERT_MERC, (genericptr_t)obj);
@@ -2938,9 +3018,9 @@ register struct obj *obj;
 	}
 	if ((Is_container(obj) && obj->otyp != MAGIC_CHEST && obj->oartifact != ART_TREASURY_OF_PROTEUS)
 		|| obj->otyp == STATUE
-		|| obj->otyp == CHURCH_BLADE
-		|| obj->otyp == CHURCH_HAMMER
+		|| is_composite_weapon(obj)
 		|| obj->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD
+		|| obj->oartifact == ART_BLEEDING_VOID
 	) {
 		struct obj *contents;
 		register int cwt = 0;
@@ -2991,8 +3071,8 @@ register struct obj *obj;
 		return eaten_stat((int)obj->quan * wt, obj);
 	} else if (obj->oclass == COIN_CLASS)
 		return (int)((obj->quan + 50L) / 100L);
-	else if (obj->otyp == BALL && obj->owt != 0)
-		return((int)(obj->owt));	/* kludge for "very" heavy iron ball */
+	else if (obj->otyp == BALL)
+		return (int)(wt + obj->ovar1_heavy_ball);
 	return((wt || obj->oartifact) ? wt*(int)obj->quan : ((int)obj->quan + 1)>>1);
 }
 
@@ -3104,6 +3184,7 @@ int x, y;
 				|| ((num) == PM_LICHEN)		\
 				|| ((num) == PM_CROW_WINGED_HALF_DRAGON)		\
 				|| ((num) == PM_BEHOLDER)		\
+				|| ((num) == PM_DEATH_BEHOLDER)		\
 				|| (is_rider(&mons[num]))	\
 				|| (mons[num].mlet == S_TROLL))
 

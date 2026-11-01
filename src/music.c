@@ -561,7 +561,7 @@ int know_spell;
 	if (u.uhp < u.uhpmax * 0.3) chance *= 2;
 
 	/* it's also difficult to play some instruments while wearing a shield. */
-	if (uarms && (instr_otyp == HARP || instr_otyp == DRUM)) 
+	if (uarms && !check_mutation(AAT_SHIELD_AURA) && (instr_otyp == HARP || instr_otyp == DRUM)) 
 		chance /= 2;
 
 	/* but it's easier with the eyes closed */
@@ -1184,6 +1184,15 @@ int distance;
 				mtmp->mdisrobe = 0;
 				mtmp->mgmld_throat = 0;
 				mtmp->mgmld_skin = 0;
+				mtmp->mbleed /= 2;
+				/* anti-syllable curses have no monster equivalent of the PC's
+				 * counteracting-syllable cure, so an expert rally can lift them */
+				mtmp->owrk = 0;
+				mtmp->ruh = 0;
+				mtmp->shey = 0;
+				mtmp->luahv = 0;
+				mtmp->nean = 0;
+				mtmp->nooh = 0;
 				if(get_mx(mtmp, MX_EDOG) && EDOG(mtmp)->apport < 10) EDOG(mtmp)->apport++;
 				if(mtmp->permspeed == 0) mon_adjust_speed(mtmp, 1, (struct obj *) 0, TRUE);
 			case P_SKILLED:
@@ -1204,7 +1213,7 @@ int distance;
 					mtmp->mfrozen = 0;
 				}
 				if(mtmp->mstdy > 0) mtmp->mstdy = 0;
-				mtmp->mwounded_legs = 0;
+				mon_heal_injuries(mtmp, 1);
 				mtmp->mstun = 0;
 				mtmp->mconf = 0;
 			case P_UNSKILLED:
@@ -1757,6 +1766,7 @@ do_pit:		    chasm = maketrap(x,y,PIT);
 		  case DOOR : /* Make the door collapse */
 		    /* ALI - artifact doors from Slash'em*/
 		    if (artifact_door(x, y))  break;
+		    if (levl[x][y].doormask & D_BARRED) break;
 		    if (levl[x][y].doormask == D_NODOOR) goto do_pit;
 		    if (cansee(x,y))
 			pline_The("door collapses.");
@@ -2001,7 +2011,7 @@ struct obj *instr;
 		return 0;
     }
 
-    if (uarms && (instr->otyp == HARP || instr->otyp == DRUM)){
+    if (uarms && !check_mutation(AAT_SHIELD_AURA) && (instr->otyp == HARP || instr->otyp == DRUM)){
 	    You("can't play properly while wearing a shield.");
 		return 0;
 	}

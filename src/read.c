@@ -22,7 +22,7 @@
 boolean	known;
 
 static NEARDATA const char readable[] =
-		   { ALL_CLASSES, SCROLL_CLASS, TILE_CLASS, SPBOOK_CLASS, 0 };
+		   { ALL_CLASSES, SCROLL_CLASS, TILE_CLASS, SPBOOK_CLASS, SANCTION_CLASS, 0 };
 static const char all_count[] = { ALLOW_COUNT, ALL_CLASSES, 0 };
 static const int random_cloud_types[] = { AD_FIRE, AD_COLD, AD_ELEC, AD_ACID};
 
@@ -36,6 +36,7 @@ static void FDECL(forget_single_object, (int));
 static void FDECL(maybe_tame, (struct monst *,struct obj *));
 static void FDECL(ranged_set_lightsources, (int, int, genericptr_t));
 static int FDECL(read_tile, (struct obj *));
+static int FDECL(do_read_sanction, (struct obj *));
 static int FDECL(study_word, (struct obj *));
 static int NDECL(learn_word);
 static void FDECL(learn_spell_aphanactonan, (int));
@@ -687,6 +688,8 @@ doread()
 			return MOVE_READ;
 		}
 #endif	/* TOURIST */
+	} else if (scroll->oclass == SANCTION_CLASS){
+		return do_read_sanction(scroll);
 	} else if (scroll->oclass == TILE_CLASS){
 		return read_tile(scroll);
 	} else if (scroll->oclass != SCROLL_CLASS
@@ -728,10 +731,13 @@ doread()
 	    const char *what = 0;
 	    if (scroll->oclass == SPBOOK_CLASS)
 			what = "mystic runes";
-	    else if (!scroll->dknown)
+	    else if (!scroll->dknown && scroll->oartifact != ART_PAINTING_FRAGMENT)
 			what = "formula on the scroll";
 	    if (what) {
-			if(check_oprop(scroll, OPROP_TACTB)){
+			if(scroll->otyp == SPE_BOOK_OF_THE_DEAD){
+				pline("The pages are oddly textured, and the runes on them feel as though they are cut deeply into stone.");
+			}
+			else if(check_oprop(scroll, OPROP_TACTB)){
 				pline("A tactile script supplements the %s.", what);
 			}
 			else {
@@ -765,12 +771,14 @@ doread()
 	if(!scroll->oartifact)
 		scroll->in_use = TRUE;	/* scroll, not spellbook, now being read */
 	if(scroll->oartifact) {
-		if(Blind && (scroll->oartifact == ART_MARAUDER_S_MAP || scroll->oartifact == ART_RITE_OF_DETESTATION)) {
+		if(Blind && scroll->oartifact == ART_MARAUDER_S_MAP) {
 			pline("Being blind, you cannot see %s.", the(xname(scroll)));
 			scroll->in_use = FALSE;
 			return MOVE_INSTANT;
 		}
-		if(scroll->oartifact != ART_PAINTING_FRAGMENT)
+		if(Blind && scroll->oartifact == ART_RITE_OF_DETESTATION)
+			pline("Being blind, you cannot see %s, but you know quite well what it is.", the(xname(scroll)));
+		else if(scroll->oartifact != ART_PAINTING_FRAGMENT)
 			pline("You examine %s.", the(xname(scroll)));
 	} else if(scroll->otyp != SCR_BLANK_PAPER) {
 	  if(Blind)
@@ -809,6 +817,44 @@ doread()
 
 static
 int
+do_read_sanction(struct obj *sanction)
+{
+	if (Blind) {
+		You_cant("make out the markings on the talisman.");
+		return MOVE_INSTANT;
+	}
+	if(ACURR(A_INT) < 19){
+		pline("This is some sort of legal document, but you cannot decipher its exact purpose.");
+		return MOVE_READ;
+	}
+	pline("This document sanctions the bearer's presence in Gehennom, but contains clauses subjecting the bearer to the laws of Hell.");
+	switch (sanction->otyp) {
+	case FIRE_RESISTANCE_SANCTION:
+		pline("The specific wording of the sanction protects the bearer from hellfire.");
+		break;
+	case COLD_RESISTANCE_SANCTION:
+		pline("The specific wording of the sanction protects the bearer from hellfrost.");
+		break;
+	case SHOCK_RESISTANCE_SANCTION:
+		pline("The specific wording of the sanction protects the bearer from hellish lightning.");
+		break;
+	case ACID_RESISTANCE_SANCTION:
+		pline("The specific wording of the sanction protects the bearer from hellish acid.");
+		break;
+	default:
+		impossible("Unknown sanction type in do_read_sanction.");
+		break;
+	}
+	makeknown(sanction->otyp);
+	if (!sanction->dknown) {
+		sanction->dknown = 1;
+	}
+	u.uconduct.literate++;
+	return MOVE_READ;
+}
+
+static
+int
 read_tile(scroll)
 struct obj *scroll;
 {
@@ -841,6 +887,7 @@ struct obj *scroll;
 			duration = 10;
 		}
 		u.uaesh_duration += duration;
+		youmonst.shey = 0;
 		if(!scroll->cursed) u.uaesh++;
 	} else if(scroll->otyp == SYLLABLE_OF_POWER__KRAU){
 		if(scroll->cursed){
@@ -855,6 +902,7 @@ struct obj *scroll;
 			duration = 10;
 		}
 		u.ukrau_duration += duration;
+		youmonst.owrk = 0;
 		if(!scroll->cursed) u.ukrau++;
 	} else if(scroll->otyp == SYLLABLE_OF_LIFE__HOON){
 		if(scroll->cursed){
@@ -869,6 +917,7 @@ struct obj *scroll;
 			duration = 10;
 		}
 		u.uhoon_duration += duration;
+		youmonst.nooh = 0;
 		if(!scroll->cursed) u.uhoon++;
 	} else if(scroll->otyp == SYLLABLE_OF_GRACE__UUR){
 		if(scroll->cursed){
@@ -883,6 +932,7 @@ struct obj *scroll;
 			duration = 10;
 		}
 		u.uuur_duration += duration;
+		youmonst.ruh = 0;
 		if(!scroll->cursed) u.uuur++;
 	} else if(scroll->otyp == SYLLABLE_OF_THOUGHT__NAEN){
 		if(scroll->cursed){
@@ -897,6 +947,7 @@ struct obj *scroll;
 			duration = 10;
 		}
 		u.unaen_duration += duration;
+		youmonst.nean = 0;
 		if(!scroll->cursed) u.unaen++;
 	} else if(scroll->otyp == SYLLABLE_OF_SPIRIT__VAUL){
 		if(scroll->cursed){
@@ -911,6 +962,7 @@ struct obj *scroll;
 			duration = 10;
 		}
 		u.uvaul_duration += duration;
+		youmonst.luahv = 0;
 		if(!scroll->cursed) u.uvaul++;
 	} else if(scroll->otyp == APHANACTONAN_RECORD){
 		if(Blind){
@@ -1776,6 +1828,13 @@ losesaninsight(percent)
 	    mvitals[indices[i]].insight_gained = 0;
 	    mvitals[indices[i]].vis_insight = FALSE;
 	    mvitals[indices[i]].insightkill = FALSE;
+		if(indices[i] == PM_PALE_NIGHT && u.umadness&MAD_PALE_NIGHT){
+			u.umadness &= ~MAD_PALE_NIGHT;
+			You_feel("something horrible slip your mind. You find you have no memory of... whatever it was!");
+			exercise(A_WIS, FALSE);
+			exercise(A_WIS, FALSE);
+			exercise(A_WIS, FALSE);
+		}
 	}
 }
 
@@ -1793,36 +1852,10 @@ mon_forget(struct monst *mtmp, int howmuch, boolean blessed, boolean cursed, boo
 			mtmp->mamnesia = TRUE;
 		}
 		mtmp->seenmadnesses = 0;
-		mtmp->mcrazed = 0;
 		mtmp->mberserk = 0;
-		mtmp->mdisrobe = 0;
 		mtmp->mdoubt = 0;
-		mtmp->mwounded_legs = 0;
-		mtmp->msanctity = 0;
-		mtmp->mgluttony = 0;
-		mtmp->mfrigophobia = 0;
-		mtmp->mcannibal = 0;
-		mtmp->mrage = 0;
-		mtmp->margent = 0;
-		mtmp->msuicide = 0;
-		mtmp->mnudist = 0;
-		mtmp->mophidio = 0;
-		mtmp->marachno = 0;
-		mtmp->mentomo = 0;
-		mtmp->mthalasso = 0;
-		mtmp->mhelmintho = 0;
-		mtmp->mparanoid = 0;
-		mtmp->mtalons = 0;
-		mtmp->mdreams = 0;
-		mtmp->msciaphilia = 0;
-		mtmp->mforgetful = 0;
-		mtmp->mapostasy = 0;
-		mtmp->mtoobig = 0;
-		mtmp->mrotting = 0;
-		mtmp->mformication = 0;
-		mtmp->mscorpions = 0;
-		mtmp->mvermin = 0;
-		mtmp->mcaterpillars = 0;
+		mon_heal_injuries(mtmp, HEAL_ALL_INJURIES);
+		mon_cure_madnesses(mtmp);
 	} else {
 		if (!silent) pline("%s looks angry and confused!", Monnam(mtmp));
 		untame(mtmp, 0);
@@ -1865,6 +1898,11 @@ int howmuch;
 	//Silently reduce the doubt timer (itimeout_incr handles negative timeouts)
 	if(HDoubt){
 		make_doubtful(itimeout_incr(HDoubt, -1*howmuch), FALSE);
+	}
+	//First roll to get rid of pale night madness specifically. San/Insight can also get rid of the madness later as a side-effect
+	if(rn2(100) < howmuch && u.umadness&MAD_PALE_NIGHT){
+		u.umadness &= ~MAD_PALE_NIGHT;
+		You_feel("something horrible fade from your mind. You find you have no memory of... whatever it was!");
 	}
 	
 	/* 1 in 3 chance of forgetting some levels */
@@ -1912,6 +1950,7 @@ struct obj *sobj;
 				role_skill++;
 			if(u.ukrau_duration)
 				role_skill += (role_skill+1)/2;
+			if(youmonst.owrk) role_skill = (role_skill+1)/2;
 			
 			for(; role_skill; role_skill--)
 				if(!resist(mtmp, sobj->oclass, 0, NOTELL)){
@@ -2248,7 +2287,12 @@ struct obj	*sobj;
 	    }
 	case SCR_BLANK_PAPER:
 		if(sobj->oartifact == ART_PAINTING_FRAGMENT){
-			You("can't make out any detail. There seems to have been a lot of white paint involved, though.");
+			if(!Blind)
+				You("can't make out any detail. There seems to have been a lot of white paint involved, though.");
+			pline("Your %s brush the surface of the %s...",
+				makeplural(body_part(FINGER)),
+				sobj->dknown ? "painting" : "scroll");
+			doparticularinvoke(sobj);
 		} else if(sobj->oartifact == ART_RITE_OF_DETESTATION){
 			doparticularinvoke(sobj);
 		} else {
@@ -3363,11 +3407,14 @@ do_it:
 	/* No-op in water - can only see the adjacent squares and that's it! */
 	if (Underwater || Is_waterlevel(&u.uz)) return;
 	/*
-	 *  If we are darkening the room and the hero is punished but not
-	 *  blind, then we have to pick up and replace the ball and chain so
-	 *  that we don't remember them if they are out of sight.
+	 *  If the hero is punished but not blind, then we have to pick up and
+	 *  replace the ball and chain so that they are redrawn if they are still
+	 *  in sight after the lighting changes, and not remembered if they aren't.
+	 *  Which squares stay in sight depends on the hero's vision type, so do
+	 *  this regardless of whether we are lighting or darkening.
 	 */
-	if (Punished && (Darksight ? on : !on) && !Blind)
+	boolean replace_bc = Punished && !Blind;
+	if (replace_bc)
 	    move_bc(1, 0, uball->ox, uball->oy, uchain->ox, uchain->oy);
 
 #ifdef REINCARNATION
@@ -3396,13 +3443,12 @@ do_it:
 	 *  correctly update all previously seen positions *and* correctly
 	 *  set the waslit bit [could be messed up from above].
 	 */
-	if (!Blind) {
+	if (!Blind)
 	    vision_recalc(2);
 
-	    /* replace ball&chain */
-	    if (Punished && (Darksight ? on : !on))
-			move_bc(0, 0, uball->ox, uball->oy, uchain->ox, uchain->oy);
-	}
+	/* replace ball&chain */
+	if (replace_bc)
+	    move_bc(0, 0, uball->ox, uball->oy, uchain->ox, uchain->oy);
 
 	vision_full_recalc = 1;	/* delayed vision recalculation */
 }
@@ -3743,30 +3789,31 @@ register struct obj	*sobj;
 	}
 	You("are being punished for your misbehavior!");
 	if(Punished){
-		if(uball->owt < 1600){
-			Your("iron ball gets heavier.");
-			uball->owt += 160 * (1 + cursed);
+		if(weight(uball) < 1600){
+			Your("%s ball gets heavier.", material_name(uball, TRUE));
+			uball->ovar1_heavy_ball += 160 * (1 + cursed);
+			uball->owt = weight(uball);
 		} else {
-			Your("iron ball can grow no heavier.");
+			Your("%s ball can grow no heavier.", material_name(uball, TRUE));
 		}
 		return;
 	}
 	if (amorphous_mon(&youmonst) || is_whirly(youracedata) || unsolid(youracedata)) {
 		pline("A ball and chain appears, then falls away.");
-		dropy(mkobj(BALL_CLASS, TRUE));
+		dropy(mkobj(BALL_CLASS, NO_MKOBJ_FLAGS));
 		return;
 	}
-	setworn(mkobj(CHAIN_CLASS, TRUE), W_CHAIN);
+	setworn(mkobj(CHAIN_CLASS, NO_MKOBJ_FLAGS), W_CHAIN);
 #ifdef CONVICT
     if (((otmp = carrying(BALL)) != 0) &&(otmp->oartifact ==
      ART_IRON_BALL_OF_LEVITATION)) {
         setworn(otmp, W_BALL);
         Your("%s chains itself to you!", xname(otmp));
     } else {
-		setworn(mkobj(BALL_CLASS, TRUE), W_BALL);
+		setworn(mkobj(BALL_CLASS, NO_MKOBJ_FLAGS), W_BALL);
     }
 #else
-	setworn(mkobj(BALL_CLASS, TRUE), W_BALL);
+	setworn(mkobj(BALL_CLASS, NO_MKOBJ_FLAGS), W_BALL);
 #endif /* CONVICT */
 	uball->spe = 1;		/* special ball (see save) */
 

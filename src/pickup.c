@@ -45,6 +45,7 @@ STATIC_DCL char NDECL(pick_bullet);
 STATIC_DCL char NDECL(pick_coin);
 STATIC_DCL struct obj * FDECL(pick_creatures_armor, (struct monst *, int *));
 STATIC_DCL struct obj * FDECL(pick_armor_for_creature, (struct monst *));
+STATIC_DCL struct obj * FDECL(pick_mon_item_for_water, (struct monst *));
 
 /* define for query_objlist() and autopickup() */
 #define FOLLOW(curr, flags) \
@@ -1997,11 +1998,14 @@ boolean *prev_loot;
 	){
 	if((otmp = pick_creatures_armor(mtmp, passed_info))){
 	long unwornmask;
+	boolean sword_disarmed;
 		if (nolimbs(youracedata)) {
 		    You_cant("do that without limbs."); /* not body_part(HAND) */
 		    return MOVE_CANCELLED;
 		}
-		if (otmp->cursed && otmp->owornmask && !is_weldproof_mon(mtmp)) {
+		if (otmp->cursed && otmp->owornmask && !is_weldproof_mon(mtmp)
+			&& !(mtmp->mtyp == PM_DANCING_SWORD && otmp == MON_WEP(mtmp))
+		) {
 		    You("can't. It seems to be stuck to %s.",
 			x_monnam(mtmp, ARTICLE_THE, (char *)0,
 				SUPPRESS_SADDLE, FALSE));
@@ -2031,11 +2035,21 @@ boolean *prev_loot;
 		    otmp->owornmask = 0L;
 		    update_mon_intrinsics(mtmp, otmp, FALSE, FALSE);
 		}
+		sword_disarmed = (mtmp->mtyp == PM_DANCING_SWORD && (unwornmask & W_WEP));
+		if (sword_disarmed) {
+			pline("%s stops dancing.", Monnam(mtmp));
+			if(otmp->oartifact && artilist[otmp->oartifact].inv_prop == WISDOM_DANCE)
+				otmp->age = 0L;
+		}
 		otmp = hold_another_object(otmp, "You drop %s!", doname(otmp),
 					(const char *)0);
 		timepassed = rnd(3) +  objects[otmp->otyp].oc_delay;
 		mtmp->mequipping = timepassed;
 		if (prev_loot) *prev_loot = TRUE;
+		if (sword_disarmed) {
+			relobj(mtmp, 0, FALSE);
+			mongone(mtmp);
+		}
 	} else {
 		return MOVE_CANCELLED;
 	}
@@ -2108,6 +2122,8 @@ dopetequip()
 			flag = W_AMUL;
 		} else if(is_shirt(otmp)){
 			flag = W_ARMU;
+		} else if(is_wingguard(otmp)){
+			flag = W_ARMW;
 		} else if(is_cloak(otmp)){
 			flag = W_ARMC;
 		} else if(is_helmet(otmp)){
@@ -2162,6 +2178,115 @@ dopetequip()
 		return MOVE_CANCELLED;
 	}
     return timepassed ? MOVE_STANDARD : MOVE_CANCELLED;
+}
+
+/* dopetwater() -- apply holy/cursed water to an item in a tame monster's inventory.
+ * Returns amount of time passed.
+ */
+int
+dopetwater(struct obj *potion)
+{
+    coord cc;
+    struct monst *mtmp;
+    struct obj *otmp;
+    boolean useeit;
+    const char *tmp;
+
+    if (!get_adjacent_loc("Apply water in which direction?", "Invalid location",
+            u.ux, u.uy, &cc)) return MOVE_CANCELLED;
+
+    if (cc.x == u.ux && cc.y == u.uy) {
+        You("pour the water on yourself. Use dipping to affect your own items.");
+        return MOVE_CANCELLED;
+    }
+
+    mtmp = m_at(cc.x, cc.y);
+
+    if (!mtmp || !canspotmon(mtmp)) {
+        You_cant("find anyone there!");
+        return MOVE_CANCELLED;
+    }
+    if (!mtmp->mtame) {
+        pline("%s doesn't trust you.", Monnam(mtmp));
+        return MOVE_CANCELLED;
+    }
+    if (nolimbs(youracedata)) {
+        You_cant("do that without limbs.");
+        return MOVE_CANCELLED;
+    }
+    if (!mtmp->minvent) {
+        pline("%s isn't carrying anything.", Monnam(mtmp));
+        return MOVE_CANCELLED;
+    }
+
+    otmp = pick_mon_item_for_water(mtmp);
+    if (!otmp) return MOVE_CANCELLED;
+
+    useeit = !Blind && cansee(mtmp->mx, mtmp->my);
+
+    if (potion->blessed) {
+        if (otmp->cursed) {
+            if (useeit)
+                pline("%s %s %s.", s_suffix(Monnam(mtmp)),
+                      aobjnam(otmp, "softly glow"), hcolor(NH_AMBER));
+            uncurse(otmp);
+            if (useeit) {
+                otmp->bknown = 1;
+                potion->bknown = 1;
+            }
+        } else if (!otmp->blessed) {
+            tmp = hcolor(NH_LIGHT_BLUE);
+            if (useeit)
+                pline("%s %s with a%s %s aura.", s_suffix(Monnam(mtmp)),
+                      aobjnam(otmp, "softly glow"),
+                      index(vowels, *tmp) ? "n" : "", tmp);
+            bless(otmp);
+            if (useeit) {
+                otmp->bknown = 1;
+                potion->bknown = 1;
+            }
+        } else {
+            if (potion->bknown) otmp->bknown = 1;
+            else if (otmp->bknown) potion->bknown = 1;
+            pline("Nothing seems to happen.");
+            return MOVE_CANCELLED;
+        }
+    } else if (potion->cursed) {
+        if (otmp->blessed) {
+            if (useeit)
+                pline("%s %s %s.", s_suffix(Monnam(mtmp)),
+                      aobjnam(otmp, "glow"), hcolor((const char *)"brown"));
+            unbless(otmp);
+            if (useeit) {
+                otmp->bknown = 1;
+                potion->bknown = 1;
+            }
+        } else if (!otmp->cursed) {
+            tmp = hcolor(NH_BLACK);
+            if (useeit)
+                pline("%s %s with a%s %s aura.", s_suffix(Monnam(mtmp)),
+                      aobjnam(otmp, "glow"),
+                      index(vowels, *tmp) ? "n" : "", tmp);
+            curse(otmp);
+            if (useeit) {
+                otmp->bknown = 1;
+                potion->bknown = 1;
+            }
+        } else {
+            if (potion->bknown) otmp->bknown = 1;
+            else if (otmp->bknown) potion->bknown = 1;
+            pline("Nothing seems to happen.");
+            return MOVE_CANCELLED;
+        }
+    } else {
+        if (useeit && otmp->bknown) potion->bknown = 1;
+        pline("Nothing seems to happen.");
+        return MOVE_CANCELLED;
+    }
+
+    makeknown(POT_WATER);
+    useup(potion);
+    return MOVE_STANDARD;
 }
 
 /*
@@ -2868,6 +2993,355 @@ boolean past;
     return;
 }
 
+STATIC_OVL void
+fill_juiblex_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    for (i = 0; i < 6; i++) { otmp = mksobj(WAGE_OF_GLUTTONY, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 12; i++) mkhellvaultitem_cnt(box, VN_SHAYATEEN);
+}
+
+STATIC_OVL void
+fill_zuggtmoy_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    for (i = 0; i < 6; i++) { otmp = mksobj(WAGE_OF_GLUTTONY, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 12; i++) mkhellvaultitem_cnt(box, VN_SHAYATEEN);
+}
+
+STATIC_OVL void
+fill_orcus_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_PRIDE, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_SLOTH, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 18; i++) mkhellvaultitem_cnt(box, VN_SHAYATEEN);
+}
+
+STATIC_OVL void
+fill_dispater_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_GREED, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_ENVY, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_PRIDE, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 6; i++) mkhellvaultitem_cnt(box, VN_A_O_BLESSINGS);
+    for (i = 0; i < 3; i++) mkhellvaultitem_cnt(box, VN_APOCALYPSE);
+    for (i = 0; i < 18; i++) mkhellvaultitem_cnt(box, VN_N_PIT_FIEND);
+}
+
+STATIC_OVL void
+fill_belial_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    for (i = 0; i < 2; i++) { otmp = mksobj(WAGE_OF_LUST, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 2; i++) { otmp = mksobj(WAGE_OF_PRIDE, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 2; i++) { otmp = mksobj(WAGE_OF_WRATH, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 18; i++) mkhellvaultitem_cnt(box, VN_N_PIT_FIEND);
+    for (i = 0; i < 6; i++) if (rn2(100) < 75) mkhellvaultitem_cnt(box, VN_N_PIT_FIEND);
+}
+
+STATIC_OVL void
+fill_fierna_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    otmp = mksobj(WAGE_OF_LUST, NO_MKOBJ_FLAGS); add_to_container(box, otmp);
+    otmp = mksobj(WAGE_OF_PRIDE, NO_MKOBJ_FLAGS); add_to_container(box, otmp);
+    otmp = mksobj(WAGE_OF_WRATH, NO_MKOBJ_FLAGS); add_to_container(box, otmp);
+    for (i = 0; i < 9; i++) mkhellvaultitem_cnt(box, VN_N_PIT_FIEND);
+    for (i = 0; i < 3; i++) if (rn2(100) < 75) mkhellvaultitem_cnt(box, VN_N_PIT_FIEND);
+}
+
+STATIC_OVL void
+fill_lilith_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    for (i = 0; i < 2; i++) { otmp = mksobj(WAGE_OF_ENVY, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 2; i++) { otmp = mksobj(WAGE_OF_LUST, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 2; i++) { otmp = mksobj(WAGE_OF_PRIDE, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 12; i++) mkhellvaultitem_cnt(box, VN_N_PIT_FIEND);
+}
+
+STATIC_OVL void
+fill_baalzebub_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    for (i = 0; i < 6; i++) { otmp = mksobj(WAGE_OF_PRIDE, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_SLOTH, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 18; i++) mkhellvaultitem_cnt(box, VN_APOCALYPSE);
+    for (i = 0; i < 9; i++) mkhellvaultitem_cnt(box, VN_N_PIT_FIEND);
+}
+
+STATIC_OVL void
+fill_mephistopheles_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_PRIDE, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 2; i++) { otmp = mksobj(WAGE_OF_GREED, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 2; i++) { otmp = mksobj(WAGE_OF_ENVY, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 2; i++) { otmp = mksobj(WAGE_OF_WRATH, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 36; i++) mkhellvaultitem_cnt(box, VN_N_PIT_FIEND);
+    for (i = 0; i < 9; i++) if (rn2(100) < 75) mkhellvaultitem_cnt(box, VN_N_PIT_FIEND);
+}
+
+STATIC_OVL void
+fill_baalphegor_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    for (i = 0; i < 4; i++) { otmp = mksobj(ANTIMAGIC_RIFT, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 4; i++) { otmp = mksobj(CATAPSI_VORTEX, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    otmp = mksobj(PRESERVATIVE_ENGINE, NO_MKOBJ_FLAGS); add_to_container(box, otmp);
+    for (i = 0; i < 24; i++) mkhellvaultitem_cnt(box, VN_A_O_BLESSINGS);
+    for (i = 0; i < 8; i++) if (rn2(100) < 75) mkhellvaultitem_cnt(box, VN_A_O_BLESSINGS);
+}
+
+STATIC_OVL void
+fill_asmodeus_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    for (i = 0; i < 3; i++) { otmp = mksobj(ANTIMAGIC_RIFT, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 3; i++) { otmp = mksobj(CATAPSI_VORTEX, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_PRIDE, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 27; i++) mkhellvaultitem_cnt(box, VN_N_PIT_FIEND);
+    for (i = 0; i < 27; i++) if (rn2(100) < 90) mkhellvaultitem_cnt(box, VN_N_PIT_FIEND);
+    for (i = 0; i < 27; i++) if (rn2(100) < 45) mkhellvaultitem_cnt(box, VN_N_PIT_FIEND);
+}
+
+STATIC_OVL void
+fill_demogorgon_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_PRIDE, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_ENVY, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 6; i++) mkhellvaultitem_cnt(box, VN_A_O_BLESSINGS);
+    for (i = 0; i < 6; i++) mkhellvaultitem_cnt(box, VN_APOCALYPSE);
+    for (i = 0; i < 6; i++) mkhellvaultitem_cnt(box, VN_AKKABISH);
+    for (i = 0; i < 6; i++) mkhellvaultitem_cnt(box, VN_N_PIT_FIEND);
+    for (i = 0; i < 12; i++) mkhellvaultitem_cnt(box, VN_SHAYATEEN);
+}
+
+STATIC_OVL void
+fill_lamashtu_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_ENVY, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_GREED, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 12; i++) mkhellvaultitem_cnt(box, VN_APOCALYPSE);
+    for (i = 0; i < 12; i++) mkhellvaultitem_cnt(box, VN_AKKABISH);
+    for (i = 0; i < 12; i++) mkhellvaultitem_cnt(box, VN_SHAYATEEN);
+}
+
+STATIC_OVL void
+fill_yeenoghu_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_GLUTTONY, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_WRATH, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 12; i++) mkhellvaultitem_cnt(box, VN_SHAYATEEN);
+}
+
+STATIC_OVL void
+fill_baphomet_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_PRIDE, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_WRATH, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 12; i++) mkhellvaultitem_cnt(box, VN_SHAYATEEN);
+}
+
+STATIC_OVL void
+fill_pale_night_reliquary(struct obj *box)
+{
+    int i;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    for (i = 0; i < 6; i++) mkhellvaultitem_cnt(box, VN_AKKABISH);
+    for (i = 0; i < 6; i++) if (rn2(100) < 90) mkhellvaultitem_cnt(box, VN_AKKABISH);
+    for (i = 0; i < 6; i++) if (rn2(100) < 75) mkhellvaultitem_cnt(box, VN_AKKABISH);
+    for (i = 0; i < 6; i++) if (rn2(100) < 50) mkhellvaultitem_cnt(box, VN_AKKABISH);
+    for (i = 0; i < 6; i++) if (rn2(100) < 25) mkhellvaultitem_cnt(box, VN_AKKABISH);
+    for (i = 0; i < 6; i++) if (rn2(100) < 10) mkhellvaultitem_cnt(box, VN_AKKABISH);
+}
+
+STATIC_OVL void
+fill_kostchtchie_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_WRATH, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_SLOTH, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 12; i++) mkhellvaultitem_cnt(box, VN_SHAYATEEN);
+}
+
+STATIC_OVL void
+fill_malcanthet_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_LUST, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_ENVY, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 18; i++) mkhellvaultitem_cnt(box, VN_SHAYATEEN);
+}
+
+STATIC_OVL void
+fill_grazzt_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_PRIDE, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 3; i++) { otmp = mksobj(WAGE_OF_LUST, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 18; i++) mkhellvaultitem_cnt(box, VN_SHAYATEEN);
+}
+
+STATIC_OVL void
+fill_avatar_of_lolth_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    for (i = 0; i < 2; i++) { otmp = mksobj(WAGE_OF_PRIDE, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 2; i++) { otmp = mksobj(WAGE_OF_LUST, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 2; i++) { otmp = mksobj(WAGE_OF_ENVY, NO_MKOBJ_FLAGS); add_to_container(box, otmp); }
+    for (i = 0; i < 18; i++) {
+        mklolthvaultitem_cnt(box);
+    }
+}
+
+STATIC_OVL void
+fill_chromatic_dragon_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+    if (get_obj_location(box, &ox, &oy, 0)) box->ox = ox, box->oy = oy;
+    otmp = mksobj(WAGE_OF_SLOTH, NO_MKOBJ_FLAGS); add_to_container(box, otmp);
+    otmp = mksobj(WAGE_OF_LUST, NO_MKOBJ_FLAGS); add_to_container(box, otmp);
+    otmp = mksobj(WAGE_OF_GLUTTONY, NO_MKOBJ_FLAGS); add_to_container(box, otmp);
+    otmp = mksobj(WAGE_OF_GREED, NO_MKOBJ_FLAGS); add_to_container(box, otmp);
+    otmp = mksobj(WAGE_OF_WRATH, NO_MKOBJ_FLAGS); add_to_container(box, otmp);
+    otmp = mksobj(WAGE_OF_ENVY, NO_MKOBJ_FLAGS); add_to_container(box, otmp);
+    otmp = mksobj(WAGE_OF_PRIDE, NO_MKOBJ_FLAGS); add_to_container(box, otmp);
+    for (i = 0; i < 9; i++) mkhellvaultitem_cnt(box, VN_APOCALYPSE);
+    for (i = 0; i < 18; i++) mkchromaticvaultitem_cnt(box);
+}
+
+STATIC_OVL void
+fill_bael_reliquary(struct obj *box)
+{
+    int i;
+    struct obj *otmp;
+    xchar ox, oy;
+
+    if (get_obj_location(box, &ox, &oy, 0))
+        box->ox = ox, box->oy = oy;
+
+    for (i = 0; i < 6; i++) {
+        otmp = mksobj(WAGE_OF_WRATH, NO_MKOBJ_FLAGS);
+        add_to_container(box, otmp);
+    }
+    for (i = 0; i < 3; i++) {
+        otmp = mksobj(WAGE_OF_ENVY, NO_MKOBJ_FLAGS);
+        add_to_container(box, otmp);
+    }
+    for (i = 0; i < 9; i++)
+        mkhellvaultitem_cnt(box, VN_APOCALYPSE);
+    for (i = 0; i < 9; i++)
+        mkhellvaultitem_cnt(box, VN_N_PIT_FIEND);
+    for (i = 0; i < 9; i++)
+        mkhellvaultitem_cnt(box, VN_SHAYATEEN);
+}
+
+void
+open_trophy_reliquary(struct obj *box)
+{
+	if(u.uwizard)
+		pline("As you break the seals, the reliquary suddenly grows heavier as the extradimensional space within dissipates.");
+	else
+		pline("As you break the seals, the reliquary suddenly grows heavier.");
+    switch (box->corpsenm) {
+    case PM_JUIBLEX:        fill_juiblex_reliquary(box);        break;
+    case PM_ZUGGTMOY:       fill_zuggtmoy_reliquary(box);       break;
+    case PM_ORCUS:          fill_orcus_reliquary(box);          break;
+    case PM_DISPATER:       fill_dispater_reliquary(box);       break;
+    case PM_BELIAL:         fill_belial_reliquary(box);         break;
+    case PM_FIERNA:         fill_fierna_reliquary(box);         break;
+    case PM_MOTHER_LILITH:
+    case PM_CRONE_LILITH:
+    case PM_DAUGHTER_LILITH: fill_lilith_reliquary(box);        break;
+    case PM_BAALZEBUB:      fill_baalzebub_reliquary(box);      break;
+    case PM_MEPHISTOPHELES: fill_mephistopheles_reliquary(box); break;
+    case PM_BAALPHEGOR:     fill_baalphegor_reliquary(box);     break;
+    case PM_ASMODEUS:       fill_asmodeus_reliquary(box);       break;
+    case PM_DEMOGORGON:     fill_demogorgon_reliquary(box);     break;
+    case PM_LAMASHTU:       fill_lamashtu_reliquary(box);       break;
+    case PM_YEENOGHU:       fill_yeenoghu_reliquary(box);       break;
+    case PM_BAPHOMET:       fill_baphomet_reliquary(box);       break;
+    case PM_PALE_NIGHT:     fill_pale_night_reliquary(box);     break;
+    case PM_KOSTCHTCHIE:    fill_kostchtchie_reliquary(box);    break;
+    case PM_MALCANTHET:     fill_malcanthet_reliquary(box);     break;
+    case PM_GRAZ_ZT:        fill_grazzt_reliquary(box);         break;
+    case PM_AVATAR_OF_LOLTH: fill_avatar_of_lolth_reliquary(box); break;
+    case PM_BAEL:           fill_bael_reliquary(box);           break;
+    case PM_CHROMATIC_DRAGON: fill_chromatic_dragon_reliquary(box); break;
+    default:
+        break;
+    }
+    box->owt = weight(box);
+    box->corpsenm = NON_PM;
+}
+
 void
 open_crazy_box(box, past)
 struct obj *box;
@@ -3008,7 +3482,13 @@ boolean past;
 		}
 	}
 
-	switch(urace.malenum){
+	if(u.uroleplay.pauper){
+		u.uurchin = TRUE;
+		expert_weapon_skill(P_DAGGER);
+		expert_weapon_skill(P_SHORT_SWORD);
+		expert_weapon_skill(P_TWO_WEAPON_COMBAT);
+	}
+	else switch(urace.malenum){
 		default:
 		case PM_HALF_DRAGON:
 			if(flags.initgend){
@@ -3228,6 +3708,8 @@ boolean past;
 				expert_weapon_skill(P_QUARTERSTAFF);
 				free_skill_up(P_QUARTERSTAFF);
 				pline("You suddenly remember that you are gelatinous!");
+				if(priminal_mudras())
+					pline("You also realize you don't have an aura of many hands, you have many pseudopods instead.");
 				pline("Oh, and you've got a tail.");
 				add_mutation(AAT_PRIMINAL);
 				add_mutation(AAT_PRIMINAL_TAIL);
@@ -3469,6 +3951,8 @@ struct monst *mon;
 				addArmorMenuOption
 			} else if(is_shirt(otmp) && !(mon->misc_worn_check&W_ARMU) && otmp->objsize == mon->data->msize && shirt_match(mon->data,otmp)){
 				addArmorMenuOption
+			} else if(is_wingguard(otmp) && !(mon->misc_worn_check&W_ARMW) && otmp->objsize == mon->data->msize && has_wings_mon(mon)){
+				addArmorMenuOption
 			} else if(is_cloak(otmp) && !(mon->misc_worn_check&W_ARMC) && (abs(otmp->objsize - mon->data->msize) <= 1)){
 				addArmorMenuOption
 			} else if(is_helmet(otmp) && !(mon->misc_worn_check&W_ARMH) && helm_match(mon,otmp) && helm_size_fits(mon->data,otmp)){
@@ -3496,6 +3980,52 @@ struct monst *mon;
 	} else pline("Nothing to equip!");
 	destroy_nhwindow(tmpwin);
 	if(n > 0){
+		struct obj *picked = selected[0].item.a_obj;
+		free(selected);
+		return picked;
+	}
+	return 0;
+}
+
+STATIC_OVL
+struct obj *
+pick_mon_item_for_water(struct monst *mon)
+{
+	winid tmpwin;
+	int n = 0, count = 0;
+	char buf[BUFSZ];
+	char incntlet = 'a';
+	struct obj *otmp;
+	menu_item *selected;
+	anything any;
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;
+
+	Sprintf(buf, "Inventory");
+	add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+	for (otmp = mon->minvent; otmp; otmp = otmp->nobj) {
+#ifdef GOLDOBJ
+		if (otmp->oclass == COIN_CLASS) continue;
+#endif
+		Sprintf1(buf, doname(otmp));
+		any.a_obj = otmp;
+		add_menu(tmpwin, NO_GLYPH, &any,
+			incntlet, 0, ATR_NONE, buf, MENU_UNSELECTED);
+		incntlet++;
+		if (incntlet > 'z') incntlet = 'A';
+		if (incntlet > 'Z' && incntlet < 'a') incntlet = 'a';
+		count++;
+	}
+	end_menu(tmpwin, "Apply water to what:");
+
+	if (count)
+		n = select_menu(tmpwin, PICK_ONE, &selected);
+	else
+		pline("Nothing to apply water to!");
+	destroy_nhwindow(tmpwin);
+	if (n > 0) {
 		struct obj *picked = selected[0].item.a_obj;
 		free(selected);
 		return picked;
@@ -3620,6 +4150,14 @@ register int held;
 	    }
 	    return MOVE_CONTAINER;
 	}
+	if (obj->otyp == TROPHY_RELIQUARY && obj->corpsenm != NON_PM
+	    && mvitals[obj->corpsenm].died == 0) {
+	    pline("This reliquary is sealed by the will of %s.",
+	          mons[obj->corpsenm].mname);
+	    return MOVE_CANCELLED;
+	}
+	if (obj->otyp == TROPHY_RELIQUARY && obj->corpsenm != NON_PM)
+	    open_trophy_reliquary(obj);
 	current_container = obj;	/* for use by in/out_container */
 	if(Is_real_container(obj)){
 		if (obj->spe == 1) {

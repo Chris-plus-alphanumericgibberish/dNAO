@@ -1,6 +1,7 @@
 #include "hack.h"
-
+#include "xhity.h"
 #include "seduce.h"
+#include "mattkbp.h"
 
 # ifdef SEDUCE
 STATIC_DCL void FDECL(mayberem, (struct obj *, const char *, BOOLEAN_P));
@@ -33,6 +34,7 @@ struct attack *mattk;
 	xchar genagr, gendef;
 	boolean tiefling = (youagr && (check_mutation(TT_ATTRACTIVE_1) || check_mutation(TT_ATTRACTIVE_2)));
 	boolean tiefling_nymph = (youagr && check_mutation(TT_ATTRACTIVE_1));
+	boolean grace_gifts = full_grace_empowers(magr, AAT_GRACE_GIFTS);
 	if(youdef || youagr){
 		if(Chastity) return 0;
 		
@@ -77,11 +79,12 @@ struct attack *mattk;
 	if(pagr->mlet == S_NYMPH || pagr->mtyp == PM_INCUBUS || pagr->mtyp == PM_SUCCUBUS
 			|| pagr->mtyp == PM_CARMILLA || pagr->mtyp == PM_VLAD_THE_IMPALER || pagr->mtyp == PM_LEVISTUS
 			|| tiefling
+			|| grace_gifts
 	){
 		if(genagr == 1 - gendef)
 			return 1;
 		else
-			return (tiefling_nymph || pagr->mlet == S_NYMPH || pagr->mtyp == PM_LEVISTUS) ? 2 : 0;
+			return (grace_gifts || tiefling_nymph || pagr->mlet == S_NYMPH || pagr->mtyp == PM_LEVISTUS) ? 2 : 0;
 	}
 	else if(pagr->mtyp == PM_MOTHER_LILITH || pagr->mtyp == PM_BELIAL){
 		if(genagr == 1 - gendef) return 1;
@@ -164,7 +167,7 @@ struct monst * mon;
 		}
 	}
 	else if(mon->mtyp == PM_VLAD_THE_IMPALER || mon->mtyp == PM_CARMILLA){
-		struct attack vampire_bite = {AT_BITE, AD_VAMP, 1, 6, 0};
+		struct attack vampire_bite = {AT_BITE, AD_VAMP, 1, 6, 0, .bodypart = ATKBP(MOUTH)};
 		xmeleehity(mon, &youmonst, &vampire_bite, (struct obj **)0, -1, 0, FALSE, 0);
 	}
 	else {
@@ -208,10 +211,8 @@ int
 dopaleseduce(mon)
 register struct monst *mon;
 {
-	register struct obj *ring, *nring;
 	boolean fem = !poly_gender(); /* male = 0, fem = 1, neuter = 2 */
 	boolean helpless = FALSE;
-	char qbuf[QBUFSZ];
 	
 	if(!monnear(mon, u.ux,u.uy)) return 0;
 	
@@ -225,7 +226,7 @@ register struct monst *mon;
 	
 	if (unconscious()) {/*Note: is probably not going to be possible to be unconscious and enter this function*/
 		You("are having a horrible dream.");
-		boolean helpless = TRUE;
+		helpless = TRUE;
 	}
 
 	if(mon->mvar_paleWarning == 1){
@@ -246,37 +247,22 @@ register struct monst *mon;
 	}
 
 	if (rn2(66) > 2*ACURR(A_WIS) - ACURR(A_INT) || helpless) {
-		int lifesaved = 0;
 		int wdmg = (int)(d(1,10)) + 1;
 		
 		sedu_undress(mon);
 
-		if(rn2( (int)(ACURR(A_WIS)/2))){
-			boolean loopingDeath = TRUE;
-			while(loopingDeath) {
-				boolean has_lifesaving = Lifesaved;
-				if (lifesaved){
-					pline("There is something horrible lurking in your memory... the mere thought of it is consuming your mind from within!");
-				}
-				else{
-					pline("As you pass through the shroud, your every sense goes mad.");
-					Your("whole world becomes an unbearable symphony of agony.");
-				}
+		if(rn2( (int)(ACURR(A_WIS)))){
+			pline("As you pass through the shroud, your every sense goes mad.");
+			Your("whole world becomes an unbearable symphony of agony.");
+			//TRANSCENDENCE_IMPURITY_UP(FALSE)
+			u.umadness |= MAD_PALE_NIGHT;
+			if(roll_madness(MAD_PALE_NIGHT)){
 				killer = "seeing something not meant for mortal eyes";
 				killer_format = KILLED_BY;
 				done(DIED);
-				lifesaved++;
-				/* avoid looping on "die(y/n)?" */
-				if (lifesaved && (discover || wizard || has_lifesaving)) {
-					if (has_lifesaving) {
-						/* used up AMULET_OF_LIFE_SAVING; still
-						   subject to dying from memory */
-						if(rn2( (int)(ACURR(A_WIS)/2)) < 4) loopingDeath = FALSE;
-					} else {
-						/* explicitly chose not to die */
-						loopingDeath = FALSE;
-					}
-				}
+			}
+			else {
+				change_usanity(save_vs_sanloss() ? (-rnd(100)) : (-rnd(10)), TRUE);
 			}
 		}
 		You("find yourself staggering away from %s, with no memory of why.", fem ? "her" : "him");
@@ -284,6 +270,8 @@ register struct monst *mon;
 		while( ABASE(A_WIS) > ATTRMIN(A_WIS) && wdmg > 0){
 			wdmg--;
 			(void) adjattrib(A_WIS, -1, TRUE);
+			(void) adjattrib(A_INT, -1, TRUE);
+			(void) adjattrib(A_CHA, -1, TRUE);
 			exercise(A_WIS, FALSE);
 		}
 		if(u.sealsActive&SEAL_HUGINN_MUNINN){
@@ -308,10 +296,10 @@ int dmg;
 	int i; //multipurpose local variable
 	int n, ln, trycount; //loop control variables for attacks;
 	int allreadydone = 0; //don't repeat the same special case;
-	struct attack bodyblow = {AT_TENT, AD_WRAP, 2, 10};
-	struct attack headshot = {AT_TENT, AD_DRIN, 2, 10};
-	struct attack handshit = {AT_TENT, AD_DRDX, 2, 10};
-	struct attack legblast = {AT_TENT, AD_LEGS, 2, 10};
+	struct attack bodyblow = {AT_TENT, AD_WRAP, 2, 10, .bodypart = ATKBP(TENTACLE_GENERIC)};
+	struct attack headshot = {AT_TENT, AD_DRIN, 2, 10, .bodypart = ATKBP(TENTACLE_GENERIC)};
+	struct attack handshit = {AT_TENT, AD_DRDX, 2, 10, .bodypart = ATKBP(TENTACLE_GENERIC)};
+	struct attack legblast = {AT_TENT, AD_LEGS, 2, 10, .bodypart = ATKBP(TENTACLE_GENERIC)};
 
 	n = 4; //4 actions
 	ln = n;
@@ -604,7 +592,7 @@ int dmg;
 				if(allreadydone&(0x1<<6)) break;
 				allreadydone |= 0x1<<6;
 				n--; //else commit to the attack.
-				if(uarmc || uarm || uarmu || (uwep && uwep->oartifact==ART_TENSA_ZANGETSU)){
+				if(uarmc || uarm || uarmu || uarmw || (uwep && uwep->oartifact==ART_TENSA_ZANGETSU)){
 					You_feel("the tentacles sucking on your %s", uarm ? "armor" : "clothes");
 			break;  //blocked
 				} //else
@@ -731,7 +719,7 @@ int dmg;
 					You_feel("the tentacles writhe over your %s.", uarmc ? "cloak" : "shihakusho");
 			break;
 				} //else
-				if(invent && !uarmc && !uarm && !uarmu && !uarmf && !uarmg && !uarms && !uarmh && !uwep
+				if(invent && !uarmc && !uarm && !uarmw && !uarmu && !uarmf && !uarmg && !uarms && !uarmh && !uwep
 					){ //only steal if you have at least one item and everything else of interest is already gone.
 					n = 0;
 					You_feel("the tentacles pick through your remaining possessions.");
@@ -743,6 +731,41 @@ int dmg;
 							return 1;
 					}
 				}
+			break;
+			case 13:
+			if(allreadydone&(0x1<<13)) break;
+			allreadydone |= 0x1<<13;
+			if(uarmw){
+				n--;
+				if(!slips_free(mon, &youmonst,  &legblast, -1)){
+					You_feel("the tentacles squirm under your wing-guards.");
+					if( d(1,100) > 90){
+						if(!Preservation){
+							pline("The tentacles begin to tear at your wing-guards!");
+							if(uarmw->spe > 1){
+								for(i=rn2(4); i>=0; i--)
+									drain_item(uarmw);
+								Your("%s less effective.", aobjnam(uarmw, "seem"));
+							}
+							else{
+								tent_destroy_arm(uarmw);
+							}
+						}
+					}
+					else{
+						pline("The tentacles pull off your wing-guards!");
+						otmp = uarmw;
+						if (donning(otmp)) cancel_don();
+						(void) WingGuard_off();
+						freeinv(otmp);
+						(void) mpickobj(mon,otmp);
+						if(roll_madness(MAD_TALONS)){
+							You("panic after having your wing-guards stolen!");
+							HPanicking += 1+rnd(6);
+						}
+					}
+				}
+			}
 			break;
 		   }
 		}
@@ -818,6 +841,7 @@ boolean dontask;
 				(obj == uarmf) ? "let me rub your feet" :
 				(obj == uarmg) ? "they're too clumsy" :
 				(obj == uarmu) ? "let me massage you" :
+				(obj == uarmw) ? "let me rub your wings" :
 				/* obj == uarmh */
 				hairbuf
 			);
@@ -928,10 +952,8 @@ struct monst * mon;
 {
 	/* check no-clothes case */
 	if (!uarm && !uarmc && !uarmf && !uarmg && !uarms && !uarmh && !uwep && !uswapwep
-#ifdef TOURIST
-		&& !uarmu
-#endif
-		) {
+		&& !uarmu && !uarmw
+	) {
 		/* message */
 		switch (mon->mtyp)
 		{
@@ -1006,10 +1028,9 @@ struct monst * mon;
 
 		if (mon->mtyp != PM_GRAZ_ZT) /* his seduces can replace your hat */
 			undressfunc(uarmh, "helmet", helpless);
-#ifdef TOURIST
 		if (!uarmc && !uarm)
 			undressfunc(uarmu, "clothes", helpless);
-#endif
+		undressfunc(uarmw, "wing-covers", helpless);
 	}
 
 	return;
@@ -1178,6 +1199,9 @@ msteal_m(struct monst *magr, struct monst *mdef, struct attack *attk, int *resul
 		return TRUE;
 	}
 
+	if(mdef->mtyp == PM_DANCING_SWORD)
+		return TRUE;
+
 	if(attk->adtyp == AD_SITM){
 		/* select item from defender's inventory */
 		for (otmp = mdef->minvent; otmp; otmp = otmp->nobj)
@@ -1243,6 +1267,8 @@ msteal_m(struct monst *magr, struct monst *mdef, struct attack *attk, int *resul
 		
 		if(seduce && (attk->adtyp == AD_SSEX || attk->adtyp == AD_LSEX)){
 			minvent_ptr = &mdef->minvent;
+			//Stealing everything
+			// Put armor last in inventory
 			while ((otmp = *minvent_ptr) != 0){
 				if (otmp->owornmask & (W_ARM|W_ARMU)){
 					if (stealoid){ /*Steal suit or undershirt*/
@@ -1263,12 +1289,18 @@ msteal_m(struct monst *magr, struct monst *mdef, struct attack *attk, int *resul
 		else {
 			/* select item from defender's inventory */
 			for (otmp = mdef->minvent; otmp; otmp = otmp->nobj)
-				if ((!magr->mtame || !otmp->cursed) && (seduce || !(otmp->owornmask&equipmentmask)))
+				if ((!magr->mtame || !otmp->cursed) 
+					&& (seduce || !(otmp->owornmask&equipmentmask))
+					&& !(otmp->owornmask&W_SKIN)
+				)
 					nitems++;
 			if(nitems){
 				nitems = rnd(nitems);
 				for (otmp = mdef->minvent; otmp; otmp = otmp->nobj)
-					if ((!magr->mtame || !otmp->cursed) && (seduce || !(otmp->owornmask&equipmentmask)))
+					if ((!magr->mtame || !otmp->cursed)
+					&& (seduce || !(otmp->owornmask&equipmentmask))
+					&& !(otmp->owornmask&W_SKIN)
+				)
 						if(--nitems <= 0)
 							break;
 			}
@@ -1277,24 +1309,15 @@ msteal_m(struct monst *magr, struct monst *mdef, struct attack *attk, int *resul
 			int delay = 0;
 			if(seduce && (otmp->owornmask&(W_ARM|W_ARMU))){
 				long unwornmask;
-				//Stealing everything
-				// minvent_ptr = &mdef->minvent;
-				// while ((otmp = *minvent_ptr) != 0)
-					// if (otmp->owornmask & (W_ARM|W_ARMU)){
-						// if (stealoid) /*Steal suit or undershirt*/
-							// continue;
-						// *minvent_ptr = otmp->nobj;	/* take armor out of minvent */
-						// stealoid = otmp;
-						// stealoid->nobj = (struct obj *)0;
-					// } else {
-						// minvent_ptr = &otmp->nobj;
-					// }
-				// *minvent_ptr = stealoid;	/* put armor back into minvent */
-				// otmp = stealoid;
+				struct obj *nobj;
 				if(vis)
 					pline("%s seduces %s and %s starts to take off %s clothes.",
 						Monnam(magr), mon_nam(mdef), mhe(mdef), mhis(mdef));
-				while ((otmp = mdef->minvent) != 0) {
+				nobj = mdef->minvent;
+				while ((otmp = nobj) != 0) {
+					nobj = otmp->nobj;
+					if(otmp->owornmask & (W_SKIN))
+						continue;
 					/* take the object away from the monster */
 					if(otmp->oclass == ARMOR_CLASS && objects[otmp->otyp].oc_delay)
 						delay = max(delay, objects[otmp->otyp].oc_delay);

@@ -531,6 +531,12 @@ nh_timeout()
 	if(u.unaen_duration) u.unaen_duration--;
 	if(u.uuur_duration) u.uuur_duration--;
 	if(u.uvaul_duration) u.uvaul_duration--;
+	if(youmonst.owrk) youmonst.owrk--;
+	if(youmonst.ruh) youmonst.ruh--;
+	if(youmonst.shey) youmonst.shey--;
+	if(youmonst.luahv) youmonst.luahv--;
+	if(youmonst.nean) youmonst.nean--;
+	if(youmonst.nooh) youmonst.nooh--;
 	
 	if (u.uluck != baseluck) {
 	    int timeout = 600;
@@ -943,7 +949,7 @@ nh_timeout()
 			stop_occupation();
 			break;
 		case BLINDED:
-			Blinded = 1;
+			set_itimeout(&Blinded, 1L);
 			make_blinded(0L, TRUE);
 			stop_occupation();
 			break;
@@ -2312,6 +2318,8 @@ struct obj * obj;
 		break;
 	case POT_OIL:
 	case STICK_OF_DYNAMITE:
+	case SANCTIFIED_EMBER:
+	case SANCTIFIED_SPARK:
 		radius = 1;     /* very dim light */
 		break;
 	case CANDELABRUM_OF_INVOCATION:
@@ -2742,8 +2750,6 @@ struct obj *obj;
 	EMON(obj)->mnotlaugh = mon->mnotlaugh;
 	EMON(obj)->mlaughing = mon->mlaughing;
 	EMON(obj)->mdoubt = mon->mdoubt;
-	EMON(obj)->mwounded_legs = mon->mwounded_legs;
-	
 	EMON(obj)->menvy = mon->menvy;
 	EMON(obj)->msanctity = mon->msanctity;
 	EMON(obj)->mgluttony = mon->mgluttony;
@@ -2775,6 +2781,19 @@ struct obj *obj;
 	return obj;
 }
 
+/* callback proc for a monster whose exhausted light-emitting cells have recovered */
+void
+relight_mon(genericptr_t arg, long timeout)
+{
+	struct monst *mon = (struct monst *)arg;
+
+	if (DEADMONSTER(mon) || mon->light)
+		return;
+	/* this timer is already off mon->timed, so emits_light_mon() gives the full radius again */
+	if (emits_light_mon(mon))
+		new_light_source(LS_MONSTER, (genericptr_t)mon, emits_light_mon(mon));
+}
+
 /* callback procs to desummon monsters/objects */
 void
 desummon_mon(arg, timeout)
@@ -2782,6 +2801,7 @@ genericptr_t arg;
 long timeout;
 {
 	struct monst * mon = (struct monst *)arg;
+	struct monst *summoner = (struct monst *)0;
 	if (DEADMONSTER(mon)) {
 		/* already dead, necessary cleanup will be done by cleanup_msummon() */
 		return;
@@ -2791,6 +2811,7 @@ long timeout;
 		return;
 	}
 	if (get_mx(mon, MX_ESUM) && mon->mextra_p->esum_p->summoner) {
+		summoner = mon->mextra_p->esum_p->summoner;
 		mon->mextra_p->esum_p->summoner->summonpwr -= mon->mextra_p->esum_p->summonstr;
 		mon->mextra_p->esum_p->summoner = (struct monst *)0;
 		mon->mextra_p->esum_p->sm_id = 0;
@@ -2815,6 +2836,9 @@ long timeout;
 			pline("%s vanishes.", Monnam(mon));
 		}
 		monvanished(mon);
+		/* vortex has vacated its square; spawn the pre-selected monster type */
+		if (mon->mtyp == PM_SUMMONING_VORTEX && mon->mvar1_summon_ID != NON_PM)
+			(void) msummon_place((int)mon->mvar1_summon_ID, mon->mx, mon->my, summoner);
 	}
 }
 
@@ -2918,6 +2942,37 @@ long timeout;
 
 
 void
+unsuppress_object(arg, timeout)
+genericptr_t arg;
+long timeout;
+{
+	struct obj *obj = (struct obj *) arg;
+	if (obj->owornmask & (W_WEP)) {
+		start_timer(1, TIMER_OBJECT,
+					UNSUPPRESS_OBJECT, (genericptr_t)obj);
+	} else if ((obj->owornmask & (W_SWAPWEP)) && (obj->where == OBJ_MINVENT || u.twoweap)) {
+		start_timer(1, TIMER_OBJECT,
+					UNSUPPRESS_OBJECT, (genericptr_t)obj);
+	} else {
+		obj->suppressed = 0;
+		find_ac();
+		if (obj->where == OBJ_INVENT)
+			update_inventory();
+	}
+}
+
+void
+attach_unsuppress_timeout(obj, duration)
+struct obj *obj;
+long duration;
+{
+	if (obj->timed)
+		(void) stop_timer(UNSUPPRESS_OBJECT, obj->timed);
+	obj->suppressed = 1;
+	start_timer(duration, TIMER_OBJECT, UNSUPPRESS_OBJECT, (genericptr_t)obj);
+}
+
+void
 revert_mercurial(arg, timeout)
 genericptr_t arg;
 long timeout;
@@ -2986,6 +3041,111 @@ long timeout;
 		fix_object(obj);
 		update_inventory();
 	}
+}
+
+/* Describes the Six-Element Sword [obj] ceasing to channel the elements and modifiers in [ended]. */
+STATIC_OVL void
+six_element_end_message(struct obj *obj, long ended)
+{
+	if (obj->where != OBJ_INVENT || Blind)
+		return;
+	//Wood
+	if ((ended & SIXEL_WOOD) && (ended & SIXEL_ELEC))
+		pline_The("scabbard's swirling etchings no longer flicker with lightning, and the sharp spike crumbles from the chape.");
+	else if (ended & SIXEL_WOOD)
+		pline_The("polished wood onlay and sharp chape-spike crumble from the scabbard.");
+	else if (ended & SIXEL_ELEC)
+		pline_The("scabbard's swirling etchings no longer flicker with lightning.");
+	//Fire
+	if (ended & SIXEL_FIRE)
+		pline_The("scabbard's wavy etchings no longer glow %s-hot.",
+			(ended & SIXEL_FIRE_MODIFIERS) == SIXEL_FIRE_MODIFIERS ? "white" : "red");
+	//Earth
+	if (ended & SIXEL_FIELD)
+		pline_The("green glaze crumbles from the scabbard's broken-line etchings, and the rough glaze from the triangular.");
+	else if (ended & SIXEL_EARTH)
+		pline_The("rough glaze crumbles from the scabbard's triangular etchings.");
+	//Metal
+	if (ended & SIXEL_FROST)
+		pline_The("frost on the scabbard melts and the circular etchings lose much of their luster.");
+	else if (ended & SIXEL_METAL)
+		pline_The("scabbard's circular etchings lose much of their luster.");
+	//Water
+	if (ended & SIXEL_ICE)
+		pline_The("fractal ice blades melt from the scabbard's edges and the curling etchings lose their slick icy sheen.");
+	else if (ended & SIXEL_WATER)
+		pline_The("scabbard's curling etchings lose their watery sheen.");
+}
+
+/* The Six-Element Sword [arg] stops channeling its current element and modifiers. */
+void
+revert_six_element(genericptr_t arg, long timeout)
+{
+	struct obj *obj = (struct obj *) arg;
+	if(obj->oartifact != ART_SIX_ELEMENT_SWORD)
+		return;
+	six_element_end_message(obj, artinstance[ART_SIX_ELEMENT_SWORD].SixElementChannel);
+	artinstance[ART_SIX_ELEMENT_SWORD].SixElementChannel = SIXEL_NONE;
+	if(obj->where == OBJ_INVENT)
+		update_inventory();
+}
+
+/* The Six-Element Sword [obj] starts channeling [element] (which may include modifiers) for 100 turns, keeping only the existing modifiers that belong to [element]. Does nothing on the Spire. */
+void
+set_six_element_channel(struct obj *obj, long element)
+{
+	long *channel = &artinstance[ART_SIX_ELEMENT_SWORD].SixElementChannel;
+
+	if (Is_spire(&u.uz))
+		return;
+	if (element & SIXEL_WOOD)
+		*channel = (*channel & SIXEL_WOOD_MODIFIERS) | element;
+	else if (element & SIXEL_METAL)
+		*channel = (*channel & SIXEL_METAL_MODIFIERS) | element;
+	else if (element & SIXEL_WATER)
+		*channel = (*channel & SIXEL_WATER_MODIFIERS) | element;
+	else if (element & SIXEL_EARTH)
+		*channel = (*channel & SIXEL_EARTH_MODIFIERS) | element;
+	else if (element & SIXEL_FIRE)
+		*channel = (*channel & SIXEL_FIRE_MODIFIERS) | element;
+	else
+		*channel = element;
+	if (obj->timed)
+		(void) stop_timer(REVERT_SIX_ELEMENT, obj->timed);
+	start_timer(100, TIMER_OBJECT, REVERT_SIX_ELEMENT, (genericptr_t)obj);
+	if (obj->where == OBJ_INVENT)
+		update_inventory();
+}
+
+void
+cloud_drift(arg, timeout)
+genericptr_t arg;
+long timeout;
+{
+	struct obj *obj = (struct obj *) arg;
+	int x, y, count, pick;
+
+	if (obj->where == OBJ_CONTAINED || !Is_airlevel(&u.uz))
+		return;
+
+	count = 0;
+	for (x = 1; x < COLNO; x++)
+		for (y = 0; y < ROWNO; y++)
+			if (IS_CLOUD(levl[x][y].typ))
+				count++;
+	if (!count)
+		return;
+
+	pick = rn2(count);
+	for (x = 1; x < COLNO; x++)
+		for (y = 0; y < ROWNO; y++)
+			if (IS_CLOUD(levl[x][y].typ) && pick-- == 0)
+				goto found;
+	return;
+found:
+	obj_extract_and_unequip_self(obj);
+	place_object(obj, x, y);
+	start_timer((long)d(7,7), TIMER_OBJECT, CLOUD_DRIFT, (genericptr_t)obj);
 }
 
 void
@@ -3140,6 +3300,12 @@ static const ttable timeout_funcs[NUM_TIME_FUNCS] = {
 	TTAB(revert_aureate_deluge,(timeout_proc)0,"revert_aureate_deluge"),
 	TTAB(gray_moldy_corpse,(timeout_proc)0,"gray_moldy_corpse"),
 	TTAB(slow_wheel,		(timeout_proc)0,	"slow_wheel"),
+	TTAB(cloud_drift,		(timeout_proc)0,	"cloud_drift"),
+	TTAB(unsuppress_object,	(timeout_proc)0,	"unsuppress_object"),
+	TTAB(relight_mon,		(timeout_proc)0,	"relight_mon"),
+	TTAB(crumble_if_improved,	(timeout_proc)0,	"crumble_if_improved"),
+	TTAB(revert_six_element,	(timeout_proc)0,	"revert_six_element"),
+	TTAB(revert_bleeding_void,	(timeout_proc)0,	"revert_bleeding_void"),
 	TTAB(omni_time_out,		(timeout_proc)0,	"omni_time_out"),
 	TTAB(omni_recharge,		(timeout_proc)0,	"omni_recharge"),
 };
@@ -3671,10 +3837,19 @@ int amt;
 {
 	struct esum * esum = get_mx(mon, MX_ESUM);
 	timer_element * tm;
+	long remaining;
 	if (!esum) return;
 	if (esum->permanent) return;
 	if (!(tm = get_timer(mon->timed, DESUMMON_MON))) return;
-	adjust_timer_duration(tm, -min(amt, tm->timeout - monstermoves));
+	remaining = tm->timeout - monstermoves;
+	if (mon->mtyp == PM_SUMMONING_VORTEX) {
+		/* a partial cut just shortens the fuse without stopping the demon
+		   from arriving -- only let a cut that desummons it outright through,
+		   and then make sure the summon it was carrying doesn't complete */
+		if (amt < remaining) return;
+		mon->mvar1_summon_ID = NON_PM;
+	}
+	adjust_timer_duration(tm, -min(amt, remaining));
 	run_timers();
 }
 /* when a summoner dies or changes levels, all of its summons disappear */
@@ -3717,6 +3892,11 @@ boolean travelling;	/* if true, don't vanish summoned items in its inventory */
 					}
 				}
 			}
+
+			/* this always collapses the timer to fire immediately (never a partial
+			   cut), so a vortex just needs its summon suppressed, not skipped */
+			if (tm->func_index == DESUMMON_MON && ((struct monst *)tm->arg)->mtyp == PM_SUMMONING_VORTEX)
+				((struct monst *)tm->arg)->mvar1_summon_ID = NON_PM;
 
 			adjust_timer_duration(tm, min(0, monstermoves - tm->timeout));
 			flags.run_timers = TRUE;

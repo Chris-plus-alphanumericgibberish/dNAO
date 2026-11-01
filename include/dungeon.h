@@ -115,6 +115,7 @@ typedef struct branch {
 #define Is_firelevel(x)		(on_level(x, &fire_level))
 #define Is_airlevel(x)		(on_level(x, &air_level))
 
+#define In_dungeons_of_doom(x)	((x)->dnum == oracle_level.dnum)
 #define Is_challenge_level(x)	(on_level(x, &challenge_level))
 #define Is_medusa_level(x)	(on_level(x, &challenge_level) && dungeon_topology.challenge_variant >= MEDUSA_LEVEL1 && dungeon_topology.challenge_variant <= MEDUSA_LEVEL4)
 #define Is_grue_level(x)	(on_level(x, &challenge_level) && dungeon_topology.challenge_variant >= GRUE_LEVEL1 && dungeon_topology.challenge_variant <= GRUE_LEVEL2)
@@ -248,6 +249,7 @@ typedef struct branch {
 #define In_moloch_temple(x)	((x)->dnum == temple_dnum)
 #define In_lost_tomb(x)		((x)->dnum == tomb_dnum)
 #define Inhell			In_hell(&u.uz)	/* now gehennom */
+#define Inhell_proper	(Inhell && !Is_valley(&u.uz))
 #define Infuture		(Role_if(PM_ANACHRONONAUT) && In_quest(&u.uz))
 #define In_endgame(x)		((x)->dnum == astral_level.dnum)
 

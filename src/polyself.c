@@ -11,6 +11,7 @@
  */
 
 #include "hack.h"
+#include "mattkbp.h"
 
 #ifdef OVLB
 STATIC_DCL void FDECL(polyman, (const char *,const char *));
@@ -22,6 +23,7 @@ STATIC_DCL void NDECL(newman);
 STATIC_DCL short NDECL(doclockmenu);
 STATIC_DCL short NDECL(dodroidmenu);
 STATIC_DCL void FDECL(worddescriptions, (int));
+STATIC_DCL boolean FDECL(mon_meets_u_gaze, (struct monst *));
 
 /* assumes u.umonnum is set already */
 void
@@ -78,6 +80,9 @@ const char *fmt, *arg;
 	skinback(FALSE);
 	u.uundetected = 0;
 
+	break_armor();
+	drop_weapon(1);
+
 	if (sticky) uunstick();
 	find_ac();
 	if (was_mimicking) {
@@ -108,7 +113,7 @@ const char *fmt, *arg;
 	    }
 	}
 	if (was_blind && !Blind) {	/* reverting from eyeless */
-	    Blinded = 1L;
+	    set_itimeout(&Blinded, 1L);
 	    make_blinded(0L, TRUE);	/* remove blindness */
 	}
 
@@ -583,7 +588,7 @@ int	mntmp;
 	    }
 	}
 	if (was_blind && !Blind) {	/* previous form was eyeless */
-	    Blinded = 1L;
+	    set_itimeout(&Blinded, 1L);
 	    make_blinded(0L, TRUE);	/* remove blindness */
 	}
 	newsym(u.ux,u.uy);		/* Change symbol */
@@ -777,6 +782,17 @@ break_armor()
 				(void) Shirt_off();
 				useup(otmp);
 			}
+		}
+    }
+	if ((otmp = uarmw) != 0) {
+		if(otmp->objsize != youracedata->msize
+				|| !has_wings_mon(&youmonst) || is_gaseous_noequip(youracedata) || noncorporeal(youracedata)
+		){
+			if (donning(otmp)) cancel_don();
+			Your("wing-guards %s!", (!has_wings_mon(&youmonst) || is_gaseous_noequip(youracedata) || noncorporeal(youracedata)) ? "fall away" : "pop off");
+			(void) WingGuard_off();
+		// setworn((struct obj *)0, otmp->owornmask & W_ARMW);
+			dropx(otmp);
 		}
     }
 	if ((otmp = uarmh) != 0){
@@ -1149,7 +1165,7 @@ dospit()
 		return MOVE_CANCELLED;
 	else {
 		if(check_mutation(TT_BLINDING_VENOM)){
-			struct attack spt = { AT_SPIT, AD_BLND, 0, 0 };
+			struct attack spt = { AT_SPIT, AD_BLND, 0, 0, .bodypart = ATKBP(MOUTH) };
 			xspity(&youmonst, &spt, 0, 0);
 		}
 		else {
@@ -1431,11 +1447,23 @@ dotinker()
 	return MOVE_STANDARD;
 }
 
+/* Return TRUE if mon can see the hero with its eyes, and so meet the hero's gaze. */
+STATIC_OVL boolean
+mon_meets_u_gaze(struct monst *mon)
+{
+	return (haseyes(mon->data)
+		&& !is_blind(mon)
+		&& !mon->msleeping
+		&& (!Invis || mon_resistance(mon, SEE_INVIS))
+		&& mon_can_see_you(mon)
+	);
+}
+
 int
 dogaze(struct monst *mtmp)
 {
 	boolean pre_targeted = mtmp != NULL;
-	boolean attack_gazes = !pre_targeted || (u.uattked && (attacktype(youracedata, AT_GAZE) || (!Upolyd && check_vampire(VAMPIRE_GAZE)) || (!Upolyd && TIEFLING_GAZE)) );
+	boolean attack_gazes = !pre_targeted || (u.uattked && (attacktype(youracedata, AT_GAZE) || (!Upolyd && check_vampire(VAMPIRE_GAZE)) || (!Upolyd && (TIEFLING_GAZE || AASIMAR_GAZE))) );
 	int result = 0;
 
 	if (Blind) {
@@ -1458,29 +1486,38 @@ dogaze(struct monst *mtmp)
 				}
 			}
 			if(attack_gazes && !Upolyd && check_vampire(VAMPIRE_GAZE)){
-				struct attack gaze = {AT_GAZE, AD_PLYS, 1, 4};
+				struct attack gaze = {AT_GAZE, AD_PLYS, 1, 4, .bodypart = ATKBP(EYES)};
 				result |= xgazey(&youmonst, mtmp, &gaze, -1);
 			}
 			if(DEADMONSTER(mtmp)){
 				return MOVE_STANDARD;
 			}
 			if(hates_unholy_mon(mtmp) && check_mutation(TT_HATEFUL_VISION)){
-				struct attack gaze = {AT_GAZE, AD_STDY, 1, 9};
+				struct attack gaze = {AT_GAZE, AD_STDY, 1, 9, .bodypart = ATKBP(EYES)};
 				result |= xgazey(&youmonst, mtmp, &gaze, -1);
 			}
 			if(DEADMONSTER(mtmp)){
 				return MOVE_STANDARD;
 			}
 			if(check_mutation(TT_CANCEL_GAZE)){
-				struct attack gaze = {AT_GAZE, AD_CNCL, 2, 6};
+				struct attack gaze = {AT_GAZE, AD_CNCL, 2, 6, .bodypart = ATKBP(EYES)};
 				result |= xgazey(&youmonst, mtmp, &gaze, -1);
 			}
 			if(DEADMONSTER(mtmp)){
 				return MOVE_STANDARD;
 			}
 			if(attack_gazes && check_mutation(TT_BEHOLDER)){
-				struct attack gaze = {AT_GAZE, AD_RGAZ, 4, 6};
+				struct attack gaze = {AT_GAZE, AD_RGAZ, 4, 6, .bodypart = ATKBP(EYES)};
 				for(int i = 0; i < 3; i++){
+					result |= xgazey(&youmonst, mtmp, &gaze, -1);
+					if(DEADMONSTER(mtmp)){
+						return MOVE_STANDARD;
+					}
+				}
+			}
+			if(attack_gazes && check_mutation(AAT_ELADRIN_GAZE)){
+				struct attack gaze;
+				if(eladrin_gaze_attack(&gaze)){
 					result |= xgazey(&youmonst, mtmp, &gaze, -1);
 					if(DEADMONSTER(mtmp)){
 						return MOVE_STANDARD;
@@ -1500,10 +1537,21 @@ dogaze(struct monst *mtmp)
 			if(DEADMONSTER(mtmp)){
 				return MOVE_STANDARD;
 			}
-			if(!mindless_mon(mtmp) && (check_mutation(TT_ODD_EYES_1) || check_mutation(TT_ODD_EYES_2) || check_mutation(TT_ODD_EYES_3) || check_mutation(TT_MANY_ODD_EYES))){
+			if(!mindless_mon(mtmp) && mon_meets_u_gaze(mtmp) && (check_mutation(TT_ODD_EYES_1) || check_mutation(TT_ODD_EYES_2) || check_mutation(TT_ODD_EYES_3) || check_mutation(TT_MANY_ODD_EYES))){
 				if(mtmp->encouraged > -6){
 					mtmp->encouraged--;
 					//pline("%s seems less confident than before.", Monnam(mtmp));
+					result |= MM_HIT;
+				}
+			}
+			if(aasimar_hunts(mtmp)){
+				struct attack gaze = {AT_GAZE, AD_STDY, 1, 7, .bodypart = ATKBP(EYES)};
+				result |= xgazey(&youmonst, mtmp, &gaze, -1);
+				if(DEADMONSTER(mtmp)){
+					return MOVE_STANDARD;
+				}
+				if(!mindless_mon(mtmp) && mon_meets_u_gaze(mtmp) && mtmp->encouraged > -7){
+					mtmp->encouraged--;
 					result |= MM_HIT;
 				}
 			}
@@ -1673,6 +1721,12 @@ dogaze(struct monst *mtmp)
 		   	     } else if(mortal_race(mtmp)){
 		   	         dmg *= 2;
 				 }
+		   	 break;
+		   	 case AD_LGHT:
+		   	     dmg = d(damn,damd);
+		   	     You("attack %s with a searing stare!", mon_nam(mtmp));
+		   	     if (mon_reflects(mtmp, "The searing light is reflected by %s %s!"))
+		   	         dmg = 0;
 		   	 break;
 			 case AD_STDY:
 				You("study %s carefully.",mon_nam(mtmp));
@@ -2717,6 +2771,105 @@ ptrbodypart(struct permonst *mptr, int part, struct monst *mon)
 	return animal_parts[part];
 }
 
+/* atkbp_bodypart_name(): the noun a piece of attack-attribution flavor text
+ * (e.g. "You grab the %s!") should use for a struct atkbp_set produced by
+ * attk_bodyparts() (src/mattkbp.c).
+ *
+ * Expects bp to be a single already-selected bit, not an arbitrary
+ * compound set -- picking which bit "wins" when an attack's attribution is
+ * a union of several (e.g. a mind flayer's TENTACLE_GENERIC|MOUTH) is a
+ * job for whatever composes the sentence, not this function. Returns NULL
+ * for bits with no physical noun at all (NONE/INNUMERABLE/MIND_NOLIMB) --
+ * callers must check.
+ */
+const char *
+atkbp_bodypart_name(struct atkbp_set bp, struct permonst *ptr)
+{
+	struct atkbp_set arm_words = atkbp_or((struct atkbp_set[]){
+	    ATKBP(ARM), ATKBP(ARM_DOMINANT), ATKBP(ARM_OFFHAND),
+	    ATKBP(ARM_3RD), ATKBP(ARM_4TH), ATKBP(ARM_5TH), ATKBP(ARM_6TH),
+	    ATKBP(ARM_7TH), ATKBP(ARM_8TH), ATKBP(MISKA_ARM_1ST), ATKBP(MISKA_ARM_2ND), ATKBP(NONE) });
+	struct atkbp_set arm_lower_words = atkbp_or((struct atkbp_set[]){
+	    ATKBP(ARM_LOWER), ATKBP(ARM_LOWER_DOMINANT),
+	    ATKBP(ARM_LOWER_OFFHAND), ATKBP(NONE) });
+	struct atkbp_set leg_words = atkbp_or((struct atkbp_set[]){
+	    ATKBP(LEG), ATKBP(LEG_REAR), ATKBP(LEG_FRONT),
+	    ATKBP(LEG_DOMINANT), ATKBP(LEG_OFFHAND),
+	    ATKBP(LEG_3RD), ATKBP(LEG_4TH), ATKBP(LEG_5TH),
+	    ATKBP(LEG_6TH), ATKBP(LEG_7TH), ATKBP(LEG_8TH), ATKBP(NONE) });
+	struct atkbp_set horn_words = atkbp_or((struct atkbp_set[]){
+	    ATKBP(HORN), ATKBP(HORN_1ST), ATKBP(HORN_2ND), ATKBP(HORN_3RD),
+	    ATKBP(HORN_4TH), ATKBP(HORN_5TH), ATKBP(HORN_6TH), ATKBP(NONE) });
+	struct atkbp_set tentacle_words = atkbp_or((struct atkbp_set[]){
+	    ATKBP(TENTACLE_GENERIC), ATKBP(TENTACLE_ARM), ATKBP(TENTACLE_ARM_DOMINANT),
+	    ATKBP(TENTACLE_ARM_OFFHAND), ATKBP(TENTACLE_ARM_3RD),
+	    ATKBP(TENTACLE_ARM_4TH), ATKBP(TENTACLE_ARM_5TH),
+	    ATKBP(TENTACLE_ARM_6TH), ATKBP(NONE) });
+	struct atkbp_set alien_limb_words = atkbp_or((struct atkbp_set[]){
+	    ATKBP(ALIEN_LIMB_1ST), ATKBP(ALIEN_LIMB_2ND), ATKBP(NONE) });
+	struct atkbp_set secondary_arm_words = atkbp_or((struct atkbp_set[]){
+	    ATKBP(SECONDARY_ARM), ATKBP(1ST_SECONDARY_ARM), ATKBP(2ND_SECONDARY_ARM),
+	    ATKBP(3RD_SECONDARY_ARM), ATKBP(4TH_SECONDARY_ARM), ATKBP(5TH_SECONDARY_ARM), ATKBP(NONE) });
+	struct atkbp_set no_noun = atkbp_or((struct atkbp_set[]){
+	    ATKBP(NONE), ATKBP(INNUMERABLE), ATKBP(MIND_NOLIMB), ATKBP(NONE) });
+
+	if (atkbp_intersects(bp, no_noun))
+	    return (const char *)0;
+
+	if (atkbp_intersects(bp, arm_words))
+	    return ptrbodypart(ptr, ARM, (struct monst *) 0);
+	if (atkbp_intersects(bp, leg_words))
+	    return ptrbodypart(ptr, LEG, (struct monst *) 0);
+	if (atkbp_intersects(bp, ATKBP(HEAD)))
+	    return ptrbodypart(ptr, HEAD, (struct monst *) 0);
+	if (atkbp_intersects(bp, ATKBP(EYES)))
+	    return ptrbodypart(ptr, EYE_BP, (struct monst *) 0);
+	if (atkbp_intersects(bp, ATKBP(LENS_ARRAY)))
+	    return "lens array";
+	if (atkbp_intersects(bp, ATKBP(TONGUE)))
+	    return ptrbodypart(ptr, TONGUE, (struct monst *) 0);
+	if (atkbp_intersects(bp, ATKBP(WING)))
+	    return ptrbodypart(ptr, WINGS_BP, (struct monst *) 0);
+
+	/* PM_*-scoped override, checked before the family's plain default */
+	if (ptr->mtyp == PM_BLIBDOOLPOOLP_S_MINDGRAVEN_CHAMPION
+		&& atkbp_intersects(bp, arm_lower_words))
+	    return "pincer";
+	if (atkbp_intersects(bp, arm_lower_words))
+	    return "lower arm";
+	if (atkbp_intersects(bp, secondary_arm_words)) {
+	    static char secondary_arm_buf[BUFSZ];
+
+	    Sprintf(secondary_arm_buf, "secondary %s", ptrbodypart(ptr, ARM, (struct monst *) 0));
+	    return secondary_arm_buf;
+	}
+
+	if (atkbp_intersects(bp, ATKBP(LIMB_GENERIC))) return "limb";
+	if (atkbp_intersects(bp, ATKBP(LAUNCHER_GENERIC))) return "launcher";
+	if (atkbp_intersects(bp, ATKBP(MECHANISM_GENERIC))) return "mechanism";
+	if (atkbp_intersects(bp, ATKBP(WHOLE_BODY))) return "body";
+	if (atkbp_intersects(bp, horn_words)) return "horn";
+	if (atkbp_intersects(bp, ATKBP(MOUTH))) return "mouth";
+	if (atkbp_intersects(bp, ATKBP(TORSO_MAW))) return "maw";
+	if (atkbp_intersects(bp, ATKBP(SIPHON))) return "siphon";
+	if (atkbp_intersects(bp, ATKBP(HALO))) return "halo";
+	if (atkbp_intersects(bp, ATKBP(HORNED_LIGHT))) return "horned light";
+	if (atkbp_intersects(bp, ATKBP(SHADOW))) return "shadow";
+	if (atkbp_intersects(bp, ATKBP(AURA_ARM))) return "arm of light";
+	if (atkbp_intersects(bp, ATKBP(ARMOR_ARM))) return "armor arm";
+	if (atkbp_intersects(bp, ATKBP(TAIL))) return "tail";
+	if (atkbp_intersects(bp, ATKBP(STINGER))) return "stinger";
+	if (atkbp_intersects(bp, ATKBP(PROBOSCIS))) return "proboscis";
+	if (atkbp_intersects(bp, tentacle_words)) return "tentacle";
+	if (atkbp_intersects(bp, ATKBP(VINE))) return "vine";
+	if (atkbp_intersects(bp, ATKBP(OTHER_APPENDAGE))) return "appendage";
+	if (atkbp_intersects(bp, alien_limb_words)) return "limb";
+	if (atkbp_intersects(bp, ATKBP(SNAKE))) return "snake";
+	if (atkbp_intersects(bp, ATKBP(CENTIPEDE))) return "centipede";
+
+	return (const char *) 0;
+}
+
 const char *
 body_part(part)
 int part;
@@ -2776,7 +2929,8 @@ int damtype, dam;
 				heal = dam / 6; /* Approx 1 per die */
 			break;
 		case AD_EFIR:
-		case AD_FIRE: if (u.umonnum == PM_IRON_GOLEM || u.umonnum == PM_GREEN_STEEL_GOLEM || u.umonnum == PM_CHAIN_GOLEM || u.umonnum == PM_ARGENTUM_GOLEM)
+		case AD_FIRE:
+		case AD_SFLM: if (u.umonnum == PM_IRON_GOLEM || u.umonnum == PM_GREEN_STEEL_GOLEM || u.umonnum == PM_CHAIN_GOLEM || u.umonnum == PM_ARGENTUM_GOLEM)
 				heal = dam;
 			break;
 	}

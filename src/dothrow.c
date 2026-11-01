@@ -367,7 +367,7 @@ jumping_polearm(genericptr_t arg, int x, int y)
 				path = TRUE;
 		}
 	}
-	if(((Role_if(PM_MONK) || Role_if(PM_KENSEI) || has_mutation(AAT_PRIMINAL)) && !Upolyd) && !mon->mpeaceful && canseemon(mon)){
+	if(AerialCombat && !mon->mpeaceful && canseemon(mon)){
 		u.dx = x - u.ux;
 		u.dy = y - u.uy;
 		if(path){
@@ -413,8 +413,8 @@ hurtle_step(arg, x, y)
     boolean may_pass = TRUE;
     struct trap *ttmp;
 	static long last_messaged = 0L;
-	boolean spiralcloud, passage, nightjar, sakura, path;
-	spiralcloud = passage = nightjar = sakura = path = FALSE;
+	boolean spiralcloud, passage, nightjar, sakura, path, crush, ashfall, whirlpool, snowfall;
+	spiralcloud = passage = nightjar = sakura = path = crush = ashfall = whirlpool = snowfall = FALSE;
 	if(Role_if(PM_KENSEI) && uwep && is_kensei_weapon(uwep)){
 		if(u.role_variant == ART_SKY_REFLECTED || u.role_variant == ART_SILVER_SKY){
 			if(artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_POWER)
@@ -434,6 +434,19 @@ hurtle_step(arg, x, y)
 			}
 			else {
 				passage = TRUE;
+			}
+		}
+		else if(u.role_variant == ART_ANCIENT_RITUAL_SWORD && uwep->oartifact == ART_SIX_ELEMENT_SWORD){
+			if(six_element_channel(uwep->oartifact, SIXEL_WATER)){
+				whirlpool = TRUE;
+				passage = !Is_spire(&u.uz);
+			}
+			else if(six_element_channel(uwep->oartifact, SIXEL_METAL)){
+				snowfall = TRUE;
+			}
+			else {
+				crush = TRUE;
+				ashfall = six_element_channel(uwep->oartifact, SIXEL_FIRE) && !Is_spire(&u.uz);
 			}
 		}
 	}
@@ -506,11 +519,17 @@ hurtle_step(arg, x, y)
 
 
     if ((mon = m_at(x, y)) != 0) {
-		if((((Role_if(PM_MONK) || Role_if(PM_KENSEI) || has_mutation(AAT_PRIMINAL)) && !Upolyd) || activeFightingForm(FFORM_ATARU)) && !mon->mpeaceful && canseemon(mon)){
+		if(AerialCombat && !mon->mpeaceful && canseemon(mon)){
 			u.dx = x - u.ux;
 			u.dy = y - u.uy;
 			flags.forcefight = TRUE;
-			if(spiralcloud){
+			if(whirlpool){
+				if(last_messaged < monstermoves){
+					pline("Whirlpool spiral!");
+					last_messaged = monstermoves;
+				}
+			}
+			else if(spiralcloud){
 				if(last_messaged < monstermoves){
 					pline("Spiralcloud passage!");
 					exercise(A_CON, TRUE);
@@ -539,9 +558,42 @@ hurtle_step(arg, x, y)
 					last_messaged = monstermoves;
 				}
 			}
-			attack2(mon);
+			else if(snowfall){
+				if(last_messaged < monstermoves){
+					pline("Still snowfall!");
+					last_messaged = monstermoves;
+				}
+				set_six_element_channel(uwep, SIXEL_METAL|SIXEL_FROST);
+			}
+			else if(crush){
+				if(last_messaged < monstermoves){
+					pline(ashfall ? "Ash fall!" : "Crush!");
+					last_messaged = monstermoves;
+				}
+				set_six_element_channel(uwep, SIXEL_EARTH);
+			}
+			if(!Upolyd && Role_if(PM_KENSEI) && u.role_variant == ART_SUN_S_BOW
+				&& uwep && is_kensei_weapon(uwep) && u_can_kick()
+			){
+				if(u.ulevel >= 14){
+					u.uattked = TRUE;
+					check_caitiff(mon);
+					dive_kick_monster(mon);
+				}
+				else kick_monster(x, y);
+			}
+			else
+				attack2(mon);
 			flags.forcefight = FALSE;
-			boolean stop = m_at(x, y) || (!passage && !path && partial_action());
+			if(ashfall && m_at(x, y) == mon && !DEADMONSTER(mon)){
+				/* knocked back like a rolling boulder's victim: straight back or off to one side */
+				int tx = sgn(x - u.ux), ty = sgn(y - u.uy), r = rn2(3);
+				int kx = (tx&&!ty) ? tx : (!tx&&ty) ? rn2(3)-1 : (r != 2) ? tx : 0;
+				int ky = (ty&&!tx) ? ty : (!ty&&tx) ? rn2(3)-1 : (r != 1) ? ty : 0;
+				if(kx || ky)
+					mhurtle(mon, kx, ky, 1, TRUE);
+			}
+			boolean stop = m_at(x, y) || (!passage && !path && !ashfall && partial_action());
 			if(stop && m_at(x, y) && nightjar){
 				mon = m_at(x, y);
 				u.dx = x - u.ux;
@@ -549,7 +601,7 @@ hurtle_step(arg, x, y)
 				int gx = x + u.dx;
 				int gy = y + u.dy;
 				if(isok(gx, gy) && teleok(gx,gy,FALSE) && !m_at(gx,gy)){
-					static struct attack weaponhit =	{ AT_WEAP, AD_PHYS, 0, 0 };
+					struct attack weaponhit = wielded_weapon_attack(&youmonst, uwep);
 					boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mon) ? VIS_MDEF : 0);
 					pline("Nightjar abduction!");
 					exercise(A_CHA, TRUE);
@@ -558,7 +610,7 @@ hurtle_step(arg, x, y)
 				}
 			}
 			if(spiralcloud)
-				cyclone_slash_monsters(FALSE);
+				cyclone_slash_monsters(FALSE, FALSE);
 			if(stop)
 				return FALSE;
 			exercise(A_INT, TRUE); // for using a special technique, for standard jumps only affects the first monster
@@ -585,6 +637,10 @@ hurtle_step(arg, x, y)
     newsym(ox, oy);		/* update old position */
     vision_recalc(1);		/* update for new position */
     flush_screen(1);
+    if(whirlpool && uwep && uwep->oartifact == ART_SIX_ELEMENT_SWORD && whirlpool_spiral_waves(uwep, last_messaged < monstermoves))
+	last_messaged = monstermoves;
+    if(snowfall && !Is_spire(&u.uz) && uwep && uwep->oartifact == ART_SIX_ELEMENT_SWORD && still_snowfall_cancels(uwep, last_messaged < monstermoves))
+	last_messaged = monstermoves;
     /* FIXME:
      * Each trap should really trigger on the recoil if
      * it would trigger during normal movement. However,
@@ -666,7 +722,7 @@ hurtle(dx, dy, range, verbose, do_nomul)
      * for diagonal movement, give the player a message and return.
      */
     if(Punished && !carried(uball)) {
-	You_feel("a tug from the iron ball.");
+	You_feel("a tug from the %s ball.", material_name(uball, TRUE));
 	if(do_nomul) nomul(0, NULL);
 	return;
     } else if (u.utrap && u.utraptype == TT_SALIVA) {
@@ -700,14 +756,14 @@ hurtle(dx, dy, range, verbose, do_nomul)
 	    m_shot.s ? "shoot" : "throw", m_shot.s ? "shot" : "toss");
 	m_shot.n = m_shot.i;	/* make current shot be the last */
     }
-    if (In_sokoban(&u.uz))
+    if (sokoban_unsolved())
 	change_luck(-1);	/* Sokoban guilt */
     uc.x = u.ux;
     uc.y = u.uy;
     /* this setting of cc is only correct if dx and dy are [-1,0,1] only */
     cc.x = u.ux + (dx * range);
     cc.y = u.uy + (dy * range);
-    (void) walk_path(&uc, &cc, hurtle_step, ((Role_if(PM_KENSEI) || Role_if(PM_MONK) || has_mutation(AAT_PRIMINAL)) && uwep && is_pole(uwep)) ? &jumping_polearm : (void *) 0, (genericptr_t)&range);
+    (void) walk_path(&uc, &cc, hurtle_step, (uwep && is_pole(uwep)) ? &jumping_polearm : (void *) 0, (genericptr_t)&range);
 	teleds(u.ux, u.uy, TRUE);
 }
 
@@ -720,6 +776,9 @@ mhurtle(mon, dx, dy, range, huge)
 	boolean huge;
 {
     coord mc, cc;
+
+	if (!isok(mon->mx, mon->my))
+	    return;
 
 	/* At the very least, debilitate the monster */
 //	mon->movement = 0;

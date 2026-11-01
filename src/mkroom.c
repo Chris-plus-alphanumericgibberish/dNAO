@@ -415,6 +415,9 @@ int misc_devil_vault[] = {
 				MISOTHEISTIC_PYRAMID, DIMENSIONAL_LOCK, 
 				PRESERVATIVE_ENGINE
 			};
+int misc_devil_sanctions[] = {
+				FIRE_RESISTANCE_SANCTION, COLD_RESISTANCE_SANCTION, SHOCK_RESISTANCE_SANCTION, ACID_RESISTANCE_SANCTION
+			};
 int misc_demon_vault[] = {
 				VITAL_SOULSTONE, SPIRITUAL_SOULSTONE,
 				VITAL_SOULSTONE, SPIRITUAL_SOULSTONE,
@@ -451,14 +454,19 @@ int vn;
 	}
 	else if(vn < LIMIT_VN_RANGE_4_DEVIL){
 		// Devil
-		type = ROLL_FROM(misc_devil_vault);
+		if(rn2(10)){
+			type = ROLL_FROM(misc_devil_vault);
+		}
+		else {
+			type = ROLL_FROM(misc_devil_sanctions);
+		}
 	}
 	else if(vn < LIMIT_VN_RANGE_5_DEMON){
 		// Demon
 		type = ROLL_FROM(misc_demon_vault);
 	}
 	else {
-		impossible("Vault number %d out-of-ramge in get_misc", vn);
+		impossible("Vault number %d out-of-range in get_misc", vn);
 		type = ROLL_FROM(misc_hell_vault);
 	}
 	return type;
@@ -474,14 +482,14 @@ mkmivaultitem(container)
 	if(!rn2(4)){
 		do {
 		if (otmp) delobj(otmp);
-		otmp = mkobj(ARMOR_CLASS, FALSE);
+		otmp = mkobj(ARMOR_CLASS, NO_MKOBJ_FLAGS);
 		} while (--try_limit > 0 &&
 		  !(objects[otmp->otyp].oc_magic || otmp->oartifact));
 		add_to_container(container, otmp);
 	} else {
 		do {
 			if(otmp && !Is_container(otmp)) delobj(otmp);
-			otmp = mkobj(RANDOM_CLASS, TRUE);
+			otmp = mkobj(RANDOM_CLASS, MKOBJ_ARTIF);
 			if(Is_container(otmp)){
 				place_object(otmp, container->ox, container->oy);
 			}
@@ -583,7 +591,7 @@ mklolthvaultitem()
 		type = RANDOM_CLASS;
 	do {
 		if(otmp) delobj(otmp);
-		otmp = sobj ? mksobj(type, MKOBJ_ARTIF) : mkobj(type, TRUE);
+		otmp = sobj ? mksobj(type, MKOBJ_ARTIF) : mkobj(type, MKOBJ_ARTIF);
 		if(!rn2(10) || ((objects[otmp->otyp].oc_magic || otmp->oartifact) && !rn2(3))){
 			otmp = mk_special(otmp);
 			if(otmp->oclass == WEAPON_CLASS || is_weptool(otmp) || otmp->oclass == ARMOR_CLASS)
@@ -609,6 +617,32 @@ mklolthvaultitem()
 	  !(objects[otmp->otyp].oc_magic || otmp->oartifact || !check_oprop(otmp, OPROP_NONE) || Is_container(otmp)));
 
 	return otmp;
+}
+
+STATIC_OVL void
+add_vaultitem_cnt(struct obj *container, struct obj *otmp)
+{
+	struct obj *content, *ncontent;
+
+	if (Is_real_container(otmp)) {
+		for (content = otmp->cobj; content; content = ncontent) {
+			ncontent = content->nobj;
+			obj_extract_self(content);
+			add_to_container(container, content);
+		}
+		if (objects[otmp->otyp].oc_magic || otmp->oartifact)
+			add_to_container(container, otmp);
+		else
+			dealloc_obj(otmp);
+	} else {
+		add_to_container(container, otmp);
+	}
+}
+
+void
+mklolthvaultitem_cnt(struct obj *container)
+{
+	add_vaultitem_cnt(container, mklolthvaultitem());
 }
 
 struct obj *
@@ -644,7 +678,7 @@ int oclass;
 		}break;
 	}
 	//default
-	return mkobj(oclass, TRUE);
+	return mkobj(oclass, MKOBJ_ARTIF);
 }
 
 struct obj *
@@ -656,7 +690,7 @@ int vn;
 		return mk_jrt_obj(oclass);
 	}
 	else{
-		return mkobj(oclass, TRUE);
+		return mkobj(oclass, MKOBJ_ARTIF);
 	}
 }
 
@@ -715,19 +749,91 @@ int vn;
 }
 
 void
-mkhellvaultitem_cnt(container, vn, bury)
-struct obj *container;
-int vn;
-boolean bury;
+mkhellvaultitem_cnt(struct obj *container, int vn)
 {
+	add_vaultitem_cnt(container, mkhellvaultitem(vn));
+}
+
+struct obj *
+mkchromaticvaultitem()
+{
+	static const int chromatic_dragon_armors[] = {
+		GRAY_DRAGON_SCALE_MAIL,       GRAY_DRAGON_SCALES,       GRAY_DRAGON_SCALE_SHIELD,
+		SILVER_DRAGON_SCALE_MAIL,     SILVER_DRAGON_SCALES,     SILVER_DRAGON_SCALE_SHIELD,
+		SHIMMERING_DRAGON_SCALE_MAIL, SHIMMERING_DRAGON_SCALES, SHIMMERING_DRAGON_SCALE_SHIELD,
+		ORANGE_DRAGON_SCALE_MAIL,     ORANGE_DRAGON_SCALES,     ORANGE_DRAGON_SCALE_SHIELD,
+		DEEP_DRAGON_SCALE_MAIL,       DEEP_DRAGON_SCALES,       DEEP_DRAGON_SCALE_SHIELD,
+	};
 	struct obj *otmp;
-	
-	otmp = mkhellvaultitem(vn);
-	if(Is_container(otmp)){
-		place_object(otmp, container->ox, container->oy);
-		if(bury) bury_an_obj(otmp);
+	int try_limit = 1000;
+	int type;
+	boolean sobj = FALSE;
+	otmp = (struct obj *)0;
+	if (!rn2(3)) {
+		/* armor: 50/50 curated non-chromatic dragon armors vs generic */
+		if (rn2(2)) {
+			type = ROLL_FROM(chromatic_dragon_armors);
+			sobj = TRUE;
+		} else {
+			type = ARMOR_CLASS;
+		}
+	} else if (rn2(2)) {
+		if (!rn2(20)) {
+			type = TOOTH;
+			sobj = TRUE;
+		} else {
+			type = WEAPON_CLASS;
+		}
+	} else if (!rn2(4)) {
+		type = SCOIN_CLASS;
+	} else if (!rn2(3)) {
+		type = get_vault_misc(VN_N_PIT_FIEND);
+		otmp = mksobj(type, NO_MKOBJ_FLAGS);
+		if (otmp) return otmp;
+		impossible("special %d obj failed??", type);
+		type = RANDOM_CLASS;
+	} else if (rn2(2)) {
+		if (!rn2(20)) {
+			type = RIN_NOTHING;
+			sobj = TRUE;
+		} else {
+			type = RING_CLASS;
+		}
+	} else {
+		type = RANDOM_CLASS;
 	}
-	else add_to_container(container, otmp);
+	do {
+		if (otmp) delobj(otmp);
+		otmp = sobj ? mksobj(type, MKOBJ_ARTIF) : mkobj(type, MKOBJ_ARTIF);
+		if (otmp->otyp == RIN_NOTHING) {
+			otmp = mk_chromatic_special(otmp);
+		} else if (!rn2(10) || ((objects[otmp->otyp].oc_magic || otmp->oartifact) && !rn2(3))) {
+			otmp = mk_chromatic_special(otmp);
+			if (otmp->oclass == WEAPON_CLASS || is_weptool(otmp) || otmp->oclass == ARMOR_CLASS)
+				otmp->spe = max_ints(d(3,3), otmp->spe);
+		} else if (!rn2(4) || ((objects[otmp->otyp].oc_magic || otmp->oartifact) && !rn2(2))) {
+			otmp = mk_chromatic_special(otmp);
+			if (otmp->oclass == WEAPON_CLASS || is_weptool(otmp) || otmp->oclass == ARMOR_CLASS)
+				otmp->spe = max_ints(d(3,3), otmp->spe);
+		} else if (!rn2(4) || otmp->oartifact) {
+			otmp = mk_minor_special(otmp);
+			if (otmp->oclass == WEAPON_CLASS || is_weptool(otmp) || otmp->oclass == ARMOR_CLASS)
+				otmp->spe = max_ints(d(1,7), otmp->spe);
+		} else {
+			if (otmp->oclass == WEAPON_CLASS || is_weptool(otmp) || otmp->oclass == ARMOR_CLASS)
+				otmp->spe = max_ints(d(2,3), otmp->spe);
+		}
+		if ((otmp->oclass == WEAPON_CLASS || is_weptool(otmp) || otmp->oclass == ARMOR_CLASS) && rn2(5))
+			otmp->oerodeproof = TRUE;
+	} while (--try_limit > 0 &&
+	  !(objects[otmp->otyp].oc_magic || otmp->oartifact || !check_oprop(otmp, OPROP_NONE) || Is_container(otmp)));
+	return otmp;
+}
+
+void
+mkchromaticvaultitem_cnt(struct obj *container)
+{
+	add_vaultitem_cnt(container, mkchromaticvaultitem());
 }
 
 STATIC_OVL
@@ -2193,13 +2299,13 @@ mkkamereltowers()
 					mtmp->mhpmax += 4*8;
 					mtmp->mhp = mtmp->mhpmax;
 					mtmp->mstrategy |= STRAT_WAITFORU;
-					otmp = mkobj(RANDOM_CLASS, TRUE);
+					otmp = mkobj(RANDOM_CLASS, MKOBJ_ARTIF);
 					(void) mpickobj(mtmp, otmp);
-					otmp = mkobj(RANDOM_CLASS, TRUE);
+					otmp = mkobj(RANDOM_CLASS, MKOBJ_ARTIF);
 					(void) mpickobj(mtmp, otmp);
-					otmp = mkobj(RANDOM_CLASS, TRUE);
+					otmp = mkobj(RANDOM_CLASS, MKOBJ_ARTIF);
 					(void) mpickobj(mtmp, otmp);
-					otmp = mkobj(RANDOM_CLASS, TRUE);
+					otmp = mkobj(RANDOM_CLASS, MKOBJ_ARTIF);
 					(void) mpickobj(mtmp, otmp);
 				}
 				break;
@@ -2274,7 +2380,7 @@ mkkamereltowers()
 				case 1:
 					mtmp = makemon(&mons[PM_AMM_KAMEREL], x, y, MM_ADJACENTOK);
 					if (mtmp){
-						otmp = mkobj(RANDOM_CLASS, TRUE);
+						otmp = mkobj(RANDOM_CLASS, MKOBJ_ARTIF);
 						(void) mpickobj(mtmp, otmp);
 					}
 				break;
@@ -2715,7 +2821,7 @@ mkfishinghut(left)
 				if(!rn2(9)) mksobj_at(POT_BOOZE, x+1, y+1, NO_MKOBJ_FLAGS);
 				if(!rn2(9)) mksobj_at(CRAM_RATION, x+1, y+1, NO_MKOBJ_FLAGS);
 				if(!rn2(20)){
-					otmp = mkobj(AMULET_CLASS, TRUE);
+					otmp = mkobj(AMULET_CLASS, MKOBJ_ARTIF);
 					set_material_gm(otmp, GOLD);
 					otmp->owt = weight(otmp);
 					place_object(otmp, x+i, y+j);
@@ -4346,7 +4452,7 @@ mkpluvillage()
 					}
 					flood_fill_rm(x+1, y+5,
 						  nroom+ROOMOFFSET, TRUE, TRUE);
-					add_room(x+1, y+4, x+sizebig1-2, y+6, TRUE, SHOPBASE + rn2(UNIQUESHOP - SHOPBASE), TRUE);
+					add_room(x+1, y+4, x+sizebig1-1, y+6, TRUE, SHOPBASE + rn2(UNIQUESHOP - SHOPBASE), TRUE);
 				break;
 				case 1: //Temple
 					for(i=1;i<sizebig1;i++){
@@ -4357,7 +4463,7 @@ mkpluvillage()
 					}
 					flood_fill_rm(x+1, y+5,
 						  nroom+ROOMOFFSET, TRUE, TRUE);
-					add_room(x+1, y+4, x+sizebig1-2, y+6, TRUE, TEMPLE, TRUE);
+					add_room(x+1, y+4, x+sizebig1-1, y+6, TRUE, TEMPLE, TRUE);
 					add_altar(x+2, y+5, A_NEUTRAL, TRUE, align_to_god(A_NEUTRAL));
 					priestini(&u.uz, &rooms[nroom - 1], x+2, y+5, FALSE);
 					level.flags.has_temple = 1;
@@ -4371,7 +4477,7 @@ mkpluvillage()
 					}
 					flood_fill_rm(x+1, y+5,
 						  nroom+ROOMOFFSET, TRUE, TRUE);
-					add_room(x+1, y+4, x+sizebig1-2, y+6, TRUE, BARRACKS, TRUE);
+					add_room(x+1, y+4, x+sizebig1-1, y+6, TRUE, BARRACKS, TRUE);
 				break;
 				case 3: //Courtroom
 					for(i=1;i<sizebig1;i++){
@@ -4383,7 +4489,7 @@ mkpluvillage()
 					flood_fill_rm(x+1, y+5,
 						  nroom+ROOMOFFSET, TRUE, TRUE);
 					throne = 1;
-					add_room(x+1, y+4, x+sizebig1-2, y+6, TRUE, COURT, TRUE);
+					add_room(x+1, y+4, x+sizebig1-1, y+6, TRUE, COURT, TRUE);
 				break;
 				case 4://Normal
 					for(i=1;i<sizebig1;i++){
@@ -4396,7 +4502,7 @@ mkpluvillage()
 					}
 					flood_fill_rm(x+1, y+5,
 						  nroom+ROOMOFFSET, TRUE, TRUE);
-					add_room(x+1, y+4, x+sizebig1-2, y+6, TRUE, OROOM, TRUE);
+					add_room(x+1, y+4, x+sizebig1-1, y+6, TRUE, OROOM, TRUE);
 				break;
 				case 5: //Gold vault
 					for(i=1;i<sizebig1;i++){
@@ -4409,7 +4515,7 @@ mkpluvillage()
 					}
 					flood_fill_rm(x+1, y+5,
 						  nroom+ROOMOFFSET, TRUE, TRUE);
-					add_room(x+1, y+4, x+sizebig1-2, y+6, TRUE, OROOM, TRUE);
+					add_room(x+1, y+4, x+sizebig1-1, y+6, TRUE, OROOM, TRUE);
 				break;
 				case 6://Tool shed
 					for(i=1;i<sizebig1;i++){
@@ -4421,7 +4527,7 @@ mkpluvillage()
 					}
 					flood_fill_rm(x+1, y+5,
 						  nroom+ROOMOFFSET, TRUE, TRUE);
-					add_room(x+1, y+4, x+sizebig1-2, y+6, TRUE, OROOM, TRUE);
+					add_room(x+1, y+4, x+sizebig1-1, y+6, TRUE, OROOM, TRUE);
 				break;
 				case 7:{//prison
 					struct obj *chest;
@@ -4439,7 +4545,7 @@ mkpluvillage()
 					}
 					flood_fill_rm(x+1, y+5,
 						  nroom+ROOMOFFSET, TRUE, TRUE);
-					add_room(x+1, y+4, x+sizebig1-2, y+6, TRUE, OROOM, TRUE);
+					add_room(x+1, y+4, x+sizebig1-1, y+6, TRUE, OROOM, TRUE);
 				}break;
 			}
 			add_door(x+sizebig1,y+5,&rooms[roomtypb]);
@@ -4637,14 +4743,14 @@ mkpluvillage()
 						}
 					}
 					chest = mksobj_at(CHEST, x+sizetot,y+5, NO_MKOBJ_FLAGS);
-					makemon(&mons[PM_CUPRILACH_RILMANI], x+1,y+5, MM_ADJACENTOK|MM_NOCOUNTBIRTH);
+					makemon(&mons[PM_CUPRILACH_RILMANI], x+sizetot,y+5, MM_ADJACENTOK|MM_NOCOUNTBIRTH);
 					for(i=sizetot;i>=sizetot+1-sizebig2+1;i-=2){
 						mkneucell(x+i,y+3,chest,0,1);
 						mkneucell(x+i,y+7,chest,0,-1);
 					}
 					flood_fill_rm(x+sizetot-1, y+5,
 						  nroom+ROOMOFFSET, TRUE, TRUE);
-					add_room(x+1, y+4, x+sizebig1-2, y+6, TRUE, OROOM, TRUE);
+					add_room(x+sizetot+1-sizebig2+1, y+4, x+sizetot+1-1, y+6, TRUE, OROOM, TRUE);
 				}break;
 			}
 			add_door(x+sizetot+1-sizebig2,y+5,&rooms[roomtypb]);
@@ -6468,6 +6574,8 @@ int	roomtype;
 	case SLABROOM:	mkslabroom(); break;
 	case ELSHAROOM:	mkzoo(ELSHAROOM); break;
 	case HELL_VAULT:	mkhellvaultroom(); break;
+	case GRYMLDROOM:	mkgrymldroom((boolean *)0); break;
+	case PRISON:	mkprison(); break;
 	default:	impossible("Tried to make a room of type %d.", roomtype);
     }
 }
@@ -6645,6 +6753,41 @@ register boolean nostairs, fullwalls;
 	return (struct mkroom *)0;
 }
 
+struct mkroom *
+pick_room_grymld(boolean nostairs, boolean fullwalls)
+/* pick_room(), but restricted to rooms with a 3 or 5 tile dimension */
+{
+	register struct mkroom *sroom;
+	register int i;
+	int width, height;
+	int minroom = level.flags.sp_lev_nroom;
+	int nrange = nroom - minroom;
+	int start;
+
+	if (nrange <= 0)
+		return (struct mkroom *)0;
+
+	start = rn2(nrange);
+	for (i = nroom; i > 0; i--, start++) {
+		sroom = &rooms[minroom + (start % nrange)];
+		/* if full walls are required, it must be an OROOM and not a JOINEDROOM */
+		if(!(sroom->rtype == OROOM) && !(sroom->rtype == JOINEDROOM && !fullwalls))
+			continue;
+		/* must be 3 or 5 tiles in width or height (either dimension qualifies) */
+		width = sroom->hx - sroom->lx + 1;
+		height = sroom->hy - sroom->ly + 1;
+		if (width != 3 && width != 5 && height != 3 && height != 5)
+			continue;
+		/* if no stairs are required, it cannot have downstairs */
+		if (has_upstairs(sroom) ||
+			(has_dnstairs(sroom) && (nostairs || rn2(3)))) {
+			continue;
+		}
+		return sroom;
+	}
+	return (struct mkroom *)0;
+}
+
 /*
  * Some special rooms can be made in places that don't have full walls.
  */
@@ -6681,6 +6824,183 @@ int type;
 	}
 }
 
+void
+mkgrymldroom(boolean *magic_chest)
+{
+	register struct mkroom *sroom;
+
+	if ((sroom = pick_room_grymld(FALSE, TRUE)) != 0) {
+		sroom->rtype = GRYMLDROOM;
+		fill_grymldroom(sroom, magic_chest);
+	}
+}
+
+void
+fill_grymldroom(struct mkroom *sroom, boolean *magic_chest)
+{
+	int width = sroom->hx - sroom->lx + 1;
+	int height = sroom->hy - sroom->ly + 1;
+	boolean primary_is_x;
+	int center;
+	int i;
+	int nmold, tried;
+	coord pos;
+	int sx, sy;
+	struct monst *mtmp;
+
+	/* the dimension that is 3 (or, failing that, 5) tiles is the
+	 * secondary axis; the primary axis is the other one */
+	if (width == 3)
+		primary_is_x = FALSE;
+	else if (height == 3)
+		primary_is_x = TRUE;
+	else if (width == 5)
+		primary_is_x = FALSE;
+	else
+		primary_is_x = TRUE;
+
+	/* the secondary axis is 3 or 5 tiles wide, so it has a single center
+	 * row/column; primary_is_x means y is secondary (a center row),
+	 * otherwise x is secondary (a center column) */
+	if (primary_is_x)
+		center = sroom->ly + height / 2;
+	else
+		center = sroom->lx + width / 2;
+
+	if (primary_is_x) {
+		for (i = sroom->lx; i <= sroom->hx; i += 2) {
+			makemon(&mons[PM_GRAY_FUNGAL_TOWER], i, center - 1, NO_MM_FLAGS);
+			makemon(&mons[PM_GRAY_FUNGAL_TOWER], i, center + 1, NO_MM_FLAGS);
+		}
+	} else {
+		for (i = sroom->ly; i <= sroom->hy; i += 2) {
+			makemon(&mons[PM_GRAY_FUNGAL_TOWER], center - 1, i, NO_MM_FLAGS);
+			makemon(&mons[PM_GRAY_FUNGAL_TOWER], center + 1, i, NO_MM_FLAGS);
+		}
+	}
+
+	makemon(&mons[PM_RUSTY_GRAY_MOLD], sroom->lx + width / 2, sroom->ly + height / 2, NO_MM_FLAGS);
+
+	nmold = (width * height) / (6 + rn2(3));
+	tried = 0;
+	while (nmold > 0 && tried++ < 100) {
+		if (somexy(sroom, &pos) && !MON_AT(pos.x, pos.y)) {
+			makemon(&mons[PM_RUSTY_GRAY_MOLD], pos.x, pos.y, NO_MM_FLAGS);
+			nmold--;
+		}
+	}
+
+	/* trigger the insight pass now, so any rusty gray mold that shouldn't
+	 * be here yet (per the insight system) vanishes before the room is
+	 * otherwise finished; the towers wait until after the terrain/treasure
+	 * fill below, so their squares stay protected from tree placement
+	 * until then */
+	for (sx = sroom->lx; sx <= sroom->hx; sx++)
+		for (sy = sroom->ly; sy <= sroom->hy; sy++) {
+			mtmp = m_at(sx, sy);
+			if (mtmp && mtmp->mtyp == PM_RUSTY_GRAY_MOLD)
+				(void) maybe_vanish(mtmp);
+		}
+
+	/* mirrors the ordinary room fill in mklev.c; trap generation is
+	 * intentionally omitted so a returning insight monster can't land
+	 * on one */
+	{
+		int x, y, tryct;
+		struct monst *tmonst;
+
+		if (u.uhave.amulet || !rn2(3)) {
+			x = somex(sroom); y = somey(sroom);
+			tmonst = makemon((struct permonst *) 0, x, y, NO_MM_FLAGS);
+			if (tmonst && tmonst->mtyp == PM_GIANT_SPIDER && !occupied(x, y))
+				(void) maketrap(x, y, WEB);
+		}
+
+		/* gold pile is guaranteed */
+		(void) mkgold(0L, somex(sroom), somey(sroom));
+
+		/* greater chance of puddles if a water source is nearby */
+		x = 40;
+		if (!rn2(10)) {
+			if (mkfeature(FOUNTAIN, FALSE, sroom))
+				x -= 20;
+		}
+#ifdef SINKS
+		if (!rn2(60)) {
+			if (mkfeature(SINK, FALSE, sroom))
+				x -= 20;
+		}
+		if (!rn2(40)) {
+			mkfeature(FORGE, FALSE, sroom);
+		}
+
+		if (!rn2(280)) {
+			mkfeature(TREE, FALSE, sroom);
+		}
+
+		if (x < 2) x = 2;
+#endif
+		if (!rn2(x))
+			mkfeature(PUDDLE, FALSE, sroom);
+
+		if (!rn2(60))
+			mkfeature(ALTAR, FALSE, sroom);
+
+		x = 80 - (depth(&u.uz) * 2);
+		if (x < 2) x = 2;
+		if (!rn2(x))
+			mkfeature(GRAVE, FALSE, sroom);
+
+		if (!rn2(20))
+			(void) mkcorpstat(STATUE, (struct monst *)0,
+					  (struct permonst *)0,
+					  somex(sroom), somey(sroom), TRUE);
+
+		if (!rn2(nroom * 5 / 2))
+			(void) mksobj_at((rn2(3)) ? BOX : CHEST, somex(sroom), somey(sroom), NO_MKOBJ_FLAGS);
+
+		/* about a 10% chance of a magic chest per level; skipped
+		 * entirely if magic_chest is NULL */
+		if (magic_chest && !*magic_chest && !rn2(nroom * 10)) {
+			(void) mksobj_at(MAGIC_CHEST, somex(sroom), somey(sroom), NO_MKOBJ_FLAGS);
+			*magic_chest = TRUE;
+		}
+
+		if (!rn2(27 + 3 * abs(depth(&u.uz)))) {
+			char buf[BUFSZ];
+			const char *mesg = random_engraving(buf);
+			if (mesg) {
+				do {
+					x = somex(sroom); y = somey(sroom);
+				} while (levl[x][y].typ != ROOM && !rn2(40));
+				if (!(IS_POOL(levl[x][y].typ) ||
+				      IS_FURNITURE(levl[x][y].typ)))
+					make_engr_at(x, y, mesg, 0L, MARK);
+			}
+		}
+
+		/* always place at least one random object here */
+		(void) mkobj_at(0, somex(sroom), somey(sroom), MKOBJ_ARTIF);
+		tryct = 0;
+		while (!rn2(5)) {
+			if (++tryct > 100) {
+				impossible("tryct overflow4");
+				break;
+			}
+			(void) mkobj_at(0, somex(sroom), somey(sroom), MKOBJ_ARTIF);
+		}
+	}
+
+	/* the towers get their own insight check now that terrain/treasure
+	 * placement (which needed them to stay put) is done */
+	for (sx = sroom->lx; sx <= sroom->hx; sx++)
+		for (sy = sroom->ly; sy <= sroom->hy; sy++) {
+			mtmp = m_at(sx, sy);
+			if (mtmp && mtmp->mtyp == PM_GRAY_FUNGAL_TOWER)
+				(void) maybe_vanish(mtmp);
+		}
+}
+
 STATIC_OVL boolean
 cell_spot(sx, sy)
 int sx,sy;
@@ -6693,6 +7013,117 @@ int sx,sy;
 			}
 		}
 	return TRUE;
+}
+
+/* Return how many cells could be built around 'sroom' the way a throne
+   room builds them: one square of solid rock two tiles beyond a straight
+   stretch of wall, entered through that wall. */
+STATIC_OVL int
+count_cell_spots(struct mkroom *sroom)
+{
+	int sx, sy, n = 0;
+
+	for (sx = sroom->lx+1; sx <= sroom->hx-1; sx++) {
+		if (cell_spot(sx, sroom->ly-2)) n++;
+		if (cell_spot(sx, sroom->hy+2)) n++;
+	}
+	for (sy = sroom->ly+1; sy <= sroom->hy-1; sy++) {
+		if (cell_spot(sroom->lx-2, sy)) n++;
+		if (cell_spot(sroom->hx+2, sy)) n++;
+	}
+	return n;
+}
+
+/* Pick one of the cell sites around 'sroom' (as counted by
+   count_cell_spots()) uniformly at random.  Return FALSE if there are
+   none; otherwise set (*cx,*cy) to the cell square and (*dx,*dy) to the
+   direction from the room to the cell. */
+boolean
+random_cell_spot(struct mkroom *sroom, int *cx, int *cy, int *dx, int *dy)
+{
+	int sx, sy, n;
+
+	if (!(n = count_cell_spots(sroom)))
+		return FALSE;
+	n = rn2(n);
+	for (sx = sroom->lx+1; sx <= sroom->hx-1; sx++) {
+		if (cell_spot(sx, sroom->ly-2) && !n--) {
+			*cx = sx; *cy = sroom->ly-2; *dx = 0; *dy = -1;
+			return TRUE;
+		}
+		if (cell_spot(sx, sroom->hy+2) && !n--) {
+			*cx = sx; *cy = sroom->hy+2; *dx = 0; *dy = 1;
+			return TRUE;
+		}
+	}
+	for (sy = sroom->ly+1; sy <= sroom->hy-1; sy++) {
+		if (cell_spot(sroom->lx-2, sy) && !n--) {
+			*cx = sroom->lx-2; *cy = sy; *dx = -1; *dy = 0;
+			return TRUE;
+		}
+		if (cell_spot(sroom->hx+2, sy) && !n--) {
+			*cx = sroom->hx+2; *cy = sy; *dx = 1; *dy = 0;
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+/* Carve an empty cell at (sx,sy), entered through a locked, barred door in
+   the room wall at (sx-dx,sy-dy). */
+void
+mkemptycell(int sx, int sy, int dx, int dy)
+{
+	levl[sx][sy].typ = CORR;
+	unblock_point(sx, sy);
+	levl[sx-dx][sy-dy].typ = DOOR;
+	levl[sx-dx][sy-dy].doormask = D_LOCKED | D_BARRED;
+	unblock_point(sx-dx, sy-dy);
+}
+
+/* Return a random empty, rectangular, ordinary room with no stairs that
+   has room for at least one cell beyond its walls, or 0 if there is none. */
+struct mkroom *
+pick_room_prison(void)
+{
+	struct mkroom *sroom;
+	int i;
+	int minroom = level.flags.sp_lev_nroom;
+	int nrange = nroom - minroom;
+	int start;
+
+	if (nrange <= 0)
+		return (struct mkroom *)0;
+
+	start = rn2(nrange);
+	for (i = nrange; i > 0; i--, start++) {
+		sroom = &rooms[minroom + (start % nrange)];
+		if (sroom->rtype != OROOM || sroom->irregular)
+			continue;
+		if (has_upstairs(sroom) || has_dnstairs(sroom))
+			continue;
+		if (!count_cell_spots(sroom))
+			continue;
+		return sroom;
+	}
+	return (struct mkroom *)0;
+}
+
+void
+mkprison(void)
+{
+	struct mkroom *sroom;
+
+	if ((sroom = pick_room_prison()) != 0) {
+		sroom->rtype = PRISON;
+		level.flags.has_prison = 1;
+		fill_prison(sroom);
+	}
+}
+
+void
+fill_prison(struct mkroom *sroom)
+{
 }
 
 struct monst *
@@ -7237,8 +7668,9 @@ int dx,dy;
 	struct obj *obj;
 	levl[sx][sy].typ = CORR;
 	unblock_point(sx,sy);
-	levl[sx-dx][sy-dy].typ = IRONBARS;
-	unblock_point(sx,sy);
+	levl[sx-dx][sy-dy].typ = DOOR;
+	levl[sx-dx][sy-dy].doormask = D_LOCKED | D_BARRED;
+	unblock_point(sx-dx,sy-dy);
 	mon = prisoner(kingtype, sx, sy);
 	if(mon){
 		for(obj = mon->minvent; obj; obj = mon->minvent){
@@ -8418,7 +8850,9 @@ register int edge; /* Allows room walls to intrude slightly into river. */
 	register int monster = PM_JELLYFISH;
 	/* Don't liquify shop walls */
 	if (level.flags.has_shop && *in_rooms(x, y, SHOPBASE)) {return;}
-	
+	/* Don't liquify a square that already has a trap (e.g. a portal) */
+	if (t_at(x, y)) {return;}
+
 	/* Don't liquify other level features */
 	if(typ != TREE && typ != GRASS && typ != SOIL && typ != SAND)
 		return;
@@ -8770,6 +9204,7 @@ mksgardenstatueat(x,y)
 				t = maketrap(x, y, MAGIC_TRAP);
 				if(t){
 					t->ttyp = STATUE_TRAP;
+					t->statueid = otmp->o_id;
 				}
 			}
 		}

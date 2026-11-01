@@ -478,12 +478,10 @@ align_str_proper(alignment)
 	\
 	if(armac > 11) armac = (armac-10)/2 + 10;\
 	\
-	if(nat_dr && armac){\
+	if(nat_dr > 0 && armac > 0){\
 		base += sqrt(nat_dr*nat_dr + armac*armac);\
-	} else if(nat_dr){\
-		base += nat_dr;\
 	} else {\
-		base += armac;\
+		base += nat_dr + armac;\
 	}
 
 void
@@ -527,6 +525,11 @@ register struct monst *mtmp;
 	} else {
 		mslotdrtotal(LEG_DR);
 		Sprintf(mbuf, "Foot Armor:       %d", base);
+		putstr(en_win, 0, mbuf);
+	}
+	if(has_wings_mon(mtmp)){
+		mslotdrtotal(WING_DR);
+		Sprintf(mbuf, "Wing Armor:       %d", base);
 		putstr(en_win, 0, mbuf);
 	}
 	
@@ -675,7 +678,7 @@ ustatusline()
 	if (Blind) {
 	    Strcat(info, ", blind");
 	    if (u.ucreamed) {
-		if ((long)u.ucreamed < Blinded || Blindfolded
+		if ((long)u.ucreamed < BlindedTimeout || Blindfolded
 						|| !haseyes(youracedata))
 		    Strcat(info, ", cover");
 		Strcat(info, "ed by sticky goop");

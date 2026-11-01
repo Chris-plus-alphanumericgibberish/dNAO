@@ -57,7 +57,7 @@ struct objclass {
 #define IMMEDIATE	2	/*		     directional */
 #define RAY		3	/*		     zap beams */
 
-	Bitfield(oc_dtyp,5);
+	Bitfield(oc_dtyp,6);
 #define WHACK		1
 #define PIERCE		2	/* for weapons & tools used as weapons */
 #define SLASH		4	/* (latter includes iron ball & chain) */
@@ -69,10 +69,11 @@ struct objclass {
 #define	HEAD_DR        0x04 /* helmet */
 #define	LEG_DR         0x08 /* boots, cloak */
 #define	ARM_DR         0x10 /* gloves */
+#define	WING_DR        0x20 /* wings */
 
 #define TORSO_DR       (UPPER_TORSO_DR|LOWER_TORSO_DR)
 #define CLOAK_DR       (UPPER_TORSO_DR|LOWER_TORSO_DR|LEG_DR)
-#define ALL_DR         (UPPER_TORSO_DR|LOWER_TORSO_DR|HEAD_DR|LEG_DR|ARM_DR)
+#define ALL_DR         (UPPER_TORSO_DR|LOWER_TORSO_DR|HEAD_DR|LEG_DR|ARM_DR|WING_DR)
 
 #define default_DR_slot(mask) (mask == W_ARM ? TORSO_DR :\
 							   mask == W_ARMC ? CLOAK_DR :\
@@ -143,7 +144,7 @@ struct objclass {
 #define is_organic(otmp)	((otmp)->obj_material <= CHITIN)
 #define is_metallic(otmp)	(metallic_material((otmp)->obj_material))
 #define metallic_material(mat)	((mat) >= IRON && (mat) <= MITHRIL)
-#define is_iron_obj(otmp)	((otmp)->obj_material == IRON || (otmp)->obj_material == GREEN_STEEL || (otmp)->oartifact == ART_AMALGAMATED_SKIES || (otmp)->oartifact == ART_SKY_REFLECTED)
+#define is_iron_obj(otmp)	(obj_is_material((otmp), IRON) || obj_is_material((otmp), GREEN_STEEL))
 #define hard_mat(mat)	((mat) >= WOOD)
 #define is_hard(otmp)	(hard_mat((otmp)->obj_material))
 
@@ -176,6 +177,7 @@ struct objclass {
 #define ARM_CLOAK	5
 #define ARM_SHIRT	6
 #define ARM_BELT	7
+#define ARM_WING	8
 #define ARM_SUIT	0
 
 	uchar	oc_oprop[8];	/* property (invis, &c.) conveyed */
@@ -237,11 +239,16 @@ struct objclass {
 #define ETRAIT_BLADEDANCE		0x00040000L
 #define ETRAIT_PUNCTURE			0x00080000L //Escalating chance for a double-damage hit
 #define ETRAIT_STRIKING			0x00100000L
-#define MAX_ETRAIT				ETRAIT_STRIKING
+#define ETRAIT_WHIP_TRICKS		0x00200000L
+#define ETRAIT_ANTI_UNDEAD		0x00400000L
+#define MAX_ETRAIT				ETRAIT_ANTI_UNDEAD
 //
 
 #define wielder_size(mon) ((mon) == &youmonst ? youracedata->msize : (mon)->data->msize)
-#define CHECK_ETRAIT(obj, mon, trait) (check_etrait((obj), (mon), (trait)))
+#define CHECK_ETRAIT(obj, mon, trait) (check_etrait((obj), (mon), (trait), TRUE))
+/* like CHECK_ETRAIT, but ignores the wielder's weapon skill: reports whether the
+   item bears the trait at all, even if the wielder isn't skilled enough to use it */
+#define HAS_ETRAIT(obj, mon, trait) (check_etrait((obj), (mon), (trait), FALSE))
 #define ROLL_ETRAIT(obj, mon, echance, schance) (((mon) == &youmonst ? (P_SKILL(weapon_type(obj)) > P_SKILLED) : ((mon)->data->mflagsf&MF_MARTIAL_E)) ? echance : schance)
 #define FFORM_ETRAIT(obj, mon) (obj->expert_traits&FFORM_ETRAITS && ((mon) == &youmonst ? (P_SKILL(weapon_type(obj)) > P_BASIC ) : (((mon)->data->mflagsf&MF_MARTIAL_E) || ((mon)->data->mflagsf&MF_MARTIAL_S))))
 
@@ -262,8 +269,8 @@ struct material {
 	const int density;			/* density (from old dnh) */
 	const int cost;				/* cost multiplier */
 	const int defense;			/* defense modifier */
-	const int flat_dr;			/* minimum ac modifier (torso, limbs and head are 1/2) */
-	const int flat_ac;			/* defense modifier (torso, limbs and head are 1/2) */
+	const int flat_dr;			/* minimum dr modifier (non-body armor is 1/2) */
+	const int flat_ac;			/* minimum ac modifier (non-body armor is 1/2) */
 };
 
 extern NEARDATA struct objclass objects[];
@@ -296,7 +303,8 @@ extern NEARDATA struct colorTextClr LightsaberColor[];
 #define BED_CLASS	19
 #define SCOIN_CLASS	20
 #define BELT_CLASS	21
-#define MAXOCLASSES	22
+#define SANCTION_CLASS	22
+#define MAXOCLASSES	23
 
 #define ALLOW_COUNT	(MAXOCLASSES+1) /* Can be used in the object class */
 #define ALL_CLASSES	(MAXOCLASSES+2) /* input to getobj().		   */
@@ -323,6 +331,7 @@ extern uchar oc_syms[MAXOCLASSES];		/* current class symbols */
 #define FOOD_SYM	'%'
 #define POTION_SYM	'!'
 #define SCROLL_SYM	'?'
+#define SANCTION_SYM	'?'
 #define SPBOOK_SYM	'+'
 #define WAND_SYM	'/'
 #define GOLD_SYM	'$'

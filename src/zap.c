@@ -3,6 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
+#include "mattkbp.h"
 #include "artifact.h"
 
 #include "xhity.h"
@@ -28,7 +29,6 @@ STATIC_DCL struct obj * FDECL(poly_obj_core, (struct obj *, int));
 STATIC_DCL void FDECL(create_polymon, (struct obj *, int));
 STATIC_DCL boolean FDECL(zap_updown, (struct obj *));
 STATIC_DCL boolean FDECL(zap_reflect, (struct monst *, struct zapdata *));
-STATIC_DCL int FDECL(zapdamage, (struct monst *, struct monst *, struct zapdata *));
 STATIC_DCL int FDECL(zhit, (struct monst *, struct monst *, struct zapdata *));
 #ifdef STEED
 STATIC_DCL boolean FDECL(zap_steed, (struct obj *));
@@ -89,6 +89,7 @@ int adtyp, ztyp;
 		case AD_MAGM: return "magic missile";
 		case AD_PHYS: return "sothothic missile";
 		case AD_FIRE: return "fireball";
+		case AD_SFLM: return "spark of silver flame";
 		case AD_COLD: return "cone of cold";
 		case AD_UHCD: return "cone of ice";
 		case AD_GMLD: return "cone of gray spores";
@@ -215,6 +216,7 @@ int adtyp;
 	case AD_HOLY:
 	case AD_SMOK:
 	case AD_SLWC:
+	case AD_SFLM:
 		return CLR_WHITE;
 	case AD_DRLI:
 		return CLR_MAGENTA;
@@ -422,6 +424,7 @@ struct obj *otmp;
 			if (otyp == SPE_FORCE_BOLT){
 				if(u.ukrau_duration) dmg *= 1.5;
 			    dmg += spell_damage_bonus();
+				if(youmonst.owrk) dmg = (dmg+1)/2;
 			}
 			
 			hit(zap_type_text, mtmp, exclam(dmg));
@@ -465,6 +468,7 @@ struct obj *otmp;
 			if (otyp == SPE_TURN_UNDEAD){
 				if(u.ukrau_duration) dmg *= 1.5;
 				dmg += spell_damage_bonus();
+				if(youmonst.owrk) dmg = (dmg+1)/2;
 			}
 			flags.bypasses = TRUE;	/* for make_corpse() */
 			if (!resist(mtmp, otmp->oclass, dmg, TELL)) {
@@ -622,6 +626,7 @@ struct obj *otmp;
 				levlost *= 1.5;
 			}
 			dmg += spell_damage_bonus();
+			if(youmonst.owrk) dmg = (dmg+1)/2;
 		}
 		if (resists_drli(mtmp)){
 		    shieldeff(mtmp->mx, mtmp->my);
@@ -2779,6 +2784,7 @@ boolean ordinary;
 		    if (!Shock_resistance) {
 				You("shock yourself!");
 				damage = d(12,6);
+				damage = elemental_dmg_resistance(&youmonst, (struct monst *)0, damage, AD_ELEC);
 				exercise(A_CON, FALSE);
 		    } else {
 				shieldeff(u.ux, u.uy);
@@ -2819,6 +2825,7 @@ boolean ordinary;
 		    } else {
 				pline("You've set yourself afire!");
 				damage = d(12,6);
+				damage = elemental_dmg_resistance(&youmonst, (struct monst *)0, damage, AD_FIRE);
 		    }
 			if(!UseInvFire_res(&youmonst)){
 				destroy_item(&youmonst, SCROLL_CLASS, AD_FIRE);
@@ -2842,6 +2849,7 @@ boolean ordinary;
 		    } else {
 				You("imitate a popsicle!");
 				damage = d(12,6);
+				damage = elemental_dmg_resistance(&youmonst, (struct monst *)0, damage, AD_COLD);
 		    }
 			roll_frigophobia();
 			if(!UseInvCold_res(&youmonst)){
@@ -2865,13 +2873,13 @@ boolean ordinary;
 		    }
 		    break;
 		case IMPERIAL_ELVEN_GAUNTLETS:
-			if(u.ualign.record > 3){
+			if(u_holiness() == HOLY_HOLINESS){
 				damage = d(max(1, 1+(obj->spe+1)/2),8);
 				if(hates_holy(youracedata))
 					damage *= 2;
 				pline("Idiot!  You've shot yourself!");
 			}
-			else if(u.ualign.record < -3){
+			else if(u_holiness() == UNHOLY_HOLINESS){
 				damage = d(max(1, 1+(obj->spe+1)/2),8);
 				if(hates_unholy(youracedata))
 					damage *= 2;
@@ -3579,12 +3587,12 @@ register struct	obj	*obj;
 			if(u.twoweap)
 				zapdat.damn *= 2;
 			zapdat.affects_floor = FALSE;
-			if(u.ualign.record > 3){
+			if(u_holiness() == HOLY_HOLINESS){
 				zapdat.damd = 8;
 				zapdat.adtyp = AD_HOLY;
 				zapdat.phase_armor = TRUE;
 			}
-			else if(u.ualign.record < -3){
+			else if(u_holiness() == UNHOLY_HOLINESS){
 				zapdat.damd = 8;
 				zapdat.adtyp = AD_UNHY;
 				zapdat.phase_armor = TRUE;
@@ -3628,6 +3636,11 @@ register struct	obj	*obj;
 				zapdat.no_hit_wall = TRUE;
 				zapdat.damn *= 1.5;
 				zapdat.damn = max(zapdat.damn, 6);
+				if(SilverInvoke && !FLAME_BAD){
+					zapdat.adtyp = AD_SFLM;
+					if(SilverInvokeWrath)
+						zapdat.damn *= 2;
+				}
 				break;
 			case SPE_ACID_SPLASH:
 				range = 1;
@@ -3854,9 +3867,10 @@ boolean *obj_destroyed;/* has object been deallocated? Pointer to boolean, may b
 	    }
 
 	    typ = levl[bhitpos.x][bhitpos.y].typ;
-	    if (typ == IRONBARS){
+	    if (IS_BARS(bhitpos.x, bhitpos.y)){
 			if ((obj->otyp == SPE_FORCE_BOLT || obj->otyp == ROD_OF_FORCE || obj->otyp == WAN_STRIKING)){
 				break_iron_bars(bhitpos.x, bhitpos.y, TRUE);
+				typ = levl[bhitpos.x][bhitpos.y].typ;
 			}
 		}
 
@@ -4072,6 +4086,7 @@ struct zapdata * zapdata;
 		if (youagr ? Spellboost : mon_resistance(magr, SPELLBOOST)) {
 			dmg *= 2;
 		}
+		if(magr->owrk) dmg = (dmg+1)/2;
 	}
 	/* general resistance */
 	if (mdef && Half_spel(mdef))
@@ -4335,7 +4350,8 @@ struct zapdata * zapdata;	/* lots of flags and data about the zap */
 
 		}/* isok && !lev != stone */
 
-		if ((!isok(sx, sy) || !ZAP_POS(lev->typ) || closed_door(sx, sy)) && (range >= 0)) {
+		if ((!isok(sx, sy) || !ZAP_POS(lev->typ) ||
+		     (closed_door(sx, sy) && !IS_BARS(sx, sy))) && (range >= 0)) {
 			int bounce;
 			uchar rmn;
 
@@ -4519,7 +4535,7 @@ struct zapdata * zapdata;
 	boolean youagr = (magr == &youmonst);
 	boolean youdef = (mdef == &youmonst);
 	boolean sho_shieldeff = FALSE;
-	struct attack attk = { AT_NONE, zapdata->adtyp, 0, 0 };
+	struct attack attk = { AT_NONE, zapdata->adtyp, 0, 0, .bodypart = ATKBP(NONE) };
 	int dmg = zapdamage(magr, mdef, zapdata);
 	int svddmg = dmg;	/* saved damage for golemeffects() */
 
@@ -4820,6 +4836,8 @@ struct zapdata * zapdata;
 				//reset seen madnesses
 				mdef->seenmadnesses = 0L;
 				you_inflict_madness(mdef);
+				if (mdef->mhp <= 0)
+					return MM_DEF_DIED;
 			}
 		}
 		else {
@@ -5603,7 +5621,7 @@ boolean *shopdamage;
 	struct rm *lev = &levl[x][y];
 	int rangemod = 0;
 
-	if(adtyp == AD_FIRE || adtyp == AD_MADF) {
+	if(adtyp == AD_FIRE || adtyp == AD_MADF || adtyp == AD_SFLM) {
 	    struct trap *t = t_at(x, y);
 
 	    if (t && t->ttyp == WEB && !Is_lolth_level(&u.uz) && !(u.specialSealsActive&SEAL_BLACK_WEB)) {
@@ -5616,6 +5634,13 @@ boolean *shopdamage;
 		lev->typ = SOIL;
 		if(cansee(x,y)) {
 			pline("The grass burns away!");
+			newsym(x,y);
+		}
+	    }
+	    if(adtyp == AD_SFLM && SilverInvokeMortal && lev->typ == TREE) {
+		lev->typ = DEADTREE;
+		if(cansee(x,y)) {
+			pline("The tree burns and dies!");
 			newsym(x,y);
 		}
 	    }
@@ -5723,20 +5748,24 @@ boolean *shopdamage;
 			// (void) create_gas_cloud(x, y, 1, 8, rn1(20, 5), yours);
 		}
 	}
-	else if(adtyp == AD_GMLD && levl[x][y].typ == IRONBARS) {
+	else if(adtyp == AD_GMLD && IS_BARS(x,y)) {
+	    boolean wasdoor = IS_DOOR(levl[x][y].typ);
 	    if (cansee(x, y))
-		pline_The("iron bars are covered in gray mold!");
+		pline_The(wasdoor ? "barred door is covered in gray mold!" :
+				    "iron bars are covered in gray mold!");
 		dissolve_bars(x, y);
 		makemon(&mons[PM_RUSTY_GRAY_MOLD], x, y, MM_NOCOUNTBIRTH);
 	}
-	else if (adtyp == AD_ACID && levl[x][y].typ == IRONBARS && (flags.drgn_brth || !rn2(5))) {
+	else if (adtyp == AD_ACID && IS_BARS(x,y) && (flags.drgn_brth || !rn2(5))) {
+	    boolean wasdoor = IS_DOOR(levl[x][y].typ);
 	    if (cansee(x, y))
-		pline_The("iron bars are dissolved!");
+		pline_The(wasdoor ? "barred door is dissolved!" :
+				    "iron bars are dissolved!");
 	    else
 		You_hear(Hallucination ? "angry snakes!" : "a hissing noise.");
 	    dissolve_bars(x, y);
 	}
-	if(closed_door(x, y)) {
+	if(closed_door(x, y) && !IS_BARS(x, y)) {
 		int new_doormask = -1;
 		const char *see_txt = 0, *sense_txt = 0, *hear_txt = 0;
 		rangemod = -1000;
@@ -5747,6 +5776,7 @@ boolean *shopdamage;
 		case AD_FIRE:
 		case AD_EFIR:
 		case AD_MADF:
+		case AD_SFLM:
 		    new_doormask = D_NODOOR;
 		    see_txt = "The door is consumed in flames!";
 		    sense_txt = "smell smoke.";
@@ -6347,6 +6377,11 @@ retry:
 	u.uconduct.wishes++;
 
 	if (otmp != &zeroobj) {
+
+	    if (otmp->oclass == SPBOOK_CLASS && otmp->otyp != SPE_BLANK_PAPER
+			&& LongtermBlind
+		)
+			add_oprop(otmp, OPROP_TACTB);
 
 	    if (!flags.debug) {
 			char llog[BUFSZ+20];

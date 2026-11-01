@@ -1,4 +1,5 @@
 #include "hack.h"
+#include "mattkbp.h"
 #include "xhity.h"
 
 STATIC_DCL void FDECL(do_digging_projectile, (struct monst *, struct obj *, int, int));
@@ -9,8 +10,8 @@ STATIC_DCL void FDECL(quest_art_swap, (struct obj **, struct monst *));
 STATIC_DCL void FDECL(sho_obj_return, (struct obj *, int, int));
 STATIC_DCL void FDECL(return_thrownobj, (struct monst *, struct obj *));
 STATIC_DCL void FDECL(toss_up, (struct obj *, boolean));
-STATIC_DCL int FDECL(calc_range, (struct monst *, struct obj *, struct obj *, int *));
 STATIC_DCL boolean FDECL(misthrow, (struct monst *, struct obj *, struct obj *, boolean, int *, int *, int *));
+STATIC_DCL boolean FDECL(aerodynamic_projectile, (struct obj *, struct obj *));
 STATIC_DCL boolean FDECL(wheel_bounce_target, (struct monst *, int, int, int, int, int *, int *));
 STATIC_DCL struct obj * FDECL(blaster_ammo, (struct obj *));
 
@@ -429,6 +430,11 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 			result = projectile_attack(magr, mdef, thrownobj_p, vpointer, hmoncode, &dx, &dy, &range, &initrange, forcedestroy);\
 			if(kicked && youagr)
 				u.uattked = TRUE;
+			/* a bow kensei's shot at a target counts as an attack in the firing direction, once per volley */
+			else if(youagr && fired && launcher && mdef != &youmonst
+				&& Role_if(PM_KENSEI) && u.role_variant == ART_SUN_S_BOW && is_kensei_weapon(launcher)
+			)
+				u.uattked = TRUE;
 
 			/* stop on hit? */
 			if (!thrownobj)
@@ -469,7 +475,7 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 		/* projectile is on a sink (it "sinks" down) or is on a non-allowable square */
 		if ((range != initrange || initrange == 0) &&
 			((!ZAP_POS(levl[bhitpos.x][bhitpos.y].typ)) ||
-			closed_door(bhitpos.x, bhitpos.y) ||
+			(closed_door(bhitpos.x, bhitpos.y) && !IS_BARS(bhitpos.x, bhitpos.y)) ||
 			(IS_SINK(levl[bhitpos.x][bhitpos.y].typ))))
 		{
 			range = 0;
@@ -489,7 +495,8 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 
 		/* space ahead has wall and no monster */
 		if (!isok(bhitpos.x + dx, bhitpos.y + dy) ||
-			((!ZAP_POS(levl[bhitpos.x + dx][bhitpos.y + dy].typ) || closed_door(bhitpos.x + dx, bhitpos.y + dy)) &&
+			((!ZAP_POS(levl[bhitpos.x + dx][bhitpos.y + dy].typ) ||
+			  (closed_door(bhitpos.x + dx, bhitpos.y + dy) && !IS_BARS(bhitpos.x + dx, bhitpos.y + dy))) &&
 			!m_at(bhitpos.x+dx, bhitpos.y+dy)))
 		{
 			do_digging_projectile(magr, thrownobj, dx, dy);
@@ -505,10 +512,10 @@ boolean impaired;				/* TRUE if throwing/firing slipped OR magr is confused/stun
 				}
 			}
 		}
-		/* space ahead has iron bars and no monster */
+		/* space ahead has iron bars (or a closed/locked barred door) and no monster */
 		/* 1/5 chance for 'small' objects (see hits_bars), unless if launched from right beside the iron bars */
 		if (isok(bhitpos.x + dx, bhitpos.y + dy) &&
-		    levl[bhitpos.x + dx][bhitpos.y + dy].typ == IRONBARS &&
+		    IS_BARS(bhitpos.x + dx, bhitpos.y + dy) &&
 			!m_at(bhitpos.x + dx, bhitpos.y + dy) &&
 			hits_bars(
 				/* object fired   */ thrownobj_p,
@@ -672,9 +679,10 @@ int dy;							/* */
 	if (!((thrownobj->otyp == BLASTER_BOLT || thrownobj->otyp == HEAVY_BLASTER_BOLT || thrownobj->otyp == CARCOSAN_BOLT || thrownobj->otyp == LASER_BEAM)))
 		return;
 
-	/* Doors (but not artifact doors) */
-	if ((closed_door(newx, newy) || room->typ == SDOOR) &&
-		!artifact_door(newx, newy)) 
+	/* Doors (but not artifact doors, and not barred doors -- those fall
+	   through to the Iron Bars case below like plain bars would) */
+	if (((closed_door(newx, newy) && !IS_BARS(newx, newy)) || room->typ == SDOOR) &&
+		!artifact_door(newx, newy))
 	{
 		/* message */
 		if (cansee(newx, newy)) (thrownobj->otyp == LASER_BEAM) ?
@@ -788,17 +796,21 @@ int dy;							/* */
 		if (!Blind && cansee(newx, newy))
 			newsym(newx, newy);
 	}
-	/* Iron Bars (laser cutter only) */
-	else if (isok(newx, newy) && (room->typ == IRONBARS) && 
+	/* Iron Bars, or a closed/locked barred door (laser cutter only) */
+	else if (isok(newx, newy) && IS_BARS(newx, newy) &&
 		(thrownobj->otyp == LASER_BEAM)
 		) {
 		int numbars;
 		struct obj *otmp;
+		boolean wasdoor = IS_DOOR(room->typ);
 		/* message */
 		if (cansee(newx, newy))
-			pline("The %s cuts through the bars!", xname(thrownobj));
+			pline("The %s cuts through the %s!", xname(thrownobj),
+			      wasdoor ? "barred door" : "bars");
 		/* create opening */
 		room->typ = CORR;
+		if (wasdoor)
+			room->doormask = 0;
 		/* create iron bars */
 		for (numbars = d(2, 4) - 1; numbars > 0; numbars--){
 			otmp = mksobj_at(BAR, newx, newy, MKOBJ_NOINIT);
@@ -841,9 +853,10 @@ int y;							/* */
 	if(!youagr && !clear_path(x(magr), y(magr), x, y))
 		return;
 
-	/* Doors (but not artifact doors) */
-	if ((closed_door(x, y) || room->typ == SDOOR) &&
-		!artifact_door(x, y)) 
+	/* Doors (but not artifact doors, and not barred doors -- those are
+	   left untouched here, same as plain iron bars already are) */
+	if (((closed_door(x, y) && !IS_BARS(x, y)) || room->typ == SDOOR) &&
+		!artifact_door(x, y))
 	{
 		/* message */
 		if (cansee(x, y))
@@ -1278,6 +1291,10 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 			vis |= VIS_NONE;
 	}
 
+	boolean blaster_proj = (thrownobj->otyp == LASER_BEAM || thrownobj->otyp == BLASTER_BOLT
+		|| thrownobj->otyp == HEAVY_BLASTER_BOLT || thrownobj->otyp == CARCOSAN_BOLT);
+	int mon_deflect_skill = youdef ? 0 : (pd->mflagsf&MF_MARTIAL_E) ? P_EXPERT : (pd->mflagsf&MF_MARTIAL_S) ? P_SKILLED : P_BASIC;
+
 	/* train player's Shien skill, if player is defending */
 	if (youdef && uwep && is_lightsaber(uwep) && litsaber(uwep) && P_SKILL(weapon_type(uwep)) >= P_BASIC){
 		if (P_SKILL(P_SHII_CHO) >= P_BASIC){
@@ -1360,9 +1377,7 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 	}
 	/* Non-future (and rockets) protectiles are blown back by Tiamat's winds (somehow!) */
 	/*  And also not a rock from a sling. It's pretty arbitrary, but the idea is aerodynamic stuff gets blown back. */
-	else if (!(thrownobj->otyp == LASER_BEAM || thrownobj->otyp == BLASTER_BOLT || thrownobj->otyp == HEAVY_BLASTER_BOLT || thrownobj->otyp == CARCOSAN_BOLT || thrownobj->otyp == BULLET 
-			|| (launcher && (launcher->otyp == SLING || launcher->otyp == GRENADE_LAUNCHER))
-		)
+	else if (aerodynamic_projectile(thrownobj, launcher)
 		&& !trap
 		&& (mdef->mtyp == PM_TIAMAT__THE_FIEND_OF_WIND || (mdef->mtyp == PM_CHAOS && !PURIFIED_WIND)))
 	{
@@ -1387,6 +1402,63 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 		obfree(thrownobj, (struct obj*) 0);
 		*thrownobj_p = NULL;
 		return MM_HIT;
+	}
+	/* the hero's deflect grace lets the hero redirect projectiles in any direction; intelligent pets always throw them back at the attacker */
+	else if (!blaster_proj && !is_bullet(thrownobj) && !youagr && full_grace_empowers(mdef, AAT_GRACE_DEFLECT)
+		&& (youdef ? (freehand() && rnd(3) < P_SKILL(P_BARE_HANDED_COMBAT))
+			: (magr && !magr->mtame && intelligent_mon(mdef) && mon_freehand(mdef) && rnd(3) < mon_deflect_skill))
+	){
+		boolean redirected = FALSE;
+		if (youdef) {
+			You("redirect %s!", the(xname(thrownobj)));
+			if (getdir("Redirect it which way?") && (u.dx || u.dy)) {
+				*pdx = u.dx;
+				*pdy = u.dy;
+				redirected = TRUE;
+			}
+		}
+		else if (vis) {
+			pline("%s redirects %s!", Monnam(mdef), the(xname(thrownobj)));
+		}
+		if (!redirected) {
+			*pdx *= -1;
+			*pdy *= -1;
+		}
+		/* spends some range */
+		if (range2 > range) {
+			*prange = *prange2;
+			*prange2 -= range2 - range;
+		}
+		return MM_REFLECT;
+	}
+	/* dust mantles blow aerodynamic projectiles back at whoever launched them */
+	else if (aerodynamic_projectile(thrownobj, launcher) && !trap && !(youagr && youdef)
+		&& mon_has_mantle(mdef, AD_BLND)
+	){
+		if (vis)
+			pline("%s blown back by %s dust mantle!", Tobjnam(thrownobj, "are"),
+				youdef ? "your" : s_suffix(mon_nam(mdef)));
+		*pdx *= -1;
+		*pdy *= -1;
+		/* spends some range */
+		if (range2 > range) {
+			*prange = *prange2;
+			*prange2 -= range2 - range;
+		}
+		return MM_REFLECT;
+	}
+	/* the deflect grace also lets the hero and intelligent pets block projectiles that weren't redirected */
+	else if (!blaster_proj && !youagr && !(magr && magr->mtame) && grace_empowers(mdef, AAT_GRACE_DEFLECT)
+		&& (youdef ? ((!uwep || !bimanual_mon(uwep, &youmonst) || is_hero_kensei_weapon(uwep, &youmonst)) && rnd(3) < P_SKILL(weapon_type(uwep)))
+			: (intelligent_mon(mdef) && (MON_WEP(mdef) ? !bimanual_mon(MON_WEP(mdef), mdef) : !nohands(pd))
+				&& rnd(3) < mon_deflect_skill))
+	){
+		if (youdef)
+			You("deflect %s!", the(xname(thrownobj)));
+		else if (vis)
+			pline("%s deflects %s!", Monnam(mdef), the(xname(thrownobj)));
+		*prange = *prange2 = 0;
+		return MM_MISS;
 	}
 
 	/* unicorns */
@@ -1506,7 +1578,7 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 
 	/* Determine if the projectile hits */
 	dieroll = rnd(20);
-	static struct attack dummy = { AT_WEAP, AD_PHYS, 0, 0 };
+	struct attack dummy = { AT_WEAP, AD_PHYS, 0, 0, .bodypart = ATKBP(NONE) };
 	struct attack * attkp = &dummy;
 	int shield_margin = -1;
 	if (magr && attacktype_fordmg(magr->data, AT_WEAP, AD_PHYS))
@@ -1517,8 +1589,11 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 	if (miss_via_insubstantial(magr, mdef, attkp, thrownobj, vis)) {
 		/* message already printed by miss_via_insubstantial */;
 	}
-	else if (accuracy > dieroll || (dieroll == 1 && accuracy > -10))
+	else if (!shield_aura_deflects(mdef) && !grace_dodges(mdef) && (accuracy > dieroll || (dieroll == 1 && accuracy > -10)))
 	{
+		/* a mantle may stop the projectile before it lands */
+		if (mantle_stops_blow(magr, mdef, thrownobj_p, vis, (boolean *)0))
+			return MM_MISS;
 		/* hit */
 		/* (player-only) exercise dex */
 		if (youagr)
@@ -2021,13 +2096,24 @@ calc_multishot(struct monst *magr, struct obj *ammo, struct obj *launcher, int s
 			//No bonus shots from skill, base rof is 2
 			multishot = 1;
 		}
-		else switch (magr_wepskill) {
-		default:
-			multishot = 1; break;
-		case P_SKILLED:
-			multishot = 2; break;
-		case P_EXPERT:
-			multishot = 3; break;
+		else if(launcher && check_oprop(launcher, OPROP_SAMOW)){
+			//No bonus shots from skill
+			multishot = 1;
+		}
+		else {
+			switch (magr_wepskill) {
+				default:
+					multishot = 1; break;
+				case P_SKILLED:
+					multishot = 2; break;
+				case P_EXPERT:
+					multishot = 3; break;
+			}
+			//Counterpart to +1 melee attack, unlike other cases requires skill in the weapon used.
+			if(youagr && Role_if(PM_KENSEI) && multishot > 1 && !Upolyd && u.ulevel >= 30){
+				minmulti++;
+				multishot++;
+			}
 		}
 
 		if(youagr ? QuickDraw : mon_resistance(magr, QUICK_DRAW)){
@@ -2388,6 +2474,21 @@ ufire_blaster(struct obj *launcher, int shotlimit)
 	return result;
 }
 
+/* Returns a free stack of launcher's conjured arrows; the caller must obfree() it */
+struct obj *
+mk_conjured_arrows(struct obj *launcher)
+{
+	struct obj *arrow = mksobj(SILVER_ARROW, MKOBJ_NOINIT);
+	arrow->spe = max(7, launcher->spe);
+	arrow->blessed = launcher->blessed;
+	arrow->cursed = launcher->cursed;
+	arrow->quan = 30;		/* Make more than enough so that we are always able to manually destroy the excess */
+	if (check_oprop(launcher, OPROP_SAMOW))
+		add_oprop(arrow, OPROP_VORPW);
+	fix_object(arrow);
+	return arrow;
+}
+
 /*
  * dofire()
  *
@@ -2562,7 +2663,7 @@ dofire()
 		/* Rogue Gear Spirits' auto-generated ammo -- mainhand only */
 		if (uwep && (!uquiver || (is_ammo(uquiver) && !ammo_and_launcher(uquiver, uwep))) && uwep->oartifact == ART_ROGUE_GEAR_SPIRITS && !Is_spire(&u.uz)){
 			struct obj *bolt = mksobj(CROSSBOW_BOLT, MKOBJ_NOINIT);
-			bolt->spe = min(0, uwep->spe);
+			bolt->spe = max(0, uwep->spe);
 			bolt->blessed = uwep->blessed;
 			bolt->cursed = uwep->cursed;
 			bolt->objsize = MZ_SMALL;
@@ -2572,13 +2673,10 @@ dofire()
 			obfree(bolt, 0);
 			return result;
 		}
-		if (uwep && (!uquiver || (is_ammo(uquiver) && !ammo_and_launcher(uquiver, uwep))) && check_oprop(uwep, OPROP_AAMOW) && !Is_spire(&u.uz)){
-			struct obj *arrow = mksobj(SILVER_ARROW, MKOBJ_NOINIT);
-			arrow->spe = max(7, uwep->spe);
-			arrow->blessed = uwep->blessed;
-			arrow->cursed = uwep->cursed;
-			arrow->quan = 30;		/* Make more than enough so that we are always able to manually destroy the excess */
-			fix_object(arrow);
+		if (uwep && (!uquiver || (is_ammo(uquiver) && !ammo_and_launcher(uquiver, uwep)))
+			&& (check_oprop(uwep, OPROP_AAMOW) || check_oprop(uwep, OPROP_SAMOW)) && !Is_spire(&u.uz)
+		){
+			struct obj *arrow = mk_conjured_arrows(uwep);
 			result = uthrow(arrow, uwep, shotlimit, TRUE, FALSE);
 			obfree(arrow, 0);
 			return result;
@@ -2940,11 +3038,12 @@ int * dz;
 		&&
 		/* at a 1/7 chance */
 		(*dx || *dy) && !rn2(7)
-		) || (
+		) || ((
 			/* Bad luck */
 			!youagr && !magr->mpeaceful && couldsee(magr->mx,magr->my)
 			&& OffensiveLuck && u.uluck > 0
 			&& rn2(20) < u.uluck
+			) || (!youagr && mon_resistance(magr, FUMBLING) && !rn2(20))
 		))
 		) {
 		boolean slipok = TRUE;
@@ -3162,6 +3261,10 @@ int tary;
 	static const int chromatic_dragon_breaths[] = { AD_FIRE, AD_COLD, AD_ELEC, AD_DRST, AD_DISN, AD_ACID };
 	static const int platinum_dragon_breaths[] = { AD_FIRE, AD_DISN, AD_SLEE, AD_ELEC };
 	static const int random_breaths[] = { AD_MAGM, AD_FIRE, AD_COLD, AD_SLEE, AD_DISN, AD_ELEC, AD_DRST, AD_ACID };
+	int multi_typs[6];
+	int multi_n = 1;
+	int multi_idx;
+	int sx, sy;
 	int dx, dy, dz;
 	int range;
 	boolean jacket = youagr ? Straitjacketed : straitjacketed_mon(magr);
@@ -3194,13 +3297,25 @@ int tary;
 	}
 
 	/* Random breath attacks */
-	if (typ == AD_RBRE){
-		if (pa->mtyp == PM_CHROMATIC_DRAGON)
-			typ = chromatic_dragon_breaths[rn2(SIZE(chromatic_dragon_breaths))];
-		else if (pa->mtyp == PM_PLATINUM_DRAGON)
-			typ = platinum_dragon_breaths[rn2(SIZE(platinum_dragon_breaths))];
-		else 
-			typ = random_breaths[rn2(SIZE(random_breaths))];
+	multi_typs[0] = typ;
+	if (typ == AD_RBRE) {
+		if (pa->mtyp == PM_CHROMATIC_DRAGON) {
+			/* all six heads fire in a random order */
+			multi_n = SIZE(chromatic_dragon_breaths);
+			for (multi_idx = 0; multi_idx < multi_n; multi_idx++)
+				multi_typs[multi_idx] = chromatic_dragon_breaths[multi_idx];
+			for (multi_idx = multi_n - 1; multi_idx > 0; multi_idx--) {
+				int swap = rn2(multi_idx + 1);
+				int tmp = multi_typs[multi_idx];
+				multi_typs[multi_idx] = multi_typs[swap];
+				multi_typs[swap] = tmp;
+			}
+		} else if (pa->mtyp == PM_PLATINUM_DRAGON) {
+			multi_typs[0] = platinum_dragon_breaths[rn2(SIZE(platinum_dragon_breaths))];
+		} else {
+			multi_typs[0] = random_breaths[rn2(SIZE(random_breaths))];
+		}
+		typ = multi_typs[0];
 	}
 	/* if cancelled, (or the player is strangled) can't use breath attack */
 	if (youagr ? Strangled_cant_speak : magr->mcan) {
@@ -3229,31 +3344,60 @@ int tary;
 	
 	/* message */
 	if (youagr || canseemon(magr)) {
-		char * bofp = flash_type(typ, ZAP_BREATH);
-		char * p = strstri(bofp, " of ");
+		if (multi_n > 1) {
+			if (jacket) {
+				if (youagr)
+					Your("straitjacket prevents you from taking a deep breath!");
+				else
+					pline("%s seems to be having trouble breathing.", Monnam(magr));
+			}
+			pline("%s breathe%s all colors!",
+				youagr ? "You" : Monnam(magr),
+				youagr ? "" : "s");
+		} else {
+			char * bofp = flash_type(typ, ZAP_BREATH);
+			char * p = strstri(bofp, " of ");
 
-		if (p) {
-			p += 4;
-			if (!*p) p = NULL;
+			if (p) {
+				p += 4;
+				if (!*p) p = NULL;
+			}
+
+			/* some breaths sound better as "a noun of x" */
+			if (typ == AD_DISN || typ == AD_BLUD)
+				p = NULL;
+
+			if (jacket) {
+				if (youagr)
+					Your("straitjacket prevents you from taking a deep breath!");
+				else
+					pline("%s seems to be having trouble breathing.", Monnam(magr));
+			}
+			pline("%s breathe%s %s!",
+				youagr ? "You" : Monnam(magr),
+				youagr ? "" : "s",
+				p ? p : an(bofp)
+				);
 		}
-		
-		/* some breaths sound better as "a noun of x" */
-		if (typ == AD_DISN || typ == AD_BLUD)
-			p = NULL;
-		
-		if(jacket){
-			if(youagr)
-				Your("straitjacket prevents you from taking a deep breath!");
-			else
-				pline("%s seems to be having trouble breathing.", Monnam(magr));
-		}
-		pline("%s breathe%s %s!",
-			youagr ? "You" : Monnam(magr),
-			youagr ? "" : "s",
-			p ? p : an(bofp)
-			);
 	}
 
+	for (multi_idx = 0; multi_idx < multi_n; multi_idx++) {
+	typ = multi_typs[multi_idx];
+	sx = x(magr);
+	sy = y(magr);
+	if (multi_n > 1) {
+		int xadj = 0, yadj = 0;
+		if (dy == 0)       yadj = d(1,3)-2 + d(1,3)-2;
+		else if (dx == 0)  xadj = d(1,3)-2 + d(1,3)-2;
+		else if (dx == dy) { int dd = d(1,3)-2 + d(1,3)-2; xadj = dd; yadj = -1*dd; }
+		else               { int dd = d(1,3)-2 + d(1,3)-2; xadj = yadj = dd; }
+		if (isok(x(magr)+xadj, y(magr)+yadj) &&
+		    ACCESSIBLE(levl[x(magr)+xadj][y(magr)+yadj].typ) &&
+		    clear_path(x(magr), y(magr), x(magr)+xadj, y(magr)+yadj)) {
+			sx = x(magr)+xadj;
+			sy = y(magr)+yadj;
+		}
+	}
 	/* set up zapdata */
 	basiczap(&zapdata, typ, ZAP_BREATH, 0);
 
@@ -3301,7 +3445,8 @@ int tary;
 		zapdata.damd = zapdata.damd/2+1;
 	}
 
-	zap(magr, x(magr), y(magr), dx, dy, range, &zapdata);
+	zap(magr, sx, sy, dx, dy, range, &zapdata);
+	} /* end multi-breath loop */
 
 	/* breath runs out sometimes. */ 
 	if (!youagr) {
@@ -3830,6 +3975,9 @@ boolean forcedestroy;
 	/* call projectile() to shoot n times */
 	for (m_shot.i = 1; m_shot.i <= m_shot.n; m_shot.i++) {
 		int dx = odx, dy = ody, dz = 0;
+		/* a shooter killed by an earlier shot (whose inventory has been dropped) stops firing */
+		if (DEADMONSTER(magr))
+			break;
 		boolean impaired = misthrow(magr, ammo, launcher, m_shot.s, &dx, &dy, &dz);
 		/* note: we actually don't care if the projectile hit anything */
 		result = projectile(magr, ammo, launcher, HMON_PROJECTILE|(m_shot.s ? HMON_PROJECTILE|HMON_FIRED : 0),
@@ -3842,6 +3990,19 @@ boolean forcedestroy;
 	m_shot.o = STRANGE_OBJECT;
 	m_shot.s = FALSE;
 	return result;
+}
+
+/* Return TRUE if thrownobj, launched from launcher (null if none), is aerodynamic enough to be blown about by wind. */
+STATIC_OVL boolean
+aerodynamic_projectile(struct obj * thrownobj, struct obj * launcher)
+{
+	if (thrownobj->otyp == LASER_BEAM || thrownobj->otyp == BLASTER_BOLT || thrownobj->otyp == HEAVY_BLASTER_BOLT
+		|| thrownobj->otyp == CARCOSAN_BOLT || thrownobj->otyp == BULLET
+	)
+		return FALSE;
+	if (launcher && (launcher->otyp == SLING || launcher->otyp == GRENADE_LAUNCHER))
+		return FALSE;
+	return TRUE;
 }
 
 /* wheel_bounce_target()

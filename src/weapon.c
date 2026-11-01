@@ -7,6 +7,7 @@
  *	bonuses for any given weapon used, as well as weapons selection
  *	code for monsters.
  */
+#include <math.h>
 #include "hack.h"
 #include "artifact.h"
 #include "xhity.h"
@@ -197,10 +198,12 @@ struct monst *magr;
 		ptr = youracedata;
 	
 	if (Is_weapon || (otmp->otyp >= LUCKSTONE && otmp->otyp <= ROCK && otmp->ovar1_projectileSkill == -P_FIREARM)){
-		if(youagr && Race_if(PM_ORC) && otmp->where == OBJ_INVENT){
-			tmp += max((u.ulevel+2)/3, otmp->spe);
-		} else {
-			tmp += otmp->spe;
+		if (!Is_spire(&u.uz) && !otmp->suppressed) {
+			if(youagr && Race_if(PM_ORC) && otmp->where == OBJ_INVENT){
+				tmp += max((u.ulevel+2)/3, otmp->spe);
+			} else {
+				tmp += otmp->spe;
+			}
 		}
 	}
 
@@ -241,6 +244,8 @@ struct monst *magr;
 	   (holy_damage(mon))){
 		if(otmp->oartifact == ART_EXCALIBUR)
 			tmp += 7; //Quite holy
+		if(otmp->oartifact == ART_WHIRLING_SWORD)
+			tmp += 7; //Quite holy
 		if(otmp->oartifact == ART_JINJA_NAGINATA)
 			tmp += 5; //Quite holy
 		else if(otmp->oartifact == ART_VAMPIRE_KILLER)
@@ -251,7 +256,7 @@ struct monst *magr;
 			tmp += 3; //Quite holy
 		else tmp += 2;
 
-		if(magr && Focused_aura(magr)){
+		if(magr && Focused_aura_wep(magr, otmp)){
 			tmp += 4;
 		}
 	}
@@ -420,7 +425,7 @@ struct monst *magr;
 		))){
 		attackmask |= PIERCE;
 	}
-	if (youagr && obj && is_knight_sword(obj)){
+	if (youagr && obj && (is_knight_sword(obj) || (Role_if(PM_KENSEI) && is_kensei_weapon(obj)))){
 		if(activeFightingForm(FFORM_HALF_SWORD))
 			attackmask = PIERCE; // only thrusting
 		else if(activeFightingForm(FFORM_POMMEL))
@@ -487,10 +492,36 @@ struct monst *magr;
 		if (obj == uwep) attackmask |= EXPLOSION;
 		else attackmask = WHACK;
 	}
+	//Six element base substitutions
+	if (six_element_channel(oartifact, SIXEL_WOOD))
+		attackmask = PIERCE;
+	else if (six_element_channel(oartifact, SIXEL_WATER))
+		attackmask = SLASH;
+	//Six element additive modifiers
+	if (six_element_channel(oartifact, SIXEL_AXE))
+		attackmask |= SLASH;
+	if (six_element_channel(oartifact, SIXEL_ICE))
+		attackmask |= WHACK;
+	if (six_element_channel(oartifact, SIXEL_FIELD))
+		attackmask |= SLASH;
 	/* if it's not any of the above, we're just smacking things with it */
 	if (!attackmask)
 		attackmask = WHACK;
 
+	return attackmask;
+}
+
+/* Returns the attack mask of [obj] (or of [otyp] and [oartifact], if [obj] is NULL)
+ *		used as a weapon by [magr] against [mdef], which may be NULL.
+ * Some weapons may change their attack type depending on the target they are striking.
+ */
+int
+attack_mask_vs_mdef(struct obj *obj, int otyp, int oartifact, struct monst *magr, struct monst *mdef)
+{
+	int attackmask = attack_mask(obj, otyp, oartifact, magr);
+
+	if(obj && mdef && ritual_sword_target(obj, mdef))
+		attackmask |= WHACK|SLASH|PIERCE;
 	return attackmask;
 }
 
@@ -588,7 +619,7 @@ struct monst *magr;
 	/* set dmod, if possible*/
 	if (obj){
 		dmod = obj->objsize - MZ_MEDIUM;
-		if(magr && Focused_aura(magr)){
+		if(magr && Focused_aura_wep(magr, obj)){
 			dmod += 2;
 		}
 
@@ -783,12 +814,46 @@ struct monst *magr;
 		}
 
 		if (otyp == BALL) {
+			/*Excess weight damage, keep in sync with objects.c
+			 * Current: base die d25, no bonus die, base weight is reasonable to view in incremets of 40
+			 */
+#define BASE_BALL_DIE 25
+#define BALL_WEIGHT_INCREMENT 40
+#define BASE_BALL_DOUBLING_WEIGHT (BASE_BALL_DIE*BALL_WEIGHT_INCREMENT)
 			int wt = (int)objects[BALL].oc_weight;
 
 			if ((int)obj->owt > wt) {
-				wt = ((int)obj->owt - wt) / 40;
-				ocd += wt;
+				if((obj->owt - wt) <= BASE_BALL_DOUBLING_WEIGHT){
+					wt = ((int)obj->owt - wt) / BALL_WEIGHT_INCREMENT;
+					ocd += wt;
+				}
+				else {
+					double doublings = log2((double)(obj->owt - wt) / BASE_BALL_DOUBLING_WEIGHT + 1);
+					static boolean warning_given = FALSE;
+					if((bond != 0 || bonn != 0) && !warning_given){
+						warning_given = TRUE;
+						pline("Bug detected: bonus die already set in heavy ball code. Report to maintainer.");
+					}
+					if(doublings <= 3){
+						ocd += BASE_BALL_DIE*doublings;
+					}
+					else {
+						ocd = BASE_BALL_DIE*4;
+						doublings-=3;
+						while(doublings > 4){
+							ocn++;
+							doublings-=4;
+						}
+						bond = BASE_BALL_DIE*(doublings);
+						if(bond > 0){
+							bonn = 1;
+						}
+					}
+				}
 			}
+#undef BASE_BALL_DIE
+#undef BALL_WEIGHT_INCREMENT
+#undef BASE_BALL_DOUBLING_WEIGHT
 		}
 		if (check_omod(obj, OMOD_BLADED))
 			ocd = max(ocd, 2*(objects[obj->otyp].oc_size + 1));
@@ -973,6 +1038,43 @@ struct monst *magr;
 				explode_amt = 1;
 		}
 
+		if (surya_astra_sword(magr) && obj == MON_WEP(magr))
+			ocn += 1;
+
+		if (six_element_channel(obj->oartifact, SIXEL_EARTH) && !Is_spire(&u.uz))
+			ocn += 1;
+		if (six_element_channel(obj->oartifact, SIXEL_AXE) && !Is_spire(&u.uz)){
+			if(!bonn){
+				bonn = 1;
+				bond = max(4 + 2 * dmod, 2);
+			}
+			else bond += 4;
+			if(large) bonn++;
+		}
+		if (six_element_channel(obj->oartifact, SIXEL_LONG) && !Is_spire(&u.uz)){
+			flat++;
+		}
+		if(obj->oartifact == ART_BLEEDING_VOID){
+			int bonus_dice = 0;
+			int insight = Insight;
+			if(ocd < 1)
+				ocd = 1;
+			// How many extra base dice?
+			while(insight/(bonus_dice + 1) >= ocd){
+				bonus_dice++;
+				insight -= ocd*bonus_dice;
+			}
+			ocn += bonus_dice;
+			// Any leftover goes onto the bonus die or flat damage
+			if(insight/(bonus_dice + 1) > 1){
+				bond += insight/(bonus_dice + 1);
+				if(!bonn)
+					bonn = 1;
+			}
+			else if(insight/(bonus_dice + 1) > 0)
+				flat += insight/(bonus_dice + 1);
+		}
+
 		/* other various artifacts and objects */
 		if (obj->oartifact == ART_VORPAL_BLADE
 			|| obj->oartifact == ART_SNICKERSNEE
@@ -1023,8 +1125,14 @@ struct monst *magr;
 		else if (obj->oartifact == ART_GREEN_DRAGON_CRESCENT_BLAD){
 			int wt = (int)objects[NAGINATA].oc_weight;
 			if ((int)obj->owt > wt) {
+				/* linear up through the first doubling of wt, then log2
+				 * growth beyond it for diminishing returns.
+				 */
+				double ratio = ((int)obj->owt <= 2 * wt)
+					? ((double)obj->owt - wt) / wt
+					: log2((double)obj->owt / wt);
 				bonn = 1;
-				bond = max(12 + 2 * dmod, 2) * ((int)obj->owt - wt) / wt;
+				bond = (int)(max(12 + 2 * dmod, 2) * ratio);
 			}
 		}
 		else if (obj->oartifact == ART_GOLDEN_SWORD_OF_Y_HA_TALLA && otyp == BULLWHIP)
@@ -1707,7 +1815,7 @@ struct monst *magr;
 
 
 	/* enchantment damage */
-	if (!Is_spire(&u.uz) && ((otmp->oclass == WEAPON_CLASS) || is_weptool(otmp)
+	if (!Is_spire(&u.uz) && !otmp->suppressed && ((otmp->oclass == WEAPON_CLASS) || is_weptool(otmp)
 		|| (otmp->otyp >= LUCKSTONE && otmp->otyp <= ROCK && otmp->ovar1_projectileSkill == -P_FIREARM)
 		|| (is_shield(otmp) && magr == &youmonst && activeFightingForm(FFORM_SHIELD_BASH)))
 	){
@@ -1723,7 +1831,7 @@ struct monst *magr;
 			tmp = 0;
 	}
 	/* Smaug gets stabbed */
-	if((attack_mask(otmp, 0, 0, magr) & PIERCE) && ptr->mtyp == PM_SMAUG)
+	if((attack_mask_vs_mdef(otmp, 0, 0, magr, mon) & PIERCE) && ptr->mtyp == PM_SMAUG)
 		tmp += rnd(20);
 	/* axes deal more damage to wooden foes */
 	if (is_axe(otmp) && is_wooden(ptr))
@@ -1749,7 +1857,7 @@ struct monst *magr;
 		   so always subtract erosion even for blunt weapons. */
 		/* Rust weapons may now shatter when used, so don't subtract
 		   damage for blunt anymore */
-		if(!(attack_mask(otmp, 0, 0, magr) & WHACK)) tmp -= greatest_erosion(otmp);
+		if(!(attack_mask_vs_mdef(otmp, 0, 0, magr, mon) & WHACK)) tmp -= greatest_erosion(otmp);
 		if (tmp < 1) tmp = 1;
 	}
 	
@@ -3178,6 +3286,9 @@ int atr;
 				(otmp->otyp == LIGHTSABER && !otmp->oartifact && otmp->ovar1_lightsaberHandle == 0))
 				mod += 1;
 
+			if (otmp->otyp == CRYSTAL_SWORD && grace_empowers(mtmp, AAT_GRACE_CRYSTAL))
+				mod += 1;
+
 			return mod;
 		case A_CON:
 			if (check_oprop(otmp, OPROP_BYAKW) || is_silverknight_weapon(otmp))
@@ -3243,6 +3354,9 @@ int atr;
 				mod += 0.5;
 
 			if(is_silverknight_weapon(otmp) && (check_oprop(otmp, OPROP_VORPW) || check_oprop(otmp, OPROP_ACIDW) || check_oprop(otmp, OPROP_OCLTW)))
+				mod += 1;
+
+			if (otmp->otyp == CRYSTAL_SWORD && full_grace_empowers(mtmp, AAT_GRACE_CRYSTAL))
 				mod += 1;
 
 			return mod;
@@ -3543,6 +3657,9 @@ int skill;
 	You("are now %s skilled in %s.",
 	P_SKILL_CORE(skill, FALSE) >= P_MAX_SKILL_CORE(skill, FALSE) ? "most" : "more",
 	P_NAME(skill));
+
+	if (skill == P_MARTIAL_ARTS)
+		unlock_martial_forms();
 }
 
 static const struct skill_range {
@@ -4065,6 +4182,9 @@ struct obj *obj;
 				continue;
 			CHECK_ALTERNATE_SKILL(skl)
 		}
+	}
+	else if(obj->oartifact == ART_ROD_OF_SEVEN_PARTS){
+		CHECK_ALTERNATE_SKILL(P_LANCE)
 	}
 
 	if(obj->otyp == DOUBLE_LIGHTSABER){
@@ -5033,7 +5153,7 @@ process_etraits(unsigned long traits, int otyp, struct obj *obj, struct monst *m
 
 	//Add traits
 	if(youagr){
-		if(is_knight_sword(obj)){
+		if(is_knight_sword(obj) || (Role_if(PM_KENSEI) && is_kensei_weapon(obj))){
 			if(activeFightingForm(FFORM_HALF_SWORD)){
 				traits |= ETRAIT_QUICK;
 				traits &= ~(ETRAIT_LUNGE|ETRAIT_GRAZE);
@@ -5046,16 +5166,24 @@ process_etraits(unsigned long traits, int otyp, struct obj *obj, struct monst *m
 		if(is_makashi_saber(obj) && activeFightingForm(FFORM_MAKASHI)){
 			traits |= ETRAIT_LUNGE|ETRAIT_STOP_THRUST;
 		}
-		if(obj->otyp == SILVERKNIGHT_SWORD && !check_oprop(obj, OPROP_NONE)){
-			if((check_oprop(obj, OPROP_FIREW) || check_oprop(obj, OPROP_ACIDW)) && (obj->where != OBJ_INVENT || (!activeFightingForm(FFORM_POMMEL) && !activeFightingForm(FFORM_HALF_SWORD))))
-				traits |= ETRAIT_CLEAVE;
-			else if(check_oprop(obj, OPROP_ELECW) && (obj->where != OBJ_INVENT || !activeFightingForm(FFORM_HALF_SWORD)))
-				traits |= ETRAIT_HEW;
-			 else if(check_oprop(obj, OPROP_COLDW))
-				traits |= ETRAIT_FELL;
-			 else if(check_oprop(obj, OPROP_MAGCW) && (obj->where != OBJ_INVENT || !activeFightingForm(FFORM_POMMEL)))
-				traits |= ETRAIT_PUNCTURE;
-		}
+	}
+	if(obj->otyp == CRYSTAL_SWORD && grace_empowers(mon, AAT_GRACE_CRYSTAL)){
+		if(youagr && activeFightingForm(FFORM_HALF_SWORD))
+			traits |= ETRAIT_PUNCTURE;
+		else if(youagr && activeFightingForm(FFORM_POMMEL))
+			traits |= ETRAIT_ANTI_UNDEAD;
+		else
+			traits |= ETRAIT_BLEED;
+	}
+	if(obj->otyp == SILVERKNIGHT_SWORD && !check_oprop(obj, OPROP_NONE)){
+		if((check_oprop(obj, OPROP_FIREW) || check_oprop(obj, OPROP_ACIDW)) && (obj->where != OBJ_INVENT || (!activeFightingForm(FFORM_POMMEL) && !activeFightingForm(FFORM_HALF_SWORD))))
+			traits |= ETRAIT_CLEAVE;
+		else if(check_oprop(obj, OPROP_ELECW) && (obj->where != OBJ_INVENT || !activeFightingForm(FFORM_HALF_SWORD)))
+			traits |= ETRAIT_HEW;
+		else if(check_oprop(obj, OPROP_COLDW))
+			traits |= ETRAIT_FELL;
+		else if(check_oprop(obj, OPROP_MAGCW) && (obj->where != OBJ_INVENT || !activeFightingForm(FFORM_POMMEL)))
+			traits |= ETRAIT_PUNCTURE;
 	}
 	if(otyp == POLEAXE){
 		if(obj->o_e_trait & ETRAIT_FOCUS_FIRE)
@@ -5092,9 +5220,9 @@ process_etraits(unsigned long traits, int otyp, struct obj *obj, struct monst *m
 		if(obj->o_e_trait & ETRAIT_FOCUS_FIRE)
 			traits |= ETRAIT_STOP_THRUST|ETRAIT_BRACED|ETRAIT_PUNCTURE;
 		else if(obj->o_e_trait & ETRAIT_HEW)
-			traits |= ETRAIT_PENETRATE_ARMOR;
+			traits |= ETRAIT_PENETRATE_ARMOR|ETRAIT_ANTI_UNDEAD;
 		else if(obj->o_e_trait & ETRAIT_STUNNING_STRIKE)
-			traits |= ETRAIT_CLEAVE|ETRAIT_PENETRATE_ARMOR;
+			traits |= ETRAIT_CLEAVE|ETRAIT_PENETRATE_ARMOR|ETRAIT_ANTI_UNDEAD;
 		else
 			traits |= ETRAIT_STOP_THRUST|ETRAIT_LUNGE|ETRAIT_PUNCTURE;
 	}
@@ -5107,6 +5235,9 @@ process_etraits(unsigned long traits, int otyp, struct obj *obj, struct monst *m
 			traits |= ETRAIT_GRAZE;
 		if(Insight >= 24)
 			traits |= ETRAIT_CLEAVE;
+	}
+	if(pa->mtyp == PM_DEATH_KNIGHT){
+		traits |= ETRAIT_CLEAVE|ETRAIT_BLEED|ETRAIT_LONG_SLASH|ETRAIT_PENETRATE_ARMOR;
 	}
 	if(obj->o_e_trait&ETRAIT_FOCUS_FIRE){
 		if(otyp == SILVERKNIGHT_SWORD){
@@ -5133,17 +5264,42 @@ process_etraits(unsigned long traits, int otyp, struct obj *obj, struct monst *m
 				traits |= ETRAIT_BLADEDANCE;
 		}
 	}
+	if(six_element_channel(obj->oartifact, SIXEL_WOOD)){
+		traits |= ETRAIT_PUNCTURE;
+		traits &= ~(ETRAIT_HEW|ETRAIT_STUNNING_STRIKE);
+	}
+	else if(six_element_channel(obj->oartifact, SIXEL_EARTH)){
+		traits |= ETRAIT_PENETRATE_ARMOR;
+		if(six_element_channel(obj->oartifact, SIXEL_FIELD))
+			traits |= ETRAIT_BLEED;
+	}
+	else if(six_element_channel(obj->oartifact, SIXEL_WATER)){
+		traits |= ETRAIT_LONG_SLASH;
+		traits &= ~(ETRAIT_HEW|ETRAIT_STUNNING_STRIKE);
+	}
+	/* the hero's blade-dance grace gives one-handed weapons blade dance at full HP, and light weapons and the hero's Kensei weapons above half HP */
+	if((obj->oclass == WEAPON_CLASS || is_weptool(obj))
+		&& ((full_grace_empowers(mon, AAT_GRACE_BLADES) && !bimanual_mon(obj, mon))
+			|| (grace_empowers(mon, AAT_GRACE_BLADES) && (light_weapon_mon(obj, mon) || is_hero_kensei_weapon(obj, mon))))
+	)
+		traits |= ETRAIT_BLADEDANCE;
+	/* the hero's lunge grace gives one-handed weapons and the hero's Kensei weapons lunge above half HP, and any weapon at full HP */
+	if((obj->oclass == WEAPON_CLASS || is_weptool(obj))
+		&& (full_grace_empowers(mon, AAT_GRACE_LUNGE)
+			|| (grace_empowers(mon, AAT_GRACE_LUNGE) && (!bimanual_mon(obj, mon) || is_hero_kensei_weapon(obj, mon))))
+	)
+		traits |= ETRAIT_LUNGE;
 
 	return traits;
 }
 
 boolean
-check_etrait(struct obj *obj, struct monst *mon, unsigned long trait)
+check_etrait(struct obj *obj, struct monst *mon, unsigned long trait, boolean skillgate)
 {
 	boolean youagr = (mon == &youmonst);
 	struct permonst *pa = youagr ? youracedata : mon->data;
 
-	if(youagr && P_SKILL(weapon_type(obj)) < P_SKILLED)
+	if(skillgate && youagr && P_SKILL(weapon_type(obj)) < P_SKILLED)
 		return FALSE;
 	else if(is_lightsaber(obj) && !litsaber(obj))
 		return FALSE;
