@@ -851,6 +851,9 @@ aligntyp alignment;
 			/* avoid boots for chiropterans */
 			skip_if(Race_if(PM_CHIROPTERAN) && objects[a->otyp].oc_class == ARMOR_CLASS && objects[a->otyp].oc_armcat == ARM_BOOTS);
 
+			/* avoid wing-guards for the wingless */
+			skip_if(!has_wings_mon(&youmonst) && objects[a->otyp].oc_class == ARMOR_CLASS && objects[a->otyp].oc_armcat == ARM_WING);
+
 			skip_if((a->gflags & ARTG_NAME));
 
 			/* skip Callandor for non-males */
