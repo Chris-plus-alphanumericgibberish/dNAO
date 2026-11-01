@@ -3676,6 +3676,12 @@ int n;	/* number to try to fire */
 		rngmod = 8;
 		volley = TRUE;
 		break;
+    case AD_PHYS:
+        ammo_type = DIAMOND;
+        qvr = mksobj(ammo_type, MKOBJ_NOINIT);
+        rngmod = 10;
+        volley=TRUE;
+        break;
 	default:
 		ammo_type = ARROW;
 		break;

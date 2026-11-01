@@ -179,6 +179,10 @@ hack_artifacts()
 			art->alignment = alignmnt;
 
 
+    /*Those from the future might have inherited the Omnitrix*/
+    if(Role_if(PM_ANACHRONONAUT) || Role_if(PM_TOURIST)){
+        artilist[ART_OMNITRIX].gflags |= ARTG_INHER;
+    }
 	/* Excalibur can be used by any lawful character, not just knights */
 	if (!Role_if(PM_KNIGHT)){
  	    artilist[ART_EXCALIBUR].role = NON_PM;

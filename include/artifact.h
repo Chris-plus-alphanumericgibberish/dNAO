@@ -531,6 +531,7 @@ extern struct artifact * artilist;
 #define BOREAL_INVOKE   (LAST_PROP+98)
 #define WISDOM_DANCE    (LAST_PROP+99)
 #define DRAW_BLEEDING_VOID	(LAST_PROP+100)
+#define CHSELF_OMNI     (LAST_PROP+101)
 
 #define MASTERY_ARTIFACT_LEVEL 20
 

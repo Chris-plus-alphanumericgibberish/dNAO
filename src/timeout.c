@@ -3168,6 +3168,38 @@ long timeout;
 	}
 }
 
+#define STATE_READY 0
+#define STATE_ACTIVE 1
+#define STATE_CHARGING 2
+void
+omni_time_out(arg, timeout)
+genericptr_t arg;
+long timeout;
+{
+	struct obj *obj = (struct obj *) arg;
+    if(obj->spe == STATE_ACTIVE){
+        rehumanize();
+        obj->spe = STATE_CHARGING;
+        obj->objsize = youracedata->msize;
+        start_timer(100 + rnd(500), TIMER_OBJECT, OMNI_RECHARGE, (genericptr_t)obj);
+    }
+}
+
+void
+omni_recharge(arg, timeout)
+genericptr_t arg;
+long timeout;
+{
+	struct obj *obj = (struct obj *) arg;
+    if(obj->spe == STATE_CHARGING){
+        pline("%s beeps.", The(xname(obj)));
+        obj->spe = STATE_READY;
+    }
+}
+#undef STATE_READY
+#undef STATE_CHARGING
+#undef STATE_ACTIVE
+
 
 #ifdef OVL0
 /* ------------------------------------------------------------------------- */
@@ -3274,6 +3306,8 @@ static const ttable timeout_funcs[NUM_TIME_FUNCS] = {
 	TTAB(crumble_if_improved,	(timeout_proc)0,	"crumble_if_improved"),
 	TTAB(revert_six_element,	(timeout_proc)0,	"revert_six_element"),
 	TTAB(revert_bleeding_void,	(timeout_proc)0,	"revert_bleeding_void"),
+	TTAB(omni_time_out,		(timeout_proc)0,	"omni_time_out"),
+	TTAB(omni_recharge,		(timeout_proc)0,	"omni_recharge"),
 };
 #undef TTAB
 
