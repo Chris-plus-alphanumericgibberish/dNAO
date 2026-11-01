@@ -807,6 +807,41 @@ find_dwingcovers()
 	return 0;
 }
 
+/* find the object index for a non-fumble/constrict/weak metallic wing-guard */
+int
+find_good_mwingguard()
+{
+	static int i = -1;
+    register const char *s;
+	if (i != -1) return i;
+
+	/* spiral -> zigzag -> rayed -> chain -> delicate */
+	if ((i = find_otyp_of_desc("spiral wing-guards", 0, WING_GUARDS_OF_SPEED, WING_GUARDS_OF_BUMBLING, 0)) != -1 &&
+		 i != WING_GUARDS_OF_BUMBLING && i != WING_GUARDS_OF_WEAKNESS &&
+		 i != CONSTRICTING_WING_GUARDS && i != WING_GUARDS_OF_THE_RAPTOR)
+		return i;
+	else if ((i = find_otyp_of_desc("zigzag wing-covers", 0, WING_GUARDS_OF_SPEED, WING_GUARDS_OF_BUMBLING, 0)) != -1 &&
+		 i != WING_GUARDS_OF_BUMBLING && i != WING_GUARDS_OF_WEAKNESS &&
+		 i != CONSTRICTING_WING_GUARDS && i != WING_GUARDS_OF_THE_RAPTOR)
+		return i;
+	else if ((i = find_otyp_of_desc("rayed wing-guards", 0, WING_GUARDS_OF_SPEED, WING_GUARDS_OF_BUMBLING, 0)) != -1 &&
+		 i != WING_GUARDS_OF_BUMBLING && i != WING_GUARDS_OF_WEAKNESS &&
+		 i != CONSTRICTING_WING_GUARDS && i != WING_GUARDS_OF_THE_RAPTOR)
+		return i;
+	else if ((i = find_otyp_of_desc("chain wing-drapes", 0, WING_GUARDS_OF_SPEED, WING_GUARDS_OF_BUMBLING, 0)) != -1 &&
+		 i != WING_GUARDS_OF_BUMBLING && i != WING_GUARDS_OF_WEAKNESS &&
+		 i != CONSTRICTING_WING_GUARDS && i != WING_GUARDS_OF_THE_RAPTOR)
+		return i;
+	else if ((i = find_otyp_of_desc("segmented wing-guards", 0, WING_GUARDS_OF_SPEED, WING_GUARDS_OF_BUMBLING, 0)) != -1 &&
+		 i != WING_GUARDS_OF_BUMBLING && i != WING_GUARDS_OF_WEAKNESS && i
+		 != CONSTRICTING_WING_GUARDS && i != WING_GUARDS_OF_THE_RAPTOR)
+		return i;
+	else
+		impossible("could not find a non-fumble/constrict/weak metallic wing-guard");
+    return 0;
+}
+
+
 /* find the object index for the signet ring */
 /* bugfix: can't be static-optimized, because we sometimes reshuffle descriptions after calling this function */
 int

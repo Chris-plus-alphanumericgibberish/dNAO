@@ -3015,7 +3015,8 @@ base_uac()
 			if(Role_if(PM_MONK)){
 				if(dexbonus < 0) dexbonus = (int)(dexbonus / 2);
 				dexbonus += max((int)( (ACURR(A_WIS)-1)/2 - 5 ),0) + (int)(u.ulevel/6 + 1);
-				if(Confusion && u.udrunken>u.ulevel) dexbonus += u.udrunken/9+1;
+				if((Confusion || (uarmw && uarmw->oartifact == ART_CLAWS_OF_THE_KERERU)) &&
+					u.udrunken > u.ulevel) dexbonus += u.udrunken/9+1;
 			}
 			if(Role_if(PM_KENSEI)){
 				if(dexbonus < 0) dexbonus = (int)(dexbonus / 2);

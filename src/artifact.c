@@ -209,6 +209,8 @@ hack_artifacts()
 	
 	artilist[ART_LOMYA].otyp = find_signet_ring();
 
+	artilist[ART_CLAWS_OF_THE_KERERU].otyp = find_good_mwingguard();
+
 	if(!Role_if(PM_BARD)){
  	    artilist[ART_SINGING_SWORD].role = NON_PM;
 	}
@@ -3395,6 +3397,10 @@ boolean narrow_only;
 		break;
 		case AD_DISN:
 			if (Disint_res(mdef))
+				return FALSE;
+		break;
+		case AD_CONF:
+			if (youdef && BConfStun)
 				return FALSE;
 		break;
 		default:
@@ -7362,6 +7368,7 @@ boolean printmessages; /* print generic elemental damage messages */
 	case ART_RAMIEL:					wepdesc = "thundering polearm";				break;
 	case ART_MJOLLNIR:					wepdesc = "massive hammer";					break;
 	case ART_TORCH_OF_XOLOTL:			wepdesc = "crackling torch";				break;
+	case ART_CLAWS_OF_THE_KERERU:		wepdesc = "corkscrewed claws";				break;
 	case ART_IBITE_ARM:
 		//Torch effects when the moon is gibbous
 		if(otmp->otyp == CLUB)
@@ -7656,6 +7663,15 @@ boolean printmessages; /* print generic elemental damage messages */
 	if (attacks(AD_SLEE, otmp)){
 		if (attacks(AD_SLEE, otmp) && (vis&VIS_MAGR) && printmessages) {
 			pline_The("soporific %s %s %s%c",
+				wepdesc,
+				vtense(wepdesc, "hit"),
+				hittee, !spec_dbon_applies ? '.' : '!');
+			*messaged = TRUE;
+		}
+	}
+	if (attacks(AD_CONF, otmp)){
+		if (attacks(AD_CONF, otmp) && (vis&VIS_MAGR) && printmessages) {
+			pline_The("%s %s %s%c",
 				wepdesc,
 				vtense(wepdesc, "hit"),
 				hittee, !spec_dbon_applies ? '.' : '!');
@@ -9892,6 +9908,22 @@ boolean printmessages; /* print generic elemental damage messages */
 				mdef->mstrategy &= ~STRAT_WAITFORU;
 				slept_monst(mdef);
 			}
+		}
+	}
+	//Confusing weapons confuse targets
+	if(attacks(AD_CONF, otmp) && !rn2(2)){
+		if (youdef) {
+			if (Blind) You("are confused!");
+			else You("are confused by %s!", mon_nam(magr));
+			make_confused(HConfusion + rnd(arti_struct->damage ? arti_struct->damage : basedmg ? basedmg : 1), FALSE);
+		}
+		else {
+			if (oartifact == ART_CLAWS_OF_THE_KERERU) pline("%s teeters drunkenly.", Monnam(mdef));
+			else pline("%s looks confused.", Monnam(mdef));
+
+			mdef->mspec_used = mdef->mspec_used + (rnd(arti_struct->damage ? arti_struct->damage : basedmg ? basedmg : 1));
+			mdef->mconf = 1;
+			mdef->mstrategy &= ~STRAT_WAITFORU;
 		}
 	}
 	//Studying weapons study target

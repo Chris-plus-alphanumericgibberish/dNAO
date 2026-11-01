@@ -3635,6 +3635,7 @@ boolean past;
 			knows_object(DROVEN_GREATSWORD);
 			knows_object(DROVEN_LANCE);
 			knows_object(DROVEN_SPEAR);
+			knows_object(DROVEN_HELM);
 			knows_object(DROVEN_CHAIN_MAIL);
 			knows_object(DROVEN_PLATE_MAIL);
 			knows_object(NOBLE_S_DRESS);

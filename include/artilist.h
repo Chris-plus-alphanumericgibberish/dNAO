@@ -1467,13 +1467,23 @@ A("Godhands",					GAUNTLETS_OF_POWER,				(const char *)0,
 	),
 
 A("The Wrappings of the Sacred Fist",	HAND_WRAPS,		"prayer-warded wraps",
-	0L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
-	A_NONE, NON_PM, NON_PM, TIER_D, (ARTG_GIFT),
+	2500L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	A_NONE, NON_PM, NON_PM, TIER_A, (ARTG_GIFT),
 	NO_MONS(),
 	ATTK(AD_HOLY, 8, 0), NOFLAG,
 	PROPS(), NOFLAG,
 	PROPS(), NOFLAG,
 	FAST_TURNING, (ARTI_PLUSSEV)
+	),
+/* random metallic non-fumble,straitjacket,weakness*/
+A("The Claws of the Kereru",	WING_GUARDS_OF_BUMBLING,		"corkscrewed wing-guards",
+	2500L, MT_DEFAULT, MZ_DEFAULT, WT_DEFAULT,
+	A_NONE, NON_PM, NON_PM, TIER_D, (ARTG_GIFT),
+	NO_MONS(),
+	ATTK(AD_CONF, 12, 12), NOFLAG,
+	PROPS(BLOCK_CONFUSION), NOFLAG,
+	PROPS(), NOFLAG,
+	NOINVOKE, (ARTI_PLUSSEV)
 	),
 
 /* permanently polymorphs you into a death knight when you die -- does not work for monsters */

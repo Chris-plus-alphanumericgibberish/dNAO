@@ -2245,6 +2245,22 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 				attk->bodypart = ATKBP(LEG);
 			}
 		}
+		if(activeFightingForm(FFORM_MNK_CRANE) && has_wings_mon(&youmonst)){
+			if(attk->aatyp == AT_WEAP){
+				if (uarmw){
+					attk->aatyp = AT_WING;
+					attk->polywep = TRUE;
+					attk->bodypart = ATKBP(WING);
+				}
+			}
+			else if(attk->aatyp == AT_XWEP){
+				if (uarmw){
+					attk->aatyp = AT_WING;
+					attk->polywep = TRUE;
+					attk->bodypart = ATKBP(WING);
+				}
+			}
+		}
 		if (attk->aatyp == AT_WEAP && check_mutation(TT_ATTRACTIVE_1) && !uwep && !(u.twoweap && uswapwep) && !check_subout(subout, SUBOUT_T_SEDUCE_STEAL)){
 			/* replace first unarmed weapon attack with a seduction steal attack */
 			if(mdef && mdef->minvent){
@@ -16937,8 +16953,16 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 			// No special move
 		}
 		else if(activeFightingForm(FFORM_MNK_CRANE)){
-			if(unarmed_punch || unarmed_touch){
+			if(unarmed_punch || unarmed_touch || unarmed_wing){
 				if(disorienting_strike_vulnerable(pd) && !resist(mdef, '\0', 0, NOTELL)) mdef->mfell++;
+			}
+			if (unarmed_wing) {
+				/* we HAVE to add the bonus damage to make this not actually abysmal. its mandatory */
+				if (weapon_dam_bonus((struct obj *) 0, P_BARE_HANDED_COMBAT) > 0){
+					bonsdmg += weapon_dam_bonus((struct obj *) 0, P_BARE_HANDED_COMBAT);
+					if (u.umaniac)
+						bonsdmg += d(1, weapon_dam_bonus((struct obj *) 0, P_BARE_HANDED_COMBAT));
+				}
 			}
 		}
 		// roll randomly
@@ -18934,7 +18958,7 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 				magr->mhp = magr->mhpmax;
 		}
 	}
-	if (valid_weapon_attack || unarmed_punch || unarmed_kick || unarmed_butt)
+	if (valid_weapon_attack || unarmed_punch || unarmed_kick || unarmed_butt || unarmed_wing)
 	{
 		int returnvalue = 0;
 		boolean artif_hit = FALSE;

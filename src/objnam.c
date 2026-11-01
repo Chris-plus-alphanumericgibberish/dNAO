@@ -3760,6 +3760,7 @@ const char *oldstr;
 		if (!BSTRNCMPI(bp, p- 4, "Eye of the Overworld", 20)
 			|| !BSTRNCMPI(bp, p-11, "Great Claws of Urdlen", 21)
 			|| !BSTRNCMPI(bp, p- 5, "Claws of the Revenancer", 23)
+			|| !BSTRNCMPI(bp, p- 5, "Claws of the Kereru", 19)
 			|| !BSTRNCMPI(bp, p-12, "Steel Scales of Kurtulmak", 25)
 			|| !BSTRNCMPI(bp, p- 9, "Wrappings of the Sacred Fist", 28)
 			|| !BSTRNCMPI(bp, p-22, "Spell-warded Wrappings of Nitocris", 34)

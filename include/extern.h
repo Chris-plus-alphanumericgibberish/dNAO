@@ -2321,6 +2321,7 @@ E int NDECL(find_cope);
 E int NDECL(find_opera_cloak);
 E int NDECL(find_pcloth);
 E int NDECL(find_dwingcovers);
+E int NDECL(find_good_mwingguard);
 E int NDECL(find_signet_ring);
 E int NDECL(find_engagement_ring);
 E int NDECL(find_gold_ring);
