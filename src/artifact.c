@@ -9636,9 +9636,10 @@ boolean printmessages; /* print generic elemental damage messages */
 	}
 
 	if (oartifact == ART_SIX_ELEMENT_SWORD && !Is_spire(&u.uz)) {
+		int aura = (magr && Focused_aura_wep(magr, otmp)) ? 4 : 0;
 		if (six_element_channel(oartifact, SIXEL_FIRE)) {
 			if (!Fire_res(mdef) || is_metal_pm(pd)){
-				*truedmgptr += elemental_dmg_resistance(mdef, magr, max(0, d(six_element_fire_dice(), 6) + otmp->spe), AD_FIRE);
+				*truedmgptr += elemental_dmg_resistance(mdef, magr, max(0, d(six_element_fire_dice(), 6 + aura) + otmp->spe), AD_FIRE);
 			}
 			if (!UseInvFire_res(mdef)) {
 				if (!rn2(4)) (void) destroy_item(mdef, POTION_CLASS, AD_FIRE);
@@ -9651,7 +9652,7 @@ boolean printmessages; /* print generic elemental damage messages */
 		else if (six_element_channel(oartifact, SIXEL_METAL)) {
 			boolean frosted = six_element_channel(oartifact, SIXEL_FROST);
 			if (!Cold_res(mdef))
-				*truedmgptr += elemental_dmg_resistance(mdef, magr, max(0, d(1, frosted ? 8 : 6) + otmp->spe/2), AD_COLD);
+				*truedmgptr += elemental_dmg_resistance(mdef, magr, max(0, d(1, (frosted ? 8 : 6) + aura) + otmp->spe/2), AD_COLD);
 			if (!UseInvCold_res(mdef)) {
 				if (!rn2(frosted ? 6 : 8)) (void) destroy_item(mdef, POTION_CLASS, AD_COLD);
 			}
@@ -9673,7 +9674,7 @@ boolean printmessages; /* print generic elemental damage messages */
 			}
 			else if (!(youdef && Waterproof) && !(!youdef && mon_resistance(mdef, WATERPROOF))) {
 				int mult = (flaming(pd) || is_iron(pd)) ? 2 : 1;
-				*truedmgptr += mult * max(0, d(1, 6) + otmp->spe/2);
+				*truedmgptr += mult * max(0, d(1, 6 + aura) + otmp->spe/2);
 				if (pd->mtyp == PM_GREMLIN && rn2(3))
 					(void)split_mon(mdef, (struct monst *)0);
 			}
@@ -9681,7 +9682,7 @@ boolean printmessages; /* print generic elemental damage messages */
 		}
 		if (six_element_channel(oartifact, SIXEL_ICE)) {
 			if (!Cold_res(mdef))
-				*truedmgptr += elemental_dmg_resistance(mdef, magr, max(0, d(2, 6) + otmp->spe), AD_COLD);
+				*truedmgptr += elemental_dmg_resistance(mdef, magr, max(0, d(2, 6 + aura) + otmp->spe), AD_COLD);
 			if (!UseInvCold_res(mdef)) {
 				if (!rn2(4)) (void) destroy_item(mdef, POTION_CLASS, AD_COLD);
 			}
@@ -9689,7 +9690,7 @@ boolean printmessages; /* print generic elemental damage messages */
 		if (six_element_channel(oartifact, SIXEL_ELEC)) {
 			if (!Shock_res(mdef)) {
 				int mult = shock_vulnerable(mdef) ? 2 : 1;
-				*truedmgptr += elemental_dmg_resistance(mdef, magr, max(0, d(mult, 8) + otmp->spe), AD_ELEC);
+				*truedmgptr += elemental_dmg_resistance(mdef, magr, max(0, d(mult, 8 + aura) + otmp->spe), AD_ELEC);
 			}
 			if (!UseInvShock_res(mdef)) {
 				if (!rn2(5)) (void) destroy_item(mdef, RING_CLASS, AD_ELEC);
@@ -9698,7 +9699,7 @@ boolean printmessages; /* print generic elemental damage messages */
 		}
 		if (six_element_channel(oartifact, SIXEL_EARTH)) {
 			if (is_watery(mdef->data)) {
-				*truedmgptr += rnd(20)+otmp->spe;
+				*truedmgptr += rnd(20 + aura)+otmp->spe;
 			}
 		}
 	}
