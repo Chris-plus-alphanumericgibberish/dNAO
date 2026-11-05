@@ -2251,6 +2251,7 @@ E boolean FDECL(surya_astra_sword, (struct monst *));
 E boolean FDECL(grace_empowers, (struct monst *, int));
 E boolean FDECL(full_grace_empowers, (struct monst *, int));
 E boolean FDECL(high_grace_empowers, (struct monst *, int));
+E boolean FDECL(dance_grace_empowers, (struct monst *, struct obj *));
 E boolean FDECL(grace_dodges, (struct monst *));
 E int NDECL(grace_mantle_adtyp);
 E boolean FDECL(grace_gifts_offer, (struct monst *, struct monst *));

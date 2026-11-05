@@ -1437,6 +1437,17 @@ high_grace_empowers(struct monst *mon, int grace)
 	return mon == &youmonst || (mon->mtame && in_beast_mastery_range(mon));
 }
 
+/* otmp may be NULL (an unarmed or natural attack). */
+boolean
+dance_grace_empowers(struct monst *mon, struct obj *otmp)
+{
+	if(!otmp || light_weapon_mon(otmp, mon) || is_hero_kensei_weapon(otmp, mon))
+		return high_grace_empowers(mon, AAT_GRACE_DANCE);
+	if(bimanual_mon(otmp, mon))
+		return FALSE;
+	return full_grace_empowers(mon, AAT_GRACE_DANCE);
+}
+
 /* Return TRUE if the hero's dodge grace makes an attack on mdef miss. */
 boolean
 grace_dodges(struct monst *mdef)

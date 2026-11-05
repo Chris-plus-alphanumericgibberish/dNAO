@@ -4329,7 +4329,7 @@ struct attack * attk;
 	int result = 0;
 	int cleave_range = is_dancer(youagr ? youracedata : magr->data) ? (mlev(magr) - 16)/2 : 0;
 	/* the hero's dance grace gives a range that starts earlier */
-	if(grace_empowers(magr, AAT_GRACE_DANCE))
+	if(dance_grace_empowers(magr, otmp))
 		cleave_range = max(cleave_range, mlev(magr)/5 + 1);
 	cleave_range = min(cleave_range, 7);
 	/*Not all attacks can cleave*/

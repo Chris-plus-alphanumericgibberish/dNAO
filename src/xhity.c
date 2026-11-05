@@ -1164,7 +1164,7 @@ xattacky(struct monst *magr, struct monst *mdef, int tarx, int tary, long modifi
 						result |= hit_with_tonguesnake(magr, tarx, tary, 0);
 					}
 					/* Dancers hit additional targets */
-					if(!ranged && !(result&(MM_AGR_DIED|MM_AGR_STOP)) && (is_dancer(magr->data) || grace_empowers(magr, AAT_GRACE_DANCE))){
+					if(!ranged && !(result&(MM_AGR_DIED|MM_AGR_STOP)) && (is_dancer(magr->data) || dance_grace_empowers(magr, otmp))){
 						result |= hit_with_dance(magr, otmp, tarx, tary, tohitmod, attk)&(MM_AGR_DIED|MM_AGR_STOP);
 					}
 					/* Rejection antennae hit additional targets (last) */
