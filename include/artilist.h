@@ -612,7 +612,7 @@ A("The Six-Element Sword",			LIANQIAO_JIAN,		(const char *)0,
 	),
 
 A("Bleeding Void",			PANXIN_JIAN,		"bloody gash in the shape of a %s",
-	3000L, METAL, MZ_DEFAULT, 0,
+	3000L, FIRMAMENT, MZ_DEFAULT, 0,
 	A_CHAOTIC, PM_KENSEI, PM_AASIMAR, TIER_B, (ARTG_NOGEN|ARTG_NOWISH),
 	NO_MONS(),
 	ATTK(AD_DISN, 4, 4), (ARTA_PHASING|ARTA_VORPAL|ARTA_CANCEL|ARTA_DEXPL),

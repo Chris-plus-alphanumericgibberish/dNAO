@@ -1813,6 +1813,8 @@ boolean adjective;
 		else
 			return (adjective ? "silver" : "strangely-liquid silver");
 	case FIRMAMENT:
+		if(obj->oartifact == ART_BLEEDING_VOID)
+			return "rent firmament";
 		return objects[obj->otyp].oc_name_known ? "firmament" : "glittering dark ceramic";
 	default:
 		return (adjective ? "mysterious" : "an enigma in solid form");
