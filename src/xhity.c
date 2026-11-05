@@ -26977,7 +26977,7 @@ perform_monk_move(int moveID, int *move_cost)
 			}
 		break;
 		case INFERNO:
-			if(circle_monk_target(!!uwep)){
+			if(circle_monk_target(!!uwep) || (!u.uswallow && !Is_spire(&u.uz) && fire_curable_ailment())){
 				struct zapdata zapdat = { 0 };
 				boolean raging = six_element_channel(uwep->oartifact, SIXEL_WOOD);
 				pline("%s!", move_name(moveID));
@@ -26985,6 +26985,8 @@ perform_monk_move(int moveID, int *move_cost)
 					cyclone_slash_monsters(TRUE, TRUE);
 					return TRUE;
 				}
+				burn_away_slime();
+				melt_frozen_air();
 				set_six_element_channel(uwep, SIXEL_FIRE|SIXEL_FIRE_1|(raging ? SIXEL_RAGING : 0L));
 				monk_aura_zapdata(&zapdat, AD_FIRE);
 				zapdat.damd += 6;

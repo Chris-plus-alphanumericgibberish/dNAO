@@ -3291,6 +3291,7 @@ E void FDECL(substitute_tiles, (d_level *));
 
 E void NDECL(burn_away_slime);
 E void NDECL(melt_frozen_air);
+E boolean NDECL(fire_curable_ailment);
 E void FDECL(unbind_lifesaving, (long));
 E void FDECL(unbind, (long, BOOLEAN_P));
 E void FDECL(unbind_core, (long, BOOLEAN_P, BOOLEAN_P));

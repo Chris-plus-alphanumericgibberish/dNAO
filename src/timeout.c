@@ -357,6 +357,12 @@ burn_away_slime()
 	return;
 }
 
+boolean
+fire_curable_ailment(void)
+{
+	return Slimed || youmonst.mcaterpillars || youmonst.momud || FrozenAir;
+}
+
 void
 melt_frozen_air()
 {
