@@ -2051,10 +2051,12 @@ food, potion, scroll, spellbook, wand, gold, gem or rock, boulder or statue,
 iron ball, chain, and venom.
 Cannot be set with the `O' command.
 .lp packorder
-Specify the order to list object types in (default ``")[%?+!=/(*`0_'').
+Specify the order to list object types in
+(default ``$")[b%?s-+!=/(*`0_\e|'').
 The value of this option should be a string containing the
-symbols for the various object types.  Any omitted types are filled in
-at the end from the previous order.
+symbols for the various object types.  Belts and hellish sanctions share
+their symbols with armor and scrolls, so they are written ``b'' and ``s''
+instead.  Any omitted types are filled in at the end from the previous order.
 .lp paranoid_hit
 If true, asks you to type the word ``yes'' when hitting any peaceful
 monster, not just the letter ``y''.
@@ -2088,7 +2090,10 @@ or overLoaded), you will be asked if you want to continue.
 .lp pickup_types
 Specify the object types to be picked up when
 .op autopickup
-is on.  Default is all types.  If your copy of the game has the experimental
+is on, using the same symbols as
+.op packorder
+(``b'' for belts and ``s'' for hellish sanctions).
+Default is all types.  If your copy of the game has the experimental
 compile time option AUTOPICKUP_EXCEPTIONS included, you may be able to use 
 .op autopickup_exception
 configuration file lines to further refine

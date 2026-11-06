@@ -148,14 +148,17 @@ menustyle     user interface for selection of multiple objects:
               only the first letter ('T','C','P','F') matters; 'N' (None)
               is a synonym for 'T', as is boolean style negation  [Full]
 packorder     a list of default symbols for kinds of objects that gives the
-              order in which your pack will be displayed  [")[%?+!=/(*`0_]
+              order in which your pack will be displayed  [$")[b%?s-+!=/(*`0_\|]
               (If you specify only some kinds of items, the others from the
-              default order will be appended to the end.)
+              default order will be appended to the end.  Use b for belts
+              and s for hellish sanctions, which share [ and ? with armor
+              and scrolls.)
 pickup_burden when you pick up an item that exceeds this encumberance
               level (Unburdened, Burdened, streSsed, straiNed, overTaxed,
               or overLoaded), you will be asked if you want to continue. [S]
 pickup_types  a list of default symbols for kinds of objects to autopickup
-              when that option is on  [all]
+              when that option is on; b is belts, s is hellish sanctions
+              [all]
 runmode       controls how often the map window is updated when performing
               multi-step movement (various running modes or travel command):
               teleport -- don't update map until movement stops;
