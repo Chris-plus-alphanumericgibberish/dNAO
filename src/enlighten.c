@@ -2374,7 +2374,7 @@ signs_appearance(boolean dumping, boolean mirror)
 		message = TRUE;
 	}
 	if(u.sealsActive&SEAL_ASTAROTH && !Invis_dumping){
-		if(!ublindf || ublindf->otyp == LENSES || ublindf->otyp == SUNGLASSES || ublindf->otyp == LIVING_MASK)
+		if(!(ublindf && is_concealing_eye_cover(ublindf)))
 			pt("A black liquid leaks from around your eyes.", "A black liquid leaked from around your eyes.");
 		else if(ublindf && (ublindf->otyp == MASK || ublindf->otyp == R_LYEHIAN_FACEPLATE))
 			pt("The black liquid leaking from your eyes is hidden by your mask.",
@@ -2694,7 +2694,7 @@ signs_appearance(boolean dumping, boolean mirror)
 		}
 	}
 	if(u.specialSealsActive&SEAL_ACERERAK){
-		if(show_visual && !NoBInvis_dumping && !(ublindf && ublindf->otyp != LENSES && ublindf->otyp != LIVING_MASK)){
+		if(show_visual && !NoBInvis_dumping && !(ublindf && is_tinted_eye_cover(ublindf))){
 			pt("You have gemstones for eyes!", "You had gemstones for eyes.");
 			message = TRUE;
 		} else if(!mirror){
@@ -2703,7 +2703,7 @@ signs_appearance(boolean dumping, boolean mirror)
 		}
 	}
 	if(u.specialSealsActive&SEAL_COUNCIL && !NoBInvis_dumping && show_visual){
-		if(!ublindf || ublindf->otyp == LENSES || ublindf->otyp == LIVING_MASK)
+		if(!(ublindf && is_tinted_eye_cover(ublindf)))
 			pt("Your eyes shine like stars.", "Your eyes shone like stars.");
 		else if(ublindf && (ublindf->otyp == MASK))
 			pt("Your star-like eyes shine through your mask.", "Your star-like eyes shone through your mask.");
@@ -2788,7 +2788,7 @@ signs_appearance(boolean dumping, boolean mirror)
 	if(u.specialSealsActive&SEAL_YOG_SOTHOTH && !Invis_dumping){
 		if(show_visual){
 			if(check_mutation(YOG_GAZE_2)){
-				if(ublindf && ublindf->otyp != LENSES && ublindf->otyp != SUNGLASSES && ublindf->otyp != LIVING_MASK){
+				if(ublindf && is_concealing_eye_cover(ublindf)){
 					char mbuf[BUFSZ] = {0};
 					Sprintf(mbuf, dumping ? "Your flaming eyes were hidden by your %s."
 										: "Your flaming eyes are hidden by your %s.", xname(ublindf));
@@ -2797,7 +2797,7 @@ signs_appearance(boolean dumping, boolean mirror)
 					pt("Magenta flames flare from your eyesockets.", "Magenta flames flared from your eyesockets.");
 				}
 			} else if(check_mutation(YOG_GAZE_1)){
-				if(ublindf && ublindf->otyp != LENSES && ublindf->otyp != LIVING_MASK){
+				if(ublindf && is_tinted_eye_cover(ublindf)){
 					char mbuf[BUFSZ] = {0};
 					Sprintf(mbuf, dumping ? "Your fiery eyes were hidden by your %s."
 										: "Your fiery eyes are hidden by your %s.", xname(ublindf));
@@ -2807,7 +2807,7 @@ signs_appearance(boolean dumping, boolean mirror)
 				}
 			}
 		}
-		if(!uarm && !(uarmu && arm_blocks_lower_body(uarmu->otyp)))
+		if(!LowerBodyCovered)
 			pt("You have a belt of writhing leeches.", "You had a belt of writhing leeches.");
 		else if(!Invis_dumping && moves <= u.yogAttack+5)
 			pt("Your waist-tentacles wave around in search of further prey.",

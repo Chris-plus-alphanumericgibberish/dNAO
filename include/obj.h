@@ -1034,6 +1034,9 @@ struct obj {
 							 (o)->otyp == TOWEL || (o)->otyp == LENSES || (o)->otyp == SUNGLASSES || (o)->otyp == SOUL_LENS || \
 							 (o)->otyp == LIVING_MASK || (o)->otyp == MASK || (o)->otyp == R_LYEHIAN_FACEPLATE)
 #define is_opaque_worn_tool(o)	((o)->otyp == BLINDFOLD || (o)->otyp == TOWEL || (o)->otyp == R_LYEHIAN_FACEPLATE)
+#define is_tinted_eye_cover(o)	((o)->otyp != LENSES && (o)->otyp != LIVING_MASK && (o)->otyp != SOUL_LENS)
+#define is_concealing_eye_cover(o)	(is_tinted_eye_cover(o) && (o)->otyp != SUNGLASSES)
+#define is_closed_cloak(o)	((o)->otyp == ROBE || (o)->otyp == WHITE_FACELESS_ROBE || (o)->otyp == BLACK_FACELESS_ROBE || (o)->otyp == SMOKY_VIOLET_FACELESS_ROBE)
 #define is_instrument(o)	((o)->otyp >= FLUTE && \
 			 (o)->otyp <= DRUM_OF_EARTHQUAKE)
 #define is_mummy_wrap(o)	((o)->otyp == MUMMY_WRAPPING || \
