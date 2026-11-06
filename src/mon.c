@@ -9746,6 +9746,63 @@ struct monst *mon;
 			}
 		}
 	}
+	if(mon->mtyp == PM_JUIBLEX){
+		struct monst *tmpm, *nmon;
+		int damage;
+		for(tmpm = fmon; tmpm; tmpm = nmon){
+			nmon = tmpm->nmon;
+			if(DEADMONSTER(tmpm) || tmpm == mon || nonthreat(tmpm))
+				continue;
+			if(tmpm->mpeaceful == mon->mpeaceful && !mm_aggression(mon, tmpm))
+				continue;
+			if(dist2(tmpm->mx, tmpm->my, mon->mx, mon->my) > 3*3+2)
+				continue;
+			if(!UseInvCold_res(tmpm) && mlev(mon) > rn2(20))
+				destroy_item(tmpm, POTION_CLASS, AD_COLD);
+			damage = d(6,6);
+			golemeffects(tmpm, AD_COLD, damage);
+			if(Cold_res(tmpm))
+				continue;
+			damage = reduce_dmg(tmpm, damage, FALSE, TRUE);
+			damage = elemental_dmg_resistance(tmpm, mon, damage, AD_COLD);
+			if(damage <= 0)
+				continue;
+			if(canspotmon(tmpm))
+				pline("%s is frozen%s by %s circle of cold!",
+					Monnam(tmpm),
+					damage >= tmpm->mhp ? " solid" : "",
+					s_suffix(mon_nam(mon)));
+			tmpm->mhp -= damage;
+			if(tmpm->mhp <= 0){
+				grow_up(mon, tmpm);
+				mondied(tmpm);
+				//Grow up may have killed mon
+				if(DEADMONSTER(mon))
+					return;
+			}
+		}
+		if(!mon->mpeaceful
+			&& dist2(u.ux, u.uy, mon->mx, mon->my) <= 3*3+2
+		){
+			roll_frigophobia();
+			if(!UseInvCold_res(&youmonst) && mlev(mon) > rn2(20))
+				destroy_item(&youmonst, POTION_CLASS, AD_COLD);
+			damage = d(6,6);
+			ugolemeffects(AD_COLD, damage);
+			if(!Cold_res(&youmonst)){
+				damage = reduce_dmg(&youmonst, damage, FALSE, TRUE);
+				damage = elemental_dmg_resistance(&youmonst, mon, damage, AD_COLD);
+				if(damage > 0){
+					if(canspotmon(mon))
+						You("are frozen by %s circle of cold!", s_suffix(mon_nam(mon)));
+					else
+						You("are frozen by a circle of cold!");
+					losehp(damage, "a circle of cold", KILLED_BY);
+					nomul(0, NULL); //Interrupt
+				}
+			}
+		}
+	}
 }
 
 void
