@@ -1492,7 +1492,7 @@ do_look(quick)
 				struct obj *lookup = (struct obj *)0;
 				if (oartifact == ART_BLEEDING_VOID)
 					lookup = inventory_bleeding_void();
-				putstr(datawin, 0, x_str);
+				putstr(datawin, 0, lookup ? doname(lookup) : x_str);
 				describe_item(lookup, otyp, oartifact, &datawin);
 			}
 			// check encyclopedia

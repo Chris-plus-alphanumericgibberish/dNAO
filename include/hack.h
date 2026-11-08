@@ -229,6 +229,30 @@ NEARDATA extern coord bhitpos;	/* place where throw or zap hits or stops */
 #include "rect.h"
 #include "region.h"
 
+/* outcomes of plan_drag_ball() */
+#define BCD_NONE	0	/* neither ball nor chain needs to move */
+#define BCD_CHAIN	1	/* only the chain moves */
+#define BCD_DRAG	2	/* ball and chain are both dragged */
+#define BCD_TOO_HEAVY	3	/* ball must be dragged, but hero is too burdened to */
+#define BCD_JERKED	4	/* ball must be dragged, but the chain is caught in a pool or pit */
+
+struct bc_drag_plan {
+	int result;		/* BCD_* */
+	int bc_control;		/* BC_BALL/BC_CHAIN mask for move_bc() */
+	xchar ballx, bally;	/* ball destination */
+	xchar chainx, chainy;	/* chain destination */
+	boolean cause_delay;	/* dragging the ball costs the hero a move */
+	boolean lev_tug;	/* BCD_DRAG while levitating over the pool or pit */
+	struct trap *snag;	/* pit or hole the chain is caught in, if any */
+};
+
+/* walk_path() argument for hurtle_step() */
+struct hurtle_state {
+	int range;		/* squares left to travel */
+	boolean drags_ball;	/* drag a punishment ball along rather than stopping */
+	boolean placed;		/* hero has already landed; don't land them again */
+};
+
 #ifdef USE_TRAMPOLI /* This doesn't belong here, but we have little choice */
 #undef NDECL
 #define NDECL(f) f()

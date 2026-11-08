@@ -1421,7 +1421,7 @@ domove()
 					result |= hit_with_tonguesnake(&youmonst, x, y, 0);
 				}
 				/* Dancers hit additional targets */
-				if(!(result&(MM_AGR_DIED|MM_AGR_STOP)) && (is_dancer(&youmonst) || grace_empowers(&youmonst, AAT_GRACE_DANCE))){
+				if(!(result&(MM_AGR_DIED|MM_AGR_STOP)) && (is_dancer(&youmonst) || dance_grace_empowers(&youmonst, otmp))){
 					result |= hit_with_dance(&youmonst, otmp, x, y, 0, attk);
 				}
 				/* Rejection antennae hit additional targets (last) */

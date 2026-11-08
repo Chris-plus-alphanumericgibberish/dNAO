@@ -1164,7 +1164,7 @@ xattacky(struct monst *magr, struct monst *mdef, int tarx, int tary, long modifi
 						result |= hit_with_tonguesnake(magr, tarx, tary, 0);
 					}
 					/* Dancers hit additional targets */
-					if(!ranged && !(result&(MM_AGR_DIED|MM_AGR_STOP)) && (is_dancer(magr->data) || grace_empowers(magr, AAT_GRACE_DANCE))){
+					if(!ranged && !(result&(MM_AGR_DIED|MM_AGR_STOP)) && (is_dancer(magr->data) || dance_grace_empowers(magr, otmp))){
 						result |= hit_with_dance(magr, otmp, tarx, tary, tohitmod, attk)&(MM_AGR_DIED|MM_AGR_STOP);
 					}
 					/* Rejection antennae hit additional targets (last) */
@@ -23380,7 +23380,7 @@ android_combo()
 			else return MOVE_ATTACKED;
 		}
 		if (P_SKILL(P_BARE_HANDED_COMBAT) >= P_EXPERT && u.uen > 0){
-			int j = jump(1) != MOVE_CANCELLED;
+			int j = jump(1, FALSE) != MOVE_CANCELLED;
 			int k = dokick() != MOVE_CANCELLED;
 			if (j || k){
 				u.uen--;
@@ -23389,7 +23389,7 @@ android_combo()
 			else return MOVE_ATTACKED;
 		}
 		if (P_SKILL(P_BARE_HANDED_COMBAT) >= P_MASTER && u.uen > 0){
-			int j = jump(1) != MOVE_CANCELLED;
+			int j = jump(1, FALSE) != MOVE_CANCELLED;
 			int d = getdir((char *)0);
 			if (!j && !d) return MOVE_ATTACKED;
 			u.uen--;
@@ -23481,7 +23481,7 @@ android_combo()
 			else return MOVE_ATTACKED;
 		}
 		if (uwep && P_SKILL(weapon_type(uwep)) >= P_EXPERT && u.uen > 0){
-			int j = jump(1) != MOVE_CANCELLED;
+			int j = jump(1, FALSE) != MOVE_CANCELLED;
 			int d = getdir((char *)0);
 			if (!j && (!d || u.dz))
 				return MOVE_ATTACKED;
@@ -27016,7 +27016,7 @@ perform_monk_move(int moveID, int *move_cost)
 			}
 		break;
 		case INFERNO:
-			if(circle_monk_target(!!uwep)){
+			if(circle_monk_target(!!uwep) || (!u.uswallow && !Is_spire(&u.uz) && fire_curable_ailment())){
 				struct zapdata zapdat = { 0 };
 				boolean raging = six_element_channel(uwep->oartifact, SIXEL_WOOD);
 				pline("%s!", move_name(moveID));
@@ -27024,6 +27024,8 @@ perform_monk_move(int moveID, int *move_cost)
 					cyclone_slash_monsters(TRUE, TRUE);
 					return TRUE;
 				}
+				burn_away_slime();
+				melt_frozen_air();
 				set_six_element_channel(uwep, SIXEL_FIRE|SIXEL_FIRE_1|(raging ? SIXEL_RAGING : 0L));
 				monk_aura_zapdata(&zapdat, AD_FIRE);
 				zapdat.damd += 6;

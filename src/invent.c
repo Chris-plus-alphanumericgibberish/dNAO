@@ -3667,24 +3667,34 @@ winid *datawin;
 	}
 	/* Six-Element Sword channeled elements */
 	if (oartifact == ART_SIX_ELEMENT_SWORD && !Is_spire(&u.uz)) {
+		int aura = FocusAura ? 4 : 0;
 		if (six_element_channel(oartifact, SIXEL_FIRE)) {
-			Sprintf(buf, "Deals %dd6 + enchantment bonus fire damage, even to fire-resistant metal creatures.", six_element_fire_dice());
+			Sprintf(buf, "Deals %dd%d + enchantment bonus fire damage, even to fire-resistant metal creatures.", six_element_fire_dice(), 6 + aura);
 			OBJPUTSTR(buf);
 		}
 		else if (six_element_channel(oartifact, SIXEL_METAL)) {
 			if (six_element_channel(oartifact, SIXEL_FROST))
-				OBJPUTSTR("Deals 1d8 + half enchantment bonus cold damage, and may cancel its target.");
+				Sprintf(buf, "Deals 1d%d + half enchantment bonus cold damage, and may cancel its target.", 8 + aura);
 			else
-				OBJPUTSTR("Deals 1d6 + half enchantment bonus cold damage.");
+				Sprintf(buf, "Deals 1d%d + half enchantment bonus cold damage.", 6 + aura);
+			OBJPUTSTR(buf);
 		}
-		else if (six_element_channel(oartifact, SIXEL_WATER))
-			OBJPUTSTR("Deals 1d6 + half enchantment bonus water damage.");
-		if (six_element_channel(oartifact, SIXEL_ICE))
-			OBJPUTSTR("Deals 2d6 + enchantment bonus cold damage.");
-		if (six_element_channel(oartifact, SIXEL_ELEC))
-			OBJPUTSTR("Deals 1d8 + enchantment bonus lightning damage.");
-		if (six_element_channel(oartifact, SIXEL_EARTH))
-			OBJPUTSTR("Deals 1d20 + enchantment bonus damage to watery creatures.");
+		else if (six_element_channel(oartifact, SIXEL_WATER)) {
+			Sprintf(buf, "Deals 1d%d + half enchantment bonus water damage.", 6 + aura);
+			OBJPUTSTR(buf);
+		}
+		if (six_element_channel(oartifact, SIXEL_ICE)) {
+			Sprintf(buf, "Deals 2d%d + enchantment bonus cold damage.", 6 + aura);
+			OBJPUTSTR(buf);
+		}
+		if (six_element_channel(oartifact, SIXEL_ELEC)) {
+			Sprintf(buf, "Deals 1d%d + enchantment bonus lightning damage.", 8 + aura);
+			OBJPUTSTR(buf);
+		}
+		if (six_element_channel(oartifact, SIXEL_EARTH)) {
+			Sprintf(buf, "Deals 1d%d + enchantment bonus damage to watery creatures.", 20 + aura);
+			OBJPUTSTR(buf);
+		}
 		if (six_element_channel(oartifact, SIXEL_FIELD))
 			OBJPUTSTR("Harvests slain monsters to heal the wielder.");
 	}

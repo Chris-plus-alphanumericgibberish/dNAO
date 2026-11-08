@@ -967,6 +967,64 @@ int template;
 	return;
 }
 
+static void
+apply_tomb_herd_dice_bonus(int *n, int *d)
+{
+	if (*n < 3)
+		*d += 2;
+	else
+		(*n)++;
+}
+
+/* Returns TRUE if [attk]'s attribution names no physical body part (modifier bits ignored). */
+static boolean
+tomb_herd_nonphysical_attk(struct attack *attk)
+{
+	struct atkbp_set nonphysical = atkbp_or((struct atkbp_set[]){
+		ATKBP(MIND_NOLIMB), ATKBP(EYES), ATKBP(HALO), ATKBP(HORNED_LIGHT),
+		ATKBP(SHADOW), ATKBP(AURA_ARM), ATKBP(NONE) });
+
+	return atkbp_is_none(atkbp_diff(attk->bodypart,
+		atkbp_union(nonphysical, ATKBP_MODIFIER_MASK())));
+}
+
+/* Possibly converts the AT_ARRW attack attk into a different attack by the attributed body part. */
+static void
+tomb_herd_arrow_swap(struct attack *attk)
+{
+	struct atkbp_set extra_arms[] = {
+		ATKBP(ARM_3RD), ATKBP(ARM_4TH), ATKBP(ARM_5TH),
+		ATKBP(ARM_6TH), ATKBP(ARM_7TH), ATKBP(ARM_8TH)
+	};
+	int k;
+
+	if (atkbp_intersects(attk->bodypart, ATKBP(ARM_DOMINANT))) {
+		attk->aatyp = AT_WEAP;
+		attk->bodypart = ATKBP(ARM_DOMINANT);
+		return;
+	}
+	if (atkbp_intersects(attk->bodypart, ATKBP(ARM_OFFHAND))) {
+		attk->aatyp = AT_XWEP;
+		attk->bodypart = ATKBP(ARM_OFFHAND);
+		return;
+	}
+	for (k = 0; k < SIZE(extra_arms); k++) {
+		if (atkbp_intersects(attk->bodypart, extra_arms[k])) {
+			attk->aatyp = AT_MARI;
+			attk->bodypart = extra_arms[k];
+			return;
+		}
+	}
+	if (atkbp_intersects(attk->bodypart, ATKBP(ARM)))
+		attk->aatyp = AT_CLAW;
+	else if (atkbp_intersects(attk->bodypart, ATKBP(TAIL)))
+		attk->aatyp = AT_TAIL;
+	else if (atkbp_intersects(attk->bodypart, ATKBP(MOUTH)))
+		attk->aatyp = AT_BITE;
+	else
+		attk->damd = 1;
+}
+
 /* 
  * Modifies a base permonst struct for a specific template and saves it to `ptr`
  */
@@ -1812,6 +1870,60 @@ int template;
 			attk[j] = noattack;
 		}
 
+		/* the tomb herd keeps only what a stone body could physically do,
+		 * judged by both attack type and original body-part attribution */
+		while ((template == TOMB_HERD) && !is_null_attk(attk) &&
+			(tomb_herd_nonphysical_attk(attk) ||
+			!(
+			attk->aatyp == AT_CLAW ||
+			attk->aatyp == AT_BITE ||
+			attk->aatyp == AT_KICK ||
+			attk->aatyp == AT_BUTT ||
+			attk->aatyp == AT_TUCH ||
+			attk->aatyp == AT_STNG ||
+			attk->aatyp == AT_HUGS ||
+			attk->aatyp == AT_SQUZ ||
+			attk->aatyp == AT_LNCK ||
+			attk->aatyp == AT_WBIT ||
+			attk->aatyp == AT_OBIT ||
+			attk->aatyp == AT_TAIL ||
+			attk->aatyp == AT_WING ||
+			attk->aatyp == AT_TENT ||
+			attk->aatyp == AT_WHIP ||
+			attk->aatyp == AT_VINE ||
+			attk->aatyp == AT_TONG ||
+			attk->aatyp == AT_LRCH ||
+			attk->aatyp == AT_5SQR ||
+			attk->aatyp == AT_5SBT ||
+			attk->aatyp == AT_REND ||
+			attk->aatyp == AT_WEAP ||
+			attk->aatyp == AT_XWEP ||
+			attk->aatyp == AT_MARI ||
+			attk->aatyp == AT_DEVA ||
+			attk->aatyp == AT_JUGL ||
+			/* swapped for physical equivalents later */
+			attk->aatyp == AT_SRPR ||
+			attk->aatyp == AT_XSPR ||
+			attk->aatyp == AT_MSPR ||
+			attk->aatyp == AT_DSPR ||
+			attk->aatyp == AT_MAGC ||
+			attk->aatyp == AT_MMGC ||
+			attk->aatyp == AT_TNKR ||
+			attk->aatyp == AT_HITS ||
+			attk->aatyp == AT_ARRW ||
+			attk->aatyp == AT_BKGT ||
+			attk->aatyp == AT_BKG2
+			))
+		){
+			/* shift all further attacks forwards one slot, and make last one all 0s */
+			for (j = 0; j < (NATTK - i - 1); j++)
+				attk[j] = attk[j + 1];
+			attk[j] = noattack;
+		}
+		/* black goat monster's shifting attacks become a plain butt */
+		if (template == TOMB_HERD && (attk->aatyp == AT_BKGT || attk->aatyp == AT_BKG2))
+			attk->aatyp = AT_BUTT;
+
 		/* some templates alter damage types */
 		if (template == POISON_TEMPLATE){
 			if(ptr->mtyp == PM_JRT_NETJER){
@@ -2052,27 +2164,34 @@ int template;
 				attk[j] = noattack;
 			}
 		}
-		/* tomb herd's attacks are generally stronger */
-		if (template == TOMB_HERD && (
-			!is_null_attk(attk))
-			)
-		{
-			if (attk->damn < 3)
-				attk->damd += 2;
-			else
-				attk->damn++;
-		}
-		/* tomb herd also gets an abduction attack */
-		if (template == TOMB_HERD && (
-			insert_okay(special)
-			))
-		{
-			maybe_insert();
-			attk->aatyp = AT_TUCH;
-			attk->adtyp = AD_ABDC;
-			attk->damn = 1;
-			attk->damd = 1;
-			special = TRUE;
+		/* tomb herd damage: a monster left with no attacks gets a claw attack like a zombie.
+		 * No retained attack does less than that claw.
+		 * The first attack, and only the first, is improved. Since a zombie is fleshy,
+		 * the claw is always improved, regardless of whether or not the HERD's base is fleshy.
+		 * A retained first attack is improved only if the statue depicts something
+		 * not already made of stone or metal. */
+		if (template == TOMB_HERD && (i == 0 || !is_null_attk(attk))) {
+			int fb_n = ptr->mlevel / 10 + 1;
+			int fb_d = max(ptr->msize * 2, 4);
+			int at_n, at_d;
+
+			if (is_null_attk(attk)) {
+				attk->aatyp = (nolimbs(ptr) && has_head(ptr)) ? AT_BITE : AT_CLAW;
+				attk->adtyp = AD_PHYS;
+			}
+			at_n = attk->damn;
+			at_d = attk->damd;
+			if (i == 0) {
+				apply_tomb_herd_dice_bonus(&fb_n, &fb_d);
+				if (!is_stone(ptr) && !is_metal_pm(ptr))
+					apply_tomb_herd_dice_bonus(&at_n, &at_d);
+			}
+			if (at_n * at_d < fb_n * fb_d) {
+				at_n = fb_n;
+				at_d = fb_d;
+			}
+			attk->damn = at_n;
+			attk->damd = at_d;
 		}
 		/* yith gain spellcasting */
 		if (template == YITH && (
@@ -2410,12 +2529,54 @@ int template;
 		if (template == MISTWEAVER && attk->aatyp == AT_MMGC && attk->adtyp == AD_CLRC)
 			attk->bodypart = ATKBP(TENTACLE_GENERIC);
 
+		/* the tomb herd swaps attacks it cannot make for physical
+		 * equivalents, keeping each one's original attribution */
+		if (template == TOMB_HERD) {
+			switch (attk->aatyp) {
+			case AT_SRPR:
+				attk->aatyp = AT_WEAP;
+				break;
+			case AT_XSPR:
+				attk->aatyp = AT_XWEP;
+				break;
+			case AT_MSPR:
+				attk->aatyp = AT_MARI;
+				break;
+			case AT_DSPR:
+				attk->aatyp = AT_DEVA;
+				break;
+			case AT_TUCH:
+			case AT_MAGC:
+			case AT_MMGC:
+			case AT_TNKR:
+			case AT_HITS:
+				attk->aatyp = AT_CLAW;
+				break;
+			case AT_ARRW:
+				tomb_herd_arrow_swap(attk);
+				break;
+			}
+			/* and its blows are only stone, though it can still grapple */
+			if (attk->adtyp != AD_WRAP)
+				attk->adtyp = AD_PHYS;
+		}
+
 		/* A tomb herd strikes with the statue it is piloting, not with a
 		 * body of its own -- every attack keeps its ordinary identity, but
 		 * the limb making contact is the statue's */
 		if (template == TOMB_HERD)
 			attk->bodypart = atkbp_or((struct atkbp_set[]){
 				attk->bodypart, ATKBP(ARMOR_SKIN), ATKBP(NONE) });
+	}
+	/* the ghost-thing piloting a tomb herd's statue reaches out of it directly
+	 * to abduct, after all the statue's own attacks */
+	if (template == TOMB_HERD && i < NATTK) {
+		attk = &(ptr->mattk[i]);
+		attk->aatyp = AT_TUCH;
+		attk->adtyp = AD_ABDC;
+		attk->damn = 1;
+		attk->damd = 1;
+		attk->bodypart = ATKBP(TENTACLE_GENERIC);
 	}
 #undef insert_okay
 #undef end_insert_okay
@@ -2424,6 +2585,13 @@ int template;
 	/* pass 5: summarize the finished body plan. Runs after pass 4, not
 	 * with pass 3, so that the overrides above are part of the summary. */
 	ptr->bodyparts = mon_bodyparts(ptr, INSIGHT_ALL);
+	/* a tomb herd keeps the statue's whole original body plan, whatever
+	 * attacks it lost, adding the piloting ghost-thing's own parts -- but not
+	 * any part that has no physical form to carve in stone */
+	if (template == TOMB_HERD)
+		ptr->bodyparts = atkbp_diff(
+			atkbp_union(base->bodyparts, ptr->bodyparts),
+			ATKBP(HORNED_LIGHT));
 
 	/*Adjust the name*/
 	/* horrors are disallowed out of caution - they definitely break if this is enabled */

@@ -387,8 +387,13 @@ jumping_polearm(genericptr_t arg, int x, int y)
 /*
  * Single step for the hero flying through the air from jumping, flying,
  * etc.  Called from hurtle() and jump() via walk_path().  We expect the
- * argument to be a pointer to an integer -- the range -- which is
+ * argument to be a pointer to a struct hurtle_state, whose range is
  * used in the calculation of points off if we hit something.
+ *
+ * If Punished, the ball and chain follow each step; unless hs->drags_ball,
+ * the flight stops before any step that would move the ball.  hs->placed
+ * is set if the hero has already landed somewhere and must not be landed
+ * again.
  *
  * Bumping into monsters won't cause damage but will wake them and make
  * them angry.  Auto-pickup isn't done, since you don't have control over
@@ -403,11 +408,10 @@ jumping_polearm(genericptr_t arg, int x, int y)
  *	o let jumps go over boulders
  */
 boolean
-hurtle_step(arg, x, y)
-    genericptr_t arg;
-    int x, y;
+hurtle_step(genericptr_t arg, int x, int y)
 {
-    int ox, oy, *range = (int *)arg;
+    struct hurtle_state *hs = (struct hurtle_state *)arg;
+    int ox, oy, *range = &hs->range;
     struct obj *obj;
     struct monst *mon;
     boolean may_pass = TRUE;
@@ -600,12 +604,13 @@ hurtle_step(arg, x, y)
 				u.dy = y - u.uy;
 				int gx = x + u.dx;
 				int gy = y + u.dy;
-				if(isok(gx, gy) && teleok(gx,gy,FALSE) && !m_at(gx,gy)){
+				if(isok(gx, gy) && teleok(gx,gy,FALSE) && !m_at(gx,gy) && (!Punished || carried(uball))){
 					struct attack weaponhit = wielded_weapon_attack(&youmonst, uwep);
 					boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mon) ? VIS_MDEF : 0);
 					pline("Nightjar abduction!");
 					exercise(A_CHA, TRUE);
 					teleds(gx, gy, TRUE);
+					hs->placed = TRUE;
 					xmeleehity(&youmonst, mon, &weaponhit, &uwep, vis, 0, FALSE, ATTKFLAG_SUPER_SNEAK);
 				}
 			}
@@ -629,6 +634,26 @@ hurtle_step(arg, x, y)
 	    return FALSE;
 	}
     }
+
+	if (Punished) {
+		struct bc_drag_plan plan;
+
+		plan_drag_ball(x, y, TRUE, &plan);
+		if (plan.result >= BCD_DRAG && !hs->drags_ball) {
+			You_feel("a tug from the %s ball.", material_name(uball, TRUE));
+			return FALSE;
+		}
+		u.ux0 = u.ux;
+		u.uy0 = u.uy;
+		if (!do_drag_ball(&plan)) {
+			if (plan.result == BCD_JERKED) {
+				hs->placed = TRUE;
+				vision_full_recalc = 1;
+			}
+			return FALSE;
+		}
+		move_bc(0, plan.bc_control, plan.ballx, plan.bally, plan.chainx, plan.chainy);
+	}
 
     ox = u.ux;
     oy = u.uy;
@@ -712,6 +737,7 @@ hurtle(dx, dy, range, verbose, do_nomul)
     boolean do_nomul;
 {
     coord uc, cc;
+    struct hurtle_state hs;
 
     /* The chain is stretched vertically, so you shouldn't be able to move
      * very far diagonally.  The premise that you should be able to move one
@@ -763,8 +789,12 @@ hurtle(dx, dy, range, verbose, do_nomul)
     /* this setting of cc is only correct if dx and dy are [-1,0,1] only */
     cc.x = u.ux + (dx * range);
     cc.y = u.uy + (dy * range);
-    (void) walk_path(&uc, &cc, hurtle_step, (uwep && is_pole(uwep)) ? &jumping_polearm : (void *) 0, (genericptr_t)&range);
-	teleds(u.ux, u.uy, TRUE);
+    hs.range = range;
+    hs.drags_ball = FALSE;
+    hs.placed = FALSE;
+    (void) walk_path(&uc, &cc, hurtle_step, (uwep && is_pole(uwep)) ? &jumping_polearm : (void *) 0, (genericptr_t)&hs);
+	if (!hs.placed)
+		teleds(u.ux, u.uy, TRUE);
 }
 
 /* Move a monster through the air for a few squares.

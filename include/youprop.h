@@ -281,6 +281,8 @@
 #define	FacelessCloak(obj) ((obj)->otyp == WHITE_FACELESS_ROBE || (obj)->otyp == BLACK_FACELESS_ROBE || (obj)->otyp == SMOKY_VIOLET_FACELESS_ROBE)
 #define	Faceless(obj) (FacelessHelm(obj) || FacelessCloak(obj))
 
+#define LowerBodyCovered	(uarm || (uarmu && arm_blocks_lower_body(uarmu->otyp)) || (uarmc && is_closed_cloak(uarmc)))
+
 #define Disguised	((ublindf && (ublindf->otyp == LENSES || ublindf->otyp == SUNGLASSES \
 								|| ublindf->otyp == MASK || ublindf->otyp == R_LYEHIAN_FACEPLATE \
 								|| ublindf->otyp == TOWEL \

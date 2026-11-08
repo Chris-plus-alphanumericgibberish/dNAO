@@ -5993,6 +5993,20 @@ dahlverNarVis()
 	}
 }
 
+#define yog_body_signs_exposed()	(!LowerBodyCovered || !uarmf)
+#define yog_attacked_recently()	(moves <= u.yogAttack+5)
+#define yog_far_visible()	(!Invis && ( \
+			(!uarmc && yog_body_signs_exposed()) \
+			|| (check_mutation(YOG_GAZE_2) && !(ublindf && is_concealing_eye_cover(ublindf))) \
+			|| yog_attacked_recently() \
+		))
+#define yog_close_visible()	(!Invis && ( \
+			yog_body_signs_exposed() \
+			|| (check_mutation(YOG_GAZE_1) && !(ublindf && is_tinted_eye_cover(ublindf))) \
+			|| (check_mutation(YOG_GAZE_2) && !(ublindf && is_concealing_eye_cover(ublindf))) \
+			|| yog_attacked_recently() \
+		))
+
 int
 countFarSigns(mon)
 struct monst *mon;
@@ -6003,7 +6017,7 @@ struct monst *mon;
 		if(u.sealsActive&SEAL_AMON && !Invis && !(uarmh && is_metallic(uarmh))) count ++;
 		// if(u.sealsActive&SEAL_ANDREALPHUS);
 		// if(u.sealsActive&SEAL_ANDROMALIUS);
-		if(u.sealsActive&SEAL_ASTAROTH && !Invis && !(ublindf && ublindf->otyp != LENSES && ublindf->otyp != SUNGLASSES && ublindf->otyp != LIVING_MASK)) count++;
+		if(u.sealsActive&SEAL_ASTAROTH && !Invis && !(ublindf && is_concealing_eye_cover(ublindf))) count++;
 		if(u.sealsActive&SEAL_BALAM && !Invis && !(uarmc || (uarm && arm_blocks_upper_body(uarm->otyp)))) count++;
 		if(u.sealsActive&SEAL_BERITH && !Invis && (u.usteed || !((uarm && arm_blocks_upper_body(uarm->otyp)) && is_metallic(uarm) && uarmg && uarmf && uarmh))) count++;
 		if(u.sealsActive&SEAL_BUER && !Invis && !uarmf) count++;
@@ -6034,7 +6048,7 @@ struct monst *mon;
 												 (moves>100000 && !(uarmc && uarmg && uarmf && (uarm && arm_blocks_upper_body(uarm->otyp)) && uarmh && ublindf && (ublindf->otyp==MASK || ublindf->otyp == R_LYEHIAN_FACEPLATE)))
 												)) count++;
 		if(u.specialSealsActive&SEAL_DAHLVER_NAR && !NoBInvis && dahlverNarVis()) count++;
-		if(u.specialSealsActive&SEAL_ACERERAK && !NoBInvis && !(ublindf && ublindf->otyp != LENSES && ublindf->otyp != LIVING_MASK)) count++;
+		if(u.specialSealsActive&SEAL_ACERERAK && !NoBInvis && !(ublindf && is_tinted_eye_cover(ublindf))) count++;
 		// if(u.specialSealsActive&SEAL_COUNCIL) count++;
 		if(u.specialSealsActive&SEAL_COSMOS) count++;
 		if(u.specialSealsActive&SEAL_LIVING_CRYSTAL) count++;
@@ -6042,11 +6056,7 @@ struct monst *mon;
 		if(u.specialSealsActive&SEAL_MISKA && !Invis && u.ulevel >= 10) count++;
 		if(u.specialSealsActive&SEAL_NUDZIRATH) count++;
 		// if(u.specialSealsActive&SEAL_BLACK_WEB);
-		if(u.specialSealsActive&SEAL_YOG_SOTHOTH && !Invis && (
-			(!uarmc && ((!uarm && (!uarmu || !arm_blocks_lower_body(uarmu->otyp))) || !uarmf))
-			|| (check_mutation(YOG_GAZE_2) && !(ublindf && ublindf->otyp != LENSES && ublindf->otyp != SUNGLASSES && ublindf->otyp != LIVING_MASK))
-			|| (moves <= u.yogAttack+5)
-		)) count++;
+		if(u.specialSealsActive&SEAL_YOG_SOTHOTH && yog_far_visible()) count++;
 		// if(u.specialSealsActive&SEAL_NUMINA);
 	}
 	return count;
@@ -6097,15 +6107,10 @@ struct monst *mon;
 		// if(u.sealsActive&SEAL_YMIR && !Invis && ((moves>5000 && !((uarm && arm_blocks_upper_body(uarm->otyp)) || uarmc)) || (moves>10000 && !(uarmc)) || (moves>20000 && !(uarmc && uarmg)))) count++;
 		// if(u.specialSealsActive&SEAL_DAHLVER_NAR && !NoBInvis && dahlverNarVis()) count++;
 		// if(u.specialSealsActive&SEAL_ACERERAK && !NoBInvis && !ublindf) count++;
-		if(u.specialSealsActive&SEAL_COUNCIL && !(Blind || (ublindf && !(ublindf->otyp == LENSES || ublindf->otyp == LIVING_MASK)))) count++;
+		if(u.specialSealsActive&SEAL_COUNCIL && !(Blind || (ublindf && is_tinted_eye_cover(ublindf)))) count++;
 		if(u.specialSealsActive&SEAL_ALIGNMENT_THING) count++;
 		if(u.specialSealsActive&SEAL_BLACK_WEB && !Invis && (dimness(u.ux, u.uy) <= 0)) count++;
-		if(u.specialSealsActive&SEAL_YOG_SOTHOTH && !Invis && (
-			(uarmc && ((!uarm && (!uarmu || !arm_blocks_lower_body(uarmu->otyp))) || !uarmf))
-			|| (check_mutation(YOG_GAZE_1) && !check_mutation(YOG_GAZE_2) && !(ublindf && ublindf->otyp != LENSES && ublindf->otyp != LIVING_MASK))
-		)
-		 && (moves > u.yogAttack+5)
-		) count++;//Otherwise counted with the far signs
+		if(u.specialSealsActive&SEAL_YOG_SOTHOTH && yog_close_visible() && !yog_far_visible()) count++;
 	}
 	if(u.specialSealsActive&SEAL_NUMINA) count++;
 //	if(u.specialSealsActive&SEAL_UNKNOWN_GOD) count++;

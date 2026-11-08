@@ -581,6 +581,8 @@ STATIC_DCL char *FDECL(string_for_env_opt, (const char *, char *,BOOLEAN_P));
 STATIC_DCL void FDECL(bad_negation, (const char *,BOOLEAN_P));
 STATIC_DCL int FDECL(change_inv_order, (char *));
 STATIC_DCL void FDECL(oc_to_str, (char *, char *));
+STATIC_DCL int FDECL(optchar_to_objclass, (char));
+STATIC_DCL char FDECL(objclass_to_optchar, (int));
 STATIC_DCL void FDECL(graphics_opts, (char *,const char *,int,int));
 STATIC_DCL int FDECL(feature_alert_opts, (char *, const char *));
 STATIC_DCL const char *FDECL(get_compopt_value, (const char *, char *));
@@ -1047,7 +1049,7 @@ char *op;
 #endif
 
     for (sp = op; *sp; sp++) {
-	oc_sym = def_char_to_objclass(*sp);
+	oc_sym = optchar_to_objclass(*sp);
 	/* reject bad or duplicate entries; validate against every class
 	   that's ever orderable (def_inv_order), not just whatever
 	   flags.inv_order happens to already contain -- flags.inv_order
@@ -2871,10 +2873,12 @@ goodfruit:
 	/* types of objects to pick up automatically */
 	if (match_optname(opts, "pickup_types", 8, TRUE)) {
 		char ocl[MAXOCLASSES + 1], tbuf[MAXOCLASSES + 1],
+		     ccl[MAXOCLASSES + 1], cbuf[MAXOCLASSES + 1],
 		     qbuf[QBUFSZ], abuf[BUFSZ];
 		int oc_sym;
 		boolean badopt = FALSE, compat = (strlen(opts) <= 6), use_menu;
 
+		Strcpy(cbuf, flags.pickup_types);
 		oc_to_str(flags.pickup_types, tbuf);
 		flags.pickup_types[0] = '\0';	/* all */
 		op = string_for_opt(opts, (compat || !initial));
@@ -2886,11 +2890,19 @@ goodfruit:
 			flags.pickup = !negated;
 			return;
 		    }
-		    oc_to_str(flags.inv_order, ocl);
+		    /* candidate classes: current pack order, topped up with
+		       any orderable class it's missing */
+		    Strcpy(ccl, flags.inv_order);
+		    for (num = (int) strlen(ccl), op = def_inv_order; *op; op++)
+			if (!index(ccl, *op)) {
+			    ccl[num++] = *op;
+			    ccl[num] = '\0';
+			}
 		    use_menu = TRUE;
 		    if (flags.menu_style == MENU_TRADITIONAL ||
 			    flags.menu_style == MENU_COMBINATION) {
 			use_menu = FALSE;
+			oc_to_str(ccl, ocl);
 			Sprintf(qbuf, "New pickup_types: [%s am] (%s)",
 				ocl, *tbuf ? tbuf : "all");
 			getlin(qbuf, abuf);
@@ -2901,9 +2913,11 @@ goodfruit:
 			    use_menu = TRUE;
 		    }
 		    if (use_menu) {
+			/* escaping leaves the previous selection in cbuf */
 			(void) choose_classes_menu("Auto-Pickup what?", 1,
-						   TRUE, ocl, tbuf);
-			op = tbuf;
+						   TRUE, ccl, cbuf);
+			Strcpy(flags.pickup_types, cbuf);
+			return;
 		    }
 		}
 		if (negated) {
@@ -2914,7 +2928,7 @@ goodfruit:
 		if (*op != 'a' && *op != 'A') {
 		    num = 0;
 		    while (*op) {
-			oc_sym = def_char_to_objclass(*op);
+			oc_sym = optchar_to_objclass(*op);
 			/* make sure all are valid obj symbols occuring once */
 			if (oc_sym != MAXOCLASSES &&
 			    !index(flags.pickup_types, oc_sym)) {
@@ -3737,9 +3751,46 @@ static NEARDATA const char *sortltype[] = {
 };
 #endif
 
+/* Class-list option letters for object classes whose default symbol is shared with an earlier class. */
+static const struct {
+	char oclass;
+	char optchar;
+} oc_optchars[] = {
+	{ BELT_CLASS, 'b' },
+	{ SANCTION_CLASS, 's' },
+	{ 0, 0 }
+};
+
+/* Return the object class class-list option character ch stands for, or MAXOCLASSES if none. */
+STATIC_OVL int
+optchar_to_objclass(char ch)
+{
+	int i;
+
+	for (i = 0; oc_optchars[i].oclass; i++)
+		if (oc_optchars[i].optchar == ch)
+			return (int) oc_optchars[i].oclass;
+	return def_char_to_objclass(ch);
+}
+
 /*
- * Convert the given string of object classes to a string of default object
- * symbols.
+ * Return the class-list option character for an object class: its option
+ * letter if it has one, else its default symbol.
+ */
+STATIC_OVL char
+objclass_to_optchar(int oclass)
+{
+	int i;
+
+	for (i = 0; oc_optchars[i].oclass; i++)
+		if ((int) oc_optchars[i].oclass == oclass)
+			return oc_optchars[i].optchar;
+	return def_oc_syms[oclass];
+}
+
+/*
+ * Convert the given string of object classes to a string of class-list
+ * option characters.
  */
 STATIC_OVL void
 oc_to_str(src,dest)
@@ -3751,7 +3802,7 @@ oc_to_str(src,dest)
 	if (i < 0 || i >= MAXOCLASSES)
 	    impossible("oc_to_str:  illegal object class %d", i);
 	else
-	    *dest++ = def_oc_syms[i];
+	    *dest++ = objclass_to_optchar(i);
     }
     *dest = '\0';
 }
@@ -4077,7 +4128,7 @@ packorder_menu(void)
 			int oclass = (int) remaining[i];
 			any = zeroany;
 			any.a_int = i + 1;
-			Sprintf(buf, "%c  %s", def_oc_syms[oclass],
+			Sprintf(buf, "%c  %s", objclass_to_optchar(oclass),
 				objexplain[oclass]);
 			add_menu(tmpwin, NO_GLYPH, &any, (char)('a' + i), 0,
 				 ATR_NONE, buf, MENU_UNSELECTED);
@@ -5391,7 +5442,7 @@ nonew:
  *	     The title at the top of the menu.
  *
  * category: 0 = monster class
- *           1 = object  class
+ *           1 = object  class (class_list and class_select hold object classes, not symbols)
  *
  * way
  *	     FALSE = PICK_ONE, TRUE = PICK_ANY
@@ -5439,9 +5490,10 @@ char *class_select;
 			Sprintf(buf, "%s", text);
 			break;
 		case 1:
-			text = objexplain[def_char_to_objclass(*class_list)];
+			text = objexplain[(int) *class_list];
 			accelerator = next_accelerator;
-			Sprintf(buf, "%c  %s", *class_list, text);
+			Sprintf(buf, "%c  %s",
+				objclass_to_optchar((int) *class_list), text);
 			break;
 		default:
 			impossible("choose_classes_menu: invalid category %d",
@@ -5454,7 +5506,7 @@ char *class_select;
 	}
 	any.a_int = *class_list;
 	add_menu(win, NO_GLYPH, &any, accelerator,
-		  category ? *class_list : 0,
+		  category ? objclass_to_optchar((int) *class_list) : 0,
 		  ATR_NONE, buf, selected);
 	++class_list;
 	if (category > 0) {
