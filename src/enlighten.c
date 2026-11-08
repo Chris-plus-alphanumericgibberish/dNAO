@@ -3075,8 +3075,8 @@ aasimar_enlightenment_subroutine(boolean dumping)
 
 	case AASIMAR_TYPE_ELADRIN:
 		if(u.ulevel >= 30)
-			pt("Your powerful aura provides strong protection across your whole body.",
-			   "Your powerful aura provided strong protection across your whole body.");
+			pt("Your powerful aura provides protection across your whole body.",
+			   "Your powerful aura provided protection across your whole body.");
 		else
 			pt("Your aura provides some protection across your whole body.",
 			   "Your aura provided some protection across your whole body.");
@@ -3124,8 +3124,8 @@ aasimar_enlightenment_subroutine(boolean dumping)
 
 	case AASIMAR_TYPE_IKSH_NA:
 		if(u.ulevel >= 30)
-			pt("Your powerful aura provides strong protection across your whole body.",
-			   "Your powerful aura provided strong protection across your whole body.");
+			pt("Your powerful aura provides protection across your whole body.",
+			   "Your powerful aura provided protection across your whole body.");
 		else
 			pt("Your aura provides some protection across your whole body.",
 			   "Your aura provided some protection across your whole body.");
