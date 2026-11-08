@@ -60,7 +60,7 @@ E int NDECL(doapply);
 E int NDECL(dorub);
 E int NDECL(doresearch);
 E int NDECL(dojump);
-E int FDECL(jump, (int));
+E int FDECL(jump, (int, boolean));
 E int NDECL(number_leashed);
 E void FDECL(o_unleash, (struct obj *));
 E void FDECL(m_unleash, (struct monst *,BOOLEAN_P));
@@ -326,8 +326,10 @@ E void NDECL(placebc);
 E void NDECL(unplacebc);
 E void FDECL(set_bc, (int));
 E void FDECL(move_bc, (int,int,XCHAR_P,XCHAR_P,XCHAR_P,XCHAR_P));
-E boolean FDECL(drag_ball, (XCHAR_P,XCHAR_P,
-		int *,xchar *,xchar *,xchar *,xchar *, boolean *,BOOLEAN_P));
+E void FDECL(plan_drag_ball, (int, int, int, struct bc_drag_plan *));
+E boolean FDECL(do_drag_ball, (struct bc_drag_plan *));
+E boolean FDECL(drag_ball, (int, int,
+		int *,xchar *,xchar *,xchar *,xchar *, boolean *, int));
 E void FDECL(drop_ball, (XCHAR_P,XCHAR_P));
 E void NDECL(drag_down);
 E void NDECL(bc_sanity_check);

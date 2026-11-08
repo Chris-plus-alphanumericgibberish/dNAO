@@ -4387,23 +4387,25 @@ dojump()
 		int dist = min(P_SKILL(P_QUARTERSTAFF), P_SKILL(P_MARTIAL_ARTS));
 		if(dist >= P_EXPERT)
 			dist = P_SKILL(P_MARTIAL_ARTS);
-		return jump(dist);
+		return jump(dist, FALSE);
 	}
 	else if(!Upolyd && Role_if(PM_KENSEI) && uwep && is_kensei_weapon(uwep) && P_SKILL(P_MARTIAL_ARTS)){
-		return jump(P_SKILL(P_MARTIAL_ARTS));
+		return jump(P_SKILL(P_MARTIAL_ARTS), FALSE);
 	}
 	else if(check_mutation(AAT_PRIMINAL) && uwep && (uwep->otyp == QUARTERSTAFF || uwep->otyp == KHAKKHARA)){
 		int dist = min(P_SKILL(P_QUARTERSTAFF), P_SKILL(P_MARTIAL_ARTS));
 		if(dist >= P_EXPERT)
 			dist = P_SKILL(P_MARTIAL_ARTS);
-		return jump(dist);
+		return jump(dist, FALSE);
 	}
-	return jump(0);
+	return jump(0, FALSE);
 }
 
+/* magic: 0=Physical, otherwise skill level; drags_ball: a punished hero
+ * hauls the ball along instead of stopping when it would have to move
+ */
 int
-jump(magic)
-int magic; /* 0=Physical, otherwise skill level */
+jump(int magic, boolean drags_ball)
 {
 	coord cc;
 
@@ -4508,6 +4510,7 @@ int magic; /* 0=Physical, otherwise skill level */
 		return MOVE_CANCELLED;
 	} else {
 	    coord uc;
+	    struct hurtle_state hs;
 	    int range, temp;
 
 	    if(u.utrap)
@@ -4598,13 +4601,17 @@ int magic; /* 0=Physical, otherwise skill level */
 	    if (range < temp)
 		range = temp;
 		u.lastmoved = monstermoves;
-	    (void) walk_path(&uc, &cc, hurtle_step, (uwep && is_pole(uwep)) ? &jumping_polearm : (void *) 0, (genericptr_t)&range);
+	    hs.range = range;
+	    hs.drags_ball = drags_ball;
+	    hs.placed = FALSE;
+	    (void) walk_path(&uc, &cc, hurtle_step, (uwep && is_pole(uwep)) ? &jumping_polearm : (void *) 0, (genericptr_t)&hs);
 
 	    /* A little Sokoban guilt... */
 	    if (sokoban_unsolved())
 		change_luck(-1);
 
-	    teleds(cc.x, cc.y, TRUE);
+	    if (!hs.placed)
+		teleds(cc.x, cc.y, FALSE);
 	    nomul(-1, "jumping around");
 	    nomovemsg = "";
 		if(!Role_if(PM_MONK) && !Role_if(PM_KENSEI))
@@ -9073,7 +9080,7 @@ use_doll(obj)
 	struct monst *mtmp;
 	switch(obj->otyp){
 		case DOLL_OF_JUMPING:
-			if (jump(4)){
+			if (jump(4, TRUE)){
 				res = MOVE_STANDARD;
 				give_intrinsic(JUMPING, 100L);
 				if(!Blind)

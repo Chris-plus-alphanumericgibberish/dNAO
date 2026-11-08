@@ -23341,7 +23341,7 @@ android_combo()
 			else return MOVE_ATTACKED;
 		}
 		if (P_SKILL(P_BARE_HANDED_COMBAT) >= P_EXPERT && u.uen > 0){
-			int j = jump(1) != MOVE_CANCELLED;
+			int j = jump(1, FALSE) != MOVE_CANCELLED;
 			int k = dokick() != MOVE_CANCELLED;
 			if (j || k){
 				u.uen--;
@@ -23350,7 +23350,7 @@ android_combo()
 			else return MOVE_ATTACKED;
 		}
 		if (P_SKILL(P_BARE_HANDED_COMBAT) >= P_MASTER && u.uen > 0){
-			int j = jump(1) != MOVE_CANCELLED;
+			int j = jump(1, FALSE) != MOVE_CANCELLED;
 			int d = getdir((char *)0);
 			if (!j && !d) return MOVE_ATTACKED;
 			u.uen--;
@@ -23442,7 +23442,7 @@ android_combo()
 			else return MOVE_ATTACKED;
 		}
 		if (uwep && P_SKILL(weapon_type(uwep)) >= P_EXPERT && u.uen > 0){
-			int j = jump(1) != MOVE_CANCELLED;
+			int j = jump(1, FALSE) != MOVE_CANCELLED;
 			int d = getdir((char *)0);
 			if (!j && (!d || u.dz))
 				return MOVE_ATTACKED;

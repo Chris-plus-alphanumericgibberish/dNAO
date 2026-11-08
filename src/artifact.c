@@ -14056,7 +14056,7 @@ arti_invoke(obj)
 				return MOVE_CANCELLED;
 			}
 			You("click your heels together and take a step... ");
-			jump(15);
+			jump(15, TRUE);
 			// Set seven league boots to full speed as well
 			if(obj->oartifact == ART_SEVEN_LEAGUE_BOOTS)
 				artinstance[ART_SEVEN_LEAGUE_BOOTS].LeagueMod = 10;

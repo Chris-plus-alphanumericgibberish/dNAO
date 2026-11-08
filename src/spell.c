@@ -4993,7 +4993,7 @@ dothrowspell:
 		cast_protection();
 		break;
 	case SPE_JUMPING:
-		if (!jump(max(role_skill,1)))
+		if (!jump(max(role_skill,1), TRUE))
 			pline1(nothing_happens);
 		break;
 	case SPE_ABJURATION:
