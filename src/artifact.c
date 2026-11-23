@@ -7717,7 +7717,7 @@ boolean printmessages; /* print generic elemental damage messages */
 	if (attacks(AD_DISN, otmp)){
 		if ((vis&VIS_MAGR) && printmessages) {
 			if(otmp->oartifact == ART_BLEEDING_VOID)
-				pline_The("blood-rimmed gash %s %s%c",
+				pline_The("blood-rimmed wound %s %s%c",
 						!spec_dbon_applies ? "hits" :
 						"flays space around",
 					hittee, !spec_dbon_applies ? '.' : '!');
@@ -8327,7 +8327,7 @@ boolean printmessages; /* print generic elemental damage messages */
 			}
 			break;
 		case ART_BLEEDING_VOID:
-			wepdesc = "blood-rimmed gash";
+			wepdesc = "blood-rimmed wound";
 			if (dieroll == 1) {
 				if (has_head_mon(mdef) && !(youagr && u.uswallow))
 					method = VORPAL_BEHEAD;
