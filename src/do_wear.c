@@ -5159,7 +5159,7 @@ struct obj *armor;
 	else {
 		symbiote = *attacktype_fordmg(&mons[PM_SCORPION], AT_STNG, AD_DRST);
 	}
-	symbiote.bodypart = ATKBP(NONE);	/* the carapace's own sting, not the real scorpion's/Scorpius's TAIL that attacktype_fordmg() copied */
+	symbiote.bodypart = ATKBP(ARMOR_ARM);
 
 	for(j=8;j>=1;j--){
 		if(youagr && u.ustuck && u.uswallow)

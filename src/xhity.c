@@ -3153,6 +3153,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 			&& check_carapace_mod(otmp, CPROP_CLAWS)
 		){
 			*attk = *attacktype_fordmg(&mons[PM_VERMIURGE], AT_CLAW, AD_PHYS);
+			attk->bodypart = ATKBP(ARMOR_ARM);
 			fromlist = FALSE;
 			if(check_subout(subout, SUBOUT_V_CLAWS1))
 				add_subout(subout, SUBOUT_V_CLAWS2);
@@ -3545,6 +3546,7 @@ int * tohitmod;					/* some attacks are made with decreased accuracy */
 				*attk = *attacktype_fordmg(&mons[PM_SCORPION], AT_STNG, AD_DRST);
 				add_subout(subout, SUBOUT_SCORPION);
 			}
+			attk->bodypart = ATKBP(ARMOR_ARM);
 			fromlist = FALSE;
 		}
 	}
