@@ -435,6 +435,11 @@ MONSTER: 'f', random, random, hostile
 MONSTER: 's', random, random, hostile
 MONSTER: 'S', random, random, hostile
 
+OBJECT:'?',"taming",random
+OBJECT:'?',"taming",random
+OBJECT:'?',"taming",random
+OBJECT[50%]:'?',"taming",random
+OBJECT[10%]:'?',"taming",random
 
 LEVEL: "Brd-filb"
 #
@@ -442,32 +447,38 @@ ROOM: "ordinary" , random, random, random, random
 STAIR: random, up
 OBJECT: random,random,random
 MONSTER: 'S', random, random
+OBJECT[10%]:'?',"taming",random
 
 ROOM: "ordinary" , random, random, random, random
 OBJECT: random, random, random
 OBJECT: random,random,random
+OBJECT[10%]:'?',"taming",random
 MONSTER: 'r', random, random
 
 ROOM: "ordinary" , random, random, random, random
 OBJECT: random, random, random
 TRAP: random, random
 OBJECT: random,random,random
+OBJECT[10%]:'?',"taming",random
 MONSTER: 's', random, random
 
 ROOM: "ordinary" , random, random, random, random
 STAIR: random, down
 OBJECT: random, random, random
+OBJECT[10%]:'?',"taming",random
 TRAP: random, random
 MONSTER: 'S', random, random
 
 ROOM: "ordinary" , random, random, random, random
 OBJECT: random, random, random
 OBJECT: random, random, random
+OBJECT[10%]:'?',"taming",random
 TRAP: random, random
 MONSTER: 'S', random, random
 
 ROOM: "ordinary" , random, random, random, random
 OBJECT: random, random, random
+OBJECT[10%]:'?',"taming",random
 TRAP: random, random
 MONSTER: 's', random, random
 
