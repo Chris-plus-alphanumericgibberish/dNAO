@@ -359,6 +359,7 @@
 #define DarksightOnly	u.uprops[DARKVISION_ONLY].intrinsic
 #define Shattering		u.uprops[SHATTERING].intrinsic
 #define DimensionalLock	u.uprops[DIMENSION_LOCK].intrinsic
+#define NoDemonGating	(DimensionalLock || ((uwep && uwep->oartifact && arti_worn_prop(uwep, ARTP_NOCALL)) || THREATENING_MUDRA))
 
 /* Hallucination is solely a timeout; its resistance can be intrinsic or extrinsic */
 #define HHallucination		u.uprops[HALLUC].intrinsic

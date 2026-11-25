@@ -1516,28 +1516,25 @@ register struct monst *mtmp;
 	}
 	if(is_greater_demon(mtmp->data) && spotted && !mtmp->mpeaceful && !mtmp->mgroup_summoned && !mtmp->mcan
 		&& distmin(mtmp->mx, mtmp->my, u.ux, u.uy) <= BOLT_LIM
-		&& !DimensionalLock
+		&& !NoDemonGating
 	){
 		mcall_group(mtmp, u.ux, u.uy, 3);
 		return 0;
 	}
 	//Pit fiend per round
 	if(Inhell && (mtmp->mtyp == PM_PIT_FIEND || mtmp->mtyp == PM_NESSIAN_PIT_FIEND) && spotted && !mtmp->mpeaceful && !mtmp->mcan
-		&& !(uwep && uwep->oartifact && arti_worn_prop(uwep, ARTP_NOCALL))
 		&& distmin(mtmp->mx, mtmp->my, u.ux, u.uy) <= 9
-		&& !DimensionalLock
+		&& !NoDemonGating
 	)
 		mcall_pit_fiend(mtmp, u.ux, u.uy, 3);
 	if(Inhell && (mtmp->mtyp == PM_BAEL) && spotted && !mtmp->mpeaceful && !mtmp->mcan
-		&& !(uwep && uwep->oartifact && arti_worn_prop(uwep, ARTP_NOCALL))
 		&& distmin(mtmp->mx, mtmp->my, u.ux, u.uy) <= 9
-		&& !DimensionalLock
+		&& !NoDemonGating
 	)
 		mcall_bael(mtmp, u.ux, u.uy, 3);
 	//Alkilith per round
 	if(mtmp->mtyp == PM_ALKILITH && !mtmp->mpeaceful && !mtmp->mcan
-		&& !(uwep && uwep->oartifact && arti_worn_prop(uwep, ARTP_NOCALL))
-		&& !DimensionalLock
+		&& !NoDemonGating
 	)
 		mcall_alkilith(mtmp, mtmp->mx, mtmp->my, 1);
 

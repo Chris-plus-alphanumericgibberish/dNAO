@@ -552,8 +552,8 @@ xattacky(struct monst *magr, struct monst *mdef, int tarx, int tary, long modifi
 	/* mvu only; we don't want it mvm and player's is handled as an ability */
 	if (youdef && !magr->cham && gates_in_help(pa) && !template_blocks_gate(magr)
 		&& !ranged && !missedyou && (magr->summonpwr < magr->data->mlevel)
-		&& !(uwep && uwep->oartifact && arti_worn_prop(uwep, ARTP_NOCALL) && is_demon(magr->data))
 		&& !DimensionalLock
+		&& !(is_demon(magr->data) && NoDemonGating)
 	) {
 		
 		if (!magr->mcan && !rn2(13)) {

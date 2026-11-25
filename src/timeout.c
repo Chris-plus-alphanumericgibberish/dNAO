@@ -2843,7 +2843,10 @@ long timeout;
 		}
 		monvanished(mon);
 		/* vortex has vacated its square; spawn the pre-selected monster type */
-		if (mon->mtyp == PM_SUMMONING_VORTEX && mon->mvar1_summon_ID != NON_PM)
+		if (mon->mtyp == PM_SUMMONING_VORTEX && mon->mvar1_summon_ID != NON_PM
+			&& !DimensionalLock
+			&& !(NoDemonGating && (summoner ? is_demon(summoner->data) : is_demon(&mons[mon->mvar1_summon_ID])))
+		)
 			(void) msummon_place((int)mon->mvar1_summon_ID, mon->mx, mon->my, summoner);
 	}
 }
