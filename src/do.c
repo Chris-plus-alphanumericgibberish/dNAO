@@ -1694,6 +1694,17 @@ misc_levelport:
 	if (Punished) placebc();
 	obj_delivery();		/* before killing geno'd monsters' eggs */
 	losedogs();
+	if (new && Is_qhome(&u.uz) && Race_if(PM_SILVERKNIGHT)) {
+		struct monst *mount = makedog();
+		if (mount) {
+			for (int i = 0; i < 2; i++) {
+				grow_up(mount, (struct monst *)0);
+				//Might grow into a genocided form.
+				if (DEADMONSTER(mount))
+					break;
+			}
+		}
+	}
 	kill_genocided_monsters();  /* for those wiped out while in limbo */
 	/*
 	 * Expire all timers that have gone off while away.  Must be
