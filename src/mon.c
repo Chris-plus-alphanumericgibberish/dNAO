@@ -2156,6 +2156,7 @@ movemon()
 		&& !mon_resistance(mtmp,LEVITATION)
 		&& mtmp != u.ustuck
 		&& mtmp != u.usteed
+		&& mtmp != u.urider
 	){
 		struct d_level target_level;
 		target_level.dnum = u.uz.dnum;
@@ -8881,6 +8882,16 @@ struct monst *mtmp;
 	if(mtmp->mtyp == PM_LIVING_DOLL){
 		mondied(mtmp);
 	} else {
+#ifdef STEED
+		if(mtmp == u.usteed){
+			pline("%s vanishes from underneath you.", Monnam(mtmp));
+			dismount_steed(DISMOUNT_VANISHED);
+		}
+		else if(mtmp == u.urider){
+			pline("%s vanishes from your saddle.", Monnam(mtmp));
+			rider_dismounts_you(DISMOUNT_VANISHED);
+		}
+#endif
 		migrate_to_level(mtmp, ledger_no(&u.uz), MIGR_EXACT_XY, (coord *)0);
 	}
 }
