@@ -3667,239 +3667,152 @@ struct attack * attk;
 ///////////////////////////////////////////////////////////////////////////////
 /* Isamusei hit additional targets, if your insight is high enough to percieve the distortions */
 ///////////////////////////////////////////////////////////////////////////////
-int
-ihit(struct monst *magr, struct obj *otmp, int dx, int dy, int tohitmod, struct attack *attk)
+
+/* Returns the monster that [magr]'s warp strike at offset ([dx],[dy]) from it would hit (the engulfer while the hero is engulfed), or NULL if there is no valid target there. */
+struct monst *
+iwarp_target(struct monst *magr, int dx, int dy)
 {
 	boolean youagr = magr == &youmonst;
+	struct monst *mdef;
+
 	if(!isok(x(magr)+dx, y(magr)+dy))
-		return 0;
-	struct monst *mdef = !youagr ? m_u_at(x(magr)+dx, y(magr)+dy) : 
-								u.uswallow ? u.ustuck : 
-								(dx || dy) ? m_at(x(magr)+dx, y(magr)+dy) : 
-								(struct monst *)0;
-	if(mdef 
+		return (struct monst *)0;
+	mdef = !youagr ? m_u_at(x(magr)+dx, y(magr)+dy) :
+			u.uswallow ? u.ustuck :
+			(dx || dy) ? m_at(x(magr)+dx, y(magr)+dy) :
+			(struct monst *)0;
+	if(mdef
 		&& (!DEADMONSTER(mdef))
 		&& ((youagr || mdef == &youmonst) ? couldsee(mdef->mx,mdef->my) : clear_path(magr->mx, magr->my, mdef->mx, mdef->my))
 		&& ((!youagr && mdef != &youmonst && mdef->mpeaceful != magr->mpeaceful) ||
 			(!youagr && mdef == &youmonst && !magr->mpeaceful) ||
 			(youagr && !nonthreat_ful(mdef)))
-	){ //Can hit a worm multiple times
-		int vis = VIS_NONE;
-		if(youagr || canseemon(magr))
-			vis |= VIS_MAGR;
-		if(mdef == &youmonst || canseemon(mdef))
-			vis |= VIS_MDEF;
-		bhitpos.x = x(magr) + dx; bhitpos.y = y(magr) + dy;
-		notonhead = (bhitpos.x != x(mdef) || bhitpos.y != y(mdef));
-		return xmeleehity(magr, mdef, attk, &otmp, vis, tohitmod, TRUE, 0);
+	) //Can hit a worm multiple times
+		return mdef;
+	return (struct monst *)0;
+}
+
+/* Makes [magr]'s warp strike with [otmp] at offset ([dx],[dy]) with ATTKFLAG_ [attack_flags], setting *mdef_p (if non-NULL) to the monster struck or NULL.
+ * Returns the xmeleehity() result, or 0 if there was nothing to strike. */
+int
+ihit(struct monst *magr, struct obj *otmp, int dx, int dy, int tohitmod, struct attack *attk, long attack_flags, struct monst **mdef_p)
+{
+	struct monst *mdef = iwarp_target(magr, dx, dy);
+	int vis = VIS_NONE;
+
+	if(mdef_p)
+		*mdef_p = mdef;
+	if(!mdef)
+		return 0;
+	if(magr == &youmonst || canseemon(magr))
+		vis |= VIS_MAGR;
+	if(mdef == &youmonst || canseemon(mdef))
+		vis |= VIS_MDEF;
+	bhitpos.x = x(magr) + dx; bhitpos.y = y(magr) + dy;
+	notonhead = (bhitpos.x != x(mdef) || bhitpos.y != y(mdef));
+	return xmeleehity(magr, mdef, attk, &otmp, vis, tohitmod, TRUE, attack_flags);
+}
+
+/* Fills [offs] with the Isamusei-Skies full-circle offsets at distance [dist] (2 or 3) for facing ([dx],[dy]); returns how many. */
+STATIC_OVL int
+iwarp_ring_offsets(int dx, int dy, int dist, coord *offs)
+{
+	static const int ring2_dx[] = {-2,-1, 0, 1, 2, 2, 2, 2, 2, 1, 0,-1,-2,-2,-2,-2};
+	static const int ring2_dy[] = {-2,-2,-2,-2,-2,-1, 0, 1, 2, 2, 2, 2, 2, 1, 0,-1};
+	static const int ring3_dx[] = {-3,-2,-1, 0, 1, 2, 3, 3, 3, 3, 3, 3, 3, 2, 1, 0,-1,-2,-3,-3,-3,-3,-3,-3};
+	static const int ring3_dy[] = {-3,-3,-3,-3,-3,-3,-3,-2,-1, 0, 1, 2, 3, 3, 3, 3, 3, 3, 3, 2, 1, 0,-1,-2};
+	const int *ring_dx, *ring_dy;
+	int len, facing = 0, i, n = 0;
+
+	for(i = 0; i <= dist; i++){
+		offs[n].x = -i*dx;
+		offs[n].y = -i*dy;
+		n++;
 	}
-	return 0;
+	if(dist == 2){
+		ring_dx = ring2_dx;
+		ring_dy = ring2_dy;
+		len = SIZE(ring2_dx);
+	}
+	else if(dist == 3){
+		ring_dx = ring3_dx;
+		ring_dy = ring3_dy;
+		len = SIZE(ring3_dx);
+	}
+	else return n;
+	for(i = 0; i < len; i++){
+		if(ring_dx[i] == dx*dist && ring_dy[i] == dy*dist){
+			facing = i;
+			break;
+		}
+	}
+	for(i = 1; i <= len; i++){
+		offs[n].x = ring_dx[(facing+i)%len];
+		offs[n].y = ring_dy[(facing+i)%len];
+		n++;
+	}
+	return n;
+}
+
+/* Fills [offs] (room for IWARP_MAX_OFFSETS) with the offsets from [magr], in strike order (repeats possible), of the squares its isamusei
+ * warp strikes when it attacks ([tarx],[tary]) with [otmp]; returns how many. The caller checks the warp's Insight threshold. */
+int
+iwarp_offsets(struct monst *magr, struct obj *otmp, int tarx, int tary, coord *offs)
+{
+	boolean youagr = magr == &youmonst;
+	/* try to find direction (u.dx and u.dy may be incorrect) */
+	int dx = sgn(tarx - x(magr));
+	int dy = sgn(tary - y(magr));
+	int dist = 1;
+	int n = 0;
+
+#define IWARP_ADD(ox, oy) (offs[n].x = dist*(ox), offs[n].y = dist*(oy), n++)
+	if(otmp && is_streaming_merc(otmp) && mlev(magr) > 20 && (
+		(youagr && Insight > 20 && YOU_MERC_SPECIAL)
+		|| (!youagr && insightful(magr->data) && is_chaotic_mon(magr))
+	)){
+		dist = (youagr ? (Insight > 60) : (mlev(magr) > 30)) ? 3 : 2;
+		if(Insight >= 70)
+			return iwarp_ring_offsets(dx, dy, dist, offs);
+	}
+	if(!(isok(tarx - dx, tary - dy) &&
+		(dx || dy) &&
+		x(magr) == tarx - dx &&
+		y(magr) == tary - dy)
+	)
+		return 0;
+
+	//180 degree rotation
+	IWARP_ADD(-dx, -dy);
+	if(Insight >= 45){
+		//90 and -90 degree rotations
+		IWARP_ADD(-dy, dx);
+		IWARP_ADD(dy, -dx);
+	}
+	if(Insight >= 57){
+		//45 and -45 degree rotations
+		IWARP_ADD(sgn(dx+dy), sgn(dy-dx));
+		IWARP_ADD(sgn(dx-dy), sgn(dx+dy));
+	}
+	if(Insight >= 70){
+		//135 and -135 degree rotations
+		IWARP_ADD(sgn(-dx-dy), sgn(dx-dy));
+		IWARP_ADD(sgn(-dx+dy), sgn(-dx-dy));
+	}
+#undef IWARP_ADD
+	return n;
 }
 
 int
 hit_with_iwarp(struct monst *magr, struct obj *otmp, int tarx, int tary, int tohitmod, struct attack *attk)
 {
-	int subresult = 0;
-	boolean youagr = magr == &youmonst;
-	/* try to find direction (u.dx and u.dy may be incorrect) */
-	int dx = sgn(tarx - x(magr));
-	int dy = sgn(tary - y(magr));
-	int nx, ny;
+	coord offs[IWARP_MAX_OFFSETS];
+	int n = iwarp_offsets(magr, otmp, tarx, tary, offs);
 	int result = 0;
-	if(magr && mlev(magr) > 20 && (
-		(youagr && Insight > 20 && YOU_MERC_SPECIAL)
-		|| (!youagr && insightful(magr->data) && is_chaotic_mon(magr))
-	)){
-		return hit_with_amalgamated_iwarp(magr, otmp, tarx, tary, tohitmod, attk);
-	}
-	if(!(isok(tarx - dx, tary - dy) &&
-		(dx || dy) &&
-		x(magr) == tarx - dx &&
-		y(magr) == tary - dy)
-	)
-		return result;
 
-	result = ihit(magr, otmp, -1*dx, -1*dy, tohitmod, attk);
-	result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
-	if(Insight >= 45){
-		//90 degree rotation
-		nx = -dy;
-		ny = dx;
-		result = ihit(magr, otmp, nx, ny, tohitmod, attk);
-		result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
-		//-90 degree rotation
-		nx = dy;
-		ny = -dx;
-		result = ihit(magr, otmp, nx, ny, tohitmod, attk);
-		result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
-	}
-	if(Insight >= 57){
-		//45 degree rotation
-		nx = sgn(dx+dy);
-		ny = sgn(dy-dx);
-		result = ihit(magr, otmp, nx, ny, tohitmod, attk);
-		result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
-		//-45 degree rotation
-		nx = sgn(dx-dy);
-		ny = sgn(dx+dy);
-		result = ihit(magr, otmp, nx, ny, tohitmod, attk);
-		result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
-	}
-	if(Insight >= 70){
-		//135 degree rotation
-		//x = xcos0 - ysin0
-		//x = x*(-0.7) - y*(0.7)
-		//y = xsin0 + ycos0
-		//y = x*(0.7) + y*(-0.7)
-		nx = sgn(-dx-dy);
-		ny = sgn(dx-dy);
-		result = ihit(magr, otmp, nx, ny, tohitmod, attk);
-		result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
-		//-135 degree rotation
-		//x = xcos0 - ysin0
-		//x = x*(-0.7) - y*(-0.7)
-		//y = ysin0 + ycos0
-		//y = x*(-0.7) + y*(-0.7)
-		//-45 degree rotation
-		nx = sgn(-dx+dy);
-		ny = sgn(-dx-dy);
-		result = ihit(magr, otmp, nx, ny, tohitmod, attk);
-		result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
-	}
-	return result;
-}
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Isamusei-Skies hits additional targets, if your insight is high enough to percieve the distortions */
-///////////////////////////////////////////////////////////////////////////////////////////////////////
-int
-distance_rotate(struct monst * magr, struct obj * otmp, int agrx, int agry, int dx, int dy, int dist, int tohitmod, struct attack * attk, int rotation_steps)
-{
-	int distance_2_rotation_dx[] = {-2,-1, 0, 1, 2, 2, 2, 2, 2, 1, 0,-1,-2,-2,-2,-2};
-	int distance_2_rotation_dy[] = {-2,-2,-2,-2,-2,-1, 0, 1, 2, 2, 2, 2, 2, 1, 0,-1};
-	int distance_3_rotation_dx[] = {-3,-2,-1, 0, 1, 2, 3, 3, 3, 3, 3, 3, 3, 2, 1, 0,-1,-2,-3,-3,-3,-3,-3,-3};
-	int distance_3_rotation_dy[] = {-3,-3,-3,-3,-3,-3,-3,-2,-1, 0, 1, 2, 3, 3, 3, 3, 3, 3, 3, 2, 1, 0,-1,-2};
-	int result = 0;
-	while(dx > 1 || dy > 1 || dx < -1 || dy < -1){
-		dx /= 2;
-		dy /= 2;
-	}
-	//180 degree bar
-	int ix, iy;
-	for(int i = 0; i <= dist; i++){
-		ix = -i*dx;
-		iy = -i*dy;
-		ihit(magr, otmp, ix, iy, tohitmod, attk);
-	}
-	dx *= dist;
-	dy *= dist;
-	//Locate facing
-	int n = 0;
-	int i;
-	if(dist == 2){
-		for(int i = 0; i < SIZE(distance_2_rotation_dx); i++){
-			if(distance_2_rotation_dx[i] == dx && distance_2_rotation_dy[i] == dy){
-				n = i;
-				break;
-			}
-		}
-	}
-	else if(dist == 3){
-		for(int i = 0; i < SIZE(distance_3_rotation_dx); i++){
-			if(distance_3_rotation_dx[i] == dx && distance_3_rotation_dy[i] == dy){
-				n = i;
-				break;
-			}
-		}
-	}
-	else {
-		return 0;
-	}
-	//Rotate and attack
-	int subresult = 0;
-	boolean youagr = magr == &youmonst;
-	int vis2 = VIS_NONE;
-	int len = 0;
-	int *rotation_dx;
-	int *rotation_dy;
-	if(dist == 2){
-		len = SIZE(distance_2_rotation_dx);
-		rotation_dx = distance_2_rotation_dx;;
-		rotation_dy = distance_2_rotation_dy;
-	}
-	else {
-		len = SIZE(distance_3_rotation_dx);
-		rotation_dx = distance_3_rotation_dx;
-		rotation_dy = distance_3_rotation_dy;
-	}
-	struct monst *mdef2;
-	int ndx, ndy;
-	for(n = (n+1) % len, i=0; i < len; n = (n+1) % len, i++){
-		ndx = rotation_dx[n];
-		ndy = rotation_dy[n];
-		subresult = ihit(magr, otmp, ndx, ndy, tohitmod, attk);
+	for(int i = 0; i < n && !(result&(MM_AGR_DIED|MM_AGR_STOP)); i++){
 		/* handle MM_AGR_DIED and MM_AGR_STOP by adding them to the overall result, ignore other outcomes */
-		result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
-	}
-	return result;	
-}
-
-int
-hit_with_amalgamated_iwarp(struct monst *magr, struct obj *otmp, int tarx, int tary, int tohitmod, struct attack *attk)
-{
-	boolean youagr = magr == &youmonst;
-	int agrx = x(magr);
-	int agry = y(magr);
-	int dx = sgn(tarx - agrx);
-	int dy = sgn(tary - agry);
-	int dist = (youagr ? (Insight > 60) : (mlev(magr) > 30)) ? 3 : 2;
-	//Notes: Insight 45: 90 degree rotation
-	//       Insight 57: 45 degree rotation
-	//       Insight 70: 135 degree rotation
-	//	     Always: 180 degree rotation
-	//	   Breakpoint is therfore 70 for full circle
-	// Distance is possibly determined by monster level
-	//  Rotation is always by Insight
-	if(Insight >= 70)
-		return distance_rotate(magr, otmp, agrx, agry, dx, dy, dist, tohitmod, attk, 4);
-
-	int subresult = 0;
-	/* try to find direction (u.dx and u.dy may be incorrect) */
-	int nx, ny;
-	int result = 0;
-	if(!(isok(tarx - dx, tary - dy) &&
-		(dx || dy) &&
-		x(magr) == tarx - dx &&
-		y(magr) == tary - dy)
-	)
-		return result;
-
-	result = ihit(magr, otmp, -1*dist*dx, -1*dist*dy, tohitmod, attk);
-	result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
-	if(Insight >= 45){
-		//90 degree rotation
-		nx = -dy;
-		ny = dx;
-		result = ihit(magr, otmp, dist*nx, dist*ny, tohitmod, attk);
-		result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
-		//-90 degree rotation
-		nx = dy;
-		ny = -dx;
-		result = ihit(magr, otmp, dist*nx, dist*ny, tohitmod, attk);
-		result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
-	}
-	if(Insight >= 57){
-		//45 degree rotation
-		nx = sgn(dx+dy);
-		ny = sgn(dy-dx);
-		result = ihit(magr, otmp, dist*nx, dist*ny, tohitmod, attk);
-		result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
-		//-45 degree rotation
-		nx = sgn(dx-dy);
-		ny = sgn(dx+dy);
-		result = ihit(magr, otmp, dist*nx, dist*ny, tohitmod, attk);
-		result |= subresult&(MM_AGR_DIED|MM_AGR_STOP);
+		result |= ihit(magr, otmp, offs[i].x, offs[i].y, tohitmod, attk, 0L, (struct monst **)0)&(MM_AGR_DIED|MM_AGR_STOP);
 	}
 	return result;
 }

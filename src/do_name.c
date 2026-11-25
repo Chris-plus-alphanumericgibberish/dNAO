@@ -808,7 +808,7 @@ const char *name;
 			obj->sub_material = MORGANITE;
 		}
 		else if(obj->oartifact == ART_WHIRLING_SWORD){
-			obj->sub_material = SAPPHIRE;
+			set_submat(obj, SAPPHIRE);
 		}
 		else if(obj->oartifact == ART_IBITE_ARM){
 			obj->obj_color = CLR_BRIGHT_GREEN;

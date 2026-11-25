@@ -551,7 +551,11 @@ struct you {
 #define REACH_FLAME 77
 #define GROW_SHOOT 78
 #define RECEPT_F 79
-#define MAX_MYSTIC_FORMS 79
+#define STRONG_S 80
+#define SWIFT_S 81
+#define FIRE_LANCE 82
+#define FIRE_STRK 83
+#define MAX_MYSTIC_FORMS 83
 
 #define MFORM_STREAM MAX_MYSTIC_FORMS+1
 #define MFORM_CHAINS MAX_MYSTIC_FORMS+2

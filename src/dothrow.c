@@ -358,13 +358,17 @@ jumping_polearm(genericptr_t arg, int x, int y)
 {
 	struct monst *mon = m_at(x, y);
 	static long last_messaged = 0L;
-	boolean path = FALSE;
-	if(!mon)
+	boolean path = FALSE, uproot = FALSE;
+	if(!mon || !uwep || !is_pole(uwep))
 		return TRUE;
-	if(Role_if(PM_KENSEI) && uwep && is_kensei_weapon(uwep)){
+	if(Role_if(PM_KENSEI) && is_kensei_weapon(uwep)){
 		if(u.role_variant == ART_SKY_REFLECTED || u.role_variant == ART_SILVER_SKY){
 			if(artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_POWER)
 				path = TRUE;
+		}
+		else if(u.role_variant == ART_ANCIENT_RITUAL_SWORD && uwep->oartifact == ART_SIX_ELEMENT_SWORD){
+			if(six_element_channel(uwep->oartifact, SIXEL_LONG))
+				uproot = TRUE;
 		}
 	}
 	if(AerialCombat && !mon->mpeaceful && canseemon(mon)){
@@ -378,8 +382,20 @@ jumping_polearm(genericptr_t arg, int x, int y)
 				last_messaged = monstermoves;
 			}
 		}
-		if(path || !partial_action())
-			u_pole_pound(mon);
+		if(path || !partial_action()){
+			if(uproot){
+				struct obj *sword = uwep;
+				if(last_messaged < monstermoves){
+					pline("Uproot!");
+					last_messaged = monstermoves;
+				}
+				u_pole_pound(mon, Is_spire(&u.uz) ? 0L : (ATTKFLAG_DOUBLE_DAMAGE|blunt_strike_dmgtype(uwep, &youmonst, mon)));
+				if(uwep == sword)
+					set_six_element_channel(sword, SIXEL_EARTH);
+			}
+			else
+				u_pole_pound(mon, 0L);
+		}
 	}
 	return TRUE; //Note: We'd only stop if we died, and if we die we don't reach here.
 }

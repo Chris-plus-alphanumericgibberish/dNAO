@@ -26008,6 +26008,13 @@ edge_strike_dmgtype(struct obj *wep, struct monst *magr, struct monst *mdef)
 	return mask_attkflags(mask & ~PIERCE);
 }
 
+/* Returns the ATTKFLAG_ damage types for [wep]'s attack by [magr] against [mdef] (which may be NULL), with blunt added. */
+long
+blunt_strike_dmgtype(struct obj *wep, struct monst *magr, struct monst *mdef)
+{
+	return mask_attkflags(attack_mask_vs_mdef(wep, 0, 0, magr, mdef)) | ATTKFLAG_WHACK;
+}
+
 const char *
 move_name(int moveid)
 {
@@ -26087,6 +26094,10 @@ move_name(int moveid)
 		case ICE_STORM_K: return "Ice storm";
 		case REACH_FLAME: return "Reaching flame";
 		case RECEPT_F: return "Receptive field";
+		case STRONG_S: return !uwep ? "Strong strike" : (attack_mask(uwep, 0, 0, &youmonst) & SLASH) ? "Heavy slash" : (attack_mask(uwep, 0, 0, &youmonst) & PIERCE) ? "Heavy thrust" : "Heavy blow";
+		case SWIFT_S: return "Swift strike";
+		case FIRE_LANCE: return "Fire lance";
+		case FIRE_STRK: return "Fire strike";
 		case GROW_SHOOT: return (uwep && six_element_channel(uwep->oartifact, SIXEL_LONG)) ? "Waving shoots" : "Growing shoots";
 		case FALLING_SKY: return (uwep && six_element_channel(uwep->oartifact, SIXEL_EARTH) && !Is_spire(&u.uz)) ? "Mountain's bones" : "Falling sky";
 		case IMPALE: return (uwep && six_element_channel(uwep->oartifact, SIXEL_WATER) && !Is_spire(&u.uz)) ? "Overgrowth" : "Impale";
@@ -26460,6 +26471,280 @@ pole_triple_thrust()
 	return TRUE;
 }
 
+STATIC_OVL boolean
+isamusei_kendo(void)
+{
+	return kendo_moveset() && uwep->otyp == ISAMUSEI;
+}
+
+/* [mdef] drops its wielded weapon, if it has one and is still on the level. */
+STATIC_OVL void
+cross_disarm(struct monst *mdef)
+{
+	struct obj *mwep;
+
+	if(DEADMONSTER(mdef) || MIGRATINGMONSTER(mdef) || !(mwep = MON_WEP(mdef)))
+		return;
+	You("disarm %s!", mon_nam(mdef));
+	obj_extract_and_unequip_self(mwep);
+	if (!flooreffects(mwep, x(mdef), y(mdef), "fall")) {
+		place_object(mwep, x(mdef), y(mdef));
+		stackobj(mwep);
+		newsym(x(mdef), y(mdef));
+	}
+}
+
+/* Fills [offs] with the hero's isamusei warp offsets for a kendo move striking ([tarx],[tary]); returns how many (0 below 22 Insight). */
+STATIC_OVL int
+isamusei_move_offsets(int tarx, int tary, coord *offs)
+{
+	return (Insight >= 22) ? iwarp_offsets(&youmonst, uwep, tarx, tary, offs) : 0;
+}
+
+/* Returns the hostile monster one square beyond the empty square at offset ([dx],[dy]) from the hero, in line of sight or not; NULL if there is none or while engulfed. */
+STATIC_OVL struct monst *
+isamusei_pull_candidate(int dx, int dy)
+{
+	int ix = u.ux + dx, iy = u.uy + dy;
+	struct monst *mon;
+
+	if(u.uswallow || (!dx && !dy) || !isok(ix, iy) || m_at(ix, iy))
+		return (struct monst *)0;
+	ix += sgn(dx);
+	iy += sgn(dy);
+	if(isok(ix, iy) && (mon = m_at(ix, iy)) && !DEADMONSTER(mon) && !nonthreat_ful(mon))
+		return mon;
+	return (struct monst *)0;
+}
+
+/* Pulls the hostile monster one square beyond the empty square at offset ([dx],[dy]) from the hero into that square, in line of sight or not, huge ones too; nothing while engulfed. */
+STATIC_OVL void
+isamusei_pull(int dx, int dy)
+{
+	struct monst *mon = isamusei_pull_candidate(dx, dy);
+
+	if(mon)
+		mhurtle(mon, -dx, -dy, 1, TRUE);
+}
+
+/* Returns TRUE if a kendo move with the hero's isamusei toward (u.dx, u.dy) has a target: the adjacent one, or (unless engulfed) one at its warp squares. */
+STATIC_OVL boolean
+isamusei_line_target(void)
+{
+	coord offs[IWARP_MAX_OFFSETS];
+	int n, i;
+
+	if(adjacent_move_target(TRUE))
+		return TRUE;
+	if(u.uswallow || !isok(u.ux+u.dx, u.uy+u.dy))
+		return FALSE;
+	n = isamusei_move_offsets(u.ux+u.dx, u.uy+u.dy, offs);
+	for(i = 0; i < n; i++)
+		if(iwarp_target(&youmonst, offs[i].x, offs[i].y))
+			return TRUE;
+	return FALSE;
+}
+
+/* Returns TRUE if Do with the hero's isamusei has a target: an adjacent one, or (22+ Insight) one it could pull into a square around the hero. */
+STATIC_OVL boolean
+isamusei_circle_target(void)
+{
+	extern const int clockwisex[8];
+	extern const int clockwisey[8];
+	int i;
+
+	if(circle_monk_target(TRUE))
+		return TRUE;
+	if(u.uswallow || Insight < 22)
+		return FALSE;
+	for(i = 0; i < 8; i++)
+		if(isamusei_pull_candidate(clockwisex[i], clockwisey[i]))
+			return TRUE;
+	return FALSE;
+}
+
+/* Performs the hero's isamusei warp strike at each of the [n] [offs] with ATTKFLAG_ [atk_flags], pulling into empty squares first if [pull].
+ * Stops if the hero dies, must stop, or loses the isamusei.
+ * If non-NULL, struck[i] gets the monster hit at offs[i] (else NULL), and *survivor_hit is set TRUE if any monster hit survived (else left alone).
+ * Returns the accumulated MM_AGR_DIED/MM_AGR_STOP/MM_HIT/MM_DEF_DIED flags. */
+STATIC_OVL int
+isamusei_warp_strikes(coord *offs, int n, struct attack *weaponhit, long atk_flags, boolean pull, struct monst **struck, boolean *survivor_hit)
+{
+	struct monst *mdef;
+	int result = 0, res, i;
+
+	if(struck)
+		for(i = 0; i < n; i++)
+			struck[i] = (struct monst *)0;
+	for(i = 0; i < n; i++){
+		if(result&(MM_AGR_DIED|MM_AGR_STOP) || !uwep || uwep->otyp != ISAMUSEI)
+			break;
+		if(pull)
+			isamusei_pull(offs[i].x, offs[i].y);
+		res = ihit(&youmonst, uwep, offs[i].x, offs[i].y, 0, weaponhit, atk_flags, &mdef);
+		if(struck && (res&MM_HIT))
+			struck[i] = mdef;
+		if(survivor_hit && (res&MM_HIT) && !(res&MM_DEF_DIED))
+			*survivor_hit = TRUE;
+		result |= res&(MM_AGR_DIED|MM_AGR_STOP|MM_HIT|MM_DEF_DIED);
+	}
+	return result;
+}
+
+/* Perform Tsuki with the hero's isamusei; returns TRUE if the move goes off. */
+STATIC_OVL boolean
+isamusei_tsuki(struct attack *weaponhit)
+{
+	struct monst *mdef;
+	coord offs[IWARP_MAX_OFFSETS];
+	long atk_flags;
+	int vis, n, res = 0;
+
+	if(!isamusei_line_target())
+		return FALSE;
+	pline("%s!", move_name(LANCE_T));
+	mdef = adjacent_move_target(TRUE);
+	n = isamusei_move_offsets(u.ux+u.dx, u.uy+u.dy, offs);
+	atk_flags = ATTKFLAG_FORCE_CHECK_JOUST|lance_thrust_dmgtype(uwep, &youmonst, mdef);
+	if(mdef){
+		vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+		res = xmeleehity(&youmonst, mdef, weaponhit, &uwep, vis, 0, FALSE, atk_flags);
+	}
+	if(!(res&(MM_AGR_DIED|MM_AGR_STOP)))
+		isamusei_warp_strikes(offs, n, weaponhit, atk_flags, FALSE, (struct monst **)0, (boolean *)0);
+	return TRUE;
+}
+
+/* Perform Men with the hero's isamusei; returns TRUE if the move goes off. */
+STATIC_OVL boolean
+isamusei_men(struct attack *weaponhit)
+{
+	struct monst *mdef;
+	coord offs[IWARP_MAX_OFFSETS];
+	long atk_flags;
+	int vis, n, res = 0;
+
+	if(!isamusei_line_target())
+		return FALSE;
+	pline("%s!", move_name(RISING_B));
+	mdef = adjacent_move_target(TRUE);
+	n = isamusei_move_offsets(u.ux+u.dx, u.uy+u.dy, offs);
+	atk_flags = ATTKFLAG_DOUBLE_DAMAGE|edge_strike_dmgtype(uwep, &youmonst, mdef);
+	if(mdef){
+		vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+		res = xmeleehity(&youmonst, mdef, weaponhit, &uwep, vis, 0, FALSE, atk_flags);
+	}
+	if(!(res&(MM_AGR_DIED|MM_AGR_STOP)))
+		isamusei_warp_strikes(offs, n, weaponhit, atk_flags, FALSE, (struct monst **)0, (boolean *)0);
+	return TRUE;
+}
+
+/* Perform Kote with the hero's isamusei, disarming every monster it hits; returns TRUE if the move goes off. */
+STATIC_OVL boolean
+isamusei_kote(struct attack *weaponhit)
+{
+	struct monst *mdef;
+	struct monst *struck[2][IWARP_MAX_OFFSETS];
+	struct monst *disarm[1 + 2*IWARP_MAX_OFFSETS];
+	coord offs[IWARP_MAX_OFFSETS];
+	long atk_flags;
+	int vis, n, ndisarm = 0, round, i, j, res;
+
+	if(u.uswallow || !isamusei_line_target())
+		return FALSE;
+	pline("%s!", move_name(CROSS));
+	mdef = adjacent_move_target(TRUE);
+	vis = (VIS_MAGR | VIS_NONE) | ((mdef && canseemon(mdef)) ? VIS_MDEF : 0);
+	n = isamusei_move_offsets(u.ux+u.dx, u.uy+u.dy, offs);
+	atk_flags = edge_strike_dmgtype(uwep, &youmonst, mdef);
+	for(round = 0; round < 2; round++){
+		if(!uwep || uwep->otyp != ISAMUSEI){
+			/* lost the weapon: no more strikes, but what was already hit can still be disarmed */
+			for(; round < 2; round++)
+				for(i = 0; i < n; i++)
+					struck[round][i] = (struct monst *)0;
+			break;
+		}
+		if(mdef && !DEADMONSTER(mdef) && !MIGRATINGMONSTER(mdef)){
+			res = xmeleehity(&youmonst, mdef, weaponhit, &uwep, vis, 0, FALSE, atk_flags);
+			if((res&MM_HIT) && !ndisarm)
+				disarm[ndisarm++] = mdef;
+			if(res&(MM_AGR_DIED|MM_AGR_STOP))
+				return TRUE;
+		}
+		if(isamusei_warp_strikes(offs, n, weaponhit, atk_flags, FALSE, struck[round], (boolean *)0)&(MM_AGR_DIED|MM_AGR_STOP))
+			return TRUE;
+	}
+	for(round = 0; round < 2; round++){
+		for(i = 0; i < n; i++){
+			if(!struck[round][i])
+				continue;
+			for(j = 0; j < ndisarm; j++)
+				if(disarm[j] == struck[round][i])
+					break;
+			if(j == ndisarm)
+				disarm[ndisarm++] = struck[round][i];
+		}
+	}
+	for(j = 0; j < ndisarm; j++)
+		cross_disarm(disarm[j]);
+	return TRUE;
+}
+
+/* Perform Do with the hero's isamusei; returns TRUE if the move goes off. */
+STATIC_OVL boolean
+isamusei_do(struct attack *weaponhit)
+{
+	extern const int clockwisex[8];
+	extern const int clockwisey[8];
+	coord offs[IWARP_MAX_OFFSETS];
+	struct monst *mon, *pulled;
+	long atk_flags;
+	int sdx = u.dx, sdy = u.dy;
+	int offset, ix, iy, i, n, res;
+	boolean survivor_hit = FALSE;
+
+	if(!isamusei_circle_target())
+		return FALSE;
+	pline("%s!", move_name(CYCLONE));
+	offset = rn2(8);
+	for(i = 0; i < 8; i++){
+		if(!uwep || uwep->otyp != ISAMUSEI)
+			break;
+		//Necessary for any knockbacks.
+		u.dx = clockwisex[(offset+i)%8];
+		u.dy = clockwisey[(offset+i)%8];
+		ix = u.ux + u.dx;
+		iy = u.uy + u.dy;
+		if(!isok(ix, iy))
+			continue;
+		pulled = (Insight >= 22) ? isamusei_pull_candidate(u.dx, u.dy) : (struct monst *)0;
+		if(pulled)
+			mhurtle(pulled, -u.dx, -u.dy, 1, TRUE);
+		mon = (u.ustuck && u.uswallow) ? u.ustuck : m_at(ix, iy);
+		if(mon && ((mon->mpeaceful && !Hallucination) || DEADMONSTER(mon)))
+			mon = (struct monst *)0;
+		/* a square that had a monster to pull in is struck even if the pull failed */
+		if(!mon && !pulled)
+			continue;
+		n = isamusei_move_offsets(ix, iy, offs);
+		atk_flags = edge_strike_dmgtype(uwep, &youmonst, mon);
+		res = 0;
+		if(mon){
+			res = xmeleehity(&youmonst, mon, weaponhit, &uwep, (VIS_MAGR | VIS_NONE) | (canseemon(mon) ? VIS_MDEF : 0), 0, FALSE, atk_flags);
+			if((res&MM_HIT) && !(res&MM_DEF_DIED))
+				survivor_hit = TRUE;
+		}
+		if(!(res&(MM_AGR_DIED|MM_AGR_STOP)))
+			res |= isamusei_warp_strikes(offs, n, weaponhit, atk_flags, Insight >= 22, (struct monst **)0, &survivor_hit);
+		if((res&(MM_AGR_DIED|MM_AGR_STOP)) || survivor_hit)
+			break;
+	}
+	u.dx = sdx;
+	u.dy = sdy;
+	return TRUE;
+}
+
 /* perform_monk_move()
  *
  * Attempts to perform the given monk move, given that a target is found and energy is sufficient.
@@ -26526,6 +26811,8 @@ perform_monk_move(int moveID, int *move_cost)
 		break;
 		
 		case LANCE_T:
+			if(isamusei_kendo())
+				return isamusei_tsuki(&weaponhit);
 			if(uwep && is_pole(uwep))
 				return pole_thrust();
 			if((mdef = adjacent_move_target(!!uwep))){
@@ -26776,6 +27063,8 @@ perform_monk_move(int moveID, int *move_cost)
 			}
 		break;
 		case CYCLONE:
+			if(isamusei_kendo())
+				return isamusei_do(&weaponhit);
 			if(uwep && is_pole(uwep))
 				return pole_cyclone();
 			if(circle_monk_target(!!uwep)){
@@ -27109,7 +27398,9 @@ perform_monk_move(int moveID, int *move_cost)
 			if((mdef = adjacent_move_target(!!uwep)) && kensei_turn_target(mdef)){
 				boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
 				pline("%s!", move_name(moveID));
+				mdef->mlaidtorest = 1;
 				xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE, 0);
+				mdef->mlaidtorest = 0;
 				if(!Is_spire(&u.uz))
 					kensei_turn_effect();
 				return TRUE;
@@ -27177,6 +27468,8 @@ perform_monk_move(int moveID, int *move_cost)
 			}
 		break;
 		case RISING_B:
+			if(isamusei_kendo())
+				return isamusei_men(&weaponhit);
 			if(uwep && is_pole(uwep))
 				return pole_fall();
 			if((mdef = adjacent_move_target(!!uwep))){
@@ -27284,6 +27577,60 @@ perform_monk_move(int moveID, int *move_cost)
 		break;
 		case STRONG_P:
 			if((mdef = adjacent_move_target(!!uarmg))){
+				pline("%s!", move_name(moveID));
+				boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+				xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE, ATTKFLAG_DOUBLE_DAMAGE);
+				return TRUE;
+			}
+		break;
+		case STRONG_S:
+			if((mdef = adjacent_move_target(!!uwep))){
+				pline("%s!", move_name(moveID));
+				boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+				xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE, ATTKFLAG_DOUBLE_DAMAGE);
+				return TRUE;
+			}
+		break;
+		case FIRE_LANCE:
+			if((mdef = adjacent_move_target(!!uwep))){
+				pline("%s!", move_name(moveID));
+				boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+				xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE, ATTKFLAG_FORCE_CHECK_JOUST|lance_thrust_dmgtype(uwep, &youmonst, mdef));
+				return TRUE;
+			}
+			if((!(uswapwep && u.twoweap) || is_monk_weapon(uswapwep))
+				&& !Is_spire(&u.uz)
+				&& beam_monk_target(3)
+			){
+				pline("%s!", move_name(moveID));
+				monk_aura_bolt_from(1, 3, AD_FIRE);
+				return TRUE;
+			}
+		break;
+		case FIRE_STRK:
+			if((mdef = adjacent_move_target(!!uwep))){
+				struct zapdata zapdat = { 0 };
+				int tx = x(mdef), ty = y(mdef);
+				int res;
+				pline("%s!", move_name(moveID));
+				boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+				res = xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE, ATTKFLAG_DOUBLE_DAMAGE);
+				if((res&MM_AGR_DIED) || Is_spire(&u.uz) || !uwep || uwep->oartifact != ART_WHIRLING_SWORD)
+					return TRUE;
+				monk_aura_zapdata(&zapdat, AD_FIRE);
+				if(u.uswallow){
+					if(!DEADMONSTER(u.ustuck))
+						engulfer_burst(AD_FIRE, zapdamage(&youmonst, (struct monst *)0, &zapdat));
+					return TRUE;
+				}
+				explode_full_threats(tx, ty, AD_FIRE, 0, zapdamage(&youmonst, (struct monst *)0, &zapdat),
+					adtyp_expl_color(AD_FIRE), 1, 0, TRUE, (struct permonst *)0, 0L);
+				return TRUE;
+			}
+		break;
+		case SWIFT_S:
+			/* only lands off a step */
+			if(u.umoved && (mdef = adjacent_move_target(!!uwep))){
 				pline("%s!", move_name(moveID));
 				boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
 				xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE, ATTKFLAG_DOUBLE_DAMAGE);
@@ -27484,6 +27831,8 @@ perform_monk_move(int moveID, int *move_cost)
 			}
 		break;
 		case CROSS:
+			if(isamusei_kendo())
+				return isamusei_kote(&weaponhit);
 			if(!u.uswallow && (mdef = adjacent_move_target(!!uwep))){
 				boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
 				pline("%s!", move_name(moveID));
@@ -27499,18 +27848,8 @@ perform_monk_move(int moveID, int *move_cost)
 				if(two&(MM_AGR_STOP|MM_DEF_DIED))
 					return (one&(MM_HIT|MM_DEF_DIED) || two&(MM_HIT|MM_DEF_DIED)) ? TRUE : FALSE;
 
-				if(one&(MM_HIT) || two&(MM_HIT)){
-					if(!DEADMONSTER(mdef) && !MIGRATINGMONSTER(mdef) && MON_WEP(mdef)){
-						struct obj *mwep = MON_WEP(mdef);
-						You("disarm %s!", mon_nam(mdef));
-						obj_extract_and_unequip_self(mwep);
-						if (!flooreffects(mwep, x(mdef), y(mdef), "fall")) {
-							place_object(mwep, x(mdef), y(mdef));
-							stackobj(mwep);
-							newsym(x(mdef), y(mdef));
-						}
-					}
-				}
+				if(one&(MM_HIT) || two&(MM_HIT))
+					cross_disarm(mdef);
 				return TRUE;
 			}
 		break;
@@ -27719,7 +28058,9 @@ forward_move()
 			if(uwep->otyp == HIGH_ELVEN_WARSWORD)
 				return WHIRLWIND;
 			if(u.role_variant == ART_WHIRLING_SWORD)
-				return WHIRLWIND;
+				return (activeFightingForm(FFORM_HALF_SWORD)
+					|| (activeFightingForm(FFORM_POMMEL) && bimanual_mod(uwep, &youmonst) <= 1)
+				) ? SWIFT_S : WHIRLWIND;
 			if(u.role_variant == ART_SUN_S_BOW)
 				return QUICKSHOT;
 			if(uwep->otyp == SQUARE_CLUB)
@@ -27815,8 +28156,18 @@ hook_move()
 			return STRONG_P;
 		if(uwep->oartifact == ART_ANSERMEE)
 			return SONIC_B;
-		if(uwep->oartifact == ART_WHIRLING_SWORD)
+		if(uwep->oartifact == ART_WHIRLING_SWORD){
+			if(activeFightingForm(FFORM_HALF_SWORD))
+				return FIRE_LANCE;
+			if(activeFightingForm(FFORM_POMMEL) && bimanual_mod(uwep, &youmonst) <= 1)
+				return FIRE_STRK;
 			return BURN_CYC;
+		}
+		if(u.role_variant == ART_WHIRLING_SWORD
+			&& (activeFightingForm(FFORM_HALF_SWORD)
+				|| (activeFightingForm(FFORM_POMMEL) && bimanual_mod(uwep, &youmonst) <= 1))
+		)
+			return STRONG_S;
 		if(u.role_variant == ART_SUN_S_BOW)
 			return (uwep->oartifact == ART_SUN_S_BOW) ? THUNDER_V : REPULSE;
 		if(uwep->oartifact == ART_WINTER_REAPER || objects[uwep->otyp].oc_skill == P_HARVEST)
@@ -28888,7 +29239,19 @@ bleeding_void_invoke(struct obj *obj)
 	nomul(0, NULL);
 	u.did_move = TRUE;
 	adjalign(-dice);
+	if(!Inhell && !Misotheism && u.ualign.type != A_VOID){
+		godlist[u.ualign.god].anger++;
+		gods_angry(u.ualign.god);
+	}
 	u.ualign.sins += dice;
+	if(u.ualign.sins > 0){
+		if(Deadmagic < TIMEOUT_INF)
+			incr_itimeout(&Deadmagic, u.ualign.sins);
+		if(Catapsi < TIMEOUT_INF)
+			incr_itimeout(&Catapsi, u.ualign.sins);
+		if(Misotheism < TIMEOUT_INF)
+			incr_itimeout(&Misotheism, u.ualign.sins);
+	}
 	change_hod(dice);
 	if(Role_if(PM_KENSEI))
 		exercise(A_INT, FALSE);
@@ -28897,11 +29260,11 @@ bleeding_void_invoke(struct obj *obj)
 
 /* u_pole_pound()
  * 
- * hits monster at bhitpos with your (mainhand) polearm
+ * hits monster at bhitpos with your (mainhand) polearm, applying ATTKFLAG_ [attack_flags]
+ * to it and any cleave follow-up hit.
  */
 int
-u_pole_pound(mdef)
-struct monst * mdef;
+u_pole_pound(struct monst *mdef, long attack_flags)
 {
 	int vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
 	int res;
@@ -28909,7 +29272,7 @@ struct monst * mdef;
 	notonhead = (bhitpos.x != x(mdef) || bhitpos.y != y(mdef));
 	if(check_oprop(uwep, OPROP_CCLAW))
 		uwep->otyp = CLAWED_HAND;
-	res = xmeleehity(&youmonst, mdef, &poleattk, &uwep, vis, 0, TRUE, 0);
+	res = xmeleehity(&youmonst, mdef, &poleattk, &uwep, vis, 0, TRUE, attack_flags);
 	if((res&MM_DEF_DIED)
 		&& CHECK_ETRAIT(uwep, &youmonst, ETRAIT_CLEAVE)
 		&& !(uwep->o_e_trait == ETRAIT_HEW && CHECK_ETRAIT(uwep, &youmonst, ETRAIT_HEW))
@@ -28944,7 +29307,7 @@ struct monst * mdef;
 				continue;
 			mdef = m_at(nx, ny);
 			if(mdef && !DEADMONSTER(mdef) && !nonthreat_ful(mdef) && couldsee(mdef->mx, mdef->my)){
-				subres = xmeleehity(&youmonst, mdef, &poleattk, &uwep, vis, 0, TRUE, 0);
+				subres = xmeleehity(&youmonst, mdef, &poleattk, &uwep, vis, 0, TRUE, attack_flags);
 				res |= subres&(MM_AGR_DIED|MM_AGR_STOP);
 				break;
 			}

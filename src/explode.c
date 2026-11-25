@@ -279,7 +279,7 @@ remove_nonthreats_from_explode_region(ExplodeRegion *reg)
 	}
 }
 
-/* As explode_full_nocenter(), but also skips any location occupied by a nonthreat_ful() monster */
+/* As explode_full(), but skips the hero's location and any location occupied by a nonthreat_ful() monster */
 void
 explode_full_threats(int x, int y, int adtyp, int olet, int dam, int color, int radius, int dest, boolean yours, struct permonst *pa, long special_flags)
 {
@@ -300,7 +300,7 @@ explode_full_threats(int x, int y, int adtyp, int olet, int dam, int color, int 
 		do_clear_area(x, y, radius, add_location_to_explode_region, (genericptr_t)(area));
 	}
 
-	remove_location_from_explode_region(x, y, area);
+	remove_location_from_explode_region(u.ux, u.uy, area);
 	remove_nonthreats_from_explode_region(area);
 	if (area->nlocations)
 		do_explode(x, y, area, adtyp, olet, dam, color, dest, yours, pa, special_flags);

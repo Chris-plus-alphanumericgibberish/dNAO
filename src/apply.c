@@ -8222,7 +8222,7 @@ use_pole(obj)
 	if (mtmp) {
 	    bhitpos = cc;
 	    check_caitiff(mtmp);
-		if (u_pole_pound(mtmp)) {
+		if (u_pole_pound(mtmp, 0L)) {
 			u.uconduct.weaphit++;
 		}
 	} else if(levl[cc.x][cc.y].typ == GRASS && (attack_mask(obj, 0, 0, &youmonst) & SLASH)){
@@ -8399,7 +8399,7 @@ use_grapple (obj)
 		return MOVE_STANDARD;
 		}
 		else if ((!bigmonst(mtmp->data) && !strongmonst(mtmp->data)) || rn2(4)) {
-			u_pole_pound(mtmp);
+			u_pole_pound(mtmp, 0L);
 			return MOVE_ATTACKED;
 		}
 	    /* FALL THROUGH */
@@ -8531,7 +8531,7 @@ use_crook (obj)
 			} else if ((!bigmonst(mtmp->data) && !strongmonst(mtmp->data)) ||
 				   rn2(P_SKILL(typ))
 			) {
-				u_pole_pound(mtmp);
+				u_pole_pound(mtmp, 0L);
 				return MOVE_ATTACKED;
 			} else {
 				You("are yanked toward %s!", mon_nam(mtmp));

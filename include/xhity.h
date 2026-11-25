@@ -170,5 +170,8 @@
 
 #define XYATKFLAG_MIRROR_ATK		0x00000001L
 
+/* most squares an isamusei warp can strike: the distance-3 bar (4) plus the distance-3 ring (24) */
+#define IWARP_MAX_OFFSETS	28
+
 #define ZFOCUS(otmp) (otmp && (otmp->obj_material == MERCURIAL) && (artinstance[ART_SKY_REFLECTED].ZerthUpgrades&ZPROP_FOCUS) && (BlockableClearThoughts || (u.usanity-80) > rnd(10)))
 #endif

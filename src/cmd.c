@@ -1438,7 +1438,7 @@ doKnightForm()
 		else if (i == FFORM_POMMEL)
 			block_reason = "lack of a longsword";
 		else if (i == FFORM_HALF_SWORD){
-			if (!uwep || uwep->otyp != LONG_SWORD) block_reason = "lack of a longsword";
+			if (!uwep || !(is_knight_sword(uwep) || (Role_if(PM_KENSEI) && is_kensei_weapon(uwep)))) block_reason = "lack of a longsword";
 			else block_reason = "lack of a free hand";
 		}
 		else if (i == FFORM_GREAT_WEP)

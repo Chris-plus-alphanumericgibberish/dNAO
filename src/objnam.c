@@ -1845,11 +1845,12 @@ char *buf;
 		/*Known artifact is made from the artifact's expected material */
 		if(artilist[obj->oartifact].material && obj->obj_material == artilist[obj->oartifact].material)
 			return;
-	} else if((obj->oartifact == ART_IBITE_ARM || obj->oartifact == ART_STAR_OF_HYPERNOTUS || obj->oartifact == ART_FLUTE_OF_TEZCATLIPOCA)
+	} else if((obj->oartifact == ART_IBITE_ARM || obj->oartifact == ART_STAR_OF_HYPERNOTUS || obj->oartifact == ART_FLUTE_OF_TEZCATLIPOCA || obj->oartifact == ART_BLEEDING_VOID)
 				&& artilist[obj->oartifact].material && obj->obj_material == artilist[obj->oartifact].material){
 		//Ibite arm descriptor includes "flabby," which is both a material and an appearance :-/
 		//Star of Hypernotus plays "fast and loose" with the material - and the material affects the final word rather than being a prefix
 		//Flute of Tezcatlipoca include bone/clay as appearances, for english adjective ordering
+		//Bleeding Void's "bloody wound" descriptor is its appearance; a "rent firmament" prefix reads oddly in front of it
 		return;
 	} else {
 		/*Special case: circlets should always show their material, but oc_showmat is tied to otyp, not appearance */
