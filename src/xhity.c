@@ -16662,7 +16662,7 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 			sneak_dice++;
 		if (Role_if(PM_ANACHRONONAUT) && Race_if(PM_MYRKALFR) && !Upolyd)
 			sneak_dice++;
-		if (Role_if(PM_CONVICT) && !Upolyd && weapon && weapon->owornmask && (weapon->otyp == SPOON || (weapon->oartifact == ART_STORM_CURSE && weapon->o_e_trait&ETRAIT_FOCUS_FIRE)))
+		if (Role_if(PM_CONVICT) && !Upolyd && weapon && weapon->owornmask && (weapon->otyp == SPOON || (weapon->oartifact == ART_STORM_CURSE && weapon->o_e_trait&ETRAIT_FOCUS_FIRE && CHECK_ETRAIT(weapon, &youmonst, ETRAIT_FOCUS_FIRE))))
 			sneak_dice++;
 		if (u.sealsActive&SEAL_ANDROMALIUS)
 			sneak_dice++;
