@@ -10493,7 +10493,9 @@ int mmflags;
 				m_initthrow(mtmp, CROSSBOW_BOLT, 12, mkobjflags);
 		    }
 		}
-		if(ptr->mtyp == PM_FOREST_CENTAUR || ptr->mtyp == PM_PLAINS_CENTAUR || ptr->mtyp == PM_PLAINS_CENTAUR){
+		if(ptr->mtyp == PM_FOREST_CENTAUR || ptr->mtyp == PM_PLAINS_CENTAUR || ptr->mtyp == PM_MOUNTAIN_CENTAUR
+			|| ptr->mtyp == PM_CENTAUR_CHIEFTAIN
+		){
 			int threshold = rnd(10)+rn2(11);
 			if(mtmp->female && (faction == GOATMOM_FACTION) && Insight > threshold){
 				set_template(mtmp, MISTWEAVER);
