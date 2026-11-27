@@ -47,6 +47,11 @@ typedef struct	align {		/* alignment & record */
 #define GOAT_EAT_PASSIVE 0
 #define GOAT_EAT_OFFERED 1
 #define GOAT_EAT_MARKED 2
+#define GOAT_EAT_MARKED_FOR_YOU 3	/* credits the hero like MARKED, but never punishes them */
+
+#define FLAME_EAT_PASSIVE 0
+#define FLAME_EAT_OFFERED 1
+#define FLAME_EAT_MARKED_FOR_YOU 2	/* credits the hero like OFFERED, but never punishes them */
 
 #define Amask2align(x)	((aligntyp) ( (x)==AM_NONE ? A_NONE : \
 									  (x)==AM_CHAOTIC ? A_CHAOTIC :\

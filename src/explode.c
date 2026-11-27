@@ -142,7 +142,7 @@ ExplodeRegion *reg;
 
 /* This is the "do-it-all" explosion command */
 STATIC_DCL void FDECL(do_explode,
-	(int,int,ExplodeRegion *,int,int,int,int,int, boolean, struct permonst *, long));
+	(int,int,ExplodeRegion *,int,int,int,int,int, boolean, struct permonst *, long, struct monst *));
 
 /* Note: I had to choose one of three possible kinds of "type" when writing
  * this function: a wand type (like in zap.c), an adtyp, or an object type.
@@ -161,13 +161,13 @@ int dam;
 int color;
 int radius;
 {
-	explode_full(x, y, adtyp, olet, dam, color, radius, 0, !flags.mon_moving, (struct permonst *) 0, 0L);
+	explode_full((struct monst *) 0, x, y, adtyp, olet, dam, color, radius, 0, !flags.mon_moving, (struct permonst *) 0, 0L);
 }
 
 void
 explode_spell(int x, int y, int adtyp, int olet, int dam, int color, int radius, long special_flags)
 {
-	explode_full(x, y, adtyp, olet, dam, color, radius, 0, !flags.mon_moving, (struct permonst *) 0, special_flags);
+	explode_full((struct monst *) 0, x, y, adtyp, olet, dam, color, radius, 0, !flags.mon_moving, (struct permonst *) 0, special_flags);
 }
 
 void
@@ -180,7 +180,7 @@ int color;
 int radius;
 int dest;
 {
-	explode_full(x, y, adtyp, olet, dam, color, radius, dest, !flags.mon_moving, (struct permonst *) 0, 0L);
+	explode_full((struct monst *) 0, x, y, adtyp, olet, dam, color, radius, dest, !flags.mon_moving, (struct permonst *) 0, 0L);
 }
 
 void
@@ -193,7 +193,7 @@ int color;
 int radius;
 struct permonst *pa;
 {
-	explode_full(x, y, adtyp, olet, dam, color, radius, 0, !flags.mon_moving, pa, 0L);
+	explode_full((struct monst *) 0, x, y, adtyp, olet, dam, color, radius, 0, !flags.mon_moving, pa, 0L);
 }
 
 
@@ -211,11 +211,25 @@ boolean yours; /* is it your fault (for killing monsters) */
 	 * this is used for not-player-caused explosions on the player's turn,
 	 * print your own sound effects
 	 */
-	explode_full(x, y, adtyp, olet, dam, color, radius, 0, yours, (struct permonst *)0, 0L);
+	explode_full((struct monst *) 0, x, y, adtyp, olet, dam, color, radius, 0, yours, (struct permonst *)0, 0L);
+}
+
+/* As explode_spell(), but magr is the monster whose spell caused the explosion */
+void
+explode_mon(struct monst *magr, int x, int y, int adtyp, int olet, int dam, int color, int radius, long special_flags)
+{
+	explode_full(magr, x, y, adtyp, olet, dam, color, radius, 0, !flags.mon_moving, (struct permonst *) 0, special_flags);
 }
 
 void
-explode_full(int x, int y, int adtyp, int olet, int dam, int color, int radius, int dest, boolean yours, struct permonst *pa, long special_flags)
+explode_full_no_magr(int x, int y, int adtyp, int olet, int dam, int color, int radius, int dest, boolean yours, struct permonst *pa, long special_flags)
+{
+	explode_full((struct monst *) 0, x, y, adtyp, olet, dam, color, radius, dest, yours, pa, special_flags);
+}
+
+/* magr (which may be null) is the monster responsible for the explosion */
+void
+explode_full(struct monst *magr, int x, int y, int adtyp, int olet, int dam, int color, int radius, int dest, boolean yours, struct permonst *pa, long special_flags)
 {
 	ExplodeRegion *area;
 	area = create_explode_region();
@@ -237,7 +251,7 @@ explode_full(int x, int y, int adtyp, int olet, int dam, int color, int radius, 
 		do_clear_area(x, y, radius, add_location_to_explode_region, (genericptr_t)(area));
 	}
 
-	do_explode(x, y, area, adtyp, olet, dam, color, dest, yours, pa, special_flags);
+	do_explode(x, y, area, adtyp, olet, dam, color, dest, yours, pa, special_flags, magr);
 	free_explode_region(area);
 }
 
@@ -262,7 +276,7 @@ explode_full_nocenter(int x, int y, int adtyp, int olet, int dam, int color, int
 	}
 
 	remove_location_from_explode_region(x, y, area);
-	do_explode(x, y, area, adtyp, olet, dam, color, dest, yours, pa, special_flags);
+	do_explode(x, y, area, adtyp, olet, dam, color, dest, yours, pa, special_flags, (struct monst *) 0);
 	free_explode_region(area);
 }
 
@@ -303,7 +317,7 @@ explode_full_threats(int x, int y, int adtyp, int olet, int dam, int color, int 
 	remove_location_from_explode_region(u.ux, u.uy, area);
 	remove_nonthreats_from_explode_region(area);
 	if (area->nlocations)
-		do_explode(x, y, area, adtyp, olet, dam, color, dest, yours, pa, special_flags);
+		do_explode(x, y, area, adtyp, olet, dam, color, dest, yours, pa, special_flags, (struct monst *) 0);
 	free_explode_region(area);
 }
 
@@ -333,7 +347,7 @@ splash(int x, int y, int dx, int dy, int adtyp, int olet, int dam, int color, lo
 	if (isok(x + i, y + j) && ((!i && dx) || (!j && dy) || ((!dx || i == dx) & (!dy || j == dy))) && ((ZAP_POS(levl[x][y].typ) || distmin(x - dx, y - dy, x + i, y + j) == 1) || ZAP_POS(levl[x - dx + i][y - dy + j].typ))) // it looks strange, but it works
 		add_location_to_explode_region(x + i, y + j, area);
 
-	do_explode(x, y, area, adtyp, olet, dam, color, 0, !flags.mon_moving, (struct permonst *)0, special_flags);
+	do_explode(x, y, area, adtyp, olet, dam, color, 0, !flags.mon_moving, (struct permonst *)0, special_flags, (struct monst *) 0);
 	free_explode_region(area);
 }
 
@@ -341,8 +355,9 @@ splash(int x, int y, int dx, int dy, int adtyp, int olet, int dam, int color, lo
 //int dest; /* 0 = normal, 1 = silent, 2 = remote, 4 = no sound */	
 // boolean yours; /* is it your fault (for killing monsters) */
 // struct permonst *pa; /* permonst of the attacker (used for disease) */
+// struct monst *magr; /* monster responsible for the explosion, or null */
 STATIC_DCL void
-do_explode(int x, int y, ExplodeRegion *area, int adtyp, int olet, int dam, int color, int dest, boolean yours, struct permonst *pa, long special_flags)
+do_explode(int x, int y, ExplodeRegion *area, int adtyp, int olet, int dam, int color, int dest, boolean yours, struct permonst *pa, long special_flags, struct monst *magr)
 {
 	int i, k, damu = dam;
 	boolean starting = 1, silver = FALSE;
@@ -634,17 +649,14 @@ do_explode(int x, int y, ExplodeRegion *area, int adtyp, int olet, int dam, int 
 					impossible("explosion type %d?", adtyp);
 					break;
 				}
-				if(special_flags&GOAT_SPELL){
-					mtmp->mgoatmarked = TRUE;
-					if(yours){
-						mtmp->myoumarked = TRUE;
-					}
+				boolean mon_caster = (magr && !yours);
+				boolean markable = !mon_caster || (mtmp != magr && !is_rider(mtmp->data) && !(magr->mtame && mtmp->mtame));
+				boolean for_you = (mon_caster && magr->mtame);
+				if(special_flags&GOAT_SPELL && markable){
+					mtmp->mgoatmarked = yours ? CULT_MARK_YOU : for_you ? CULT_MARK_FOR_YOU : mtmp->mgoatmarked ? mtmp->mgoatmarked : CULT_MARK_OTHER;
 				}
-				if(adtyp == AD_SFLM && sflm_target(mtmp)){
-					mtmp->mflamemarked = TRUE;
-					if(yours){
-						mtmp->myoumarked = TRUE;
-					}
+				if(adtyp == AD_SFLM && sflm_target(mtmp) && markable){
+					mtmp->mflamemarked = yours ? CULT_MARK_YOU : for_you ? CULT_MARK_FOR_YOU : mtmp->mflamemarked ? mtmp->mflamemarked : CULT_MARK_OTHER;
 				}
 			}
 		}
@@ -1607,7 +1619,7 @@ int dest;
     grenade_effects(obj, x, y, fiery_area, gas_area, dig_area, isyou);
     if (fiery_area->nlocations) {
 	adtyp = AD_FIRE;
-	do_explode(x, y, fiery_area, adtyp, WEAPON_CLASS, d(3,6), EXPL_FIERY, dest, isyou, (struct permonst *)0, 0L);
+	do_explode(x, y, fiery_area, adtyp, WEAPON_CLASS, d(3,6), EXPL_FIERY, dest, isyou, (struct permonst *)0, 0L, (struct monst *) 0);
     }
     wake_nearto(x, y, 400);
     /* Like cartoons - the explosion first, then
@@ -1633,7 +1645,7 @@ int dest;
     if (gas_area->nlocations) {
 	adtyp = AD_DRST;
 	do_explode(x, y, gas_area, adtyp, WEAPON_CLASS, d(3,6),
-	  EXPL_NOXIOUS, dest, isyou, (struct permonst *)0, 0L);
+	  EXPL_NOXIOUS, dest, isyou, (struct permonst *)0, 0L, (struct monst *) 0);
     }
     free_explode_region(gas_area);
     if (shop_damage) pay_for_damage("damage", FALSE);

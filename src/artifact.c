@@ -7402,14 +7402,10 @@ boolean printmessages; /* print generic elemental damage messages */
 	}
 	
 	if(check_oprop(otmp, OPROP_SFLMW) && !(youagr && FLAME_BAD) && !youdef && sflm_target(mdef)){
-		mdef->mflamemarked = TRUE;
-		if(youagr)
-			mdef->myoumarked = TRUE;
+		mdef->mflamemarked = youagr ? CULT_MARK_YOU : mdef->mflamemarked ? mdef->mflamemarked : CULT_MARK_OTHER;
 	}
 	else if(goatweaponturn && !youdef && !is_rider(mdef->data)){
-		mdef->mgoatmarked = TRUE;
-		if(youagr)
-			mdef->myoumarked = TRUE;
+		mdef->mgoatmarked = youagr ? CULT_MARK_YOU : mdef->mgoatmarked ? mdef->mgoatmarked : CULT_MARK_OTHER;
 	}
 	if (mercweaponslice[0] || mercweaponslice[1] || mercweaponslice[2]){
 		int fire_count = 0;
@@ -8980,9 +8976,7 @@ boolean printmessages; /* print generic elemental damage messages */
 		if(is_human(pd)){
 			*truedmgptr += rnd(10);
 			if(is_mercenary(pd) || is_lord(pd) || is_prince(pd) || attacktype_fordmg(pd, AT_MAGC, AD_CLRC) || attacktype_fordmg(pd, AT_MMGC, AD_CLRC)){
-				mdef->mibitemarked = TRUE;
-				if(youagr)
-					mdef->myoumarked = TRUE;
+				mdef->mibitemarked = youagr ? CULT_MARK_YOU : mdef->mibitemarked ? mdef->mibitemarked : CULT_MARK_OTHER;
 			}
 		}
 		if(artinstance[ART_IBITE_ARM].IbiteUpgrades&IPROP_DESTROY){
@@ -9139,9 +9133,9 @@ boolean printmessages; /* print generic elemental damage messages */
 
 			while(n--) {
 				if(rn2(2))
-					explode_full(x, y, AD_FIRE, 0, d(6,6), EXPL_FIERY, 1, 4, FALSE, (struct permonst *) 0, 0L);
+					explode_full_no_magr(x, y, AD_FIRE, 0, d(6,6), EXPL_FIERY, 1, 4, FALSE, (struct permonst *) 0, 0L);
 				else
-					explode_full(x, y, AD_PHYS, 0, d(6,6), EXPL_MUDDY, 1, 4, FALSE, (struct permonst *) 0, 0L);
+					explode_full_no_magr(x, y, AD_PHYS, 0, d(6,6), EXPL_MUDDY, 1, 4, FALSE, (struct permonst *) 0, 0L);
 				
 				x = cc.x+rnd(3)-2; y = cc.y+rnd(3)-2;
 				if (!isok(x,y)) {

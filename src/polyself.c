@@ -2126,8 +2126,7 @@ doexposefoundry(){
 				mon->mcansee = 0;
 				mon->mstrategy &= ~STRAT_WAITFORU;
 			}
-			mon->mflamemarked = TRUE;
-			mon->myoumarked = TRUE;
+			mon->mflamemarked = CULT_MARK_YOU;
 		}
 	}
 	

@@ -5213,15 +5213,16 @@ int eatflag;
 	struct monst *mtmp;
 	extern const int monstr[];
 	xchar x, y;
+	boolean no_smite = (eatflag == GOAT_EAT_MARKED_FOR_YOU);
 	
 	get_obj_location(otmp, &x, &y, BURIED_TOO);
 	
-	if(goat_resurrect(otmp, eatflag)){
+	if(goat_resurrect(otmp, no_smite ? GOAT_EAT_PASSIVE : eatflag)){
 		//otmp is now gone, and resurrect may have printed messages
 		return;
 	}
 	
-	if(goat_rider(otmp, eatflag)){
+	if(goat_rider(otmp, no_smite ? GOAT_EAT_PASSIVE : eatflag)){
 		//otmp is now gone, and rider may have printed messages
 		return;
 	}
@@ -5235,6 +5236,10 @@ int eatflag;
 		pline("The effigy proves inedible.");
 		return;
 	}
+
+	/* the hero didn't choose this offering, so their god doesn't block it; it's redirected to the passive eating handling */
+	if(no_smite)
+		eatflag = GOAT_BAD ? GOAT_EAT_PASSIVE : GOAT_EAT_MARKED;
 
 	if(eatflag != GOAT_EAT_PASSIVE && GOAT_BAD){
 		pline("The will of %s blocks your actions.", u_gname());
@@ -5256,11 +5261,13 @@ int eatflag;
 	if (eatflag != GOAT_EAT_PASSIVE && your_race(ptr) && !is_animal(ptr) && !mindless(ptr) && u.ualign.type != A_VOID && !Role_if(PM_ANACHRONONAUT) && !no_anger_index(u.ualign.god)) {
 	//No demon summoning.  Your god just smites you, and sac continues.
 		if (u.ualign.type != A_CHAOTIC && u.ualign.type != A_NONE) {
-			adjalign(-5);
-			godlist[u.ualign.god].anger += 3;
-			(void) adjattrib(A_WIS, -1, TRUE);
-			if (!Inhell) angrygods(u.ualign.god);
-			change_luck(-5);
+			if (!no_smite) {
+				adjalign(-5);
+				godlist[u.ualign.god].anger += 3;
+				(void) adjattrib(A_WIS, -1, TRUE);
+				if (!Inhell) angrygods(u.ualign.god);
+				change_luck(-5);
+			}
 		} else adjalign(5);
 	//Pets are just eaten like anything else.  Your god doesn't know you did it, and the goat doesn't care.
 	//Shubbie doesn't give extra credit for undead.
@@ -5415,21 +5422,19 @@ yog_sothoth_drink(struct obj *otmp)
 }
 
 void
-flame_consume(mtmp, otmp, offering)
-struct monst *mtmp;
-struct obj *otmp;
-boolean offering;
+flame_consume(struct monst *mtmp, struct obj *otmp, int offering)
 {
     int value = 0;
 	struct permonst *ptr = mtmp ? mtmp->data : otmp ? &mons[otmp->corpsenm] : 0;
 	extern const int monstr[];
+	boolean no_smite = (offering == FLAME_EAT_MARKED_FOR_YOU);
 	
 	if(!ptr){
 		impossible("flame eat with no subject");
 		return;
 	}
 	
-	if(otmp && fire_rider(otmp, offering)){
+	if(otmp && fire_rider(otmp, no_smite ? FALSE : offering)){
 		//otmp is now gone, and rider may have printed messages
 		return;
 	}
@@ -5455,11 +5460,13 @@ boolean offering;
 	if (your_race(ptr) && !is_animal(ptr) && !mindless(ptr) && u.ualign.type != A_VOID && !Role_if(PM_ANACHRONONAUT) && !no_anger_index(u.ualign.god)) {
 	//No demon summoning.  Your god just smites you, and sac continues.
 		if (u.ualign.type != A_LAWFUL && u.ualign.type != A_NONE) {
-			adjalign(-5);
-			godlist[u.ualign.god].anger += 3;
-			(void) adjattrib(A_WIS, -1, TRUE);
-			if (!Inhell) angrygods(u.ualign.god);
-			change_luck(-5);
+			if (!no_smite) {
+				adjalign(-5);
+				godlist[u.ualign.god].anger += 3;
+				(void) adjattrib(A_WIS, -1, TRUE);
+				if (!Inhell) angrygods(u.ualign.god);
+				change_luck(-5);
+			}
 		} else adjalign(5);
 	//Pets are burned like anything else.
 	} else if (is_undead(ptr)) { /* Not demons--no demon corpses */

@@ -162,9 +162,12 @@ struct monst {
 	Bitfield(zombify,1);/* should rise as zombie */ /*88*/
 	Bitfield(ispolyp,1);/* is a polypoid being */ /*89*/
 	Bitfield(mdisrobe,1);/* disrobing */ /*90*/
-	Bitfield(mgoatmarked,1);/* will be eaten by the goat if you kill it this turn */ /*91*/
-	Bitfield(mflamemarked,1); /* monster was damaged by a silver flame weapon and will be sacced if they die */ /*92*/
-	Bitfield(myoumarked,1); /* monster was marked for cult sacrifice on your behalf */ /*93*/
+	Bitfield(mgoatmarked,2);/* CULT_MARK_*: will be eaten by the goat if it dies this turn */ /*92*/
+	Bitfield(mflamemarked,2); /* CULT_MARK_*: monster was damaged by a silver flame weapon and will be sacced if they die */ /*94*/
+#define CULT_MARK_NONE		0
+#define CULT_MARK_OTHER		1	/* marked by someone not acting for you */
+#define CULT_MARK_FOR_YOU	2	/* marked by something acting for you; credits you but never punishes you */
+#define CULT_MARK_YOU		3	/* marked by you */
 	Bitfield(mlaidtorest,1); /* should not come back under any circumstances (save riders), mortal blade*/
 	Bitfield(mpetitioner,1);/* already dead (shouldn't leave a corpse) */ /*94*/
 	Bitfield(mdoubt,1);/* clerical spellcasting blocked */ /*95*/
@@ -204,7 +207,7 @@ struct monst {
 	Bitfield(mnoise,1); /* made noise in the last turn (dochug) */ /*126*/
 	Bitfield(marriving,1); /* monster is arriving on the level and should be placed when there's space */ /*127*/
 	Bitfield(brainblooms,1);/* should rise as brainblossom */ /*128*/
-	Bitfield(mibitemarked,1); /* monster was damaged by the ibite arm and will be sacced if they die */ /*129*/
+	Bitfield(mibitemarked,2); /* CULT_MARK_*: monster was damaged by the ibite arm and will be sacced if they die */ /*129*/
 	Bitfield(mpassive,1); /* if tame, won't attack monsters ever */ /*130*/
 	Bitfield(mopen,2);/* open to sneak attacks */
 

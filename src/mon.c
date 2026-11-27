@@ -22,6 +22,7 @@
 extern int monstr[];
 
 STATIC_DCL boolean FDECL(restrap,(struct monst *));
+STATIC_DCL void FDECL(offer_slain_monster, (struct monst *, struct obj *, XCHAR_P, XCHAR_P, BOOLEAN_P));
 STATIC_DCL int FDECL(scent_callback,(genericptr_t, int, int));
 STATIC_DCL void FDECL(dead_familiar,(long));
 STATIC_DCL boolean FDECL(clothes_bite_mon,(struct monst *));
@@ -1990,10 +1991,9 @@ struct monst *mtmp;
 	}
 	
 	//No point in checking it before setting it.
-	mtmp->mgoatmarked = FALSE;
-	mtmp->mflamemarked = FALSE;
-	mtmp->mibitemarked = FALSE;
-	mtmp->myoumarked = FALSE;
+	mtmp->mgoatmarked = CULT_MARK_NONE;
+	mtmp->mflamemarked = CULT_MARK_NONE;
+	mtmp->mibitemarked = CULT_MARK_NONE;
 	mtmp->mironmarked = FALSE;
 	mtmp->mprobed = FALSE;
 	
@@ -6196,11 +6196,64 @@ gray_mold_dies(struct monst *mdef)
 	}
 }
 
+/* Applies the cult and artifact consequences of mtmp's death at (x, y).
+ * corpse is the corpse it left, or null, and may be destroyed. youagr is TRUE
+ * if the hero made the kill. */
+STATIC_OVL void
+offer_slain_monster(struct monst *mtmp, struct obj *corpse, int x, int y, int youagr)
+{
+	/* a cult your god now forbids treats your marks as anyone else's */
+	int flame_flag = FLAME_BAD ? FLAME_EAT_PASSIVE
+		: mtmp->mflamemarked == CULT_MARK_YOU ? FLAME_EAT_OFFERED
+		: mtmp->mflamemarked == CULT_MARK_FOR_YOU ? FLAME_EAT_MARKED_FOR_YOU
+		: FLAME_EAT_PASSIVE;
+	int goat_flag = GOAT_BAD ? GOAT_EAT_PASSIVE
+		: mtmp->mgoatmarked == CULT_MARK_YOU ? GOAT_EAT_MARKED
+		: mtmp->mgoatmarked == CULT_MARK_FOR_YOU ? GOAT_EAT_MARKED_FOR_YOU
+		: GOAT_EAT_PASSIVE;
+
+	if(mtmp->mironmarked && (
+		is_elf(mtmp->data)
+		|| is_fey(mtmp->data)
+	)){
+		level.flags.rage++;
+	}
+	if(mtmp->mibitemarked){
+		mtmp->mflamemarked = CULT_MARK_NONE;
+		mtmp->mgoatmarked = CULT_MARK_NONE;
+		if(mtmp->mibitemarked == CULT_MARK_YOU || mtmp->mibitemarked == CULT_MARK_FOR_YOU){
+			artinstance[ART_IBITE_ARM].IbiteFavor += monstr[mtmp->mtyp] + 1;
+			if(wizard)
+				pline("IbiteCredit = %ld", artinstance[ART_IBITE_ARM].IbiteFavor);
+		}
+	}
+	if(mtmp->mflamemarked){
+		if(mtmp->data->geno&G_NOCORPSE)
+			flame_consume(mtmp, (struct obj *) 0, flame_flag);
+		else if(corpse){
+			flame_consume((struct monst *) 0, corpse, flame_flag);
+			corpse = (struct obj *)0; //corpse pointer is now stale
+		}
+	}
+	if(corpse && corpse->otyp == CORPSE && !corpse->oartifact){
+		if(youagr && goat_mouth_at(x,y) && has_object_type(invent, HOLY_SYMBOL_OF_THE_BLACK_MOTHE)){
+			goat_eat(corpse, GOAT_EAT_OFFERED); //Goat eat tries *really* hard to destroy whatever you give it.
+			corpse = (struct obj *)0; //corpse pointer is now stale
+		} else if(mtmp->mgoatmarked && !Infuture){
+			goat_eat(corpse, goat_flag); //Goat eat tries *really* hard to destroy whatever you give it.
+			corpse = (struct obj *)0; //corpse pointer is now stale
+		} else if(youagr)
+			goat_seenonce = FALSE;
+		if (corpse && mtmp->mtecpatlmarked) corpse->odrained = 1;
+	}
+}
+
 /* drop (perhaps) a cadaver and remove monster */
 void
-mondied(mdef)
-register struct monst *mdef;
+mondied(struct monst *mdef)
 {
+	struct obj *corpse = (struct obj *)0;
+
 	mondead(mdef);
 	if (mdef->mhp > 0) return;	/* lifesaved */
 	/* we did not lifesave */
@@ -6209,7 +6262,8 @@ register struct monst *mdef;
 
 	if (corpse_chance(mdef, (struct monst *)0, FALSE) &&
 	    (accessible(mdef->mx, mdef->my) || is_pool(mdef->mx, mdef->my, FALSE)))
-		(void) make_corpse(mdef);
+		corpse = make_corpse(mdef);
+	offer_slain_monster(mdef, corpse, mdef->mx, mdef->my, FALSE);
 }
 
 /* monster disappears, not dies */
@@ -7034,37 +7088,8 @@ xkilled(mtmp, dest)
 		if (corpse_chance(mtmp, (struct monst *)0, FALSE)){
 			corpse = make_corpse(mtmp);
 		}
-		if(mtmp->mironmarked && (
-			is_elf(mtmp->data)
-			|| is_fey(mtmp->data)
-		)){
-			level.flags.rage++;
-		}
-		if(mtmp->mibitemarked){
-			mtmp->mflamemarked = FALSE;
-			mtmp->mgoatmarked = FALSE;
-			artinstance[ART_IBITE_ARM].IbiteFavor += monstr[mtmp->mtyp] + 1;
-			if(wizard)
-				pline("IbiteCredit = %ld", artinstance[ART_IBITE_ARM].IbiteFavor);
-		}
-		if(mtmp->mflamemarked){
-			if(mtmp->data->geno&G_NOCORPSE)
-				flame_consume(mtmp, (struct obj *) 0, mtmp->myoumarked);
-			else if(corpse){
-				flame_consume((struct monst *) 0, corpse, mtmp->myoumarked);
-				corpse = (struct obj *)0; //corpse pointer is now stale
-			}
-		}
-		if(corpse && corpse->otyp == CORPSE && !corpse->oartifact){
-			//We are in the "player has killed monster" function, so it's their fault
-			if(goat_mouth_at(x,y) && has_object_type(invent, HOLY_SYMBOL_OF_THE_BLACK_MOTHE)){
-				goat_eat(corpse, GOAT_EAT_OFFERED); //Goat eat tries *really* hard to destroy whatever you give it.
-			} else if(mtmp->mgoatmarked && !Infuture){
-				goat_eat(corpse, mtmp->myoumarked ? GOAT_EAT_MARKED : GOAT_EAT_PASSIVE); //Goat eat tries *really* hard to destroy whatever you give it.
-			} else goat_seenonce = FALSE;
-			if (corpse && mtmp->mtecpatlmarked) corpse->odrained = 1;
-			corpse = (struct obj *)0; //corpse pointer is now stale
-		}
+		offer_slain_monster(mtmp, corpse, x, y, TRUE);
+		corpse = (struct obj *)0; //corpse pointer is now stale
 	}
 	if(redisp) newsym(x,y);
 cleanup:
