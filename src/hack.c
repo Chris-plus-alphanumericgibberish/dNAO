@@ -1877,28 +1877,20 @@ domove()
 			You("stop. %s doesn't want to swap places.",
 				upstart(y_monnam(mtmp)));
 
-	    } else if (mtmp->mpeaceful && !mtmp->mtame
-		    && (!goodpos(u.ux0, u.uy0, mtmp, 0)
-			|| t_at(u.ux0, u.uy0) != NULL
-			|| mtmp->m_id == quest_status.leader_m_id)
-		) {
-			u.ux = u.ux0, u.uy = u.uy0; /* didn't move after all */
-			You("stop. %s doesn't want to swap places.",
-				upstart(y_monnam(mtmp)));
-
 	    } else {
 			char pnambuf[BUFSZ];
 			extern const int clockwisex[8];
 			extern const int clockwisey[8];
 			int newx = 0;
 			int newy = 0;
+			boolean found_spot = FALSE;
 
 			/* goodpos for pet? otherwise we shunt somewhere else
 			 * pet knowledge of pets checks tseen / searching. polytraps and */
 
 			boolean pet_goodpos = goodpos(u.ux0, u.uy0, mtmp, 0);
 			
-			if ((trap = t_at(x, y)) != NULL && (trap->tseen || mon_resistance(mtmp, SEARCHING)) &&
+			if ((trap = t_at(u.ux0, u.uy0)) != NULL && (trap->tseen || mon_resistance(mtmp, SEARCHING)) &&
 				!(trap->ttyp == MAGIC_PORTAL || trap->ttyp == POLY_TRAP))
 					pet_goodpos = FALSE;
 
@@ -1921,15 +1913,17 @@ domove()
 
 					newx = tmpx;
 					newy = tmpy;
+					found_spot = TRUE;
 					break;
 				}
 			} else {
 				newx = u.ux0;
 				newy = u.uy0;
+				found_spot = TRUE;
 			}
 #undef tmpx
 #undef tmpy
-			if (newx && newy){
+			if (found_spot){
 				u.ux = x, u.uy = y; /* re-move, cleared to check goodpos */
 				mtmp->mtrapped = 0;
 				remove_monster(x, y);
@@ -1940,6 +1934,7 @@ domove()
 			}
 			
 			if (mtmp->mx == x && mtmp->my == y){
+				u.ux = u.ux0, u.uy = u.uy0; /* didn't move after all */
 				You("stop. %s doesn't want to swap places.", upstart(y_monnam(mtmp)));
 			} else {
 				/* check for displacing it into pools and traps. 
