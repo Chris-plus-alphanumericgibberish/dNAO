@@ -19333,7 +19333,7 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 		int resistmask = damage_resist_mask(pd);
 
 		if ((thick_skinned(pd) || (youdef && u.sealsActive&SEAL_ECHIDNA)) && (
-			(unarmed_kick && !(youagr && !Upolyd && Race_if(PM_CLOCKWORK_AUTOMATON)) && !(strike_obj && (
+			(unarmed_kick && !natural_strike && !(youagr && !Upolyd && Race_if(PM_CLOCKWORK_AUTOMATON)) && !(strike_obj && (
 				strike_obj->otyp == STILETTOS || strike_obj->otyp == WIND_AND_FIRE_WHEELS || strike_obj->otyp == HEELED_BOOTS || strike_obj->otyp == KICKING_BOOTS 
 				|| is_metallic(strike_obj) || (strike_obj->otyp == IMPERIAL_ELVEN_BOOTS && check_imp_mod(strike_obj, IEA_KICKING))))
 			) || (strike_obj && (valid_weapon_attack || invalid_weapon_attack) && (strike_obj->obj_material <= LEATHER) && !litsaber(strike_obj))
