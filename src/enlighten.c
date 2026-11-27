@@ -3088,15 +3088,52 @@ aasimar_enlightenment_subroutine(boolean dumping)
 			pt("Your aura provides some protection across your whole body.",
 			   "Your aura provided some protection across your whole body.");
 		if(u.ulevel >= 14){
-			if(storm_aasimar(flags.aasimar_subtype))
-				pt("Your aura has destabilized into a storm.",
-				   "Your aura had destabilized into a storm.");
-			else if(flags.aasimar_subtype == AASIMAR_SUBTYPE_COURE)
-				pt("Your aura has formed into blades of starlight.",
-				   "Your aura had formed into blades of starlight.");
-			else if(flags.aasimar_subtype == AASIMAR_SUBTYPE_GAE)
-				pt("Your aura has formed into reaching vines.",
-				   "Your aura had formed into reaching vines.");
+			const char *storm = (const char *)0;
+			switch(flags.aasimar_subtype){
+				case AASIMAR_SUBTYPE_COURE:
+					pt("Your aura has formed into blades of starlight.",
+					   "Your aura had formed into blades of starlight.");
+				break;
+				case AASIMAR_SUBTYPE_GAE:
+					pt("Your aura has formed into reaching vines.",
+					   "Your aura had formed into reaching vines.");
+				break;
+				case AASIMAR_SUBTYPE_NOVIERE:
+					storm = "a hailstorm";
+				break;
+				case AASIMAR_SUBTYPE_BRALANI:
+					storm = "a sandstorm";
+				break;
+				case AASIMAR_SUBTYPE_FIRRE:
+					storm = "a firestorm";
+				break;
+				case AASIMAR_SUBTYPE_SHIERE:
+					storm = "an icestorm";
+				break;
+				case AASIMAR_SUBTYPE_GHAELE:
+					storm = "a lightning storm";
+				break;
+				case AASIMAR_SUBTYPE_TULANI:
+					storm = "a chaos storm";
+				break;
+				case AASIMAR_SUBTYPE_BRIGHID:
+					storm = "an ash-fall";
+				break;
+				case AASIMAR_SUBTYPE_UISCERRE:
+					storm = "a downpour";
+				break;
+				case AASIMAR_SUBTYPE_CAILLEA:
+					storm = "a star-storm";
+				break;
+				default:
+					if(storm_aasimar(flags.aasimar_subtype))
+						storm = "a storm";
+				break;
+			}
+			if(storm){
+				Sprintf(buf, "Your aura %s destabilized into %s.", dumping ? "had" : "has", storm);
+				p(buf);
+			}
 		}
 		break;
 
