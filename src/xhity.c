@@ -6984,7 +6984,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 					silverman_exhultation(16);
 					dmg += 100;
 				}
-				if(!youagr && mdef->mhp < mdef->mhpmax/2 && ((magr->mspores && !rn2(20)) || has_template(magr, SPORE_ZOMBIE) || has_template(magr, CORDYCEPS)))
+				if(!youagr && uncancelled && mdef->mhp < mdef->mhpmax/2 && ((magr->mspores && !rn2(20)) || has_template(magr, SPORE_ZOMBIE) || has_template(magr, CORDYCEPS)))
 					mdef->mspores = TRUE;
 			}
 		}
