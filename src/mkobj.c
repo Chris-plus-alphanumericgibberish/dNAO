@@ -2953,6 +2953,21 @@ int mat;
  *	   of the code messes with a contained object and doesn't update the
  *	   container's weight.
  */
+/* Returns weight wt scaled for an object of class oclass that is difsize size
+ * categories larger (positive) or smaller (negative) than medium. */
+int
+size_adjusted_weight(int wt, int difsize, int oclass)
+{
+	int factor;
+
+	if (difsize == 0)
+		return wt;
+	factor = abs(difsize) + 1;
+	if (oclass != ARMOR_CLASS && oclass != WEAPON_CLASS)
+		factor *= factor;
+	return (difsize > 0) ? wt*factor : wt/factor;
+}
+
 int
 weight(obj)
 register struct obj *obj;
@@ -2989,17 +3004,8 @@ register struct obj *obj;
 	}
 
 	if(obj->objsize != MZ_MEDIUM){
-		int difsize = obj->objsize - MZ_MEDIUM;
-		if(difsize > 0){
-			difsize++;
-			if(obj->oclass == ARMOR_CLASS || obj->oclass == WEAPON_CLASS) wt = wt*difsize;
-			else wt = wt*difsize*difsize;
-		} else {
-			difsize = abs(difsize)+1;
-			if(obj->oclass == ARMOR_CLASS || obj->oclass == WEAPON_CLASS) wt = wt/(difsize);
-			else wt = wt/(difsize*difsize);
-			if (wt < 1 && wt != artifact_weight(obj)) wt = 1;
-		}
+		wt = size_adjusted_weight(wt, obj->objsize - MZ_MEDIUM, obj->oclass);
+		if (obj->objsize < MZ_MEDIUM && wt < 1 && wt != artifact_weight(obj)) wt = 1;
 	}
 	
 	if ((Is_real_container(obj) && obj->otyp != MAGIC_CHEST) && obj->spe){ /* Schroedinger's Cat */

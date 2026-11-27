@@ -4831,16 +4831,33 @@ int wep_type;
 	return bonus;
 }
 
-int
-shield_skill(shield)
-struct obj *shield;
+/* Returns the silverknight spear whose built-in buckler protects you, or null.
+ * Only one spear's buckler ever counts. */
+struct obj *
+your_silverknight_spear(void)
 {
-	int size_adjust = get_your_shield_size();
+	if (uwep && uwep->otyp == SILVERKNIGHT_SPEAR)
+		return uwep;
+	if (u.twoweap && uswapwep && uswapwep->otyp == SILVERKNIGHT_SPEAR)
+		return uswapwep;
+	return (struct obj *) 0;
+}
+
+int
+shield_skill(struct obj *shield)
+{
 	int bonus = 0;
-	if(size_adjust < 0)
-		size_adjust = 0;
-	else size_adjust += 1;
-	if(weight(shield) > (int)objects[BUCKLER].oc_weight*size_adjust){
+	int otyp = shield->otyp;
+
+	if (otyp == SILVERKNIGHT_SPEAR)
+		otyp = BUCKLER;		/* built-in buckler */
+	else if (shield->oartifact == ART_SCORPION_CARAPACE)
+		otyp = shield_synergy_wep(uwep) ? KITE_SHIELD : BUCKLER;
+
+	/* compare physical size, not material-adjusted weight */
+	if(size_adjusted_weight(objects[otyp].oc_weight, shield->objsize - MZ_MEDIUM, objects[otyp].oc_class)
+		> size_adjusted_weight(objects[BUCKLER].oc_weight, get_your_shield_size(), ARMOR_CLASS)
+	){
 		switch(P_SKILL(P_SHIELD)){
 			case P_BASIC:	bonus = 1; break;
 			case P_SKILLED:	bonus = activeFightingForm(FFORM_SHIELD_BASH) ? 2 : 3; break;

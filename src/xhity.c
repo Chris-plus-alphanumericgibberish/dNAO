@@ -5692,42 +5692,22 @@ int *shield_margin;
 		if (youdef){
 			defn_acc += AC_VALUE(u.uac + ac_mod + u.uspellprot) - u.uspellprot;
 			if(shield_margin) {
+				struct obj *skspear = your_silverknight_spear();
+
 				if(uarms){
 					*shield_margin = max(0, arm_ac_bonus(uarms) + (uarms->objsize - youracedata->msize)) + shield_skill(uarms);
-					if(uwep && (objects[uwep->otyp].oc_skill == P_SPEAR || objects[uwep->otyp].oc_skill == P_POLEARMS
-						|| objects[uwep->otyp].oc_skill == P_TRIDENT || objects[uwep->otyp].oc_skill == P_LANCE)
-					)
+					if(shield_synergy_wep(uwep))
 						*shield_margin += 2;
 				}
 				else if(uarm && uarm->oartifact == ART_SCORPION_CARAPACE && check_carapace_mod(uarm, CPROP_SHIELDS)){
 					*shield_margin = 1 + shield_skill(uarm);
-					if(uwep && (objects[uwep->otyp].oc_skill == P_SPEAR || objects[uwep->otyp].oc_skill == P_POLEARMS
-						|| objects[uwep->otyp].oc_skill == P_TRIDENT || objects[uwep->otyp].oc_skill == P_LANCE)
-					)
+					if(shield_synergy_wep(uwep))
 						*shield_margin += 3;//+1 bonus to shield size
 				}
-				else if((uwep && uwep->otyp == SILVERKNIGHT_SPEAR) || (u.twoweap && uswapwep && uswapwep->otyp == SILVERKNIGHT_SPEAR)){
-					*shield_margin = 1 + uwep->spe + shield_skill(uwep);
+				else if(skspear){
+					*shield_margin = 1 + ((!skspear->suppressed && !Is_spire(&u.uz)) ? skspear->spe : 0) + shield_skill(skspear);
 				}
 				else *shield_margin = -1;
-				if(magr && ((uwep && uwep->otyp == SILVERKNIGHT_SPEAR) || (u.twoweap && uswapwep && uswapwep->otyp == SILVERKNIGHT_SPEAR))){
-					if(attk && is_poison_ad(attk->aatyp)){
-						*shield_margin += 3;
-						defn_acc -= 3;
-					}
-					if(calc_agrrot(magr) > 0){
-						*shield_margin += 2;
-						defn_acc -= 2;
-					}
-					if(calc_agrimpure(magr) > 0){
-						*shield_margin += 1;
-						defn_acc -= 1;
-					}
-					if(calc_agrmoral(magr) < 0 && uwep->blessed){
-						*shield_margin += 1;
-						defn_acc -= 1;
-					}
-				}
 			}
 		}
 		else {
@@ -5737,6 +5717,14 @@ int *shield_margin;
 				else if(carapace_shield_ac_mon(mdef)) *shield_margin = carapace_shield_ac_mon(mdef);
 				else *shield_margin = -1;
 			}
+		}
+		if(magr){
+			struct obj *skspear = youdef ? your_silverknight_spear() : mon_silverknight_spear(mdef);
+			int skdef = skspear ? silverknight_spear_foe_bonus(magr, skspear, attk) : 0;
+
+			defn_acc -= skdef;
+			if(shield_margin && *shield_margin > 0)
+				*shield_margin += skdef;
 		}
 	}
 

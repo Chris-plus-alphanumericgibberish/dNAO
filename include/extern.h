@@ -1748,6 +1748,7 @@ E void FDECL(rand_interesting_obj_material, (struct obj *));
 E void FDECL(set_material, (struct obj *, int));
 E void FDECL(set_material_gm, (struct obj *, int));
 E int FDECL(weight, (struct obj *));
+E int FDECL(size_adjusted_weight, (int, int, int));
 E struct obj *FDECL(mkgold, (long,int,int));
 E struct obj *FDECL(mkgold_core, (long,int,int,boolean));
 E struct obj *FDECL(mkcorpstat,
@@ -3669,6 +3670,7 @@ E int FDECL(otyp_type, (int));
 E int NDECL(uwep_skill_type);
 E int NDECL(get_your_size);
 E int NDECL(get_your_shield_size);
+E struct obj *NDECL(your_silverknight_spear);
 E int NDECL(max_offhand_weight);
 E int FDECL(weapon_hit_bonus, (struct obj *, int));
 E int FDECL(mon_weapon_dam_bonus, (struct permonst *, struct obj *, int));
@@ -3777,6 +3779,9 @@ E int FDECL(count_wsegs, (struct monst *));
 E boolean FDECL(worm_known, (struct monst *));
 
 /* ### worn.c ### */
+E boolean FDECL(shield_synergy_wep, (struct obj *));
+E struct obj *FDECL(mon_silverknight_spear, (struct monst *));
+E int FDECL(silverknight_spear_foe_bonus, (struct monst *, struct obj *, struct attack *));
 E boolean FDECL(item_has_property, (struct obj *, int));
 E void FDECL(get_item_property_list, (int *, struct obj*, int));
 E void FDECL(setworn, (struct obj *,long));

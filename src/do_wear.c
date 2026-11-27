@@ -3083,16 +3083,12 @@ find_ac()
 	if (uarmf)	uac -= arm_ac_bonus(uarmf);
 	if(uarms){
 		uac -= max(0, arm_ac_bonus(uarms) + (uarms->objsize - youracedata->msize)) + shield_skill(uarms);
-		if(uwep && (objects[uwep->otyp].oc_skill == P_SPEAR || objects[uwep->otyp].oc_skill == P_POLEARMS
-			|| objects[uwep->otyp].oc_skill == P_TRIDENT || objects[uwep->otyp].oc_skill == P_LANCE)
-		)
+		if(shield_synergy_wep(uwep))
 			uac -= 2;
 	}
 	else if(uarm && uarm->oartifact == ART_SCORPION_CARAPACE && check_carapace_mod(uarm, CPROP_SHIELDS)){
 		uac -= 1 + shield_skill(uarm);
-		if(uwep && (objects[uwep->otyp].oc_skill == P_SPEAR || objects[uwep->otyp].oc_skill == P_POLEARMS
-			|| objects[uwep->otyp].oc_skill == P_TRIDENT || objects[uwep->otyp].oc_skill == P_LANCE)
-		)
+		if(shield_synergy_wep(uwep))
 			uac -= 3;//+1 bonus to shield size
 	}
 	if(!uarms && uwep && CHECK_ETRAIT(uwep, &youmonst, ETRAIT_BLADEDANCE) && Race_if(PM_ELF)){
@@ -3132,8 +3128,9 @@ find_ac()
 			else
 				uac -= 1+(weapon_spe)/2;
 		}
-		if(uwep->otyp == SILVERKNIGHT_SPEAR && !uarms){
-			uac -= 1+weapon_spe+shield_skill(uwep);
+		if(!uarms && your_silverknight_spear()){
+			struct obj *skspear = your_silverknight_spear();
+			uac -= 1 + (skspear == uwep ? weapon_spe : swapwep_spe) + shield_skill(skspear);
 		}
 		const struct artifact *weap = get_artifact(uwep);
 		if(weap && (weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART) && activeMentalEdge(GSTYLE_DEFENSE)){

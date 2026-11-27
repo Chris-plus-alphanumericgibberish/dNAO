@@ -11,6 +11,7 @@ boolean FDECL(mon_gets_extrinsic, (struct monst *, int, struct obj *));
 STATIC_DCL void FDECL(update_mon_intrinsic, (struct monst *,struct obj *,int,BOOLEAN_P,BOOLEAN_P));
 STATIC_DCL void FDECL(m_dowear_type, (struct monst *,long, BOOLEAN_P, BOOLEAN_P));
 STATIC_DCL int FDECL(def_beastmastery, (struct monst *));
+STATIC_DCL int FDECL(mon_silverknight_spear_ac, (struct monst *));
 STATIC_DCL int NDECL(def_vilya);
 STATIC_DCL int NDECL(def_narya);
 STATIC_DCL int NDECL(def_lomya);
@@ -870,11 +871,65 @@ boolean on, silently;
 		newsym(mon->mx, mon->my);
 }
 
-STATIC_OVL boolean
-shield_reach_wep(struct obj *wep)
+/* Returns TRUE if wep gains extra protection when used with a shield. */
+boolean
+shield_synergy_wep(struct obj *wep)
 {
 	return wep && (objects[wep->otyp].oc_skill == P_SPEAR || objects[wep->otyp].oc_skill == P_POLEARMS
 		|| objects[wep->otyp].oc_skill == P_TRIDENT || objects[wep->otyp].oc_skill == P_LANCE);
+}
+
+/* Returns the silverknight spear whose built-in buckler protects mon, or null.
+ * Only one spear's buckler ever counts. */
+struct obj *
+mon_silverknight_spear(struct monst *mon)
+{
+	if (MON_WEP(mon) && MON_WEP(mon)->otyp == SILVERKNIGHT_SPEAR)
+		return MON_WEP(mon);
+	if (MON_SWEP(mon) && MON_SWEP(mon)->otyp == SILVERKNIGHT_SPEAR)
+		return MON_SWEP(mon);
+	return (struct obj *) 0;
+}
+
+/* Returns the extra defense the buckler of silverknight spear skspear gives
+ * against attack attk (may be null) by magr. */
+int
+silverknight_spear_foe_bonus(struct monst *magr, struct obj *skspear, struct attack *attk)
+{
+	int def = 0;
+
+	if (attk && is_poison_ad(attk->adtyp))
+		def += 3;
+	if (calc_agrrot(magr) > 0)
+		def += 2;
+	if (calc_agrimpure(magr) > 0)
+		def += 1;
+	if (calc_agrmoral(magr) < 0 && skspear->blessed)
+		def += 1;
+	return def;
+}
+
+/* Returns the AC mon gets from the built-in buckler of a silverknight spear
+ * while it wears no shield. */
+STATIC_OVL int
+mon_silverknight_spear_ac(struct monst *mon)
+{
+	struct obj *skspear;
+	int ac;
+
+	if (which_armor(mon, W_ARMS) || !(skspear = mon_silverknight_spear(mon)))
+		return 0;
+
+	ac = 1 + ((!skspear->suppressed && !Is_spire(&u.uz)) ? skspear->spe : 0);
+	if (mon_knight(mon) || mon_dark_knight(mon)) {
+		if (mon->m_lev >= 28)
+			ac += 8;
+		else if (mon->m_lev >= 14)
+			ac += 3;
+		else
+			ac += 1;
+	}
+	return ac;
 }
 
 int
@@ -882,7 +937,7 @@ shield_ac_mon(struct monst *mon, struct obj *obj)
 {
 	int shield_ac = 0;
 	shield_ac += max(0, arm_ac_bonus(obj) + (obj->objsize - mon->data->msize));
-	if(shield_reach_wep(MON_WEP(mon)))
+	if(shield_synergy_wep(MON_WEP(mon)))
 		shield_ac += 2;
 	if(mon_knight(mon) || mon_dark_knight(mon)){
 		if(mon->m_lev >= 28)
@@ -903,7 +958,7 @@ carapace_shield_ac_mon(struct monst *mon)
 
 	if(which_armor(mon, W_ARMS) || !armor || armor->oartifact != ART_SCORPION_CARAPACE || !check_carapace_mod(armor, CPROP_SHIELDS))
 		return 0;
-	return shield_reach_wep(MON_WEP(mon)) ? 4 : 1;
+	return shield_synergy_wep(MON_WEP(mon)) ? 4 : 1;
 }
 
 STATIC_OVL int
@@ -1232,20 +1287,10 @@ struct monst *mon;
 			else
 				armac += 1+(monwep_spe)/2;
 		}
-		if(monwep->otyp == SILVERKNIGHT_SPEAR && !which_armor(mon, W_ARMS)){
-			armac += 1+monwep_spe;
-			if(mon_knight(mon) || mon_dark_knight(mon)){
-				if(mon->m_lev >= 28)
-					armac += 8;
-				else if(mon->m_lev >= 14)
-					armac += 3;
-				else
-					armac += 1;
-			}
-		}
 		if(!which_armor(mon, W_ARMS) && is_elf(mon->data) && CHECK_ETRAIT(monwep, mon, ETRAIT_BLADEDANCE))
 			armac += ROLL_ETRAIT(monwep, mon, 3, 1);
 	}
+	armac += mon_silverknight_spear_ac(mon);
 	armac += mon_hand_protection_ac(mon, FALSE);
 	if(armac > 11) armac = rnd(armac-10) + 10; /* high armor ac values act like player ac values */
 	
@@ -1422,20 +1467,10 @@ struct monst *mon;
 			else
 				armac += 1+(monwep_spe)/2;
 		}
-		if(monwep->otyp == SILVERKNIGHT_SPEAR && !which_armor(mon, W_ARMS)){
-			armac += 1+monwep_spe;
-			if(mon_knight(mon) || mon_dark_knight(mon)){
-				if(mon->m_lev >= 28)
-					armac += 8;
-				else if(mon->m_lev >= 14)
-					armac += 3;
-				else
-					armac += 1;
-			}
-		}
 		if(!which_armor(mon, W_ARMS) && is_elf(mon->data) && CHECK_ETRAIT(monwep, mon, ETRAIT_BLADEDANCE))
 			armac += ROLL_ETRAIT(monwep, mon, 3, 1);
 	}
+	armac += mon_silverknight_spear_ac(mon);
 	armac += mon_hand_protection_ac(mon, FALSE);
 	base -= dancing_sword_def(mon, TRUE);
 
