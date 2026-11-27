@@ -6051,7 +6051,7 @@ xmeleehity(struct monst *magr, struct monst *mdef, struct attack *attk, struct o
 		&& rn2(10)															/* suppressed entirely 1/10 times */
 		&& !((youagr || youdef) && Stealth && !rn2(3)))						/* suppressed entirely 1/3 times if the player is attacking/defending and stealthy */
 		wake_nearto(x(mdef), y(mdef),										/* call function to wake nearby monsters */
-		combatNoise(pa) / (((youagr || youdef) && Stealth) ? 2 : 1));		/* range is reduced if the player is involved and stealthy */
+		max(1, combatNoise(pa) / (((youagr || youdef) && Stealth) ? 2 : 1)));	/* range is reduced if the player is involved and stealthy (0 would wake the whole level) */
 
 	/* show mimics on successful attack */
 	if (mdef->mappearance && hit) {
