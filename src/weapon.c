@@ -275,9 +275,9 @@ struct monst *magr;
 
 	if(youagr && (u.seraph_eyes >= SE_FUTURE ||
 			check_mutation(TT_CLOCKWORK_EYES) || (uclockwork && check_mutation(ANODIC_MIND))) && mon && canseemon_eyes(mon)){
-		if(is_chaotic_mon(magr))
+		if(is_chaotic_mon(mon))
 			tmp += rnd(4);
-		else if(is_lawful_mon(magr))
+		else if(is_lawful_mon(mon))
 			tmp += rnd(20);
 		else
 			tmp += rnd(10);
