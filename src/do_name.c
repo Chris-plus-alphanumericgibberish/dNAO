@@ -34,6 +34,7 @@ const char *goal;
     /* disgusting hack; the alternate selection characters work for any
        getpos call, but they only matter for dowhatis (and doquickwhatis) */
     putstr(tmpwin, 0, "Use m and M to select a monster.");
+    putstr(tmpwin, 0, "Use e and E to select a hostile monster.");
     putstr(tmpwin, 0, "Use @ to select yourself.");
     doing_what_is = (goal == what_is_an_unknown_object);
     Sprintf(sbuf, "Type a .%s when you are at the right place.",
@@ -53,6 +54,10 @@ struct _getpos_monarr {
 static int getpos_monarr_len = 0;
 static int getpos_monarr_idx = 0;
 static struct _getpos_monarr *getpos_monarr_pos = NULL;
+static boolean getpos_monarr_hostile = FALSE;	/* list holds only hostile monsters */
+
+#define getpos_mon_ok(mtmp, hostile_only) \
+	(!DEADMONSTER(mtmp) && canspotmon(mtmp) && !((hostile_only) && nonthreat_ful(mtmp)))
 
 void
 getpos_freemons()
@@ -72,13 +77,16 @@ getpos_monarr_cmp(a, b)
     return (m1->du - m2->du);
 }
 
+/* Builds the sorted list of visible monsters for getpos, or only the hostile
+ * ones if hostile_only. */
 void
-getpos_initmons()
+getpos_initmons(boolean hostile_only)
 {
     struct monst *mtmp = fmon;
     if (getpos_monarr_pos) getpos_freemons();
+    getpos_monarr_hostile = hostile_only;
     while (mtmp) {
-	if (!DEADMONSTER(mtmp) && canspotmon(mtmp)) getpos_monarr_len++;
+	if (getpos_mon_ok(mtmp, hostile_only)) getpos_monarr_len++;
 	mtmp = mtmp->nmon;
     }
     if (getpos_monarr_len) {
@@ -86,7 +94,7 @@ getpos_initmons()
 	getpos_monarr_pos = (struct _getpos_monarr *)malloc(sizeof(struct _getpos_monarr) * getpos_monarr_len);
 	mtmp = fmon;
 	while (mtmp) {
-	    if (!DEADMONSTER(mtmp) && canspotmon(mtmp)) {
+	    if (getpos_mon_ok(mtmp, hostile_only)) {
 		getpos_monarr_pos[idx].pos.x = mtmp->mx;
 		getpos_monarr_pos[idx].pos.y = mtmp->my;
 		getpos_monarr_pos[idx].du = distu(mtmp->mx, mtmp->my);
@@ -98,11 +106,15 @@ getpos_initmons()
     }
 }
 
+/* Returns the next monster in the getpos list, considering only hostile ones
+ * if hostile_only. */
 struct monst *
-getpos_nextmon()
+getpos_nextmon(boolean hostile_only)
 {
+    if (getpos_monarr_pos && getpos_monarr_hostile != hostile_only)
+	getpos_freemons();
     if (!getpos_monarr_pos) {
-	getpos_initmons();
+	getpos_initmons(hostile_only);
 	if (getpos_monarr_len < 1) return NULL;
 	getpos_monarr_idx = -1;
     }
@@ -116,11 +128,15 @@ getpos_nextmon()
     return NULL;
 }
 
+/* Returns the previous monster in the getpos list, considering only hostile ones
+ * if hostile_only. */
 struct monst *
-getpos_prevmon()
+getpos_prevmon(boolean hostile_only)
 {
+    if (getpos_monarr_pos && getpos_monarr_hostile != hostile_only)
+	getpos_freemons();
     if (!getpos_monarr_pos) {
-	getpos_initmons();
+	getpos_initmons(hostile_only);
 	if (getpos_monarr_len < 1) return NULL;
 	getpos_monarr_idx = getpos_monarr_len;
     }
@@ -277,8 +293,9 @@ const char *goal;
 
 	if(c == '?'){
 	    getpos_help(force, goal);
-	} else if (c == 'm' || c == 'M') {
-	    struct monst *tmpmon = (c == 'm') ? getpos_nextmon() : getpos_prevmon();
+	} else if (c == 'm' || c == 'M' || c == 'e' || c == 'E') {
+	    boolean hostile_only = (c == 'e' || c == 'E');
+	    struct monst *tmpmon = (c == 'm' || c == 'e') ? getpos_nextmon(hostile_only) : getpos_prevmon(hostile_only);
 	    if (tmpmon) {
 		cx = tmpmon->mx;
 		cy = tmpmon->my;
