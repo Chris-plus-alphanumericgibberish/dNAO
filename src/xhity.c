@@ -5197,8 +5197,8 @@ int *shield_margin;
 			}
 			/* intrinsic accuracy bonuses */
 			bons_acc += u.uhitinc;
-			if(uarmg && uarmg->otyp == IMPERIAL_ELVEN_HELM && check_imp_mod(uarmg, IEA_INC_ACC))
-				bons_acc += uarmg->spe;
+			if(uarmh && uarmh->otyp == IMPERIAL_ELVEN_HELM && check_imp_mod(uarmh, IEA_INC_ACC))
+				bons_acc += uarmh->spe;
 			/* Malphas' bonus accuracy from having nearby crows -- btw Chris this is horribly named */
 			bons_acc += u.spiritAttk;
 			/* Uur (active) */
