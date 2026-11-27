@@ -3231,10 +3231,10 @@ winid *datawin;
 				Strcat(buf, "damage to all, and triple to those that live or live again.");
 			break;
 			case ART_FIRE_BRAND:
-				Strcat(buf, "fire damage, doubled to fire-vulnerable creatures.");
+				Strcat(buf, "fire damage, and half again to fire-vulnerable creatures.");
 			break;
 			case ART_FROST_BRAND:
-				Strcat(buf, "cold damage, doubled to cold-vulnerable creatures.");
+				Strcat(buf, "cold damage, and half againto cold-vulnerable creatures.");
 			break;
 			default:
 				switch (oart->adtyp) {

@@ -70,7 +70,6 @@ STATIC_DCL boolean FDECL(Am_hit, (struct monst *magr,struct monst *mdef,
 				  struct obj *,int *,int,boolean,char *,char *));
 STATIC_DCL boolean FDECL(voidPen_hit, (struct monst *magr,struct monst *mdef,
 				  struct obj *,int *,int,boolean,char *));
-STATIC_DCL boolean FDECL(narrow_voidPen_hit, (struct monst *mdef, struct obj *));
 STATIC_DCL void FDECL(pg_bullwhip_hit, (struct monst *magr, struct monst *mdef, struct obj *));
 
 #ifndef OVLB
@@ -3301,10 +3300,7 @@ boolean narrow_only;
 
 	/* special cases */
 	if (weap->name == artilist[ART_PEN_OF_THE_VOID].name) {
-		if (narrow_only)
-			return narrow_voidPen_hit(mdef, otmp);
-		else
-			return (mvitals[PM_ACERERAK].died > 0);
+		return (mvitals[PM_ACERERAK].died > 0);
 	}
 	
 	
@@ -4024,7 +4020,7 @@ voidPen_hit(struct monst *magr, struct monst *mdef, struct obj *pen, int *dmgptr
 			fire_damage = elemental_dmg_resistance(mdef, (struct monst *) 0, fire_damage, AD_FIRE);
 			*dmgptr += fire_damage;
 		}
-	} // triggers narrow_voidPen_hit - fire res
+	}
 	if (pen->ovara_seals&SEAL_ASTAROTH) {
 	    if (vis){ 
 			and ? Strcat(buf, " and crackling") : Sprintf(buf, "crackling");
@@ -4041,7 +4037,7 @@ voidPen_hit(struct monst *magr, struct monst *mdef, struct obj *pen, int *dmgptr
 			shock_damage = elemental_dmg_resistance(mdef, (struct monst *) 0, shock_damage, AD_ELEC);
 			*dmgptr += shock_damage;
 		}
-	} // nvPh - shock res
+	}
 	if (pen->ovara_seals&SEAL_BALAM) {
 	    if (vis){ 
 			and ? Strcat(buf, " yet freezing") : Sprintf(buf, "freezing");
@@ -4055,7 +4051,7 @@ voidPen_hit(struct monst *magr, struct monst *mdef, struct obj *pen, int *dmgptr
 			cold_damage = elemental_dmg_resistance(mdef, (struct monst *) 0, cold_damage, AD_COLD);
 			*dmgptr += cold_damage;
 		}
-	} // nvPh - cold res
+	}
 	if (pen->ovara_seals&SEAL_BERITH){
 		berithdamage = d(dnum,4);
 #ifndef GOLDOBJ
@@ -4109,7 +4105,7 @@ voidPen_hit(struct monst *magr, struct monst *mdef, struct obj *pen, int *dmgptr
 			if(youdefend) aggravate();
 			else mdef->mprobed = 1;
 		}
-	} // nvPh - !mindless
+	}
 	if (pen->ovara_seals&SEAL_ECHIDNA) {
 	    if (vis){ 
 			and ? Strcat(buf, " and sizzling") : Sprintf(buf, "sizzling");
@@ -4123,7 +4119,7 @@ voidPen_hit(struct monst *magr, struct monst *mdef, struct obj *pen, int *dmgptr
 			acid_dmg = elemental_dmg_resistance(mdef, (struct monst *) 0, acid_dmg, AD_ACID);
 			*dmgptr += acid_dmg;
 		}
-	} // nvPh - acid res
+	}
 	if (pen->ovara_seals&SEAL_ENKI) {
 	    if (vis){ 
 			if(pen->ovara_seals&SEAL_AMON) and ? Strcat(buf, " and steaming") : Sprintf(buf, "steaming");
@@ -4164,7 +4160,7 @@ voidPen_hit(struct monst *magr, struct monst *mdef, struct obj *pen, int *dmgptr
 				}
 			}
 		}
-	} // nvPh - water res
+	}
 	if (pen->ovara_seals&SEAL_MAEGERA){
 		if (vis){
 			and ? Strcat(buf, " and ruinous") : Sprintf(buf, "ruinous");
@@ -4175,7 +4171,7 @@ voidPen_hit(struct monst *magr, struct monst *mdef, struct obj *pen, int *dmgptr
 		} else if(youdefend ? nonliving(youracedata) : nonliving(mdef->data)){
 			*dmgptr += d(dnum,4);
 		}
-	} // nvPh - golem/nonliving
+	}
 	if (pen->ovara_seals&SEAL_HUGINN_MUNINN){
 		if(youdefend){
 			if(!Blind){
@@ -4190,7 +4186,7 @@ voidPen_hit(struct monst *magr, struct monst *mdef, struct obj *pen, int *dmgptr
 				mdef->mblinded = 1;
 			}
 		}
-	} // nvPh - blind
+	}
 	if (pen->ovara_seals&SEAL_IRIS) {
 	    if (vis){ 
 			if(pen->ovara_seals&SEAL_ENKI) and ? Strcat(buf, " yet thirsty") : Sprintf(buf, "thirsty");
@@ -4200,7 +4196,7 @@ voidPen_hit(struct monst *magr, struct monst *mdef, struct obj *pen, int *dmgptr
 		if(youdefend ? !(nonliving(youracedata) || is_anhydrous(youracedata)) : !(nonliving(mdef->data) || is_anhydrous(mdef->data))){
 			*dmgptr += d(dnum,4);
 		}
-	} // nvPh - hydrous
+	}
 	if (pen->ovara_seals&SEAL_MOTHER && dieroll <= dnum){
 		if(youdefend) nomul(5,"held by the Pen of the Void");
 	    else if(mdef->mcanmove || mdef->mfrozen){
@@ -4214,7 +4210,7 @@ voidPen_hit(struct monst *magr, struct monst *mdef, struct obj *pen, int *dmgptr
 			if(mdef->mflee) *dmgptr += d(dnum,4);
 			if(mdef->mpeaceful) *dmgptr += d(dnum,4);
 		}
-	} // nvPh - peaceful/fleeing
+	}
 	if (pen->ovara_seals&SEAL_ORTHOS && dieroll < 3){
 	    *dmgptr += d(2*dnum,8);
 		if(youdefend){
@@ -4231,7 +4227,7 @@ voidPen_hit(struct monst *magr, struct monst *mdef, struct obj *pen, int *dmgptr
 	if (pen->ovara_seals&SEAL_OSE){
 		if(youdefend && !Tele_blind && (Blind_telepat || !rn2(5))) *dmgptr += d(dnum,15);
 		else if(!youdefend && !mindless_mon(mdef) && (mon_resistance(mdef,TELEPAT) || !rn2(5))) *dmgptr += d(dnum,15);
-	} // nvPh - telepathy
+	}
 	if (pen->ovara_seals&SEAL_OTIAX){
 		char bufO[BUFSZ];
 		bufO[0] = '\0';
@@ -4340,13 +4336,13 @@ voidPen_hit(struct monst *magr, struct monst *mdef, struct obj *pen, int *dmgptr
 	if (pen->ovara_seals&SEAL_PAIMON){
 		if(youattack) u.uen = min(u.uen+dnum,u.uenmax);
 		else magr->mspec_used = max(magr->mspec_used - dnum,0);
-	} // nvPh - !cancelled
+	}
 	if (pen->ovara_seals&SEAL_SHIRO){
 		struct obj *otmp;
 		otmp = mksobj((mvitals[PM_ACERERAK].died > 0) ? BOULDER : ROCK, MKOBJ_NOINIT);
 		projectile(magr, otmp, (void *)0, HMON_PROJECTILE|HMON_FIRED, mdef->mx, mdef->my, 0, 0, 0, 0, TRUE, FALSE, FALSE);
 		if(mdef->mhp <= 0) return vis;//Monster was killed by throw and we should stop.
-	} // nvPh potential - invisible?
+	}
 	if (pen->ovara_seals&SEAL_SIMURGH){
 		if(youdefend && !Blind){
 			You("are dazzled by prismatic feathers!");
@@ -4360,7 +4356,7 @@ voidPen_hit(struct monst *magr, struct monst *mdef, struct obj *pen, int *dmgptr
 			if(mvitals[PM_ACERERAK].died > 0) *dmgptr += d(2,4);
 		}
 		and = TRUE;
-	} // nvPh - blind
+	}
 	if (pen->ovara_seals&SEAL_TENEBROUS && dieroll <= dnum){
 		if(youdefend && !Drain_resistance){
 			if (Blind)
@@ -4388,136 +4384,13 @@ voidPen_hit(struct monst *magr, struct monst *mdef, struct obj *pen, int *dmgptr
 			}
 		}
 		and = TRUE;
-	} // nvPh - drain res
+	}
 	
 	if (buf[0] != '\0'){
 		pline("The %s blade hits %s.", buf, hittee);
 		return (and || vis);
 	}
 	
-	return FALSE;
-}
-
-/* called when someone is being hit by the pen of the void */
-STATIC_OVL boolean
-narrow_voidPen_hit(mdef, pen)
-struct monst *mdef;	/* defender */
-struct obj *pen;	/* Pen of the Void */
-{
-	boolean youdefend = mdef == &youmonst;
-	
-	/*
-	if (u.specialSealsActive&SEAL_COSMOS || u.specialSealsActive&SEAL_LIVING_CRYSTAL || u.specialSealsActive&SEAL_TWO_TREES) {
-		if(!youdefend && (mdef->data->maligntyp == A_CHAOTIC)) return TRUE;
-	}
-	else if (u.specialSealsActive&SEAL_MISKA) {
-		if(!youdefend && (mdef->data->maligntyp == A_LAWFUL)) return TRUE;
-	}
-	else if (u.specialSealsActive&SEAL_NUDZIRATH) {
-		if(!youdefend && (mdef->data->maligntyp != A_NEUTRAL) && !rn2(2)) return TRUE;
-	}
-	else if (u.specialSealsActive&SEAL_ALIGNMENT_THING) {
-		if(!youdefend && !rn2(3)) return TRUE;
-	}
-	*/
-	// I went ahead and implemented these, not sure if they're balanced so commented out - riker	
-	
-	if (pen->ovara_seals&SEAL_AMON) {
-		if(youdefend ? !Fire_resistance : !resists_fire(mdef)){
-			return TRUE;
-		}
-	}
-	if (pen->ovara_seals&SEAL_ASTAROTH) {
-		if(youdefend ? !Shock_resistance : !resists_elec(mdef)){
-			return TRUE;
-		}
-	}
-	if (pen->ovara_seals&SEAL_BALAM) {
-		if(youdefend ? !Cold_resistance : !resists_cold(mdef)){
-			return TRUE;
-		}
-	}
-	if (pen->ovara_seals&SEAL_DANTALION){
-	    if(youdefend || !mindless_mon(mdef))
-			return TRUE;
-	}
-	if (pen->ovara_seals&SEAL_ENKI) {
-		if(youdefend){
-			if(!Waterproof && !(uarmc && uarmc->greased))
-				return TRUE;
-		} else{ //Monster
-			struct obj *cloak = which_armor(mdef, W_ARMC);
-			if(!mon_resistance(mdef, WATERPROOF) && !(cloak && cloak->greased)){
-				return TRUE;
-			}
-		}
-	}
-	if (pen->ovara_seals&SEAL_ECHIDNA) {
-		if(youdefend ? !Acid_resistance : !resists_acid(mdef)){
-			return TRUE;
-		}
-	}
-	if (pen->ovara_seals&SEAL_MAEGERA){
-		if(youdefend ? is_golem(youracedata) : is_golem(mdef->data)){
-			return TRUE;
-		} else if(youdefend ? nonliving(youracedata) : nonliving(mdef->data)){
-			return TRUE;
-		}
-	}
-	if (pen->ovara_seals&SEAL_HUGINN_MUNINN){
-		if(youdefend && !Blind){
-			return TRUE;
-		}
-		else if(mdef->mcansee && haseyes(mdef->data)){
-			return TRUE;
-		}
-	}
-	if (pen->ovara_seals&SEAL_IRIS) {
-		if(youdefend ? !(nonliving(youracedata) || is_anhydrous(youracedata)) : !(nonliving(mdef->data) || is_anhydrous(mdef->data))){
-			return TRUE;
-		}
-	}
-	if (pen->ovara_seals&SEAL_NABERIUS){
-		if(youdefend && (Upolyd ? u.mh < .25*u.mhmax : u.uhp < .25*u.uhpmax)){
-			return TRUE;
-		}
-		else if(mdef->mflee || mdef->mpeaceful){
-			return TRUE;
-		}
-	}
-	if (pen->ovara_seals&SEAL_OSE){
-		if(youdefend && !Tele_blind && Blind_telepat){
-			return TRUE;
-		}
-		else if(!mindless_mon(mdef) && mon_resistance(mdef,TELEPAT)){
-			return TRUE;
-		}
-	}
-	if (pen->ovara_seals&SEAL_PAIMON){
-		if(youdefend && (u.uen < u.uenmax/4)){
-			return TRUE;
-		}
-		else if(mdef->mcan){
-			return TRUE;
-		}
-	}
-	if (pen->ovara_seals&SEAL_SIMURGH){
-		if(youdefend && !Blind){
-			return TRUE;
-		}
-		else if(mdef->mcansee && haseyes(mdef->data)){
-			return TRUE;
-		}
-	}
-	if (pen->ovara_seals&SEAL_TENEBROUS){
-		if(youdefend && !Drain_resistance){
-			return TRUE;
-		}
-		else if(!youdefend && !resists_drli(mdef)){
-			return TRUE;
-		}
-	}
-
 	return FALSE;
 }
 
