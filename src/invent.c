@@ -3170,7 +3170,12 @@ winid *datawin;
 				if (oart->damage > 1)
 				{
 					Sprintf(buf, "Deals %dd%d bonus ",
-						((obj && obj->oartifact == ART_SILVER_STARLIGHT) ? 4 : (obj && is_lightsaber(obj) && litsaber(obj)) ? 3 : 1) * (double_bonus_damage_artifact(oartifact) ? 2 : 1),
+						(
+							(obj && obj->oartifact == ART_SILVER_STARLIGHT) ? 4 :
+							(obj && obj->oartifact == ART_FIRE_BRAND) ? 4 :
+							(obj && obj->oartifact == ART_FROST_BRAND) ? 2 :
+							(obj && is_lightsaber(obj) && litsaber(obj)) ? 3 : 1
+						) * (double_bonus_damage_artifact(oartifact) ? 2 : 1),
 						oart->damage);
 				}
 				else
@@ -3224,6 +3229,12 @@ winid *datawin;
 				break;
 			case ART_MORTAL_BLADE:
 				Strcat(buf, "damage to all, and triple to those that live or live again.");
+			break;
+			case ART_FIRE_BRAND:
+				Strcat(buf, "fire damage, and half again to fire-vulnerable creatures.");
+			break;
+			case ART_FROST_BRAND:
+				Strcat(buf, "cold damage, and half againto cold-vulnerable creatures.");
 			break;
 			default:
 				switch (oart->adtyp) {

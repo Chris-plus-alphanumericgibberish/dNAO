@@ -19366,7 +19366,6 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 		if ((attackmask & ~(resistmask)) == 0L
 			&& (subtotl > 0)
 			&& !(modifier_flags&MELEEHURT_BYPASS_RESIST)
-			&& !(strike_obj && spec_applies(strike_obj, mdef, TRUE))
 			&& !(strike_obj && magr && CHECK_ETRAIT(strike_obj, magr, ETRAIT_ANTI_UNDEAD) && is_undead(mdef->data))
 			&& !(strike_obj && is_undead(mdef->data) && astra_empowers(magr, AAT_MONADIC_ASTRA))
 		) {
@@ -26085,7 +26084,7 @@ boolean
 ritual_sword_target(struct obj *wep, struct monst *mon)
 {
 	return wep && wep->otyp == RITUAL_SWORD
-		&& ((wep->blessed && hates_holy_mon(mon)) || (wep->oartifact && spec_applies(wep, mon, FALSE)));
+		&& ((wep->blessed && hates_holy_mon(mon)) || (wep->oartifact && spec_applies(wep, mon)));
 }
 
 /* Returns the ATTKFLAG_ damage type for a thrust by [magr] with [wep] against [mdef] (which may be NULL), or 0 if [wep]'s damage type shouldn't be overridden. */
