@@ -3745,7 +3745,7 @@ E void FDECL(find_goal, (struct monst *));
 E void NDECL(aggravate);
 E void NDECL(clonewiz);
 E int NDECL(pick_nasty);
-E int FDECL(nasty, (struct monst*));
+E int FDECL(nasty, (struct monst*, int *));
 E void NDECL(yellow_nasty);
 E void NDECL(yellow_dead);
 E boolean NDECL(yellow_smite);

@@ -756,20 +756,26 @@ pick_nasty()
 
 /* create some nasty monsters, aligned or neutral with the caster */
 /* a null caster is assumed to be Wizard intervention */
+/* returns the number created; if seen is non-null, sets *seen to how many of them the hero can spot */
 int
-nasty(mcast)
-	struct monst *mcast;
+nasty(struct monst *mcast, int *seen)
 {
     register struct monst *mtmp;
     register int i, j, tmp;
     int castalign = (mcast ? mcast->data->maligntyp : -1);
     coord bypos;
     int count=0;
+    int seecount = 0;
 
     if(!rn2(10) && Inhell) {
+		struct monst *oldfmon = fmon;
 		/* creatures made this way are full monsters gated in, not summons tied to mcast */
 		msummon(mcast, (struct permonst *) 0);	/* summons like WoY */
 		count++;
+		/* new monsters are prepended to fmon */
+		for (mtmp = fmon; mtmp && mtmp != oldfmon; mtmp = mtmp->nmon)
+			if (!DEADMONSTER(mtmp) && canspotmon(mtmp))
+				seecount++;
     } else {
 	tmp = (u.ulevel > 3) ? u.ulevel/3 : 1; /* just in case -- rph */
 	/* if we don't have a casting monster, the nasties appear around you */
@@ -802,16 +808,21 @@ nasty(mcast)
 					mtmp = makemon((struct permonst *)0,
 							bypos.x, bypos.y, MM_ESUM);
 				if(!mtmp) /* makemon still failed, abort */
-					return count;
+					goto nasty_done;
 				mtmp->msleeping = 0;
 				untame(mtmp, 0);
 				set_malign(mtmp);
 				mark_mon_as_summoned(mtmp, mcast, ESUMMON_PERMANENT, 0);
 				count++;
+				if (canspotmon(mtmp))
+					seecount++;
 				break;
 			}
 	    }
     }
+nasty_done:
+    if (seen)
+		*seen = seecount;
     return count;
 }
 
@@ -1384,7 +1395,7 @@ intervene()
 			break;
 	    case 3:	aggravate();
 			break;
-	    case 4:	(void)nasty((struct monst *)0);
+	    case 4:	(void)nasty((struct monst *)0, (int *)0);
 			break;
 	    case 5:	resurrect();
 			break;

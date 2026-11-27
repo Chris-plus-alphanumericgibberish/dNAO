@@ -6840,17 +6840,15 @@ int tary;
 		}
 		else
 		{
-			int count;
+			int count, seen;
 			u.summonMonster = TRUE;
-			count = nasty(magr);	/* summon something nasty */
+			count = nasty(magr, &seen);	/* summon something nasty */
 			if (magr->iswiz)
 				verbalize("Destroy the thief, my pet%s!", plur(count));
-			else {
+			else if (seen) {
 				const char *mappear =
-					(count == 1) ? "A monster appears" : "Monsters appear";
+					(seen == 1) ? "A monster appears" : "Monsters appear";
 
-				/* messages not quite right if plural monsters created but
-				only a single monster is seen */
 				if (Invisible && !mon_resistance(magr, SEE_INVIS) &&
 					(tarx != u.ux || tary != u.uy))
 					pline("%s around a spot near you!", mappear);
