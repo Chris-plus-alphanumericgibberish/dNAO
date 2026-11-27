@@ -3744,13 +3744,9 @@ spec_dbon(struct obj *otmp, struct monst *mon, int basedmg, int *plusdmgptr, int
 	pline("spec_dbon_applies: %s", spec_dbon_applies ? "TRUE" : "FALSE");
 #endif
 	/* determine if we will apply bonus damage */
-	if ((spec_dbon_applies && !(
+	if (spec_dbon_applies && !(
 			(weap->adtyp == AD_SLEE) ||	(weap->adtyp == AD_STDY) || (weap->adtyp == AD_DISN)	/* doesn't do damage */
 			 || (otmp->oartifact == ART_TORCH_OF_XOLOTL && night()) // no 'base' damage in the day
-		)) || (
-		/* alternative conditions for dealing bonus damage (ie spec_dbon_applies == FALSE) */
-		(otmp->oartifact == ART_FIRE_BRAND) ||
-		(otmp->oartifact == ART_FROST_BRAND)
 		)
 	){
 		int multiplier = 1;
@@ -3769,14 +3765,24 @@ spec_dbon(struct obj *otmp, struct monst *mon, int basedmg, int *plusdmgptr, int
 			else if (*hp < (*hpmax / 2))
 				multiplier = 2;
 		}
+
+		if (otmp->oartifact == ART_FIRE_BRAND)
+			multiplier = 4; // +2d6 fire damage, doubled +8d6 into vuln
+		if (otmp->oartifact == ART_FROST_BRAND)
+			multiplier = 2; // +1d12 cold damage, doubled +4d12 into vuln
+
 		/* some artifacts are 3x damage, or add 2dX damage */
 		if (double_bonus_damage_artifact(otmp->oartifact)
-			|| (otmp->oartifact == ART_FROST_BRAND && cold_vulnerable(mon) && spec_dbon_applies)
-			|| (otmp->oartifact == ART_FIRE_BRAND && fire_vulnerable(mon) && spec_dbon_applies)
 			|| (attacks(AD_HOLY, otmp) && hates_holy_mon(mon) && spec_dbon_applies)
 			|| (attacks(AD_DARK, otmp) && Dark_vuln(mon) && spec_dbon_applies)
 		)
 			multiplier *= 2;
+
+		if ((otmp->oartifact == ART_FROST_BRAND && cold_vulnerable(mon) && spec_dbon_applies)
+			|| (otmp->oartifact == ART_FIRE_BRAND && fire_vulnerable(mon) && spec_dbon_applies)
+		)
+			multiplier = multiplier * 3 / 2; // 1.5x damage for vulnerable monsters
+
 		if(otmp->oartifact == ART_SILVER_STARLIGHT)
 			multiplier *= 4;
 		if(otmp->oartifact == ART_ANSERMEE && otmp->spe > 0)
@@ -3800,7 +3806,7 @@ spec_dbon(struct obj *otmp, struct monst *mon, int basedmg, int *plusdmgptr, int
 			damd = (damd + 1) / 2;
 			dmgtomulti = (dmgtomulti + 1) / 2;
 		}
-		/* some artifacts made it into here despite their spec_dbon not applying -- they have reduced bonus damage */
+		/* if an arti somehow makes it without spec_dbon_applies -- they have reduced bonus damage */
 		if (!spec_dbon_applies) {
 			damd = (damd + 1) / 2;
 			dmgtomulti = (dmgtomulti + 1) / 2;
@@ -3827,37 +3833,6 @@ spec_dbon(struct obj *otmp, struct monst *mon, int basedmg, int *plusdmgptr, int
 				truedmg_tracker = *truedmgptr;
 			}
 #endif
-
-			//Also do a fireball or a hail effect
-			if(otmp->oartifact == ART_FIRE_BRAND && spec_dbon_applies){
-				int fire_bonus = d(6*multiplier, 6);
-				fire_bonus = elemental_dmg_resistance(mon, magr, fire_bonus, AD_FIRE);
-				*truedmgptr += fire_bonus;
-#ifdef DBON_DBUG
-				if(*truedmgptr != truedmg_tracker){
-					pline("Fire Brand fireball true damage: %d", *truedmgptr - truedmg_tracker);
-					truedmg_tracker = *truedmgptr;
-				}
-#endif
-			}
-			else if(otmp->oartifact == ART_FROST_BRAND){
-				if(spec_dbon_applies) {
-					int cold_truedmg = d(3*multiplier, 8);
-					cold_truedmg = elemental_dmg_resistance(mon, magr, cold_truedmg, AD_COLD);
-					*truedmgptr += cold_truedmg;
-				}
-				*plusdmgptr += d(3*multiplier, 8); /* physical hail impact */
-#ifdef DBON_DBUG
-				if(*plusdmgptr != plusdmg_tracker){
-					pline("Frost Brand hail bonus damage: %d", *plusdmgptr - plusdmg_tracker);
-					plusdmg_tracker = *plusdmgptr;
-				}
-				if(*truedmgptr != truedmg_tracker){
-					pline("Frost Brand hail true damage: %d", *truedmgptr - truedmg_tracker);
-					truedmg_tracker = *truedmgptr;
-				}
-#endif
-			}
 		}
 		return TRUE;
 	}

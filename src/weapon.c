@@ -1168,6 +1168,23 @@ struct monst *magr;
 				flat += 2;
 			}
 		}
+		/* for "bad" base types, bump fire/frost brand dice to a minimum value
+		 * must come after size/material so every pierce/slash wep doesn't end up 2d8/1d14 */
+		if (obj->oartifact == ART_FIRE_BRAND && (ocn*ocd + bonn*bond + 2*flat) <= 12){
+			ocn = 2;
+			ocd = 6;
+			bonn = 0;
+			bond = 0;
+			flat = 0;
+		}
+		/* frost brand can give some unusual damage code on borderline weapons due to added attack masks */
+		if (obj->oartifact == ART_FROST_BRAND && (ocn*ocd + bonn*bond + 2*flat) <= 12){
+			ocn = 1;
+			ocd = 12;
+			bonn = 0;
+			bond = 0;
+			flat = 0;
+		}
 		if(litsaber(obj) && obj->cobj && obj->cobj->oartifact == ART_FLUORITE_OCTAHEDRON){
 			ocd = 8;
 			octet = TRUE;
