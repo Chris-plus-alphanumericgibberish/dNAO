@@ -199,7 +199,7 @@ E boolean FDECL(material_dbon, (struct obj *, struct monst *, struct monst *, in
 E void FDECL(mercy_blade_conflict, (struct monst *, struct monst *, int, boolean));
 E void FDECL(mind_blade_conflict, (struct monst *, struct monst *, int, boolean));
 E void FDECL(mindstealer_conflict, (struct monst *, struct monst *));
-E int FDECL(spec_applies, (struct obj *,struct monst *, boolean));
+E int FDECL(spec_applies, (struct obj *,struct monst *));
 E void FDECL(discover_artifact, (int));
 E void FDECL(undiscover_artifact, (int));
 E boolean FDECL(undiscovered_artifact, (int));

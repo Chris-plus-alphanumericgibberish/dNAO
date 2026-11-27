@@ -3182,7 +3182,7 @@ touch_artifact(obj, mon, hypothetical)
     if (!badalign && (arti_attack_prop(obj, ARTA_HATES) != 0) && obj->oartifact != ART_LIFEHUNT_SCYTHE) {
 		/* spec_applies for hateful artifacts should always return FALSE if mon isn't hated. */
 		/* a hateful artifact should never apply to non-hated foes */
-		badalign = spec_applies(obj, mon, TRUE);
+		badalign = spec_applies(obj, mon);
     }
 	if(badalign && yours && Role_if(PM_EXILE)){
 		if(u.specialSealsActive&SEAL_ALIGNMENT_THING){
@@ -3277,10 +3277,9 @@ touch_artifact(obj, mon, hypothetical)
 
 /* decide whether an artifact's special attacks apply against mdef */
 int
-spec_applies(otmp, mdef, narrow_only)
+spec_applies(otmp, mdef)
 struct obj * otmp;
 struct monst *mdef;
-boolean narrow_only;
 {
 	register const struct artifact *weap = get_artifact(otmp);
 	struct permonst *ptr;
@@ -3303,10 +3302,9 @@ boolean narrow_only;
 		return (mvitals[PM_ACERERAK].died > 0);
 	}
 	
-	
 	/* artifacts that deal physical bonus damage and aren't limited to a specific group of foes are always applicable */
 	if (weap->adtyp == AD_PHYS && !(weap->aflags&ARTA_HATES))
-		return (!narrow_only);
+		return TRUE;
 
 	if(!mdef)
 		return FALSE; //Invoked with a null monster while calculating hypothetical data (I think)
@@ -3352,9 +3350,6 @@ boolean narrow_only;
 		break;
 		case AD_MAGM:
 			if (Magic_res(mdef))
-				return FALSE;
-			/* monsters can save via MR against magic damage? */
-			if (mdef != &youmonst && rn2(100) < ptr->mr)
 				return FALSE;
 		break;
 		case AD_DRST:
@@ -3599,7 +3594,7 @@ boolean youagr;
 	
 	if(youagr && u.upriest) return bonus + weap->accuracy; //priests always get the maximum to-hit bonus.
 	
-	if (weap && weap->accuracy && spec_applies(otmp, mon, FALSE))
+	if (weap && weap->accuracy && spec_applies(otmp, mon))
 	    return bonus + rnd((int)weap->accuracy);
 	
 	return bonus;
@@ -3730,21 +3725,18 @@ spec_dbon(struct obj *otmp, struct monst *mon, int basedmg, int *plusdmgptr, int
 		return TRUE;
 	}
 	
-	spec_dbon_applies = spec_applies(otmp, mon, FALSE)
-			&& !(
-			/* additional conditions required to deal bonus damage */
-			(weap->inv_prop == ICE_SHIKAI && artinstance[otmp->oartifact].SnSd3duration < monstermoves) /* only while invoked */
-			||	(otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD && !otmp->lamplit)	/* only while lit */
-			);
+	spec_dbon_applies = spec_applies(otmp, mon) &&
+		!( /* additional conditions required to deal bonus damage */
+			(weap->inv_prop == ICE_SHIKAI && artinstance[otmp->oartifact].SnSd3duration < monstermoves) || /* only while invoked */
+			(otmp->oartifact == ART_HOLY_MOONLIGHT_SWORD && !otmp->lamplit)	|| /* only while lit */
+			(otmp->oartifact == ART_TORCH_OF_XOLOTL && night()) || /* no 'base' damage in the day */
+			(weap->adtyp == AD_SLEE) ||	(weap->adtyp == AD_STDY) || (weap->adtyp == AD_DISN) /* doesn't do direct damage */
+		);
 #ifdef DBON_DBUG
 	pline("spec_dbon_applies: %s", spec_dbon_applies ? "TRUE" : "FALSE");
 #endif
 	/* determine if we will apply bonus damage */
-	if (spec_dbon_applies && !(
-			(weap->adtyp == AD_SLEE) ||	(weap->adtyp == AD_STDY) || (weap->adtyp == AD_DISN)	/* doesn't do damage */
-			 || (otmp->oartifact == ART_TORCH_OF_XOLOTL && night()) // no 'base' damage in the day
-		)
-	){
+	if (spec_dbon_applies){
 		int multiplier = 1;
 		int dmgtomulti = basedmg;
 
@@ -3802,11 +3794,6 @@ spec_dbon(struct obj *otmp, struct monst *mon, int basedmg, int *plusdmgptr, int
 			damd = (damd + 1) / 2;
 			dmgtomulti = (dmgtomulti + 1) / 2;
 		}
-		/* if an arti somehow makes it without spec_dbon_applies -- they have reduced bonus damage */
-		if (!spec_dbon_applies) {
-			damd = (damd + 1) / 2;
-			dmgtomulti = (dmgtomulti + 1) / 2;
-		}
 #ifdef DBON_DBUG
 		pline("spec_dbon: multiplier=%d, damd=%d, dmgtomulti=%d", multiplier, damd, dmgtomulti);
 #endif
@@ -3815,7 +3802,7 @@ spec_dbon(struct obj *otmp, struct monst *mon, int basedmg, int *plusdmgptr, int
 		if (goodpointers) {
 			int spec_bonus = damd ? d(multiplier, damd) : max(dmgtomulti, 1)*multiplier;
 			spec_bonus = elemental_dmg_resistance(mon, magr, spec_bonus, weap->adtyp);
-			if (spec_applies(otmp, mon, TRUE))
+			if (weap->adtyp != AD_PHYS || (weap->aflags&ARTA_HATES))
 				*truedmgptr += spec_bonus;
 			else
 				*plusdmgptr += spec_bonus;
