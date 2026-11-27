@@ -78,7 +78,7 @@ int x,y,dir;
 			if (!IS_WALL(levl[fromx][fromy].typ))
 				impossible("down: no wall at %d,%d?",fromx,
 									fromy);
-			dodoor(fromx, fromy, &rooms[r[x][y].nroom]);
+			dodoor(fromx, fromy, &rooms[r[x][y].nroom], NO_DD_FLAGS);
 			levl[fromx][fromy].doormask = D_NODOOR;
 			fromy++;
 		}
@@ -97,7 +97,7 @@ int x,y,dir;
 			tox += 1 + 26*x; toy += 7*y;
 			if (!IS_WALL(levl[tox][toy].typ))
 				impossible("up: no wall at %d,%d?",tox,toy);
-			dodoor(tox, toy, &rooms[r[x][y].nroom]);
+			dodoor(tox, toy, &rooms[r[x][y].nroom], NO_DD_FLAGS);
 			levl[tox][toy].doormask = D_NODOOR;
 			toy--;
 		}
@@ -115,7 +115,7 @@ int x,y,dir;
 			if (!IS_WALL(levl[fromx][fromy].typ))
 				impossible("down: no wall at %d,%d?",fromx,
 									fromy);
-			dodoor(fromx, fromy, &rooms[r[x][y].nroom]);
+			dodoor(fromx, fromy, &rooms[r[x][y].nroom], NO_DD_FLAGS);
 			levl[fromx][fromy].doormask = D_NODOOR;
 			fromx++;
 		}
@@ -134,7 +134,7 @@ int x,y,dir;
 			tox += 1 + 26*x; toy += 7*y;
 			if (!IS_WALL(levl[tox][toy].typ))
 				impossible("left: no wall at %d,%d?",tox,toy);
-			dodoor(tox, toy, &rooms[r[x][y].nroom]);
+			dodoor(tox, toy, &rooms[r[x][y].nroom], NO_DD_FLAGS);
 			levl[tox][toy].doormask = D_NODOOR;
 			tox--;
 		}

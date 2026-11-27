@@ -299,6 +299,10 @@ struct hurtle_state {
 #define MKOBJ_SUMMON	0x04	/* attach ox_esum struct to obj */
 #define MKOBJ_GOODEQUIP	0x08	/* attach ox_esum struct to obj */
 
+/* flags to control dodoor() */
+#define NO_DD_FLAGS	0x00	/* use this rather than plain 0 */
+#define DD_NOSECRET	0x01	/* never make a secret door */
+
 /* flags to control tamedog_core() */
 #define TD_ENHANCED	0x01	/* tame many normally untamable monsters */
 #define TD_LOYAL	0x02	/* pet should be loyal */

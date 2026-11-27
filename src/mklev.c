@@ -78,6 +78,8 @@ STATIC_DCL void FDECL(hallway_swath_carve,(XCHAR_P,XCHAR_P,XCHAR_P,XCHAR_P,BOOLE
 STATIC_DCL void FDECL(hallway_endpoint,(int,XCHAR_P,XCHAR_P,xchar *,xchar *,schar *,schar *));
 STATIC_DCL boolean FDECL(find_hallway,(int,int,xchar *,xchar *));
 STATIC_DCL boolean FDECL(dohalldoor,(XCHAR_P,XCHAR_P,struct mkroom *));
+STATIC_DCL boolean NDECL(hallways_no_secret_doors);
+STATIC_DCL int NDECL(hallway_fb_door_type);
 STATIC_DCL void FDECL(carve_hallway,(int,int,XCHAR_P,XCHAR_P));
 STATIC_DCL void NDECL(wallify_mithardir_corridors);
 STATIC_DCL void NDECL(wallify_hallway_corridors);
@@ -439,7 +441,7 @@ boolean nxcor;
 		// add the door
 		if (okdoor(xx, yy))
 		{
-			dodoor(xx, yy, croom);
+			dodoor(xx, yy, croom, NO_DD_FLAGS);
 			add_door(xx, yy, troom);
 		}
 		// note the connection
@@ -453,7 +455,7 @@ boolean nxcor;
 		return;
 
 	if (okdoor(xx,yy))
-	    dodoor(xx,yy,croom);
+	    dodoor(xx,yy,croom,NO_DD_FLAGS);
 
 	org.x  = xx+dx; org.y  = yy+dy;
 	dest.x = tx; dest.y = ty;
@@ -464,7 +466,7 @@ boolean nxcor;
 
 	/* we succeeded in digging the corridor */
 	if (okdoor(tt.x, tt.y))
-	    dodoor(tt.x, tt.y, troom);
+	    dodoor(tt.x, tt.y, troom, NO_DD_FLAGS);
 
 	if(smeq[a] < smeq[b])
 		smeq[b] = smeq[a];
@@ -579,7 +581,7 @@ merge_adj_rooms()
 
 				if (okdoor(f, g))
 				{
-					dodoor(f, g, t);
+					dodoor(f, g, t, NO_DD_FLAGS);
 					add_door(f, g, u);
 				}
 				else
@@ -1000,8 +1002,23 @@ dohalldoor(int cx, int cy, struct mkroom *aroom)
 {
 	if (!okdoor(cx, cy))
 		return FALSE;
-	dodoor(cx, cy, aroom);
+	dodoor(cx, cy, aroom,
+		hallways_no_secret_doors() ? DD_NOSECRET : NO_DD_FLAGS);
 	return TRUE;
+}
+
+/* hallway levels shallower than the Oracle never get secret doors */
+STATIC_OVL boolean
+hallways_no_secret_doors(void)
+{
+	return dunlev(&u.uz) < dunlev(&oracle_level);
+}
+
+/* door type for a fallback corridor's doors */
+STATIC_OVL int
+hallway_fb_door_type(void)
+{
+	return hallways_no_secret_doors() ? DOOR : SDOOR;
 }
 
 /* pass 2: carve one pass-1-approved hallway and merge the two rooms'
@@ -1074,9 +1091,9 @@ wallify_mithardir_corridors(void)
 }
 
 /* convert makehallways()'s own CORR/SCORR terrain into a walled
-   hallway.  SCORR cells caught by the neighbor scan become SDOOR
-   (fallback-corridor terrain bridging into a wallified primary
-   hallway).  Only walls the 3x3 neighborhood of each corridor cell,
+   hallway.  SCORR cells caught by the neighbor scan (fallback-corridor
+   terrain bridging into a wallified primary hallway) become doors,
+   secret at or below the Oracle.  Only walls the 3x3 neighborhood of each corridor cell,
    rather than the whole map, so that SCORR elsewhere is preserved.
    These will be reverted to plain CORR before wallification(). */
 STATIC_OVL void
@@ -1101,7 +1118,7 @@ wallify_hallway_corridors(void)
 							if(levl[ix][jy].typ == STONE)
 								levl[ix][jy].typ = VWALL;
 							else if(levl[ix][jy].typ == SCORR){
-								levl[ix][jy].typ = SDOOR;
+								levl[ix][jy].typ = hallway_fb_door_type();
 								levl[ix][jy].doormask = !rn2(5) ? D_LOCKED : D_CLOSED;
 							}
 						}
@@ -1547,10 +1564,10 @@ STATIC_OVL void
 fb_commit_endpoint(struct fb_endpoint *e)
 {
 	if (e->level == 1) {
-		dosdoor(e->doorx, e->doory, &rooms[e->room], SDOOR);
+		dosdoor(e->doorx, e->doory, &rooms[e->room], hallway_fb_door_type());
 	} else {
 		if (e->need_door)
-			dosdoor(e->wallx, e->wally, &rooms[e->room], SDOOR);
+			dosdoor(e->wallx, e->wally, &rooms[e->room], hallway_fb_door_type());
 		levl[e->doorx][e->doory].typ = SCORR;
 	}
 }
@@ -1582,7 +1599,7 @@ fb_try_direct_hit(struct fb_endpoint *e, int otherroom)
 	fb_commit_endpoint(e); /* W (per fb_level2's own need_door) + doorx/doory -> SCORR */
 
 	if ((typ == HWALL || typ == VWALL) && okdoor(e->goalx, e->goaly))
-		dosdoor(e->goalx, e->goaly, &rooms[otherroom], SDOOR);
+		dosdoor(e->goalx, e->goaly, &rooms[otherroom], hallway_fb_door_type());
 	/* IS_DOOR/SDOOR, or okdoor() false because a door's already adjacent:
 	   entry is already provided right here, nothing more to place. */
 
@@ -3618,16 +3635,14 @@ register xchar x, y;
 }
 
 void
-dodoor(x,y,aroom)
-register int x, y;
-register struct mkroom *aroom;
+dodoor(int x, int y, struct mkroom *aroom, int ddflags)
 {
 	if(doorindex >= DOORMAX) {
 		impossible("DOORMAX exceeded?");
 		return;
 	}
 
-	dosdoor(x,y,aroom,rn2(8) ? DOOR : SDOOR);
+	dosdoor(x,y,aroom,((ddflags & DD_NOSECRET) || rn2(8)) ? DOOR : SDOOR);
 }
 
 boolean

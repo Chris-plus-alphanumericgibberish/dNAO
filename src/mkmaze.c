@@ -1357,7 +1357,7 @@ maze_add_rooms(int attempts, int maxsize)
 				}
 				continue;
 			}
-			dodoor(doorx, doory, r);
+			dodoor(doorx, doory, r, NO_DD_FLAGS);
 			/* carve a matching 1-wide strip from the door out to the
 			   neighboring block, so it isn't sealed behind the raw
 			   wallthick-deep margin beyond the room's own wall */
@@ -1513,7 +1513,7 @@ int careful;
 					if (maze_wallthick > 1)
 						maze_fill_block(x, my0, 1, maze_wallthick - 1, floortyp);
 				}
-				dodoor(wallx, wally, &rooms[levl[dx2][dy2].roomno - ROOMOFFSET]);
+				dodoor(wallx, wally, &rooms[levl[dx2][dy2].roomno - ROOMOFFSET], NO_DD_FLAGS);
 			}
 			else {
 				/* plain reopen between two corridor blocks: carve the
