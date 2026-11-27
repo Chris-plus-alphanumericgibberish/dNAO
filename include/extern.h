@@ -2830,6 +2830,7 @@ E long NDECL(random);
 
 E int NDECL(doread);
 E boolean FDECL(is_chargeable, (struct obj *));
+E int FDECL(enchant_safe_limit, (struct obj *));
 E int FDECL(recharge, (struct obj *,int));
 E void FDECL(mon_forget, (struct monst *, int, boolean, boolean, boolean));
 E void FDECL(forget, (int));

@@ -1962,6 +1962,17 @@ struct obj *sobj;
 	}
 }
 
+/* Returns the enchantment above which enchanting obj further risks evaporation. */
+int
+enchant_safe_limit(struct obj *obj)
+{
+	if (is_plusten(obj))
+		return 9;
+	if (obj->oclass == ARMOR_CLASS)
+		return is_plussev_armor(obj) ? 5 : 3;
+	return 5;
+}
+
 int
 seffects(sobj)
 struct obj	*sobj;
@@ -1989,7 +2000,8 @@ struct obj	*sobj;
 	case SCR_ENCHANT_ARMOR:
 	    {
 		register schar s;
-		boolean special_armor, plusten_armor;
+		boolean special_armor;
+		int safelim;
 		boolean same_color;
 
 		otmp = some_armor(&youmonst);
@@ -2064,8 +2076,8 @@ struct obj	*sobj;
 			break;
 		}
 		/* elven armor vibrates warningly when enchanted beyond a limit */
-		special_armor = is_plussev_armor(otmp);
-		plusten_armor = is_plusten(otmp);
+		special_armor = is_plussev_armor(otmp) || is_plusten(otmp);
+		safelim = enchant_safe_limit(otmp);
 		if (sobj->cursed)
 		    same_color =
 			(otmp->otyp == BLACK_DRAGON_SCALE_MAIL ||
@@ -2081,7 +2093,7 @@ struct obj	*sobj;
 
 		/* KMH -- catch underflow */
 		s = sobj->cursed ? -otmp->spe : otmp->spe;
-		if (s > (plusten_armor ? 9 : special_armor ? 5 : 3) && rn2(s)) {
+		if (s > safelim && rn2(s)) {
 			if(otmp->oartifact){
 				int delta = 0 - otmp->spe;
 				Your("%s violently %s%s%s for a while, then %s.",
@@ -2112,7 +2124,7 @@ struct obj	*sobj;
 			break;
 		}
 		s = sobj->cursed ? -1 :
-		    otmp->spe >= 9 ? (rn2(otmp->spe) == 0) :
+		    otmp->spe >= 9 ? (otmp->spe <= safelim ? 1 : (rn2(otmp->spe) == 0)) :
 		    sobj->blessed ? rnd(3-otmp->spe/3) : 1;
 		if (s >= 0 && otmp->otyp >= GRAY_DRAGON_SCALES &&
 					otmp->otyp <= YELLOW_DRAGON_SCALES) {
@@ -2166,8 +2178,8 @@ struct obj	*sobj;
 			known = otmp->known;
 		}
 
-		if ((otmp->spe > (plusten_armor ? 9 : special_armor ? 5 : 3)) &&
-		    (plusten_armor || special_armor || !rn2(7)))
+		if ((otmp->spe > safelim) &&
+		    (special_armor || !rn2(7)))
 			Your("%s suddenly %s %s.",
 				xname(otmp), otense(otmp, "vibrate"),
 				Blind ? "again" : "unexpectedly");
@@ -2427,7 +2439,7 @@ struct obj	*sobj;
 		} else return !chwepon(sobj,
 				       sobj->cursed ? -1 :
 				       !uwep ? 1 :
-				       uwep->spe >= 10 ? (rn2(uwep->spe) == 0) :
+				       uwep->spe >= 9 ? (uwep->spe <= enchant_safe_limit(uwep) ? 1 : (rn2(uwep->spe) == 0)) :
 				       sobj->blessed ? rnd(3-uwep->spe/3) : 1);
 		break;
 	case SCR_TAMING:
