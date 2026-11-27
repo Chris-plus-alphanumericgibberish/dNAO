@@ -1391,6 +1391,19 @@ boolean forcedestroy;			/* TRUE if projectile should be forced to be destroyed a
 		}
 		return MM_REFLECT;
 	}
+	/* a Whirling Sword with the no-arrow upgrade burns projectiles (not blaster bolts or laser beams) aimed at its wielder out of the air */
+	else if (!blaster_proj
+		&& (artinstance[ART_WHIRLING_SWORD].WSwordUpgrades&WSPROP_NOARROW)
+		&& (youdef ? (uwep && uwep->oartifact == ART_WHIRLING_SWORD) : (MON_WEP(mdef) && MON_WEP(mdef)->oartifact == ART_WHIRLING_SWORD))
+	){
+		if (youdef)
+			pline("%s burns %s out of the %s!", Yname2(uwep), doname(thrownobj), (Underwater || Is_waterlevel(&u.uz)) ? "water" : "air");
+		else if (vis&VIS_MDEF)
+			pline("%s %s burns %s out of the %s!", s_suffix(Monnam(mdef)), xname(MON_WEP(mdef)), doname(thrownobj), (Underwater || Is_waterlevel(&u.uz)) ? "water" : "air");
+		obfree(thrownobj, (struct obj*) 0);
+		*thrownobj_p = NULL;
+		return MM_HIT;
+	}
 	/* the player has a chance to burn some projectiles (not blaster bolts or laser beams) out of the air with a lightsaber */
 	else if (!(thrownobj->otyp == LASER_BEAM || thrownobj->otyp == BLASTER_BOLT || thrownobj->otyp == HEAVY_BLASTER_BOLT || thrownobj->otyp == CARCOSAN_BOLT)
 		&& youdef && uwep && is_lightsaber(uwep) && litsaber(uwep) && (

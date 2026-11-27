@@ -486,6 +486,7 @@ E NEARDATA boolean in_mklev;
 E NEARDATA boolean stoned;
 E NEARDATA boolean golded;
 E NEARDATA boolean glassed;
+E NEARDATA boolean salted;
 E NEARDATA boolean unweapon;
 E NEARDATA boolean mrg_to_wielded;
 E NEARDATA boolean mon_ranged_gazeonly;

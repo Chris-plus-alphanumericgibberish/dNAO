@@ -23,6 +23,9 @@ struct spell {
 #define KEEN 20000
 
 #define GOAT_SPELL 0x1L
+/* explosion elemental damage tiers */
+#define EXPL_HELL_TIER 0x2L
+#define EXPL_HOLY_TIER 0x4L
 
 #define incrnknow(spell)        spl_book[spell].sp_know = KEEN
 #define percdecrnknow(spell, knw)        spl_book[spell].sp_know = max(0, spl_book[spell].sp_know - (KEEN*knw)/100)

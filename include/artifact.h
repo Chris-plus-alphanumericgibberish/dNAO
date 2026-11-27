@@ -317,6 +317,18 @@ struct artinstance{
 #define	IPROP_BRANCHPORT	0x00000020L
 #define	IPROP_REFLECT	0x00000040L
 #define	ALL_IPROP		(0x0000000FL|IPROP_TELEPORT|IPROP_LEVELPORT|IPROP_BRANCHPORT|IPROP_REFLECT)
+#define WSwordUpgrades avar1
+#define	WSPROP_HELLFIRE		0x00000001L
+#define	WSPROP_HOLYFIRE		0x00000002L
+#define	WSPROP_HELLSHOCK	0x00000004L
+#define	WSPROP_HOLYSHOCK	0x00000008L
+#define	WSPROP_PENETRATION	(WSPROP_HELLFIRE|WSPROP_HOLYFIRE|WSPROP_HELLSHOCK|WSPROP_HOLYSHOCK)
+#define	WSPROP_DISINTEGRATE	0x00000010L
+#define	WSPROP_PETRIFY	0x00000020L
+#define	WSPROP_SUNSWORD	0x00000040L
+#define	WSPROP_AVENGER	0x00000080L
+#define	WSPROP_OFFERING	0x00000100L
+#define	WSPROP_NOARROW	0x00000200L
 #define ZerthUpgrades avar1
 #define	ZPROP_WRATH		0x00000001L
 #define	ZPROP_STEEL		0x00000002L
@@ -383,6 +395,7 @@ struct artinstance{
 #define RRSlunar avar2
 #define PlagueDoOnHit avar2
 #define IbiteFavor avar2
+#define WSwordDevotion avar2
 #define GithStyle avar2
 #define	GSTYLE_PENETRATE	1
 #define	GSTYLE_COLD			2
@@ -411,9 +424,11 @@ struct artinstance{
 #define	AMAT_COPPER	    0x00000040L
 #define	AMAT_LEAD   	0x00000080L
 #define mortalBloodsmoke avar3
+#define WSwordPenCultsval avar3
 	long avar4;
 #define SnSd3duration avar4
 #define CarapaceAura avar4
+#define WSwordPenDevotion avar4
 #define C_CROWN_AURA_ADD 10
 #define C_CROWN_AURA_DIVISOR 100
 #define C_CROWN_AURA_MAX 333
@@ -531,6 +546,7 @@ extern struct artifact * artilist;
 #define BOREAL_INVOKE   (LAST_PROP+98)
 #define WISDOM_DANCE    (LAST_PROP+99)
 #define DRAW_BLEEDING_VOID	(LAST_PROP+100)
+#define WHIRLING_SWORD_CULT	(LAST_PROP+101)
 
 #define MASTERY_ARTIFACT_LEVEL 20
 

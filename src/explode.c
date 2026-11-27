@@ -470,6 +470,7 @@ do_explode(int x, int y, ExplodeRegion *area, int adtyp, int olet, int dam, int 
 	}
 
 	any_shield = visible = FALSE;
+	int elem_tier = expl_flags_to_elem_tier(special_flags);
 	for(i = 0; i < area->nlocations; i++) {
 		explmask = FALSE;
 		xi = area->locations[i].x;
@@ -484,7 +485,7 @@ do_explode(int x, int y, ExplodeRegion *area, int adtyp, int olet, int dam, int 
 				break;
 			case AD_EFIR:
 			case AD_FIRE:
-				explmask = !!Fire_resistance;
+				explmask = !!immune_to_elem_at_tier(&youmonst, AD_FIRE, elem_tier);
 				break;
 			case AD_SFLM: {
 				boolean resisted = !!Fire_resistance;
@@ -526,7 +527,7 @@ do_explode(int x, int y, ExplodeRegion *area, int adtyp, int olet, int dam, int 
 				break;
 			case AD_EELC:
 			case AD_ELEC:
-				explmask = !!Shock_resistance;
+				explmask = !!immune_to_elem_at_tier(&youmonst, AD_ELEC, elem_tier);
 				break;
 			case AD_DRST:
 				explmask = !!Poison_resistance;
@@ -582,7 +583,7 @@ do_explode(int x, int y, ExplodeRegion *area, int adtyp, int olet, int dam, int 
 					break;
 				case AD_EFIR:
 				case AD_FIRE:
-					explmask |= resists_fire(mtmp);
+					explmask |= immune_to_elem_at_tier(mtmp, AD_FIRE, elem_tier);
 					break;
 				case AD_SFLM: {
 					boolean resisted = resists_fire(mtmp);
@@ -622,7 +623,7 @@ do_explode(int x, int y, ExplodeRegion *area, int adtyp, int olet, int dam, int 
 					break;
 				case AD_EELC:
 				case AD_ELEC:
-					explmask |= resists_elec(mtmp);
+					explmask |= immune_to_elem_at_tier(mtmp, AD_ELEC, elem_tier);
 					break;
 				case AD_DRST:
 					explmask |= resists_poison(mtmp);
@@ -939,7 +940,7 @@ do_explode(int x, int y, ExplodeRegion *area, int adtyp, int olet, int dam, int 
 				}
 			}
 			if(!area->locations[i].shielded)
-				mdam = elemental_dmg_resistance(mtmp, (struct monst *)0, mdam, (int)adtyp);
+				mdam = elemental_dmg_resistance_tier(mtmp, (struct monst *)0, mdam, (int)adtyp, elem_tier);
 			if(adtyp == AD_SLIM && !Slime_res(mtmp) &&
 				(!resists_acid(mtmp) ? (mtmp->mhp <= mdam*2) : (mtmp->mhp <= mdam))
 			){
@@ -1058,7 +1059,7 @@ do_explode(int x, int y, ExplodeRegion *area, int adtyp, int olet, int dam, int 
 			}
 		}
 		if(uhurt == 2)
-			damu = elemental_dmg_resistance(&youmonst, (struct monst *)0, damu, (int)adtyp);
+			damu = elemental_dmg_resistance_tier(&youmonst, (struct monst *)0, damu, (int)adtyp, elem_tier);
 		ugolemeffects((int) adtyp, damu);
 
 		if (uhurt == 2 || uhurt == 3) {

@@ -209,6 +209,10 @@ E void FDECL(otyp_hit, (struct monst *,struct monst *,
 E int FDECL(silver_flame_disn_armor, (struct monst *,int,boolean,struct obj *,boolean *));
 E int FDECL(special_weapon_hit, (struct monst *,struct monst *,
 				struct obj *,struct obj*,int,int*,int*,int,boolean*,boolean));
+E boolean FDECL(whirling_sword_penetration_target, (struct monst *));
+E int FDECL(whirling_sword_element_tier, (int));
+E boolean FDECL(whirling_sword_petrify_target, (struct obj *, struct monst *));
+E boolean FDECL(whirling_sword_elem_immune, (struct monst *, int));
 E int NDECL(doinvoke);
 E int FDECL(doparticularinvoke,(struct obj *));
 E void FDECL(arti_speak, (struct obj *));
@@ -2693,6 +2697,8 @@ E int FDECL(candle_on_altar, (struct obj *));
 E void FDECL(goat_eat, (struct obj *, int));
 E void FDECL(yog_sothoth_drink, (struct obj *));
 E void FDECL(flame_consume, (struct monst *, struct obj *, int));
+E void FDECL(whirling_sword_burn_offering, (struct obj *, BOOLEAN_P));
+E void FDECL(whirling_sword_offering_boon, (struct obj *));
 E void FDECL(yog_credit, (int, boolean));
 E void FDECL(bokrug_offer, (struct obj *));
 E boolean FDECL(goat_mouth_at, (int, int));
@@ -3889,6 +3895,10 @@ E boolean FDECL(Curse_res, (struct monst *, boolean));
 E int FDECL(mummy_curses_x, (struct monst *, struct monst *));
 E int FDECL(reduce_dmg, (struct monst *, int, boolean, boolean));
 E int FDECL(elemental_dmg_resistance, (struct monst *, struct monst *, int, int));
+E int FDECL(elemental_dmg_resistance_tier, (struct monst *, struct monst *, int, int, int));
+E boolean FDECL(immune_to_elem_at_tier, (struct monst *, int, int));
+E long FDECL(elem_tier_to_expl_flags, (int));
+E int FDECL(expl_flags_to_elem_tier, (long));
 
 /* ### xhityhelpers.c ### */
 

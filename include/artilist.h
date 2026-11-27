@@ -568,7 +568,7 @@ A("Whirling Sword",			CRYSTAL_SWORD,	(const char *)0,
 	ATTK(AD_ELEC, 10, 12), NOFLAG,
 	PROPS(), NOFLAG,
 	PROPS(), NOFLAG,
-	NOINVOKE, NOFLAG
+	WHIRLING_SWORD_CULT, NOFLAG
 	),
 
 A("The Sun's Bow",			YUMI,		"long rainbow",

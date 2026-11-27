@@ -1994,6 +1994,8 @@ struct monst *mtmp;
 	mtmp->mgoatmarked = CULT_MARK_NONE;
 	mtmp->mflamemarked = CULT_MARK_NONE;
 	mtmp->mibitemarked = CULT_MARK_NONE;
+	mtmp->mwhirling_sword_marked = CULT_MARK_NONE;
+	mtmp->mwhirling_sword_offering = FALSE;
 	mtmp->mironmarked = FALSE;
 	mtmp->mprobed = FALSE;
 	
@@ -5737,6 +5739,8 @@ boolean was_swallowed;			/* digestion */
 		return FALSE;
 	else if(mon->mibitemarked)
 		return FALSE;
+	else if(mon->mwhirling_sword_marked && !mon->mwhirling_sword_offering)
+		return FALSE;
 	else if(mdat->mtyp == PM_ECLAVDRA)
 		return FALSE;
 	else if(mdat->mtyp == PM_CHOKHMAH_SEPHIRAH)
@@ -6235,6 +6239,10 @@ offer_slain_monster(struct monst *mtmp, struct obj *corpse, int x, int y, int yo
 			corpse = (struct obj *)0; //corpse pointer is now stale
 		}
 	}
+	if(corpse && corpse->otyp == CORPSE && !corpse->oartifact && mtmp->mwhirling_sword_marked && mtmp->mwhirling_sword_offering){
+		whirling_sword_burn_offering(corpse, mtmp->mwhirling_sword_marked == CULT_MARK_YOU || mtmp->mwhirling_sword_marked == CULT_MARK_FOR_YOU);
+		corpse = (struct obj *)0; //corpse pointer is now stale
+	}
 	if(corpse && corpse->otyp == CORPSE && !corpse->oartifact){
 		if(youagr && goat_mouth_at(x,y) && has_object_type(invent, HOLY_SYMBOL_OF_THE_BLACK_MOTHE)){
 			goat_eat(corpse, GOAT_EAT_OFFERED); //Goat eat tries *really* hard to destroy whatever you give it.
@@ -6248,6 +6256,25 @@ offer_slain_monster(struct monst *mtmp, struct obj *corpse, int x, int y, int yo
 	}
 }
 
+/* If the Whirling Sword marked the dead monster mtmp for devotion, clear its other cult marks and, if it was marked by you or on your behalf, credit the sword's devotion. */
+STATIC_OVL void
+whirling_sword_credit(struct monst *mtmp)
+{
+	if(!mtmp->mwhirling_sword_marked || mtmp->mwhirling_sword_offering)
+		return;
+	mtmp->mflamemarked = CULT_MARK_NONE;
+	mtmp->mgoatmarked = CULT_MARK_NONE;
+	if(mtmp->mwhirling_sword_marked != CULT_MARK_YOU && mtmp->mwhirling_sword_marked != CULT_MARK_FOR_YOU)
+		return;
+	if(hates_only_holy_mon(mtmp))
+		artinstance[ART_WHIRLING_SWORD].WSwordDevotion += monstr[mtmp->mtyp] + 1;
+	if(whirling_sword_penetration_target(mtmp))
+		artinstance[ART_WHIRLING_SWORD].WSwordPenDevotion += monstr[mtmp->mtyp] + 1;
+	if(wizard)
+		pline("WSwordDevotion = %ld, WSwordPenDevotion = %ld",
+			artinstance[ART_WHIRLING_SWORD].WSwordDevotion, artinstance[ART_WHIRLING_SWORD].WSwordPenDevotion);
+}
+
 /* drop (perhaps) a cadaver and remove monster */
 void
 mondied(struct monst *mdef)
@@ -6259,6 +6286,7 @@ mondied(struct monst *mdef)
 	/* we did not lifesave */
 	mdef->deadmonster |= DEADMONSTER_DEAD;
 	mdef->mprobed = 0;
+	whirling_sword_credit(mdef);
 
 	if (corpse_chance(mdef, (struct monst *)0, FALSE) &&
 	    (accessible(mdef->mx, mdef->my) || is_pool(mdef->mx, mdef->my, FALSE)))
@@ -6409,6 +6437,7 @@ register struct monst *mdef;
 		   item-conferred attributes */
 		otmp = mkcorpstat(STATUE, KEEPTRAITS(mdef) ? mdef : 0,
 				  mdef->data, x, y, FALSE);
+		if (salted) set_material_gm(otmp, SALT);
 		if (M_HAS_NAME(mdef)) otmp = oname(otmp, MNAME(mdef));
 		while ((obj = oldminvent) != 0) {
 		    oldminvent = obj->nobj;
@@ -6430,8 +6459,9 @@ register struct monst *mdef;
 		if (has_template(mdef, ILLUMINATED))
 			otmp->spe |= STATUE_FACELESS;
 		otmp->owt = weight(otmp);
-	} else
-		otmp = mksobj_at(ROCK, x, y, NO_MKOBJ_FLAGS);
+	} else {
+		otmp = mksobj_at(salted ? CHUNK_OF_SALT : ROCK, x, y, NO_MKOBJ_FLAGS);
+	}
 
 	stackobj(otmp);
 	/* mondead() already does this, but we must do it before the newsym */
@@ -6441,6 +6471,9 @@ register struct monst *mdef;
 	/* We don't currently trap the hero in the statue in this case but we could */
 	if (u.uswallow && u.ustuck == mdef) wasinside = TRUE;
 	mondead(mdef);
+	/* xkilled() credits the hero's petrifying kills (stoned) itself */
+	if (!stoned && mdef->mhp <= 0)
+		whirling_sword_credit(mdef);
 	if (wasinside) {
 		if (is_animal(mdef->data))
 			You("%s through an opening in the new %s.",
@@ -6735,6 +6768,11 @@ int how;
 		pline("Now totally engulfed, %s is yanked upright and vanishes from the world.", mhe(mdef));
 	}
 	else if ((mdef->wormno ? worm_known(mdef) : cansee(mdef->mx, mdef->my))
+		&& fltxt && !banish_kill_mon(mdef) && mdef->mwhirling_sword_marked && !mdef->mwhirling_sword_offering
+		&& how != AD_DGST && how != -AD_RBRE && how != AD_DISN && how != AD_STON
+	)
+		pline("%s is consumed in a flash of light!", Monnam(mdef));
+	else if ((mdef->wormno ? worm_known(mdef) : cansee(mdef->mx, mdef->my))
 		&& fltxt)
 	    pline("%s is %s%s%s!", Monnam(mdef),
 			(banish_kill_mon(mdef) && !has_template(mdef, SPARK_SKELETON)) ? "banished" : nonliving(mdef->data) ? "destroyed" : "killed",
@@ -6924,6 +6962,9 @@ xkilled(mtmp, dest)
 	    else if(!banish_kill_mon(mtmp) && mtmp->mibitemarked && !Infuture){
 			pline("%s vanishes down into the murky waters.", Monnam(mtmp));
 		}
+	    else if(!banish_kill_mon(mtmp) && mtmp->mwhirling_sword_marked && !mtmp->mwhirling_sword_offering){
+			pline("%s is consumed in a flash of light!", Monnam(mtmp));
+		}
 	    else if(!banish_kill_mon(mtmp) && mtmp->mflamemarked && !Infuture && !sflm_message){
 			pline("%s burns from within, consumed by silver fire!", Monnam(mtmp));
 			sflm_message = TRUE;
@@ -6994,6 +7035,7 @@ xkilled(mtmp, dest)
 	mtmp->deadmonster |= DEADMONSTER_DEAD;
 	mtmp->mbdrown = 0;
 	mtmp->mprobed = 0;
+	whirling_sword_credit(mtmp);
 
 	mdat = mtmp->data; /* note: mondead can change mtmp->data */
 	mndx = monsndx(mdat);

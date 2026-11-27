@@ -4131,6 +4131,27 @@ winid *datawin;
 			Sprintf(buf2, "Amalgamated metals: %s.", buf);
 			OBJPUTSTR(buf2);
 		}
+		if(oartifact == ART_WHIRLING_SWORD){
+			buf[0] = '\0';
+#define	WSWORDPROPS(prop, string)	\
+	ADDCLASSPROP(artinstance[ART_WHIRLING_SWORD].WSwordUpgrades&prop, string);
+			WSWORDPROPS(WSPROP_HELLFIRE, "hell-fire");
+			WSWORDPROPS(WSPROP_HOLYFIRE, "sanctified fire");
+			WSWORDPROPS(WSPROP_HELLSHOCK, "hellish lightning");
+			WSWORDPROPS(WSPROP_HOLYSHOCK, "sanctified lightning");
+			WSWORDPROPS(WSPROP_DISINTEGRATE, "disintegrate the unholy");
+			WSWORDPROPS(WSPROP_PETRIFY, "petrify mortals");
+			WSWORDPROPS(WSPROP_SUNSWORD, "sunlight");
+			WSWORDPROPS(WSPROP_AVENGER, "holy vengeance");
+			WSWORDPROPS(WSPROP_OFFERING, "burnt offerings");
+			WSWORDPROPS(WSPROP_NOARROW, "burn arrows from the air");
+#undef WSWORDPROPS
+			if(buf[0] != '\0')
+				Sprintf(buf2, "Upgrades: %s.", buf);
+			else
+				Sprintf(buf2, "No upgrades.");
+			OBJPUTSTR(buf2);
+		}
 		if (oartifact == ART_PEN_OF_THE_VOID) {
 #define acer(x, y) ((mvitals[PM_ACERERAK].died > 0) ? (x) : (y))
 			if (obj->ovara_seals&SEAL_AHAZU){

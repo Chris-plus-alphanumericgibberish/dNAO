@@ -148,6 +148,7 @@ NEARDATA boolean in_mklev = FALSE;
 NEARDATA boolean stoned = FALSE;	/* done to monsters hit by 'c' */
 NEARDATA boolean golded = FALSE;	/* done to monsters hit by Mammon's breath */
 NEARDATA boolean glassed = FALSE;	/* done to monsters hit by Baalphegor's breath */
+NEARDATA boolean salted = FALSE;	/* done to monsters petrified by the Whirling Sword */
 NEARDATA boolean unweapon = FALSE;
 NEARDATA boolean mrg_to_wielded = FALSE;
 boolean mon_ranged_gazeonly = FALSE;

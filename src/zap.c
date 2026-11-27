@@ -4647,7 +4647,7 @@ struct zapdata * zapdata;
 	case AD_FIRE:
 	case AD_EFIR:
 		/* check resist / weakness */
-		if (Fire_res(mdef)) {
+		if (immune_to_elem_at_tier(mdef, AD_FIRE, zapdata->elem_tier)) {
 			if (zapdata->adtyp == AD_EFIR) {
 				dmg *= 0.5;
 			}
@@ -4674,6 +4674,11 @@ struct zapdata * zapdata;
 		if (youdef) {
 			burn_away_slime();
 			melt_frozen_air();
+		}
+		/* tiered damage is reduced here, so xdamagey() doesn't reduce it again at the base tier */
+		if (zapdata->elem_tier != ELEM_TIER_BASE) {
+			dmg = elemental_dmg_resistance_tier(mdef, magr, dmg, AD_FIRE, zapdata->elem_tier);
+			attk.adtyp = AD_PHYS;
 		}
 		/* deal damage */
 		return xdamagey(magr, mdef, &attk, dmg);
@@ -4739,7 +4744,7 @@ struct zapdata * zapdata;
 	case AD_ELEC:
 	case AD_EELC:
 		/* check resist */
-		if (Shock_res(mdef)) {
+		if (immune_to_elem_at_tier(mdef, AD_ELEC, zapdata->elem_tier)) {
 			if (zapdata->adtyp == AD_EELC) {
 				dmg *= 0.5;
 			}
@@ -4758,6 +4763,11 @@ struct zapdata * zapdata;
 		/* damage inventory */
 		if (!UseInvShock_res(mdef)) {
 			if (!rn2(3)) (void)destroy_item(mdef, WAND_CLASS, AD_ELEC);
+		}
+		/* tiered damage is reduced here, so xdamagey() doesn't reduce it again at the base tier */
+		if (zapdata->elem_tier != ELEM_TIER_BASE) {
+			dmg = elemental_dmg_resistance_tier(mdef, magr, dmg, AD_ELEC, zapdata->elem_tier);
+			attk.adtyp = AD_PHYS;
 		}
 		/* deal damage */
 		return xdamagey(magr, mdef, &attk, dmg);

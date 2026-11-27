@@ -555,7 +555,8 @@ struct you {
 #define SWIFT_S 81
 #define FIRE_LANCE 82
 #define FIRE_STRK 83
-#define MAX_MYSTIC_FORMS 83
+#define SOLAR_F 84
+#define MAX_MYSTIC_FORMS 84
 
 #define MFORM_STREAM MAX_MYSTIC_FORMS+1
 #define MFORM_CHAINS MAX_MYSTIC_FORMS+2

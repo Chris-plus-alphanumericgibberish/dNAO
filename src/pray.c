@@ -3368,16 +3368,19 @@ god_benefit_give_intrinsic(void)
 	if(!(HSleep_resistance)) {
 		You_feel("wide awake.");
 		give_intrinsic(SLEEP_RES, timeout);
+		return;
 	}
 
 	if(!(HFire_resistance)) {
 		You(Hallucination ? "be chillin'." : "feel a momentary chill.");
 		give_intrinsic(FIRE_RES, timeout);
+		return;
 	}
 
 	if(!(HCold_resistance)) {
 		You_feel("full of hot air.");
 		give_intrinsic(COLD_RES, timeout);
+		return;
 	}
 
 	if(!(HShock_resistance)) {
@@ -5419,6 +5422,225 @@ yog_sothoth_drink(struct obj *otmp)
 		return;
 	}
 	yog_credit(value, TRUE);
+}
+
+STATIC_DCL void NDECL(whirling_sword_random_boon);
+
+/* Burns the corpse otmp as a Whirling Sword offering, using it up. If for_you, the offering was made by you or on your behalf, and you are rewarded for it. */
+void
+whirling_sword_burn_offering(struct obj *otmp, int for_you)
+{
+	xchar x, y;
+
+	get_obj_location(otmp, &x, &y, BURIED_TOO);
+	if(cansee(x, y))
+		pline("%s is consumed in a burst of flame!", The(xname(otmp)));
+	if(for_you)
+		whirling_sword_offering_boon(otmp);
+	if (carried(otmp)) useup(otmp);
+	else useupf(otmp, 1L);
+	if(cansee(x, y))
+		newsym(x, y);
+}
+
+/* Rewards the PC for the Whirling Sword offering of the corpse otmp */
+void
+whirling_sword_offering_boon(struct obj *otmp)
+{
+	int value;
+	int saved_anger = godlist[u.ualign.god].anger;
+	int saved_cnt = u.ublesscnt;
+
+	if(Inhell || Misotheism
+		|| u.ualign.god == GOD_BOKRUG__THE_WATER_LIZARD
+		|| u.ualign.god == GOD_TEZCATLIPOCA
+		|| no_anger_index(u.ualign.god)
+	)
+		return;
+
+	value = monstr[otmp->corpsenm] + 1;
+	if (otmp->oeaten)
+		value = eaten_stat(value, otmp);
+
+	if(godlist[u.ualign.god].anger > 0) {
+		godlist[u.ualign.god].anger -=
+			((value * (u.ualign.type == A_CHAOTIC ? 2 : 3)) / MAXVALUE);
+		if(godlist[u.ualign.god].anger < 0) godlist[u.ualign.god].anger = 0;
+		if(godlist[u.ualign.god].anger != saved_anger) {
+			if (godlist[u.ualign.god].anger) {
+				pline("%s seems %s.", u_gname(),
+					Hallucination ? "groovy" : "slightly mollified");
+				if ((int)u.uluck < 0) change_luck(1);
+			} else {
+				pline("%s seems %s.", u_gname(), Hallucination ?
+					"cosmic (not a new fact)" : "mollified");
+				if ((int)u.uluck < 0) u.uluck = 0;
+				u.reconciled = REC_MOL;
+			}
+		} else { /* not satisfied yet */
+			if (Hallucination)
+				pline_The("gods seem tall.");
+			else You("have a feeling of inadequacy.");
+		}
+	} else if(ugod_is_angry()) {
+		if(value > MAXVALUE) value = MAXVALUE;
+		if(value > -u.ualign.record) value = -u.ualign.record;
+		adjalign(value);
+		You_feel("partially absolved.");
+	} else if (u.ublesscnt > 0) {
+		u.ublesscnt -=
+			((value * (u.ualign.type == A_CHAOTIC ? 500 : 300)) / MAXVALUE);
+		if(u.ublesscnt < 0) u.ublesscnt = 0;
+		if(u.ublesscnt != saved_cnt) {
+			if (u.ublesscnt) {
+				if (Hallucination)
+					You("realize that the gods are not like you and I.");
+				else
+					You("have a hopeful feeling.");
+				if ((int)u.uluck < 0) change_luck(1);
+			} else {
+				if (Hallucination)
+					pline("Overall, there is a smell of fried onions.");
+				else
+					You("have a feeling of reconciliation.");
+				if ((int)u.uluck < 0) u.uluck = 0;
+				u.reconciled = REC_REC;
+			}
+		}
+	} else if (rnl((30 + u.ulevel)*10) < 10) {
+		whirling_sword_random_boon();
+	}
+}
+
+/* Grants you (and sometimes your pets) a random boon. */
+STATIC_OVL void
+whirling_sword_random_boon(void)
+{
+	struct monst *mtmp;
+
+	switch(rn2(17)){
+		//divination effects
+		case 0:
+			if(!level.flags.nommap){
+				do_mapping();
+				break;
+			}
+			/* fall through */
+		case 1:
+			do_vicinity_map(u.ux,u.uy);
+			break;
+		//healing effects
+		case 2:{
+			struct obj *pseudo;
+			pseudo = mksobj(SPE_MASS_HEALING, MKOBJ_NOINIT);
+			pseudo->blessed = pseudo->cursed = 0;
+			pseudo->quan = 20L;			/* do not let useup get it */
+			cast_mass_healing(pseudo);
+			obfree(pseudo, (struct obj *)0);
+			break;
+		}
+		case 3:
+			healing_zap(&youmonst, SPE_EXTRA_HEALING, SPBOOK_CLASS, (boolean *)0, (boolean *)0, FALSE);
+			//And pets
+			for(mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
+				if(DEADMONSTER(mtmp)) continue;
+				if(!mtmp->mtame) continue;
+				healing_zap(mtmp, SPE_EXTRA_HEALING, SPBOOK_CLASS, (boolean *)0, (boolean *)0, FALSE);
+			}
+			break;
+		case 4:
+			healing_zap(&youmonst, SPE_FULL_HEALING, SPBOOK_CLASS, (boolean *)0, (boolean *)0, FALSE);
+			//And pets
+			for(mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
+				if(DEADMONSTER(mtmp)) continue;
+				if(!mtmp->mtame) continue;
+				healing_zap(mtmp, SPE_FULL_HEALING, SPBOOK_CLASS, (boolean *)0, (boolean *)0, FALSE);
+			}
+			break;
+		//clerical effects
+		case 5:{
+			int prot = -1 * u.ulevel;
+			cast_protection();
+			//And pets
+			for(mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
+				if(DEADMONSTER(mtmp)) continue;
+				if(!mtmp->mtame) continue;
+				mtmp->mstdy = max(prot, mtmp->mstdy + prot);
+			}
+		}break;
+		//prayer effects
+		case 6:{
+			int trouble = in_trouble();
+			if(trouble > 0) fix_worst_trouble(trouble);
+			break;
+		}
+		case 7:{
+			int trouble = in_trouble();
+			if(trouble != 0) fix_worst_trouble(trouble);
+			break;
+		}
+		case 8:
+			golden_glow();
+			break;
+		case 9:
+			prayer_benefit_intrinsic(0, TRUE);
+			//And pets
+			for(mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
+				if(DEADMONSTER(mtmp)) continue;
+				if(!mtmp->mtame) continue;
+				random_monster_resistance(mtmp);
+			}
+			break;
+		//sac effects
+		case 10:
+			god_benefit_boost_ability();
+			break;
+		case 11:
+			if(!god_benefit_enchant_item(&youmonst)){
+				//Try pets
+				for(mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
+					if(DEADMONSTER(mtmp)) continue;
+					if(!mtmp->mtame) continue;
+					god_benefit_enchant_item(mtmp);
+				}
+			}
+			break;
+		case 12:
+			god_benefit_identify_item();
+			break;
+		case 13:
+			god_benefit_give_intrinsic();
+			//And pets
+			for(mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
+				if(DEADMONSTER(mtmp)) continue;
+				if(!mtmp->mtame) continue;
+				random_monster_resistance(mtmp);
+			}
+			break;
+		case 14:
+			god_benefit_repair_item();
+			//And pets
+			for(mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
+				if(DEADMONSTER(mtmp)) continue;
+				if(!mtmp->mtame) continue;
+				mrepair_item(mtmp);
+			}
+			break;
+		case 15:
+			god_benefit_fix_buc();
+			//And pets
+			for(mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
+				if(DEADMONSTER(mtmp)) continue;
+				if(!mtmp->mtame) continue;
+				mfix_buc(mtmp);
+			}
+			break;
+		//luck effect
+		case 16:
+			if (u.uluck < 0) u.uluck = 0;
+			change_luck(Insight >= 21 ? 7 : 3);
+			break;
+	}
 }
 
 void

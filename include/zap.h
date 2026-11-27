@@ -31,6 +31,7 @@ struct zapdata {
 	Bitfield(directly_hits, 1);	/* actually hits monsters. Usually TRUE, but often FALSE if explosive or splashing. */
 	Bitfield(affects_floor, 1);	/* does zap-over-floor effects */
 	Bitfield(no_bounce, 1);		/* does not bounce off of walls */
+	Bitfield(elem_tier, 2);		/* ELEM_TIER_* of elemental damage */
 	Bitfield(no_hit_wall, 1);	/* stops just short of walls */
 	Bitfield(leaves_clouds, 1);	/* leaves a trail of adtyp-appropriate clouds */
 	Bitfield(blinding, 1);	/* has a blinding flash (AD_ELEC always does this) */

@@ -2448,6 +2448,22 @@ boolean while_carried;
 			j++;
 		}
 	}
+	if (oartifact == ART_WHIRLING_SWORD) {
+		long upgrades = artinstance[ART_WHIRLING_SWORD].WSwordUpgrades;
+
+		if (while_carried) {
+			if (upgrades&WSPROP_AVENGER)
+				property_list[j++] = DRAIN_RES;
+		}
+		else {
+			if (upgrades&WSPROP_SUNSWORD) {
+				property_list[j++] = BLIND_RES;
+				property_list[j++] = SEARCHING;
+			}
+			if (upgrades&WSPROP_AVENGER)
+				property_list[j++] = ANTIMAGIC;
+		}
+	}
 	// add a terminator to the array
 	property_list[j] = 0;
 	return;
@@ -2500,6 +2516,11 @@ unsigned long flag;
 {
 	if (otmp->oartifact == ART_MORTAL_BLADE && otmp != uwep)
 		return FALSE;
+
+	if (otmp->oartifact == ART_WHIRLING_SWORD && (artinstance[ART_WHIRLING_SWORD].WSwordUpgrades&WSPROP_SUNSWORD)
+		&& (flag & (ARTA_SILVER|ARTA_BRIGHT|ARTA_BLIND|ARTA_PHASING))
+	)
+		return TRUE;
 
 	const struct artifact *arti = get_artifact(otmp);
 	return((boolean)(arti && (arti->aflags & flag)));
@@ -3339,7 +3360,7 @@ boolean narrow_only;
 		switch(weap->adtyp) 
 		{
 		case AD_FIRE:
-			if (Fire_res(mdef))
+			if (otmp->oartifact == ART_WHIRLING_SWORD ? whirling_sword_elem_immune(mdef, AD_FIRE) : Fire_res(mdef))
 				return FALSE;
 		break;
 		case AD_COLD:
@@ -3347,7 +3368,7 @@ boolean narrow_only;
 				return FALSE;
 		break;
 		case AD_ELEC:
-			if (Shock_res(mdef))
+			if (otmp->oartifact == ART_WHIRLING_SWORD ? whirling_sword_elem_immune(mdef, AD_ELEC) : Shock_res(mdef))
 				return FALSE;
 		break;
 		case AD_ACID:
@@ -3812,7 +3833,10 @@ spec_dbon(struct obj *otmp, struct monst *mon, int basedmg, int *plusdmgptr, int
 		/* add the damage to the appropriate pointer, if allowable */
 		if (goodpointers) {
 			int spec_bonus = damd ? d(multiplier, damd) : max(dmgtomulti, 1)*multiplier;
-			spec_bonus = elemental_dmg_resistance(mon, magr, spec_bonus, weap->adtyp);
+			if(otmp->oartifact == ART_WHIRLING_SWORD)
+				spec_bonus = elemental_dmg_resistance_tier(mon, magr, spec_bonus, weap->adtyp, whirling_sword_element_tier(weap->adtyp));
+			else
+				spec_bonus = elemental_dmg_resistance(mon, magr, spec_bonus, weap->adtyp);
 			if (spec_applies(otmp, mon, TRUE))
 				*truedmgptr += spec_bonus;
 			else
@@ -4992,7 +5016,7 @@ int * truedmgptr;
 			mistlight_bonus += d(1, 8);
 	}
 	
-	if(!Fire_res(mdef)){
+	if(otmp->oartifact == ART_WHIRLING_SWORD ? !whirling_sword_elem_immune(mdef, AD_FIRE) : !Fire_res(mdef)){
 		int fire_dmg = 0;
 		if(check_oprop(otmp, OPROP_FIREW))
 			fire_dmg += silverknight_bonus*basedmg;
@@ -5002,8 +5026,11 @@ int * truedmgptr;
 			fire_dmg += d(2, 6);
 		if(check_oprop(otmp, OPROP_GOLDW))
 			fire_dmg += d(5, spiritDsize());
+		if(otmp->oartifact == ART_WHIRLING_SWORD && (artinstance[ART_WHIRLING_SWORD].WSwordUpgrades&WSPROP_OFFERING) && is_animal(mdef->data))
+			fire_dmg += max(0, d(2,7) + otmp->spe);
 		if(fire_dmg > 0)
-			fire_dmg = elemental_dmg_resistance(mdef, magr, fire_dmg, AD_FIRE);
+			fire_dmg = elemental_dmg_resistance_tier(mdef, magr, fire_dmg, AD_FIRE,
+				otmp->oartifact == ART_WHIRLING_SWORD ? whirling_sword_element_tier(AD_FIRE) : ELEM_TIER_BASE);
 		*truedmgptr += fire_dmg;
 	}
 	if(!Cold_res(mdef)){
@@ -5045,7 +5072,7 @@ int * truedmgptr;
 		}
 	}
 
-	if (!Shock_res(mdef)){
+	if (otmp->oartifact == ART_WHIRLING_SWORD ? !whirling_sword_elem_immune(mdef, AD_ELEC) : !Shock_res(mdef)){
 		int mult = 1;
 		if(shock_vulnerable(mdef))
 			mult *= 2;
@@ -5057,7 +5084,8 @@ int * truedmgptr;
 		if(check_oprop(otmp, OPROP_LESSER_ELECW))
 			shock_dmg += d(mult*2, 6);
 		if(shock_dmg > 0)
-			shock_dmg = elemental_dmg_resistance(mdef, magr, shock_dmg, AD_ELEC);
+			shock_dmg = elemental_dmg_resistance_tier(mdef, magr, shock_dmg, AD_ELEC,
+				otmp->oartifact == ART_WHIRLING_SWORD ? whirling_sword_element_tier(AD_ELEC) : ELEM_TIER_BASE);
 		*truedmgptr += shock_dmg;
 	}
 
@@ -9017,6 +9045,70 @@ boolean printmessages; /* print generic elemental damage messages */
 		}
 	}
 
+	if(oartifact == ART_WHIRLING_SWORD && !youdef){
+		boolean devotion_target = hates_only_holy_mon(mdef) || whirling_sword_penetration_target(mdef);
+		boolean offering_target = (artinstance[ART_WHIRLING_SWORD].WSwordUpgrades&WSPROP_OFFERING) && is_animal(mdef->data);
+		if(devotion_target || offering_target){
+			/* a devotion mark takes priority over an offering mark */
+			if(devotion_target)
+				mdef->mwhirling_sword_offering = FALSE;
+			else if(!mdef->mwhirling_sword_marked)
+				mdef->mwhirling_sword_offering = TRUE;
+			mdef->mwhirling_sword_marked = youagr ? CULT_MARK_YOU : (magr && magr->mtame) ? CULT_MARK_FOR_YOU : mdef->mwhirling_sword_marked ? mdef->mwhirling_sword_marked : CULT_MARK_OTHER;
+		}
+	}
+
+	if(oartifact == ART_WHIRLING_SWORD && (artinstance[ART_WHIRLING_SWORD].WSwordUpgrades&WSPROP_DISINTEGRATE)
+		&& (is_minion(pd) || is_demon(pd) || hates_only_holy_mon(mdef))
+	){
+		int i = (basedmg+1)/2;
+		int disn_dmg = d(2, 7) + otmp->spe;
+
+		i = silver_flame_disn_armor(mdef, i, vis, msgr, messaged);
+		if(!Disint_res(mdef) && disn_dmg > 0){
+			if(i > 0)
+				*truedmgptr += disn_dmg;
+			else
+				*plusdmgptr += disn_dmg/2;
+		}
+	}
+
+	if(oartifact == ART_WHIRLING_SWORD && (artinstance[ART_WHIRLING_SWORD].WSwordUpgrades&WSPROP_SUNSWORD)
+		&& (is_undead(pd) || is_demon(pd))
+	)
+		*truedmgptr += max(0, d(2, 7) + otmp->spe);
+
+	if(oartifact == ART_WHIRLING_SWORD && (artinstance[ART_WHIRLING_SWORD].WSwordUpgrades&WSPROP_AVENGER)){
+		if(dieroll <= 2){
+			if (cancel_monst(mdef, otmp, youagr, FALSE, FALSE, 0)){
+				if (youagr){
+					u.uen += 10;
+					if(u.uen > u.uenmax) u.uen = u.uenmax;
+				}
+				else if(magr){
+					set_mcan(magr, FALSE);
+					magr->mspec_used = 0;
+				}
+			}
+		}
+		*plusdmgptr += d(1, 7);
+		if(youdef ? (u.ualign.type != A_LAWFUL) : (sgn(mdef->data->maligntyp) <= 0))
+			*truedmgptr += d(1, 7);
+		if(hates_holy_mon(mdef) && is_holy(otmp))
+			*truedmgptr += d(1, 7);
+		if(hates_unholy_mon(mdef) && is_unholy(otmp))
+			*truedmgptr += d(1, 7);
+	}
+
+	/* killing blows turn the victim to salt in xdamagey() */
+	if(dieroll < 7 && whirling_sword_petrify_target(otmp, mdef)){
+		if((vis&VIS_MAGR) && printmessages){
+			pline_The("%s %s %s!", wepdesc, vtense(wepdesc, "petrify"), hittee);
+			*messaged = TRUE;
+		}
+		*truedmgptr += max(0, d(2, 7) + otmp->spe);
+	}
+
 	if(youagr && otmp->oartifact){
 		const struct artifact *weap = get_artifact(otmp);
 		if((weap->inv_prop == GITH_ART || weap->inv_prop == AMALGUM_ART)){
@@ -10046,6 +10138,230 @@ zerth_mantras()
 	}
 }
 
+/* Return TRUE if mon resists the Whirling Sword's fire or lightning at its current penetration upgrades, but not that element's holy form. */
+boolean
+whirling_sword_penetration_target(struct monst *mon)
+{
+	long upgrades = artinstance[ART_WHIRLING_SWORD].WSwordUpgrades;
+
+	if(!(upgrades&WSPROP_HOLYFIRE) && !resists_holyfire(mon)
+		&& ((upgrades&WSPROP_HELLFIRE) ? resists_hellfire(mon) : resists_fire(mon))
+	)
+		return TRUE;
+	if(!(upgrades&WSPROP_HOLYSHOCK) && !resists_holyelec(mon)
+		&& ((upgrades&WSPROP_HELLSHOCK) ? resists_hellelec(mon) : resists_elec(mon))
+	)
+		return TRUE;
+	return FALSE;
+}
+
+/* Return the ELEM_TIER_* of the Whirling Sword's adtyp damage; ELEM_TIER_BASE for anything but AD_FIRE or AD_ELEC. */
+int
+whirling_sword_element_tier(int adtyp)
+{
+	long upgrades = artinstance[ART_WHIRLING_SWORD].WSwordUpgrades;
+
+	switch(adtyp){
+		case AD_FIRE:
+			return (upgrades&WSPROP_HOLYFIRE) ? ELEM_TIER_HOLY : (upgrades&WSPROP_HELLFIRE) ? ELEM_TIER_HELL : ELEM_TIER_BASE;
+		case AD_ELEC:
+			return (upgrades&WSPROP_HOLYSHOCK) ? ELEM_TIER_HOLY : (upgrades&WSPROP_HELLSHOCK) ? ELEM_TIER_HELL : ELEM_TIER_BASE;
+	}
+	return ELEM_TIER_BASE;
+}
+
+/* Return TRUE if mdef is immune to the Whirling Sword's adtyp damage at its current penetration upgrades; FALSE for anything but AD_FIRE or AD_ELEC. */
+boolean
+whirling_sword_elem_immune(struct monst *mdef, int adtyp)
+{
+	if(adtyp != AD_FIRE && adtyp != AD_ELEC)
+		return FALSE;
+	return immune_to_elem_at_tier(mdef, adtyp, whirling_sword_element_tier(adtyp));
+}
+
+/* Return TRUE if otmp is the Whirling Sword with its petrify upgrade, and mdef (possibly the hero) is a mortal
+ * that doesn't resist petrification.
+ */
+boolean
+whirling_sword_petrify_target(struct obj *otmp, struct monst *mdef)
+{
+	return otmp && otmp->oartifact == ART_WHIRLING_SWORD
+		&& (artinstance[ART_WHIRLING_SWORD].WSwordUpgrades&WSPROP_PETRIFY)
+		&& !Stone_res(mdef) && Dark_vuln(mdef);
+}
+
+/* Return the devotion the Whirling Sword must have accumulated before its next upgrade can be bought, given cult value cultsval. */
+STATIC_OVL long
+whirling_sword_upgrade_threshold(long cultsval)
+{
+	if(Role_if(PM_MADMAN))
+		cultsval = 7*cultsval/10;
+
+	return 25*(10 + cultsval*cultsval*2/25);
+}
+
+/* Return TRUE if the Whirling Sword's penetration upgrade (upgrade) can be bought now. */
+STATIC_OVL boolean
+whirling_sword_can_buy_penetration(long upgrade)
+{
+	struct artinstance *wsword = &artinstance[ART_WHIRLING_SWORD];
+
+	if(wsword->WSwordUpgrades&upgrade)
+		return FALSE;
+	if(upgrade == WSPROP_HOLYFIRE && !(wsword->WSwordUpgrades&WSPROP_HELLFIRE))
+		return FALSE;
+	if(upgrade == WSPROP_HOLYSHOCK && !(wsword->WSwordUpgrades&WSPROP_HELLSHOCK))
+		return FALSE;
+	return wsword->WSwordDevotion + wsword->WSwordPenDevotion > whirling_sword_upgrade_threshold(u.ucultsval);
+}
+
+/* Invoke menu for the Whirling Sword (obj): buy one of its upgrades, if you have at least 7 Insight. Returns the time taken. */
+STATIC_OVL int
+whirling_sword_menu(struct obj *obj)
+{
+	static const struct {
+		long upgrade;
+		const char *name;
+		int tier;
+	} penetration_upgrades[] = {
+		{WSPROP_HELLFIRE,  "Hell-fire", TIER_C},
+		{WSPROP_HOLYFIRE,  "Sanctified fire", TIER_C},
+		{WSPROP_HELLSHOCK, "Hellish lightning", TIER_C},
+		{WSPROP_HOLYSHOCK, "Sanctified lightning", TIER_C},
+	};
+	static const struct {
+		long upgrade;
+		const char *name;
+		int tier;
+	} standard_upgrades[] = {
+		{WSPROP_DISINTEGRATE, "Disintegrate the unholy", TIER_A},
+		{WSPROP_PETRIFY, "Petrify mortals", TIER_B},
+		{WSPROP_SUNSWORD, "Sunlight", TIER_A},
+		{WSPROP_AVENGER, "Holy vengeance", TIER_B},
+		{WSPROP_OFFERING, "Burnt offerings", TIER_C},
+		{WSPROP_NOARROW, "Burn arrows from the air", TIER_D},
+	};
+	struct artinstance *wsword = &artinstance[ART_WHIRLING_SWORD];
+	long threshold = whirling_sword_upgrade_threshold(u.ucultsval - wsword->WSwordPenCultsval);
+	int tier = 0;
+	winid tmpwin;
+	int n, i, picked;
+	char buf[BUFSZ];
+	menu_item *selected;
+	anything any;
+	boolean any_option = FALSE;
+	boolean any_standard = FALSE;
+	char inclet = 'a';
+
+	if(Insight < 7){
+		pline("%s glimmers faintly.", The(xname(obj)));
+		return MOVE_CANCELLED;
+	}
+
+	if(wizard)
+		pline("%ld needed (%ld for penetration), %ld standard and %ld penetration accumulated",
+			threshold, whirling_sword_upgrade_threshold(u.ucultsval), wsword->WSwordDevotion, wsword->WSwordPenDevotion);
+
+	tmpwin = create_nhwindow(NHW_MENU);
+	start_menu(tmpwin);
+	any.a_void = 0;		/* zero out all bits */
+
+	for(i = 0; i < SIZE(penetration_upgrades); i++){
+		if(!whirling_sword_can_buy_penetration(penetration_upgrades[i].upgrade))
+			continue;
+		if(!any_option){
+			Sprintf(buf, "Resistance penetration");
+			add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+			any_option = TRUE;
+		}
+		any.a_int = penetration_upgrades[i].upgrade;
+		add_menu(tmpwin, NO_GLYPH, &any, inclet + i, 0, ATR_NONE, penetration_upgrades[i].name, MENU_UNSELECTED);
+		any.a_void = 0;
+	}
+	inclet += SIZE(penetration_upgrades);
+
+	for(i = 0; i < SIZE(standard_upgrades); i++){
+		if((wsword->WSwordUpgrades&standard_upgrades[i].upgrade) || wsword->WSwordDevotion <= threshold)
+			continue;
+		if(!any_standard){
+			Sprintf(buf, "New effects");
+			add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_BOLD, buf, MENU_UNSELECTED);
+			any_standard = any_option = TRUE;
+		}
+		any.a_int = standard_upgrades[i].upgrade;
+		add_menu(tmpwin, NO_GLYPH, &any, inclet + i, 0, ATR_NONE, standard_upgrades[i].name, MENU_UNSELECTED);
+		any.a_void = 0;
+	}
+
+	if(!any_option){
+		destroy_nhwindow(tmpwin);
+		pline("%s glimmers faintly.", The(xname(obj)));
+		return MOVE_CANCELLED;
+	}
+
+	end_menu(tmpwin, "Improve the sword how?");
+	n = select_menu(tmpwin, PICK_ONE, &selected);
+	destroy_nhwindow(tmpwin);
+	if(n <= 0)
+		return MOVE_CANCELLED;
+	picked = selected[0].item.a_int;
+	free(selected);
+
+	for(i = 0; i < SIZE(penetration_upgrades); i++)
+		if(penetration_upgrades[i].upgrade == picked)
+			tier = penetration_upgrades[i].tier;
+	for(i = 0; i < SIZE(standard_upgrades); i++)
+		if(standard_upgrades[i].upgrade == picked)
+			tier = standard_upgrades[i].tier;
+	wsword->WSwordUpgrades |= picked;
+	u.ucultsval += tier;
+	if(picked&WSPROP_PENETRATION)
+		wsword->WSwordPenCultsval += tier;
+	/* upgrades may grant wielded/carried properties; reapply them */
+	if(obj == uwep)
+		set_artifact_intrinsic(obj, TRUE, W_WEP);
+	if(obj->where == OBJ_INVENT)
+		set_artifact_intrinsic(obj, TRUE, W_ART);
+
+	switch(picked){
+		case WSPROP_HELLFIRE:
+		case WSPROP_HOLYFIRE:
+			pline("The flames burn hotter.");
+		break;
+		case WSPROP_HELLSHOCK:
+			pline("Black lightning crackles along the blade.");
+		break;
+		case WSPROP_HOLYSHOCK:
+			pline("The lightning along the blade turns brilliant white.");
+		break;
+		case WSPROP_DISINTEGRATE:
+			pline("The blue light of the blade intensifies.");
+		break;
+		case WSPROP_PETRIFY:
+			pline("A fine white rain of salt drifts from the blade.");
+		break;
+		case WSPROP_AVENGER:
+			pline("Winged shadows fly with the blade.");
+		break;
+		case WSPROP_OFFERING:
+			pline("The scent of woodsmoke rises from the blade.");
+		break;
+		case WSPROP_NOARROW:
+			pline("The blade's flames burn in spiral trails.");
+		break;
+		case WSPROP_SUNSWORD:
+			pline("Sunlight shines from deep within the crystal.");
+			if(obj == uwep && !obj->lamplit){
+				begin_burn(obj);
+				if(!Blind)
+					pline("%s to %s%s!", Tobjnam(obj, "begin"),
+						(obj->blessed ? "shine very" : "glow"), (obj->cursed ? "" : " brilliantly"));
+			}
+		break;
+	}
+	return MOVE_STANDARD;
+}
+
 int
 ibite_upgrade_menu(obj)
 struct obj *obj;
@@ -11004,6 +11320,7 @@ arti_invoke(obj)
 		|| oart->inv_prop == SCORPION_UPGRADES
 		|| oart->inv_prop == IBITE_ARM
 		|| oart->inv_prop == DRAW_BLEEDING_VOID
+		|| oart->inv_prop == WHIRLING_SWORD_CULT
 	)) {
 	    /* the artifact is tired :-) */
 		if(obj->oartifact == ART_FIELD_MARSHAL_S_BATON){
@@ -11039,6 +11356,7 @@ arti_invoke(obj)
 		|| oart->inv_prop == SEVENFOLD
 		|| oart->inv_prop == IBITE_ARM
 		|| oart->inv_prop == DRAW_BLEEDING_VOID
+		|| oart->inv_prop == WHIRLING_SWORD_CULT
 	))
 		obj->age = monstermoves + (long)(rnz(100)*(u.upriest ? .8 : 1));
 
@@ -14501,6 +14819,9 @@ arti_invoke(obj)
 		case DRAW_BLEEDING_VOID:
 			time = bleeding_void_invoke(obj);
 		break;
+		case WHIRLING_SWORD_CULT:
+			time = whirling_sword_menu(obj);
+		break;
 		default: pline("Program in disorder.  Artifact invoke property not recognized");
 		break;
 	} //end of first case:  Artifact Specials!!!!
@@ -16359,6 +16680,7 @@ struct obj *obj;
 {
 
 	if (obj && obj->oartifact == ART_PEN_OF_THE_VOID && obj->ovara_seals&SEAL_JACK) return TRUE;
+	if (obj && obj->oartifact == ART_WHIRLING_SWORD && (artinstance[ART_WHIRLING_SWORD].WSwordUpgrades&WSPROP_SUNSWORD)) return TRUE;
 
 	return (obj && obj->oartifact && arti_is_prop(obj, ARTI_LIGHT));
 }

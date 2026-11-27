@@ -1074,6 +1074,7 @@
 #define hates_holy(ptr)		(is_demon(ptr) || (is_undead(ptr) && ptr->mtyp != PM_DREAD_SERAPH) || (((ptr)->mflagsg&MG_HATESHOLY) != 0))
 #define hates_unholy(ptr)	((ptr->mflagsg&MG_HATESUNHOLY) != 0)
 #define hates_unholy_mon(mon)	((mon) == &youmonst ? hates_unholy(youracedata) : hates_unholy((mon)->data))
+#define hates_only_holy_mon(mon)	(hates_holy_mon(mon) && !hates_unholy_mon(mon))
 #define hates_unblessed(ptr)	((ptr->mflagsg&MG_HATESUNBLESSED) != 0)
 #define hates_unblessed_mon(mon)	((mon) == &youmonst ? hates_unblessed(youracedata) : hates_unblessed((mon)->data))
 #define hates_silver(ptr)	((ptr->mflagsg&MG_HATESSILVER) != 0)

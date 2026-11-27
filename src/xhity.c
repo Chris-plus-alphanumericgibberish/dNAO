@@ -59,7 +59,7 @@ STATIC_DCL boolean FDECL(blacklight_tentacles_suck_x, (struct monst *, struct mo
 STATIC_DCL int FDECL(bonus_ac, (struct monst *, struct monst *));
 STATIC_DCL boolean FDECL(beam_monk_target_from, (int, int));
 STATIC_DCL void FDECL(monk_aura_bolt_from, (int, int, int));
-STATIC_DCL void FDECL(engulfer_burst, (int, int));
+STATIC_DCL void FDECL(engulfer_burst, (int, int, int));
 /* for long worms */
 extern boolean notonhead;
 
@@ -4615,6 +4615,17 @@ int dmg;				/* damage to deal */
 		*hp(mdef) = 1;
 		return MM_HIT|xstoney(magr, mdef, TRUE);
 	}
+	else if(magr && attk && attk->aatyp == AT_WEAP && *hp(mdef) < 0
+		&& whirling_sword_petrify_target(youagr ? uwep : MON_WEP(magr), mdef)
+	){
+		int res;
+
+		*hp(mdef) = 1;
+		salted = TRUE;
+		res = xstoney(magr, mdef, TRUE);
+		salted = FALSE;
+		return MM_HIT|res;
+	}
 	/* mhitu */
 	else if (youdef) {
 		stop_occupation();
@@ -4808,7 +4819,7 @@ xstoney(struct monst *magr, struct monst *mdef, boolean bypass_resistance)
 	struct permonst * pd = youdef ? youracedata : mdef->data;
 
 	if (bypass_resistance || (!Stone_res(mdef)
-		&& !(youdef && Stoned))
+		&& !(youdef && (Stoned || Salted)))
 	){
 		/* wake the defender */
 		wakeup2(mdef, youagr);
@@ -4816,7 +4827,10 @@ xstoney(struct monst *magr, struct monst *mdef, boolean bypass_resistance)
 		/* vs player */
 		if (youdef) {
 			if (!(poly_when_stoned(youracedata) && polymon(PM_STONE_GOLEM))) {
-				Stoned = 5;
+				if (salted)
+					Salted = 5;
+				else
+					Stoned = 5;
 				if (magr) {
 					delayed_killer = pa->mname;
 					if (pa->geno & G_UNIQ) {
@@ -20039,6 +20053,9 @@ hmoncore(struct monst *magr, struct monst *mdef, struct attack *attk, struct att
 			else if (otmp->oartifact == ART_GLAMDRING && (silverobj&slot)) {
 				Strcat(buf, "white-burning blade");
 			}
+			else if (otmp->oartifact == ART_WHIRLING_SWORD && (silverobj&slot)) {
+				Strcat(buf, "sun-bright sapphire blade");
+			}
 			else {
 				if (silverobj & slot){
 					if (!strstri(obuf, "silver")){
@@ -24409,6 +24426,9 @@ monk_aura_zapdata(struct zapdata *zapdat, int adtyp_override)
 		zapdat->adtyp = adtyp_override;
 		zapdat->affects_floor = TRUE;
 	}
+
+	if(uwep && uwep->oartifact == ART_WHIRLING_SWORD)
+		zapdat->elem_tier = whirling_sword_element_tier(zapdat->adtyp);
 }
 
 void
@@ -24442,22 +24462,28 @@ burning_cyclone(void)
 	monk_aura_zapdata(&zapdat, AD_FIRE);
 	if(u.uswallow){
 		if(!DEADMONSTER(u.ustuck))
-			engulfer_burst(AD_FIRE, zapdamage(&youmonst, (struct monst *)0, &zapdat));
+			engulfer_burst(AD_FIRE, zapdamage(&youmonst, (struct monst *)0, &zapdat), zapdat.elem_tier);
 		return;
 	}
 	explode_full_threats(u.ux, u.uy, AD_FIRE, 0, zapdamage(&youmonst, (struct monst *)0, &zapdat),
-		adtyp_expl_color(AD_FIRE), 2, 0, TRUE, (struct permonst *)0, 0L);
+		adtyp_expl_color(AD_FIRE), 2, 0, TRUE, (struct permonst *)0, elem_tier_to_expl_flags(zapdat.elem_tier));
 }
 
-/* A fire or cold ([adtyp] AD_FIRE or AD_COLD) burst around the engulfed hero, which hits only the engulfer, for [dam] damage scaled as an explosion inside an engulfer. */
+/* A fire or cold ([adtyp] AD_FIRE or AD_COLD) burst of tier [tier] (ELEM_TIER_*) around the engulfed hero, which hits only the engulfer, for [dam] damage scaled as an explosion inside an engulfer. */
 STATIC_OVL void
-engulfer_burst(int adtyp, int dam)
+engulfer_burst(int adtyp, int dam, int tier)
 {
 	struct monst *mtmp = u.ustuck;
 	int mdam = dam*2;
 	boolean cold = (adtyp == AD_COLD);
 
 	pline("%s gets %s!", Monnam(mtmp), cold ? (is_animal(mtmp->data) ? "chilly" : "slightly chilly") : is_animal(mtmp->data) ? "heartburn" : "slightly toasted");
+	if(immune_to_elem_at_tier(mtmp, adtyp, tier)){
+		shieldeff(mtmp->mx, mtmp->my);
+		golemeffects(mtmp, adtyp, mdam);
+		setmangry(mtmp);
+		return;
+	}
 	if(!cold){
 		(void) destroy_item(mtmp, SCROLL_CLASS, AD_FIRE);
 		(void) destroy_item(mtmp, SPBOOK_CLASS, AD_FIRE);
@@ -24467,7 +24493,7 @@ engulfer_burst(int adtyp, int dam)
 		mdam = (mdam * mtmp->data->msize)/MZ_MEDIUM;
 	if(cold ? cold_vulnerable(mtmp) : fire_vulnerable(mtmp))
 		mdam *= 2;
-	mdam = elemental_dmg_resistance(mtmp, (struct monst *)0, mdam, adtyp);
+	mdam = elemental_dmg_resistance_tier(mtmp, (struct monst *)0, mdam, adtyp, tier);
 	mtmp->mhp -= mdam;
 	if(mtmp->mhp <= 0)
 		xkilled(mtmp, 1);
@@ -25856,21 +25882,127 @@ kensei_lightning_strike(struct monst *mdef)
 	int dmg = 0;
 
 	pline("A bolt of lightning strikes down at %s from above!", mon_nam(mdef));
+	monk_aura_zapdata(&zapdat, AD_ELEC);
 	reflects = mon_reflects(mdef, "It bounces off %s %s.");
-	if (reflects || Shock_res(mdef)) {
+	if (reflects || immune_to_elem_at_tier(mdef, AD_ELEC, zapdat.elem_tier)) {
 		shieldeff(mdef->mx, mdef->my);
 	}
 	else {
-		monk_aura_zapdata(&zapdat, AD_ELEC);
 		dmg = zapdamage(&youmonst, mdef, &zapdat);
 		dmg = reduce_dmg(mdef, dmg, FALSE, TRUE);
+		/* partial resistances are applied here at the bolt's tier, so xdamagey() is handed non-elemental damage */
+		dmg = elemental_dmg_resistance_tier(mdef, &youmonst, dmg, AD_ELEC, zapdat.elem_tier);
+		lightning.adtyp = AD_PHYS;
 	}
 	if (!(reflects || UseInvShock_res(mdef))) {
 		destroy_item(mdef, WAND_CLASS, AD_ELEC);
 		destroy_item(mdef, RING_CLASS, AD_ELEC);
 	}
-	/* xdamagey() applies elemental resistances */
 	return xdamagey(&youmonst, mdef, &lightning, dmg);
+}
+
+/* Performs a petrification effect on hostile mortals in view that the Whirling Sword could petrify (in turn undead range) */
+static void
+whirling_sword_area_petrification(struct monst *mdef)
+{
+	int range = BOLT_LIM + (u.ulevel / 5);	/* 5 to 11 */
+	range *= range;
+	struct monst *mtmp, *mtmp2;
+	for(mtmp = fmon; mtmp; mtmp = mtmp2) {
+		mtmp2 = mtmp->nmon;
+
+		if (DEADMONSTER(mtmp)) continue;
+		if (mtmp != mdef && (nonthreat_ful(mtmp)
+			|| !couldsee(mtmp->mx,mtmp->my)
+			|| distu(mtmp->mx,mtmp->my) > range)
+		) continue;
+		if (!whirling_sword_petrify_target(uwep, mtmp)) continue;
+
+		if (!resist(mtmp, WEAPON_CLASS, 0, NOTELL)) {
+			salted = TRUE;
+			xstoney(&youmonst, mtmp, TRUE);
+			salted = FALSE;
+		}
+	}
+}
+
+/* Swarm of burning rocks striking mdef (as the METEOR_SWARM monster spell, but dealing the hero's aura slash damage, half physical and half fire) */
+static int
+kensei_meteor_swarm(struct monst *mdef)
+{
+	struct attack meteors = { AT_MAGC, AD_PHYS, 0, 0 };
+	struct zapdata zapdat = { 0 };
+	int dmg, pdmg, fdmg;
+
+	monk_aura_zapdata(&zapdat, AD_FIRE);
+	dmg = zapdamage(&youmonst, mdef, &zapdat);
+	pdmg = (dmg + 1)/2;
+	fdmg = (dmg + 1)/2;
+	if (canseemon(mdef))
+		pline("Burning rocks pummel %s from all sides!", mon_nam(mdef));
+
+	pdmg = reduce_dmg(mdef, pdmg, TRUE, FALSE);
+	pdmg -= max(0, avg_mdr(mdef));
+	if (pdmg < 1)
+		pdmg = 1;
+
+	if (immune_to_elem_at_tier(mdef, AD_FIRE, zapdat.elem_tier)) {
+		shieldeff(mdef->mx, mdef->my);
+		fdmg = 0;
+	}
+	else {
+		fdmg = reduce_dmg(mdef, fdmg, FALSE, TRUE);
+		fdmg = elemental_dmg_resistance_tier(mdef, &youmonst, fdmg, AD_FIRE, zapdat.elem_tier);
+	}
+	if (!UseInvFire_res(mdef))
+		destroy_item(mdef, POTION_CLASS, AD_FIRE);
+
+	return xdamagey(&youmonst, mdef, &meteors, pdmg + fdmg);
+}
+
+/* If the hero wields the Whirling Sword with its sunlight upgrade, light the area around the hero */
+static void
+kensei_whirling_light_area(void)
+{
+	if(uwep && uwep->oartifact == ART_WHIRLING_SWORD
+		&& (artinstance[ART_WHIRLING_SWORD].WSwordUpgrades&WSPROP_SUNSWORD)
+	)
+		litroom(TRUE, uwep);
+}
+
+/* Strikes the target with a whirling sword disintegration blast */
+static void
+kensei_whirling_disintegrate(struct monst *mdef, int vis)
+{
+	int disn_count;
+
+	if(!uwep || uwep->oartifact != ART_WHIRLING_SWORD
+		|| !(artinstance[ART_WHIRLING_SWORD].WSwordUpgrades&WSPROP_DISINTEGRATE)
+		|| DEADMONSTER(mdef) || MIGRATINGMONSTER(mdef)
+	)
+		return;
+	disn_count = d(2, 7) + uwep->spe;
+	if(disn_count > 0){
+		pline("%s glows faintly blue!", Monnam(mdef));
+		xdisintegratey(&youmonst, mdef, disn_count, vis);
+	}
+}
+
+/* Dawn breaks helper: strike mdef with the dawn breaks move */
+static void
+kensei_dawn_breaks(struct monst *mdef, struct attack *weaponhit, int vis)
+{
+	int initial = mdef->mhp;
+	int res = kensei_shot_or_strike(mdef, weaponhit, vis);
+	if((res&MM_HIT) && !(res&MM_AGR_STOP) && !Is_spire(&u.uz)){
+		if(res&(MM_DEF_DIED|MM_DEF_LSVD))
+			healup(initial, 0, FALSE, FALSE);
+		else if(mdef->mhp < initial)
+			healup(initial - mdef->mhp, 0, FALSE, FALSE);
+		if(!DEADMONSTER(mdef) && !MIGRATINGMONSTER(mdef) && !resist(mdef, WEAPON_CLASS, 0, TRUE)){
+			set_mcan(mdef, TRUE);
+		}
+	}
 }
 
 /* Handle general throwing attack */
@@ -26082,6 +26214,7 @@ move_name(int moveid)
 		case CHAIN_MAG: return "Chain magic";
 		case STEAL_S: return "Talon strike";
 		case LIGHTNING_S: return "Lightning slash";
+		case SOLAR_F: return (u.uhp*2 > u.uhpmax && u.uhp > u.ulevel) ? "Solar flash" : "Dawn breaks";
 		case BURN_CYC: return "Burning cyclone";
 		case QUICKSHOT: return "Quickshot";
 		case DOUBLE_SH: return "Double shot";
@@ -27322,7 +27455,7 @@ perform_monk_move(int moveID, int *move_cost)
 				zapdat.damd += 6;
 				zapdat.damn += raging ? 2 : 1;
 				if(u.uswallow){
-					engulfer_burst(AD_FIRE, zapdamage(&youmonst, (struct monst *)0, &zapdat));
+					engulfer_burst(AD_FIRE, zapdamage(&youmonst, (struct monst *)0, &zapdat), zapdat.elem_tier);
 					return TRUE;
 				}
 				explode_full_threats(u.ux, u.uy, AD_FIRE, 0, zapdamage(&youmonst, (struct monst *)0, &zapdat),
@@ -27343,7 +27476,7 @@ perform_monk_move(int moveID, int *move_cost)
 				zapdat.damd += 6;
 				zapdat.damn += 1;
 				if(u.uswallow){
-					engulfer_burst(AD_COLD, zapdamage(&youmonst, (struct monst *)0, &zapdat));
+					engulfer_burst(AD_COLD, zapdamage(&youmonst, (struct monst *)0, &zapdat), zapdat.elem_tier);
 					return TRUE;
 				}
 				explode_full_threats(u.ux, u.uy, AD_COLD, 0, zapdamage(&youmonst, (struct monst *)0, &zapdat),
@@ -27620,11 +27753,11 @@ perform_monk_move(int moveID, int *move_cost)
 				monk_aura_zapdata(&zapdat, AD_FIRE);
 				if(u.uswallow){
 					if(!DEADMONSTER(u.ustuck))
-						engulfer_burst(AD_FIRE, zapdamage(&youmonst, (struct monst *)0, &zapdat));
+						engulfer_burst(AD_FIRE, zapdamage(&youmonst, (struct monst *)0, &zapdat), zapdat.elem_tier);
 					return TRUE;
 				}
 				explode_full_threats(tx, ty, AD_FIRE, 0, zapdamage(&youmonst, (struct monst *)0, &zapdat),
-					adtyp_expl_color(AD_FIRE), 1, 0, TRUE, (struct permonst *)0, 0L);
+					adtyp_expl_color(AD_FIRE), 1, 0, TRUE, (struct permonst *)0, elem_tier_to_expl_flags(zapdat.elem_tier));
 				return TRUE;
 			}
 		break;
@@ -27659,22 +27792,40 @@ perform_monk_move(int moveID, int *move_cost)
 							mdef->mfrozen = d(2, 3);
 						}
 					}
-					u.uhp -= u.ulevel;
-					return TRUE;
-				}
-				else {
-					int initial = mdef->mhp;
-					pline("%s!", move_name(moveID));
-					int res = kensei_shot_or_strike(mdef, &weaponhit, vis);
-					if((res&MM_HIT) && !(res&(MM_AGR_STOP|MM_DEF_DIED)) && !Is_spire(&u.uz)){
-						if(mdef->mhp < initial)
-						healup(initial - mdef->mhp, 0, FALSE, FALSE);
+					if(uwep && uwep->oartifact == ART_AVENGER && !Is_spire(&u.uz)){
 						if(!DEADMONSTER(mdef) && !MIGRATINGMONSTER(mdef) && !resist(mdef, WEAPON_CLASS, 0, TRUE)){
 							set_mcan(mdef, TRUE);
 						}
 					}
+					u.uhp -= u.ulevel;
 					return TRUE;
 				}
+				else {
+					pline("%s!", move_name(moveID));
+					kensei_dawn_breaks(mdef, &weaponhit, vis);
+					return TRUE;
+				}
+			}
+		break;
+		case SOLAR_F:
+			if(!u.uswallow && (mdef = adjacent_move_target(!!uwep))){
+				boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
+				pline("%s!", move_name(moveID));
+				if(u.uhp*2 > u.uhpmax && u.uhp > u.ulevel){
+					if(!Is_spire(&u.uz)){
+						litroom(TRUE, uwep);
+						kensei_lightning_strike(mdef);
+						kensei_turn_effect();
+					}
+					if(!DEADMONSTER(mdef) && !MIGRATINGMONSTER(mdef))
+						xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE, 0);
+				}
+				else {
+					if(!Is_spire(&u.uz))
+						litroom(TRUE, uwep);
+					kensei_dawn_breaks(mdef, &weaponhit, vis);
+				}
+				return TRUE;
 			}
 		break;
 		case HUBRIS:
@@ -27880,15 +28031,34 @@ perform_monk_move(int moveID, int *move_cost)
 		case LIGHTNING_S:
 			if(!u.uswallow && (mdef = adjacent_move_target(!!uwep))){
 				boolean vis = (VIS_MAGR | VIS_NONE) | (canseemon(mdef) ? VIS_MDEF : 0);
-				boolean cleansing = kensei_turn_target(mdef);
-				pline("%s!", cleansing ? "Cleansing blast" : "Judgement bolt");
+				boolean sulfur = uwep && uwep->oartifact == ART_WHIRLING_SWORD
+					&& (artinstance[ART_WHIRLING_SWORD].WSwordUpgrades&WSPROP_PETRIFY)
+					&& whirling_sword_petrify_target(uwep, mdef);
+				boolean cleansing = !sulfur && kensei_turn_target(mdef);
+				pline("%s!", sulfur ? "Burning sulfur" : cleansing ? "Cleansing blast" : "Judgement bolt");
 				if(!Is_spire(&u.uz)){
-					kensei_lightning_strike(mdef);
+					kensei_whirling_light_area();
+					if(sulfur){
+						whirling_sword_area_petrification(mdef);
+						if(!DEADMONSTER(mdef) && !MIGRATINGMONSTER(mdef))
+							kensei_meteor_swarm(mdef);
+					}
+					else
+						kensei_lightning_strike(mdef);
+					kensei_whirling_disintegrate(mdef, vis);
 					if(cleansing)
 						kensei_turn_effect();
 				}
 				if(!DEADMONSTER(mdef) && !MIGRATINGMONSTER(mdef))
 					xmeleehity(&youmonst, mdef, &weaponhit, &uwep, vis, 0, FALSE, 0);
+				if(uwep && uwep->oartifact == ART_WHIRLING_SWORD
+					&& (artinstance[ART_WHIRLING_SWORD].WSwordUpgrades&WSPROP_AVENGER)
+					&& !Is_spire(&u.uz)
+				){
+					if(!DEADMONSTER(mdef) && !MIGRATINGMONSTER(mdef) && !resist(mdef, WEAPON_CLASS, 0, TRUE)){
+						set_mcan(mdef, TRUE);
+					}
+				}
 				return TRUE;
 			}
 			if((!(uswapwep && u.twoweap) || is_monk_weapon(uswapwep))
@@ -27896,6 +28066,7 @@ perform_monk_move(int moveID, int *move_cost)
 				&& beam_monk_target(monk_aura_range())
 			){
 				pline("%s!", move_name(moveID));
+				kensei_whirling_light_area();
 				monk_aura_bolt(AD_ELEC);
 				return TRUE;
 			}
@@ -28279,6 +28450,9 @@ uturn_move()
 		if(Race_if(PM_GITHYANKI)){
 			return SOUL_CUT;
 		}
+		//Very broad fallbacks
+		if(uwep && is_kensei_weapon(uwep) && uwep->oartifact == ART_SUNSWORD)
+			return SOLAR_F;
 		//Default (No metodrive)
 		return BREAKER;
 	}
@@ -29826,7 +30000,48 @@ boolean magical;
 int
 elemental_dmg_resistance(struct monst *mdef, struct monst *magr, int dmg, int damtype)
 {
+	return elemental_dmg_resistance_tier(mdef, magr, dmg, damtype, ELEM_TIER_BASE);
+}
+
+/* Return TRUE if mon (possibly the hero) is immune to adtyp damage of tier ELEM_TIER_*; FALSE for anything but AD_FIRE, AD_COLD, AD_ELEC, or AD_ACID. */
+boolean
+immune_to_elem_at_tier(struct monst *mon, int adtyp, int tier)
+{
+	switch(adtyp){
+		case AD_FIRE:
+			return tier >= ELEM_TIER_HOLY ? HolyFire_res(mon) : tier == ELEM_TIER_HELL ? HellFire_res(mon) : Fire_res(mon);
+		case AD_COLD:
+			return tier >= ELEM_TIER_HOLY ? HolyCold_res(mon) : tier == ELEM_TIER_HELL ? HellCold_res(mon) : Cold_res(mon);
+		case AD_ELEC:
+			return tier >= ELEM_TIER_HOLY ? HolyShock_res(mon) : tier == ELEM_TIER_HELL ? HellShock_res(mon) : Shock_res(mon);
+		case AD_ACID:
+			return tier >= ELEM_TIER_HOLY ? HolyAcid_res(mon) : tier == ELEM_TIER_HELL ? HellAcid_res(mon) : Acid_res(mon);
+	}
+	return FALSE;
+}
+
+long
+elem_tier_to_expl_flags(int tier)
+{
+	return tier >= ELEM_TIER_HOLY ? EXPL_HOLY_TIER : tier == ELEM_TIER_HELL ? EXPL_HELL_TIER : 0L;
+}
+
+int
+expl_flags_to_elem_tier(long special_flags)
+{
+	return (special_flags&EXPL_HOLY_TIER) ? ELEM_TIER_HOLY : (special_flags&EXPL_HELL_TIER) ? ELEM_TIER_HELL : ELEM_TIER_BASE;
+}
+
+/* Return dmg of elemental type damtype dealt to mdef at tier ELEM_TIER_* (raised to hell in Gehennom or holy in the endgame), after mdef's partial resistances. */
+int
+elemental_dmg_resistance_tier(struct monst *mdef, struct monst *magr, int dmg, int damtype, int tier)
+{
 	boolean has_base, has_hell, has_base_both, has_hell_both;
+
+	if(In_endgame(&u.uz))
+		tier = max(tier, ELEM_TIER_HOLY);
+	else if(Inhell)
+		tier = max(tier, ELEM_TIER_HELL);
 
 	if(mdef == &youmonst) {
 		switch(damtype) {
@@ -29898,7 +30113,7 @@ elemental_dmg_resistance(struct monst *mdef, struct monst *magr, int dmg, int da
 		}
 	}
 
-	if(In_endgame(&u.uz)) {
+	if(tier >= ELEM_TIER_HOLY) {
 		if(has_hell) {
 			dmg /= 3;
 			if(has_hell_both) dmg /= 3;
@@ -29906,7 +30121,7 @@ elemental_dmg_resistance(struct monst *mdef, struct monst *magr, int dmg, int da
 			dmg = 2 * dmg / 3;
 			if(has_base_both) dmg = 2 * dmg / 3;
 		}
-	} else if(Inhell) {
+	} else if(tier == ELEM_TIER_HELL) {
 		if(has_base) {
 			dmg /= 2;
 			if(has_base_both) dmg /= 2;

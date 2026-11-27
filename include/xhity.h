@@ -64,6 +64,11 @@
 
 #define FATAL_DAMAGE_MODIFIER 9001
 
+/* elemental damage tiers, in increasing order of the resistance needed to fully block them */
+#define ELEM_TIER_BASE	0
+#define ELEM_TIER_HELL	1	/* as in Gehennom */
+#define ELEM_TIER_HOLY	2	/* as in the endgame */
+
 #define VIS_MAGR	0x01	/* aggressor is clearly visible */
 #define VIS_MDEF	0x02	/* defender is clearly visible */
 #define VIS_NONE	0x04	/* you are aware of at least one of magr and mdef */
