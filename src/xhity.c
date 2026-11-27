@@ -9579,11 +9579,11 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 		if (youdef) {
 			/* see seduce.c */
 			if(Chastity)
-				break;
+				return result;
 
 			if ((uleft  && uleft->otyp == find_engagement_ring()) ||
 				(uright && uright->otyp == find_engagement_ring()))
-				break;
+				return result;
 
 			if (notmcan && could_seduce(magr, &youmonst, attk) == 1) {
 				if(magr->mappearance) seemimic_ambush(magr);
@@ -9595,7 +9595,7 @@ xmeleehurty_core(struct monst *magr, struct monst *mdef, struct attack *attk, st
 			struct obj *obj;
 			long unwornmask;
 			if ((youagr && Chastity) || mon_resistance(mdef, CHASTITY))
-				break;
+				return result;
 			// No monster rings
 			if (could_seduce(magr, mdef, attk) == 1) {
 				if(MON_WEP(mdef) || MON_SWEP(mdef) || mdef->misc_worn_check&(W_ARMOR|W_BELT)){
