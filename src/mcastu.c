@@ -8930,7 +8930,8 @@ dream_wolves(int tx, int ty)
 STATIC_OVL int
 lich_spell(struct monst *magr, struct monst *mdef, struct attack *attk, int tarx, int tary)
 {
-	if(!mdef)
+	/* the bonus spells are all directed attacks: they need a located target other than the caster */
+	if(!mdef || mdef == magr || tarx != x(mdef) || tary != y(mdef))
 		return 0;
 	switch(magr->mtyp){
 		case PM_LICH:
